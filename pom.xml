@@ -74,6 +74,11 @@
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>${logback.logstash.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlinx</groupId>
+			<artifactId>kotlinx-coroutines-slf4j</artifactId>
+			<version>${kotlinx-coroutines.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
