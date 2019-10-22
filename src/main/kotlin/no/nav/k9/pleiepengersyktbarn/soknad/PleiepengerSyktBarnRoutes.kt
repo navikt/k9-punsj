@@ -23,7 +23,7 @@ internal class PleiepengerSyktBarnRoutes(
 ) {
 
     private companion object {
-        private const val SøknadBasePath = "/api/v3/pleiepenger-sykt-barn/soknad/{journalPostId}"
+        private const val SøknadBasePath = "/api/pleiepenger-sykt-barn/soknad/{journalPostId}"
     }
 
     @Bean
