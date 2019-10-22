@@ -1,0 +1,52 @@
+name: Build and deploy
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENCE'
+      - 'CODEOWNERS'
+    branches:
+      - master
+
+jobs:
+  enhetstester:
+    name: Enhetstester
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hente kode
+        uses: actions/checkout@v1
+      - name: Sette opp Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '13.x'
+      - name: Kjøre tester
+        run: ./mvnw clean test
+
+  docker:
+    name: Laste opp Docker image
+    needs: enhetstester
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hente kode
+        uses: actions/checkout@v1
+      - name: Sette opp Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '13.x'
+      - name: Bygge JAR
+        run: ./mvnw clean package -DskipTests
+      - name: Sette Docker- navn og tag
+        env:
+          DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/k9-punsj
+        run: |
+          echo $DOCKER_IMAGE > .docker_image
+          echo "$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" > .docker_tag
+      - name: Bygge Docker image
+        run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
+      - name: Laste opp Docker image
+        run: |
+          echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
+          docker push $(cat .docker_image):$(cat .docker_tag)
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
