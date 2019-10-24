@@ -26,7 +26,8 @@ internal class PleiepengerSyktBarnRoutes(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
-        private const val SøknadBasePath = "/api/pleiepenger-sykt-barn/soknad/{journalPostId}"
+        private const val JournalpostIdKey = "journalpost_id"
+        private const val SøknadBasePath = "/api/pleiepenger-sykt-barn/soknad/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -34,7 +35,7 @@ internal class PleiepengerSyktBarnRoutes(
         PUT(SøknadBasePath, contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 logger.info("Mellomlagrer søknader.")
-                val journalPostId = request.journalPostId()
+                val journalPostId = request.journalpostId()
                 val innsending = request.innsending()
                 val oppdatertInnsending = service.oppdater(journalPostId, innsending)
                 val violations = oppdatertInnsending.valider()
@@ -45,7 +46,7 @@ internal class PleiepengerSyktBarnRoutes(
                         .status(httpStatus)
                         .json()
                         .bodyValueAndAwait(MellomlagringsResultat(
-                                innhold = innsending.innhold,
+                                innhold = oppdatertInnsending.innhold,
                                 violations = violations
                         ))
             }
@@ -54,7 +55,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST(SøknadBasePath, contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 logger.info("Sender inn søknader.")
-                val journalPostId = request.journalPostId()
+                val journalPostId = request.journalpostId()
                 val innsending = request.innsending()
                 val violations = innsending.valider()
                 if (violations.isEmpty()) {
@@ -71,7 +72,7 @@ internal class PleiepengerSyktBarnRoutes(
         GET(SøknadBasePath) { request ->
             RequestContext(coroutineContext, request) {
                 logger.info("Henter søknader.")
-                val journalPostId = request.journalPostId()
+                val journalPostId = request.journalpostId()
                 val innsending = service.hent(journalPostId)
                 if (innsending != null) {
                     ServerResponse
@@ -92,6 +93,6 @@ internal class PleiepengerSyktBarnRoutes(
         return validator.validate(søknader)
     }
 
-    private suspend fun ServerRequest.journalPostId() : JournalpostId = pathVariable("journalPostId")
+    private suspend fun ServerRequest.journalpostId() : JournalpostId = pathVariable(JournalpostIdKey)
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
 }
