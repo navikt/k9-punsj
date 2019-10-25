@@ -12,37 +12,35 @@ internal val objectMapper = jacksonObjectMapper()
 typealias JournalpostId = String
 
 typealias Innhold = MutableMap<String, Any?>
+typealias InnholdType = String
+typealias NorskIdent = String
 
-data class Innsending(val innhold: MutableList<Innhold>)
-
-internal fun Innsending.oppdater(nyInnsending: Innsending) : Innsending {
-    innhold.forEachIndexed { index, eksisterendeInnhold ->
-        val før = objectMapper.valueToTree<ObjectNode>(eksisterendeInnhold)
-        val nytt = objectMapper.valueToTree<ObjectNode>(nyInnsending.innhold[index])
-        val map = objectMapper.convertValue<Map<String, Any?>>(merge(før, nytt))
-        eksisterendeInnhold.clear()
-        eksisterendeInnhold.putAll(map)
-    }
-    return this
+internal fun Innhold.merge(nyttInnhold: Innhold) {
+    val før = objectMapper.valueToTree<ObjectNode>(this)
+    val nytt = objectMapper.valueToTree<ObjectNode>(nyttInnhold)
+    val merged = objectMapper.convertValue<Innhold>(merge(før, nytt))
+    clear()
+    putAll(merged)
 }
 
-data class MellomlagringsResultat(
-        val innhold: List<Innhold>,
-        private val violations: Set<ConstraintViolation<*>>
-) {
-    val feil = violations.map { Feil(
-            attributt = it.propertyPath.toString(),
-            ugyldigVerdi = it.invalidValue,
-            melding = it.message
-    )}
-}
+data class Innsending(
+        val norskIdent: NorskIdent,
+        val journalpostId: JournalpostId,
+        val innhold: Innhold
+)
 
-data class Feil(
+data class Mangel(
         val attributt: String,
         @JsonProperty(value = "ugyldig_verdi")
         val ugyldigVerdi: Any?,
         val melding: String
 )
+
+internal fun Set<ConstraintViolation<*>>.mangler() = map { Mangel(
+        attributt = it.propertyPath.toString(),
+        ugyldigVerdi = it.invalidValue,
+        melding = it.message
+)}.toSet()
 
 private fun merge(mainNode: JsonNode, updateNode: JsonNode): JsonNode {
     updateNode.fieldNames().forEach { fieldName ->

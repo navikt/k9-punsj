@@ -1,41 +1,28 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
 import no.nav.k9.*
-import no.nav.k9.MellomlagringService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-internal class PleiepengerSyktBarnSoknadService(
-        private val mellomlagringService: MellomlagringService
-) {
+internal class PleiepengerSyktBarnSoknadService {
 
     private companion object {
-        private val innholdstype = PleiepengerSyktBarnSoknadInnholdstype()
+        private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
     }
 
-    internal suspend fun oppdater(journalpostId: JournalpostId,
-                          nyInnsending: Innsending) : Innsending {
-        val lagretInnsending = mellomlagringService.hent(journalpostId, innholdstype)
-        val oppdatertInnsending = lagretInnsending?.oppdater(nyInnsending) ?: nyInnsending
-        mellomlagringService.lagre(journalpostId, innholdstype, oppdatertInnsending)
-        return oppdatertInnsending
+    internal suspend fun komplettSøknadMedEnInnsending(
+            innsending: Innsending
+    ) {
+        logger.info("komplettSøknadMedEnInnsending")
+        logger.info("Innsending=$innsending")
     }
 
-    internal suspend fun hent(journalpostId: JournalpostId) = mellomlagringService.hent(journalpostId, innholdstype)
-
-    internal suspend fun sendKompletteSøknader(journalpostId: JournalpostId, innsending: Innsending) {
-        // 1. Oppdater JournalPost med innsendingen
-        mellomlagringService.slett(journalpostId, innholdstype)
+    internal suspend fun komplettSøknadMedMappe(
+            mappe: Mappe
+    ) {
+        logger.info("komplettSøknadMedMappe")
+        logger.info("Mappe=$mappe")
     }
-
-    internal suspend fun sendUkompletteSøknader(journalpostId: JournalpostId, innsending: Innsending) {
-        // 1. Oppdater JournalPost med innsendingen
-        mellomlagringService.slett(journalpostId, innholdstype)
-    }
-}
-
-typealias PleiepengerSyktBarnSøknad = Innhold
-
-private class PleiepengerSyktBarnSoknadInnholdstype : Innholdstype {
-    override fun type() = "PleiepengerSyktBarn"
 }
