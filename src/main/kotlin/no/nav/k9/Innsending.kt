@@ -1,6 +1,5 @@
 package no.nav.k9
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -31,7 +30,6 @@ data class Innsending(
 
 data class Mangel(
         val attributt: String,
-        @JsonProperty(value = "ugyldig_verdi")
         val ugyldigVerdi: Any?,
         val melding: String
 )

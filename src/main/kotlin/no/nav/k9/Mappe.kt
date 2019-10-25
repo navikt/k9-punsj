@@ -1,6 +1,5 @@
 package no.nav.k9
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -26,7 +25,6 @@ internal fun Mappe.dto(mangler: Set<Mangel>) = MappeDTO (
 )
 
 data class MappeDTO(
-        @JsonProperty("mappe_id")
         val mappeId: MappeId,
         val innhold: Innhold,
         val innsendinger: MutableSet<JournalpostId>,
