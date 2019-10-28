@@ -4,7 +4,7 @@ metadata:
   name: k9-punsj
   namespace: default
   labels:
-    team: k9-saksbehandling
+    team: k9saksbehandling
 spec:
   image: {{ image }}:{{ tag }}
   port: 8080

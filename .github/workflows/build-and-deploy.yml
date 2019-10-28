@@ -56,5 +56,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           cluster: prod-fss
-          team: k9-saksbehandling
+          team: k9saksbehandling
           resources: nais/dev-fss.yml
