@@ -23,8 +23,8 @@ jobs:
       - name: Kjøre tester
         run: ./mvnw clean test
 
-  docker:
-    name: Laste opp Docker image
+  docker-and-nais-deploy:
+    name: Laste opp docker image og deploye
     needs: enhetstester
     runs-on: ubuntu-latest
     steps:
@@ -50,14 +50,11 @@ jobs:
           docker push $(cat .docker_image):$(cat .docker_tag)
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-
-  dev-deploy:
-    name: Deploye til dev
-    needs: docker
-    uses: navikt/deployment-cli/action@0.4.1
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      cluster: dev-fss
-      team: k9-saksbehandling
-      resources: nais/dev-fss.yaml
+      - name: Deploye til dev
+        uses: navikt/deployment-cli/action@0.4.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          cluster: prod-fss
+          team: k9-saksbehandling
+          resources: nais/dev-fss.yaml
