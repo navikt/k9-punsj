@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.springframework.http.HttpStatus
 import javax.validation.ConstraintViolation
 
 internal val objectMapper = jacksonObjectMapper()
@@ -20,6 +21,19 @@ internal fun Innhold.merge(nyttInnhold: Innhold) {
     val merged = objectMapper.convertValue<Innhold>(merge(før, nytt))
     clear()
     putAll(merged)
+}
+
+data class InnsendingDTO(
+        val norskIdent: NorskIdent,
+        val journalpostId: JournalpostId,
+        val innhold: Innhold,
+        val sendTilBehandling: Boolean = false
+) {
+    internal fun domain() = Innsending(
+            norskIdent = norskIdent,
+            journalpostId = journalpostId,
+            innhold = innhold
+    )
 }
 
 data class Innsending(
@@ -39,6 +53,8 @@ internal fun Set<ConstraintViolation<*>>.mangler() = map { Mangel(
         ugyldigVerdi = it.invalidValue,
         melding = it.message
 )}.toSet()
+
+internal fun Set<Mangel>.httpStatus() = if (isEmpty()) HttpStatus.OK else HttpStatus.BAD_REQUEST
 
 private fun merge(mainNode: JsonNode, updateNode: JsonNode): JsonNode {
     updateNode.fieldNames().forEach { fieldName ->

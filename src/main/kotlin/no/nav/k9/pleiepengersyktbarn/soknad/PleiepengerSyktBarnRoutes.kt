@@ -21,18 +21,23 @@ internal class PleiepengerSyktBarnRoutes(
         private val mappeService: MappeService,
         private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService
 ) {
-
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
         private const val NorskIdentKey = "norsk_ident"
         private const val MappeIdKey = "mappe_id"
-        private val innholdType : InnholdType = "pleiepenger-sykt-barn-soknad"
+        private const val innholdType : InnholdType = "pleiepenger-sykt-barn-soknad"
+    }
+
+    internal object Urls {
+        internal const val HenteMapper = "/$innholdType/mapper/{$NorskIdentKey}"
+        internal const val NySøknad = "/$innholdType"
+        internal const val OppdaterSøknad = "/$innholdType/mappe/{$MappeIdKey}"
     }
 
     @Bean
     fun pleiepengerSyktBarnSøknadRoutes() = Routes {
 
-        GET("/api/$innholdType/mapper/{$NorskIdentKey}") { request ->
+        GET("/api${Urls.HenteMapper}") { request ->
             RequestContext(coroutineContext, request) {
                 val mapper = mappeService.hent(
                         norskIdent = request.norskIdent(),
@@ -48,9 +53,11 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        PUT("/api/$innholdType/mappe/{$MappeIdKey}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        PUT("/api${Urls.OppdaterSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val innsending = request.innsending()
+                val innsendingDTO = request.innsendingDTO()
+                val innsending = innsendingDTO.domain()
+
                 val mappe = mappeService.utfyllendeInnsending(
                         mappeId = request.mappeId(),
                         innholdType = innholdType,
@@ -63,7 +70,7 @@ internal class PleiepengerSyktBarnRoutes(
                             .buildAndAwait()
                 } else {
                     val mangler = mappe.innhold.valider()
-                    if (mangler.isEmpty()) {
+                    if (mangler.isEmpty() && innsendingDTO.sendTilBehandling) {
                         pleiepengerSyktBarnSoknadService.komplettSøknadMedMappe(mappe)
                         mappeService.fjern(
                                 mappeId = mappe.mappeId,
@@ -75,7 +82,7 @@ internal class PleiepengerSyktBarnRoutes(
                                 .buildAndAwait()
                     } else {
                         ServerResponse
-                                .badRequest()
+                                .status(mangler.httpStatus())
                                 .json()
                                 .bodyValueAndAwait(mappe.dto(mangler))
                     }
@@ -85,12 +92,13 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        POST("/api/$innholdType", contentType(MediaType.APPLICATION_JSON)) { request ->
+        POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val innsending = request.innsending()
+                val innsendingDTO = request.innsendingDTO()
+                val innsending = innsendingDTO.domain()
                 val mangler = innsending.innhold.valider()
 
-                if (mangler.isEmpty()) {
+                if (mangler.isEmpty() && innsendingDTO.sendTilBehandling) {
                     pleiepengerSyktBarnSoknadService.komplettSøknadMedEnInnsending(innsending)
                     ServerResponse
                             .accepted()
@@ -100,8 +108,9 @@ internal class PleiepengerSyktBarnRoutes(
                             innsending = innsending,
                             innholdType = innholdType
                     )
+
                     ServerResponse
-                            .badRequest()
+                            .status(mangler.httpStatus())
                             .json()
                             .bodyValueAndAwait(mappe.dto(mangler))
                 }
@@ -115,5 +124,5 @@ internal class PleiepengerSyktBarnRoutes(
     }
     private suspend fun ServerRequest.mappeId() : MappeId = pathVariable(MappeIdKey)
     private suspend fun ServerRequest.norskIdent() : NorskIdent = pathVariable(NorskIdentKey)
-    private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
+    private suspend fun ServerRequest.innsendingDTO() = body(BodyExtractors.toMono(InnsendingDTO::class.java)).awaitFirst()
 }
