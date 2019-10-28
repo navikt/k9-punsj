@@ -1,6 +1,10 @@
 package no.nav.k9
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Contact
@@ -43,23 +47,102 @@ internal class OpenApi {
 }
 
 @RestController
-@Tag(name = "Pleiepenger Sykt Barn Søknad", description = "Håndterer domain av papirsøknader")
+@Tag(name = "Pleiepenger sykt barn søknad", description = "Håndtering av papirsøknader")
 internal class PleiepengerSyktBarnSoknadController {
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteMapper, produces = ["application/json"])
-    @Operation(summary = "Hente lagrede mapper på peronen med ufullstendige søknader")
+    @Operation(summary = "Hente eksisterende mapper på en person som inneholder ufullstendige søknader.")
     fun HenteMapper(@PathVariable("norsk_ident") norskIdent: String
-    ) : Set<MappeDTO> = setOf()
+    ) : Set<OasPleiepengerSyktBarnSoknadMappe> = setOf()
 
-    @PutMapping(PleiepengerSyktBarnRoutes.Urls.OppdaterSøknad, consumes = ["application/json"], produces = ["application/json"])
-    @Operation(summary = "Oppdatere en søknad på en eksisterende mappe")
+    @PutMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
+    @Operation(summary = "Oppdatere en søknad i en eksisterende mappe.")
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Innhold på søknad er oppdatert og søknaden er klar for innsending.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "400",
+                description = "Innhold på søknad er oppdatert, men inneholder fortsatt mangler.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                        )
+                )]
+        )
+    ])
     fun OppdatereSøknad(
             @PathVariable("mappe_id") mappeId: String,
-            @RequestBody søknad: Søknad
-    ) : MappeDTO? = null
+            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Søknad>
+    ) {}
 
-    @PostMapping(PleiepengerSyktBarnRoutes.Urls.NySøknad, consumes = ["application/json"], produces = ["application/json"])
-    @Operation(summary = "Ny søknad")
+    @PostMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
+    @Operation(summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.")
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "202",
+                description = "Søknaden er sendt til behandling og mappen slettet.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = Void::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "400",
+                description = "Innsending feilet grunnet mangler i søknaden.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                        )
+                )]
+        )
+    ])
+    fun SendSøknad(
+            @PathVariable("mappe_id") mappeId: String
+    ) {}
+
+    @PostMapping(PleiepengerSyktBarnRoutes.Urls.NySøknad,
+            consumes = ["application/json"],
+            produces = ["application/json"]
+    )
+    @Operation(summary = "Starte en helt ny søknad")
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "201",
+                description = "Opprettet mappe for en ny søknad. Se 'Location' header for URL til mappen.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                        )
+                )]
+        )
+    ])
     fun NySøknad(
-            @RequestBody søknad: Søknad
-    ) : MappeDTO? = null
+            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Søknad>
+    ){}
 }
+
+data class OasPleiepengerSykBarnInnsending<T>(
+        val norsk_ident: String,
+        val journalpost_id: String,
+        val innhold: T
+)
+
+data class OasMangel(
+        val attributt: String,
+        val ugyldig_verdi: Any?,
+        val melding: String
+)
+data class OasPleiepengerSyktBarnSoknadMappe(
+        val mappe_id : String,
+        val innsendinger: Set<String>,
+        val innhold: Søknad,
+        val mangler: Set<OasMangel>
+)
+

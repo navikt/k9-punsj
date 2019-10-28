@@ -78,14 +78,17 @@ internal class MappeService {
         return mappe
     }
 
+    internal suspend fun hent(
+            mappeId: MappeId
+    ) = map.values.firstOrNull { it -> it.any { it.mappeId == mappeId }}?.firstOrNull()
+
+
     internal suspend fun fjern(
-            mappeId: MappeId,
-            norskIdent: NorskIdent,
-            innholdType: InnholdType
+            mappeId: MappeId
+
     ) {
-        val key = Pair(norskIdent, innholdType)
-        map[key]?.apply {
-            this.removeIf{ it.mappeId == mappeId }
+        map.forEach { key, value ->
+            value.removeIf { it.mappeId == mappeId }
         }
     }
 }

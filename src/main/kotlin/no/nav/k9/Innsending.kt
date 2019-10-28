@@ -23,19 +23,6 @@ internal fun Innhold.merge(nyttInnhold: Innhold) {
     putAll(merged)
 }
 
-data class InnsendingDTO(
-        val norskIdent: NorskIdent,
-        val journalpostId: JournalpostId,
-        val innhold: Innhold,
-        val sendTilBehandling: Boolean = false
-) {
-    internal fun domain() = Innsending(
-            norskIdent = norskIdent,
-            journalpostId = journalpostId,
-            innhold = innhold
-    )
-}
-
 data class Innsending(
         val norskIdent: NorskIdent,
         val journalpostId: JournalpostId,
