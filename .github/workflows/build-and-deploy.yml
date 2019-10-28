@@ -57,4 +57,4 @@ jobs:
         with:
           cluster: prod-fss
           team: k9-saksbehandling
-          resources: nais/dev-fss.yaml
+          resources: nais/dev-fss.yml
