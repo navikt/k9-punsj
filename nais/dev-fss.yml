@@ -34,3 +34,6 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
+  env:
+    - name: NAV_SWAGGERURL
+      value: https://k9-punsj.nais.preprod.local
