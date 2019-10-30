@@ -19,7 +19,8 @@ internal class PleiepengerSyktBarnRoutes(
         private val validator: Validator,
         private val objectMapper: ObjectMapper,
         private val mappeService: MappeService,
-        private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService
+        private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
+        private val authenticationHandler: AuthenticationHandler
 ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)

@@ -24,3 +24,13 @@ nav:
   navn : '@project.artifactId@'
   versjon : '@project.version@'
   beskrivelse : '@project.description@'
+
+no.nav.security.jwt:
+  expirythreshold: 1
+  issuer:
+    azurev1:
+      discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
+      accepted_audience: 3ccdda02-eaf5-4c75-af01-ea0ee7d01819
+    azurev2:
+      discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
+      accepted_audience: 3ccdda02-eaf5-4c75-af01-ea0ee7d01819

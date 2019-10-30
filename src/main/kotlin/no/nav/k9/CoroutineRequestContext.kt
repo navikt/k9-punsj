@@ -6,13 +6,11 @@ import kotlinx.coroutines.withContext
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.coRouter
 import java.util.*
 import net.logstash.logback.argument.StructuredArguments.e
+import org.springframework.web.reactive.function.server.*
 
 private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::class.java)
 private const val RequestIdHeader = "X-Request-ID"
@@ -32,6 +30,7 @@ internal fun CoroutineContext.hentCorrelationId() : CorrelationId = hentAttribut
 internal typealias CorrelationId = String
 
 internal fun Routes(
+        authenticationHandler: AuthenticationHandler? = null,
         routes : CoRouterFunctionDsl.() -> Unit
 ) = coRouter {
     before { serverRequest ->
@@ -45,7 +44,8 @@ internal fun Routes(
         logger.info("-> ${serverRequest.methodName()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
-    after { serverRequest, serverResponse ->
+    filter { serverRequest, requestedOperation ->
+        val serverResponse = authenticationHandler?.authenticatedRequest(serverRequest, requestedOperation) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}")
         serverResponse
     }
