@@ -34,6 +34,13 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
+  vault:
+    enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/vault
+        kvPath: /kv/preprod/fss/k9-punsj/default
+      - mountPath: /var/run/secrets/nais.io/azuread
+        kvPath: /azuread/data/dev/creds/k9-punsj
   env:
     - name: NAV_SWAGGERURL
       value: https://k9-punsj.nais.preprod.local
