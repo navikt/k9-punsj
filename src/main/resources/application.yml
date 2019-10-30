@@ -27,6 +27,11 @@ nav:
 
 no.nav.security.jwt:
   expirythreshold: 1
+  client:
+    azure:
+      client_id: ${AZURE_client_id:#{null}}
+      client_secret: ${AZURE_client_secret:#{null}}
+      jwk: ${AZURE_jwk:#{null}}
   issuer:
     azurev1:
       discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
