@@ -45,3 +45,9 @@ spec:
   env:
     - name: NAV_SWAGGERURL
       value: https://k9-punsj.nais.preprod.local
+    - name: AZURE_token_endpoint
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token
+    - name: AZURE_V1_discovery_url
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
+    - name: AZURE_V2_discovery_url
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration

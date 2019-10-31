@@ -29,13 +29,13 @@ no.nav.security.jwt:
   expirythreshold: 1
   client:
     azure:
-      client_id: ${AZURE_client_id:#{null}}
-      client_secret: ${AZURE_client_secret:#{null}}
-      jwk: ${AZURE_jwk:#{null}}
+      client_id: ${AZURE_client_id}
+      jwk: ${AZURE_jwk}
+      token_endpoint: ${AZURE_token_endpoint}
   issuer:
     azurev1:
-      discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
-      accepted_audience: 3ccdda02-eaf5-4c75-af01-ea0ee7d01819
+      discoveryurl: ${AZURE_V1_discovery_url}
+      accepted_audience: ${AZURE_client_id}
     azurev2:
-      discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
-      accepted_audience: 3ccdda02-eaf5-4c75-af01-ea0ee7d01819
+      discoveryurl: ${AZURE_V2_discovery_url}
+      accepted_audience: ${AZURE_client_id}
