@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
+import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.Søknad
 import org.springframework.beans.factory.annotation.Value
@@ -146,3 +147,40 @@ data class OasPleiepengerSyktBarnSoknadMappe(
         val mangler: Set<OasMangel>
 )
 
+@RestController
+@Tag(name = "Journalposter", description = "Håndtering av journalposter")
+internal class JournalpostController {
+    @GetMapping(JournalpostRoutes.Urls.HenteJournalpostInfo, produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Liste med dokumenter som er i journalposten.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasJournalpostInfo::class
+                        )
+                )]
+        )
+    ])
+    @Operation(summary = "Hente informasjon om en journalpost")
+    fun HenteJournalpostInfo(
+            @PathVariable("journalpost_id") journalpostId : String){}
+    @GetMapping(JournalpostRoutes.Urls.HenteDokument, produces = ["application/pdf"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Dokumentet."
+        )
+    ])
+    @Operation(summary = "Hente dokumentet")
+    fun HenteDokument(
+            @PathVariable("journalpost_id") journalpostId : String,
+            @PathVariable("dokument_id") dokumentId : String){}
+}
+
+data class OasDokumentInfo(
+        val dokument_id: String
+)
+data class OasJournalpostInfo(
+        val dokumenter : Set<OasDokumentInfo>
+)
