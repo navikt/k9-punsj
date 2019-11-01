@@ -1,6 +1,7 @@
 package no.nav.k9
 
 import com.nimbusds.jose.jwk.JWK
+import net.minidev.json.JSONObject
 import no.nav.helse.dusseldorf.oauth2.client.DirectKeyId
 import no.nav.helse.dusseldorf.oauth2.client.FromJwk
 import no.nav.helse.dusseldorf.oauth2.client.SignedJwtAccessTokenClient
@@ -24,10 +25,32 @@ internal class AuthenticationClient (
         private val logger: Logger = LoggerFactory.getLogger(AuthenticationClient::class.java)
     }
 
+    private val handeledJwk = try {
+        JWK.parse(azureJwk)
+        azureJwk
+    } catch (cause: Throwable) {
+        val jwk = mutableMapOf<String, String>()
+        azureJwk
+                .removePrefix("map[")
+                .removeSuffix("]")
+                .split(" ")
+                .map { it.split(":") }
+                .forEach {
+                    jwk[it.first()] = it[1]
+                }
+        JSONObject(jwk).toJSONString()
+    }
+
+    init {
+        logger.info("AzureClientId=$azureClientId")
+        logger.info("AzureTokenEndpoint=$azureTokenEndpoint")
+    }
+
+
     private val accessTokenClient = SignedJwtAccessTokenClient(
             clientId = azureClientId,
-            privateKeyProvider = FromJwk(azureJwk),
-            keyIdProvider = DirectKeyId(JWK.parse(azureJwk).keyID),
+            privateKeyProvider = FromJwk(handeledJwk),
+            keyIdProvider = DirectKeyId(JWK.parse(handeledJwk).keyID),
             tokenEndpoint = azureTokenEndpoint
     )
 
