@@ -1,7 +1,6 @@
 package no.nav.k9
 
 import com.nimbusds.jose.jwk.JWK
-import net.minidev.json.JSONObject
 import no.nav.helse.dusseldorf.oauth2.client.DirectKeyId
 import no.nav.helse.dusseldorf.oauth2.client.FromJwk
 import no.nav.helse.dusseldorf.oauth2.client.SignedJwtAccessTokenClient
@@ -25,22 +24,12 @@ internal class AuthenticationClient (
         private val logger: Logger = LoggerFactory.getLogger(AuthenticationClient::class.java)
     }
 
-    private val handeledJwk = try {
-        JWK.parse(azureJwk)
-        logger.info("JWK på JSON-format")
-        azureJwk
-    } catch (cause: Throwable) {
-        val jwk = mutableMapOf<String, String>()
-        azureJwk
-                .removePrefix("map[")
-                .removeSuffix("]")
-                .split(" ")
-                .map { it.split(":") }
-                .forEach {
-                    jwk[it.first()] = it[1]
-                }
-        logger.info("JWK på Map-format")
-        JSONObject(jwk).toJSONString()
+    private val keyId = try {
+        val jwk = JWK.parse(azureJwk)
+        requireNotNull(jwk.keyID) { "Azure JWK inneholder ikke keyID." }
+        jwk.keyID
+    } catch (_: Throwable) {
+        throw IllegalArgumentException("Azure JWK på feil format.")
     }
 
     init {
@@ -51,8 +40,8 @@ internal class AuthenticationClient (
 
     private val accessTokenClient = SignedJwtAccessTokenClient(
             clientId = azureClientId,
-            privateKeyProvider = FromJwk(handeledJwk),
-            keyIdProvider = DirectKeyId(JWK.parse(handeledJwk).keyID),
+            privateKeyProvider = FromJwk(azureJwk),
+            keyIdProvider = DirectKeyId(keyId),
             tokenEndpoint = azureTokenEndpoint
     )
 
