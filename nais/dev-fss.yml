@@ -41,6 +41,7 @@ spec:
         kvPath: /kv/preprod/fss/k9-punsj/default
       - mountPath: /var/run/secrets/nais.io/azuread
         kvPath: /azuread/data/dev/creds/k9-punsj
+        format: json
   webproxy: true
   env:
     - name: NAV_SWAGGERURL

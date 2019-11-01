@@ -27,6 +27,7 @@ internal class AuthenticationClient (
 
     private val handeledJwk = try {
         JWK.parse(azureJwk)
+        logger.info("JWK på JSON-format")
         azureJwk
     } catch (cause: Throwable) {
         val jwk = mutableMapOf<String, String>()
@@ -38,6 +39,7 @@ internal class AuthenticationClient (
                 .forEach {
                     jwk[it.first()] = it[1]
                 }
+        logger.info("JWK på Map-format")
         JSONObject(jwk).toJSONString()
     }
 
