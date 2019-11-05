@@ -23,7 +23,8 @@ internal object MockConfiguration {
             "AZURE_jwk" to azureJwk,
             "AZURE_token_endpoint" to "http://localhost:8081/oauth2/v2.0/token",
             "AZURE_V1_discovery_url" to "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration",
-            "AZURE_V2_discovery_url" to "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration"
+            "AZURE_V2_discovery_url" to "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration",
+            "SAF_BASE_URL" to "http://localhost:8081/saf"
     )
 
     internal fun config() = configMap

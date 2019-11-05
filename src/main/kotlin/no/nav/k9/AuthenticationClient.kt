@@ -1,6 +1,7 @@
 package no.nav.k9
 
 import com.nimbusds.jose.jwk.JWK
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.DirectKeyId
 import no.nav.helse.dusseldorf.oauth2.client.FromJwk
 import no.nav.helse.dusseldorf.oauth2.client.SignedJwtAccessTokenClient
@@ -38,15 +39,17 @@ internal class AuthenticationClient (
     }
 
 
-    private val accessTokenClient = SignedJwtAccessTokenClient(
+    private val signedJwtAccessTokenClient = SignedJwtAccessTokenClient(
             clientId = azureClientId,
             privateKeyProvider = FromJwk(azureJwk),
             keyIdProvider = DirectKeyId(keyId),
             tokenEndpoint = azureTokenEndpoint
     )
 
+    internal val accessTokenClient = CachedAccessTokenClient(signedJwtAccessTokenClient)
+
     override fun health() = Mono.just(try {
-        accessTokenClient.getAccessToken(setOf(
+        signedJwtAccessTokenClient.getAccessToken(setOf(
                 "4bd971d8-2469-434f-9322-8cfe7a7a3379/.default"
         ))
         Health.up().build()
