@@ -28,7 +28,6 @@ internal class JournalpostRoutes(
     internal object Urls {
         internal const val HenteJournalpostInfo = "/journalpost/{$JournalpostIdKey}"
         internal const val HenteDokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
-
     }
 
     @Bean

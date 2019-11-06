@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
+import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.Søknad
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import java.net.URI
+import java.time.LocalDate
 
 @Component
 internal class OpenApi {
@@ -185,4 +187,40 @@ data class OasDokumentInfo(
 )
 data class OasJournalpostInfo(
         val dokumenter : Set<OasDokumentInfo>
+)
+
+@RestController
+@Tag(name = "Fagsaker", description = "Liste fagsaker")
+internal class FagsakerController {
+    @GetMapping(FagsakRoutes.Urls.HenteFagsakinfo, produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Liste med fagsaker tilknyttet personen.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasFagsakListe::class
+                        )
+                )]
+        )
+    ])
+    @Operation(summary = "Hente liste med fagsaker tilknyttet personen.", description = "ytelse må være 'pleiepenger-sykt-barn'")
+    fun HenteFagsaker(
+            @RequestParam("ytelse") ytelse: String,
+            @PathVariable("norsk_ident") norskIdent : String){}
+}
+
+data class OasFagsakListe(
+        val fagsaker: Set<OasFagsak>
+)
+data class OasFagsak(
+        val fagsak_id: String,
+        val url: String,
+        val fra_og_med: LocalDate,
+        val til_og_med: LocalDate?,
+        val barn: OasFagsakBarn
+)
+data class OasFagsakBarn(
+        val fødselsdato: LocalDate,
+        val navn: String
 )
