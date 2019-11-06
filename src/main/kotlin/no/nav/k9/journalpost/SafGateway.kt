@@ -39,6 +39,8 @@ internal class SafGateway(
 
     init {
         logger.info("SafBaseUr=$safBaseUrl")
+        logger.info("HenteJournalpostScopes=${henteJournalpostScopes.joinToString()}")
+        logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
 
     private val client = WebClient.create(safBaseUrl.toString())
@@ -87,6 +89,7 @@ internal class SafGateway(
             accessTokenClient.getAccessToken(henteJournalpostScopes)
             healthBuilder.withDetail("hente-journalpost-access-token", "OK!")
         } catch (cause: Throwable) {
+            logger.warn("Feil ved henting av access token for henting av journalpost fra SAF. ${cause.message}")
             healthBuilder.withDetail("hente-journalpost-access-token", cause.message?:"Feil!")
             ok = false
         }
@@ -95,6 +98,7 @@ internal class SafGateway(
             accessTokenClient.getAccessToken(henteDokumentScopes)
             healthBuilder.withDetail("hente-dokument-access-token", "OK!")
         } catch (cause: Throwable) {
+            logger.warn("Feil ved henting av access token for henting av dokument fra SAF. ${cause.message}")
             healthBuilder.withDetail("hente-dokuemnt-access-token", cause.message?:"Feil!")
             ok = false
         }

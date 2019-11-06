@@ -8,7 +8,7 @@ management:
       enabled: false
   endpoint:
     health:
-      show-details : never
+      show-details : always
   endpoints:
     web:
       exposure:
@@ -29,8 +29,8 @@ no.nav:
   saf:
     base_url: ${SAF_BASE_URL}
     scopes:
-      hente_journalpost_scopes: ${SAF_HENTE_JOURNALPOST_SCOPES:foo,bar}
-      hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES:foo,bar}
+      hente_journalpost_scopes: ${SAF_HENTE_JOURNALPOST_SCOPES}
+      hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES}
   security.jwt:
     expirythreshold: 1
     client:
