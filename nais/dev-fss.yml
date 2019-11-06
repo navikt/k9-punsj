@@ -43,7 +43,7 @@ spec:
         kvPath: /azuread/data/dev/creds/k9-punsj
   webproxy: true
   env:
-    - name: NAV_SWAGGERURL
+    - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.nais.preprod.local
     - name: AZURE_token_endpoint
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token

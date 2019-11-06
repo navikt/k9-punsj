@@ -21,11 +21,13 @@ springdoc:
     path: /internal/swagger
   version: 1.0
 nav:
-  navn : '@project.artifactId@'
-  versjon : '@project.version@'
-  beskrivelse : '@project.description@'
+
 
 no.nav:
+  navn: '@project.artifactId@'
+  versjon: '@project.version@'
+  beskrivelse: '@project.description@'
+  swagger_server_base_url: ${SWAGGER_SERVER_BASE_URL:http://localhost:8080}
   saf:
     base_url: ${SAF_BASE_URL}
     scopes:

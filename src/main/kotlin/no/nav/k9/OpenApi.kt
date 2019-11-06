@@ -18,21 +18,23 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 @Component
 internal class OpenApi {
     @Bean
     internal fun openApi(
-            @Value("\${nav.navn}") navn: String,
-            @Value("\${nav.beskrivelse}") beskrivelse: String,
-            @Value("\${nav.versjon}") versjon: String,
-            @Value("\${nav.swagger-url:http://localhost:8080}") swaggerUrl: String
+            @Value("\${no.nav.navn}") navn: String,
+            @Value("\${no.nav.beskrivelse}") beskrivelse: String,
+            @Value("\${no.nav.versjon}") versjon: String,
+            @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
+            @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
     ): OpenAPI = OpenAPI()
-            .addServersItem(Server().url("$swaggerUrl/api").description("Swagger Server"))
+            .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
             .info(
                     Info()
                             .title(navn)
-                            .description(beskrivelse)
+                            .description("$beskrivelse\n\nScope for å tjenesten: `$azureClientId/.default`")
                             .version(versjon)
                             .contact(
                                     Contact()
