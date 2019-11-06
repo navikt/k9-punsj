@@ -1,18 +1,23 @@
 package no.nav.k9.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import no.nav.k9.AuthenticationClient
+import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.JournalpostId
 import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.actuate.health.Health
+import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
@@ -21,11 +26,11 @@ internal class SafGateway(
         @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
         @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
         @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
-        private val authenticationClient: AuthenticationClient
-) {
+        @Qualifier("saf") private val accessTokenClient: AccessTokenClient
+) : ReactiveHealthIndicator {
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
-
         private const val VariantType = "ARKIV"
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
@@ -37,10 +42,10 @@ internal class SafGateway(
     }
 
     private val client = WebClient.create(safBaseUrl.toString())
+    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId) : Set<DokumentInfo> {
-        val accessToken = authenticationClient
-                .accessTokenClient
+        val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteJournalpostScopes,
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
@@ -50,8 +55,7 @@ internal class SafGateway(
     }
 
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId) : Dokument? {
-        val accessToken = authenticationClient
-                .accessTokenClient
+        val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteDokumentScopes,
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
@@ -73,6 +77,33 @@ internal class SafGateway(
                     dataBuffer = response.body?: throw java.lang.IllegalStateException("Body ikke satt")
             )
         }
+    }
+
+    override fun health(): Mono<Health> {
+        var ok = true
+        val healthBuilder = Health.Builder()
+
+        try {
+            accessTokenClient.getAccessToken(henteJournalpostScopes)
+            healthBuilder.withDetail("hente-journalpost-access-token", "OK!")
+        } catch (cause: Throwable) {
+            healthBuilder.withDetail("hente-journalpost-access-token", cause.message?:"Feil!")
+            ok = false
+        }
+
+        try {
+            accessTokenClient.getAccessToken(henteDokumentScopes)
+            healthBuilder.withDetail("hente-dokument-access-token", "OK!")
+        } catch (cause: Throwable) {
+            healthBuilder.withDetail("hente-dokuemnt-access-token", cause.message?:"Feil!")
+            ok = false
+        }
+
+        if (ok) healthBuilder.up()
+        else healthBuilder.down()
+
+        return Mono.just(healthBuilder.build())
+
     }
 }
 
