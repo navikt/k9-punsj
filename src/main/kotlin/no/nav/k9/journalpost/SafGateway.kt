@@ -4,13 +4,13 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.JournalpostId
+import no.nav.k9.helsesjekk
 import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
@@ -46,7 +46,7 @@ internal class SafGateway(
     private val client = WebClient.create(safBaseUrl.toString())
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId) : Set<DokumentInfo> {
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): Set<DokumentInfo> {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteJournalpostScopes,
@@ -56,7 +56,7 @@ internal class SafGateway(
         return emptySet()
     }
 
-    internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId) : Dokument? {
+    internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteDokumentScopes,
@@ -73,43 +73,28 @@ internal class SafGateway(
                 .toEntity(DataBuffer::class.java)
                 .awaitFirstOrNull()
 
-        return if (response == null) { null } else {
+        return if (response == null) {
+            null
+        } else {
             Dokument(
                     contentType = response.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
-                    dataBuffer = response.body?: throw java.lang.IllegalStateException("Body ikke satt")
+                    dataBuffer = response.body ?: throw java.lang.IllegalStateException("Body ikke satt")
             )
         }
     }
 
-    override fun health(): Mono<Health> {
-        var ok = true
-        val healthBuilder = Health.Builder()
-
-        try {
-            accessTokenClient.getAccessToken(henteJournalpostScopes)
-            healthBuilder.withDetail("hente-journalpost-access-token", "OK!")
-        } catch (cause: Throwable) {
-            logger.warn("Feil ved henting av access token for henting av journalpost fra SAF. ${cause.message}")
-            healthBuilder.withDetail("hente-journalpost-access-token", cause.message?:"Feil!")
-            ok = false
-        }
-
-        try {
-            accessTokenClient.getAccessToken(henteDokumentScopes)
-            healthBuilder.withDetail("hente-dokument-access-token", "OK!")
-        } catch (cause: Throwable) {
-            logger.warn("Feil ved henting av access token for henting av dokument fra SAF. ${cause.message}")
-            healthBuilder.withDetail("hente-dokuemnt-access-token", cause.message?:"Feil!")
-            ok = false
-        }
-
-        if (ok) healthBuilder.up()
-        else healthBuilder.down()
-
-        return Mono.just(healthBuilder.build())
-
-    }
+    override fun health() = Mono.just(
+            accessTokenClient.helsesjekk(
+                    operasjon = "hente-journalpost",
+                    scopes = henteJournalpostScopes,
+                    initialHealth = accessTokenClient.helsesjekk(
+                            operasjon = "hente-dokument",
+                            scopes = henteDokumentScopes
+                    )
+            )
+    )
 }
+
 
 typealias DokumentId = String
 
