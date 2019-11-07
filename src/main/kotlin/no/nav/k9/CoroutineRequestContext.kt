@@ -52,7 +52,7 @@ internal fun Routes(
     }
     filter { serverRequest, requestedOperation ->
         val serverResponse = authenticationHandler?.authenticatedRequest(serverRequest, requestedOperation) ?: requestedOperation(serverRequest)
-        logger.info("<- HTTP ${serverResponse.rawStatusCode()}")
+        logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
     }
     routes()
