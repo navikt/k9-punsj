@@ -66,10 +66,7 @@ private data class NameValueCookie(private val name: String, private val value: 
 }
 
 private class ServerHttpRequest(private val serverRequest: ServerRequest) : HttpRequest {
-    override fun getCookies() = serverRequest.cookies().map {
-        NameValueCookie(it.key, it.value.first().value)
-    }.toTypedArray()
-
+    override fun getCookies() = emptyArray<HttpRequest.NameValue>()
     override fun getHeader(headerNavn: String) = serverRequest.headers().header(headerNavn).firstOrNull()
 
 }

@@ -1,5 +1,6 @@
 package no.nav.k9.journalpost
 
+import no.nav.k9.AuthenticationHandler
 import no.nav.k9.Routes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +15,8 @@ import org.springframework.web.reactive.function.server.json
 
 @Configuration
 internal class JournalpostRoutes(
-        @Value("classpath:dummy_soknad.pdf") dummySoknad: Resource
+        @Value("classpath:dummy_soknad.pdf") dummySoknad: Resource,
+        private val authenticationHandler: AuthenticationHandler
 ) {
 
     private companion object {
@@ -31,7 +33,7 @@ internal class JournalpostRoutes(
     }
 
     @Bean
-    fun JournalpostRoutes() = Routes {
+    fun JournalpostRoutes() = Routes (authenticationHandler) {
 
         GET("/api${Urls.HenteJournalpostInfo}") { request ->
             ServerResponse
