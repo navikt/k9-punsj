@@ -76,6 +76,12 @@
 			<artifactId>dusseldorf-oauth2-client</artifactId>
 			<version>1.2.5.4fa349a</version>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.helse</groupId>
+			<artifactId>dusseldorf-ktor-test-support</artifactId>
+			<version>1.2.5.4fa349a</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Monitorering -->
 		<dependency>
 			<groupId>io.micrometer</groupId>

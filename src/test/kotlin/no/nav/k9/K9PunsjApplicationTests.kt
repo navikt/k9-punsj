@@ -1,5 +1,6 @@
 package no.nav.k9
 
+import no.nav.k9.wiremock.initWireMock
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -10,8 +11,14 @@ import org.springframework.test.context.junit4.SpringRunner
 @SpringBootTest
 class K9PunsjApplicationTests {
 
+	private val wireMockServer = initWireMock(
+			port = 8081
+	)
+
 	init {
-	    MockConfiguration.config().setAsProperties()
+	    MockConfiguration.config(
+				wireMockServer = wireMockServer
+		).setAsProperties()
 	}
 
 	@Test

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.net.URI
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -73,7 +74,7 @@ internal class SafGateway(
                 .toEntity(DataBuffer::class.java)
                 .awaitFirstOrNull()
 
-        return if (response == null) {
+        return if (response == null || response.statusCodeValue != 200) {
             null
         } else {
             Dokument(
@@ -110,3 +111,7 @@ data class DokumentInfo(
 data class JournalpostInfo(
         val journalpostId: JournalpostId
 )
+
+fun main() {
+    println(UUID.randomUUID().toString())
+}
