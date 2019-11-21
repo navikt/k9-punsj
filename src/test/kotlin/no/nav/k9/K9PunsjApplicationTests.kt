@@ -49,11 +49,11 @@ class K9PunsjApplicationTests {
 
 	@Test
 	fun `Endepunkt brukt for isReady og isAlive fungerer`() {
-		val res = runBlocking {
-			client.get().uri {
-				it.pathSegment("internal", "actuator", "info").build()
-			}.awaitExchange()
-		}
+		val res =
+		client.get().uri {
+			it.pathSegment("internal", "actuator", "info").build()
+		}.awaitExchangeBlocking()
+
 		assertEquals(res.statusCode(), HttpStatus.OK)
 	}
 
