@@ -65,7 +65,7 @@ internal class SafGateway(
 
         val response = client
                 .get()
-                .uri(journalpostId, dokumentId, VariantType)
+                .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())

@@ -2,18 +2,17 @@ package no.nav.k9.journalpost
 
 import no.nav.k9.AuthenticationHandler
 import no.nav.k9.JournalpostId
+import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.Resource
 import org.springframework.web.reactive.function.server.*
+import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class JournalpostRoutes(
-        @Value("classpath:dummy_soknad.pdf") dummySoknad: Resource,
         private val authenticationHandler: AuthenticationHandler,
         private val safGateway: SafGateway
 ) {
@@ -24,8 +23,6 @@ internal class JournalpostRoutes(
         private const val DokumentIdKey = "dokument_id"
     }
 
-    private val dummyPdfContent = dummySoknad.inputStream.readAllBytes()
-
     internal object Urls {
         internal const val HenteJournalpostInfo = "/journalpost/{$JournalpostIdKey}"
         internal const val HenteDokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
@@ -35,35 +32,38 @@ internal class JournalpostRoutes(
     fun JournalpostRoutes() = Routes (authenticationHandler) {
 
         GET("/api${Urls.HenteJournalpostInfo}") { request ->
-            ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait("""
+            RequestContext(coroutineContext, request) {
+                ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait("""
                         {
                             "dokumenter": [{
                                 "dokument_id": "123"
                             }]
                         }
                     """.trimIndent())
+            }
         }
 
         GET("/api${Urls.HenteDokument}") { request ->
-            val dokument = safGateway.hentDokument(
-                journalpostId = request.journalpostId(),
-                dokumentId = request.dokumentId()
-            )
+            RequestContext(coroutineContext, request) {
+                val dokument = safGateway.hentDokument(
+                        journalpostId = request.journalpostId(),
+                        dokumentId = request.dokumentId()
+                )
 
-            if (dokument == null) {
-                ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-            } else {
-                ServerResponse
-                        .ok()
-                        .contentType(dokument.contentType)
-                        .bodyValueAndAwait(dokument.dataBuffer)
+                if (dokument == null) {
+                    ServerResponse
+                            .notFound()
+                            .buildAndAwait()
+                } else {
+                    ServerResponse
+                            .ok()
+                            .contentType(dokument.contentType)
+                            .bodyValueAndAwait(dokument.dataBuffer)
+                }
             }
-
         }
     }
 

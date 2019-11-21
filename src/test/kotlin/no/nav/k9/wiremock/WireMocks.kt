@@ -7,6 +7,10 @@ internal fun initWireMock(
 ) = WireMockBuilder()
         .withPort(port)
         .withAzureSupport()
+        .wireMockConfiguration {
+            it.withRootDirectory("src/test/resources")
+        }
         .build()
+        .stubSaksbehandlerAccessToken()
         .stubSafHenteDokument()
-        .stubSafHenteJounralpost()
+        .stubSafHenteJournalpost()

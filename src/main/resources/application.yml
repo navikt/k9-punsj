@@ -2,7 +2,9 @@ management:
   metrics:
     web:
       server:
-        auto-time-requests: true
+        request:
+          autotime:
+            enabled: true
   health :
     diskspace:
       enabled: false
@@ -14,14 +16,13 @@ management:
       exposure:
         include: info, health, prometheus
       base-path: /internal/actuator
+
 springdoc:
   api-docs:
     path: /internal/api-docs
   swagger-ui:
     path: /internal/swagger
   version: 1.0
-nav:
-
 
 no.nav:
   navn: '@project.artifactId@'
@@ -47,3 +48,5 @@ no.nav:
       azurev2:
         discoveryurl: ${AZURE_V2_discovery_url}
         accepted_audience: ${AZURE_client_id}
+server:
+  port: ${PORT:8080}

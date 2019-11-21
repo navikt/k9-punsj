@@ -6,12 +6,13 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.k9.wiremock.getSafBaseUrl
-import java.lang.System.setProperty
 
 internal object MockConfiguration {
     internal fun config(
-            wireMockServer: WireMockServer
+            wireMockServer: WireMockServer,
+            port: Int
     ) = mapOf(
+            "PORT" to "$port",
             "AZURE_client_id" to "k9-punsj",
             "AZURE_jwk" to ClientCredentials.ClientA.privateKeyJwk,
             "AZURE_token_endpoint" to wireMockServer.getAzureV2TokenUrl(),
@@ -21,8 +22,4 @@ internal object MockConfiguration {
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default"
     )
-}
-
-internal fun Map<String, String>.setAsProperties() = forEach { key, value ->
-    setProperty(key, value)
 }
