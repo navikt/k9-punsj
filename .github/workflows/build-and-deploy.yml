@@ -21,7 +21,10 @@ jobs:
         with:
           java-version: '13.x'
       - name: Kjøre tester
-        run: ./mvnw clean test
+        run: ./mvnw clean test --settings ./.m2/settings.xml
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
   docker-and-nais-deploy:
     name: Laste opp docker image og deploye
@@ -35,7 +38,10 @@ jobs:
         with:
           java-version: '13.x'
       - name: Bygge JAR
-        run: ./mvnw clean package -DskipTests
+        run: ./mvnw clean package -DskipTests --settings ./.m2/settings.xml
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       - name: Sette Docker- navn og tag
         env:
           DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/k9-punsj
