@@ -1,10 +1,14 @@
 package no.nav.k9
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.security.SecurityScheme
+import io.swagger.v3.oas.annotations.security.SecuritySchemes
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Contact
@@ -24,6 +28,8 @@ import java.time.LocalDate
 
 @Component
 internal class OpenApi {
+
+
     @Bean
     internal fun openApi(
             @Value("\${no.nav.navn}") navn: String,
@@ -152,6 +158,12 @@ data class OasPleiepengerSyktBarnSoknadMappe(
 )
 
 @RestController
+@SecurityScheme(
+    name = "BearerAuth",
+    type = SecuritySchemeType.HTTP,
+    scheme = "bearer",
+    bearerFormat = "jwt"
+)
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
     @GetMapping(JournalpostRoutes.Urls.HenteJournalpostInfo, produces = ["application/json"])
@@ -164,9 +176,28 @@ internal class JournalpostController {
                                 implementation = OasJournalpostInfo::class
                         )
                 )]
+        ),
+        ApiResponse(
+                responseCode = "400",
+                description = "Journalpost kan ikke håndteres i Punsj"
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
         )
     ])
-    @Operation(summary = "Hente informasjon om en journalpost")
+    @Operation(
+            summary = "Hente informasjon om en journalpost",
+            security = [SecurityRequirement(name = "BearerAuth")]
+    )
     fun HenteJournalpostInfo(
             @PathVariable("journalpost_id") journalpostId : String){}
     @GetMapping(JournalpostRoutes.Urls.HenteDokument, produces = ["application/pdf"])
@@ -174,9 +205,24 @@ internal class JournalpostController {
         ApiResponse(
                 responseCode = "200",
                 description = "Dokumentet."
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
         )
     ])
-    @Operation(summary = "Hente dokumentet")
+    @Operation(
+            summary = "Hente dokumentet",
+            security = [SecurityRequirement(name = "BearerAuth")]
+    )
     fun HenteDokument(
             @PathVariable("journalpost_id") journalpostId : String,
             @PathVariable("dokument_id") dokumentId : String){}

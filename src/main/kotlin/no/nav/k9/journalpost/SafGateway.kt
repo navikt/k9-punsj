@@ -1,5 +1,6 @@
 package no.nav.k9.journalpost
 
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -17,6 +18,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
@@ -46,14 +48,36 @@ internal class SafGateway(
     private val client = WebClient.create(safBaseUrl.toString())
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): Set<DokumentInfo> {
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteJournalpostScopes,
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
                 )
+        val response = client
+                .post()
+                .uri { it.pathSegment("graphql").build() }
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+                .retrieve()
+                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+                .awaitFirst()
 
-        return emptySet()
+        val safResponse = response.body
+        val errors = safResponse?.errors
+        val journalpost = response.body?.data?.journalpost
+
+        check(safResponse != null) {"Ingen response entity fra SAF"}
+
+        if (safResponse.journalpostFinnesIkke) return null
+        if (safResponse.manglerTilgang) throw IkkeTilgang()
+
+        check(errors == null) {"Feil ved oppslag mot SAF graphql. Error = $errors"}
+
+        return journalpost
     }
 
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
@@ -63,23 +87,29 @@ internal class SafGateway(
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
                 )
 
-        val response = client
+        val clientResponse = client
                 .get()
                 .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .retrieve()
-                .toEntity(DataBuffer::class.java)
-                .awaitFirstOrNull()
+                .awaitExchange()
 
-        return if (response == null || response.statusCodeValue != 200) {
-            null
-        } else {
-            Dokument(
-                    contentType = response.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
-                    dataBuffer = response.body ?: throw java.lang.IllegalStateException("Body ikke satt")
-            )
+        return when (clientResponse.rawStatusCode()) {
+            200 -> {
+                val entity = clientResponse
+                        .toEntity(DataBuffer::class.java)
+                        .awaitFirstOrNull()
+                Dokument(
+                        contentType = entity?.headers?.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
+                        dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
+                )
+            }
+            404 -> null
+            403 -> throw IkkeTilgang()
+            else -> {
+                throw IllegalStateException("Feil ved henting av dokument fra SAF. ${clientResponse.statusCode()}")
+            }
         }
     }
 
@@ -101,12 +131,4 @@ typealias DokumentId = String
 data class Dokument(
         val contentType: MediaType,
         val dataBuffer: DataBuffer
-)
-
-data class DokumentInfo(
-        val dokumentId: DokumentId
-)
-
-data class JournalpostInfo(
-        val journalpostId: JournalpostId
 )

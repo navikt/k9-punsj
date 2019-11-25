@@ -2,6 +2,7 @@ package no.nav.k9
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9.wiremock.JournalpostIds
 import no.nav.k9.wiremock.initWireMock
 import no.nav.k9.wiremock.saksbehandlerAccessToken
 import org.junit.AfterClass
@@ -9,6 +10,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -67,15 +69,78 @@ class K9PunsjApplicationTests {
 	}
 
 	@Test
-	fun `Hente et dokument fra Journalpost med credentials fungerer`() {
+	fun `Hente et dokument fra Journalpost fungerer`() {
 		val res= client.get().uri {
-			it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
-		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-				.awaitExchangeBlocking()
+			it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
 		assertEquals(res.statusCode(), HttpStatus.OK)
 		val responsePdf = runBlocking { res.awaitBody<ByteArray>() }
 		assertArrayEquals(responsePdf, dummyPdf)
+	}
+
+	@Test
+	fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.NOT_FOUND)
+	}
+
+	@Test
+	fun `Hente et dokument fra Journalpost uten tilgang håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
+	}
+
+	@Test
+	fun `Hente journalpostinfo fungerer`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+		val responseEntity = runBlocking { res.awaitBody<String>() }
+		JSONAssert.assertEquals(responseEntity, """
+			{
+				"journalpost_id": "1",
+				"norsk_ident": "29099012345",
+				"dokumenter": [{
+					"dokument_id": "470164680"
+				},{
+					"dokument_id": "470164681"
+				}]
+			}
+		""".trimIndent(), true)
+	}
+
+	@Test
+	fun `Hente journalpostinfo for ikke eksisterende journalpost håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke).build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.NOT_FOUND)
+	}
+
+	@Test
+	fun `Hente journalpostinfo på journalpost uten tilgang på journalpostnivå håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.AbacError).build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
+	}
+
+	@Test
+	fun `Hente journalpostinfo på journalpost uten tilgang på alle dokumenter håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.IkkeKomplettTilgang).build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
 	}
 }
 
