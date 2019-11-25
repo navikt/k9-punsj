@@ -63,21 +63,28 @@ internal class JournalpostRoutes(
 
         GET("/api${Urls.HenteDokument}") { request ->
             RequestContext(coroutineContext, request) {
-                val dokument = journalpostService.hentDokument(
-                        journalpostId = request.journalpostId(),
-                        dokumentId = request.dokumentId()
-                )
+                try {
+                    val dokument = journalpostService.hentDokument(
+                            journalpostId = request.journalpostId(),
+                            dokumentId = request.dokumentId()
+                    )
 
-                if (dokument == null) {
+                    if (dokument == null) {
+                        ServerResponse
+                                .notFound()
+                                .buildAndAwait()
+                    } else {
+                        ServerResponse
+                                .ok()
+                                .contentType(dokument.contentType)
+                                .bodyValueAndAwait(dokument.dataBuffer)
+                    }
+                } catch (cause: IkkeTilgang) {
                     ServerResponse
-                            .notFound()
+                            .status(HttpStatus.FORBIDDEN)
                             .buildAndAwait()
-                } else {
-                    ServerResponse
-                            .ok()
-                            .contentType(dokument.contentType)
-                            .bodyValueAndAwait(dokument.dataBuffer)
                 }
+
             }
         }
     }

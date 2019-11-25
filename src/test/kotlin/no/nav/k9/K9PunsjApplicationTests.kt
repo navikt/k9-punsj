@@ -69,14 +69,32 @@ class K9PunsjApplicationTests {
 	}
 
 	@Test
-	fun `Hente et dokument fra Journalpost med credentials fungerer`() {
+	fun `Hente et dokument fra Journalpost fungerer`() {
 		val res= client.get().uri {
-			it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
+			it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
 		assertEquals(res.statusCode(), HttpStatus.OK)
 		val responsePdf = runBlocking { res.awaitBody<ByteArray>() }
 		assertArrayEquals(responsePdf, dummyPdf)
+	}
+
+	@Test
+	fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.NOT_FOUND)
+	}
+
+	@Test
+	fun `Hente et dokument fra Journalpost uten tilgang håndteres`() {
+		val res= client.get().uri {
+			it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
+		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
 	}
 
 	@Test

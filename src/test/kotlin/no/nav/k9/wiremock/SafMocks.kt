@@ -10,9 +10,9 @@ private const val path = "/saf-mock"
 
 internal fun WireMockServer.getSafBaseUrl() = baseUrl() + path
 
-internal fun WireMockServer.stubSafHenteDokument(): WireMockServer {
+internal fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/.*")).willReturn(
+            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
                     WireMock.aResponse()
                             .withHeader("Content-Type", "application/pdf")
                             .withBodyFile("dummy_soknad.pdf")
@@ -21,6 +21,30 @@ internal fun WireMockServer.stubSafHenteDokument(): WireMockServer {
     )
     return this
 }
+
+private fun WireMockServer.stubSafHenteDokumentError(
+        journalpostId: JournalpostId,
+        httpStatus: Int
+): WireMockServer {
+    WireMock.stubFor(
+            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")).willReturn(
+                    WireMock.aResponse()
+                            .withStatus(httpStatus)
+            )
+    )
+    return this
+}
+
+internal fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
+        journalpostId = JournalpostIds.FinnesIkke,
+        httpStatus = 404
+)
+
+internal fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
+        journalpostId = JournalpostIds.AbacError,
+        httpStatus = 403
+)
+
 private fun WireMockServer.stubSafHenteJournalpost(
         journalpostId: JournalpostId? = null,
         responseBody: String = SafMockResponses.OkResponseHenteJournalpost
@@ -53,6 +77,7 @@ internal fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJou
 )
 
 internal object JournalpostIds {
+    internal const val Ok : JournalpostId = "200"
     internal const val AbacError : JournalpostId = "500"
     internal const val IkkeKomplettTilgang : JournalpostId = "403"
     internal const val FinnesIkke : JournalpostId = "404"

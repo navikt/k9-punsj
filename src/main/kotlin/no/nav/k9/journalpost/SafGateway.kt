@@ -15,10 +15,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
@@ -70,12 +70,11 @@ internal class SafGateway(
         val errors = safResponse?.errors
         val journalpost = response.body?.data?.journalpost
 
-        check(response.statusCode == HttpStatus.OK) {"Feil ved oppslag mot SAF graphql. HTTP ${response.statusCodeValue}. Error = $errors"}
         check(safResponse != null) {"Ingen response entity fra SAF"}
 
         if (safResponse.journalpostFinnesIkke) return null
         if (safResponse.manglerTilgang) throw IkkeTilgang()
-        
+
         check(errors == null) {"Feil ved oppslag mot SAF graphql. Error = $errors"}
 
         return journalpost
@@ -88,23 +87,29 @@ internal class SafGateway(
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
                 )
 
-        val response = client
+        val clientResponse = client
                 .get()
                 .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .retrieve()
-                .toEntity(DataBuffer::class.java)
-                .awaitFirstOrNull()
+                .awaitExchange()
 
-        return if (response == null || response.statusCodeValue != 200) {
-            null
-        } else {
-            Dokument(
-                    contentType = response.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
-                    dataBuffer = response.body ?: throw java.lang.IllegalStateException("Body ikke satt")
-            )
+        return when (clientResponse.rawStatusCode()) {
+            200 -> {
+                val entity = clientResponse
+                        .toEntity(DataBuffer::class.java)
+                        .awaitFirstOrNull()
+                Dokument(
+                        contentType = entity?.headers?.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
+                        dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
+                )
+            }
+            404 -> null
+            403 -> throw IkkeTilgang()
+            else -> {
+                throw IllegalStateException("Feil ved henting av dokument fra SAF. ${clientResponse.statusCode()}")
+            }
         }
     }
 

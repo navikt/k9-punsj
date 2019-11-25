@@ -12,7 +12,9 @@ internal fun initWireMock(
         }
         .build()
         .stubSaksbehandlerAccessToken()
-        .stubSafHenteDokument()
+        .stubSafHenteDokumentOk()
+        .stubSafHenteDokumentNotFound()
+        .stubSafHenteDokumentAbacError()
         .stubSafHentJournalpostOk()
         .stubSafHentJournalpostAbacError()
         .stubSafHentJournalpostIkkeKomplettTilgang()

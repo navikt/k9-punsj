@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
@@ -32,6 +33,7 @@ internal class OpenApi {
             @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
             @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
     ): OpenAPI = OpenAPI()
+            .addSecurityItem(SecurityRequirement())
             .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
             .info(
                     Info()
