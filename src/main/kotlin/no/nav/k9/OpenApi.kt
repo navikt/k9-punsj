@@ -1,16 +1,19 @@
 package no.nav.k9
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.security.SecurityScheme
+import io.swagger.v3.oas.annotations.security.SecuritySchemes
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
-import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
@@ -25,6 +28,8 @@ import java.time.LocalDate
 
 @Component
 internal class OpenApi {
+
+
     @Bean
     internal fun openApi(
             @Value("\${no.nav.navn}") navn: String,
@@ -33,7 +38,6 @@ internal class OpenApi {
             @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
             @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
     ): OpenAPI = OpenAPI()
-            .addSecurityItem(SecurityRequirement())
             .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
             .info(
                     Info()
@@ -154,6 +158,12 @@ data class OasPleiepengerSyktBarnSoknadMappe(
 )
 
 @RestController
+@SecurityScheme(
+    name = "BearerAuth",
+    type = SecuritySchemeType.HTTP,
+    scheme = "bearer",
+    bearerFormat = "jwt"
+)
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
     @GetMapping(JournalpostRoutes.Urls.HenteJournalpostInfo, produces = ["application/json"])
@@ -184,7 +194,10 @@ internal class JournalpostController {
                 description = "Journalpost eksisterer ikke"
         )
     ])
-    @Operation(summary = "Hente informasjon om en journalpost")
+    @Operation(
+            summary = "Hente informasjon om en journalpost",
+            security = [SecurityRequirement(name = "BearerAuth")]
+    )
     fun HenteJournalpostInfo(
             @PathVariable("journalpost_id") journalpostId : String){}
     @GetMapping(JournalpostRoutes.Urls.HenteDokument, produces = ["application/pdf"])
@@ -206,7 +219,10 @@ internal class JournalpostController {
                 description = "Journalpost eksisterer ikke"
         )
     ])
-    @Operation(summary = "Hente dokumentet")
+    @Operation(
+            summary = "Hente dokumentet",
+            security = [SecurityRequirement(name = "BearerAuth")]
+    )
     fun HenteDokument(
             @PathVariable("journalpost_id") journalpostId : String,
             @PathVariable("dokument_id") dokumentId : String){}

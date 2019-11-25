@@ -20,6 +20,7 @@ internal object MockConfiguration {
             "AZURE_V2_discovery_url" to wireMockServer.getAzureV2WellKnownUrl(),
             "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
-            "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default"
+            "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
+            "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port"
     )
 }
