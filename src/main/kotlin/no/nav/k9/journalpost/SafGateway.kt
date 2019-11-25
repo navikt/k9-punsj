@@ -66,10 +66,16 @@ internal class SafGateway(
                 .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
                 .awaitFirst()
 
-        val errors = response.body?.errors
+        val safResponse = response.body
+        val errors = safResponse?.errors
         val journalpost = response.body?.data?.journalpost
 
         check(response.statusCode == HttpStatus.OK) {"Feil ved oppslag mot SAF graphql. HTTP ${response.statusCodeValue}. Error = $errors"}
+        check(safResponse != null) {"Ingen response entity fra SAF"}
+
+        if (safResponse.journalpostFinnesIkke) return null
+        if (safResponse.manglerTilgang) throw IkkeTilgang()
+        
         check(errors == null) {"Feil ved oppslag mot SAF graphql. Error = $errors"}
 
         return journalpost

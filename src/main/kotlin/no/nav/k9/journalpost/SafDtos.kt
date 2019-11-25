@@ -59,23 +59,23 @@ internal object SafDtos {
     }
 
     internal data class Bruker(
-            val id: String?,
-            val type: String?
+        val id: String?,
+        val type: String?
     )
 
     internal data class Avsender(
-            val id: String?,
-            val type: String?
+        val id: String?,
+        val type: String?
     )
 
     internal data class DokumentVariant(
-            val variantformat: String,
-            val saksbehandlerHarTilgang: Boolean
+        val variantformat: String,
+        val saksbehandlerHarTilgang: Boolean
     )
 
     internal data class Dokument(
-            val dokumentInfoId: String,
-            val dokumentvarianter: MutableList<DokumentVariant>?
+        val dokumentInfoId: String,
+        val dokumentvarianter: MutableList<DokumentVariant>?
     )
 
     internal data class Journalpost(
@@ -88,11 +88,14 @@ internal object SafDtos {
     )
 
     internal data class JournalpostResponse(
-            val journalpost: Journalpost?
+        val journalpost: Journalpost?
     )
 
     data class JournalpostResponseWrapper(
-            val data: JournalpostResponse?,
-            val errors : List<Any>?
-    )
+        val data: JournalpostResponse?,
+        val errors : List<Any>?
+    ) {
+        internal val journalpostFinnesIkke = errors?.toString()?.contains("NullPointerException")?:false
+        internal val manglerTilgang = errors?.toString()?.contains("AbacException")?:false
+    }
 }

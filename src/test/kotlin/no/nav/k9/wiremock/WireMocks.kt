@@ -14,6 +14,6 @@ internal fun initWireMock(
         .stubSaksbehandlerAccessToken()
         .stubSafHenteDokument()
         .stubSafHentJournalpostOk()
-        .stubSafHentJournalpostError()
-        .stubSafHentJournalpostIkkeTilgang()
+        .stubSafHentJournalpostAbacError()
+        .stubSafHentJournalpostIkkeKomplettTilgang()
         .stubSafHentJournalpostFinnesIkke()

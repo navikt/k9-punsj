@@ -38,13 +38,13 @@ private fun WireMockServer.stubSafHenteJournalpost(
 }
 
 internal fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
-internal fun WireMockServer.stubSafHentJournalpostError() = stubSafHenteJournalpost(
-        journalpostId = JournalpostIds.Error,
-        responseBody = SafMockResponses.ErrorResponseHenteJournalpost
+internal fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
+        journalpostId = JournalpostIds.AbacError,
+        responseBody = SafMockResponses.AbacErrorResponseHenteJournalpost
 )
-internal fun WireMockServer.stubSafHentJournalpostIkkeTilgang() = stubSafHenteJournalpost(
-        journalpostId = JournalpostIds.IkkeTilgang,
-        responseBody = SafMockResponses.IkkeTilgangResponseHenteJournalpost
+internal fun WireMockServer.stubSafHentJournalpostIkkeKomplettTilgang() = stubSafHenteJournalpost(
+        journalpostId = JournalpostIds.IkkeKomplettTilgang,
+        responseBody = SafMockResponses.IkkeKomplettTilgangResponseHenteJournalpost
 )
 
 internal fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJournalpost(
@@ -53,8 +53,8 @@ internal fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJou
 )
 
 internal object JournalpostIds {
-    internal const val Error : JournalpostId = "500"
-    internal const val IkkeTilgang : JournalpostId = "403"
+    internal const val AbacError : JournalpostId = "500"
+    internal const val IkkeKomplettTilgang : JournalpostId = "403"
     internal const val FinnesIkke : JournalpostId = "404"
 
 }
@@ -101,7 +101,7 @@ private object SafMockResponses {
     }
     """.trimIndent()
 
-    val ErrorResponseHenteJournalpost = """
+    val AbacErrorResponseHenteJournalpost = """
     {
       "errors": [
         {
@@ -125,7 +125,7 @@ private object SafMockResponses {
     }
     """.trimIndent()
 
-    val IkkeTilgangResponseHenteJournalpost = """
+    val IkkeKomplettTilgangResponseHenteJournalpost = """
     {
       "data": {
         "journalpost": {
