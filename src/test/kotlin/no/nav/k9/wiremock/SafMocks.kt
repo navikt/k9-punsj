@@ -92,7 +92,6 @@ private object SafMockResponses {
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
-          "journalpostId": "453481599",
           "bruker": {
             "type": "FNR",
             "id": "29099012345"
@@ -157,7 +156,6 @@ private object SafMockResponses {
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
-          "journalpostId": "453481599",
           "bruker": {
             "type": "FNR",
             "id": "29099012345"

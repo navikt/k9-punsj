@@ -7,13 +7,12 @@ internal object SafDtos {
             query {
               journalpost(journalpostId: "$journalpostId") {
                 tema
+                journalposttype
                 journalstatus
-                journalpostId
                 bruker {
                   type
                   id
                 }
-                kanal
                 dokumenter {
                   dokumentInfoId
                   dokumentvarianter {
