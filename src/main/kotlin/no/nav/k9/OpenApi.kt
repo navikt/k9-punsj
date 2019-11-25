@@ -164,6 +164,22 @@ internal class JournalpostController {
                                 implementation = OasJournalpostInfo::class
                         )
                 )]
+        ),
+        ApiResponse(
+                responseCode = "400",
+                description = "Journalpost kan ikke håndteres i Punsj"
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
         )
     ])
     @Operation(summary = "Hente informasjon om en journalpost")
@@ -174,6 +190,18 @@ internal class JournalpostController {
         ApiResponse(
                 responseCode = "200",
                 description = "Dokumentet."
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
         )
     ])
     @Operation(summary = "Hente dokumentet")
