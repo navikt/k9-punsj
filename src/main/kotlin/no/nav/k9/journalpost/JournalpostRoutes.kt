@@ -8,13 +8,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class JournalpostRoutes(
         private val authenticationHandler: AuthenticationHandler,
-        private val safGateway: SafGateway
+        private val journalpostService: JournalpostService
 ) {
 
     private companion object {
@@ -33,22 +34,36 @@ internal class JournalpostRoutes(
 
         GET("/api${Urls.HenteJournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
-                ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait("""
-                        {
-                            "dokumenter": [{
-                                "dokument_id": "123"
-                            }]
-                        }
-                    """.trimIndent())
+                try {
+                    val journalpostInfo = journalpostService.hentJournalpostInfo(
+                            journalpostId = request.journalpostId()
+                    )
+                    if (journalpostInfo == null) {
+                        ServerResponse
+                                .notFound()
+                                .buildAndAwait()
+                    } else {
+                        ServerResponse
+                                .ok()
+                                .json()
+                                .bodyValueAndAwait(journalpostInfo)
+                    }
+
+                } catch (cause: IkkeStøttetJournalpost) {
+                    ServerResponse
+                            .badRequest()
+                            .buildAndAwait()
+                } catch (case: IkkeTilgang) {
+                    ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .buildAndAwait()
+                }
             }
         }
 
         GET("/api${Urls.HenteDokument}") { request ->
             RequestContext(coroutineContext, request) {
-                val dokument = safGateway.hentDokument(
+                val dokument = journalpostService.hentDokument(
                         journalpostId = request.journalpostId(),
                         dokumentId = request.dokumentId()
                 )

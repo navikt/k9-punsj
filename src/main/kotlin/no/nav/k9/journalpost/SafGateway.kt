@@ -1,5 +1,6 @@
 package no.nav.k9.journalpost
 
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -46,14 +48,31 @@ internal class SafGateway(
     private val client = WebClient.create(safBaseUrl.toString())
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): Set<DokumentInfo> {
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = henteJournalpostScopes,
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
                 )
+        val response = client
+                .post()
+                .uri { it.pathSegment("graphql").build() }
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+                .retrieve()
+                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+                .awaitFirst()
 
-        return emptySet()
+        val errors = response.body?.errors
+        val journalpost = response.body?.data?.journalpost
+
+        check(response.statusCode == HttpStatus.OK) {"Feil ved oppslag mot SAF graphql. HTTP ${response.statusCodeValue}. Error = $errors"}
+        check(errors == null) {"Feil ved oppslag mot SAF graphql. Error = $errors"}
+
+        return journalpost
     }
 
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
@@ -101,12 +120,4 @@ typealias DokumentId = String
 data class Dokument(
         val contentType: MediaType,
         val dataBuffer: DataBuffer
-)
-
-data class DokumentInfo(
-        val dokumentId: DokumentId
-)
-
-data class JournalpostInfo(
-        val journalpostId: JournalpostId
 )
