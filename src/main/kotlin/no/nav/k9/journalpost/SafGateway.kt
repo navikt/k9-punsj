@@ -1,7 +1,6 @@
 package no.nav.k9.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.JournalpostId
@@ -22,6 +21,8 @@ import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+import org.springframework.web.reactive.function.client.awaitEntity
 
 @Service
 internal class SafGateway(
@@ -37,6 +38,7 @@ internal class SafGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
+        private const val MaxDokumentSize = 5 * 1024 * 1024
     }
 
     init {
@@ -45,7 +47,19 @@ internal class SafGateway(
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
 
-    private val client = WebClient.create(safBaseUrl.toString())
+    private val client = WebClient
+            .builder()
+            .baseUrl(safBaseUrl.toString())
+            .exchangeStrategies(
+                    ExchangeStrategies.builder()
+                            .codecs { configurer ->
+                                configurer
+                                        .defaultCodecs()
+                                        .maxInMemorySize(MaxDokumentSize)
+                            }.build()
+            )
+            .build()
+
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
@@ -95,13 +109,12 @@ internal class SafGateway(
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                 .awaitExchange()
 
+
         return when (clientResponse.rawStatusCode()) {
             200 -> {
-                val entity = clientResponse
-                        .toEntity(DataBuffer::class.java)
-                        .awaitFirstOrNull()
+                val entity = clientResponse.awaitEntity<DataBuffer>()
                 Dokument(
-                        contentType = entity?.headers?.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
+                        contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
                         dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
                 )
             }
