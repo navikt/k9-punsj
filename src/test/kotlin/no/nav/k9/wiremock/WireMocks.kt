@@ -1,5 +1,6 @@
 package no.nav.k9.wiremock
 
+import com.github.tomakehurst.wiremock.core.Options
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 
 internal fun initWireMock(
@@ -9,6 +10,7 @@ internal fun initWireMock(
         .withAzureSupport()
         .wireMockConfiguration {
             it.withRootDirectory("src/test/resources")
+            it.useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
         }
         .build()
         .stubSaksbehandlerAccessToken()
