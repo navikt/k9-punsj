@@ -7,8 +7,8 @@ import org.springframework.boot.runApplication
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
-
-
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
+import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
 class K9PunsjApplication {
@@ -18,7 +18,10 @@ class K9PunsjApplication {
 		builder.propertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
 		return builder
 	}
-
+	@Bean
+	fun reactiveWebServerFactory(): ReactiveWebServerFactory {
+		return NettyReactiveWebServerFactory()
+	}
 }
 
 fun main(args: Array<String>) {
