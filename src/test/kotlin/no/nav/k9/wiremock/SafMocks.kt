@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
 import no.nav.k9.JournalpostId
+import org.springframework.http.HttpHeaders
 
 private const val path = "/saf-mock"
 
@@ -15,6 +16,7 @@ internal fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
                     WireMock.aResponse()
                             .withHeader("Content-Type", "application/pdf")
+                            .withHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
                             .withBodyFile("dummy_soknad.pdf")
                             .withStatus(200)
             )
