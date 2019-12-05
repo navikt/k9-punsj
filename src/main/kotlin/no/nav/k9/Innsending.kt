@@ -25,7 +25,6 @@ internal fun Innhold.merge(nyttInnhold: Innhold) : Innhold {
 }
 
 data class Innsending(
-        val felles: JournalpostInnhold?,
         val personlig: Map<NorskIdent, JournalpostInnhold>?
 )
 

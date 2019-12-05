@@ -8,7 +8,6 @@ typealias MappeId = String
 data class Mappe(
         val mappeId: MappeId,
         val innholdType: InnholdType,
-        val felles: Undermappe?,
         val personlig: MutableMap<NorskIdent, Undermappe>
 )
 
@@ -18,10 +17,9 @@ data class MapperDTO(
 
 data class MappeDTO(
         val mappeId: MappeId,
-        val felles: UndermappeDTO,
         val personlig: MutableMap<NorskIdent, UndermappeDTO>
 ) {
-    internal fun erKomplett() = felles.mangler.isEmpty() && personlig.all { it.value.mangler.isEmpty() }
+    internal fun erKomplett() = personlig.all { it.value.mangler.isEmpty() }
 }
 
 data class Undermappe(
@@ -36,7 +34,6 @@ data class UndermappeDTO(
 )
 
 internal fun Mappe.dto(
-        fellesMangler: Set<Mangel>,
         personligMangler: Map<NorskIdent, Set<Mangel>>
 ) : MappeDTO {
     val personligInnhold = mutableMapOf<NorskIdent, UndermappeDTO>()
@@ -50,11 +47,6 @@ internal fun Mappe.dto(
 
     return MappeDTO (
             mappeId = mappeId,
-            felles = UndermappeDTO(
-                    innsendinger = felles?.innsendinger?: mutableSetOf(),
-                    innhold = felles?.innhold?: mutableMapOf(),
-                    mangler = fellesMangler
-            ),
             personlig = personligInnhold
         )
 }
@@ -81,7 +73,6 @@ internal fun Innsending.leggIMappe(
     return Mappe(
             mappeId = mappe?.mappeId ?: UUID.randomUUID().toString(),
             innholdType = mappe?.innholdType ?: innholdType!!,
-            felles = felles?.leggIUndermappe(undermappe = mappe?.felles),
             personlig = personligInnholdUndermapper
     )
 }

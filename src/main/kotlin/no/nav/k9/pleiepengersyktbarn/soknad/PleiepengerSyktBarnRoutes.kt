@@ -138,21 +138,16 @@ internal class PleiepengerSyktBarnRoutes(
         val personligInnholdMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
         personlig.forEach { (norskIdent, undermappe) ->
              if (validerFor == null || validerFor.contains(norskIdent)) {
-                 personligInnholdMangler[norskIdent] = undermappe.innhold.validerPersonligdel()
+                 personligInnholdMangler[norskIdent] = undermappe.innhold.validerSøknad()
              }
         }
         return dto(
-                fellesMangler = felles?.innhold?.validerFellesdel()?: setOf(),
                 personligMangler = personligInnholdMangler
         )
     }
-    private fun Innhold.validerPersonligdel() : Set<Mangel> {
-        val personligDel : PersonligDel = objectMapper.convertValue(this)
-        return validator.validate(personligDel).mangler()
-    }
-    private fun Innhold.validerFellesdel() : Set<Mangel> {
-        val fellesDel : FellesDel = objectMapper.convertValue(this)
-        return validator.validate(fellesDel).mangler()
+    private fun Innhold.validerSøknad() : Set<Mangel> {
+        val søknad : PleiepengerSyktBarnSoknad = objectMapper.convertValue(this)
+        return validator.validate(søknad).mangler()
     }
 
     private suspend fun ServerRequest.mappeId() : MappeId = pathVariable(MappeIdKey)
