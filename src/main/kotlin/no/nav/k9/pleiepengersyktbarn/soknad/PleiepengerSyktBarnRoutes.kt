@@ -13,6 +13,7 @@ import kotlin.coroutines.coroutineContext
 import no.nav.k9.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 
 @Configuration
 internal class PleiepengerSyktBarnRoutes(
@@ -30,7 +31,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     internal object Urls {
-        internal const val HenteMapper = "/$innholdType/mapper/{$NorskIdentKey}"
+        internal const val HenteMapper = "/$innholdType/mapper"
         internal const val NySøknad = "/$innholdType"
         internal const val EksisterendeSøknad = "/$innholdType/mappe/{$MappeIdKey}"
     }
@@ -41,16 +42,16 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMapper}") { request ->
             RequestContext(coroutineContext, request) {
                 val mapper = mappeService.hent(
-                        norskIdent = request.norskIdent(),
+                        norskeIdenter = request.norskeIdenter(),
                         innholdType = innholdType
                 ).map { mappe ->
-                    mappe.dto(mappe.innhold.valider())
+                    mappe.dtoMedValidering(validerFor = request.norskeIdenter())
                 }
 
                 ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(mapper)
+                        .bodyValueAndAwait(MapperDTO(mapper))
             }
         }
 
@@ -69,41 +70,46 @@ internal class PleiepengerSyktBarnRoutes(
                             .notFound()
                             .buildAndAwait()
                 } else {
-                    val mangler = mappe.innhold.valider()
+                    val mappeDTO = mappe.dtoMedValidering()
                     ServerResponse
-                            .status(mangler.httpStatus())
+                            .status(mappeDTO.erKomplett().httpStatus())
                             .json()
-                            .bodyValueAndAwait(mappe.dto(mangler))
+                            .bodyValueAndAwait(mappeDTO)
                 }
-
             }
         }
 
-        POST("/api${Urls.EksisterendeSøknad}") { request ->
+        POST("/api${Urls.EksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
+                val norskIdent = request.norskIdent()
                 val mappeId = request.mappeId()
-
                 val mappe = mappeService.hent(mappeId)
 
-                if (mappe == null) {
+                if (mappe == null || norskIdent == null) {
                     ServerResponse
                             .notFound()
                             .buildAndAwait()
                 } else {
-                    val mangler = mappe.innhold.valider()
-                    if (mangler.isEmpty()) {
-                        pleiepengerSyktBarnSoknadService.komplettSøknadMedMappe(mappe)
-                        mappeService.fjern(mappeId)
+                    val mappeDTO = mappe.dtoMedValidering(validerFor = setOf(norskIdent))
+
+                    if (mappeDTO.erKomplett()) {
+                        pleiepengerSyktBarnSoknadService.sendSøknad(
+                                norskIdent = norskIdent,
+                                mappe = mappe
+                        )
+                        mappeService.fjern(
+                                mappeId = mappeId,
+                                norskIdent = norskIdent
+                        )
                         ServerResponse
                                 .accepted()
                                 .buildAndAwait()
                     } else {
                         ServerResponse
-                                .status(mangler.httpStatus())
+                                .status(HttpStatus.BAD_REQUEST)
                                 .json()
-                                .bodyValueAndAwait(mappe.dto(mangler))
+                                .bodyValueAndAwait(mappeDTO)
                     }
-
                 }
 
             }
@@ -112,27 +118,46 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()
-                val mangler = innsending.innhold.valider()
-
                 val mappe = mappeService.førsteInnsending(
                         innsending = innsending,
                         innholdType = innholdType
                 )
 
+                val mappeDTO = mappe.dtoMedValidering()
+
                 ServerResponse
                         .created(request.mappeLocation(mappe.mappeId))
                         .json()
-                        .bodyValueAndAwait(mappe.dto(mangler))
+                        .bodyValueAndAwait(mappeDTO)
             }
         }
     }
 
-    private fun Innhold.valider() : Set<Mangel> {
-        val søknad : Søknad = objectMapper.convertValue(this)
-        return validator.validate(søknad).mangler()
+
+    private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeDTO {
+        val personligInnholdMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
+        personlig.forEach { (norskIdent, undermappe) ->
+             if (validerFor == null || validerFor.contains(norskIdent)) {
+                 personligInnholdMangler[norskIdent] = undermappe.innhold.validerPersonligdel()
+             }
+        }
+        return dto(
+                fellesMangler = felles?.innhold?.validerFellesdel()?: setOf(),
+                personligMangler = personligInnholdMangler
+        )
     }
+    private fun Innhold.validerPersonligdel() : Set<Mangel> {
+        val personligDel : PersonligDel = objectMapper.convertValue(this)
+        return validator.validate(personligDel).mangler()
+    }
+    private fun Innhold.validerFellesdel() : Set<Mangel> {
+        val fellesDel : FellesDel = objectMapper.convertValue(this)
+        return validator.validate(fellesDel).mangler()
+    }
+
     private suspend fun ServerRequest.mappeId() : MappeId = pathVariable(MappeIdKey)
-    private suspend fun ServerRequest.norskIdent() : NorskIdent = pathVariable(NorskIdentKey)
+    private suspend fun ServerRequest.norskIdent() : NorskIdent? = if(norskeIdenter().size != 1) null else norskeIdenter().first()
+    private suspend fun ServerRequest.norskeIdenter() : Set<NorskIdent> = headers().header("X-Nav-NorskIdent").toSet()
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
 }

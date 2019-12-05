@@ -1,3 +1,4 @@
+/*
 package no.nav.k9
 
 import io.swagger.v3.oas.annotations.Operation
@@ -8,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
-import io.swagger.v3.oas.annotations.security.SecuritySchemes
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Contact
@@ -17,8 +17,9 @@ import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
+import no.nav.k9.pleiepengersyktbarn.soknad.FellesDel
+import no.nav.k9.pleiepengersyktbarn.soknad.PersonligDel
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
-import no.nav.k9.pleiepengersyktbarn.soknad.Søknad
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
@@ -89,7 +90,7 @@ internal class PleiepengerSyktBarnSoknadController {
     ])
     fun OppdatereSøknad(
             @PathVariable("mappe_id") mappeId: String,
-            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Søknad>
+            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Innsen>
     ) {}
 
     @PostMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
@@ -135,14 +136,13 @@ internal class PleiepengerSyktBarnSoknadController {
         )
     ])
     fun NySøknad(
-            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Søknad>
+            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Innsending>
     ){}
 }
 
-data class OasPleiepengerSykBarnInnsending<T>(
-        val norsk_ident: String,
-        val journalpost_id: String,
-        val innhold: T
+data class OasPleiepengerSykBarnInnsending(
+        val felles_innhold: FellesDel,
+        val personlig_innhold: Map<String, PersonligDel>
 )
 
 data class OasMangel(
@@ -269,4 +269,4 @@ data class OasFagsak(
 data class OasFagsakBarn(
         val fødselsdato: LocalDate,
         val navn: String
-)
+)*/
