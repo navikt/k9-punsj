@@ -23,11 +23,11 @@ internal class K9PunsjApplicationWithMocks {
         @JvmStatic
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
-                    port = 8080
+                    port = 8082
             )
             startup(
                     wireMockServer = wireMockServer,
-                    port = 9081
+                    port = 8081
             )
         }
     }
