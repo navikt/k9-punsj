@@ -92,20 +92,24 @@ internal class PleiepengerSyktBarnRoutes(
                 } else {
                     val mappeDTO = mappe.dtoMedValidering(validerFor = setOf(norskIdent))
 
-                    if (mappeDTO.erKomplett()) {
-                        pleiepengerSyktBarnSoknadService.sendSøknad(
-                                norskIdent = norskIdent,
-                                mappe = mappe
-                        )
-                        mappeService.fjern(
-                                mappeId = mappeId,
-                                norskIdent = norskIdent
-                        )
-                        ServerResponse
-                                .accepted()
+                    when {
+                        !mappeDTO.personlig.containsKey(norskIdent) -> ServerResponse
+                                .notFound()
                                 .buildAndAwait()
-                    } else {
-                        ServerResponse
+                        mappeDTO.erKomplett() -> {
+                            pleiepengerSyktBarnSoknadService.sendSøknad(
+                                    norskIdent = norskIdent,
+                                    mappe = mappe
+                            )
+                            mappeService.fjern(
+                                    mappeId = mappeId,
+                                    norskIdent = norskIdent
+                            )
+                            ServerResponse
+                                    .accepted()
+                                    .buildAndAwait()
+                        }
+                        else -> ServerResponse
                                 .status(HttpStatus.BAD_REQUEST)
                                 .json()
                                 .bodyValueAndAwait(mappeDTO)
