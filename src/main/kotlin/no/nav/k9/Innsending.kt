@@ -15,16 +15,21 @@ typealias Innhold = MutableMap<String, Any?>
 typealias InnholdType = String
 typealias NorskIdent = String
 
-internal fun Innhold.merge(nyttInnhold: Innhold) {
+internal fun Innhold.merge(nyttInnhold: Innhold) : Innhold {
     val før = objectMapper.valueToTree<ObjectNode>(this)
     val nytt = objectMapper.valueToTree<ObjectNode>(nyttInnhold)
     val merged = objectMapper.convertValue<Innhold>(merge(før, nytt))
     clear()
     putAll(merged)
+    return this
 }
 
 data class Innsending(
-        val norskIdent: NorskIdent,
+        val felles: JournalpostInnhold?,
+        val personlig: Map<NorskIdent, JournalpostInnhold>?
+)
+
+data class JournalpostInnhold(
         val journalpostId: JournalpostId,
         val innhold: Innhold
 )
@@ -41,7 +46,7 @@ internal fun Set<ConstraintViolation<*>>.mangler() = map { Mangel(
         melding = it.message
 )}.toSet()
 
-internal fun Set<Mangel>.httpStatus() = if (isEmpty()) HttpStatus.OK else HttpStatus.BAD_REQUEST
+internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST
 
 private fun merge(mainNode: JsonNode, updateNode: JsonNode): JsonNode {
     updateNode.fieldNames().forEach { fieldName ->

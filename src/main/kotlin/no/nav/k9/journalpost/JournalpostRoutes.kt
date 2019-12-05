@@ -79,6 +79,7 @@ internal class JournalpostRoutes(
                                 .ok()
                                 .contentType(dokument.contentType)
                                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=${request.dokumentId()}.${dokument.contentType.subtype}")
+                                .header("Content-Security-Policy", "frame-src;")
                                 .bodyValueAndAwait(dokument.dataBuffer)
                     }
                 } catch (cause: IkkeTilgang) {

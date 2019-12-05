@@ -12,17 +12,12 @@ internal class PleiepengerSyktBarnSoknadService {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
     }
 
-    internal suspend fun komplettSøknadMedEnInnsending(
-            innsending: Innsending
-    ) {
-        logger.info("komplettSøknadMedEnInnsending")
-        logger.info("Innsending=$innsending")
-    }
-
-    internal suspend fun komplettSøknadMedMappe(
+    internal suspend fun sendSøknad(
+            norskIdent: NorskIdent,
             mappe: Mappe
     ) {
-        logger.info("komplettSøknadMedMappe")
+        logger.info("sendSøknad")
+        logger.info("NorskIdent=$norskIdent")
         logger.info("Mappe=$mappe")
     }
 }
