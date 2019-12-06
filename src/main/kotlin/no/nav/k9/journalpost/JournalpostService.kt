@@ -46,7 +46,6 @@ internal class JournalpostService(
     }
 
     internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: Ytelse) {
-        hentJournalpostInfo(journalpostId = journalpostId) // Verifirsere at saksbehandler har tilgang
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
 }

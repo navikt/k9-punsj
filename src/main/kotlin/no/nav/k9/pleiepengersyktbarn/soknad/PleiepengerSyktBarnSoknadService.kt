@@ -16,6 +16,7 @@ internal class PleiepengerSyktBarnSoknadService {
             norskIdent: NorskIdent,
             mappe: Mappe
     ) {
+        // TODO: Legge på en kafka-topic k9-fordel håndterer.
         logger.info("sendSøknad")
         logger.info("NorskIdent=$norskIdent")
         logger.info("Mappe=$mappe")
