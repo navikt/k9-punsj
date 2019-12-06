@@ -44,6 +44,11 @@ internal class JournalpostService(
             }
         }
     }
+
+    internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: Ytelse) {
+        hentJournalpostInfo(journalpostId = journalpostId) // Verifirsere at saksbehandler har tilgang
+        // TODO: Legge på en kafka-topic k9-fordel håndterer.
+    }
 }
 
 private fun SafDtos.Journalpost.parseJournalpost() : ParsedJournalpost {
@@ -93,6 +98,14 @@ data class JournalpostInfo(
 data class DokumentInfo(
         val dokumentId: DokumentId
 )
+
+enum class Ytelse {
+    PleiepengerSyktBarn,
+    PleiepengerNærstående,
+    Omsorgspenger,
+    Opplæringspenger,
+    Annet
+}
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
 internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")
