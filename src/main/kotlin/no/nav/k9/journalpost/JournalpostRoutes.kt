@@ -1,7 +1,8 @@
 package no.nav.k9.journalpost
 
+import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.*
 import no.nav.k9.AuthenticationHandler
-import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
 
@@ -26,14 +29,15 @@ internal class JournalpostRoutes(
     }
 
     internal object Urls {
-        internal const val HenteJournalpostInfo = "/journalpost/{$JournalpostIdKey}"
-        internal const val HenteDokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
+        internal const val JournalpostInfo = "/journalpost/{$JournalpostIdKey}"
+        internal const val OmfordelJournalpost = "$JournalpostInfo/omfordel"
+        internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
     }
 
     @Bean
     fun JournalpostRoutes() = Routes (authenticationHandler) {
 
-        GET("/api${Urls.HenteJournalpostInfo}") { request ->
+        GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
@@ -62,7 +66,40 @@ internal class JournalpostRoutes(
             }
         }
 
-        GET("/api${Urls.HenteDokument}") { request ->
+        POST("/api${Urls.OmfordelJournalpost}", contentType(MediaType.APPLICATION_JSON)) { request ->
+            RequestContext(coroutineContext, request) {
+                val omfordelingRequest = request.omfordelingRequest()
+                try {
+                    val journalpostInfo = journalpostService.hentJournalpostInfo(
+                            journalpostId = request.journalpostId()
+                    )
+                    if (journalpostInfo == null) {
+                        ServerResponse
+                                .notFound()
+                                .buildAndAwait()
+                    } else {
+                        journalpostService.omfordelJournalpost(
+                                journalpostId = request.journalpostId(),
+                                ytelse = omfordelingRequest.ytelse
+                        )
+                        ServerResponse
+                                .noContent()
+                                .buildAndAwait()
+                    }
+
+                } catch (cause: IkkeStøttetJournalpost) {
+                    ServerResponse
+                            .badRequest()
+                            .buildAndAwait()
+                } catch (case: IkkeTilgang) {
+                    ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .buildAndAwait()
+                }
+            }
+        }
+
+        GET("/api${Urls.Dokument}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
                     val dokument = journalpostService.hentDokument(
@@ -94,5 +131,9 @@ internal class JournalpostRoutes(
 
     private suspend fun ServerRequest.journalpostId() : JournalpostId = pathVariable(JournalpostIdKey)
     private suspend fun ServerRequest.dokumentId() : DokumentId = pathVariable(DokumentIdKey)
+    private suspend fun ServerRequest.omfordelingRequest() = body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
+    data class OmfordelingRequest(
+            val ytelse: Ytelse
+    )
 }

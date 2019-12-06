@@ -215,7 +215,34 @@ data class OasMangel(
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
-    @GetMapping(JournalpostRoutes.Urls.HenteJournalpostInfo, produces = ["application/json"])
+    @PostMapping(JournalpostRoutes.Urls.OmfordelJournalpost, consumes = ["application/json"], produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "204",
+                description = "Journalpost omfordelt"
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
+        )
+    ])
+    @Operation(
+            summary = "Omfordele journalpost",
+            security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun OmfordelJournalpost(
+            @PathVariable("journalpost_id") journalpostId : String,
+            @RequestBody body: JournalpostRoutes.OmfordelingRequest){}
+
+    @GetMapping(JournalpostRoutes.Urls.JournalpostInfo, produces = ["application/json"])
     @ApiResponses(value = [
         ApiResponse(
                 responseCode = "200",
@@ -249,7 +276,8 @@ internal class JournalpostController {
     )
     fun HenteJournalpostInfo(
             @PathVariable("journalpost_id") journalpostId : String){}
-    @GetMapping(JournalpostRoutes.Urls.HenteDokument, produces = ["application/pdf"])
+
+    @GetMapping(JournalpostRoutes.Urls.Dokument, produces = ["application/pdf"])
     @ApiResponses(value = [
         ApiResponse(
                 responseCode = "200",
