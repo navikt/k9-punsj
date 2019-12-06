@@ -1,4 +1,4 @@
-/*package no.nav.k9
+package no.nav.k9
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -27,7 +27,6 @@ import java.time.LocalDate
 
 @Component
 internal class OpenApi {
-
 
     @Bean
     internal fun openApi(
@@ -60,43 +59,60 @@ internal class OpenApi {
 @Tag(name = "Pleiepenger sykt barn søknad", description = "Håndtering av papirsøknader")
 internal class PleiepengerSyktBarnSoknadController {
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteMapper, produces = ["application/json"])
-    @Operation(summary = "Hente eksisterende mapper på en person som inneholder ufullstendige søknader.")
-    fun HenteMapper(@PathVariable("norsk_ident") norskIdent: String
-    ) : Set<OasPleiepengerSyktBarnSoknadMappe> = setOf()
+    @Operation(
+            summary = "Hente eksisterende mapper på en person som inneholder ufullstendige søknader.",
+            description = "Kan sendes en eller fler NorskIdenter som headere. Viser kun mapper hvor alle Norske Identer er med i."
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Alle mapper lagret på personen(e) sendt inn.",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                        )
+                )]
+        )
+    ])
+    fun HenteMapper(
+            @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>
+    ) {}
+
 
     @PutMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
     @Operation(summary = "Oppdatere en søknad i en eksisterende mappe.")
     @ApiResponses(value = [
         ApiResponse(
                 responseCode = "200",
-                description = "Innhold på søknad er oppdatert og søknaden er klar for innsending.",
+                description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                                implementation = OasPleiepengerSyktBarSoknadMapper::class
                         )
                 )]
         ),
         ApiResponse(
                 responseCode = "400",
-                description = "Innhold på søknad er oppdatert, men inneholder fortsatt mangler.",
+                description = "Innhold på søknader er oppdatert, men inneholder fortsatt mangler.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                                implementation = OasPleiepengerSyktBarSoknadMapper::class
                         )
                 )]
         )
     ])
     fun OppdatereSøknad(
             @PathVariable("mappe_id") mappeId: String,
-            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Innsen>
+            @RequestBody søknad: OasInnsending<PleiepengerSyktBarnSoknad>
     ) {}
+
 
     @PostMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
     @Operation(summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.")
     @ApiResponses(value = [
         ApiResponse(
                 responseCode = "202",
-                description = "Søknaden er sendt til behandling og mappen slettet.",
+                description = "Søknaden er sendt til behandling og personen fjernet fra mappen.",
                 content = [Content(
                         schema = Schema(
                                 implementation = Void::class
@@ -108,13 +124,14 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innsending feilet grunnet mangler i søknaden.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                                implementation = OasPleiepengerSyktBarSoknadMapper::class
                         )
                 )]
         )
     ])
     fun SendSøknad(
-            @PathVariable("mappe_id") mappeId: String
+            @PathVariable("mappe_id") mappeId: String,
+            @RequestHeader("X-Nav-NorskIdent") norskIdenter: String
     ) {}
 
     @PostMapping(PleiepengerSyktBarnRoutes.Urls.NySøknad,
@@ -128,31 +145,42 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Opprettet mappe for en ny søknad. Se 'Location' header for URL til mappen.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarnSoknadMappe::class
+                                implementation = OasPleiepengerSyktBarSoknadMapper::class
                         )
                 )]
         )
     ])
     fun NySøknad(
-            @RequestBody søknad: OasPleiepengerSykBarnInnsending<Innsending>
+            @RequestBody søknad: OasInnsending<PleiepengerSyktBarnSoknad>
     ){}
 }
 
-data class OasPleiepengerSykBarnInnsending(
-        val felles_innhold: FellesDel,
-        val personlig_innhold: Map<String, PersonligDel>
+data class OasJournalpostInnhold<T>(
+        val journalpost_id: String,
+        val innhold: T
+)
+data class OasInnsending<T>(
+        val personlig: Map<String, OasJournalpostInnhold<T>>
+)
+
+data class OasMappeInnhold<T>(
+        val innsendinger: Set<String>,
+        val innhold: T,
+        val mangler: Set<OasMangel>
+)
+
+data class OasMappe<T>(
+        val mappe_id : String,
+        val personlig: Map<String, OasMappeInnhold<T>>
+
+)
+data class OasPleiepengerSyktBarSoknadMapper(
+        val mapper: Set<OasMappe<PleiepengerSyktBarnSoknad>>
 )
 
 data class OasMangel(
         val attributt: String,
-        val ugyldig_verdi: Any?,
         val melding: String
-)
-data class OasPleiepengerSyktBarnSoknadMappe(
-        val mappe_id : String,
-        val innsendinger: Set<String>,
-        val innhold: Søknad,
-        val mangler: Set<OasMangel>
 )
 
 @RestController
@@ -268,4 +296,3 @@ data class OasFagsakBarn(
         val fødselsdato: LocalDate,
         val navn: String
 )
-*/

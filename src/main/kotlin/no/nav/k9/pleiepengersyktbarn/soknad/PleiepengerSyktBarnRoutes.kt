@@ -79,7 +79,7 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        POST("/api${Urls.EksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        POST("/api${Urls.EksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 val mappeId = request.mappeId()
@@ -156,7 +156,11 @@ internal class PleiepengerSyktBarnRoutes(
 
     private suspend fun ServerRequest.mappeId() : MappeId = pathVariable(MappeIdKey)
     private suspend fun ServerRequest.norskIdent() : NorskIdent? = if(norskeIdenter().size != 1) null else norskeIdenter().first()
-    private suspend fun ServerRequest.norskeIdenter() : Set<NorskIdent> = headers().header("X-Nav-NorskIdent").toSet()
+    private suspend fun ServerRequest.norskeIdenter() : Set<NorskIdent> {
+        val identer = mutableSetOf<NorskIdent>()
+        headers().header("X-Nav-NorskIdent").forEach { it -> identer.addAll(it.split(",").onEach { it.trim() }) }
+        return identer.toSet()
+    }
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
 }
