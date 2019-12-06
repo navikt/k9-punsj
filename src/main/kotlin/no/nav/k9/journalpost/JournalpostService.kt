@@ -100,7 +100,6 @@ data class DokumentInfo(
 )
 
 enum class Ytelse {
-    PleiepengerSyktBarn,
     PleiepengerNærstående,
     Omsorgspenger,
     Opplæringspenger,
