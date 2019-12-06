@@ -55,6 +55,22 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
+        GET("/api${Urls.EksisterendeSøknad}") { request ->
+            RequestContext(coroutineContext, request) {
+                val mappeDTO = mappeService.hent(request.mappeId())?.dtoMedValidering()
+                if (mappeDTO == null) {
+                    ServerResponse
+                            .notFound()
+                            .buildAndAwait()
+                } else {
+                    ServerResponse
+                            .status(mappeDTO.erKomplett().httpStatus())
+                            .json()
+                            .bodyValueAndAwait(mappeDTO)
+                }
+            }
+        }
+
         PUT("/api${Urls.EksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()

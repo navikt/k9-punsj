@@ -78,6 +78,29 @@ internal class PleiepengerSyktBarnSoknadController {
             @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>
     ) {}
 
+    @GetMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, produces = ["application/json"])
+    @Operation(
+            summary = "Hente eksisterende mappe"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Mappen",
+                content = [Content(
+                        schema = Schema(
+                                implementation = OasPleiepengerSyktBarSoknadMappe::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Mappen finnes ikke"
+        )
+    ])
+    fun HenteMappe(
+            @PathVariable("mappe_id") mappeId: String
+    ) {}
+
 
     @PutMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
     @Operation(summary = "Oppdatere en søknad i en eksisterende mappe.")
@@ -169,13 +192,13 @@ data class OasMappeInnhold<T>(
         val mangler: Set<OasMangel>
 )
 
-data class OasMappe<T>(
+data class OasPleiepengerSyktBarSoknadMappe(
         val mappe_id : String,
-        val personlig: Map<String, OasMappeInnhold<T>>
+        val personlig: Map<String, OasMappeInnhold<PleiepengerSyktBarnSoknad>>
 
 )
 data class OasPleiepengerSyktBarSoknadMapper(
-        val mapper: Set<OasMappe<PleiepengerSyktBarnSoknad>>
+        val mapper: Set<OasPleiepengerSyktBarSoknadMappe>
 )
 
 data class OasMangel(
