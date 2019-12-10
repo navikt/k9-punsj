@@ -21,7 +21,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
         søknad!!.barn?.apply {
             if (this.foedselsdato == null && this.norsk_ident == null) {
-                valid = withError(context, "MAA_SETTE_NORSK_IDENT_ELLER_FOEDSELSDATO_PAA_BARN", "barn")
+                valid = withError(context, "MAA_SETTE_NORSK_IDENT_ELLER_FOEDSELSDATO", "barn")
             }
         }
         søknad.perioder?.filter { it.fra_og_med != null && it.til_og_med!= null }?.forEach {
