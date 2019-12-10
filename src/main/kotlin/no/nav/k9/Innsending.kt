@@ -35,13 +35,11 @@ data class JournalpostInnhold(
 
 data class Mangel(
         val attributt: String,
-        val ugyldigVerdi: Any?,
         val melding: String
 )
 
 internal fun Set<ConstraintViolation<*>>.mangler() = map { Mangel(
         attributt = it.propertyPath.toString(),
-        ugyldigVerdi = it.invalidValue,
         melding = it.message
 )}.toSet()
 
