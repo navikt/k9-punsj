@@ -5,12 +5,15 @@ import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 import kotlin.reflect.KClass
 
+
+
 internal const val MåSettes = "MAA_SETTES"
 internal const val MåSigneres = "MAA_SIGNERES"
+internal const val MinstEnMåSettes = "MINST_EN_MAA_SETTES"
 
 @Constraint(validatedBy = arrayOf(SoknadValidator::class))
 annotation class ValidPleiepengerSyktBarnSoknad(
-        val message: String = "UGYLDIG_SOEKNAD",
+        val message: String = MåSettes,
         val groups: Array<KClass<out Any>> = [],
         val payload: Array<KClass<out Any>> = []
 )

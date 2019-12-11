@@ -8,7 +8,7 @@ import javax.validation.constraints.Size
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
         @get:NotNull(message = MåSettes)
-        @get:Size(min=1, message = "MINST_EN_PERIODE_MAA_SETTES")
+        @get:Size(min=1, message = MinstEnMåSettes)
         @get:Valid
         val perioder: Set<Periode>?,
 
