@@ -5,6 +5,8 @@ import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 import kotlin.reflect.KClass
 
+internal const val MåSettes = "MAA_SETTES"
+internal const val MåSigneres = "MAA_SIGNERES"
 
 @Constraint(validatedBy = arrayOf(SoknadValidator::class))
 annotation class ValidPleiepengerSyktBarnSoknad(
@@ -21,18 +23,41 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
         søknad!!.barn?.apply {
             if (this.foedselsdato == null && this.norsk_ident == null) {
-                valid = withError(context, "MAA_SETTE_NORSK_IDENT_ELLER_FOEDSELSDATO", "barn")
+                valid = withError(context, "NORSK_IDENT_ELLER_FOEDSELSDATO_MAA_SETTES", "barn")
             }
         }
-        søknad.perioder?.filter { it.fra_og_med != null && it.til_og_med!= null }?.forEach {
-            if (it.til_og_med!!.isBefore(it.fra_og_med)) {
-                valid = withError(context, "FRA_OG_MED_MAA_VAERE_FOER_TIL_OG_MED", "perioder[].fra_og_med")
+        søknad.perioder?.forEachIndexed { i, periode ->
+            val prefix = "perioder[$i]"
+
+            periode.beredskap?.apply {
+                if (this.svar == null) {
+                    valid = withError(context, MåSettes, "$prefix.beredskap.svar")
+                }
+            }
+
+            periode.nattevaak?.apply {
+                if (this.svar == null) {
+                    valid = withError(context, MåSettes, "$prefix.beredskap.svar")
+
+                }
+            }
+
+            if (periode.fra_og_med == null) {
+                valid = withError(context, MåSettes, "$prefix.fra_og_med")
+            }
+
+            if (periode.til_og_med == null) {
+                valid = withError(context, MåSettes, "$prefix.til_og_med")
+            }
+
+            if (periode.til_og_med != null && periode.fra_og_med != null && periode.til_og_med.isBefore(periode.fra_og_med)) {
+                valid = withError(context, "MAA_VAERE_FOER_TIL_OG_MED", "$prefix.fra_og_med")
             }
         }
 
         søknad.signert?.apply {
             if (!this) {
-                valid = withError(context, "SOEKNADEN_MAA_SIGNERES", "signert")
+                valid = withError(context, MåSigneres, "signert")
             }
         }
         return valid
