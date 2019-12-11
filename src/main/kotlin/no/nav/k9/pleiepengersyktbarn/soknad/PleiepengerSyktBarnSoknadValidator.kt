@@ -38,7 +38,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
             periode.nattevaak?.apply {
                 if (this.svar == null) {
-                    valid = withError(context, MåSettes, "$prefix.beredskap.svar")
+                    valid = withError(context, MåSettes, "$prefix.nattevaak.svar")
 
                 }
             }

@@ -10,7 +10,7 @@ data class PleiepengerSyktBarnSoknad(
         @get:NotNull(message = MåSettes)
         @get:Size(min=1, message = MinstEnMåSettes)
         @get:Valid
-        val perioder: Set<Periode>?,
+        val perioder: List<Periode>?,
 
         @get:NotNull(message = MåSettes)
         val spraak: Språk?,
