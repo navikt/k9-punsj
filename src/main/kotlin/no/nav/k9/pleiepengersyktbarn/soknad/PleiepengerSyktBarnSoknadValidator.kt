@@ -5,8 +5,6 @@ import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 import kotlin.reflect.KClass
 
-
-
 internal const val MåSettes = "MAA_SETTES"
 internal const val MåSigneres = "MAA_SIGNERES"
 internal const val MinstEnMåSettes = "MINST_EN_MAA_SETTES"
@@ -25,7 +23,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         var valid = true
 
         søknad!!.barn?.apply {
-            if (this.foedselsdato == null && this.norsk_ident == null) {
+            if (this.foedselsdato == null && this.norsk_ident.isNullOrBlank()) {
                 valid = withError(context, "NORSK_IDENT_ELLER_FOEDSELSDATO_MAA_SETTES", "barn")
             }
         }
