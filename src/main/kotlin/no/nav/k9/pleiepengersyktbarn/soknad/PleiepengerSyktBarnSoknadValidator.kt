@@ -22,38 +22,52 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             context: ConstraintValidatorContext?): Boolean {
         var valid = true
 
+        fun validerPeriode(periode: Periode?, prefix: String) : Boolean {
+            if (periode == null) {
+                return withError(context, MåSettes, "$prefix.periode")
+            }
+
+            if (periode.fraOgMed == null) {
+                valid = withError(context, MåSettes, "$prefix.periode.fraOgMed")
+            }
+
+            if (periode.tilOgMed == null) {
+                valid = withError(context, MåSettes, "$prefix.periode.tilOgMed")
+            }
+
+            if (periode.tilOgMed != null && periode.fraOgMed != null && periode.tilOgMed.isBefore(periode.fraOgMed)) {
+                valid = withError(context, "MAA_VAERE_FOER_TIL_OG_MED", "$prefix.periode.fraOgMed")
+            }
+            return valid
+        }
+
+        fun validerSvar(jaNeiMedTilleggsinformasjon: JaNeiMedTilleggsinformasjon, prefix: String) : Boolean {
+            if (jaNeiMedTilleggsinformasjon.svar == null) {
+                valid = withError(context, MåSettes, "$prefix.svar")
+            }
+
+            return validerPeriode(jaNeiMedTilleggsinformasjon.periode, prefix)
+        }
+
         søknad!!.barn?.apply {
-            if (this.foedselsdato == null && this.norsk_ident.isNullOrBlank()) {
+            if (this.foedselsdato == null && this.norskIdent.isNullOrBlank()) {
                 valid = withError(context, "NORSK_IDENT_ELLER_FOEDSELSDATO_MAA_SETTES", "barn")
             }
         }
-        søknad.perioder?.forEachIndexed { i, periode ->
-            val prefix = "perioder[$i]"
 
-            periode.beredskap?.apply {
-                if (this.svar == null) {
-                    valid = withError(context, MåSettes, "$prefix.beredskap.svar")
-                }
-            }
+        søknad.nattevaak?.forEachIndexed { i, nattevaak ->
+            val prefix = "nattevaar[$i]"
+            valid = validerSvar(nattevaak, prefix)
+        }
 
-            periode.nattevaak?.apply {
-                if (this.svar == null) {
-                    valid = withError(context, MåSettes, "$prefix.nattevaak.svar")
+        søknad.beredskap?.forEachIndexed { i, beredskap ->
+            val prefix = "beredskap[$i]"
+            valid = validerSvar(beredskap, prefix)
+        }
 
-                }
-            }
-
-            if (periode.fra_og_med == null) {
-                valid = withError(context, MåSettes, "$prefix.fra_og_med")
-            }
-
-            if (periode.til_og_med == null) {
-                valid = withError(context, MåSettes, "$prefix.til_og_med")
-            }
-
-            if (periode.til_og_med != null && periode.fra_og_med != null && periode.til_og_med.isBefore(periode.fra_og_med)) {
-                valid = withError(context, "MAA_VAERE_FOER_TIL_OG_MED", "$prefix.fra_og_med")
-            }
+        søknad.tilsynsordning?.forEachIndexed{ i, tilsynsordning ->
+            val prefix = "tilsynsordning[$i]"
+            valid = validerPeriode(tilsynsordning.periode, prefix)
         }
 
         søknad.signert?.apply {
@@ -69,11 +83,9 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             error: String,
             attributt: String) : Boolean {
         context!!.disableDefaultConstraintViolation()
-        context
-                .buildConstraintViolationWithTemplate(error)
+        context.buildConstraintViolationWithTemplate(error)
                 .addPropertyNode(attributt)
                 .addConstraintViolation()
         return false
     }
-
 }

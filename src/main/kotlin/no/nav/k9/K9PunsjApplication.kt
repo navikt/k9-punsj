@@ -15,7 +15,7 @@ class K9PunsjApplication {
 	@Bean
 	fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
 		val builder = Jackson2ObjectMapperBuilder()
-		builder.propertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+		builder.propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
 		return builder
 	}
 	@Bean
@@ -29,4 +29,3 @@ fun main(args: Array<String>) {
 		setBannerMode(Banner.Mode.OFF)
 	}
 }
-

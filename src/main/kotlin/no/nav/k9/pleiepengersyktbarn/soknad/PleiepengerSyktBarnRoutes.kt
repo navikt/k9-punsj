@@ -27,13 +27,13 @@ internal class PleiepengerSyktBarnRoutes(
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
         private const val NorskIdentKey = "norsk_ident"
         private const val MappeIdKey = "mappe_id"
-        private const val innholdType : InnholdType = "pleiepenger-sykt-barn-soknad"
+        private const val søknadType : SøknadType = "pleiepenger-sykt-barn-soknad"
     }
 
     internal object Urls {
-        internal const val HenteMapper = "/$innholdType/mapper"
-        internal const val NySøknad = "/$innholdType"
-        internal const val EksisterendeSøknad = "/$innholdType/mappe/{$MappeIdKey}"
+        internal const val HenteMapper = "/$søknadType/mapper"
+        internal const val NySøknad = "/$søknadType"
+        internal const val EksisterendeSøknad = "/$søknadType/mappe/{$MappeIdKey}"
     }
 
     @Bean
@@ -43,7 +43,7 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val mapper = mappeService.hent(
                         norskeIdenter = request.norskeIdenter(),
-                        innholdType = innholdType
+                        søknadType = søknadType
                 ).map { mappe ->
                     mappe.dtoMedValidering(validerFor = request.norskeIdenter())
                 }
@@ -77,7 +77,7 @@ internal class PleiepengerSyktBarnRoutes(
 
                 val mappe = mappeService.utfyllendeInnsending(
                         mappeId = request.mappeId(),
-                        innholdType = innholdType,
+                        søknadType = søknadType,
                         innsending = innsending
                 )
 
@@ -109,7 +109,7 @@ internal class PleiepengerSyktBarnRoutes(
                     val mappeDTO = mappe.dtoMedValidering(validerFor = setOf(norskIdent))
 
                     when {
-                        !mappeDTO.personlig.containsKey(norskIdent) -> ServerResponse
+                        !mappeDTO.personer.containsKey(norskIdent) -> ServerResponse
                                 .notFound()
                                 .buildAndAwait()
                         mappeDTO.erKomplett() -> {
@@ -140,7 +140,7 @@ internal class PleiepengerSyktBarnRoutes(
                 val innsending = request.innsending()
                 val mappe = mappeService.førsteInnsending(
                         innsending = innsending,
-                        innholdType = innholdType
+                        søknadType = søknadType
                 )
 
                 val mappeDTO = mappe.dtoMedValidering()
@@ -155,17 +155,17 @@ internal class PleiepengerSyktBarnRoutes(
 
 
     private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeDTO {
-        val personligInnholdMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
-        personlig.forEach { (norskIdent, undermappe) ->
+        val personMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
+        innsending.forEach { (norskIdent, Person) ->
              if (validerFor == null || validerFor.contains(norskIdent)) {
-                 personligInnholdMangler[norskIdent] = undermappe.innhold.validerSøknad()
+                 personMangler[norskIdent] = Person.soeknad.valider()
              }
         }
         return dto(
-                personligMangler = personligInnholdMangler
+                personMangler = personMangler
         )
     }
-    private fun Innhold.validerSøknad() : Set<Mangel> {
+    private fun Søknad.valider() : Set<Mangel> {
         val søknad : PleiepengerSyktBarnSoknad = objectMapper.convertValue(this)
         return validator.validate(søknad).mangler()
     }

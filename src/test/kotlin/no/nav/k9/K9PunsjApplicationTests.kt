@@ -26,10 +26,10 @@ class K9PunsjApplicationTests {
 	private companion object {
 
 		private val wireMockServer = initWireMock(
-				port = 8084
+				port = 9192
 		)
 
-		private const val port = 8083
+		private const val port = 9193
 		private val client = WebClient.create("http://localhost:$port")
 
 		private val app = K9PunsjApplicationWithMocks.startup(
@@ -105,12 +105,12 @@ class K9PunsjApplicationTests {
 		val responseEntity = runBlocking { res.awaitBody<String>() }
 		JSONAssert.assertEquals(responseEntity, """
 			{
-				"journalpost_id": "1",
-				"norsk_ident": "29099012345",
+				"journalpostId": "1",
+				"norskIdent": "29099012345",
 				"dokumenter": [{
-					"dokument_id": "470164680"
+					"dokumentId": "470164680"
 				},{
-					"dokument_id": "470164681"
+					"dokumentId": "470164681"
 				}]
 			}
 		""".trimIndent(), true)
