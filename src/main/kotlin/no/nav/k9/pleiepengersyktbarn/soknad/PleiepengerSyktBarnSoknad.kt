@@ -5,6 +5,8 @@ import javax.validation.Valid
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
+typealias Arbeidstid = String
+
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
         @get:NotNull(message = MåSettes)
@@ -20,7 +22,13 @@ data class PleiepengerSyktBarnSoknad(
         val barn: Barn?,
 
         @get:NotNull(message = MåSettes)
-        val signert: Boolean?
+        val signert: Boolean?,
+
+        val beredskap: List<JaNeiMedTilleggsinformasjon>?,
+        val nattevaak: List<JaNeiMedTilleggsinformasjon>?,
+
+        @get:NotNull(message = MåSettes)
+        val tilsynsordning: List<Tilsynsordning>?
 )
 
 enum class Språk {
@@ -28,18 +36,26 @@ enum class Språk {
 }
 
 data class Periode(
-        val fra_og_med: LocalDate?,
-        val til_og_med: LocalDate?,
-        val beredskap: JaNeiMedTilleggsinformasjon?,
-        val nattevaak: JaNeiMedTilleggsinformasjon?
+        val fraOgMed: LocalDate?,
+        val tilOgMed: LocalDate?
 )
 
 data class Barn(
-        val norsk_ident: String?,
+        val norskIdent: String?,
         val foedselsdato: LocalDate?
+)
+
+data class Tilsynsordning(
+        val periode: Periode,
+        val mandag: Arbeidstid?,
+        val tirsdag: Arbeidstid?,
+        val onsdag: Arbeidstid?,
+        val torsdag: Arbeidstid?,
+        val fredag: Arbeidstid?
 )
 
 data class JaNeiMedTilleggsinformasjon(
         val svar: Boolean?,
-        val tilleggsinformasjon: String?
+        val tilleggsinformasjon: String?,
+        val periode: Periode?
 )

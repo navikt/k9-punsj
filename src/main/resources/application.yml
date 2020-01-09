@@ -28,7 +28,7 @@ no.nav:
   navn: '@project.artifactId@'
   versjon: '@project.version@'
   beskrivelse: '@project.description@'
-  swagger_server_base_url: ${SWAGGER_SERVER_BASE_URL:http://localhost:8080}
+  swagger_server_base_url: ${SWAGGER_SERVER_BASE_URL:http://localhost:8085}
   saf:
     base_url: ${SAF_BASE_URL}
     scopes:

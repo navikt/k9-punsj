@@ -69,7 +69,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Alle mapper lagret på personen(e) sendt inn.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                                implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
                         )
                 )]
         )
@@ -88,7 +88,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Mappen",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMappe::class
+                                implementation = OasPleiepengerSyktBarSoknadMappeSvar::class
                         )
                 )]
         ),
@@ -110,7 +110,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                                implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
                         )
                 )]
         ),
@@ -119,7 +119,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innhold på søknader er oppdatert, men inneholder fortsatt mangler.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                                implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
                         )
                 )]
         )
@@ -147,7 +147,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innsending feilet grunnet mangler i søknaden.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                                implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
                         )
                 )]
         )
@@ -168,7 +168,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Opprettet mappe for en ny søknad. Se 'Location' header for URL til mappen.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapper::class
+                                implementation = OasPleiepengerSyktBarSoknadMappeSvar::class
                         )
                 )]
         )
@@ -179,26 +179,26 @@ internal class PleiepengerSyktBarnSoknadController {
 }
 
 data class OasJournalpostInnhold<T>(
-        val journalpost_id: String,
-        val innhold: T
+        val journalpostId: String,
+        val soeknad: T
 )
 data class OasInnsending<T>(
-        val personlig: Map<String, OasJournalpostInnhold<T>>
+        val personer: Map<String, OasJournalpostInnhold<T>>
 )
 
-data class OasMappeInnhold<T>(
+data class OasMappeInnholdSvar<T>(
         val innsendinger: Set<String>,
-        val innhold: T,
+        val soeknad: T,
         val mangler: Set<OasMangel>
 )
 
-data class OasPleiepengerSyktBarSoknadMappe(
-        val mappe_id : String,
-        val personlig: Map<String, OasMappeInnhold<PleiepengerSyktBarnSoknad>>
+data class OasPleiepengerSyktBarSoknadMappeSvar(
+        val mappeId : String,
+        val personer: Map<String, OasMappeInnholdSvar<PleiepengerSyktBarnSoknad>>
 
 )
-data class OasPleiepengerSyktBarSoknadMapper(
-        val mapper: Set<OasPleiepengerSyktBarSoknadMappe>
+data class OasPleiepengerSyktBarSoknadMapperSvar(
+        val mapper: Set<OasPleiepengerSyktBarSoknadMappeSvar>
 )
 
 data class OasMangel(

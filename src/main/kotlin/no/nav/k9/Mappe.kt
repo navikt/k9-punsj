@@ -7,8 +7,8 @@ typealias MappeId = String
 
 data class Mappe(
         val mappeId: MappeId,
-        val innholdType: InnholdType,
-        val personlig: MutableMap<NorskIdent, Undermappe>
+        val søknadType: SøknadType,
+        val innsending: MutableMap<NorskIdent, Person>
 )
 
 data class MapperDTO(
@@ -17,63 +17,61 @@ data class MapperDTO(
 
 data class MappeDTO(
         val mappeId: MappeId,
-        val personlig: MutableMap<NorskIdent, UndermappeDTO>
+        val personer: MutableMap<NorskIdent, PersonDTO>
 ) {
-    internal fun erKomplett() = personlig.all { it.value.mangler.isEmpty() }
+    internal fun erKomplett() = personer.all { it.value.mangler.isEmpty() }
 }
 
-data class Undermappe(
+data class Person(
         val innsendinger: MutableSet<JournalpostId>,
-        val innhold: Innhold
+        val soeknad: Søknad
 )
 
-data class UndermappeDTO(
+data class PersonDTO(
         val innsendinger: MutableSet<JournalpostId>,
-        val innhold: Innhold,
+        val soeknad: Søknad,
         val mangler: Set<Mangel>
 )
 
-internal fun Mappe.dto(
-        personligMangler: Map<NorskIdent, Set<Mangel>>
-) : MappeDTO {
-    val personligInnhold = mutableMapOf<NorskIdent, UndermappeDTO>()
-    personligMangler.forEach { (norskIdent, mangler) ->
-        personligInnhold[norskIdent] = UndermappeDTO(
-                innsendinger = personlig[norskIdent]!!.innsendinger,
-                innhold = personlig[norskIdent]!!.innhold,
+internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeDTO {
+    val personer = mutableMapOf<NorskIdent, PersonDTO>()
+    personMangler.forEach { (norskIdent, mangler) ->
+        personer[norskIdent] = PersonDTO(
+                innsendinger = innsending[norskIdent]!!.innsendinger,
+                soeknad = innsending[norskIdent]!!.soeknad,
                 mangler = mangler
         )
     }
 
     return MappeDTO (
             mappeId = mappeId,
-            personlig = personligInnhold
+            personer = personer
         )
 }
 
 
 private fun JournalpostInnhold.leggIUndermappe(
-        undermappe: Undermappe?
-) : Undermappe {
-    return Undermappe(
-            innsendinger = undermappe?.innsendinger?.leggTil(journalpostId) ?: mutableSetOf(journalpostId),
-            innhold = undermappe?.innhold?.merge(innhold) ?: innhold
+        person: Person?
+) : Person {
+    return Person(
+            innsendinger = person?.innsendinger?.leggTil(journalpostId) ?: mutableSetOf(journalpostId),
+            soeknad = person?.soeknad?.merge(soeknad) ?: soeknad
     )
 }
 
 internal fun Innsending.leggIMappe(
         mappe: Mappe?,
-        innholdType: InnholdType? = null
+        søknadType: SøknadType? = null
 ) : Mappe {
-    val personligInnholdUndermapper = mappe?.personlig?: mutableMapOf()
-    personlig?.forEach { (norskIdent, journalpostInnhold) ->
-        personligInnholdUndermapper[norskIdent] = journalpostInnhold.leggIUndermappe(undermappe = mappe?.personlig?.get(norskIdent))
+    val personligInnholdUndermapper = mappe?.innsending?: mutableMapOf()
+    personer?.forEach { (norskIdent, journalpostInnhold) ->
+        personligInnholdUndermapper[norskIdent] = journalpostInnhold.leggIUndermappe(person = mappe?.innsending?.get(norskIdent))
     }
 
     return Mappe(
             mappeId = mappe?.mappeId ?: UUID.randomUUID().toString(),
-            innholdType = mappe?.innholdType ?: innholdType!!,
-            personlig = personligInnholdUndermapper
+            søknadType = mappe?.søknadType ?: søknadType!!,
+            innsending = personligInnholdUndermapper
     )
 }
 
@@ -88,16 +86,16 @@ internal class MappeService {
 
     internal suspend fun hent(
             norskeIdenter: Set<NorskIdent>,
-            innholdType: InnholdType
-    ) = map.filterValues { it.personlig.containsKeys(norskeIdenter) }.map { (_, mappe) ->
+            søknadType: SøknadType
+    ) = map.filterValues { it.innsending.containsKeys(norskeIdenter) }.map { (_, mappe) ->
         mappe
     }.toSet()
 
     internal suspend fun førsteInnsending(
-            innholdType: InnholdType,
+            søknadType: SøknadType,
             innsending: Innsending
     ) : Mappe {
-        val opprettetMappe = innsending.leggIMappe(mappe = null, innholdType = innholdType);
+        val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
 
         map[opprettetMappe.mappeId] = opprettetMappe
 
@@ -106,7 +104,7 @@ internal class MappeService {
 
     internal suspend fun utfyllendeInnsending(
             mappeId: MappeId,
-            innholdType: InnholdType,
+            søknadType: SøknadType,
             innsending: Innsending
     ) : Mappe? {
         val eksisterendeMappe = map[mappeId]?: return null
@@ -127,11 +125,11 @@ internal class MappeService {
             norskIdent: NorskIdent
     ) {
         val mappe = hent(mappeId)?:return
-        if (mappe.personlig.containsKey(norskIdent)) {
-            if (mappe.personlig.size == 1) {
+        if (mappe.innsending.containsKey(norskIdent)) {
+            if (mappe.innsending.size == 1) {
                 map.remove(mappeId)
             } else {
-                mappe.personlig.remove(norskIdent)
+                mappe.innsending.remove(norskIdent)
                 map[mappeId] = mappe
             }
         }

@@ -11,26 +11,26 @@ internal val objectMapper = jacksonObjectMapper()
 
 typealias JournalpostId = String
 
-typealias Innhold = MutableMap<String, Any?>
-typealias InnholdType = String
+typealias Søknad = MutableMap<String, Any?>
+typealias SøknadType = String
 typealias NorskIdent = String
 
-internal fun Innhold.merge(nyttInnhold: Innhold) : Innhold {
+internal fun Søknad.merge(nySøknad: Søknad) : Søknad {
     val før = objectMapper.valueToTree<ObjectNode>(this)
-    val nytt = objectMapper.valueToTree<ObjectNode>(nyttInnhold)
-    val merged = objectMapper.convertValue<Innhold>(merge(før, nytt))
+    val nytt = objectMapper.valueToTree<ObjectNode>(nySøknad)
+    val merged = objectMapper.convertValue<Søknad>(merge(før, nytt))
     clear()
     putAll(merged)
     return this
 }
 
 data class Innsending(
-        val personlig: Map<NorskIdent, JournalpostInnhold>?
+        val personer: Map<NorskIdent, JournalpostInnhold>?
 )
 
 data class JournalpostInnhold(
         val journalpostId: JournalpostId,
-        val innhold: Innhold
+        val soeknad: Søknad
 )
 
 data class Mangel(
