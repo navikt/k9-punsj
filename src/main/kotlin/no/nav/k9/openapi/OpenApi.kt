@@ -15,8 +15,12 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
+import no.nav.k9.JournalpostInnhold
+import no.nav.k9.NorskIdent
 import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
+import no.nav.k9.mappe.MappeId
+import no.nav.k9.mappe.PersonDTO
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnSoknad
 import org.springframework.beans.factory.annotation.Value
@@ -114,7 +118,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                         schema = Schema(
-                                implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
+                                implementation = OasPleiepengerSyktBarSoknadMappeSvar::class
                         )
                 )]
         ),
@@ -130,7 +134,7 @@ internal class PleiepengerSyktBarnSoknadController {
     ])
     fun OppdatereSøknad(
             @PathVariable("mappe_id") mappeId: String,
-            @RequestBody søknad: OasInnsending<PleiepengerSyktBarnSoknad>
+            @RequestBody søknad: OasInnsending
     ) {}
 
 
@@ -178,36 +182,22 @@ internal class PleiepengerSyktBarnSoknadController {
         )
     ])
     fun NySøknad(
-            @RequestBody søknad: OasInnsending<PleiepengerSyktBarnSoknad>
+            @RequestBody søknad: OasInnsending
     ){}
 }
 
-data class OasJournalpostInnhold<T>(
-        val journalpostId: String,
-        val soeknad: T
-)
-data class OasInnsending<T>(
-        val personer: Map<String, OasJournalpostInnhold<T>>
-)
-
-data class OasMappeInnholdSvar<T>(
-        val innsendinger: Set<String>,
-        val soeknad: T,
-        val mangler: Set<OasMangel>
+// Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
+data class OasInnsending(
+        val personer: Map<String, JournalpostInnhold<PleiepengerSyktBarnSoknad>>
 )
 
 data class OasPleiepengerSyktBarSoknadMappeSvar(
-        val mappeId : String,
-        val personer: Map<String, OasMappeInnholdSvar<PleiepengerSyktBarnSoknad>>
-
+        val mappeId: MappeId,
+        val personer: MutableMap<NorskIdent, PersonDTO<PleiepengerSyktBarnSoknad>>
 )
+
 data class OasPleiepengerSyktBarSoknadMapperSvar(
-        val mapper: Set<OasPleiepengerSyktBarSoknadMappeSvar>
-)
-
-data class OasMangel(
-        val attributt: String,
-        val melding: String
+        val mapper : List<OasPleiepengerSyktBarSoknadMappeSvar>
 )
 
 @RestController

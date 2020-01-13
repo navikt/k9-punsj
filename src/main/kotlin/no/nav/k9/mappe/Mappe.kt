@@ -1,5 +1,6 @@
-package no.nav.k9
+package no.nav.k9.mappe
 
+import no.nav.k9.*
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -8,49 +9,32 @@ typealias MappeId = String
 data class Mappe(
         val mappeId: MappeId,
         val søknadType: SøknadType,
-        val innsending: MutableMap<NorskIdent, Person>
+        val person: MutableMap<NorskIdent, Person>
 )
-
-data class MapperDTO(
-        val mapper : List<MappeDTO>
-)
-
-data class MappeDTO(
-        val mappeId: MappeId,
-        val personer: MutableMap<NorskIdent, PersonDTO>
-) {
-    internal fun erKomplett() = personer.all { it.value.mangler.isEmpty() }
-}
 
 data class Person(
         val innsendinger: MutableSet<JournalpostId>,
-        val soeknad: Søknad
+        val soeknad: SøknadJson
 )
 
-data class PersonDTO(
-        val innsendinger: MutableSet<JournalpostId>,
-        val soeknad: Søknad,
-        val mangler: Set<Mangel>
-)
-
-internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeDTO {
-    val personer = mutableMapOf<NorskIdent, PersonDTO>()
+internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeSvarDTO {
+    val personer = mutableMapOf<NorskIdent, PersonDTO<SøknadJson>>()
     personMangler.forEach { (norskIdent, mangler) ->
         personer[norskIdent] = PersonDTO(
-                innsendinger = innsending[norskIdent]!!.innsendinger,
-                soeknad = innsending[norskIdent]!!.soeknad,
+                innsendinger = person[norskIdent]!!.innsendinger,
+                soeknad = person[norskIdent]!!.soeknad,
                 mangler = mangler
         )
     }
 
-    return MappeDTO (
+    return MappeSvarDTO(
             mappeId = mappeId,
             personer = personer
         )
 }
 
 
-private fun JournalpostInnhold.leggIUndermappe(
+private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(
         person: Person?
 ) : Person {
     return Person(
@@ -63,15 +47,15 @@ internal fun Innsending.leggIMappe(
         mappe: Mappe?,
         søknadType: SøknadType? = null
 ) : Mappe {
-    val personligInnholdUndermapper = mappe?.innsending?: mutableMapOf()
+    val personligInnholdUndermapper = mappe?.person?: mutableMapOf()
     personer?.forEach { (norskIdent, journalpostInnhold) ->
-        personligInnholdUndermapper[norskIdent] = journalpostInnhold.leggIUndermappe(person = mappe?.innsending?.get(norskIdent))
+        personligInnholdUndermapper[norskIdent] = journalpostInnhold.leggIUndermappe(person = mappe?.person?.get(norskIdent))
     }
 
     return Mappe(
             mappeId = mappe?.mappeId ?: UUID.randomUUID().toString(),
             søknadType = mappe?.søknadType ?: søknadType!!,
-            innsending = personligInnholdUndermapper
+            person = personligInnholdUndermapper
     )
 }
 
@@ -87,7 +71,7 @@ internal class MappeService {
     internal suspend fun hent(
             norskeIdenter: Set<NorskIdent>,
             søknadType: SøknadType
-    ) = map.filterValues { it.innsending.containsKeys(norskeIdenter) }.map { (_, mappe) ->
+    ) = map.filterValues { it.person.containsKeys(norskeIdenter) }.map { (_, mappe) ->
         mappe
     }.toSet()
 
@@ -125,11 +109,11 @@ internal class MappeService {
             norskIdent: NorskIdent
     ) {
         val mappe = hent(mappeId)?:return
-        if (mappe.innsending.containsKey(norskIdent)) {
-            if (mappe.innsending.size == 1) {
+        if (mappe.person.containsKey(norskIdent)) {
+            if (mappe.person.size == 1) {
                 map.remove(mappeId)
             } else {
-                mappe.innsending.remove(norskIdent)
+                mappe.person.remove(norskIdent)
                 map[mappeId] = mappe
             }
         }

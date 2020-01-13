@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.server.*
 import javax.validation.Validator
 import kotlin.coroutines.coroutineContext
 import no.nav.k9.*
+import no.nav.k9.mappe.*
+import no.nav.k9.mappe.MappeService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -51,7 +53,7 @@ internal class PleiepengerSyktBarnRoutes(
                 ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(MapperDTO(mapper))
+                        .bodyValueAndAwait(MapperSvarDTO(mapper))
             }
         }
 
@@ -154,9 +156,9 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
 
-    private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeDTO {
+    private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeSvarDTO {
         val personMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
-        innsending.forEach { (norskIdent, Person) ->
+        person.forEach { (norskIdent, Person) ->
              if (validerFor == null || validerFor.contains(norskIdent)) {
                  personMangler[norskIdent] = Person.soeknad.valider()
              }
@@ -165,7 +167,7 @@ internal class PleiepengerSyktBarnRoutes(
                 personMangler = personMangler
         )
     }
-    private fun Søknad.valider() : Set<Mangel> {
+    private fun SøknadJson.valider() : Set<Mangel> {
         val søknad : PleiepengerSyktBarnSoknad = objectMapper.convertValue(this)
         return validator.validate(søknad).mangler()
     }
