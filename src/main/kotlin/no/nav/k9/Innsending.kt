@@ -25,7 +25,7 @@ internal fun Søknad.merge(nySøknad: Søknad) : Søknad {
 }
 
 data class Innsending(
-        val personer: Map<NorskIdent, JournalpostInnhold>?
+        val personer: Map<NorskIdent, JournalpostInnhold>
 )
 
 data class JournalpostInnhold(

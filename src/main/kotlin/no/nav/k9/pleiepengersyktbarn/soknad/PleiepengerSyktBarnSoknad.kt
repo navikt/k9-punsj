@@ -1,11 +1,10 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
+import java.time.Duration
 import java.time.LocalDate
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
-
-typealias Arbeidstid = String
 
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
@@ -47,11 +46,11 @@ data class Barn(
 
 data class Tilsynsordning(
         val periode: Periode,
-        val mandag: Arbeidstid?,
-        val tirsdag: Arbeidstid?,
-        val onsdag: Arbeidstid?,
-        val torsdag: Arbeidstid?,
-        val fredag: Arbeidstid?
+        val mandag: Duration?,
+        val tirsdag: Duration?,
+        val onsdag: Duration?,
+        val torsdag: Duration?,
+        val fredag: Duration?
 )
 
 data class JaNeiMedTilleggsinformasjon(
