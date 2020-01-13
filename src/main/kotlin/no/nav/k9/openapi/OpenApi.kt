@@ -1,5 +1,6 @@
-package no.nav.k9
+package no.nav.k9.openapi
 
+import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.media.Content
@@ -9,15 +10,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.swagger.v3.oas.models.*
+import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
-import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnSoknad
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
+import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnSoknad
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
@@ -27,6 +28,9 @@ import java.time.LocalDate
 
 @Component
 internal class OpenApi {
+
+    @Bean
+    internal fun modelConverter() : ModelConverter = DurationMockConverter()
 
     @Bean
     internal fun openApi(
