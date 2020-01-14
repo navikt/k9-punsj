@@ -65,9 +65,19 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             valid = validerSvar(beredskap, prefix)
         }
 
-        søknad.tilsynsordning?.forEachIndexed{ i, tilsynsordning ->
-            val prefix = "tilsynsordning[$i]"
-            valid = validerPeriode(tilsynsordning.periode, prefix)
+        søknad.tilsynsordning?.apply {
+            if (this.itilsynsordning == null) {
+                valid = withError(context, "I_TILSYNSORDNING_MAA_SETTES", "iTilsynsordning")
+            }
+            else if (this.itilsynsordning == JaNeiVetikke.ja) {
+                if (this.opphold.isEmpty()) {
+                    valid = withError(context, "OPPHOLD_MAA_OPPGIS_HVIS_AKTIV_I_TILSYNSORDNING", "opphold")
+                }
+                this.opphold.forEachIndexed { i, opphold ->
+                    val prefix = "tilsynsordning.opphold[$i]"
+                    valid = validerPeriode(opphold.periode, prefix)
+                }
+            }
         }
 
         søknad.signert?.apply {
