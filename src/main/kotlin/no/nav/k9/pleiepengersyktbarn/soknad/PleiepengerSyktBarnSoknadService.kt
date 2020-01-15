@@ -1,6 +1,7 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
 import no.nav.k9.*
+import no.nav.k9.mappe.Mappe
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
