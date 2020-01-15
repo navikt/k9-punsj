@@ -66,17 +66,44 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         }
 
         søknad.tilsynsordning?.apply {
-            if (this.itilsynsordning == null) {
-                valid = withError(context, "I_TILSYNSORDNING_MAA_SETTES", "iTilsynsordning")
+            if (this.iTilsynsordning == null) {
+                valid = withError(context, MåSettes, "iTilsynsordning")
             }
-            else if (this.itilsynsordning == JaNeiVetikke.ja) {
+            else if (this.iTilsynsordning == JaNeiVetikke.ja) {
                 if (this.opphold.isEmpty()) {
-                    valid = withError(context, "OPPHOLD_MAA_OPPGIS_HVIS_AKTIV_I_TILSYNSORDNING", "opphold")
+                    valid = withError(context, "MAA_OPPGIS_HVIS_AKTIV_I_TILSYNSORDNING", "opphold")
                 }
                 this.opphold.forEachIndexed { i, opphold ->
                     val prefix = "tilsynsordning.opphold[$i]"
                     valid = validerPeriode(opphold.periode, prefix)
                 }
+            }
+        }
+
+        søknad.arbeidsgivere?.apply {
+            val prefix = "arbeidsgivere"
+
+            arbeidsforhold?.apply{
+                if (organisasjonsnummer == null && norskIdent == null) {
+                    valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", "$prefix.arbeidsforhold")
+                }
+                if (organisasjonsnummer != null && norskIdent != null) {
+                    valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", "$prefix.arbeidsforhold")
+                }
+
+                valid = validerPeriode(periode, "$prefix.arbeidsforhold")
+
+                if (skalJobbeProsent == null) {
+                    valid = withError(context, MåSettes, "$prefix.arbeidsforhold")
+                }
+            }
+
+            selvstendigNaeringsdrivende?.apply {
+                valid = validerPeriode(periode, "$prefix.selvstendigNæringsdrivende")
+            }
+
+            frilans?.apply {
+                valid = validerPeriode(periode, "$prefix.frilans")
             }
         }
 
