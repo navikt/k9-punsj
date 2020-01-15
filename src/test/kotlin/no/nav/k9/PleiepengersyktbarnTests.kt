@@ -2,9 +2,7 @@ package no.nav.k9
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.mappe.MapperSvarDTO
-import no.nav.k9.wiremock.initWireMock
 import org.junit.Assert.assertEquals
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
@@ -16,32 +14,15 @@ import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 
 @ExtendWith(SpringExtension::class)
-class K9PunsjPleiepengerTests {
+class PleiepengersyktbarnTests {
 
-    private companion object {
-        private val wireMockServer = initWireMock(
-                port = 9192
-        )
-
-        private const val port = 9193
-        private val client = WebClient.create("http://localhost:$port/api/pleiepenger-sykt-barn-soknad/")
-
-        private val app = K9PunsjApplicationWithMocks.startup(
-                wireMockServer = wireMockServer,
-                port = port
-        )
-
-        @JvmStatic
-        @AfterAll
-        fun tearDown() {
-            wireMockServer.stop()
-            app.stop()
-        }
-    }
+    val client = TestSetup.client
+    val api = "api"
+    val søknad = "pleiepenger-sykt-barn-soknad"
 
     @Test
     fun `Hente eksisterende mapper`() {
-        val res = client.get().uri{ it.pathSegment("mapper").build() }
+        val res = client.get().uri{ it.pathSegment(api, søknad, "mapper").build() }
                 .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
     }
@@ -49,7 +30,7 @@ class K9PunsjPleiepengerTests {
     @Test
     fun `Opprette ny mappe uten person`() {
         val innsending = Innsending(personer = mutableMapOf())
-        val res = client.post()
+        val res = client.post().uri{ it.pathSegment(api, søknad).build() }
                 .body(BodyInserters.fromValue(innsending))
                 .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, res.statusCode())
@@ -58,7 +39,7 @@ class K9PunsjPleiepengerTests {
     @Test
     fun `Opprette ny mappe på person`() {
         val innsending = lagInnsending("12345", "999")
-        val res = client.post()
+        val res = client.post().uri{ it.pathSegment(api, søknad).build() }
                 .body(BodyInserters.fromValue(innsending))
                 .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, res.statusCode())
@@ -68,10 +49,12 @@ class K9PunsjPleiepengerTests {
     fun `Hente eksisterende mappe på person`() {
         val innsending = lagInnsending("12345", "9999")
 
-        val resPost = client.post().body(BodyInserters.fromValue(innsending)).awaitExchangeBlocking()
+        val resPost = client.post()
+                .uri{ it.pathSegment(api, søknad).build() }
+                .body(BodyInserters.fromValue(innsending)).awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, resPost.statusCode())
 
-        val res = client.get().uri{ it.pathSegment("mapper").build() }
+        val res = client.get().uri{ it.pathSegment(api, søknad, "mapper").build() }
                 .header("X-Nav-NorskIdent", "12345")
                 .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
