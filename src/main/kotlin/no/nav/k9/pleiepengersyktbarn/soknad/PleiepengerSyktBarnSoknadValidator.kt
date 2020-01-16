@@ -80,30 +80,30 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             }
         }
 
-        søknad.arbeidsgivere?.apply {
-            val prefix = "arbeidsgivere"
+        søknad.arbeid?.apply {
+            arbeidstaker?.forEachIndexed { i, arbidstaker ->
+                val prefix = "arbeid.arbidstakere[$i]"
 
-            arbeidsforhold?.apply{
-                if (organisasjonsnummer == null && norskIdent == null) {
-                    valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", "$prefix.arbeidsforhold")
+                if (arbidstaker.organisasjonsnummer == null && arbidstaker.norskIdent == null) {
+                    valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", prefix)
                 }
-                if (organisasjonsnummer != null && norskIdent != null) {
-                    valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", "$prefix.arbeidsforhold")
+                if (arbidstaker.organisasjonsnummer != null && arbidstaker.norskIdent != null) {
+                    valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", prefix)
                 }
 
-                valid = validerPeriode(periode, "$prefix.arbeidsforhold")
+                valid = validerPeriode(arbidstaker.periode, prefix)
 
-                if (skalJobbeProsent == null) {
-                    valid = withError(context, MåSettes, "$prefix.arbeidsforhold")
+                if (arbidstaker.skalJobbeProsent == null) {
+                    valid = withError(context, MåSettes, prefix)
                 }
             }
 
-            selvstendigNaeringsdrivende?.apply {
-                valid = validerPeriode(periode, "$prefix.selvstendigNæringsdrivende")
+            selvstendigNaeringsdrivende?.forEachIndexed { i,  sn ->
+                valid = validerPeriode(sn.periode, "arbeid.selvstendigNæringsdrivende[$i]")
             }
 
-            frilans?.apply {
-                valid = validerPeriode(periode, "$prefix.frilans")
+            frilanser?.forEachIndexed { i, frilanser ->
+                valid = validerPeriode(frilanser.periode, "arbeid.frilansere[$i]")
             }
         }
 

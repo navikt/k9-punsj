@@ -30,7 +30,7 @@ data class PleiepengerSyktBarnSoknad(
         val tilsynsordning: Tilsynsordning?,
 
         @get:NotNull(message = MåSettes)
-        val arbeidsgivere: Arbeid?
+        val arbeid: Arbeid?
 )
 
 enum class Språk {
@@ -53,12 +53,12 @@ data class Tilsynsordning(
 )
 
 data class Arbeid (
-        val arbeidsforhold: Arbeidsforhold?,
-        val selvstendigNaeringsdrivende: Oppdragsforhold?,
-        val frilans: Oppdragsforhold?
+        val arbeidstaker: List<Arbeidsperiode>?,
+        val selvstendigNaeringsdrivende: List<Oppdragsforhold>?,
+        val frilanser: List<Oppdragsforhold>?
 )
 
-data class Arbeidsforhold(
+data class Arbeidsperiode(
         val periode: Periode?,
         val skalJobbeProsent: Float?,
         val organisasjonsnummer: String?,
