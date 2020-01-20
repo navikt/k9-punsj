@@ -65,9 +65,46 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             valid = validerSvar(beredskap, prefix)
         }
 
-        søknad.tilsynsordning?.forEachIndexed{ i, tilsynsordning ->
-            val prefix = "tilsynsordning[$i]"
-            valid = validerPeriode(tilsynsordning.periode, prefix)
+        søknad.tilsynsordning?.apply {
+            if (this.iTilsynsordning == null) {
+                valid = withError(context, MåSettes, "iTilsynsordning")
+            }
+            else if (this.iTilsynsordning == JaNeiVetikke.ja) {
+                if (this.opphold.isEmpty()) {
+                    valid = withError(context, "MAA_OPPGIS_HVIS_AKTIV_I_TILSYNSORDNING", "opphold")
+                }
+                this.opphold.forEachIndexed { i, opphold ->
+                    val prefix = "tilsynsordning.opphold[$i]"
+                    valid = validerPeriode(opphold.periode, prefix)
+                }
+            }
+        }
+
+        søknad.arbeid?.apply {
+            arbeidstaker?.forEachIndexed { i, arbidstaker ->
+                val prefix = "arbeid.arbidstakere[$i]"
+
+                if (arbidstaker.organisasjonsnummer == null && arbidstaker.norskIdent == null) {
+                    valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", prefix)
+                }
+                if (arbidstaker.organisasjonsnummer != null && arbidstaker.norskIdent != null) {
+                    valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", prefix)
+                }
+
+                valid = validerPeriode(arbidstaker.periode, prefix)
+
+                if (arbidstaker.skalJobbeProsent == null) {
+                    valid = withError(context, MåSettes, prefix)
+                }
+            }
+
+            selvstendigNaeringsdrivende?.forEachIndexed { i,  sn ->
+                valid = validerPeriode(sn.periode, "arbeid.selvstendigNæringsdrivende[$i]")
+            }
+
+            frilanser?.forEachIndexed { i, frilanser ->
+                valid = validerPeriode(frilanser.periode, "arbeid.frilansere[$i]")
+            }
         }
 
         søknad.signert?.apply {

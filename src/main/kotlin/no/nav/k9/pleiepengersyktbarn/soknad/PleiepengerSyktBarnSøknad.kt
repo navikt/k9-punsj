@@ -27,7 +27,10 @@ data class PleiepengerSyktBarnSoknad(
         val nattevaak: List<JaNeiMedTilleggsinformasjon>?,
 
         @get:NotNull(message = MåSettes)
-        val tilsynsordning: List<Tilsynsordning>?
+        val tilsynsordning: Tilsynsordning?,
+
+        @get:NotNull(message = MåSettes)
+        val arbeid: Arbeid?
 )
 
 enum class Språk {
@@ -45,13 +48,37 @@ data class Barn(
 )
 
 data class Tilsynsordning(
-        val periode: Periode,
+        val iTilsynsordning: JaNeiVetikke?,
+        val opphold: List<Opphold>
+)
+
+data class Arbeid (
+        val arbeidstaker: List<Arbeidsperiode>?,
+        val selvstendigNaeringsdrivende: List<Oppdragsforhold>?,
+        val frilanser: List<Oppdragsforhold>?
+)
+
+data class Arbeidsperiode(
+        val periode: Periode?,
+        val skalJobbeProsent: Float?,
+        val organisasjonsnummer: String?,
+        val norskIdent: String?
+)
+
+data class Oppdragsforhold(
+        val periode: Periode?
+)
+
+data class Opphold(
+        val periode: Periode?,
         val mandag: Duration?,
         val tirsdag: Duration?,
         val onsdag: Duration?,
         val torsdag: Duration?,
         val fredag: Duration?
 )
+
+enum class JaNeiVetikke { ja, nei, vetIkke }
 
 data class JaNeiMedTilleggsinformasjon(
         val svar: Boolean?,
