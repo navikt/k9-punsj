@@ -56,7 +56,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         }
 
         søknad.nattevaak?.forEachIndexed { i, nattevaak ->
-            val prefix = "nattevaar[$i]"
+            val prefix = "nattevaak[$i]"
             valid = validerSvar(nattevaak, prefix)
         }
 
@@ -82,7 +82,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
         søknad.arbeid?.apply {
             arbeidstaker?.forEachIndexed { i, arbidstaker ->
-                val prefix = "arbeid.arbidstakere[$i]"
+                val prefix = "arbeid.arbidstaker[$i]"
 
                 if (arbidstaker.organisasjonsnummer == null && arbidstaker.norskIdent == null) {
                     valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", prefix)
@@ -99,11 +99,11 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             }
 
             selvstendigNaeringsdrivende?.forEachIndexed { i,  sn ->
-                valid = validerPeriode(sn.periode, "arbeid.selvstendigNæringsdrivende[$i]")
+                valid = validerPeriode(sn.periode, "arbeid.selvstendigNaeringsdrivende[$i]")
             }
 
             frilanser?.forEachIndexed { i, frilanser ->
-                valid = validerPeriode(frilanser.periode, "arbeid.frilansere[$i]")
+                valid = validerPeriode(frilanser.periode, "arbeid.frilanser[$i]")
             }
         }
 
