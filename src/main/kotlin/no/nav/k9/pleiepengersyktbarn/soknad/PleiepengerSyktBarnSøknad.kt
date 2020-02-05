@@ -4,14 +4,13 @@ import java.time.Duration
 import java.time.LocalDate
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
-import javax.validation.constraints.Size
 
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
+
         @get:NotNull(message = MåSettes)
-        @get:Size(min=1, message = MinstEnMåSettes)
         @get:Valid
-        val perioder: List<Periode>?,
+        val periode: Periode?,
 
         @get:NotNull(message = MåSettes)
         val spraak: Språk?,
@@ -19,9 +18,6 @@ data class PleiepengerSyktBarnSoknad(
         @get:NotNull(message = MåSettes)
         @get:Valid
         val barn: Barn?,
-
-        @get:NotNull(message = MåSettes)
-        val signert: Boolean?,
 
         val beredskap: List<JaNeiMedTilleggsinformasjon>?,
         val nattevaak: List<JaNeiMedTilleggsinformasjon>?,

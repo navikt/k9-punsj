@@ -22,21 +22,24 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             context: ConstraintValidatorContext?): Boolean {
         var valid = true
 
-        fun validerPeriode(periode: Periode?, prefix: String) : Boolean {
+        fun validerPeriode(periode: Periode?, prefix: String?) : Boolean {
+
+            val prefixPeriode = if (prefix == null) "periode" else "$prefix.periode"
+
             if (periode == null) {
-                return withError(context, MåSettes, "$prefix.periode")
+                return withError(context, MåSettes, prefixPeriode)
             }
 
             if (periode.fraOgMed == null) {
-                valid = withError(context, MåSettes, "$prefix.periode.fraOgMed")
+                valid = withError(context, MåSettes, "$prefixPeriode.fraOgMed")
             }
 
             if (periode.tilOgMed == null) {
-                valid = withError(context, MåSettes, "$prefix.periode.tilOgMed")
+                valid = withError(context, MåSettes, "$prefixPeriode.tilOgMed")
             }
 
             if (periode.tilOgMed != null && periode.fraOgMed != null && periode.tilOgMed.isBefore(periode.fraOgMed)) {
-                valid = withError(context, "MAA_VAERE_FOER_TIL_OG_MED", "$prefix.periode.fraOgMed")
+                valid = withError(context, "MAA_VAERE_FOER_TIL_OG_MED", "$prefixPeriode.fraOgMed")
             }
             return valid
         }
@@ -54,6 +57,8 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
                 valid = withError(context, "NORSK_IDENT_ELLER_FOEDSELSDATO_MAA_SETTES", "barn")
             }
         }
+
+        søknad.periode?.apply { valid = validerPeriode(this, null) }
 
         søknad.nattevaak?.forEachIndexed { i, nattevaak ->
             val prefix = "nattevaak[$i]"
@@ -104,12 +109,6 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
             frilanser?.forEachIndexed { i, frilanser ->
                 valid = validerPeriode(frilanser.periode, "arbeid.frilanser[$i]")
-            }
-        }
-
-        søknad.signert?.apply {
-            if (!this) {
-                valid = withError(context, MåSigneres, "signert")
             }
         }
         return valid
