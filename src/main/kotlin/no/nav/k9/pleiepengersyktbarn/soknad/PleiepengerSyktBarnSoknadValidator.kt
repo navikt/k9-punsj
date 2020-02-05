@@ -81,19 +81,19 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         }
 
         søknad.arbeid?.apply {
-            arbeidstaker?.forEachIndexed { i, arbidstaker ->
-                val prefix = "arbeid.arbidstaker[$i]"
+            arbeidstaker?.forEachIndexed { i, arbeidstaker ->
+                val prefix = "arbeid.arbeidstaker[$i]"
 
-                if (arbidstaker.organisasjonsnummer == null && arbidstaker.norskIdent == null) {
+                if (arbeidstaker.organisasjonsnummer == null && arbeidstaker.norskIdent == null) {
                     valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", prefix)
                 }
-                if (arbidstaker.organisasjonsnummer != null && arbidstaker.norskIdent != null) {
+                if (arbeidstaker.organisasjonsnummer != null && arbeidstaker.norskIdent != null) {
                     valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", prefix)
                 }
 
-                valid = validerPeriode(arbidstaker.periode, prefix)
+                valid = validerPeriode(arbeidstaker.periode, prefix)
 
-                if (arbidstaker.skalJobbeProsent == null) {
+                if (arbeidstaker.skalJobbeProsent == null) {
                     valid = withError(context, MåSettes, prefix)
                 }
             }
