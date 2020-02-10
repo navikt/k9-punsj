@@ -4,13 +4,15 @@ import java.time.Duration
 import java.time.LocalDate
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
 
         @get:NotNull(message = MåSettes)
+        @get:Size(min=1, message = MinstEnMåSettes)
         @get:Valid
-        val periode: Periode?,
+        val perioder: List<Periode>?,
 
         @get:NotNull(message = MåSettes)
         val spraak: Språk?,

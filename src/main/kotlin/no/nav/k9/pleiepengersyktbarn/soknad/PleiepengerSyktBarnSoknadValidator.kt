@@ -22,9 +22,9 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             context: ConstraintValidatorContext?): Boolean {
         var valid = true
 
-        fun validerPeriode(periode: Periode?, prefix: String?) : Boolean {
+        fun validerPeriode(periode: Periode?, prefix: String, isOverordnetPeriode: Boolean = false) : Boolean {
 
-            val prefixPeriode = if (prefix == null) "periode" else "$prefix.periode"
+            val prefixPeriode = if (isOverordnetPeriode) prefix else "$prefix.periode"
 
             if (periode == null) {
                 return withError(context, MåSettes, prefixPeriode)
@@ -58,7 +58,10 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             }
         }
 
-        søknad.periode?.apply { valid = validerPeriode(this, null) }
+        søknad.perioder?.forEachIndexed { i, periode ->
+            val prefix = "perioder[$i]"
+            valid = validerPeriode(periode, prefix, true)
+        }
 
         søknad.nattevaak?.forEachIndexed { i, nattevaak ->
             val prefix = "nattevaak[$i]"
