@@ -2,6 +2,7 @@
 
 Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kapittel 9.
 
+[![](https://github.com/navikt/k9-punsj/workflows/Build%20and%20deploy/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+and+deploy%22)
 
 ## Bygge lokalt
 ```
