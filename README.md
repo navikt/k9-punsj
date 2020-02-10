@@ -6,7 +6,7 @@ Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kap
 ## Bygge lokalt
 ```
 export GITHUB_USERNAME=x-access-token
-export GITHUB_PASSWORD=et-personal-access-token-med-read-packages-tilgang
+export GITHUB_PASSWORD=af06c6f24bfafff3c4062f404f772eb770f4ad12
 ./mvnw clean install --settings .m2/settings.xml 
 ```
 
@@ -19,3 +19,5 @@ Bruk klassen `K9PunsjApplicationWithMocks` som en del av `test`
  Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
  
  Interne henvendelser kan sendes via Slack i kanalen #sif_saksbehandling.
+
+![k9-punsj](logo.png)
