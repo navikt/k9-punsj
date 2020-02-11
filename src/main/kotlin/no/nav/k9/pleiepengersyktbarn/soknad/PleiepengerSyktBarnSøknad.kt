@@ -10,6 +10,9 @@ import javax.validation.constraints.Size
 data class PleiepengerSyktBarnSoknad(
 
         @get:NotNull(message = MåSettes)
+        val datoMottatt: LocalDate?,
+
+        @get:NotNull(message = MåSettes)
         @get:Size(min=1, message = MinstEnMåSettes)
         @get:Valid
         val perioder: List<Periode>?,

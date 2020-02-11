@@ -58,6 +58,12 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             }
         }
 
+        søknad.datoMottatt.apply {
+            if (this == null) {
+                valid = withError(context, MåSettes, "datoMottatt");
+            }
+        }
+
         søknad.perioder?.forEachIndexed { i, periode ->
             val prefix = "perioder[$i]"
             valid = validerPeriode(periode, prefix, true)
