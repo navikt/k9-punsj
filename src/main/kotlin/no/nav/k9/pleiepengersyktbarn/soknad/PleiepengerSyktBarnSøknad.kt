@@ -24,8 +24,8 @@ data class PleiepengerSyktBarnSoknad(
         @get:Valid
         val barn: Barn?,
 
-        val beredskap: List<JaNeiMedTilleggsinformasjon>?,
-        val nattevaak: List<JaNeiMedTilleggsinformasjon>?,
+        val beredskap: List<PeriodeMedTilleggsinformasjon>?,
+        val nattevaak: List<PeriodeMedTilleggsinformasjon>?,
 
         @get:NotNull(message = MåSettes)
         val tilsynsordning: Tilsynsordning?,
@@ -81,8 +81,7 @@ data class Opphold(
 
 enum class JaNeiVetikke { ja, nei, vetIkke }
 
-data class JaNeiMedTilleggsinformasjon(
-        val svar: Boolean?,
+data class PeriodeMedTilleggsinformasjon(
         val tilleggsinformasjon: String?,
         val periode: Periode?
 )
