@@ -17,6 +17,33 @@ management:
         include: info, health, prometheus
       base-path: /internal/actuator
 
+kafka:
+  bootstrap:
+    server: localhost:9093
+  ack:  1
+  retries:  0
+  batch:
+    size: 16384
+  linger:
+    ms: 1
+  buffer:
+    memory: 33554432
+  key:
+    serializer: org.apache.kafka.common.serialization.StringSerializer
+  value:
+    serializer: org.apache.kafka.common.serialization.StringSerializer
+  security:
+    protocol: SASL_SSL
+  sasl:
+    mechanism:  PLAIN
+  SslConfig:
+    truststore: /Users/jankaspermartinsen/.modig/truststore.jks
+    password: changeit
+
+
+
+
+
 springdoc:
   api-docs:
     path: /internal/api-docs
