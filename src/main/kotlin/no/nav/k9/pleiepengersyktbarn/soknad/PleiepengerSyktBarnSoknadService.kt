@@ -195,7 +195,9 @@ internal class PleiepengerSyktBarnSoknadService {
         val producer = KafkaProducer<String, String>(props)
         try {
             producer.send(ProducerRecord(topic, dummyJsonMessage)).get()
+            logger.info("sendte en message på en kafka topic")
         }catch (e:Exception){
+            logger.warn("feil")
 
         }finally {
             producer.flush()
