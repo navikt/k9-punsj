@@ -84,9 +84,117 @@ internal class PleiepengerSyktBarnSoknadService {
         props[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = kafkapropertieshelper.truststore
         props[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = kafkapropertieshelper.password
 
+        val dummyJsonMessage = "{\n" +
+                "  \"versjon\" : \"1.0.0\",\n" +
+                "  \"søknadId\": \"1\",\n" +
+                "  \"mottattDato\" : \"2019-10-20T07:15:36.124Z\",\n" +
+                "  \"språk\": \"nb\",\n" +
+                "  \"søker\" : {\n" +
+                "    \"norskIdentitetsnummer\" : \"12345678901\"\n" +
+                "  },\n" +
+                "  \"perioder\" : {\n" +
+                "    \"2018-12-30/2019-10-20\": {}\n" +
+                "  },\n" +
+                "  \"barn\" : {\n" +
+                "    \"fødselsdato\": null,\n" +
+                "    \"norskIdentitetsnummer\" : \"12345678902\"\n" +
+                "  },\n" +
+                "  \"bosteder\": {\n" +
+                "    \"perioder\": {\n" +
+                "      \"2022-12-30/2023-10-10\" : {\n" +
+                "        \"land\": \"POL\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"utenlandsopphold\": {\n" +
+                "    \"perioder\": {\n" +
+                "      \"2018-12-30/2019-10-10\" : {\n" +
+                "        \"land\": \"SWE\",\n" +
+                "        \"årsak\": \"barnetInnlagtIHelseinstitusjonForNorskOffentligRegning\"\n" +
+                "      },\n" +
+                "      \"2018-10-10/2018-10-30\" : {\n" +
+                "        \"land\": \"NOR\",\n" +
+                "        \"årsak\": null\n" +
+                "      },\n" +
+                "      \"2021-10-10/2050-01-05\" : {\n" +
+                "        \"land\": \"DEN\",\n" +
+                "        \"årsak\": \"barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"beredskap\": {\n" +
+                "    \"perioder\": {\n" +
+                "      \"2018-10-10/2018-12-29\": {\n" +
+                "        \"tilleggsinformasjon\": \"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"\n" +
+                "      },\n" +
+                "      \"2019-01-01/2019-01-30\": {\n" +
+                "        \"tilleggsinformasjon\": \"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"nattevåk\": {\n" +
+                "    \"perioder\": {\n" +
+                "      \"2018-10-10/2018-12-29\" : {\n" +
+                "        \"tilleggsinformasjon\": \"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"\n" +
+                "      },\n" +
+                "      \"2019-01-01/2019-01-30\": {\n" +
+                "        \"tilleggsinformasjon\": \"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"tilsynsordning\": {\n" +
+                "    \"iTilsynsordning\": \"ja\",\n" +
+                "    \"opphold\": {\n" +
+                "      \"2019-01-01/2019-01-01\": {\n" +
+                "        \"lengde\": \"PT7H30M\"\n" +
+                "      },\n" +
+                "      \"2020-01-02/2020-01-02\": {\n" +
+                "        \"lengde\": \"PT7H25M\"\n" +
+                "      },\n" +
+                "      \"2020-01-03/2020-01-09\": {\n" +
+                "        \"lengde\": \"PT168H\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"arbeid\": {\n" +
+                "    \"arbeidstaker\": [{\n" +
+                "      \"organisasjonsnummer\": \"999999999\",\n" +
+                "      \"norskIdentitetsnummer\": null,\n" +
+                "      \"perioder\" : {\n" +
+                "        \"2018-10-10/2018-12-29\": {\n" +
+                "          \"skalJobbeProsent\": 50.25\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },{\n" +
+                "      \"organisasjonsnummer\": null,\n" +
+                "      \"norskIdentitetsnummer\": \"29099012345\",\n" +
+                "      \"perioder\" : {\n" +
+                "        \"2018-11-10/2018-12-29\": {\n" +
+                "          \"skalJobbeProsent\": 20.00\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }],\n" +
+                "    \"selvstendigNæringsdrivende\": [{\n" +
+                "      \"perioder\" : {\n" +
+                "        \"2018-11-11/2018-11-30\": {}\n" +
+                "      }\n" +
+                "    }],\n" +
+                "    \"frilanser\": [{\n" +
+                "      \"perioder\" : {\n" +
+                "        \"2019-10-10/2019-12-29\": {}\n" +
+                "      }\n" +
+                "    }]\n" +
+                "  },\n" +
+                "  \"lovbestemtFerie\":  {\n" +
+                "    \"perioder\": {\n" +
+                "      \"2018-11-10/2018-12-29\": {}\n" +
+                "    }\n" +
+                "  }\n" +
+                "}"
+
         val producer = KafkaProducer<String, String>(props)
         try {
-            producer.send(ProducerRecord(topic, "{}")).get()
+            producer.send(ProducerRecord(topic, dummyJsonMessage)).get()
         }catch (e:Exception){
 
         }finally {
