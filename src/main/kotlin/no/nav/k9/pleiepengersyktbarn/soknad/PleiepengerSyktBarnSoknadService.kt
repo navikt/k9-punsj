@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.KafkaException
 import org.apache.kafka.common.config.SslConfigs
 import org.springframework.beans.factory.annotation.Value
 import java.util.*
@@ -17,29 +18,31 @@ import java.util.*
 @Service
 class KafkaPropertiesHelper {
     @Value("\${kafka.bootstrap.server}")
-    val server= ""
+    val server = ""
     @Value("\${kafka.ack}")
-    val ack="1"
+    val ack = "1"
     @Value("\${kafka.retries}")
-    val retries="0"
+    val retries = "0"
     @Value("\${kafka.batch.size}")
-    val size="33554432"
+    val size = "33554432"
     @Value("\${kafka.linger.ms}")
-    val ms="1"
+    val ms = "1"
     @Value("\${kafka.buffer.memory}")
-    val memory="33554432"
+    val memory = "33554432"
     @Value("\${kafka.key.serializer}")
-    val key="org.apache.kafka.common.serialization.StringSerializer"
+    val key = "org.apache.kafka.common.serialization.StringSerializer"
     @Value("\${kafka.value.serializer}")
-    val value="org.apache.kafka.common.serialization.StringSerializer"
+    val value = "org.apache.kafka.common.serialization.StringSerializer"
     @Value("\${kafka.security.protocol}")
-    val protocol="SASL_SSL"
+    val protocol = "SASL_SSL"
     @Value("\${kafka.sasl.mechanism}")
-    val mechanism="SASL_SSL"
+    val mechanism = "SASL_SSL"
     @Value("\${kafka.sslconfig.truststore}")
-    val truststore="/Users/jankaspermartinsen/.modig/truststore.jks"
+    val truststore = "/Users/jankaspermartinsen/.modig/truststore.jks"
     @Value("\${kafka.sslconfig.password}")
-    val password="changeit"
+    val password = "changeit"
+    @Value("\${kafka.config}")
+    val config = ""
 }
 
 @Service
@@ -78,9 +81,7 @@ internal class PleiepengerSyktBarnSoknadService {
         props["value.serializer"] = kafkapropertieshelper.value
         props["security.protocol"] = kafkapropertieshelper.protocol
         props["sasl.mechanism"] = kafkapropertieshelper.mechanism
-        props["sasl.jaas.config"] = "org.apache.kafka.common.security.plain.PlainLoginModule required\n" +
-                "username=\"vtp\"\n" +
-                "password=\"vtp\";"
+        props["sasl.jaas.config"] = kafkapropertieshelper.config
         props[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = kafkapropertieshelper.truststore
         props[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = kafkapropertieshelper.password
 
@@ -90,9 +91,9 @@ internal class PleiepengerSyktBarnSoknadService {
         try {
             producer.send(ProducerRecord(topic, dummyJsonMessage)).get()
             logger.info("sendte en message på en kafka topic")
-        }catch (e:Exception){
-            logger.warn("feil")
-
+        }catch (kafkaException:KafkaException){
+            logger.warn("avbryter transaksjon"+kafkaException.message)
+            producer.abortTransaction()
         }finally {
             producer.flush()
             producer.close()

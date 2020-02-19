@@ -39,6 +39,7 @@ kafka:
   SslConfig:
     truststore: /Users/jankaspermartinsen/.modig/truststore.jks
     password: changeit
+  config: "org.apache.kafka.common.security.plain.PlainLoginModule required\n username=\"vtp\"\n password=\"vtp\";"
 
 
 
