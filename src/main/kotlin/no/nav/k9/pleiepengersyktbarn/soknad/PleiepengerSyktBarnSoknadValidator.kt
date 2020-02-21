@@ -131,10 +131,12 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
                     valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", prefix)
                 }
 
-                valid = validerPeriode(arbeidstaker.periode, prefix)
-
                 if (arbeidstaker.skalJobbeProsent == null) {
                     valid = withError(context, MåSettes, prefix)
+                } else {
+                    arbeidstaker.skalJobbeProsent.forEachIndexed { j, tilstedevaerelsesgrad ->
+                        valid = validerPeriode(tilstedevaerelsesgrad.periode, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j]")
+                    }
                 }
             }
 

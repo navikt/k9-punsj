@@ -54,16 +54,20 @@ data class Tilsynsordning(
 )
 
 data class Arbeid (
-        val arbeidstaker: List<Arbeidsperiode>?,
+        val arbeidstaker: List<Arbeidsgiver>?,
         val selvstendigNaeringsdrivende: List<Oppdragsforhold>?,
         val frilanser: List<Oppdragsforhold>?
 )
 
-data class Arbeidsperiode(
-        val periode: Periode?,
-        val skalJobbeProsent: Float?,
+data class Arbeidsgiver(
+        val skalJobbeProsent: List<Tilstedevaerelsesgrad>?,
         val organisasjonsnummer: String?,
         val norskIdent: String?
+)
+
+data class Tilstedevaerelsesgrad(
+        val periode: Periode?,
+        val grad: Float?
 )
 
 data class Oppdragsforhold(
