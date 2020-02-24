@@ -7,7 +7,7 @@ Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kap
 ## Bygge lokalt
 ```
 export GITHUB_USERNAME=x-access-token
-export GITHUB_PASSWORD=af06c6f24bfafff3c4062f404f772eb770f4ad12
+export GITHUB_PASSWORD=et-personal-access-token-med-read-packages-tilgang
 ./mvnw clean install --settings .m2/settings.xml 
 ```
 
