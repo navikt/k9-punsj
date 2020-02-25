@@ -110,11 +110,6 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>net.soundvibe</groupId>
-			<artifactId>kafka-config</artifactId>
-			<version>1.0.1</version>
-		</dependency>
 
 	</dependencies>
 

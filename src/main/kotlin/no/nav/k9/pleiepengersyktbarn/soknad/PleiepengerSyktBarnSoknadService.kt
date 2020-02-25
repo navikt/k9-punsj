@@ -1,102 +1,36 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
-import no.nav.k9.*
+import no.nav.k9.NorskIdent
+import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.mappe.Mappe
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.KafkaException
-import org.apache.kafka.common.config.SslConfigs
-import org.springframework.beans.factory.annotation.Value
-import java.util.*
 
 
 @Service
-class KafkaPropertiesHelper {
-    @Value("\${kafka.bootstrap.server}")
-    val server = ""
-    @Value("\${kafka.ack}")
-    val ack = "1"
-    @Value("\${kafka.retries}")
-    val retries = "0"
-    @Value("\${kafka.batch.size}")
-    val size = "33554432"
-    @Value("\${kafka.linger.ms}")
-    val ms = "1"
-    @Value("\${kafka.buffer.memory}")
-    val memory = "33554432"
-    @Value("\${kafka.key.serializer}")
-    val key = "org.apache.kafka.common.serialization.StringSerializer"
-    @Value("\${kafka.value.serializer}")
-    val value = "org.apache.kafka.common.serialization.StringSerializer"
-    @Value("\${kafka.security.protocol}")
-    val protocol = "SASL_SSL"
-    @Value("\${kafka.sasl.mechanism}")
-    val mechanism = "SASL_SSL"
-    @Value("\${kafka.sslconfig.truststore}")
-    val truststore = "/Users/jankaspermartinsen/.modig/truststore.jks"
-    @Value("\${kafka.sslconfig.password}")
-    val password = "changeit"
-    @Value("\${kafka.config}")
-    val config = ""
-}
+class PleiepengerSyktBarnSoknadService {
 
-@Service
-internal class PleiepengerSyktBarnSoknadService {
+
+    @Autowired
+    lateinit var hendelseProducer: HendelseProducer
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
+        const val PLEIEPENGER_SYKT_BARN_TOPIC = "privat-omsorgspengesoknad-journalfort"
     }
-
-    @Autowired
-    lateinit var kafkapropertieshelper : KafkaPropertiesHelper
 
     internal suspend fun sendSøknad(
             norskIdent: NorskIdent,
             mappe: Mappe
     ) {
-
-        sendKafkaMessage("privat-omsorgspengesoknad-journalfort")
-
-        // TODO: Legge på en kafka-topic k9-fordel håndterer.
-        logger.info("sendSøknad")
-        logger.info("NorskIdent=$norskIdent")
-        logger.info("Mappe=$mappe")
-    }
-
-    fun sendKafkaMessage(topic:String){
-
-        val props = Properties()
-        props["bootstrap.servers"] = kafkapropertieshelper.server
-        props["acks"] = kafkapropertieshelper.ack
-        props["retries"] = kafkapropertieshelper.retries
-        props["batch.size"] = kafkapropertieshelper.size
-        props["linger.ms"] = kafkapropertieshelper.ms
-        props["buffer.memory"] = kafkapropertieshelper.memory
-        props["key.serializer"] = kafkapropertieshelper.key
-        props["value.serializer"] = kafkapropertieshelper.value
-        props["security.protocol"] = kafkapropertieshelper.protocol
-        props["sasl.mechanism"] = kafkapropertieshelper.mechanism
-        props["sasl.jaas.config"] = kafkapropertieshelper.config
-        props[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = kafkapropertieshelper.truststore
-        props[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = kafkapropertieshelper.password
-
         val dummyJsonMessage = "{\"versjon\":\"1.0.0\",\"søknadId\":\"1\",\"mottattDato\":\"2019-10-20T07:15:36.124Z\",\"språk\":\"nb\",\"søker\":{\"norskIdentitetsnummer\":\"12345678901\"},\"perioder\":{\"2018-12-30/2019-10-20\":{}},\"barn\":{\"fødselsdato\":null,\"norskIdentitetsnummer\":\"12345678902\"},\"bosteder\":{\"perioder\":{\"2022-12-30/2023-10-10\":{\"land\":\"POL\"}}},\"utenlandsopphold\":{\"perioder\":{\"2018-12-30/2019-10-10\":{\"land\":\"SWE\",\"årsak\":\"barnetInnlagtIHelseinstitusjonForNorskOffentligRegning\"},\"2018-10-10/2018-10-30\":{\"land\":\"NOR\",\"årsak\":null},\"2021-10-10/2050-01-05\":{\"land\":\"DEN\",\"årsak\":\"barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd\"}}},\"beredskap\":{\"perioder\":{\"2018-10-10/2018-12-29\":{\"tilleggsinformasjon\":\"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"},\"2019-01-01/2019-01-30\":{\"tilleggsinformasjon\":\"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"}}},\"nattevåk\":{\"perioder\":{\"2018-10-10/2018-12-29\":{\"tilleggsinformasjon\":\"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"},\"2019-01-01/2019-01-30\":{\"tilleggsinformasjon\":\"Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ.\"}}},\"tilsynsordning\":{\"iTilsynsordning\":\"ja\",\"opphold\":{\"2019-01-01/2019-01-01\":{\"lengde\":\"PT7H30M\"},\"2020-01-02/2020-01-02\":{\"lengde\":\"PT7H25M\"},\"2020-01-03/2020-01-09\":{\"lengde\":\"PT168H\"}}},\"arbeid\":{\"arbeidstaker\":[{\"organisasjonsnummer\":\"999999999\",\"norskIdentitetsnummer\":null,\"perioder\":{\"2018-10-10/2018-12-29\":{\"skalJobbeProsent\":50.25}}},{\"organisasjonsnummer\":null,\"norskIdentitetsnummer\":\"29099012345\",\"perioder\":{\"2018-11-10/2018-12-29\":{\"skalJobbeProsent\":20}}}],\"selvstendigNæringsdrivende\":[{\"perioder\":{\"2018-11-11/2018-11-30\":{}}}],\"frilanser\":[{\"perioder\":{\"2019-10-10/2019-12-29\":{}}}]},\"lovbestemtFerie\":{\"perioder\":{\"2018-11-10/2018-12-29\":{}}}}\n"
 
-        val producer = KafkaProducer<String, String>(props)
-        try {
-            producer.send(ProducerRecord(topic, dummyJsonMessage)).get()
-            logger.info("sendte en message på en kafka topic")
-        }catch (kafkaException:KafkaException){
-            logger.warn("avbryter transaksjon"+kafkaException.message)
-            producer.abortTransaction()
-        }finally {
-            producer.flush()
-            producer.close()
-        }
+        //TODO: Bytte ut dummy-json med reell punchet søknad
+        hendelseProducer.sendKafkaMessage(PLEIEPENGER_SYKT_BARN_TOPIC, dummyJsonMessage)
+        // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
+
+
 }

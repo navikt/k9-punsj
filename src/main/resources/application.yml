@@ -20,30 +20,17 @@ management:
 kafka:
   bootstrap:
     server: localhost:9093
-  ack:  1
-  retries:  0
-  batch:
-    size: 16384
-  linger:
-    ms: 1
-  buffer:
-    memory: 33554432
-  key:
-    serializer: org.apache.kafka.common.serialization.StringSerializer
-  value:
-    serializer: org.apache.kafka.common.serialization.StringSerializer
-  security:
-    protocol: SASL_SSL
-  sasl:
-    mechanism:  PLAIN
-  SslConfig:
-    truststore: /Users/jankaspermartinsen/.modig/truststore.jks
-    password: changeit
-  config: "org.apache.kafka.common.security.plain.PlainLoginModule required\n username=\"vtp\"\n password=\"vtp\";"
+  clientId: k9-punsj
 
+systembruker:
+  username: ${SYSTEMBRUKER_USERNAME}
+  password: ${SYSTEMBRUKER_PASSWORD}
 
-
-
+javax:
+  net:
+    ssl:
+      trustStore: ${NAV_TRUSTSTORE_PATH}
+      trustStorePassword: ${NAV_TRUSTSTORE_PASSWORD}
 
 springdoc:
   api-docs:
