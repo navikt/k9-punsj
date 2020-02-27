@@ -80,7 +80,7 @@ class HendelseProducer {
         }
     }
 
-    fun sendToKafka(topicName: String, message: String) {
+    fun sendTilKafkaTopic(topicName: String, message: String) {
         val future: ListenableFuture<SendResult<Int?, String?>> = kafkaTemplate()!!.send(topicName,message)
         future.addCallback(object : ListenableFutureCallback<SendResult<Int?, String?>?> {
             override fun onSuccess(result: SendResult<Int?, String?>?) {
