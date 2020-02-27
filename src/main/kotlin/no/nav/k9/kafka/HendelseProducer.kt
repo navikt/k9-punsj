@@ -87,7 +87,9 @@ class HendelseProducer {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
             }
             override fun onFailure(ex: Throwable) {
+                //TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
                 logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}" )
+                throw KafkaException("Kunne ikke sende sende søknad til topic: $topicName")
             }
         })
     }

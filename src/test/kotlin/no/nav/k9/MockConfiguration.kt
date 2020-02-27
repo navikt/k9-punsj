@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
-import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.k9.wiremock.getSafBaseUrl
 
 internal object MockConfiguration {
@@ -17,7 +16,7 @@ internal object MockConfiguration {
             "AZURE_jwk" to ClientCredentials.ClientA.privateKeyJwk,
             "AZURE_token_endpoint" to wireMockServer.getAzureV2TokenUrl(),
             "AZURE_V1_discovery_url" to wireMockServer.getAzureV1WellKnownUrl(),
-            "AZURE_V2_discovery_url" to wireMockServer.getAzureV2WellKnownUrl(),
+            "AZURE_V2_discovery_url" to "http://localhost:8082/.well-known/openid-configuration",
             "SYSTEMBRUKER_USERNAME" to "vtp",
             "SYSTEMBRUKER_PASSWORD" to "vtp",
             "NAV_TRUSTSTORE_PATH" to "~/.modig/truststore.jks",
