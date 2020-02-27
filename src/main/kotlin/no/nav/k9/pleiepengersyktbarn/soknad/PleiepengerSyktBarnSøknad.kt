@@ -9,6 +9,8 @@ import javax.validation.constraints.Size
 @ValidPleiepengerSyktBarnSoknad
 data class PleiepengerSyktBarnSoknad(
 
+        val id: String,
+
         @get:NotNull(message = MåSettes)
         val datoMottatt: LocalDate?,
 

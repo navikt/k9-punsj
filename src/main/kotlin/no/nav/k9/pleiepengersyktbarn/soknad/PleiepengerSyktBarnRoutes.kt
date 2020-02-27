@@ -13,9 +13,20 @@ import kotlin.coroutines.coroutineContext
 import no.nav.k9.*
 import no.nav.k9.mappe.*
 import no.nav.k9.mappe.MappeService
+import no.nav.k9.søknad.JsonUtils
+import no.nav.k9.søknad.ValideringsFeil
+import no.nav.k9.søknad.felles.*
+import no.nav.k9.søknad.felles.Barn
+import no.nav.k9.søknad.felles.Periode
+import no.nav.k9.søknad.felles.Språk
+import no.nav.k9.søknad.pleiepengerbarn.*
+import no.nav.k9.søknad.pleiepengerbarn.Arbeid
+import no.nav.k9.søknad.pleiepengerbarn.Tilsynsordning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import java.time.DayOfWeek
+import java.time.ZoneId
 
 @Configuration
 internal class PleiepengerSyktBarnRoutes(
@@ -115,17 +126,22 @@ internal class PleiepengerSyktBarnRoutes(
                                 .notFound()
                                 .buildAndAwait()
                         mappeDTO.erKomplett() -> {
-                            pleiepengerSyktBarnSoknadService.sendSøknad(
-                                    norskIdent = norskIdent,
-                                    mappe = mappe
-                            )
-                            mappeService.fjern(
-                                    mappeId = mappeId,
-                                    norskIdent = norskIdent
-                            )
-                            ServerResponse
-                                    .accepted()
-                                    .buildAndAwait()
+                            try {
+                                val soknad = søknadConverter(objectMapper.convertValue(mappe.person[norskIdent]!!.soeknad), norskIdent)
+                                val soknadjson: String = JsonUtils.toString(soknad)
+                                pleiepengerSyktBarnSoknadService.sendSøknad(soknadjson)
+                                mappeService.fjern(
+                                        mappeId = mappeId,
+                                        norskIdent = norskIdent
+                                )
+                                ServerResponse
+                                        .accepted()
+                                        .buildAndAwait()
+                            } catch (e: ValideringsFeil) {
+                                ServerResponse
+                                        .badRequest()
+                                        .buildAndAwait()
+                            }
                         }
                         else -> ServerResponse
                                 .status(HttpStatus.BAD_REQUEST)
@@ -133,7 +149,6 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(mappeDTO)
                     }
                 }
-
             }
         }
 
@@ -159,9 +174,9 @@ internal class PleiepengerSyktBarnRoutes(
     private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeSvarDTO {
         val personMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
         person.forEach { (norskIdent, Person) ->
-             if (validerFor == null || validerFor.contains(norskIdent)) {
-                 personMangler[norskIdent] = Person.soeknad.valider()
-             }
+            if (validerFor == null || validerFor.contains(norskIdent)) {
+                personMangler[norskIdent] = Person.soeknad.valider()
+            }
         }
         return dto(
                 personMangler = personMangler
@@ -181,4 +196,64 @@ internal class PleiepengerSyktBarnRoutes(
     }
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
+
+    private fun søknadConverter(pleiepengerSyktBarnSoknad: PleiepengerSyktBarnSoknad?, ident: NorskIdent): PleiepengerBarnSøknad {
+
+        if (pleiepengerSyktBarnSoknad == null) {
+            return PleiepengerBarnSøknad.builder().build();
+        }
+
+        val tilsynsordningMap: Map<Periode, TilsynsordningOpphold> = emptyMap()
+        pleiepengerSyktBarnSoknad.tilsynsordning?.opphold?.forEach{
+            it.periode?.fraOgMed?.datesUntil(it.periode.tilOgMed)?.forEach{dag ->
+                tilsynsordningMap.plus(Pair(Periode.builder().enkeltDag(dag).build(), TilsynsordningOpphold.builder().lengde(when (dag.dayOfWeek) {
+                    DayOfWeek.MONDAY -> it.mandag
+                    DayOfWeek.TUESDAY -> it.tirsdag
+                    DayOfWeek.WEDNESDAY -> it.onsdag
+                    DayOfWeek.THURSDAY -> it.torsdag
+                    DayOfWeek.FRIDAY -> it.fredag
+                    else -> null
+                }).build()))
+            }
+        }
+
+        return PleiepengerBarnSøknad.builder()
+                .søknadId(SøknadId.of(pleiepengerSyktBarnSoknad.id))
+                .mottattDato(pleiepengerSyktBarnSoknad.datoMottatt?.atStartOfDay()?.atZone(ZoneId.systemDefault()))
+                .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(ident)).build())
+                .barn(Barn.builder()
+                        .norskIdentitetsnummer(NorskIdentitetsnummer.of(pleiepengerSyktBarnSoknad.barn?.norskIdent))
+                        .fødselsdato(pleiepengerSyktBarnSoknad.barn?.foedselsdato)
+                        .build())
+                .språk(Språk.of(pleiepengerSyktBarnSoknad.spraak.toString()))
+                .søknadsperioder(pleiepengerSyktBarnSoknad.perioder?.map{periodeConverter(it) to SøknadsperiodeInfo.builder().build()}?.toMap())
+                .arbeid(Arbeid.builder()
+                        .arbeidstaker(pleiepengerSyktBarnSoknad.arbeid?.arbeidstaker?.map{Arbeidstaker.builder()
+                                .norskIdentitetsnummer(NorskIdentitetsnummer.of(it.norskIdent))
+                                .organisasjonsnummer(Organisasjonsnummer.of(it.organisasjonsnummer))
+                                .perioder(it.skalJobbeProsent?.map{periodeConverter(it.periode) to Arbeidstaker.ArbeidstakerPeriodeInfo.builder().skalJobbeProsent(it.grad?.toBigDecimal()).build()}?.toMap())
+                                .build()})
+                        .frilanser(pleiepengerSyktBarnSoknad.arbeid?.frilanser?.map{Frilanser.builder().periode(periodeConverter(it.periode), Frilanser.FrilanserPeriodeInfo()).build()})
+                        .selvstendigNæringsdrivende(pleiepengerSyktBarnSoknad.arbeid?.selvstendigNaeringsdrivende?.map{SelvstendigNæringsdrivende.builder().periode(periodeConverter(it.periode), SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo()).build()})
+                        .build())
+                .beredskap(Beredskap.builder()
+                        .perioder(pleiepengerSyktBarnSoknad.beredskap?.map{periodeConverter(it.periode) to Beredskap.BeredskapPeriodeInfo.builder().tilleggsinformasjon(it.tilleggsinformasjon).build()}?.toMap())
+                        .build())
+                .nattevåk(Nattevåk.builder()
+                        .perioder(pleiepengerSyktBarnSoknad.nattevaak?.map{periodeConverter(it.periode) to Nattevåk.NattevåkPeriodeInfo.builder().tilleggsinformasjon(it.tilleggsinformasjon).build()}?.toMap())
+                        .build())
+                .tilsynsordning(Tilsynsordning.builder()
+                        .iTilsynsordning(when (pleiepengerSyktBarnSoknad.tilsynsordning?.iTilsynsordning) {
+                            JaNeiVetikke.ja -> TilsynsordningSvar.JA
+                            JaNeiVetikke.nei -> TilsynsordningSvar.NEI
+                            else -> TilsynsordningSvar.VET_IKKE
+                        })
+                        .opphold(tilsynsordningMap)
+                        .build())
+                .build()
+    }
+
+    private fun periodeConverter(periode: no.nav.k9.pleiepengersyktbarn.soknad.Periode?): Periode {
+        return Periode.builder().fraOgMed(periode?.fraOgMed).tilOgMed(periode?.tilOgMed).build();
+    }
 }
