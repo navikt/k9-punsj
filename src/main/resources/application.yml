@@ -17,6 +17,21 @@ management:
         include: info, health, prometheus
       base-path: /internal/actuator
 
+kafka:
+  bootstrap:
+    server: localhost:9093
+  clientId: k9-punsj
+
+systembruker:
+  username: ${SYSTEMBRUKER_USERNAME}
+  password: ${SYSTEMBRUKER_PASSWORD}
+
+javax:
+  net:
+    ssl:
+      trustStore: ${NAV_TRUSTSTORE_PATH}
+      trustStorePassword: ${NAV_TRUSTSTORE_PASSWORD}
+
 springdoc:
   api-docs:
     path: /internal/api-docs
