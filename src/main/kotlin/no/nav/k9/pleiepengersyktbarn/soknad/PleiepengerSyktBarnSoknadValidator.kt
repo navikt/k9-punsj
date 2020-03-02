@@ -9,6 +9,10 @@ import kotlin.reflect.KClass
 internal const val MåSettes = "MAA_SETTES"
 internal const val MinstEnMåSettes = "MINST_EN_MAA_SETTES"
 internal const val MåVæreIFortiden = "MAA_VAERE_I_FORTIDEN"
+internal const val NorskIdentMåBeståAv11Sifre = "NORSK_IDENT_MAA_BESTAA_AV_11_SIFRE"
+internal const val NorskIdentMåVæreGyldig = "NORSK_IDENT_MAA_VAERE_GYLDIG"
+internal const val Duplikat = "DUPLIKAT"
+internal const val Overlapp = "OVERLAPP"
 
 @Constraint(validatedBy = arrayOf(SoknadValidator::class))
 annotation class ValidPleiepengerSyktBarnSoknad(
@@ -55,26 +59,10 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
             }
 
             if (!this.norskIdent.isNullOrBlank()) {
-
-                val regexFnr = Regex("^((((0[1-9]|[12]\\d|30)(0[469]|11)|(0[1-9]|[12]\\d|3[01])(0[13578]|1[02])|((0[1-9]|1\\d|2[0-8])02))\\d{2})|2902([02468][048]|[13579][26]))\\d{5}\$")
-                val regexDnr = Regex("^((((4[1-9]|[56]\\d|70)(0[469]|11)|(4[1-9]|[56]\\d|7[01])(0[13578]|1[02])|((4[1-9]|5\\d|6[0-8])02))\\d{2})|6902([02468][048]|[13579][26]))\\d{5}\$")
-                val controlKey1 = listOf(3,7,6,1,8,9,4,5,2)
-                val controlKey2 = listOf(5,4,3,2,7,6,5,4,3,2)
-
-                fun isControlDigitValid(controlKey: List<Int>, value: String, controlDigitIndex: Int): Boolean {
-                    fun digitAt(index: Int, v: String): Int {return v.get(index).toString().toInt()}
-                    val controlDigit = 11-(controlKey.indices.fold(0, {s,i -> s+controlKey[i]*digitAt(i, value)}))%11
-                    return (if (controlDigit == 11) 0 else controlDigit) == digitAt(controlDigitIndex, value)
-                }
-
                 if (!Regex("^\\d{11}$").matches(this.norskIdent)) {
-                    valid = withError(context, "NORSK_IDENT_MAA_BESTAA_AV_11_SIFRE", "barn.norskIdent")
-                } else if (
-                    (!regexFnr.matches(this.norskIdent) && !regexDnr.matches(this.norskIdent))
-                    || !isControlDigitValid(controlKey1, this.norskIdent, 9)
-                    || !isControlDigitValid(controlKey2, this.norskIdent, 10)
-                ) {
-                    valid = withError(context, "NORSK_IDENT_MAA_VAERE_GYLDIG", "barn.norskIdent")
+                    valid = withError(context, NorskIdentMåBeståAv11Sifre, "barn.norskIdent")
+                } else if (!isValidFnrOrDnr(this.norskIdent)) {
+                    valid = withError(context, NorskIdentMåVæreGyldig, "barn.norskIdent")
                 }
             }
         }
@@ -90,65 +78,171 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         søknad.perioder?.forEachIndexed { i, periode ->
             val prefix = "perioder[$i]"
             valid = validerPeriode(periode, prefix, true)
+            if (søknad.perioder.count{arePeriodsValidAndEqual(it, periode)} > 1) {
+                valid = withError(context, Duplikat, prefix)
+            } else if (søknad.perioder.count{arePeriodsOverlapping(it, periode)} > 1) {
+                valid = withError(context, Overlapp, prefix)
+            }
         }
 
         if (søknad.tilsynsordning?.iTilsynsordning == JaNeiVetikke.ja || søknad.tilsynsordning?.iTilsynsordning == JaNeiVetikke.vetIkke) {
 
             søknad.nattevaak?.forEachIndexed { i, nattevaak ->
-                val prefix = "nattevaak[$i]"
+                val prefix = "nattevaak[$i].periode"
                 valid = validerPeriode(nattevaak.periode, prefix)
+                if (søknad.nattevaak.count{arePeriodsValidAndEqual(it.periode, nattevaak.periode)} > 1) {
+                    valid = withError(context, Duplikat, "$prefix.periode")
+                } else if (søknad.nattevaak.count{arePeriodsOverlapping(it.periode, nattevaak.periode)} > 1) {
+                    valid = withError(context, Overlapp, "$prefix.periode")
+                }
             }
 
             søknad.beredskap?.forEachIndexed { i, beredskap ->
-                val prefix = "beredskap[$i]"
+                val prefix = "beredskap[$i].periode"
                 valid = validerPeriode(beredskap.periode, prefix)
+                if (søknad.beredskap.count{arePeriodsValidAndEqual(it.periode, beredskap.periode)} > 1) {
+                    valid = withError(context, Duplikat, "$prefix.periode")
+                } else if (søknad.beredskap.count{arePeriodsOverlapping(it.periode, beredskap.periode)} > 1) {
+                    valid = withError(context, Overlapp, "$prefix.periode")
+                }
             }
         }
 
         søknad.tilsynsordning?.apply {
             if (this.iTilsynsordning == null) {
                 valid = withError(context, MåSettes, "iTilsynsordning")
-            }
-            else if (this.iTilsynsordning == JaNeiVetikke.ja) {
+            } else if (this.iTilsynsordning == JaNeiVetikke.ja) {
                 if (this.opphold.isEmpty()) {
                     valid = withError(context, "MAA_OPPGIS_HVIS_AKTIV_I_TILSYNSORDNING", "opphold")
                 }
                 this.opphold.forEachIndexed { i, opphold ->
                     val prefix = "tilsynsordning.opphold[$i]"
                     valid = validerPeriode(opphold.periode, prefix)
+                    if (this.opphold.count{arePeriodsValidAndEqual(it.periode, opphold.periode)} > 1) {
+                        valid = withError(context, Duplikat, "$prefix.periode")
+                    } else if (this.opphold.count{arePeriodsOverlapping(it.periode, opphold.periode)} > 1) {
+                        valid = withError(context, Overlapp, "$prefix.periode")
+                    }
                 }
             }
         }
 
         søknad.arbeid?.apply {
-            arbeidstaker?.forEachIndexed { i, arbeidstaker ->
+            arbeidstaker?.forEachIndexed { i, arbeidstakerItem ->
                 val prefix = "arbeid.arbeidstaker[$i]"
 
-                if (arbeidstaker.organisasjonsnummer == null && arbeidstaker.norskIdent == null) {
+                if (arbeidstakerItem.organisasjonsnummer == null && arbeidstakerItem.norskIdent == null) {
                     valid = withError(context, "MAA_ENTEN_HA_ORGNR_ELLER_NORSKIDENT", prefix)
                 }
-                if (arbeidstaker.organisasjonsnummer != null && arbeidstaker.norskIdent != null) {
+                if (arbeidstakerItem.organisasjonsnummer != null && arbeidstakerItem.norskIdent != null) {
                     valid = withError(context, "KAN_IKKE_HA_BAADE_ORGNR_OG_NORSKIDENT", prefix)
                 }
+                if (arbeidstakerItem.organisasjonsnummer != null) {
+                    if (!Regex("^\\d{9}$").matches(arbeidstakerItem.organisasjonsnummer)) {
+                        valid = withError(context, "ORGNR_MAA_BESTAA_AV_9_SIFRE", "$prefix.organisasjonsnummer")
+                    } else if (!isValidOrgnr(arbeidstakerItem.organisasjonsnummer)) {
+                        valid = withError(context, "ORGNR_MAA_VAERE_GYLDIG", "$prefix.organisasjonsnummer")
+                    } else if (arbeidstaker.count{it.organisasjonsnummer == arbeidstakerItem.organisasjonsnummer} > 1) {
+                        valid = withError(context, Duplikat, "$prefix.organisasjonsnummer")
+                    }
+                }
+                if (arbeidstakerItem.norskIdent != null) {
+                    if (!Regex("^\\d{11}$").matches(arbeidstakerItem.norskIdent)) {
+                        valid = withError(context, NorskIdentMåBeståAv11Sifre, "$prefix.norskIdent")
+                    } else if (!isValidFnrOrDnr(arbeidstakerItem.norskIdent)) {
+                        valid = withError(context, NorskIdentMåVæreGyldig, "$prefix.norskIdent")
+                    } else if (arbeidstaker.count{it.norskIdent == arbeidstakerItem.norskIdent} > 1) {
+                        valid = withError(context, Duplikat, "$prefix.norskIdent")
+                    }
+                }
 
-                if (arbeidstaker.skalJobbeProsent == null) {
+                if (arbeidstakerItem.skalJobbeProsent == null) {
                     valid = withError(context, MåSettes, prefix)
                 } else {
-                    arbeidstaker.skalJobbeProsent.forEachIndexed { j, tilstedevaerelsesgrad ->
+                    arbeidstakerItem.skalJobbeProsent.forEachIndexed { j, tilstedevaerelsesgrad ->
                         valid = validerPeriode(tilstedevaerelsesgrad.periode, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j]")
+                        if (arbeidstakerItem.skalJobbeProsent.count{arePeriodsValidAndEqual(it.periode, tilstedevaerelsesgrad.periode)} > 1) {
+                            valid = withError(context, Duplikat, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].periode")
+                        } else if (arbeidstakerItem.skalJobbeProsent.count{arePeriodsOverlapping(it.periode, tilstedevaerelsesgrad.periode)} > 1) {
+                            valid = withError(context, Overlapp, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].periode")
+                        }
                     }
                 }
             }
 
             selvstendigNaeringsdrivende?.forEachIndexed { i,  sn ->
                 valid = validerPeriode(sn.periode, "arbeid.selvstendigNaeringsdrivende[$i]")
+                if (selvstendigNaeringsdrivende.count{arePeriodsValidAndEqual(it.periode, sn.periode)} > 1) {
+                    valid = withError(context, Duplikat, "arbeid.selvstendigNaeringsdrivende[$i].periode")
+                } else if (selvstendigNaeringsdrivende.count{arePeriodsOverlapping(it.periode, sn.periode)} > 1) {
+                    valid = withError(context, Overlapp, "arbeid.selvstendigNaeringsdrivende[$i].periode")
+                }
             }
 
-            frilanser?.forEachIndexed { i, frilanser ->
-                valid = validerPeriode(frilanser.periode, "arbeid.frilanser[$i]")
+            frilanser?.forEachIndexed { i, frilanserItem ->
+                valid = validerPeriode(frilanserItem.periode, "arbeid.frilanser[$i]")
+                if (frilanser.count{arePeriodsValidAndEqual(it.periode, frilanserItem.periode)} > 1) {
+                    valid = withError(context, Duplikat, "arbeid.frilanser[$i].periode")
+                } else if (frilanser.count{arePeriodsOverlapping(it.periode, frilanserItem.periode)} > 1) {
+                    valid = withError(context, Overlapp, "arbeid.frilanser[$i].periode")
+                }
             }
         }
         return valid
+    }
+
+    private fun isValidFnrOrDnr(ident: String): Boolean {
+
+        val regexFnr = Regex("^((((0[1-9]|[12]\\d|30)(0[469]|11)|(0[1-9]|[12]\\d|3[01])(0[13578]|1[02])|((0[1-9]|1\\d|2[0-8])02))\\d{2})|2902([02468][048]|[13579][26]))\\d{5}\$")
+        val regexDnr = Regex("^((((4[1-9]|[56]\\d|70)(0[469]|11)|(4[1-9]|[56]\\d|7[01])(0[13578]|1[02])|((4[1-9]|5\\d|6[0-8])02))\\d{2})|6902([02468][048]|[13579][26]))\\d{5}\$")
+        val controlKey1 = listOf(3,7,6,1,8,9,4,5,2)
+        val controlKey2 = listOf(5,4,3,2,7,6,5,4,3,2)
+
+        fun isControlDigitValid(controlKey: List<Int>, value: String, controlDigitIndex: Int): Boolean {
+            fun digitAt(index: Int, v: String): Int {return v.get(index).toString().toInt()}
+            val controlDigit = 11-(controlKey.indices.fold(0, {s,i -> s+controlKey[i]*digitAt(i, value)}))%11
+            return (if (controlDigit == 11) 0 else controlDigit) == digitAt(controlDigitIndex, value)
+        }
+
+        return Regex("^\\d{11}$").matches(ident)
+                && (regexFnr.matches(ident) || regexDnr.matches(ident))
+                && isControlDigitValid(controlKey1, ident, 9)
+                && isControlDigitValid(controlKey2, ident, 10)
+    }
+
+    private fun isValidOrgnr(orgnr: String): Boolean {
+
+        if (!Regex("^\\d{9}$").matches(orgnr)) {
+            return false
+        }
+
+        val controlKey = listOf(3,2,7,6,5,4,3,2)
+        val controlDigitIndex = 8
+
+        fun digitAt(index: Int, v: String): Int {return v.get(index).toString().toInt()}
+
+        val controlDigit = 11-(controlKey.indices.fold(0, {s,i -> s+controlKey[i]*digitAt(i, orgnr)}))%11
+
+        return (if (controlDigit == 11) 0 else controlDigit) == digitAt(controlDigitIndex, orgnr)
+    }
+
+    private fun isPeriodValid(period: Periode?): Boolean {
+        return period?.fraOgMed != null && period.tilOgMed != null && !period.tilOgMed.isBefore(period.fraOgMed);
+    }
+
+    private fun arePeriodsValidAndEqual(period1: Periode?, period2: Periode?): Boolean {
+        return isPeriodValid(period1) && period1 == period2
+    }
+
+    private fun isDateWithinPeriod(date: LocalDate, period: Periode): Boolean {
+        return isPeriodValid(period)
+                && (date == period.fraOgMed || date == period.tilOgMed || (date.isAfter(period.fraOgMed) && date.isBefore(period.tilOgMed)))
+    }
+
+    private fun arePeriodsOverlapping(period1: Periode?, period2: Periode?): Boolean {
+        return isPeriodValid(period1)
+                && isPeriodValid(period2)
+                && (isDateWithinPeriod(period1!!.fraOgMed!!, period2!!) || isDateWithinPeriod(period1.tilOgMed!!, period2))
     }
 
     private fun withError(
