@@ -139,7 +139,7 @@ internal class PleiepengerSyktBarnRoutes(
                                         .buildAndAwait()
                             } catch (e: ValideringsFeil) {
                                 ServerResponse
-                                        .badRequest()
+                                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                         .buildAndAwait()
                             }
                         }
@@ -205,16 +205,20 @@ internal class PleiepengerSyktBarnRoutes(
 
         val tilsynsordningMap: Map<Periode, TilsynsordningOpphold> = emptyMap()
         pleiepengerSyktBarnSoknad.tilsynsordning?.opphold?.forEach{
-            it.periode?.fraOgMed?.datesUntil(it.periode.tilOgMed)?.forEach{dag ->
-                tilsynsordningMap.plus(Pair(Periode.builder().enkeltDag(dag).build(), TilsynsordningOpphold.builder().lengde(when (dag.dayOfWeek) {
-                    DayOfWeek.MONDAY -> it.mandag
-                    DayOfWeek.TUESDAY -> it.tirsdag
-                    DayOfWeek.WEDNESDAY -> it.onsdag
-                    DayOfWeek.THURSDAY -> it.torsdag
-                    DayOfWeek.FRIDAY -> it.fredag
-                    else -> null
-                }).build()))
-            }
+            it.periode?.fraOgMed?.datesUntil(it.periode.tilOgMed)
+                    ?.filter{dag -> dag.dayOfWeek != DayOfWeek.SATURDAY}
+                    ?.filter{dag -> dag.dayOfWeek != DayOfWeek.SUNDAY}
+                    ?.forEach{dag -> tilsynsordningMap.plus(Pair(
+                        Periode.builder().enkeltDag(dag).build(),
+                        TilsynsordningOpphold.builder().lengde(when (dag.dayOfWeek) {
+                            DayOfWeek.MONDAY -> it.mandag
+                            DayOfWeek.TUESDAY -> it.tirsdag
+                            DayOfWeek.WEDNESDAY -> it.onsdag
+                            DayOfWeek.THURSDAY -> it.torsdag
+                            DayOfWeek.FRIDAY -> it.fredag
+                            else -> null
+                        }).build()
+                    ))}
         }
 
         return PleiepengerBarnSøknad.builder()
