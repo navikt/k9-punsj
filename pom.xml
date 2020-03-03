@@ -108,7 +108,7 @@
 		<dependency>
 			<groupId>no.nav.k9</groupId>
 			<artifactId>soknad-pleiepenger-barn</artifactId>
-			<version>2.0.0.518a9c5</version>
+			<version>2.0.2.d31ae67</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>

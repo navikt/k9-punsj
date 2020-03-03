@@ -25,7 +25,6 @@ import no.nav.k9.søknad.pleiepengerbarn.Tilsynsordning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import java.time.DayOfWeek
 import java.time.ZoneId
 
 @Configuration
@@ -197,28 +196,24 @@ internal class PleiepengerSyktBarnRoutes(
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
 
-    private fun søknadConverter(pleiepengerSyktBarnSoknad: PleiepengerSyktBarnSoknad?, ident: NorskIdent): PleiepengerBarnSøknad {
+    private fun søknadConverter(pleiepengerSyktBarnSoknad: PleiepengerSyktBarnSoknad, ident: NorskIdent): PleiepengerBarnSøknad {
 
-        if (pleiepengerSyktBarnSoknad == null) {
-            return PleiepengerBarnSøknad.builder().build();
-        }
-
-        val tilsynsordningMap: Map<Periode, TilsynsordningOpphold> = emptyMap()
+        var tilsynsordningBuilder = Tilsynsordning.builder().iTilsynsordning(when (pleiepengerSyktBarnSoknad.tilsynsordning?.iTilsynsordning) {
+            JaNeiVetikke.ja -> TilsynsordningSvar.JA
+            JaNeiVetikke.nei -> TilsynsordningSvar.NEI
+            else -> TilsynsordningSvar.VET_IKKE
+        })
         pleiepengerSyktBarnSoknad.tilsynsordning?.opphold?.forEach{
-            it.periode?.fraOgMed?.datesUntil(it.periode.tilOgMed)
-                    ?.filter{dag -> dag.dayOfWeek != DayOfWeek.SATURDAY}
-                    ?.filter{dag -> dag.dayOfWeek != DayOfWeek.SUNDAY}
-                    ?.forEach{dag -> tilsynsordningMap.plus(Pair(
-                        Periode.builder().enkeltDag(dag).build(),
-                        TilsynsordningOpphold.builder().lengde(when (dag.dayOfWeek) {
-                            DayOfWeek.MONDAY -> it.mandag
-                            DayOfWeek.TUESDAY -> it.tirsdag
-                            DayOfWeek.WEDNESDAY -> it.onsdag
-                            DayOfWeek.THURSDAY -> it.torsdag
-                            DayOfWeek.FRIDAY -> it.fredag
-                            else -> null
-                        }).build()
-                    ))}
+            tilsynsordningBuilder = tilsynsordningBuilder.uke(
+                    TilsynsordningUke.builder()
+                            .periode(periodeConverter(it.periode))
+                            .mandag(it.mandag)
+                            .tirsdag(it.tirsdag)
+                            .onsdag(it.onsdag)
+                            .torsdag(it.torsdag)
+                            .fredag(it.fredag)
+                            .build()
+            )
         }
 
         return PleiepengerBarnSøknad.builder()
@@ -246,14 +241,7 @@ internal class PleiepengerSyktBarnRoutes(
                 .nattevåk(Nattevåk.builder()
                         .perioder(pleiepengerSyktBarnSoknad.nattevaak?.map{periodeConverter(it.periode) to Nattevåk.NattevåkPeriodeInfo.builder().tilleggsinformasjon(it.tilleggsinformasjon).build()}?.toMap())
                         .build())
-                .tilsynsordning(Tilsynsordning.builder()
-                        .iTilsynsordning(when (pleiepengerSyktBarnSoknad.tilsynsordning?.iTilsynsordning) {
-                            JaNeiVetikke.ja -> TilsynsordningSvar.JA
-                            JaNeiVetikke.nei -> TilsynsordningSvar.NEI
-                            else -> TilsynsordningSvar.VET_IKKE
-                        })
-                        .opphold(tilsynsordningMap)
-                        .build())
+                .tilsynsordning(tilsynsordningBuilder.build())
                 .build()
     }
 
