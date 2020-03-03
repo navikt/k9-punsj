@@ -10,12 +10,14 @@ internal class K9PunsjApplicationWithMocks {
         internal fun startup(
                 wireMockServer: WireMockServer,
                 port: Int,
-                args: Array<String> = arrayOf()
+                args: Array<String> = arrayOf(),
+                azureV2DiscoveryUrl: String? = null
         ) = SpringApplicationBuilder(K9PunsjApplication::class.java)
                 .bannerMode(Banner.Mode.OFF)
                 .properties(MockConfiguration.config(
                         wireMockServer = wireMockServer,
-                        port = port
+                        port = port,
+                        azureV2DiscoveryUrl = azureV2DiscoveryUrl
                 ))
                 .main(K9PunsjApplication::class.java)
                 .run(*args)
@@ -27,7 +29,8 @@ internal class K9PunsjApplicationWithMocks {
             )
             startup(
                     wireMockServer = wireMockServer,
-                    port = 8085
+                    port = 8085,
+                    azureV2DiscoveryUrl = "http://localhost:8082/.well-known/openid-configuration"
             )
         }
     }
