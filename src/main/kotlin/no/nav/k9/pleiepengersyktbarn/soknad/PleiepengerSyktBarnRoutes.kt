@@ -3,19 +3,20 @@ package no.nav.k9.pleiepengersyktbarn.soknad
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.*
+import no.nav.k9.mappe.*
+import no.nav.k9.søknad.JsonUtils
+import no.nav.k9.søknad.ValideringsFeil
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import javax.validation.Validator
 import kotlin.coroutines.coroutineContext
-import no.nav.k9.*
-import no.nav.k9.mappe.*
-import no.nav.k9.mappe.MappeService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 
 @Configuration
 internal class PleiepengerSyktBarnRoutes(
@@ -23,7 +24,8 @@ internal class PleiepengerSyktBarnRoutes(
         private val objectMapper: ObjectMapper,
         private val mappeService: MappeService,
         private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
-        private val authenticationHandler: AuthenticationHandler
+        private val authenticationHandler: AuthenticationHandler,
+        private val pleiepengerSyktBarnSoknadConverter: PleiepengerSyktBarnSoknadConverter
 ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
@@ -115,17 +117,22 @@ internal class PleiepengerSyktBarnRoutes(
                                 .notFound()
                                 .buildAndAwait()
                         mappeDTO.erKomplett() -> {
-                            pleiepengerSyktBarnSoknadService.sendSøknad(
-                                    norskIdent = norskIdent,
-                                    mappe = mappe
-                            )
-                            mappeService.fjern(
-                                    mappeId = mappeId,
-                                    norskIdent = norskIdent
-                            )
-                            ServerResponse
-                                    .accepted()
-                                    .buildAndAwait()
+                            try {
+                                val soknad = pleiepengerSyktBarnSoknadConverter.convert(objectMapper.convertValue(mappe.person[norskIdent]!!.soeknad), norskIdent)
+                                val soknadjson: String = JsonUtils.toString(soknad)
+                                pleiepengerSyktBarnSoknadService.sendSøknad(soknadjson)
+                                mappeService.fjern(
+                                        mappeId = mappeId,
+                                        norskIdent = norskIdent
+                                )
+                                ServerResponse
+                                        .accepted()
+                                        .buildAndAwait()
+                            } catch (e: ValideringsFeil) {
+                                ServerResponse
+                                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .buildAndAwait()
+                            }
                         }
                         else -> ServerResponse
                                 .status(HttpStatus.BAD_REQUEST)
@@ -133,7 +140,6 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(mappeDTO)
                     }
                 }
-
             }
         }
 
@@ -159,9 +165,9 @@ internal class PleiepengerSyktBarnRoutes(
     private fun Mappe.dtoMedValidering(validerFor: Set<NorskIdent>? = null) : MappeSvarDTO {
         val personMangler = mutableMapOf<NorskIdent, Set<Mangel>>()
         person.forEach { (norskIdent, Person) ->
-             if (validerFor == null || validerFor.contains(norskIdent)) {
-                 personMangler[norskIdent] = Person.soeknad.valider()
-             }
+            if (validerFor == null || validerFor.contains(norskIdent)) {
+                personMangler[norskIdent] = Person.soeknad.valider()
+            }
         }
         return dto(
                 personMangler = personMangler

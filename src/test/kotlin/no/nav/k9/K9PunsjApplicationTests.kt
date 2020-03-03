@@ -33,7 +33,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("internal", "actuator", "info").build()
 		}.awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.OK)
+		assertEquals(HttpStatus.OK, res.statusCode())
 	}
 
 	@Test
@@ -42,7 +42,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
 		}.awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.UNAUTHORIZED)
+		assertEquals(HttpStatus.UNAUTHORIZED, res.statusCode())
 	}
 
 	@Test
@@ -51,7 +51,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.OK)
+		assertEquals(HttpStatus.OK, res.statusCode())
 		val responsePdf = runBlocking { res.awaitBody<ByteArray>() }
 		assertArrayEquals(responsePdf, dummyPdf)
 	}
@@ -62,7 +62,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.NOT_FOUND)
+		assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
 	}
 
 	@Test
@@ -71,7 +71,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
+		assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
 	}
 
 	@Test
@@ -80,7 +80,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 		val responseEntity = runBlocking { res.awaitBody<String>() }
-		JSONAssert.assertEquals(responseEntity, """
+		JSONAssert.assertEquals( """
 			{
 				"journalpostId": "1",
 				"norskIdent": "29099012345",
@@ -90,7 +90,7 @@ class K9PunsjApplicationTests {
 					"dokumentId": "470164681"
 				}]
 			}
-		""".trimIndent(), true)
+		""".trimIndent(),responseEntity, true)
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke).build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.NOT_FOUND)
+		assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
 	}
 
 	@Test
@@ -108,7 +108,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.AbacError).build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
+		assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", JournalpostIds.IkkeKomplettTilgang).build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
-		assertEquals(res.statusCode(), HttpStatus.FORBIDDEN)
+		assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
 	}
 }
 
