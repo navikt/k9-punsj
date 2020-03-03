@@ -10,6 +10,7 @@ import no.nav.k9.søknad.pleiepengerbarn.Arbeid
 import no.nav.k9.søknad.pleiepengerbarn.Tilsynsordning
 import org.springframework.context.annotation.Configuration
 import java.time.ZoneId
+import java.util.*
 
 @Configuration
 internal class PleiepengerSyktBarnSoknadConverter {
@@ -35,7 +36,7 @@ internal class PleiepengerSyktBarnSoknadConverter {
         }
 
         return PleiepengerBarnSøknad.builder()
-                .søknadId(SøknadId.of(pleiepengerSyktBarnSoknad.id))
+                .søknadId(SøknadId.of(UUID.randomUUID().toString()))
                 .mottattDato(pleiepengerSyktBarnSoknad.datoMottatt?.atStartOfDay()?.atZone(ZoneId.systemDefault()))
                 .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(ident)).build())
                 .barn(Barn.builder()

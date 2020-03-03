@@ -37,7 +37,6 @@ internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeSvarD
 private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(
         person: Person?
 ) : Person {
-    soeknad["id"] = soeknad["id"] ?: UUID.randomUUID().toString()
     return Person(
             innsendinger = person?.innsendinger?.leggTil(journalpostId) ?: mutableSetOf(journalpostId),
             soeknad = person?.soeknad?.merge(soeknad) ?: soeknad
