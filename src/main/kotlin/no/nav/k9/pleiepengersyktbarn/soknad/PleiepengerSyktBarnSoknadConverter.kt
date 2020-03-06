@@ -39,10 +39,9 @@ internal class PleiepengerSyktBarnSoknadConverter {
                 .søknadId(SøknadId.of(UUID.randomUUID().toString()))
                 .mottattDato(pleiepengerSyktBarnSoknad.datoMottatt?.atStartOfDay()?.atZone(ZoneId.systemDefault()))
                 .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(ident)).build())
-                .barn(Barn.builder()
-                        .norskIdentitetsnummer(NorskIdentitetsnummer.of(pleiepengerSyktBarnSoknad.barn?.norskIdent))
-                        .fødselsdato(pleiepengerSyktBarnSoknad.barn?.foedselsdato)
-                        .build())
+                .barn(if (pleiepengerSyktBarnSoknad.barn?.norskIdent.isNullOrBlank())
+                    Barn.builder().fødselsdato(pleiepengerSyktBarnSoknad.barn?.foedselsdato).build()
+                    else Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(pleiepengerSyktBarnSoknad.barn?.norskIdent)).build())
                 .språk(Språk.of(pleiepengerSyktBarnSoknad.spraak.toString()))
                 .søknadsperioder(pleiepengerSyktBarnSoknad.perioder?.map{convertPeriode(it) to SøknadsperiodeInfo.builder().build()}?.toMap())
                 .arbeid(Arbeid.builder()
@@ -65,6 +64,6 @@ internal class PleiepengerSyktBarnSoknadConverter {
     }
 
     fun convertPeriode(periode: no.nav.k9.pleiepengersyktbarn.soknad.Periode?): Periode {
-        return Periode.builder().fraOgMed(periode?.fraOgMed).tilOgMed(periode?.tilOgMed).build();
+        return Periode.builder().fraOgMed(periode?.fraOgMed).tilOgMed(periode?.tilOgMed).build()
     }
 }
