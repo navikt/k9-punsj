@@ -14,7 +14,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
-        const val PLEIEPENGER_SYKT_BARN_TOPIC = "punsjet-soknad-pleiepenger-barn"
+        const val PLEIEPENGER_SYKT_BARN_TOPIC = "privat-punsjet-pleiepengesoknad"
     }
 
     internal suspend fun sendSøknad(
