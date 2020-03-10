@@ -7,6 +7,7 @@ import no.nav.k9.*
 import no.nav.k9.mappe.*
 import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.ValideringsFeil
+import org.apache.kafka.common.KafkaException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -132,6 +133,11 @@ internal class PleiepengerSyktBarnRoutes(
                                 ServerResponse
                                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                         .buildAndAwait()
+                            } catch (e: KafkaException) {
+                                ServerResponse
+                                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .json()
+                                        .bodyValueAndAwait(e)
                             }
                         }
                         else -> ServerResponse

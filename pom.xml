@@ -106,13 +106,20 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9</groupId>
-			<artifactId>soknad-pleiepenger-barn</artifactId>
-			<version>2.0.2.d31ae67</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9</groupId>
+			<artifactId>soknad-pleiepenger-barn</artifactId>
+			<version>2.0.0.518a9c5</version>
+		</dependency>
+		<!-- Testing -->
+		<dependency>
+			<groupId>io.mockk</groupId>
+			<artifactId>mockk</artifactId>
+			<version>1.9.3</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

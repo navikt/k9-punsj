@@ -69,7 +69,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
 
         søknad.datoMottatt.apply {
             if (this == null) {
-                valid = withError(context, MåSettes, "datoMottatt");
+                valid = withError(context, MåSettes, "datoMottatt")
             } else if (this.isAfter(LocalDate.now())) {
                 valid = withError(context, MåVæreIFortiden, "datoMottatt")
             }
@@ -161,6 +161,11 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
                 } else {
                     arbeidstakerItem.skalJobbeProsent.forEachIndexed { j, tilstedevaerelsesgrad ->
                         valid = validerPeriode(tilstedevaerelsesgrad.periode, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j]")
+                        if (tilstedevaerelsesgrad.grad!! > 100) {
+                            valid = withError(context, "TILSTEDEVAERELSESGRAD_MAA_VAERE_MINDRE_ENN_ELLER_LIK_100", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
+                        } else if (tilstedevaerelsesgrad.grad < 0) {
+                            valid = withError(context, "TILSTEDEVAERELSESGRAD_MAA_VAERE_STOERRE_ENN_ELLER_LIK_0", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
+                        }
                         if (arbeidstakerItem.skalJobbeProsent.count{arePeriodsValidAndEqual(it.periode, tilstedevaerelsesgrad.periode)} > 1) {
                             valid = withError(context, Duplikat, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].periode")
                         } else if (arbeidstakerItem.skalJobbeProsent.count{arePeriodsOverlapping(it.periode, tilstedevaerelsesgrad.periode)} > 1) {
@@ -199,7 +204,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         val controlKey2 = listOf(5,4,3,2,7,6,5,4,3,2)
 
         fun isControlDigitValid(controlKey: List<Int>, value: String, controlDigitIndex: Int): Boolean {
-            fun digitAt(index: Int, v: String): Int {return v.get(index).toString().toInt()}
+            fun digitAt(index: Int, v: String): Int {return v[index].toString().toInt()}
             val controlDigit = 11-(controlKey.indices.fold(0, {s,i -> s+controlKey[i]*digitAt(i, value)}))%11
             return (if (controlDigit == 11) 0 else controlDigit) == digitAt(controlDigitIndex, value)
         }
@@ -219,7 +224,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
         val controlKey = listOf(3,2,7,6,5,4,3,2)
         val controlDigitIndex = 8
 
-        fun digitAt(index: Int, v: String): Int {return v.get(index).toString().toInt()}
+        fun digitAt(index: Int, v: String): Int {return v[index].toString().toInt()}
 
         val controlDigit = 11-(controlKey.indices.fold(0, {s,i -> s+controlKey[i]*digitAt(i, orgnr)}))%11
 
@@ -227,7 +232,7 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
     }
 
     private fun isPeriodValid(period: Periode?): Boolean {
-        return period?.fraOgMed != null && period.tilOgMed != null && !period.tilOgMed.isBefore(period.fraOgMed);
+        return period?.fraOgMed != null && period.tilOgMed != null && !period.tilOgMed.isBefore(period.fraOgMed)
     }
 
     private fun arePeriodsValidAndEqual(period1: Periode?, period2: Periode?): Boolean {
