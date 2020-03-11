@@ -130,6 +130,8 @@ internal class PleiepengerSyktBarnRoutes(
                                         .accepted()
                                         .buildAndAwait()
                             } catch (e: ValideringsFeil) {
+                                // Kommer hit hvis PleiepengerBarnSøknadValidator oppdager en feil som ikke har blitt oppdaget av validatoren i k9-punsj.
+                                // Hvis dette skjer, må k9-punsj utvides til å håndtere denne feilen før søknaden kommer til PleiepengerBarnSøknadValidator.
                                 ServerResponse
                                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                         .buildAndAwait()

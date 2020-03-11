@@ -162,9 +162,9 @@ class SoknadValidator : ConstraintValidator<ValidPleiepengerSyktBarnSoknad, Plei
                     arbeidstakerItem.skalJobbeProsent.forEachIndexed { j, tilstedevaerelsesgrad ->
                         valid = validerPeriode(tilstedevaerelsesgrad.periode, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j]")
                         if (tilstedevaerelsesgrad.grad!! > 100) {
-                            valid = withError(context, "TILSTEDEVAERELSESGRAD_MAA_VAERE_MINDRE_ENN_ELLER_LIK_100", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
+                            valid = withError(context, "MAA_VAERE_MINDRE_ENN_ELLER_LIK_100", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
                         } else if (tilstedevaerelsesgrad.grad < 0) {
-                            valid = withError(context, "TILSTEDEVAERELSESGRAD_MAA_VAERE_STOERRE_ENN_ELLER_LIK_0", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
+                            valid = withError(context, "MAA_VAERE_STOERRE_ENN_ELLER_LIK_0", "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].grad")
                         }
                         if (arbeidstakerItem.skalJobbeProsent.count{arePeriodsValidAndEqual(it.periode, tilstedevaerelsesgrad.periode)} > 1) {
                             valid = withError(context, Duplikat, "arbeid.arbeidstaker[$i].skalJobbeProsent[$j].periode")
