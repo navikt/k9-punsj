@@ -19,7 +19,7 @@ management:
 
 kafka:
   bootstrap:
-    server: localhost:9093
+    server: ${KAFKA_BOOTSTRAP_SERVERS}
   clientId: k9-punsj
 
 systembruker:
