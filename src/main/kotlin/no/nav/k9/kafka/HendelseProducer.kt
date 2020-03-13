@@ -1,5 +1,7 @@
 package no.nav.k9.kafka
 
+import no.nav.k9.søknad.JsonUtils
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -39,7 +41,7 @@ class HendelseProducer {
     }
 
     @Bean
-    fun producerFactory(): ProducerFactory<Int?, String?>? {
+    fun producerFactory(): ProducerFactory<String?, String?>? {
         return DefaultKafkaProducerFactory(producerConfigs()!!)
     }
 
@@ -58,11 +60,11 @@ class HendelseProducer {
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<Int?, String?>? {
+    fun kafkaTemplate(): KafkaTemplate<String?, String?>? {
         return KafkaTemplate(producerFactory()!!)
     }
 
-    private fun setSecurity(username: String?, properties: MutableMap<String,Any>) {
+    private fun setSecurity(username: String?, properties: MutableMap<String, Any>) {
         if (username != null && !username.isEmpty()) {
             properties["security.protocol"] = "SASL_SSL"
             properties["sasl.mechanism"] = "PLAIN"
@@ -80,15 +82,17 @@ class HendelseProducer {
         }
     }
 
-    fun sendTilKafkaTopic(topicName: String, message: String) {
-        val future: ListenableFuture<SendResult<Int?, String?>> = kafkaTemplate()!!.send(topicName,message)
-        future.addCallback(object : ListenableFutureCallback<SendResult<Int?, String?>?> {
-            override fun onSuccess(result: SendResult<Int?, String?>?) {
+    fun sendTilKafkaTopic(topicName: String, søknad: PleiepengerBarnSøknad) {
+        val soknadjson: String = JsonUtils.toString(søknad)
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknad.søknadId.id, soknadjson)
+        future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
+            override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
             }
+
             override fun onFailure(ex: Throwable) {
                 //TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
-                logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}" )
+                logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
                 throw KafkaException("Kunne ikke sende sende søknad til topic: $topicName")
             }
         })

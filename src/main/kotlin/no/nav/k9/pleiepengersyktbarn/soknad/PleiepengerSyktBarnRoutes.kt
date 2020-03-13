@@ -7,7 +7,6 @@ import no.nav.k9.*
 import no.nav.k9.mappe.*
 import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.ValideringsFeil
-import org.apache.kafka.common.KafkaException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -120,8 +119,7 @@ internal class PleiepengerSyktBarnRoutes(
                         mappeDTO.erKomplett() -> {
                             try {
                                 val soknad = pleiepengerSyktBarnSoknadConverter.convert(objectMapper.convertValue(mappe.person[norskIdent]!!.soeknad), norskIdent)
-                                val soknadjson: String = JsonUtils.toString(soknad)
-                                pleiepengerSyktBarnSoknadService.sendSøknad(soknadjson)
+                                pleiepengerSyktBarnSoknadService.sendSøknad(soknad)
                                 mappeService.fjern(
                                         mappeId = mappeId,
                                         norskIdent = norskIdent
@@ -130,16 +128,9 @@ internal class PleiepengerSyktBarnRoutes(
                                         .accepted()
                                         .buildAndAwait()
                             } catch (e: ValideringsFeil) {
-                                // Kommer hit hvis PleiepengerBarnSøknadValidator oppdager en feil som ikke har blitt oppdaget av validatoren i k9-punsj.
-                                // Hvis dette skjer, må k9-punsj utvides til å håndtere denne feilen før søknaden kommer til PleiepengerBarnSøknadValidator.
                                 ServerResponse
                                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                         .buildAndAwait()
-                            } catch (e: KafkaException) {
-                                ServerResponse
-                                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .json()
-                                        .bodyValueAndAwait(e)
                             }
                         }
                         else -> ServerResponse

@@ -1,6 +1,7 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
 import no.nav.k9.kafka.HendelseProducer
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,11 +18,9 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
         const val PLEIEPENGER_SYKT_BARN_TOPIC = "privat-punsjet-pleiepengesoknad"
     }
 
-    internal suspend fun sendSøknad(
-            soeknadJson : String
-    ) {
+    internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad) {
 
-        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, soeknadJson )
+        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad)
     }
 
 
