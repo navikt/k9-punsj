@@ -1,5 +1,8 @@
 package no.nav.k9.kafka
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.apache.kafka.clients.CommonClientConfigs
@@ -83,8 +86,9 @@ class HendelseProducer {
     }
 
     fun sendTilKafkaTopic(topicName: String, søknad: PleiepengerBarnSøknad) {
-        val soknadjson: String = JsonUtils.toString(søknad)
-        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknad.søknadId.id, soknadjson)
+        // TODO K9: Håndter journalposter:
+        val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, "TODO K9")
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknad.søknadId.id, dokumentfordelingMelding)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
@@ -96,5 +100,17 @@ class HendelseProducer {
                 throw KafkaException("Kunne ikke sende sende søknad til topic: $topicName")
             }
         })
+    }
+    
+    fun toDokumentfordelingMelding(pleiepengerBarnSøknad: PleiepengerBarnSøknad, journalpostId: String): String {
+        // Midlertidig generering av meldings-JSON i påvente av et definert format.
+        val om: ObjectMapper = JsonUtils.getObjectMapper()
+        val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
+        val data: ObjectNode = dokumentfordelingMelding.objectNode()
+        data.set<JsonNode>("søknad", om.valueToTree(pleiepengerBarnSøknad))
+        data.put("journalpostId", journalpostId)
+        dokumentfordelingMelding.set<JsonNode>("data", data)
+        
+        return dokumentfordelingMelding.toString()
     }
 }
