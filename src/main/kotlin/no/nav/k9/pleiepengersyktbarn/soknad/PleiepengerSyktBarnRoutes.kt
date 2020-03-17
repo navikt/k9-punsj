@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.*
 import no.nav.k9.mappe.*
-import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.ValideringsFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -118,8 +117,9 @@ internal class PleiepengerSyktBarnRoutes(
                                 .buildAndAwait()
                         mappeDTO.erKomplett() -> {
                             try {
-                                val soknad = pleiepengerSyktBarnSoknadConverter.convert(objectMapper.convertValue(mappe.person[norskIdent]!!.soeknad), norskIdent)
-                                pleiepengerSyktBarnSoknadService.sendSøknad(soknad)
+                                val person = mappe.person[norskIdent]
+                                val soknad = pleiepengerSyktBarnSoknadConverter.convert(objectMapper.convertValue(person!!.soeknad), norskIdent)
+                                pleiepengerSyktBarnSoknadService.sendSøknad(soknad, person.innsendinger)
                                 mappeService.fjern(
                                         mappeId = mappeId,
                                         norskIdent = norskIdent

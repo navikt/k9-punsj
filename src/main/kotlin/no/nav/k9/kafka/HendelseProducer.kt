@@ -1,8 +1,9 @@
 package no.nav.k9.kafka
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.k9.JournalpostId
 import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.apache.kafka.clients.CommonClientConfigs
@@ -85,9 +86,9 @@ class HendelseProducer {
         }
     }
 
-    fun sendTilKafkaTopic(topicName: String, søknad: PleiepengerBarnSøknad) {
+    fun sendTilKafkaTopic(topicName: String, søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
         // TODO K9: Håndter journalposter:
-        val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, "TODO K9")
+        val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknad.søknadId.id, dokumentfordelingMelding)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
@@ -101,16 +102,16 @@ class HendelseProducer {
             }
         })
     }
-    
-    fun toDokumentfordelingMelding(pleiepengerBarnSøknad: PleiepengerBarnSøknad, journalpostId: String): String {
+
+    fun toDokumentfordelingMelding(pleiepengerBarnSøknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>): String {
         // Midlertidig generering av meldings-JSON i påvente av et definert format.
         val om: ObjectMapper = JsonUtils.getObjectMapper()
         val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
         val data: ObjectNode = dokumentfordelingMelding.objectNode()
         data.set<JsonNode>("søknad", om.valueToTree(pleiepengerBarnSøknad))
-        data.put("journalpostId", journalpostId)
+        data.put("journalpostId", journalpostIder.first())
         dokumentfordelingMelding.set<JsonNode>("data", data)
-        
+
         return dokumentfordelingMelding.toString()
     }
 }
