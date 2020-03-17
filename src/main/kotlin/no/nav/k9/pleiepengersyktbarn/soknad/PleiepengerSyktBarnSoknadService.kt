@@ -1,5 +1,6 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
+import no.nav.k9.JournalpostId
 import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.slf4j.Logger
@@ -18,9 +19,9 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
         const val PLEIEPENGER_SYKT_BARN_TOPIC = "privat-punsjet-pleiepengesoknad"
     }
 
-    internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad) {
+    internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
 
-        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad)
+        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad, journalpostIder)
     }
 
 
