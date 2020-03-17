@@ -39,10 +39,12 @@ spec:
     paths:
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-punsj/default
-      - mountPath: /var/run/secrets/nais.io/azuread
+      - mountPath: /var/run/secrets/nais.io/azureadg
         kvPath: /azuread/data/dev/creds/k9-punsj
       - mountPath: /var/run/secrets/nais.io/srvk9punsj
         kvPath: /serviceuser/data/dev/srvk9punsj
+      - mountPath: /var/run/secrets/nais.io/appdynamics
+        kvPath: /apikey/appdynamics/dev
   webproxy: true
   env:
     - name: SWAGGER_SERVER_BASE_URL
