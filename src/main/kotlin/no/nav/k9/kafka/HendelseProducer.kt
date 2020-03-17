@@ -2,6 +2,7 @@ package no.nav.k9.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9.JournalpostId
 import no.nav.k9.søknad.JsonUtils
@@ -109,7 +110,7 @@ class HendelseProducer {
         val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
         val data: ObjectNode = dokumentfordelingMelding.objectNode()
         data.set<JsonNode>("søknad", om.valueToTree(pleiepengerBarnSøknad))
-        data.putArray("journalpostIder").add(om.valueToTree<JsonNode>(journalpostIder) )
+        data.set<ArrayNode>("journalpostIder", om.valueToTree<ArrayNode>(journalpostIder))
         dokumentfordelingMelding.set<JsonNode>("data", data)
         return dokumentfordelingMelding.toString()
     }
