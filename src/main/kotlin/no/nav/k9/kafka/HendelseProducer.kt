@@ -109,9 +109,8 @@ class HendelseProducer {
         val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
         val data: ObjectNode = dokumentfordelingMelding.objectNode()
         data.set<JsonNode>("søknad", om.valueToTree(pleiepengerBarnSøknad))
-        data.put("journalpostId", journalpostIder.first())
+        data.putArray("journalpostId").add(om.valueToTree<JsonNode>(journalpostIder) )
         dokumentfordelingMelding.set<JsonNode>("data", data)
-
         return dokumentfordelingMelding.toString()
     }
 }
