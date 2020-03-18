@@ -27,6 +27,10 @@ internal object MockConfiguration {
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
-            "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093"
+            "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
+            "DEFAULTDS_USERNAME" to "k9punsj_unit",
+            "DEFAULTDS_PASSWORD" to "k9punsj_unit",
+            "DEFAULTDS_URL" to "jdbc:postgresql://127.0.0.1:5432/k9punsj_unit",
+            "DEFAULTDS_VAULT_MOUNTPATH" to ""
     )
 }

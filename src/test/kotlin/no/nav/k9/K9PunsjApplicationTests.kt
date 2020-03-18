@@ -2,6 +2,7 @@ package no.nav.k9
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9.db.hikariConfig
 import no.nav.k9.wiremock.JournalpostIds
 import no.nav.k9.wiremock.saksbehandlerAccessToken
 import org.junit.Assert.assertArrayEquals
@@ -12,6 +13,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
@@ -19,6 +21,7 @@ import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 
 @ExtendWith(SpringExtension::class)
+@TestPropertySource(locations = ["classpath:application.yml"])
 class K9PunsjApplicationTests {
 
 	private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
@@ -80,7 +83,7 @@ class K9PunsjApplicationTests {
 			it.pathSegment("api", "journalpost", "1").build()
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 		val responseEntity = runBlocking { res.awaitBody<String>() }
-		JSONAssert.assertEquals( """
+		JSONAssert.assertEquals("""
 			{
 				"journalpostId": "1",
 				"norskIdent": "29099012345",
@@ -118,6 +121,12 @@ class K9PunsjApplicationTests {
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
 		assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
+	}
+
+	@Test
+	fun databasetest() {
+
+		assert(true);
 	}
 }
 

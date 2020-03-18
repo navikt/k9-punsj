@@ -1,6 +1,8 @@
 package no.nav.k9.mappe
 
+import com.zaxxer.hikari.HikariDataSource
 import no.nav.k9.*
+import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -33,6 +35,13 @@ internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeSvarD
         )
 }
 
+internal fun Mappe.getFirstNorskIdent(): NorskIdent {
+    return this.person.keys.first();
+}
+
+internal fun Mappe.getFirstPerson(): Person? {
+    return this.person[this.getFirstNorskIdent()];
+}
 
 private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(
         person: Person?
@@ -65,7 +74,7 @@ private fun <E> MutableSet<E>.leggTil(item: E): MutableSet<E> {
 }
 
 @Service
-internal class MappeService {
+internal class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBarnRepository) {
     private val map = mutableMapOf<MappeId, Mappe>()
 
     internal suspend fun hent(
@@ -80,8 +89,9 @@ internal class MappeService {
             innsending: Innsending
     ) : Mappe {
         val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
-
+        pleiepengerSyktBarnRepository.oppretteSoknad(opprettetMappe);
         map[opprettetMappe.mappeId] = opprettetMappe
+        pleiepengerSyktBarnRepository.hentAlleSoknader();
 
         return opprettetMappe
     }
@@ -95,14 +105,17 @@ internal class MappeService {
         val oppdatertMappe = innsending.leggIMappe(mappe = eksisterendeMappe)
 
         map[mappeId] = oppdatertMappe
+        pleiepengerSyktBarnRepository.oppdatereSoknad(oppdatertMappe)
 
         return oppdatertMappe
     }
 
     internal suspend fun hent(
             mappeId: MappeId
-    ) = map[mappeId]
-
+    ): Mappe? {
+        pleiepengerSyktBarnRepository.finneMappe(mappeId);
+        return map[mappeId];
+    }
 
     internal suspend fun fjern(
             mappeId: MappeId,

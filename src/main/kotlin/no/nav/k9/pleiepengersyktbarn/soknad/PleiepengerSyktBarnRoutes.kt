@@ -2,8 +2,10 @@ package no.nav.k9.pleiepengersyktbarn.soknad
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.*
+import no.nav.k9.db.DbConfiguration
 import no.nav.k9.mappe.*
 import no.nav.k9.søknad.ValideringsFeil
 import org.slf4j.Logger
@@ -24,7 +26,8 @@ internal class PleiepengerSyktBarnRoutes(
         private val mappeService: MappeService,
         private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
         private val authenticationHandler: AuthenticationHandler,
-        private val pleiepengerSyktBarnSoknadConverter: PleiepengerSyktBarnSoknadConverter
+        private val pleiepengerSyktBarnSoknadConverter: PleiepengerSyktBarnSoknadConverter,
+        private val hikariDataSource: HikariDataSource
 ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)

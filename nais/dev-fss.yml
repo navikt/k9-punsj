@@ -63,3 +63,7 @@ spec:
       value: c7adbfbb-1b1e-41f6-9b7a-af9627c04998/.default
     - name: KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    - name: DEFAULTDS_USERNAME
+      value: k9-punsj
+    - name: DEFAULTDS_URL
+      value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-punsj

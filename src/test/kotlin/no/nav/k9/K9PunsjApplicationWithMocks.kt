@@ -1,6 +1,8 @@
 package no.nav.k9
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.k9.db.DbConfiguration
+import no.nav.k9.db.hikariConfig
 import no.nav.k9.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
