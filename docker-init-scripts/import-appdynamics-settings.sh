@@ -1,7 +1,6 @@
-#!/bin/env sh
+#!/usr/bin/env sh
 
-echo "Importing Appdynamics variables"
-
+echo "Importing Appdynamics settings"
 
 if test -d /var/run/secrets/nais.io/appdynamics ;
 then
