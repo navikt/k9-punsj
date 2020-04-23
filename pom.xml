@@ -112,7 +112,7 @@
 		<dependency>
 			<groupId>no.nav.k9</groupId>
 			<artifactId>soknad-pleiepenger-barn</artifactId>
-			<version>2.0.0.518a9c5</version>
+			<version>3.2.0-20200422143239-2b3223e</version>
 		</dependency>
 		<!-- Testing -->
 		<dependency>
