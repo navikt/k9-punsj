@@ -7,6 +7,8 @@ import no.nav.k9.søknad.felles.Periode
 import no.nav.k9.søknad.felles.Språk
 import no.nav.k9.søknad.pleiepengerbarn.*
 import no.nav.k9.søknad.pleiepengerbarn.Arbeid
+import no.nav.k9.søknad.pleiepengerbarn.Frilanser
+import no.nav.k9.søknad.pleiepengerbarn.SelvstendigNæringsdrivende
 import no.nav.k9.søknad.pleiepengerbarn.Tilsynsordning
 import org.springframework.context.annotation.Configuration
 import java.time.ZoneId
@@ -50,8 +52,8 @@ internal class PleiepengerSyktBarnSoknadConverter {
                                 .organisasjonsnummer(Organisasjonsnummer.of(it.organisasjonsnummer))
                                 .perioder(it.skalJobbeProsent?.map{convertPeriode(it.periode) to Arbeidstaker.ArbeidstakerPeriodeInfo.builder().skalJobbeProsent(it.grad?.toBigDecimal()).build()}?.toMap())
                                 .build()})
-                        .frilanser(pleiepengerSyktBarnSoknad.arbeid?.frilanser?.map{Frilanser.builder().periode(convertPeriode(it.periode), Frilanser.FrilanserPeriodeInfo()).build()})
-                        .selvstendigNæringsdrivende(pleiepengerSyktBarnSoknad.arbeid?.selvstendigNaeringsdrivende?.map{SelvstendigNæringsdrivende.builder().periode(convertPeriode(it.periode), SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo()).build()})
+                        .frilanser(pleiepengerSyktBarnSoknad.arbeid?.frilanser?.map{ Frilanser.builder().periode(convertPeriode(it.periode), Frilanser.FrilanserPeriodeInfo()).build()})
+                        .selvstendigNæringsdrivende(pleiepengerSyktBarnSoknad.arbeid?.selvstendigNaeringsdrivende?.map{ SelvstendigNæringsdrivende.builder().periode(convertPeriode(it.periode), SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo()).build()})
                         .build())
                 .beredskap(Beredskap.builder()
                         .perioder(pleiepengerSyktBarnSoknad.beredskap?.map{convertPeriode(it.periode) to Beredskap.BeredskapPeriodeInfo.builder().tilleggsinformasjon(it.tilleggsinformasjon).build()}?.toMap())
