@@ -21,7 +21,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
 
     internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
 
-        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad, journalpostIder)
+        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad, søknad.søknadId.id, journalpostIder)
     }
 
 

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9.JournalpostId
 import no.nav.k9.søknad.JsonUtils
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -87,10 +86,10 @@ class HendelseProducer {
         }
     }
 
-    fun sendTilKafkaTopic(topicName: String, søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
+    fun sendTilKafkaTopic(topicName: String, søknad: Any, søknadId: String, journalpostIder: MutableSet<JournalpostId>) {
         // TODO K9: Håndter journalposter:
         val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
-        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknad.søknadId.id, dokumentfordelingMelding)
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknadId, dokumentfordelingMelding)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
@@ -104,12 +103,12 @@ class HendelseProducer {
         })
     }
 
-    fun toDokumentfordelingMelding(pleiepengerBarnSøknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>): String {
+    fun toDokumentfordelingMelding(søknad: Any, journalpostIder: MutableSet<JournalpostId>): String {
         // Midlertidig generering av meldings-JSON i påvente av et definert format.
         val om: ObjectMapper = JsonUtils.getObjectMapper()
         val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
         val data: ObjectNode = dokumentfordelingMelding.objectNode()
-        data.set<JsonNode>("søknad", om.valueToTree(pleiepengerBarnSøknad))
+        data.set<JsonNode>("søknad", om.valueToTree(søknad))
         data.set<ArrayNode>("journalpostIder", om.valueToTree<ArrayNode>(journalpostIder))
         dokumentfordelingMelding.set<JsonNode>("data", data)
         return dokumentfordelingMelding.toString()
