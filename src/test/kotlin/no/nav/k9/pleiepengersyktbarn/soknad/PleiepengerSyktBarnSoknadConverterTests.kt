@@ -91,7 +91,7 @@ class PleiepengerSyktBarnConverterTests {
         assertEquals(standardTilleggsinformasjon, konvertertSoknad.nattevåk.perioder[konvertertPeriode]!!.tilleggsinformasjon)
         assertEquals(konvertertITilsynsordning, konvertertSoknad.tilsynsordning.iTilsynsordning)
 
-        // todo: testfeil: 22 != 5
+        // TODO: TSF-1185: testfeil: 22 != 5
         assertEquals(22, konvertertSoknad.tilsynsordning.opphold.size)
     }
 
@@ -150,7 +150,7 @@ class PleiepengerSyktBarnConverterTests {
         val konvertertSoknad = pleiepengerSyktBarnSoknadConverter.convert(soknad, standardIdent)
         val konverterteOpphold = konvertertSoknad.tilsynsordning.opphold;
 
-        assert(konverterteOpphold.containsKey(periode1Mandag)) // todo: feiler
+        assert(konverterteOpphold.containsKey(periode1Mandag)) // TODO: TSF-1185: feiler
         assert(konverterteOpphold.containsKey(periode1Tirsdag))
         assert(konverterteOpphold.containsKey(periode1Onsdag))
         assert(konverterteOpphold.containsKey(periode1Torsdag))

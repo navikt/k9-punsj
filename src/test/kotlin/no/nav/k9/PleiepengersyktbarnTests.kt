@@ -195,7 +195,7 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
     }
 
-    @Disabled // todo: PleiepengerSyktBarnConverter mangler obligatorisk felt på output
+    @Disabled // TODO: TSF-1185: PleiepengerSyktBarnConverter mangler obligatorisk felt på output
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val gyldigSoeknad: SøknadJson = genererSoknad()
