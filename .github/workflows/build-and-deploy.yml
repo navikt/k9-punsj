@@ -44,6 +44,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13.x'
+      - name: Cache Maven repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Bygge JAR
         run: ./mvnw clean package -DskipTests --settings ./.m2/settings.xml
         env:
