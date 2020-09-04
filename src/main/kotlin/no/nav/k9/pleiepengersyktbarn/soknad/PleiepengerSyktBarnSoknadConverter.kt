@@ -50,6 +50,7 @@ internal class PleiepengerSyktBarnSoknadConverter {
                         .arbeidstaker(pleiepengerSyktBarnSoknad.arbeid?.arbeidstaker?.map{Arbeidstaker.builder()
                                 .norskIdentitetsnummer(NorskIdentitetsnummer.of(it.norskIdent))
                                 .organisasjonsnummer(Organisasjonsnummer.of(it.organisasjonsnummer))
+                                // TODO: TSF-1185: ArbeidstakerPeriodeInfo mangler obligatorisk felt: .jobberNormaltPerUke(Duration)
                                 .perioder(it.skalJobbeProsent?.map{convertPeriode(it.periode) to Arbeidstaker.ArbeidstakerPeriodeInfo.builder().skalJobbeProsent(it.grad?.toBigDecimal()).build()}?.toMap())
                                 .build()})
                         .frilanser(pleiepengerSyktBarnSoknad.arbeid?.frilanser?.map{ Frilanser.builder().periode(convertPeriode(it.periode), Frilanser.FrilanserPeriodeInfo()).build()})
