@@ -20,6 +20,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13.x'
+      - name: Cache Maven repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Kjøre tester
         run: ./mvnw clean test --settings ./.m2/settings.xml
         env:
@@ -37,6 +44,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13.x'
+      - name: Cache Maven repository
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Bygge JAR
         run: ./mvnw clean package -DskipTests --settings ./.m2/settings.xml
         env:
@@ -48,6 +62,7 @@ jobs:
         run: |
           echo $DOCKER_IMAGE > .docker_image
           echo "$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" > .docker_tag
+          echo "::set-env name=IMAGE::$(cat .docker_image):$(cat .docker_tag)"
       - name: Bygge Docker image
         run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
       - name: Laste opp Docker image
@@ -59,10 +74,8 @@ jobs:
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
       - name: Deploye til dev
-        uses: navikt/deployment-cli/action@0.4.1
+        uses: nais/deploy/actions/deploy@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          cluster: dev-fss
-          team: k9saksbehandling
-          resources: nais/dev-fss.yml
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais/dev-fss.yml
