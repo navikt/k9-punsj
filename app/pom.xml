@@ -10,8 +10,8 @@
 
     <artifactId>app</artifactId>
     <packaging>jar</packaging>
-<!--    <name>k9-punsj</name>
-    <description>Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kapittel 9</description>-->
+    <name>k9-punsj</name>
+    <description>Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kapittel 9</description>
 
     <dependencies>
         <dependency>
