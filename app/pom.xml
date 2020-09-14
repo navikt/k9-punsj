@@ -14,6 +14,12 @@
     <description>Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kapittel 9</description>-->
 
     <dependencies>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>punsj-mocks</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

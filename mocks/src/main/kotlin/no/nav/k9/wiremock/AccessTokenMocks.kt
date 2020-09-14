@@ -6,7 +6,7 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 
 private const val path = "/access-token-mock/saksbehandler"
 
-internal fun WireMockServer.stubSaksbehandlerAccessToken(): WireMockServer {
+fun WireMockServer.stubSaksbehandlerAccessToken(): WireMockServer {
 
     val jwt = Azure.V2_0.saksbehandlerAccessToken()
 
@@ -25,7 +25,7 @@ internal fun WireMockServer.stubSaksbehandlerAccessToken(): WireMockServer {
     return this
 }
 
-internal fun Azure.V2_0.saksbehandlerAccessToken() = generateJwt(
+fun Azure.V2_0.saksbehandlerAccessToken() = generateJwt(
         clientId = "k9-punsj-frontend-oidc-auth-proxy",
         audience = "k9-punsj",
         overridingClaims = mapOf(

@@ -4,19 +4,20 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
-import no.nav.k9.JournalpostId
-import org.springframework.http.HttpHeaders
+import com.google.common.net.HttpHeaders.CONTENT_DISPOSITION
+
+typealias JournalpostId = String
 
 private const val path = "/saf-mock"
 
-internal fun WireMockServer.getSafBaseUrl() = baseUrl() + path
+fun WireMockServer.getSafBaseUrl() = baseUrl() + path
 
-internal fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
+fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
                     WireMock.aResponse()
                             .withHeader("Content-Type", "application/pdf")
-                            .withHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
                             .withBodyFile("dummy_soknad.pdf")
                             .withStatus(200)
             )
@@ -37,12 +38,12 @@ private fun WireMockServer.stubSafHenteDokumentError(
     return this
 }
 
-internal fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
+fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
         journalpostId = JournalpostIds.FinnesIkke,
         httpStatus = 404
 )
 
-internal fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
+fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
         journalpostId = JournalpostIds.AbacError,
         httpStatus = 403
 )
@@ -63,26 +64,26 @@ private fun WireMockServer.stubSafHenteJournalpost(
     return this
 }
 
-internal fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
-internal fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
+fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
+fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
         journalpostId = JournalpostIds.AbacError,
         responseBody = SafMockResponses.AbacErrorResponseHenteJournalpost
 )
-internal fun WireMockServer.stubSafHentJournalpostIkkeKomplettTilgang() = stubSafHenteJournalpost(
+fun WireMockServer.stubSafHentJournalpostIkkeKomplettTilgang() = stubSafHenteJournalpost(
         journalpostId = JournalpostIds.IkkeKomplettTilgang,
         responseBody = SafMockResponses.IkkeKomplettTilgangResponseHenteJournalpost
 )
 
-internal fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJournalpost(
+fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJournalpost(
         journalpostId = JournalpostIds.FinnesIkke,
         responseBody = SafMockResponses.FinnesIkkeResponseHenteJournalpost
 )
 
-internal object JournalpostIds {
-    internal const val Ok : JournalpostId = "200"
-    internal const val AbacError : JournalpostId = "500"
-    internal const val IkkeKomplettTilgang : JournalpostId = "403"
-    internal const val FinnesIkke : JournalpostId = "404"
+object JournalpostIds {
+    const val Ok : JournalpostId = "200"
+    const val AbacError : JournalpostId = "500"
+    const val IkkeKomplettTilgang : JournalpostId = "403"
+    const val FinnesIkke : JournalpostId = "404"
 
 }
 
