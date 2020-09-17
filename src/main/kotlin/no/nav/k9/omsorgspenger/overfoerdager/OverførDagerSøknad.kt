@@ -1,15 +1,12 @@
 package no.nav.k9.omsorgspenger.overfoerdager
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.k9.søknad.felles.NorskIdentitetsnummer
 import java.time.LocalDate
 
 enum class JaNei { ja, nei }
 
 enum class Mottaker { Ektefelle, Samboer }
-
-data class Avsender (
-        val fødselsnummer: String
-)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Arbeidssituasjon (
@@ -19,11 +16,12 @@ data class Arbeidssituasjon (
 )
 
 data class Barn (
-        val fødselsnummer: String
+        val identitetsnummer: NorskIdentitetsnummer,
+        val fødselsdato: LocalDate
 )
 
 data class OmsorgenDelesMed (
-        val fødselsnummer: String,
+        val identitetsnummer: NorskIdentitetsnummer,
         val mottaker: Mottaker,
         val antallOverførteDager: Int,
         val samboerSiden: LocalDate?
@@ -31,8 +29,9 @@ data class OmsorgenDelesMed (
 
 data class OverførDagerSøknad (
         val mottaksdato: LocalDate,
-        val avsender: Avsender,
+        val identitetsnummer: NorskIdentitetsnummer,
         val arbeidssituasjon: Arbeidssituasjon,
+        val borINorge: JaNei,
         val aleneOmOmsorgen: JaNei,
         val barn: List<Barn>,
         val omsorgenDelesMed: OmsorgenDelesMed
@@ -40,5 +39,6 @@ data class OverførDagerSøknad (
 
 data class OverførDagerDTO (
         val journalpostId: String,
-        val søknad: OverførDagerSøknad
+        val søknad: OverførDagerSøknad,
+        val dedupKey: String
 )

@@ -1,6 +1,5 @@
 package no.nav.k9
 
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -20,7 +19,6 @@ class K9PunsjApplication {
 		return Jackson2ObjectMapperBuilder()
 		.propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
 		.modulesToInstall(JavaTimeModule())
-		.featuresToEnable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 		.featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
 	}
 

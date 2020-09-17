@@ -69,7 +69,7 @@ class HendelseProducer {
     }
 
     private fun setSecurity(username: String?, properties: MutableMap<String, Any>) {
-        if (username != null && !username.isEmpty()) {
+        if (username != null && username.isNotEmpty()) {
             properties["security.protocol"] = "SASL_SSL"
             properties["sasl.mechanism"] = "PLAIN"
             properties[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = trustStorePath
@@ -78,18 +78,16 @@ class HendelseProducer {
     }
 
     private fun setUsernameAndPassword(username: String?, password: String?, properties: MutableMap<String, Any>) {
-        if (username != null && !username.isEmpty()
-                && password != null && !password.isEmpty()) {
+        if (username != null && username.isNotEmpty()
+                && password != null && password.isNotEmpty()) {
             val jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";"
             val jaasCfg = String.format(jaasTemplate, username, password)
             properties["sasl.jaas.config"] = jaasCfg
         }
     }
 
-    fun sendTilKafkaTopic(topicName: String, søknad: Any, søknadId: String, journalpostIder: MutableSet<JournalpostId>) {
-        // TODO K9: Håndter journalposter:
-        val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
-        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknadId, dokumentfordelingMelding)
+    fun sendTilKafkaTopic(topicName: String, søknadString: String, søknadId: String) {
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknadId, søknadString)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
@@ -101,16 +99,5 @@ class HendelseProducer {
                 throw KafkaException("Kunne ikke sende sende søknad til topic: $topicName")
             }
         })
-    }
-
-    fun toDokumentfordelingMelding(søknad: Any, journalpostIder: MutableSet<JournalpostId>): String {
-        // Midlertidig generering av meldings-JSON i påvente av et definert format.
-        val om: ObjectMapper = JsonUtils.getObjectMapper()
-        val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
-        val data: ObjectNode = dokumentfordelingMelding.objectNode()
-        data.set<JsonNode>("søknad", om.valueToTree(søknad))
-        data.set<ArrayNode>("journalpostIder", om.valueToTree<ArrayNode>(journalpostIder))
-        dokumentfordelingMelding.set<JsonNode>("data", data)
-        return dokumentfordelingMelding.toString()
     }
 }

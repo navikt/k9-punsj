@@ -1,7 +1,12 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9.JournalpostId
 import no.nav.k9.kafka.HendelseProducer
+import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,9 +25,19 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
     }
 
     internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
-
-        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, søknad, søknad.søknadId.id, journalpostIder)
+        val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
+        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, dokumentfordelingMelding, søknad.søknadId.id)
     }
 
 
+    fun toDokumentfordelingMelding(søknad: Any, journalpostIder: MutableSet<JournalpostId>): String {
+        // Midlertidig generering av meldings-JSON i påvente av et definert format.
+        val om: ObjectMapper = JsonUtils.getObjectMapper()
+        val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
+        val data: ObjectNode = dokumentfordelingMelding.objectNode()
+        data.set<JsonNode>("søknad", om.valueToTree(søknad))
+        data.set<ArrayNode>("journalpostIder", om.valueToTree<ArrayNode>(journalpostIder))
+        dokumentfordelingMelding.set<JsonNode>("data", data)
+        return dokumentfordelingMelding.toString()
+    }
 }
