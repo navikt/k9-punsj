@@ -22,6 +22,6 @@ class OverførDagerSøknadService @Autowired constructor(
                 behov = arrayOf(søknad)
         ).keyValue
 
-        hendelseProducer.sendTilKafkaTopic(rapidTopic, overføring, id)
+        hendelseProducer.sendTilKafkaTopic(topicName = rapidTopic, søknadId = id, søknadString = overføring)
     }
 }

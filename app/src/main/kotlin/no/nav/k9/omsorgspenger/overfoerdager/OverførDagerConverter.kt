@@ -7,7 +7,7 @@ internal class OverførDagerConverter {
 
     companion object {
         fun map(dto: OverførDagerDTO): OverføreOmsorgsdagerBehov {
-            val (journalpostId, søknad) = dto
+            val (journalpostIder, søknad) = dto
             val (mottaksdato, identitetsnummer, arbeidssituasjon, borINorge, aleneOmOmsorgen, barn, omsorgenDelesMed) = søknad
             val jobberINorge = listOf(arbeidssituasjon.erArbeidstaker, arbeidssituasjon.erFrilanser, arbeidssituasjon.erSelvstendigNæringsdrivende)
                     .any { it == true }
@@ -40,7 +40,7 @@ internal class OverførDagerConverter {
                         )
                     },
                     kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
-                    journalpostIder = singletonList(journalpostId)
+                    journalpostIder = journalpostIder
             )
         }
     }

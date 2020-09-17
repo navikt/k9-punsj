@@ -1,6 +1,7 @@
 package no.nav.k9.omsorgspenger.overfoerdager
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.søknad.felles.NorskIdentitetsnummer
 import java.time.LocalDate
 
@@ -38,7 +39,7 @@ data class OverførDagerSøknad (
 )
 
 data class OverførDagerDTO (
-        val journalpostId: String,
+        val journalpostIder: List<String>,
         val søknad: OverførDagerSøknad,
-        val dedupKey: String
+        val dedupKey: ULID
 )

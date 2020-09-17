@@ -32,7 +32,7 @@ class OverførDagerApi(
                 val søknad = OverførDagerConverter.map(dto)
 
                 try {
-                    overførDagerSøknadService.sendSøknad(søknad, dto.dedupKey)
+                    overførDagerSøknadService.sendSøknad(søknad, dto.dedupKey.toString())
                     logger.info("Sendte inn søknad med dedup key:", dto.dedupKey)
                     ServerResponse
                             .accepted()

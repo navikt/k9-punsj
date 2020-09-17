@@ -1,5 +1,6 @@
 package no.nav.k9.omsorgspenger.overfoerdager
 
+import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
 import no.nav.k9.søknad.felles.NorskIdentitetsnummer
 import org.assertj.core.api.Assertions.assertThat
@@ -35,8 +36,8 @@ internal class OverførDagerConverterTest {
         val journalpostId = "123"
         val overførDagerDTO = OverførDagerDTO(
                 søknad = søknad,
-                journalpostId = journalpostId,
-                dedupKey = "dedup"
+                journalpostIder = listOf(journalpostId),
+                dedupKey = ULID()
         )
 
         val mappet = OverførDagerConverter.map(overførDagerDTO)

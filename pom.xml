@@ -118,6 +118,12 @@
 				<artifactId>mockk</artifactId>
 				<version>1.10.0</version>
 			</dependency>
+			<!-- Annet -->
+			<dependency>
+				<groupId>de.huxhorn.sulky</groupId>
+				<artifactId>de.huxhorn.sulky.ulid</artifactId>
+				<version>8.2.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
