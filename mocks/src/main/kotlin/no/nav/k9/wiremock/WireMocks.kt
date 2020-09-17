@@ -3,13 +3,14 @@ package no.nav.k9.wiremock
 import com.github.tomakehurst.wiremock.core.Options
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 
-internal fun initWireMock(
-        port: Int
+fun initWireMock(
+        port: Int,
+        rootDirectory: String = "../mocks/src/main/resources"
 ) = WireMockBuilder()
         .withPort(port)
         .withAzureSupport()
         .wireMockConfiguration {
-            it.withRootDirectory("src/test/resources")
+            it.withRootDirectory(rootDirectory)
             it.useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
         }
         .build()
