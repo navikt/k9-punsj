@@ -41,5 +41,5 @@ data class OverførDagerSøknad (
 data class OverførDagerDTO (
         val journalpostIder: List<String>,
         val søknad: OverførDagerSøknad,
-        val dedupKey: ULID
+        val dedupKey: ULID.Value
 )

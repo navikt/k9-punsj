@@ -37,7 +37,7 @@ internal class OverførDagerConverterTest {
         val overførDagerDTO = OverførDagerDTO(
                 søknad = søknad,
                 journalpostIder = listOf(journalpostId),
-                dedupKey = ULID()
+                dedupKey = ULID().nextValue()
         )
 
         val mappet = OverførDagerConverter.map(overførDagerDTO)

@@ -3,6 +3,8 @@ package no.nav.k9
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import de.huxhorn.sulky.ulid.ULID
+import no.nav.k9.jackson.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
@@ -17,9 +19,10 @@ class K9PunsjApplication {
 	@Bean
 	fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
 		return Jackson2ObjectMapperBuilder()
-		.propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
-		.modulesToInstall(JavaTimeModule())
-		.featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+				.propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+				.modulesToInstall(JavaTimeModule())
+				.featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+				.deserializerByType(ULID.Value::class.java, UlidDeserializer())
 	}
 
 	@Bean
