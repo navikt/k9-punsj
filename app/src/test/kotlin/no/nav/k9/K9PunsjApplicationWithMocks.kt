@@ -25,7 +25,8 @@ internal class K9PunsjApplicationWithMocks {
         @JvmStatic
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
-                    port = 8084
+                    port = 8084,
+                    rootDirectory =  "mock-server/src/main/resources"
             )
             startup(
                     wireMockServer = wireMockServer,
