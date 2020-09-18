@@ -26,6 +26,7 @@
 		<token-support.version>1.3.0</token-support.version>
 		<dusseldorf-ktor.version>1.3.2.6840711</dusseldorf-ktor.version>
 		<hibernate.version>6.1.5.Final</hibernate.version>
+		<k9-rapid.version>1.2d2610c</k9-rapid.version>
 	</properties>
 
 	<modules>
@@ -101,11 +102,27 @@
 				<artifactId>soknad-pleiepenger-barn</artifactId>
 				<version>5.0.0-20200806083358-23cb01c</version>
 			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.rapid</groupId>
+				<artifactId>overfore-omsorgsdager</artifactId>
+				<version>${k9-rapid.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.rapid</groupId>
+				<artifactId>behov</artifactId>
+				<version>${k9-rapid.version}</version>
+			</dependency>
 			<!-- Testing -->
 			<dependency>
 				<groupId>io.mockk</groupId>
 				<artifactId>mockk</artifactId>
 				<version>1.10.0</version>
+			</dependency>
+			<!-- Annet -->
+			<dependency>
+				<groupId>de.huxhorn.sulky</groupId>
+				<artifactId>de.huxhorn.sulky.ulid</artifactId>
+				<version>8.2.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

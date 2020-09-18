@@ -104,6 +104,19 @@
             <groupId>no.nav.k9</groupId>
             <artifactId>soknad-pleiepenger-barn</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.rapid</groupId>
+            <artifactId>overfore-omsorgsdager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.rapid</groupId>
+            <artifactId>behov</artifactId>
+        </dependency>
+        <!-- Annet -->
+        <dependency>
+            <groupId>de.huxhorn.sulky</groupId>
+            <artifactId>de.huxhorn.sulky.ulid</artifactId>
+        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>io.mockk</groupId>

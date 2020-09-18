@@ -12,7 +12,7 @@ internal object MockConfiguration {
             wireMockServer: WireMockServer,
             port: Int,
             azureV2DiscoveryUrl: String?
-    ) = mapOf(
+    ): Map<String, String> = mapOf(
             "PORT" to "$port",
             "AZURE_client_id" to "k9-punsj",
             "AZURE_jwk" to ClientCredentials.ClientA.privateKeyJwk,
@@ -21,7 +21,7 @@ internal object MockConfiguration {
             "AZURE_V2_discovery_url" to (azureV2DiscoveryUrl ?: wireMockServer.getAzureV2WellKnownUrl()),
             "SYSTEMBRUKER_USERNAME" to "vtp",
             "SYSTEMBRUKER_PASSWORD" to "vtp",
-            "NAV_TRUSTSTORE_PATH" to "~/.modig/truststore.jks",
+            "NAV_TRUSTSTORE_PATH" to "${System.getProperty("user.home")}/.modig/truststore.jks",
             "NAV_TRUSTSTORE_PASSWORD" to "changeit",
             "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
