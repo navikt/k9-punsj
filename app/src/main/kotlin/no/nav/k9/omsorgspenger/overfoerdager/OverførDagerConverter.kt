@@ -40,7 +40,8 @@ internal class OverførDagerConverter {
                         )
                     },
                     kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
-                    journalpostIder = journalpostIder
+                    journalpostIder = journalpostIder,
+                    mottaksdato = mottaksdato
             )
         }
     }

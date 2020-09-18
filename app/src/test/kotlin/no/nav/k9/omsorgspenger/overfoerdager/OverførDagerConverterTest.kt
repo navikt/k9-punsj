@@ -15,8 +15,9 @@ internal class OverførDagerConverterTest {
                 NorskIdentitetsnummer.of("01010101010"),
                 fødselsdato = LocalDate.now().minusYears(10)
         )
+        val mottaksdato = LocalDate.now()
         val søknad = OverførDagerSøknad(
-                mottaksdato = LocalDate.now(),
+                mottaksdato = mottaksdato,
                 identitetsnummer = NorskIdentitetsnummer.of("12121212121"),
                 arbeidssituasjon = Arbeidssituasjon(
                         erArbeidstaker = true,
@@ -59,5 +60,6 @@ internal class OverførDagerConverterTest {
         }
         assertThat(mappet.journalpostIder).hasSize(1)
         assertThat(mappet.journalpostIder.get(0)).isEqualTo(journalpostId)
+        assertThat(mappet.mottaksdato).isEqualTo(mottaksdato)
     }
 }
