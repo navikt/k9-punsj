@@ -63,6 +63,28 @@ internal class OverførDagerApiTest {
         assertThat(response.statusCode()).isEqualTo(HttpStatus.ACCEPTED)
     }
 
+    @Test
+    fun `Ugyldig skjema om overføring gir 400` () {
+        @Language("json")
+        val req = """
+            {
+              "journalpostIder": [
+                "466988237"
+              ],
+              "søknad": {},
+              "dedupKey": "01EJTT64E3PG3DX4HKA5Z7JR75"
+            }
+        """.trimIndent()
+
+        val response = client.post()
+                .uri { it.pathSegment("api", OverførDagerApi.søknadType).build() }
+                .body(BodyInserters.fromValue(req))
+                .header("content-type", "application/json")
+                .awaitExchangeBlocking()
+
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
     private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 }
 

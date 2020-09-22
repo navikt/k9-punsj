@@ -10,6 +10,7 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import java.util.*
 import net.logstash.logback.argument.StructuredArguments.e
+import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.server.*
 
@@ -54,6 +55,9 @@ internal fun Routes(
         val serverResponse = authenticationHandler?.authenticatedRequest(serverRequest, requestedOperation) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
+    }
+    onError<DecodingException> { error, _ ->
+        ServerResponse.badRequest().bodyValueAndAwait(error.message + "")
     }
     routes()
 }

@@ -33,12 +33,12 @@ class OverførDagerApi(
 
                 try {
                     overførDagerSøknadService.sendSøknad(søknad, dto.dedupKey.toString())
-                    logger.info("Sendte inn søknad med dedup key:", dto.dedupKey)
+                    logger.info("Sendte inn søknad om overføring av dager med dedup key:", dto.dedupKey)
                     ServerResponse
                             .status(HttpStatus.ACCEPTED)
                             .buildAndAwait()
                 } catch (e: Exception) {
-                    logger.error("Det skjedde en feil under innsending", e)
+                    logger.error("Det skjedde en feil under innsending av søknad om overføring av dager", e)
                     ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .buildAndAwait()
