@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.k9.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.context.ConfigurableApplicationContext
 
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
@@ -11,22 +12,31 @@ internal class K9PunsjApplicationWithMocks {
                 wireMockServer: WireMockServer,
                 port: Int,
                 args: Array<String> = arrayOf(),
-                azureV2DiscoveryUrl: String? = null
-        ) = SpringApplicationBuilder(K9PunsjApplication::class.java)
-                .bannerMode(Banner.Mode.OFF)
-                .properties(MockConfiguration.config(
-                        wireMockServer = wireMockServer,
-                        port = port,
-                        azureV2DiscoveryUrl = azureV2DiscoveryUrl
-                ))
-                .main(K9PunsjApplication::class.java)
-                .run(*args)
+                azureV2DiscoveryUrl: String? = null,
+                profiles: String? = null
+        ): ConfigurableApplicationContext? {
+            val builder = SpringApplicationBuilder(K9PunsjApplication::class.java)
+                    .bannerMode(Banner.Mode.OFF)
+                    .properties(MockConfiguration.config(
+                            wireMockServer = wireMockServer,
+                            port = port,
+                            azureV2DiscoveryUrl = azureV2DiscoveryUrl
+                    ))
+                    .main(K9PunsjApplication::class.java)
+
+            if (profiles != null) {
+                builder.profiles(profiles)
+            }
+
+            return builder
+                    .run(*args)
+        }
 
         @JvmStatic
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
                     port = 8084,
-                    rootDirectory =  "mock-server/src/main/resources"
+                    rootDirectory = "mock-server/src/main/resources"
             )
             startup(
                     wireMockServer = wireMockServer,
