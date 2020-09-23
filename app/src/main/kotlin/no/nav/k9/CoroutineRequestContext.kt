@@ -1,5 +1,6 @@
 package no.nav.k9
 
+import de.huxhorn.sulky.ulid.ULID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
@@ -10,8 +11,10 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import java.util.*
 import net.logstash.logback.argument.StructuredArguments.e
+import no.nav.k9.exception.ExceptionResponse
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.*
 
 private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::class.java)
@@ -56,8 +59,29 @@ internal fun Routes(
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
     }
-    onError<DecodingException> { error, _ ->
-        ServerResponse.badRequest().bodyValueAndAwait(error.message ?: "Ingen detaljer")
+    onError<Throwable> { error, serverRequest ->
+        val exceptionId = ULID().nextValue().toString()
+        logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
+
+        ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
+            ExceptionResponse(
+                message = error.message ?: "Uhåndtert feil uten detaljer",
+                uri = serverRequest.uri(),
+                exceptionId = exceptionId
+            )
+        )
+    }
+    onError<DecodingException> { error, serverRequest ->
+        val exceptionId = ULID().nextValue().toString()
+        logger.error("DecodingException med id $exceptionId . URI: ${serverRequest.uri()}", error)
+
+        ServerResponse.badRequest().bodyValueAndAwait(
+            ExceptionResponse(
+                message = error.message ?: "Ingen detaljer",
+                uri = serverRequest.uri(),
+                exceptionId = exceptionId
+            )
+        )
     }
     routes()
 }

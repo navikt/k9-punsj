@@ -16,10 +16,10 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 class OverførDagerApi(
-        private val overførDagerSøknadService: OverførDagerSøknadService,
+    private val overførDagerSøknadService: OverførDagerSøknadService,
 ) {
     companion object {
-        const val søknadType : SøknadType = "omsorgspenger-overfoer-dager-soknad"
+        const val søknadType: SøknadType = "omsorgspenger-overfoer-dager-soknad"
         private val logger: Logger = LoggerFactory.getLogger(OverførDagerApi::class.java)
     }
 
@@ -31,18 +31,12 @@ class OverførDagerApi(
                 val dto = request.body(BodyExtractors.toMono(OverførDagerDTO::class.java)).awaitFirst()
                 val søknad = OverførDagerConverter.map(dto)
 
-                try {
-                    overførDagerSøknadService.sendSøknad(søknad, dto.dedupKey.toString())
-                    logger.info("Sendte inn søknad om overføring av dager med dedup key:", dto.dedupKey)
-                    ServerResponse
-                            .status(HttpStatus.ACCEPTED)
-                            .buildAndAwait()
-                } catch (e: Exception) {
-                    logger.error("Det skjedde en feil under innsending av søknad om overføring av dager", e)
-                    ServerResponse
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .buildAndAwait()
-                }
+                overførDagerSøknadService.sendSøknad(søknad, dto.dedupKey.toString())
+                logger.info("Sendte inn søknad om overføring av dager med dedup key:", dto.dedupKey)
+
+                ServerResponse
+                    .status(HttpStatus.ACCEPTED)
+                    .buildAndAwait()
             }
         }
     }
