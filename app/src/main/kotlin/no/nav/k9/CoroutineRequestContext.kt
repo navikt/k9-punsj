@@ -57,7 +57,7 @@ internal fun Routes(
         serverResponse
     }
     onError<DecodingException> { error, _ ->
-        ServerResponse.badRequest().bodyValueAndAwait(error.message + "")
+        ServerResponse.badRequest().bodyValueAndAwait(error.message ?: "Ingen detaljer")
     }
     routes()
 }
