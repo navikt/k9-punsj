@@ -14,6 +14,7 @@ object TestSetup {
 
     private val app = K9PunsjApplicationWithMocks.startup(
             wireMockServer = wireMockServer,
-            port = port
+            port = port,
+            profiles = "test"
     )
 }

@@ -26,7 +26,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
 
     internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
         val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
-        hendelseProducer.sendTilKafkaTopic(PLEIEPENGER_SYKT_BARN_TOPIC, dokumentfordelingMelding, søknad.søknadId.id)
+        hendelseProducer.send(PLEIEPENGER_SYKT_BARN_TOPIC, dokumentfordelingMelding, søknad.søknadId.id)
     }
 
 
