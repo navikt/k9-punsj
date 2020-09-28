@@ -1,6 +1,5 @@
 package no.nav.k9.mappe
 
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.k9.*
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRepository
 import org.springframework.stereotype.Service
@@ -91,7 +90,6 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
         val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
         pleiepengerSyktBarnRepository.oppretteSoknad(opprettetMappe);
         map[opprettetMappe.mappeId] = opprettetMappe
-        pleiepengerSyktBarnRepository.hentAlleSoknader();
 
         return opprettetMappe
     }

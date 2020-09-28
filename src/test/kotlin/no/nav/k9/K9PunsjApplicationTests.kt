@@ -2,7 +2,7 @@ package no.nav.k9
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9.db.hikariConfig
+import no.nav.k9.mappe.MappeSvarDTO
 import no.nav.k9.wiremock.JournalpostIds
 import no.nav.k9.wiremock.saksbehandlerAccessToken
 import org.junit.Assert.assertArrayEquals
@@ -13,12 +13,15 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
+import reactor.core.publisher.Mono
 
 @ExtendWith(SpringExtension::class)
 @TestPropertySource(locations = ["classpath:application.yml"])
@@ -121,6 +124,48 @@ class K9PunsjApplicationTests {
 		}.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
 		assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
+	}
+
+	@Test
+	fun `Crud-test`() {
+
+		// Opprette mappe
+		val body = BodyInserters.fromPublisher(
+				Mono.just(Innsending(personer = mapOf(Pair("15049228314", JournalpostInnhold(
+						journalpostId = "200",
+						soeknad = mutableMapOf()
+				))))),
+				Innsending::class.java
+		)
+		val resOpprette = client
+				.post()
+				.uri { it.pathSegment("api", "pleiepenger-sykt-barn-soknad").build() }
+				.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.body(body)
+				.awaitExchangeBlocking()
+		assertEquals(HttpStatus.CREATED, resOpprette.statusCode())
+		val opprettetMappe = resOpprette
+				.bodyToMono(MappeSvarDTO::class.java)
+				.block()
+		val mappeid = opprettetMappe?.mappeId
+
+		// Finne opprettet mappe
+		val resFinneMappe = client
+				.get()
+				.uri { it.pathSegment("api", "mappe", mappeid).build() }
+				.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+				.awaitExchangeBlocking()
+		assertEquals(HttpStatus.OK, resFinneMappe.statusCode())
+		val funnetMappe = resFinneMappe
+				.bodyToMono(MappeSvarDTO::class.java)
+				.block()
+		assertEquals(funnetMappe?.mappeId, mappeid)
+
+		// TODO: Oppdatere mappe
+		// TODO: Finne oppdatert mappe og verifisere at den er oppdatert
+		// TODO: Slette mappe
+		// TODO: Prøve å finne slettet mappe og verifisere at den ikke finnes
 	}
 
 	@Test
