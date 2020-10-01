@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
+import java.lang.Exception
 import javax.validation.Validator
 import kotlin.coroutines.coroutineContext
 
@@ -156,6 +157,17 @@ internal class PleiepengerSyktBarnRoutes(
                         .created(request.mappeLocation(mappe.mappeId))
                         .json()
                         .bodyValueAndAwait(mappeDTO)
+            }
+        }
+
+        DELETE("/api${Urls.EksisterendeSøknad}") {
+            request -> RequestContext(coroutineContext, request) {
+                try {
+                    mappeService.slett(mappeid = request.mappeId())
+                    ServerResponse.noContent().buildAndAwait()
+                } catch (e: Exception) {
+                    ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).buildAndAwait()
+                }
             }
         }
     }

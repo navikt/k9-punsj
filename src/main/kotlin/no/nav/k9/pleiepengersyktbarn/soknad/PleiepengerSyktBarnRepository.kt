@@ -22,8 +22,17 @@ typealias PleiepengerSyktBarnEntities = MutableList<PleiepengerSyktBarnEntity>;
 @Repository
 class PleiepengerSyktBarnRepository(private val dataSource: HikariDataSource) {
 
-    private fun prepareQuery(query: String): PreparedStatement {
-        return dataSource.getConnection().prepareStatement(query);
+    private fun prepareAndExecuteQuery(query: String): ResultSet {
+        val connection = dataSource.getConnection();
+        val preparedStatement = connection.prepareStatement(query);
+        val result = preparedStatement.executeQuery();
+        return result;
+    }
+
+    private fun prepareAndExecuteUpdate(query: String) {
+        val connection = dataSource.getConnection();
+        val preparedStatement = connection.prepareStatement(query);
+        preparedStatement.executeUpdate();
     }
 
     private fun buildEntityFromResultSet(resultSet: ResultSet): PleiepengerSyktBarnEntity {
@@ -88,12 +97,12 @@ class PleiepengerSyktBarnRepository(private val dataSource: HikariDataSource) {
                 "   '$sistEndret',\n" +
                 "   '$soknad'\n" +
                 ")"
-        prepareQuery(query).executeUpdate();
+        prepareAndExecuteUpdate(query);
     }
 
     fun hentAlleSoknader(): List<Mappe> {
         val query = "select * from soknader"
-        val result = prepareQuery(query).executeQuery();
+        val result = prepareAndExecuteQuery(query);
         val entities = getListOfEntitiesFromResultSet(result);
         val mapper = groupEntitiesByMappeid(entities);
         return convertGroupedEntitiesToMappe(mapper);
@@ -101,28 +110,33 @@ class PleiepengerSyktBarnRepository(private val dataSource: HikariDataSource) {
 
     fun finneSoknad(mappeId: MappeId, fnr: NorskIdent): SøknadJson {
         val query = "select * from soknader where id_mappe = '$mappeId' and norsk_ident = '$fnr'"
-        val result = prepareQuery(query).executeQuery();
+        val result = prepareAndExecuteQuery(query);
         val soknad = getListOfEntitiesFromResultSet(result).first().soknad
         return ObjectMapper().readValue(soknad ?: "{}")
     }
 
-    fun finneMappe(mappeId: MappeId): Mappe {
+    fun finneMappe(mappeId: MappeId): Mappe? {
         val query = "select * from soknader where id_mappe = '$mappeId'"
-        val result = prepareQuery(query).executeQuery();
+        val result = prepareAndExecuteQuery(query);
         val entities = getListOfEntitiesFromResultSet(result);
         val mapper = groupEntitiesByMappeid(entities);
         val convertedMapper = convertGroupedEntitiesToMappe(mapper);
-        return convertedMapper.first();
+        return if (convertedMapper.isEmpty()) null else convertedMapper.first();
     }
 
     fun oppdatereSoknad(mappe: Mappe) {
         val sistEndret = Timestamp.valueOf(ZonedDateTime.now().toLocalDateTime());
-        val soknad = JsonUtils.toString(mappe.getFirstPerson());
+        val soknad = JsonUtils.toString(mappe.getFirstPerson()?.soeknad);
         val query =
                 "update soknader set\n" +
                 "   sist_endret = '${sistEndret}',\n" +
                 "   soknad = '$soknad'\n" +
                 "where id_mappe = '${mappe.mappeId}' and norsk_ident = '${mappe.getFirstNorskIdent()}'";
-        prepareQuery(query).executeUpdate();
+        prepareAndExecuteUpdate(query);
+    }
+
+    fun sletteMappe(mappeId: MappeId) {
+        val query = "delete from soknader where id_mappe = '$mappeId'"
+        prepareAndExecuteUpdate(query)
     }
 }

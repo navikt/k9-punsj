@@ -111,8 +111,7 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
     internal suspend fun hent(
             mappeId: MappeId
     ): Mappe? {
-        pleiepengerSyktBarnRepository.finneMappe(mappeId);
-        return map[mappeId];
+        return pleiepengerSyktBarnRepository.finneMappe(mappeId)
     }
 
     internal suspend fun fjern(
@@ -128,6 +127,10 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
                 map[mappeId] = mappe
             }
         }
+    }
+
+    internal suspend fun slett(mappeid: MappeId) {
+        pleiepengerSyktBarnRepository.sletteMappe(mappeid)
     }
 }
 
