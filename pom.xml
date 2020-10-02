@@ -23,7 +23,7 @@
 		<springdoc.version>1.4.8</springdoc.version>
 		<kotlinx-coroutines.version>1.3.9</kotlinx-coroutines.version>
 		<logback.logstash.version>6.4</logback.logstash.version>
-		<token-support.version>1.3.0</token-support.version>
+		<token-support.version>1.3.1</token-support.version>
 		<dusseldorf-ktor.version>1.3.2.6840711</dusseldorf-ktor.version>
 		<hibernate.version>6.1.6.Final</hibernate.version>
 		<k9-rapid.version>1.2d2610c</k9-rapid.version>
