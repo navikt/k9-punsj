@@ -36,14 +36,6 @@ fun migrate(configuration: DbConfiguration) =
 
 fun runMigration(dataSource: DataSource, initSql: String? = null): Int {
 
-    // Todo: Fjernes når vi går i prod
-    Flyway.configure()
-            .locations("migreringer/")
-            .dataSource(dataSource)
-            .initSql(initSql)
-            .load()
-            .clean()
-
     return Flyway.configure()
             .locations("migreringer/")
             .dataSource(dataSource)

@@ -18,7 +18,7 @@ data class Person(
         val soeknad: SøknadJson
 )
 
-internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeSvarDTO {
+internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>): MappeSvarDTO {
     val personer = mutableMapOf<NorskIdent, PersonDTO<SøknadJson>>()
     personMangler.forEach { (norskIdent, mangler) ->
         personer[norskIdent] = PersonDTO(
@@ -31,7 +31,7 @@ internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>) : MappeSvarD
     return MappeSvarDTO(
             mappeId = mappeId,
             personer = personer
-        )
+    )
 }
 
 internal fun Mappe.getFirstNorskIdent(): NorskIdent {
@@ -44,7 +44,7 @@ internal fun Mappe.getFirstPerson(): Person? {
 
 private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(
         person: Person?
-) : Person {
+): Person {
     return Person(
             innsendinger = person?.innsendinger?.leggTil(journalpostId) ?: mutableSetOf(journalpostId),
             soeknad = person?.soeknad?.merge(soeknad) ?: soeknad
@@ -54,8 +54,8 @@ private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(
 internal fun Innsending.leggIMappe(
         mappe: Mappe?,
         søknadType: SøknadType? = null
-) : Mappe {
-    val personligInnholdUndermapper = mappe?.person?: mutableMapOf()
+): Mappe {
+    val personligInnholdUndermapper = mappe?.person ?: mutableMapOf()
     personer?.forEach { (norskIdent, journalpostInnhold) ->
         personligInnholdUndermapper[norskIdent] = journalpostInnhold.leggIUndermappe(person = mappe?.person?.get(norskIdent))
     }
@@ -86,9 +86,9 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
     internal suspend fun førsteInnsending(
             søknadType: SøknadType,
             innsending: Innsending
-    ) : Mappe {
+    ): Mappe {
         val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
-        pleiepengerSyktBarnRepository.oppretteSoknad(opprettetMappe);
+        pleiepengerSyktBarnRepository.oppretteMappe(opprettetMappe);
         map[opprettetMappe.mappeId] = opprettetMappe
 
         return opprettetMappe
@@ -98,14 +98,13 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
             mappeId: MappeId,
             søknadType: SøknadType,
             innsending: Innsending
-    ) : Mappe? {
-        val eksisterendeMappe = map[mappeId]?: return null
-        val oppdatertMappe = innsending.leggIMappe(mappe = eksisterendeMappe)
+    ): Mappe? {
 
-        map[mappeId] = oppdatertMappe
-        pleiepengerSyktBarnRepository.oppdatereSoknad(oppdatertMappe)
-
-        return oppdatertMappe
+        return pleiepengerSyktBarnRepository.lagre(mappeId) {
+            val oppdatertMappe = innsending.leggIMappe(mappe = it!!)
+            oppdatertMappe
+        }
+       
     }
 
     internal suspend fun hent(
@@ -118,7 +117,7 @@ internal class MappeService(private val pleiepengerSyktBarnRepository: Pleiepeng
             mappeId: MappeId,
             norskIdent: NorskIdent
     ) {
-        val mappe = hent(mappeId)?:return
+        val mappe = hent(mappeId) ?: return
         if (mappe.person.containsKey(norskIdent)) {
             if (mappe.person.size == 1) {
                 map.remove(mappeId)
