@@ -67,5 +67,7 @@ spec:
       value: k9-punsj
     - name: DEFAULTDS_PASSWORD
       value: k9-punsj
+    - name: DEFAULTDS_VAULT_MOUNTPATH
+      value: postgresql/preprod-fss/
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-punsj
