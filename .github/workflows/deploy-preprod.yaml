@@ -39,4 +39,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: nais/dev-fss.yaml
+          RESOURCE: nais/dev-fss.yml
