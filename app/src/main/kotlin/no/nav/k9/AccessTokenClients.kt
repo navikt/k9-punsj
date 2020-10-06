@@ -42,7 +42,6 @@ internal class AccessTokenClients (
             tokenEndpoint = azureTokenEndpoint
     )
 
-
     @Bean
     @Qualifier("saf")
     internal fun safAccessTokenClient() : AccessTokenClient = signedJwtAzureAccessTokenClient
