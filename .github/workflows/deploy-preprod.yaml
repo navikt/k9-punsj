@@ -30,7 +30,7 @@ jobs:
           echo "::set-env name=IMAGE::$BASE_IMAGE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)"
       - name: Bygg & last opp Docker image
         run: |
-          docker build --tag ${IMAGE} --tag ${BASE_IMAGE}:latest .
+          docker build --tag ${IMAGE} --tag ${BASE_IMAGE}:latest  ./app/.
           echo "$GITHUB_TOKEN" | docker login --username "$GITHUB_USERNAME" --password-stdin https://docker.pkg.github.com
           docker push $BASE_IMAGE:latest
           docker push $IMAGE
