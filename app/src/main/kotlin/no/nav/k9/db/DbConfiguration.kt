@@ -33,9 +33,7 @@ class DbConfiguration(
 
     @Bean
     fun databaseName(): String {
-        val dbNameFromUrl = getDbNameFromUrl(url)
-        logger.info("Databasenavn fra url: $dbNameFromUrl")
-        return dbNameFromUrl
+        return getDbNameFromUrl(url)
     }
 }
 

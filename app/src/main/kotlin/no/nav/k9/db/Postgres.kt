@@ -29,11 +29,9 @@ fun dataSourceFromVault(hikariConfig: DbConfiguration, role: Role): HikariDataSo
 
 fun migrate(configuration: DbConfiguration) =
         if (configuration.isVaultEnabled()) {
-            val initSql = "SET ROLE \"${configuration.databaseName()}-${Role.Admin}\""
-            logger.info("Initsql $initSql")
             runMigration(
                     dataSourceFromVault(configuration, Role.Admin),
-                    initSql
+                    "SET ROLE \'${configuration.databaseName()}-${Role.Admin}\'"
             )
         } else {
             runMigration(HikariDataSource(configuration.hikariConfig()))
