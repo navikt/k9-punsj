@@ -17,7 +17,6 @@ fun createHikariConfig(
     driverClassName = "org.postgresql.Driver"
     username?.let { this.username = it }
     password?.let { this.password = it }
-    connectionInitSql = "SET ROLE ${getDbNameFromUrl(jdbcUrl)}"
 }
 
 fun hikariConfig(hikariConfig: DbConfiguration): HikariDataSource {
