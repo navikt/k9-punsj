@@ -3,6 +3,7 @@ package no.nav.k9.db
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
@@ -37,7 +38,7 @@ fun migrate(configuration: DbConfiguration) =
             runMigration(HikariDataSource(configuration.hikariConfig()))
         }
 
-fun runMigration(dataSource: DataSource, initSql: String? = null): Int {
+fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
 
     return Flyway.configure()
             .locations("migreringer/")
