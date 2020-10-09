@@ -13,13 +13,12 @@ internal class JournalpostService(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostService::class.java)
-
     }
 
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? =
             safGateway.hentDokument(journalpostId, dokumentId)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId) : JournalpostInfo? {
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
         return if (safJournalpost == null) {
             null
@@ -29,10 +28,10 @@ internal class JournalpostService(
                 logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
                 throw IkkeStøttetJournalpost()
             } else if (!parsedJournalpost.harTilgang) {
-                logger.warn("Saksbehandler har ikke tilgang. $safJournalpost")
+                logger.warn("Saksbehandler har ikke tilgang. ${safJournalpost.copy(bruker = SafDtos.Bruker(null, null))}")
                 throw IkkeTilgang()
             } else {
-                val norskIdent : NorskIdent? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.FNR) {
+                val norskIdent: NorskIdent? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.FNR) {
                     safJournalpost.bruker?.id
                 } else null
 
@@ -50,7 +49,7 @@ internal class JournalpostService(
     }
 }
 
-private fun SafDtos.Journalpost.parseJournalpost() : ParsedJournalpost {
+private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
     val arkivDokumenter = dokumenter
             .filter { it.dokumentvarianter != null && it.dokumentvarianter.isNotEmpty() }
             .onEach { it ->
@@ -81,9 +80,9 @@ private data class ParsedJournalpost(
         val tema: SafDtos.Tema?,
         val journalstatus: SafDtos.Journalstatus?,
         val arkivDokumenter: List<SafDtos.Dokument>,
-        val harTilgang : Boolean
+        val harTilgang: Boolean
 ) {
-    internal val støttetJournalpost = listOfNotNull(
+    val støttetJournalpost = listOfNotNull(
             journalpostType, tema, journalpostType
     ).size == 3
 }
@@ -107,4 +106,5 @@ enum class Ytelse {
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
 internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")
+
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) = enumValues<T>().find { it.name.equals(name, ignoreCase = true) }
