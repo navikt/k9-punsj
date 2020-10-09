@@ -83,8 +83,8 @@ class KafkaHendelseProducer: HendelseProducer {
     }
 
 
-    override fun send(topicName: String, søknadString: String, søknadId: String) {
-        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, søknadId, søknadString)
+    override fun send(topicName: String, data: String, key: String) {
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, key, data)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")

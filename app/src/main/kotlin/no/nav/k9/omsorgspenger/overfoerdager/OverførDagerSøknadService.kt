@@ -22,6 +22,6 @@ class OverførDagerSøknadService @Autowired constructor(
                 behov = arrayOf(søknad)
         ).keyValue
 
-        hendelseProducer.send(topicName = rapidTopic, søknadId = id, søknadString = overføring)
+        hendelseProducer.send(topicName = rapidTopic, key = id, data = overføring)
     }
 }
