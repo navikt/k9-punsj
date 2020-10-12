@@ -17,7 +17,9 @@ import org.springframework.boot.runApplication
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
 import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import javax.sql.DataSource
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class, FlywayAutoConfiguration::class])
 class K9PunsjApplication @Autowired constructor(var dbConfiguration: DbConfiguration) {
@@ -36,7 +38,8 @@ class K9PunsjApplication @Autowired constructor(var dbConfiguration: DbConfigura
 	}
 
 	@Bean
-	fun databaseInitializer(): HikariDataSource {
+	@Profile("!test")
+	fun databaseInitializer(): DataSource {
 		return hikariConfig(dbConfiguration)
 	}
 }

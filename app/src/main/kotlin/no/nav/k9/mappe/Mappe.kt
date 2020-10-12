@@ -73,7 +73,7 @@ private fun <E> MutableSet<E>.leggTil(item: E): MutableSet<E> {
 }
 
 @Service
-internal class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBarnRepository) {
+class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBarnRepository) {
     private val map = mutableMapOf<MappeId, Mappe>()
 
     internal suspend fun hent(
