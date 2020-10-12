@@ -24,7 +24,7 @@ internal object SafDtos {
                   id
                   idType
                 }
-              }git restore stag
+              }
             }
             """.trimIndent(),
             variables = null
