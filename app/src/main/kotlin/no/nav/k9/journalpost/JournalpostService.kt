@@ -72,7 +72,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
                     !it.saksbehandlerHarTilgang
                 }
             },
-            avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.idType)
+            avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.type)
     )
 }
 

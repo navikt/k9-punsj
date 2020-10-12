@@ -22,7 +22,7 @@ internal object SafDtos {
                 }
                 avsenderMottaker {
                   id
-                  idType
+                  type
                 }
               }
             }
@@ -77,7 +77,7 @@ internal object SafDtos {
 
     internal data class AvsenderMottaker(
         val id: String?,
-        val idType: String?
+        val type: String?
     )
 
     internal data class DokumentVariant(
