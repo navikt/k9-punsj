@@ -122,7 +122,11 @@ private object SafMockResponses {
                 }
               ]
             }
-          ]
+          ],
+          "avsenderMottaker": {
+            "id": "29099012345",
+            "idType": "FNR"
+          }
         }
       }
     }
