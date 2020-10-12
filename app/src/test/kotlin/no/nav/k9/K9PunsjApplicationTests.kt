@@ -159,7 +159,7 @@ class K9PunsjApplicationTests {
 		JSONAssert.assertEquals("""
 			{
 				"journalpostId": "1",
-				"norskIdent": "29099012345",
+				"norskIdent": "29099000129",
 				"dokumenter": [{
 					"dokumentId": "470164680"
 				},{
