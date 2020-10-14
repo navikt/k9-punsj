@@ -129,6 +129,7 @@ internal class PleiepengerSyktBarnRoutes(
                                         .accepted()
                                         .buildAndAwait()
                             } catch (e: ValideringsFeil) {
+                                logger.error("", e)
                                 ServerResponse
                                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                         .buildAndAwait()
