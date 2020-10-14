@@ -16,8 +16,8 @@ typealias mappeId = UUID
 @Repository
 class MappeRepository(private val dataSource: DataSource) {
 
-    suspend fun hent(norskeIdenter: Set<NorskIdent>, søknadType: SøknadType) {
-        using(sessionOf(dataSource)) {
+    suspend fun hent(norskeIdenter: Set<NorskIdent>, søknadType: SøknadType? = null) : List<Mappe> {
+      return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 //language=PostgreSQL
                 tx.run(

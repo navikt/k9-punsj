@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-internal class JournalpostService(
+class JournalpostService(
         private val safGateway: SafGateway
 ) {
 
