@@ -1,12 +1,12 @@
 package no.nav.k9.fordel
 
+import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.JournalpostId
 import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class HendelseMottaker @Autowired constructor(
@@ -17,13 +17,11 @@ class HendelseMottaker @Autowired constructor(
     }
 
     fun prosesser(journalpostId: JournalpostId) {
-        val uuid = UUID.randomUUID()
-        //Opprett mappe i repo
-        
+        val ulid = ULID().nextULID()
         hendelseProducer.send(topic,
-                objectMapper().writeValueAsString(PunsjEventDto(uuid,
+                objectMapper().writeValueAsString(PunsjEventDto(ulid,
                         journalpostId = journalpostId,
                         eventTid = LocalDateTime.now())),
-                uuid.toString())
+                ulid)
     }
 }

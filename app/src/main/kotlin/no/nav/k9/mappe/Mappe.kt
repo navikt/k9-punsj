@@ -1,7 +1,6 @@
 package no.nav.k9.mappe
 
 import no.nav.k9.*
-import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -73,7 +72,7 @@ private fun <E> MutableSet<E>.leggTil(item: E): MutableSet<E> {
 }
 
 @Service
-class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBarnRepository) {
+class MappeService(private val mappeRepository: MappeRepository) {
     private val map = mutableMapOf<MappeId, Mappe>()
 
     internal suspend fun hent(
@@ -88,7 +87,7 @@ class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBar
             innsending: Innsending
     ): Mappe {
         val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
-        pleiepengerSyktBarnRepository.oppretteMappe(opprettetMappe);
+        mappeRepository.oppretteMappe(opprettetMappe);
         map[opprettetMappe.mappeId] = opprettetMappe
 
         return opprettetMappe
@@ -100,7 +99,7 @@ class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBar
             innsending: Innsending
     ): Mappe? {
 
-        return pleiepengerSyktBarnRepository.lagre(mappeId) {
+        return mappeRepository.lagre(mappeId) {
             val oppdatertMappe = innsending.leggIMappe(mappe = it!!)
             oppdatertMappe
         }
@@ -110,7 +109,7 @@ class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBar
     internal suspend fun hent(
             mappeId: MappeId
     ): Mappe? {
-        return pleiepengerSyktBarnRepository.finneMappe(mappeId)
+        return mappeRepository.finneMappe(mappeId)
     }
 
     internal suspend fun fjern(
@@ -129,7 +128,7 @@ class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBar
     }
 
     internal suspend fun slett(mappeid: MappeId) {
-        pleiepengerSyktBarnRepository.sletteMappe(mappeid)
+        mappeRepository.sletteMappe(mappeid)
     }
 }
 

@@ -4,6 +4,7 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.db.runMigration
 import no.nav.k9.mappe.Mappe
+import no.nav.k9.mappe.MappeRepository
 import no.nav.k9.mappe.Person
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -12,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
 @ExtendWith(SpringExtension::class)
-internal class PleiepengerSyktBarnRepositoryTest {
+internal class MappeRepositoryTest {
 
     @Test
     internal fun HentAlleMapperSomInneholderEnNorskIdent(): Unit = runBlocking {
@@ -20,7 +21,7 @@ internal class PleiepengerSyktBarnRepositoryTest {
         val dataSource = pg.postgresDatabase
         runMigration(dataSource)
 
-        val repo = PleiepengerSyktBarnRepository(dataSource = dataSource)
+        val repo = MappeRepository(dataSource = dataSource)
         val mappeId = UUID.randomUUID().toString()
 
         val m = Mappe(mappeId = mappeId,

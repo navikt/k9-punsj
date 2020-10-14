@@ -1,12 +1,8 @@
 package no.nav.k9
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariDataSource
-import no.nav.k9.db.hikariConfig
 import no.nav.k9.db.runMigration
 import no.nav.k9.kafka.HendelseProducer
-import no.nav.k9.mappe.MappeService
-import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
