@@ -16,6 +16,13 @@ Eventuelt om du har satt opp username password for server med id `github` i din 
 ## Starte lokalt
 Bruk klassen `K9PunsjApplicationWithMocks` som en del av `test`
 
+## Åpne
+[Melding om deling av omsorgsdager](http://localhost:8080/202#/)
+
+[Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn](http://localhost:8080/203#/)
+
+[Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler](http://localhost:8080/204#/)
+
 ## Henvendelser
  Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
  
