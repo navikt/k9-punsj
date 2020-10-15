@@ -12,15 +12,8 @@ typealias JournalpostId = String
 private const val path = "/saf-mock"
 
 fun WireMockServer.getSafBaseUrl() = baseUrl() + path
-private val mockSøknader= listOf("/__files/omsorgspenger/NAV - Førsteside.pdf",
-"/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf",
-"/__files/omsorgspenger/NAV - Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn.pdf",
-"/__files/omsorgspenger/NAV - Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler.pdf")
 
 fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
-    //.withBody(this::class.java.getResourceAsStream(mockSøknader[count++ % mockSøknader.size]).readAllBytes())
-
-
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
                     WireMock.aResponse()
@@ -34,7 +27,6 @@ fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
 }
 
 fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
-   
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/201.+")).willReturn(
                     WireMock.aResponse()
@@ -49,7 +41,6 @@ fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
 
 
 fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer {
-   
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202.+")).willReturn(
                     WireMock.aResponse()
@@ -63,7 +54,6 @@ fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer 
 }
 
 fun WireMockServer.stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk(): WireMockServer {
-   
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/203.+")).willReturn(
                     WireMock.aResponse()
@@ -77,7 +67,6 @@ fun WireMockServer.stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk(): WireMockSe
 }
 
 fun WireMockServer.stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler(): WireMockServer {
-   
     WireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/204.+")).willReturn(
                     WireMock.aResponse()
