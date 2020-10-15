@@ -42,11 +42,24 @@ fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
 
 fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202.+")).willReturn(
+            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164680.*")).willReturn(
                     WireMock.aResponse()
                             .withHeader("Content-Type", "application/pdf")
                             .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
                             .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf").readAllBytes())
+                            .withStatus(200)
+            )
+    )
+    return this
+}
+ 
+fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdagerSamværserklæring(): WireMockServer {
+    WireMock.stubFor(
+            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164681.*")).willReturn(
+                    WireMock.aResponse()
+                            .withHeader("Content-Type", "application/pdf")
+                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/Samværserklæring.pdf").readAllBytes())
                             .withStatus(200)
             )
     )

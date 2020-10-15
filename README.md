@@ -20,7 +20,7 @@ Bruk klassen `K9PunsjApplicationWithMocks` som en del av `test`
 Link til ulike skjemaer:
 [http://localhost:8080](http://localhost:8080)
 
-[Melding om deling av omsorgsdager](http://localhost:8080/202#/)
+[Melding om deling av omsorgsdager (Overføring og fordeling av omsorgsdager)](http://localhost:8080/202#/)
 
 [Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn](http://localhost:8080/203#/)
 

@@ -18,6 +18,7 @@ fun initWireMock(
         .stubSafHenteDokumentOk()
         .stubSafHenteDokumentOkForside()
         .stubSafHenteDokumentOkDelingAvOmsorgsdager()
+        .stubSafHenteDokumentOkDelingAvOmsorgsdagerSamværserklæring()
         .stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk()
         .stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler()
         .stubSafHenteDokumentNotFound()
