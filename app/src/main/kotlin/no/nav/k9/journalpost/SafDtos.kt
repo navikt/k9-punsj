@@ -20,6 +20,10 @@ internal object SafDtos {
                     saksbehandlerHarTilgang
                   }
                 }
+                avsenderMottaker {
+                  id
+                  type
+                }
               }
             }
             """.trimIndent(),
@@ -53,6 +57,10 @@ internal object SafDtos {
         //AKTOERID("AktørID på enten person eller organisasjon") // TODO: Må støtte at AktørID er satt
     }
 
+    internal enum class AvsenderMottakertype(beskrivelse: String) {
+        FNR("Fødselsnummer")
+    }
+
     internal enum class Journalstatus(beskrivelse: String) {
         MOTTATT("Mottatt journalpost")
     }
@@ -63,6 +71,11 @@ internal object SafDtos {
     )
 
     internal data class Avsender(
+        val id: String?,
+        val type: String?
+    )
+
+    internal data class AvsenderMottaker(
         val id: String?,
         val type: String?
     )
@@ -83,6 +96,7 @@ internal object SafDtos {
         val journalstatus: String?,
         val bruker: Bruker?,
         val avsender: Avsender?,
+        val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>
     )
 

@@ -166,7 +166,7 @@ private object SafMockResponses {
           "journalstatus": "MOTTATT",
           "bruker": {
             "type": "FNR",
-            "id": "29099012345"
+            "id": "29099000129"
           },
           "dokumenter": [
             {
@@ -191,7 +191,11 @@ private object SafMockResponses {
                 }
               ]
             }
-          ]
+          ],
+          "avsenderMottaker": {
+            "id": "29099000129",
+            "type": "FNR"
+          }
         }
       }
     }
@@ -232,7 +236,7 @@ private object SafMockResponses {
           "journalstatus": "MOTTATT",
           "bruker": {
             "type": "FNR",
-            "id": "29099012345"
+            "id": "29099000129"
           },
           "dokumenter": [
             {

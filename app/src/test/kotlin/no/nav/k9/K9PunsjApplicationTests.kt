@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ReactiveHttpOutputMessage
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserter
@@ -159,7 +162,7 @@ class K9PunsjApplicationTests {
 		JSONAssert.assertEquals("""
 			{
 				"journalpostId": "1",
-				"norskIdent": "29099012345",
+				"norskIdent": "29099000129",
 				"dokumenter": [{
 					"dokumentId": "470164680"
 				},{
