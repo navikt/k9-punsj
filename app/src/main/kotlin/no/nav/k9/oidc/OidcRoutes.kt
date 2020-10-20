@@ -27,7 +27,7 @@ internal class OidcRoutes(
     }
 
     @Bean
-    fun PdlRoutes() = Routes(authenticationHandler) {
+    fun OidcRoutes() = Routes(authenticationHandler) {
         POST("/api${Urls.HentNavTokenHeader}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 ServerResponse
