@@ -33,6 +33,8 @@ class JournalpostService(
             } else {
                 val norskIdent: NorskIdent? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.FNR) {
                     safJournalpost.bruker?.id
+                } else if (parsedJournalpost.avsenderMottakertype == SafDtos.AvsenderMottakertype.FNR) {
+                    safJournalpost.avsenderMottaker?.id
                 } else null
 
                 JournalpostInfo(
@@ -69,7 +71,8 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
                 it.dokumentvarianter!!.any {
                     !it.saksbehandlerHarTilgang
                 }
-            }
+            },
+            avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.type)
     )
 }
 
@@ -80,7 +83,8 @@ private data class ParsedJournalpost(
         val tema: SafDtos.Tema?,
         val journalstatus: SafDtos.Journalstatus?,
         val arkivDokumenter: List<SafDtos.Dokument>,
-        val harTilgang: Boolean
+        val harTilgang: Boolean,
+        val avsenderMottakertype: SafDtos.AvsenderMottakertype?
 ) {
     val støttetJournalpost = listOfNotNull(
             journalpostType, tema, journalpostType

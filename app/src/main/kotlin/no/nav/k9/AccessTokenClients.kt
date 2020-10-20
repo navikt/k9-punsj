@@ -1,10 +1,12 @@
 package no.nav.k9
 
 import com.nimbusds.jose.jwk.JWK
-import no.nav.helse.dusseldorf.oauth2.client.*
+import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
+import no.nav.helse.dusseldorf.oauth2.client.DirectKeyId
+import no.nav.helse.dusseldorf.oauth2.client.FromJwk
+import no.nav.helse.dusseldorf.oauth2.client.SignedJwtAccessTokenClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.context.annotation.Bean
@@ -43,7 +45,6 @@ internal class AccessTokenClients (
     )
 
     @Bean
-    @Qualifier("saf")
     internal fun safAccessTokenClient() : AccessTokenClient = signedJwtAzureAccessTokenClient
 }
 
