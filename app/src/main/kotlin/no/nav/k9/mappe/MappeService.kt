@@ -18,10 +18,12 @@ class MappeService @Autowired constructor(
         return mappeRepository.finneMappe(mappeId)
     }
 
-    suspend fun hent(
+    suspend fun hentMapper(
             norskeIdenter: Set<NorskIdent>,
             søknadType: SøknadType
-    ) = mappeRepository.hent(norskeIdenter, søknadType)
+    ): List<Mappe> {
+        return mappeRepository.hent(norskeIdenter)
+    }
 
     suspend fun førsteInnsending(
             søknadType: SøknadType,

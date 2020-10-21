@@ -22,8 +22,7 @@ class MappeRepository(private val dataSource: DataSource) {
                 //language=PostgreSQL
                 tx.run(
                         queryOf(
-                                "select data from mappe where (data -> 'person') ?| array[:identer]; ",
-                                mapOf("identer" to """'${norskeIdenter.joinToString("','")}'""")
+                                "select data from mappe where (data -> 'person') ??| array['${norskeIdenter.joinToString("','")}']",
                         )
                                 .map { row ->
                                     objectMapper().readValue<Mappe>(row.string("data"))
@@ -32,7 +31,7 @@ class MappeRepository(private val dataSource: DataSource) {
             }
         }
     }
-    
+
     suspend fun oppretteMappe(mappe: Mappe): Mappe {
         return lagre(mappe.mappeId) {
             mappe
@@ -103,5 +102,5 @@ class MappeRepository(private val dataSource: DataSource) {
         }
     }
 
- 
+
 }

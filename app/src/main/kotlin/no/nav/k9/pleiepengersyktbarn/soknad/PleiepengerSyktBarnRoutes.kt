@@ -45,7 +45,7 @@ internal class PleiepengerSyktBarnRoutes(
 
         GET("/api${Urls.HenteMapper}") { request ->
             RequestContext(coroutineContext, request) {
-                val mapper = mappeService.hent(
+                val mapper = mappeService.hentMapper(
                         norskeIdenter = request.norskeIdenter(),
                         søknadType = søknadType
                 ).map { mappe ->
