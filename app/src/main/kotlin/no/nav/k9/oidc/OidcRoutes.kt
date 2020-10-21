@@ -1,5 +1,8 @@
 package no.nav.k9.oidc
 
+import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.AuthenticationHandler
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
@@ -14,9 +17,11 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OidcRoutes(
-     //   private val authenticationHandler: AuthenticationHandler,
+        private val authenticationHandler: AuthenticationHandler,
+        accessTokenClient: AccessTokenClient
 ) {
-
+    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+    private val scope: Set<String> = setOf("openid")
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(OidcRoutes::class.java)
     }
@@ -26,13 +31,17 @@ internal class OidcRoutes(
     }
 
     @Bean
-    fun OidcRoutes() = Routes {
+    fun OidcRoutes() = Routes(authenticationHandler) {
         GET("/api${Urls.HentNavTokenHeader}") { request ->
+            val navHeader = cachedAccessTokenClient.getAccessToken(scope)
+                    .asAuthoriationHeader()
+
             RequestContext(coroutineContext, request) {
+                val clientHeader = request.headers().header("Authorization")
                 ServerResponse
                         .ok()
                         .contentType(MediaType.TEXT_PLAIN)
-                        .bodyValueAndAwait(request.headers().toString())
+                        .bodyValueAndAwait(clientHeader + "\n" + navHeader)
             }
         }
     }
