@@ -1,6 +1,5 @@
 package no.nav.k9.oidc
 
-import no.nav.k9.AuthenticationHandler
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
@@ -15,7 +14,7 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OidcRoutes(
-        private val authenticationHandler: AuthenticationHandler,
+     //   private val authenticationHandler: AuthenticationHandler,
 ) {
 
     private companion object {
@@ -23,20 +22,18 @@ internal class OidcRoutes(
     }
 
     internal object Urls {
-        internal const val HentNavTokenHeader = "/api/oidc/hentNavTokenHeader/"
+        internal const val HentNavTokenHeader = "/oidc/hentNavTokenHeader"
     }
 
     @Bean
-    fun OidcRoutes() = Routes(authenticationHandler) {
-        GET("/api${Urls.HentNavTokenHeader}", contentType(MediaType.APPLICATION_JSON)) { request ->
+    fun OidcRoutes() = Routes {
+        GET("/api${Urls.HentNavTokenHeader}") { request ->
             RequestContext(coroutineContext, request) {
                 ServerResponse
                         .ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValueAndAwait(request.headers())
-
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .bodyValueAndAwait(request.headers().toString())
             }
-
         }
     }
 }
