@@ -23,7 +23,7 @@ internal class OidcRoutes(
     }
 
     internal object Urls {
-        internal const val HentNavTokenHeader = "/oidc/hentNavTokenHeader/"
+        internal const val HentNavTokenHeader = "/api/oidc/hentNavTokenHeader/"
     }
 
     @Bean
