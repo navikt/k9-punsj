@@ -7,6 +7,7 @@ import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -18,7 +19,7 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 internal class OidcRoutes(
         private val authenticationHandler: AuthenticationHandler,
-        accessTokenClient: AccessTokenClient
+        @Qualifier("sts") accessTokenClient: AccessTokenClient
 ) {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val scope: Set<String> = setOf("openid")

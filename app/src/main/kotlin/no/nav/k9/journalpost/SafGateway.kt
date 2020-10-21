@@ -9,6 +9,7 @@ import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
@@ -28,7 +29,7 @@ class SafGateway(
         @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
         @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
         @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
-        private val accessTokenClient: AccessTokenClient
+        @Qualifier("azure")private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
 
     private companion object {

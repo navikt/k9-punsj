@@ -1,12 +1,10 @@
 package no.nav.k9
 
 import com.nimbusds.jose.jwk.JWK
-import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
-import no.nav.helse.dusseldorf.oauth2.client.DirectKeyId
-import no.nav.helse.dusseldorf.oauth2.client.FromJwk
-import no.nav.helse.dusseldorf.oauth2.client.SignedJwtAccessTokenClient
+import no.nav.helse.dusseldorf.oauth2.client.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.context.annotation.Bean
@@ -17,7 +15,11 @@ import java.net.URI
 internal class AccessTokenClients (
         @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
         @Value("\${no.nav.security.jwt.client.azure.jwk}") azureJwk: String,
-        @Value("\${no.nav.security.jwt.client.azure.token_endpoint}") azureTokenEndpoint: URI
+        @Value("\${no.nav.security.jwt.client.azure.token_endpoint}") azureTokenEndpoint: URI,
+        
+        @Value("\${systembruker.username}") clientId: String,
+        @Value("\${systembruker.password}") clientSecret: String,
+        @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI,
 ) {
 
     private companion object {
@@ -37,6 +39,8 @@ internal class AccessTokenClients (
         throw IllegalArgumentException("Azure JWK på feil format.")
     }
 
+    private val naisStsClient  = ClientSecretAccessTokenClient(clientId = clientId, clientSecret = clientSecret, tokenEndpoint =stsTokenEndpoint)
+    
     private val signedJwtAzureAccessTokenClient = SignedJwtAccessTokenClient(
             clientId = azureClientId,
             privateKeyProvider = FromJwk(azureJwk),
@@ -45,7 +49,12 @@ internal class AccessTokenClients (
     )
 
     @Bean
-    internal fun safAccessTokenClient() : AccessTokenClient = signedJwtAzureAccessTokenClient
+    @Qualifier("azure")
+    internal fun azureAccessTokenClient(): AccessTokenClient = signedJwtAzureAccessTokenClient
+    
+    @Bean
+    @Qualifier("sts")
+    internal fun stsAccessTokenClient(): AccessTokenClient = naisStsClient
 }
 
 

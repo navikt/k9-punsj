@@ -9,6 +9,7 @@ import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.http.HttpHeaders
@@ -23,7 +24,7 @@ import kotlin.coroutines.coroutineContext
 @Service
 class PdlService (
         @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
-        private val accessTokenClient: AccessTokenClient
+        @Qualifier("sts")private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator{
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
