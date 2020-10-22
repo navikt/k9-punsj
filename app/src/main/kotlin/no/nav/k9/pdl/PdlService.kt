@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.helsesjekk
+import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
 import no.nav.k9.objectMapper
@@ -33,6 +34,7 @@ class PdlService (
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
+        private const val NavConsumerTokenHeaderKey = "Nav-Consumer-Token"
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
         private const val CorrelationIdHeader = "Nav-Callid"
@@ -76,7 +78,8 @@ class PdlService (
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(TemaHeader, TemaHeaderValue)
-                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, coroutineContext.hentAuthentication().accessToken)
+                .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
