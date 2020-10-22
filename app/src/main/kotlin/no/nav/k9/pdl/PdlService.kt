@@ -74,7 +74,7 @@ class PdlService (
         )
         val response = client
                 .post()
-                .uri { it.pathSegment("graphql").build() }
+                .uri { it.build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(TemaHeader, TemaHeaderValue)
