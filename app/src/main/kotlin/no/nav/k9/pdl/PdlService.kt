@@ -4,9 +4,9 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.helsesjekk
-import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
+import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -60,8 +60,7 @@ class PdlService (
     suspend fun identifikator(fnummer: String): PdlResponse? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
-                        scopes = scope,
-                        onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                        scopes = scope
                 )
         val req =  QueryRequest(
                 getStringFromResource("/pdl/hentIdent.graphql"),
@@ -85,6 +84,7 @@ class PdlService (
                 .awaitFirst()
         val aktøridPdl = response.body ?: return null
         if (aktøridPdl.data == null) {
+            logger.info(objectMapper.writeValueAsString(aktøridPdl))
             throw IkkeTilgang()
         }
         
