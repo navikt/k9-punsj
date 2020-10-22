@@ -85,6 +85,7 @@ class PdlService (
                 .retrieve()
                 .toEntity(AktøridPdl::class.java)
                 .awaitFirst()
+        logger.info(response.toString())
         val aktøridPdl = response.body ?: return null
         if (aktøridPdl.data == null) {
             logger.info(objectMapper.writeValueAsString(aktøridPdl))
