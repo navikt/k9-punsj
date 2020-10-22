@@ -5,12 +5,12 @@ management:
         request:
           autotime:
             enabled: true
-  health :
+  health:
     diskspace:
       enabled: false
   endpoint:
     health:
-      show-details : always
+      show-details: always
   endpoints:
     web:
       exposure:
@@ -49,20 +49,26 @@ no.nav:
     scopes:
       hente_journalpost_scopes: ${SAF_HENTE_JOURNALPOST_SCOPES}
       hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES}
-  security.jwt:
-    expirythreshold: 1
-    client:
-      azure:
-        client_id: ${AZURE_client_id}
-        jwk: ${AZURE_jwk}
-        token_endpoint: ${AZURE_token_endpoint}
-    issuer:
-      azurev1:
-        discoveryurl: ${AZURE_V1_discovery_url}
-        accepted_audience: ${AZURE_client_id}
-      azurev2:
-        discoveryurl: ${AZURE_V2_discovery_url}
-        accepted_audience: ${AZURE_client_id}
+  pdl:
+    base_url: ${PDL_BASE_URL}
+  security:
+    sts:
+      client:
+        token_endpoint: ${NAIS_STS_TOKEN_ENDPOINT}
+    jwt:
+      expirythreshold: 1
+      client:
+        azure:
+          client_id: ${AZURE_client_id}
+          jwk: ${AZURE_jwk}
+          token_endpoint: ${AZURE_token_endpoint}
+      issuer:
+        azurev1:
+          discoveryurl: ${AZURE_V1_discovery_url}
+          accepted_audience: ${AZURE_client_id}
+        azurev2:
+          discoveryurl: ${AZURE_V2_discovery_url}
+          accepted_audience: ${AZURE_client_id}
   db:
     url: ${DEFAULTDS_URL}
     username: ${DEFAULTDS_USERNAME}

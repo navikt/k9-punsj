@@ -26,7 +26,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
 
     internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
         val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
-        hendelseProducer.send(PLEIEPENGER_SYKT_BARN_TOPIC, dokumentfordelingMelding, søknad.søknadId.id)
+        hendelseProducer.send(topicName = PLEIEPENGER_SYKT_BARN_TOPIC, data = dokumentfordelingMelding, key = søknad.søknadId.id)
     }
 
 

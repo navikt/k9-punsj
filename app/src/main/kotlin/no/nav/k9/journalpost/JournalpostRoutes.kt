@@ -1,8 +1,8 @@
 package no.nav.k9.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9.*
 import no.nav.k9.AuthenticationHandler
+import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import org.slf4j.Logger
@@ -15,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
+
 
 @Configuration
 internal class JournalpostRoutes(
@@ -35,7 +36,7 @@ internal class JournalpostRoutes(
     }
 
     @Bean
-    fun JournalpostRoutes() = Routes (authenticationHandler) {
+    fun JournalpostRoutes() = Routes(authenticationHandler) {
 
         GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {

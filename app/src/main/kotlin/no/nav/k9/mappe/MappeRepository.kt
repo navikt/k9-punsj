@@ -1,4 +1,4 @@
-package no.nav.k9.pleiepengersyktbarn.soknad
+package no.nav.k9.mappe
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
@@ -6,8 +6,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9.NorskIdent
 import no.nav.k9.SøknadType
-import no.nav.k9.mappe.Mappe
-import no.nav.k9.mappe.MappeId
 import no.nav.k9.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -16,16 +14,15 @@ import javax.sql.DataSource
 typealias mappeId = UUID
 
 @Repository
-class PleiepengerSyktBarnRepository(private val dataSource: DataSource) {
+class MappeRepository(private val dataSource: DataSource) {
 
-    suspend fun hent(norskeIdenter: Set<NorskIdent>, søknadType: SøknadType) {
-        using(sessionOf(dataSource)) {
+    suspend fun hent(norskeIdenter: Set<NorskIdent>, søknadType: SøknadType? = null) : List<Mappe> {
+      return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 //language=PostgreSQL
                 tx.run(
                         queryOf(
-                                "select data from mappe where (data -> 'person') ?| array[:identer]; ",
-                                mapOf("identer" to """'${norskeIdenter.joinToString("','")}'""")
+                                "select data from mappe where (data -> 'person') ??| array['${norskeIdenter.joinToString("','")}']",
                         )
                                 .map { row ->
                                     objectMapper().readValue<Mappe>(row.string("data"))
@@ -34,7 +31,7 @@ class PleiepengerSyktBarnRepository(private val dataSource: DataSource) {
             }
         }
     }
-    
+
     suspend fun oppretteMappe(mappe: Mappe): Mappe {
         return lagre(mappe.mappeId) {
             mappe
@@ -105,5 +102,5 @@ class PleiepengerSyktBarnRepository(private val dataSource: DataSource) {
         }
     }
 
- 
+
 }

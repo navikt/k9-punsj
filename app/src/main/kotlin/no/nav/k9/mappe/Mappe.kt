@@ -1,7 +1,6 @@
 package no.nav.k9.mappe
 
 import no.nav.k9.*
-import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -70,67 +69,6 @@ internal fun Innsending.leggIMappe(
 private fun <E> MutableSet<E>.leggTil(item: E): MutableSet<E> {
     add(item)
     return this
-}
-
-@Service
-class MappeService(private val pleiepengerSyktBarnRepository: PleiepengerSyktBarnRepository) {
-    private val map = mutableMapOf<MappeId, Mappe>()
-
-    internal suspend fun hent(
-            norskeIdenter: Set<NorskIdent>,
-            søknadType: SøknadType
-    ) = map.filterValues { it.person.containsKeys(norskeIdenter) }.map { (_, mappe) ->
-        mappe
-    }.toSet()
-
-    internal suspend fun førsteInnsending(
-            søknadType: SøknadType,
-            innsending: Innsending
-    ): Mappe {
-        val opprettetMappe = innsending.leggIMappe(mappe = null, søknadType = søknadType);
-        pleiepengerSyktBarnRepository.oppretteMappe(opprettetMappe);
-        map[opprettetMappe.mappeId] = opprettetMappe
-
-        return opprettetMappe
-    }
-
-    internal suspend fun utfyllendeInnsending(
-            mappeId: MappeId,
-            søknadType: SøknadType,
-            innsending: Innsending
-    ): Mappe? {
-
-        return pleiepengerSyktBarnRepository.lagre(mappeId) {
-            val oppdatertMappe = innsending.leggIMappe(mappe = it!!)
-            oppdatertMappe
-        }
-       
-    }
-
-    internal suspend fun hent(
-            mappeId: MappeId
-    ): Mappe? {
-        return pleiepengerSyktBarnRepository.finneMappe(mappeId)
-    }
-
-    internal suspend fun fjern(
-            mappeId: MappeId,
-            norskIdent: NorskIdent
-    ) {
-        val mappe = hent(mappeId) ?: return
-        if (mappe.person.containsKey(norskIdent)) {
-            if (mappe.person.size == 1) {
-                map.remove(mappeId)
-            } else {
-                mappe.person.remove(norskIdent)
-                map[mappeId] = mappe
-            }
-        }
-    }
-
-    internal suspend fun slett(mappeid: MappeId) {
-        pleiepengerSyktBarnRepository.sletteMappe(mappeid)
-    }
 }
 
 private fun <K, V> Map<K, V>.containsKeys(keys: Set<K>): Boolean {

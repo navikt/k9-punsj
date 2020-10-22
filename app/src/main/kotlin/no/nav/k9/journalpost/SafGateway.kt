@@ -16,20 +16,20 @@ import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
-import org.springframework.web.reactive.function.client.ExchangeStrategies
-import org.springframework.web.reactive.function.client.awaitEntity
 
 @Service
-internal class SafGateway(
+class SafGateway(
         @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
         @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
         @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
-        @Qualifier("saf") private val accessTokenClient: AccessTokenClient
+        @Qualifier("azure")private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
 
     private companion object {

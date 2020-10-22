@@ -55,10 +55,14 @@ spec:
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
     - name: AZURE_V2_discovery_url
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
+    - name: NAIS_STS_TOKEN_ENDPOINT
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
     - name: SAF_BASE_URL
       value: https://saf-q1.nais.preprod.local
     - name: SAF_HENTE_JOURNALPOST_SCOPES
       value: c7adbfbb-1b1e-41f6-9b7a-af9627c04998/.default
+    - name: PDL_BASE_URL
+      value: https://pdl-api.nais.preprod.local/graphql
     - name: SAF_HENTE_DOKUMENT_SCOPES
       value: c7adbfbb-1b1e-41f6-9b7a-af9627c04998/.default
     - name: KAFKA_BOOTSTRAP_SERVERS

@@ -21,6 +21,7 @@ import no.nav.k9.fagsak.FagsakRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.mappe.MappeId
 import no.nav.k9.mappe.PersonDTO
+import no.nav.k9.pdl.PdlRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnSoknad
 import org.springframework.beans.factory.annotation.Value
@@ -34,7 +35,7 @@ import java.time.LocalDate
 internal class OpenApi {
 
     @Bean
-    internal fun modelConverter() : ModelConverter = DurationMockConverter()
+    internal fun modelConverter(): ModelConverter = DurationMockConverter()
 
     @Bean
     internal fun openApi(
@@ -84,7 +85,8 @@ internal class PleiepengerSyktBarnSoknadController {
     ])
     fun HenteMapper(
             @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>
-    ) {}
+    ) {
+    }
 
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, produces = ["application/json"])
     @Operation(
@@ -107,7 +109,8 @@ internal class PleiepengerSyktBarnSoknadController {
     ])
     fun HenteMappe(
             @PathVariable("mappe_id") mappeId: String
-    ) {}
+    ) {
+    }
 
 
     @PutMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
@@ -135,7 +138,8 @@ internal class PleiepengerSyktBarnSoknadController {
     fun OppdatereSøknad(
             @PathVariable("mappe_id") mappeId: String,
             @RequestBody søknad: OasInnsending
-    ) {}
+    ) {
+    }
 
 
     @PostMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, consumes = ["application/json"], produces = ["application/json"])
@@ -163,7 +167,8 @@ internal class PleiepengerSyktBarnSoknadController {
     fun SendSøknad(
             @PathVariable("mappe_id") mappeId: String,
             @RequestHeader("X-Nav-NorskIdent") norskIdenter: String
-    ) {}
+    ) {
+    }
 
     @PostMapping(PleiepengerSyktBarnRoutes.Urls.NySøknad,
             consumes = ["application/json"],
@@ -183,7 +188,8 @@ internal class PleiepengerSyktBarnSoknadController {
     ])
     fun NySøknad(
             @RequestBody søknad: OasInnsending
-    ){}
+    ) {
+    }
 }
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
@@ -197,15 +203,15 @@ data class OasPleiepengerSyktBarSoknadMappeSvar(
 )
 
 data class OasPleiepengerSyktBarSoknadMapperSvar(
-        val mapper : List<OasPleiepengerSyktBarSoknadMappeSvar>
+        val mapper: List<OasPleiepengerSyktBarSoknadMappeSvar>
 )
 
 @RestController
 @SecurityScheme(
-    name = "BearerAuth",
-    type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
-    bearerFormat = "jwt"
+        name = "BearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "jwt"
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
@@ -233,8 +239,9 @@ internal class JournalpostController {
             security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun OmfordelJournalpost(
-            @PathVariable("journalpost_id") journalpostId : String,
-            @RequestBody body: JournalpostRoutes.OmfordelingRequest){}
+            @PathVariable("journalpost_id") journalpostId: String,
+            @RequestBody body: JournalpostRoutes.OmfordelingRequest) {
+    }
 
     @GetMapping(JournalpostRoutes.Urls.JournalpostInfo, produces = ["application/json"])
     @ApiResponses(value = [
@@ -269,7 +276,8 @@ internal class JournalpostController {
             security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteJournalpostInfo(
-            @PathVariable("journalpost_id") journalpostId : String){}
+            @PathVariable("journalpost_id") journalpostId: String) {
+    }
 
     @GetMapping(JournalpostRoutes.Urls.Dokument, produces = ["application/pdf"])
     @ApiResponses(value = [
@@ -295,15 +303,17 @@ internal class JournalpostController {
             security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteDokument(
-            @PathVariable("journalpost_id") journalpostId : String,
-            @PathVariable("dokument_id") dokumentId : String){}
+            @PathVariable("journalpost_id") journalpostId: String,
+            @PathVariable("dokument_id") dokumentId: String) {
+    }
 }
 
 data class OasDokumentInfo(
         val dokument_id: String
 )
+
 data class OasJournalpostInfo(
-        val dokumenter : Set<OasDokumentInfo>
+        val dokumenter: Set<OasDokumentInfo>
 )
 
 @RestController
@@ -324,12 +334,14 @@ internal class FagsakerController {
     @Operation(summary = "Hente liste med fagsaker tilknyttet personen.", description = "ytelse må være 'pleiepenger-sykt-barn'")
     fun HenteFagsaker(
             @RequestParam("ytelse") ytelse: String,
-            @PathVariable("norsk_ident") norskIdent : String){}
+            @PathVariable("norsk_ident") norskIdent: String) {
+    }
 }
 
 data class OasFagsakListe(
         val fagsaker: Set<OasFagsak>
 )
+
 data class OasFagsak(
         val fagsak_id: String,
         val url: String,
@@ -337,7 +349,47 @@ data class OasFagsak(
         val til_og_med: LocalDate?,
         val barn: OasFagsakBarn
 )
+
 data class OasFagsakBarn(
         val fødselsdato: LocalDate,
         val navn: String
+)
+
+@RestController
+@Tag(name = "Pdl", description = "Hent aktørid fra norsk ident")
+internal class PdlController {
+    @PostMapping(PdlRoutes.Urls.HentIdent, consumes = ["application/json"], produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Henter aktørid fra fnummer",
+                content = [Content(
+                        schema = Schema(
+                                implementation = AktørResponse::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til å slå opp personen"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Personen eksisterer ikke"
+        )
+    ])
+    
+    @Operation(summary = "Henter aktørid fra fnummer", description = "Henter aktørid fra fnummer'")
+    fun Hentident( @RequestBody body: PdlRoutes.NorskIdent) {
+        
+    }
+}
+
+data class AktørResponse(
+        val norskIdent: NorskIdent,
+        val aktørid: String
 )

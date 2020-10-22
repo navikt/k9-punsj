@@ -5,6 +5,8 @@ import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
+import no.nav.k9.wiremock.getPdlBaseUrl
 import no.nav.k9.wiremock.getSafBaseUrl
 
 internal object MockConfiguration {
@@ -24,6 +26,7 @@ internal object MockConfiguration {
             "NAV_TRUSTSTORE_PATH" to "${System.getProperty("user.home")}/.modig/truststore.jks",
             "NAV_TRUSTSTORE_PASSWORD" to "changeit",
             "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
+            "PDL_BASE_URL" to wireMockServer.getPdlBaseUrl(),
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
@@ -31,6 +34,7 @@ internal object MockConfiguration {
             "DEFAULTDS_USERNAME" to "k9punsj_unit",
             "DEFAULTDS_PASSWORD" to "k9punsj_unit",
             "DEFAULTDS_URL" to "jdbc:postgresql://127.0.0.1:5432/k9punsj_unit",
-            "DEFAULTDS_VAULT_MOUNTPATH" to ""
+            "DEFAULTDS_VAULT_MOUNTPATH" to "",
+            "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl()
     )
 }
