@@ -5,7 +5,7 @@ import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
-import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
 import no.nav.k9.wiremock.getPdlBaseUrl
 import no.nav.k9.wiremock.getSafBaseUrl
 
@@ -35,6 +35,6 @@ internal object MockConfiguration {
             "DEFAULTDS_PASSWORD" to "k9punsj_unit",
             "DEFAULTDS_URL" to "jdbc:postgresql://127.0.0.1:5432/k9punsj_unit",
             "DEFAULTDS_VAULT_MOUNTPATH" to "",
-            "NAIS_STS_DISCOVERY_ENDPOINT" to wireMockServer.getNaisStsWellKnownUrl()
+            "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl()
     )
 }

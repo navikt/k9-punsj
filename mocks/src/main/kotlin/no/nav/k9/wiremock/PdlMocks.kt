@@ -2,8 +2,7 @@ package no.nav.k9.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.google.common.net.HttpHeaders.CONTENT_DISPOSITION
-import org.intellij.lang.annotations.Language
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 
 
 private const val path = "/pdl-mock"
@@ -12,14 +11,48 @@ fun WireMockServer.getPdlBaseUrl() = baseUrl() + path
 
 fun WireMockServer.stubPdlHenteAktøridOk(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
+            WireMock.get(urlPathMatching(".*$path/graphql")).willReturn(
                     WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBodyFile("dummy_soknad.pdf")
+                            .withHeader("Content-Type", "application/json")
+                            .withBody("{\n" +
+                                    "  \"data\": {\n" +
+                                    "    \"hentIdenter\": {\n" +
+                                    "      \"identer\": [\n" +
+                                    "        {\n" +
+                                    "          \"ident\": \"2002220522526\",\n" +
+                                    "          \"historisk\": false,\n" +
+                                    "          \"gruppe\": \"AKTORID\"\n" +
+                                    "        }\n" +
+                                    "      ]\n" +
+                                    "    }\n" +
+                                    "  }\n" +
+                                    "}")
                             .withStatus(200)
             )
     )
+    "{\n" +
+            "  \"errors\": [\n" +
+            "    {\n" +
+            "      \"message\": \"Fant ikke person\",\n" +
+            "      \"locations\": [\n" +
+            "        {\n" +
+            "          \"line\": 7,\n" +
+            "          \"column\": 5\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"path\": [\n" +
+            "        \"hentIdenter\"\n" +
+            "      ],\n" +
+            "      \"extensions\": {\n" +
+            "        \"code\": \"not_found\",\n" +
+            "        \"classification\": \"ExecutionAborted\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"data\": {\n" +
+            "    \"hentIdenter\": null\n" +
+            "  }\n" +
+            "}"
     return this
 }
 
@@ -46,19 +79,3 @@ fun WireMockServer.stubPdlHenteDokumentAbacError() = stubPdlHenteDokumentError(
         httpStatus = 403
 )
 
-private object PdlMockResponses {
-    @Language("JSON")
-    val OkResponseHentIdent = """
-    
-    """.trimIndent()
-
-    @Language("JSON")
-    val AbacErrorHentIdent = """
-   
-    """.trimIndent()
-
-    @Language("JSON")
-    val FinnesIkkeHentIdent = """
-   
-    """.trimIndent()
-}

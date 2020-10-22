@@ -46,8 +46,7 @@ internal class PdlRoutes(
                         ServerResponse
                                 .notFound()
                                 .buildAndAwait()
-                    } else {
-                        
+                    } else {                        
                         ServerResponse
                                 .ok()
                                 .contentType(MediaType.APPLICATION_JSON)
