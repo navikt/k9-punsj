@@ -48,8 +48,8 @@ class KafkaHendelseProducer: HendelseProducer {
     @Bean
     fun producerConfigs(): Map<String, Any>? {
         val props: MutableMap<String, Any> = HashMap()
-        props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
-        props.put(CommonClientConfigs.CLIENT_ID_CONFIG, clientId)
+        props[CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
+        props[CommonClientConfigs.CLIENT_ID_CONFIG] = clientId
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
 
@@ -93,7 +93,7 @@ class KafkaHendelseProducer: HendelseProducer {
             override fun onFailure(ex: Throwable) {
                 //TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
                 logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
-                throw KafkaException("Kunne ikke sende sende søknad til topic: $topicName")
+                throw KafkaException("Kunne ikke sende sende til topic: $topicName")
             }
         })
     }

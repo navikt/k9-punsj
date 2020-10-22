@@ -54,7 +54,7 @@ no.nav:
   security:
     sts:
       client:
-        token_endpoint: ${NAIS_STS_DISCOVERY_ENDPOINT}
+        token_endpoint: ${NAIS_STS_TOKEN_ENDPOINT}
     jwt:
       expirythreshold: 1
       client:
