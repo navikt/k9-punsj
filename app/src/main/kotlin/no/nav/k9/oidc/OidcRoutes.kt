@@ -42,7 +42,7 @@ internal class OidcRoutes(
                 ServerResponse
                         .ok()
                         .contentType(MediaType.TEXT_PLAIN)
-                        .bodyValueAndAwait(clientHeader[0] + "\n" + navHeader)
+                        .bodyValueAndAwait(clientHeader.toString() + "\n" + navHeader)
             }
         }
     }
