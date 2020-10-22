@@ -12,7 +12,7 @@ class OverførDagerSøknadService @Autowired constructor(
         val hendelseProducer: HendelseProducer
 ){
     private companion object {
-        const val rapidTopic = "k9-rapid-v1"
+        const val rapidTopic = "k9-rapid-v2"
     }
 
     internal suspend fun sendSøknad(søknad: OverføreOmsorgsdagerBehov, dedupKey: String) {
