@@ -93,7 +93,7 @@ class PdlService(
 
         val json = response.body ?: return null
         val (data, errors) = objectMapper().readValue<AktøridPdl>(json)
-        if (errors.isNotEmpty()) {
+        if (errors!=null) {
             logger.warn(objectMapper.writeValueAsString(errors))
         }
         return PdlResponse(false, aktøridPdl = AktøridPdl(data, errors))

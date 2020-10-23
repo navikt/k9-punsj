@@ -10,7 +10,14 @@ class PdlServiceTest {
     fun deserialisereError()  {
         val s = """{"errors":[{"message":"Ikke autentisert","locations":[{"line":3,"column":5}],"path":["hentIdenter"],"extensions":{"code":"unauthenticated","classification":"ExecutionAborted"}}],"data":{"hentIdenter":null}}"""
         val (data, errors) = objectMapper().readValue<AktøridPdl>(s)
-        Assertions.assertThat(data) != null
-        Assertions.assertThat(errors) != null
+        Assertions.assertThat(data).isNotNull
+        Assertions.assertThat(errors).isNotNull
+    }
+    @Test
+    fun deserialisereOk()  {
+        val s = """{"data":{"hentIdenter":{"identer":[{"ident":"2002220522526","historisk":false,"gruppe":"AKTORID"}]}}}"""
+        val (data, errors) = objectMapper().readValue<AktøridPdl>(s)
+        Assertions.assertThat(data).isNotNull
+        Assertions.assertThat(errors).isNull()
     }
 }

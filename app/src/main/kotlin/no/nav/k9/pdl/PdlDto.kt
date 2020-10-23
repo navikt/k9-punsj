@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 data class AktøridPdl(
         val data: Data,
-        val errors: List<Error>
+        val errors: List<Error>?
 ) {
     data class Data(
             var hentIdenter: HentIdenter?
