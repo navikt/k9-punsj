@@ -1,11 +1,12 @@
 package no.nav.k9.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9.journalpost.SafDtos
-import no.nav.k9.journalpost.SafGateway
+import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
+import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -15,15 +16,19 @@ import java.net.URI
 import java.time.LocalDate
 
 @Service
-class OppgaveRestklient(
-        @Value("\${no.nav.saf.base_url}") safBaseUrl: URI
+class GosysOppgaveService(
+        @Value("\${no.nav.gosys.base_url}") safBaseUrl: URI,
+        @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) {
+
+    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(GosysOppgaveService::class.java)
         private const val VariantType = "ARKIV"
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
+        private val scope: Set<String> = setOf("openid")
         private const val MaxDokumentSize = 5 * 1024 * 1024
     }
 
@@ -41,6 +46,10 @@ class OppgaveRestklient(
             .build()
 
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String) {
+        val accessToken = cachedAccessTokenClient
+                .getAccessToken(
+                        scopes = scope
+                )
         val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = LocalDate.now(),
                 aktoerId = aktørid,
                 journalpostId = joarnalpostId,
@@ -51,11 +60,12 @@ class OppgaveRestklient(
                 .post()
                 .uri { it.pathSegment("api", "v1", "oppgaver").build() }
                 .accept(MediaType.APPLICATION_JSON)
+               
                 .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
                 .retrieve()
-                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+                .toEntity(String::class.java)
                 .awaitFirst()
-
+        logger.info(response.toString())
     }
 
 

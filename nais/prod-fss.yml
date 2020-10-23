@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: {{ image }}
+  image: { { image } }
   port: 8080
   liveness:
     path: /internal/actuator/info
@@ -56,13 +56,15 @@ spec:
     - name: AZURE_V2_discovery_url
       value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
     - name: NAIS_STS_TOKEN_ENDPOINT
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
+      value: https://security-token-service.nais.adeo.no/rest/v1/sts/token
     - name: SAF_BASE_URL
       value: https://saf.nais.adeo.no
     - name: SAF_HENTE_JOURNALPOST_SCOPES
       value: feb9588b-a3d6-4d2f-8809-97284046ae72/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.nais.adeo.no/graphql
+    - name: GOSYS_BASE_URL
+      value: https://oppgave.nais.adeo.no
     - name: SAF_HENTE_DOKUMENT_SCOPES
       value: feb9588b-a3d6-4d2f-8809-97284046ae72/.default
     - name: KAFKA_BOOTSTRAP_SERVERS
