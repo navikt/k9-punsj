@@ -7,7 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
 import java.time.LocalDate
 
 data class AktøridPdl(
-        val `data`: Data
+        val data: Data,
+        val errors: List<Error>
 ) {
     data class Data(
             var hentIdenter: HentIdenter?
@@ -22,11 +23,27 @@ data class AktøridPdl(
             )
         }
     }
+    data class Error(
+            val extensions: Extensions,
+            val locations: List<Location>,
+            val message: String,
+            val path: List<String>
+    ) {
+        data class Extensions(
+                val classification: String,
+                val code: String
+        )
+
+        data class Location(
+                val column: Int,
+                val line: Int
+        )
+    }
 }
 
 data class PdlResponse(
         val ikkeTilgang: Boolean,
-        val aktorId: AktøridPdl?
+        val aktøridPdl: AktøridPdl?
 )
 
 data class PersonPdlResponse(

@@ -53,6 +53,8 @@ fun WireMockServer.stubPdlHenteAktøridOk(): WireMockServer {
             "    \"hentIdenter\": null\n" +
             "  }\n" +
             "}"
+    
+    """{"errors":[{"message":"Ikke autentisert","locations":[{"line":3,"column":5}],"path":["hentIdenter"],"extensions":{"code":"unauthenticated","classification":"ExecutionAborted"}}],"data":{"hentIdenter":null}}"""
     return this
 }
 
