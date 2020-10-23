@@ -16,6 +16,10 @@ Eventuelt om du har satt opp username password for server med id `github` i din 
 ## Starte lokalt
 Bruk klassen `K9PunsjApplicationWithMocks` som en del av `test`
 
+## Swagger i dev
+https://k9-punsj.dev.adeo.no/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config
+## Accesstoken i dev
+https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/k9-punsj/oidc/hentNavTokenHeader
 ## Åpne
 Link til ulike skjemaer:
 [http://localhost:8080](http://localhost:8080)
