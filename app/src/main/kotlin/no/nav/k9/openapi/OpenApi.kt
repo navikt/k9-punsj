@@ -1,5 +1,6 @@
 package no.nav.k9.openapi
 
+import io.netty.handler.codec.http.HttpScheme.HTTPS
 import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -209,7 +210,7 @@ data class OasPleiepengerSyktBarSoknadMapperSvar(
 @RestController
 @SecurityScheme(
         name = "BearerAuth",
-        type = SecuritySchemeType.HTTP,
+        type = SecuritySchemeType.APIKEY,
         scheme = "bearer",
         bearerFormat = "jwt"
 )
@@ -382,10 +383,10 @@ internal class PdlController {
                 description = "Personen eksisterer ikke"
         )
     ])
-    
-    @Operation(summary = "Henter aktørid fra fnummer", description = "Henter aktørid fra fnummer'")
+
+    @Operation(summary = "Henter aktørid fra fnummer", description = "Henter aktørid fra fnummer'", security = [SecurityRequirement(name = "BearerAuth")])
     fun Hentident( @RequestBody body: PdlRoutes.NorskIdent) {
-        
+
     }
 }
 
