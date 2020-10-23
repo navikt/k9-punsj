@@ -211,7 +211,7 @@ data class OasPleiepengerSyktBarSoknadMapperSvar(
         name = "BearerAuth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
-        bearerFormat = "jwt"
+        bearerFormat = "JWT"
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
