@@ -7,6 +7,7 @@ import no.nav.k9.helsesjekk
 import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
+import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -71,28 +72,29 @@ class PdlService (
                         "grupper" to listOf("AKTORID")
                 )
         )
+        val accessToken1 = coroutineContext.hentAuthentication().accessToken
+        logger.info(accessToken1)
         val response = client
                 .post()
                 .uri { it.build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(TemaHeader, TemaHeaderValue)
-                .header(HttpHeaders.AUTHORIZATION, coroutineContext.hentAuthentication().accessToken)
+                .header(HttpHeaders.AUTHORIZATION, accessToken1)
                 .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
-                .toEntity(String::class.java)
+                .toEntity(AktøridPdl::class.java)
                 .awaitFirst()
         logger.info(response.toString())
         val aktøridPdl = response.body ?: return null
-//        if (aktøridPdl.data == null) {
-//            logger.info(objectMapper.writeValueAsString(aktøridPdl))
-//            throw IkkeTilgang()
-//        }
-//        
+        if (aktøridPdl.data == null) {
+            logger.info(objectMapper.writeValueAsString(aktøridPdl))
+            throw IkkeTilgang()
+        }
         
-        return PdlResponse(false, aktorId = AktøridPdl(data = AktøridPdl.Data(hentIdenter = null)))
+        return PdlResponse(false, aktorId = aktøridPdl)
 
     }
 
