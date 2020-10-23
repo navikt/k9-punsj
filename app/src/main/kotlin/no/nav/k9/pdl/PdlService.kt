@@ -7,7 +7,6 @@ import no.nav.k9.helsesjekk
 import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
-import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -83,16 +82,17 @@ class PdlService (
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
-                .toEntity(AktøridPdl::class.java)
+                .toEntity(String::class.java)
                 .awaitFirst()
         logger.info(response.toString())
         val aktøridPdl = response.body ?: return null
-        if (aktøridPdl.data == null) {
-            logger.info(objectMapper.writeValueAsString(aktøridPdl))
-            throw IkkeTilgang()
-        }
+//        if (aktøridPdl.data == null) {
+//            logger.info(objectMapper.writeValueAsString(aktøridPdl))
+//            throw IkkeTilgang()
+//        }
+//        
         
-        return PdlResponse(false, aktorId = aktøridPdl)
+        return PdlResponse(false, aktorId = AktøridPdl(data = AktøridPdl.Data(hentIdenter = null)))
 
     }
 
