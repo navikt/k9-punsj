@@ -1,6 +1,5 @@
 package no.nav.k9.openapi
 
-import io.netty.handler.codec.http.HttpScheme.HTTPS
 import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -210,7 +209,7 @@ data class OasPleiepengerSyktBarSoknadMapperSvar(
 @RestController
 @SecurityScheme(
         name = "BearerAuth",
-        type = SecuritySchemeType.APIKEY,
+        type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "jwt"
 )
