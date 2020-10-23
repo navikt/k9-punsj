@@ -89,7 +89,6 @@ class PdlService(
                 .retrieve()
                 .toEntity(String::class.java)
                 .awaitFirst()
-        logger.info(response.toString())
 
         val json = response.body ?: return null
         val (data, errors) = objectMapper().readValue<AktøridPdl>(json)
