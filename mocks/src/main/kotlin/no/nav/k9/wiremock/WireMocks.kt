@@ -15,6 +15,7 @@ fun initWireMock(
         }
         .build()
         .stubSaksbehandlerAccessToken()
+        .stubNavHeader()
         .stubSafHenteDokumentOk()
         .stubSafHenteDokumentOkForside()
         .stubSafHenteDokumentOkDelingAvOmsorgsdager()
@@ -27,3 +28,7 @@ fun initWireMock(
         .stubSafHentJournalpostAbacError()
         .stubSafHentJournalpostIkkeKomplettTilgang()
         .stubSafHentJournalpostFinnesIkke()
+        .stubPdlHenteAktøridOk()
+        .stubPdlHenteAktøridFinnesIkke()
+        .stubPdlHenteAktøridIkkeAutentisert()
+
