@@ -6,6 +6,7 @@ import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import no.nav.k9.journalpost.IkkeTilgang
+import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.pdl.PdlService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,7 +34,7 @@ internal class GosysRoutes(
     }
 
     internal object Urls {
-        internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalføringsoppgave/"
+        internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
     }
 
     @Bean
@@ -51,7 +52,7 @@ internal class GosysRoutes(
                         ServerResponse
                                 .notFound()
                                 .buildAndAwait()
-                    } else {                        
+                    } else {
                         ServerResponse
                                 .ok()
                                 .contentType(MediaType.APPLICATION_JSON)
