@@ -37,7 +37,7 @@ class GosysOppgaveService(
         private const val VariantType = "ARKIV"
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
-        private const val CorrelationIdHeader = "Nav-Callid"
+        private const val CorrelationIdHeader = "X-Correlation-ID"
         private val scope: Set<String> = setOf("openid")
         private const val MaxDokumentSize = 5 * 1024 * 1024
     }
@@ -69,6 +69,8 @@ class GosysOppgaveService(
                 tema = "OMS")
         try {
             logger.info(coroutineContext.hentCorrelationId())
+            val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
+            logger.info(body)
             val response = client
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
@@ -77,7 +79,7 @@ class GosysOppgaveService(
                     .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                    .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
+                    .bodyValue(body)
 
                     .retrieve()
                     .onStatus(HttpStatus::is4xxClientError) {
