@@ -21,6 +21,7 @@ import java.net.URI
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 
@@ -61,7 +62,7 @@ class GosysOppgaveService(
                         scopes = scope
                 )
         val df: DateFormat = SimpleDateFormat("yyyy-mm-dd")
-        val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = df.format(LocalDate.now()),
+        val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = df.format(Date()),
                 aktoerId = aktørid,
                 journalpostId = joarnalpostId,
                 oppgavetype = "JFR",
