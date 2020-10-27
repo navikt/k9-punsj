@@ -1,7 +1,6 @@
 package no.nav.k9.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.hentCorrelationId
@@ -16,7 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.LocalDate
@@ -75,16 +74,17 @@ class GosysOppgaveService(
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                     .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
-                    
+
                     .retrieve()
                     .onStatus(HttpStatus::is4xxClientError) {
-                        runBlocking {
-                            logger.info(it.awaitBody<String>())
+                        it.bodyToFlux<String>().flatMap {
+                            logger.info(it)
+                            Mono.just(it)
                         }
-                       return@onStatus Mono.error(IllegalStateException())
+                        return@onStatus Mono.error(IllegalStateException())
                     }
                     .toEntity(String::class.java)
-                    
+
                     .awaitFirst()
             logger.info(response.toString())
 
