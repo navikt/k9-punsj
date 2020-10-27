@@ -2,6 +2,7 @@ package no.nav.k9.fordel
 
 import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.JournalpostId
+import no.nav.k9.NorskIdent
 import no.nav.k9.journalpost.JournalpostService
 import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.mappe.MappeRepository
@@ -20,10 +21,12 @@ class HendelseMottaker @Autowired constructor(
         const val topic = "privat-k9punsj-aksjonspunkthendelse"
     }
 
-    suspend fun prosesser(journalpostId: JournalpostId) {
+    suspend fun prosesser(journalpostId: JournalpostId, norskIdent :NorskIdent) {
         val ulid = ULID().nextULID()
-        val hentDokument = journalpostService.hentJournalpostInfo(journalpostId)
-        val norskIdent = hentDokument!!.norskIdent
+        
+        // bytt ut med servicebrukertoken i stedet for on behalf
+        // val hentDokument = journalpostService.hentJournalpostInfo(journalpostId)
+        // val norskIdent = hentDokument!!.norskIdent
 
         hendelseProducer.send(topic,
                 objectMapper().writeValueAsString(PunsjEventDto(ulid,
