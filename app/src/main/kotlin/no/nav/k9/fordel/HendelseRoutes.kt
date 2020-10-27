@@ -1,9 +1,11 @@
 package no.nav.k9.fordel
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.AuthenticationHandler
 import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
+import no.nav.k9.gosys.GosysRoutes
 import no.nav.k9.journalpost.IkkeTilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
@@ -25,7 +28,6 @@ internal class HendelseRoutes(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(HendelseRoutes::class.java)
-        private const val JournalpostIdKey = "journalpost_id"
     }
 
     internal object Urls {
@@ -36,9 +38,9 @@ internal class HendelseRoutes(
     fun HendelseRoutes() = Routes(authenticationHandler) {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val journalpostId = request.journalpostId()
+                val params = request.request()
                 try {
-                    val response = hendelseMottaker.prosesser(journalpostId)
+                    val response = hendelseMottaker.prosesser(params.journalpostId, params.norskIdent)
                     if (response == null) {
                         ServerResponse
                                 .notFound()
@@ -58,5 +60,10 @@ internal class HendelseRoutes(
         }
 
     }
-    private suspend fun ServerRequest.journalpostId() : JournalpostId = pathVariable(JournalpostIdKey)
+    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(HendelseRoutes.ProsesserHendelseRequest::class.java)).awaitFirst()
+
+    data class ProsesserHendelseRequest(
+            val norskIdent: no.nav.k9.NorskIdent,
+            val journalpostId: JournalpostId
+    )
 }
