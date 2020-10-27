@@ -1,0 +1,62 @@
+package no.nav.k9.fordel
+
+import no.nav.k9.AuthenticationHandler
+import no.nav.k9.JournalpostId
+import no.nav.k9.RequestContext
+import no.nav.k9.Routes
+import no.nav.k9.journalpost.IkkeTilgang
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import kotlin.coroutines.coroutineContext
+
+@Configuration
+internal class HendelseRoutes(
+        private val hendelseMottaker: HendelseMottaker,
+        private val authenticationHandler: AuthenticationHandler,
+) {
+
+    private companion object {
+        private val logger: Logger = LoggerFactory.getLogger(HendelseRoutes::class.java)
+        private const val JournalpostIdKey = "journalpost_id"
+    }
+
+    internal object Urls {
+        internal const val ProsesserHendelse = "/prosesserHendelse/"
+    }
+
+    @Bean
+    fun HendelseRoutes() = Routes(authenticationHandler) {
+        POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+                try {
+                    val response = hendelseMottaker.prosesser(journalpostId)
+                    if (response == null) {
+                        ServerResponse
+                                .notFound()
+                                .buildAndAwait()
+                    } else {
+                        ServerResponse
+                                .ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValueAndAwait(response)
+                    }
+                    } catch (case: IkkeTilgang) {
+                    ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .buildAndAwait()
+                }
+            }
+        }
+
+    }
+    private suspend fun ServerRequest.journalpostId() : JournalpostId = pathVariable(JournalpostIdKey)
+}
