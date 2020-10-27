@@ -69,6 +69,7 @@ class GosysOppgaveService(
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                     .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
                     .exchange().flatMap { clientResponse ->
+                        logger.error(clientResponse.toString())
                         clientResponse.body { clientHttpResponse, context -> clientHttpResponse.body }
                         clientResponse.bodyToMono(String::class.java)
                     }
