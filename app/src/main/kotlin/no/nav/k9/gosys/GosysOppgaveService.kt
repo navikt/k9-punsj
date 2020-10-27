@@ -65,6 +65,8 @@ class GosysOppgaveService(
                 tema = "OMS")
         try {
             logger.info(coroutineContext.hentCorrelationId())
+            val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
+            logger.info(body)
             val response = client
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
@@ -73,7 +75,7 @@ class GosysOppgaveService(
                     .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                    .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
+                    .bodyValue(body)
 
                     .retrieve()
                     .onStatus(HttpStatus::is4xxClientError) {
