@@ -18,8 +18,11 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
 import java.net.URI
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import kotlin.coroutines.coroutineContext
+
 
 @Service
 class GosysOppgaveService(
@@ -57,7 +60,8 @@ class GosysOppgaveService(
                 .getAccessToken(
                         scopes = scope
                 )
-        val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = LocalDate.now(),
+        val df: DateFormat = SimpleDateFormat("yyyy-mm-dd")
+        val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = df.format(LocalDate.now()),
                 aktoerId = aktørid,
                 journalpostId = joarnalpostId,
                 oppgavetype = "JFR",
