@@ -66,6 +66,7 @@ class GosysOppgaveService(
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
                     .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
