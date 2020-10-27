@@ -1,5 +1,6 @@
 package no.nav.k9.gosys
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.hentCorrelationId
@@ -60,6 +61,7 @@ class GosysOppgaveService(
                 prioritet = Prioritet.NORM,
                 tema = "OMS")
         try {
+            logger.info(coroutineContext.hentCorrelationId())
             val response = client
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
@@ -68,11 +70,9 @@ class GosysOppgaveService(
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                     .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
-                    .exchange().flatMap { clientResponse ->
-                        logger.error(clientResponse.toString())
-                        clientResponse.body { clientHttpResponse, context -> clientHttpResponse.body }
-                        clientResponse.bodyToMono(String::class.java)
-                    }
+                    .retrieve()
+                    .toEntity(String::class.java)
+                    .awaitFirst()
             logger.info(response.toString())
 
         } catch (e: Exception) {
