@@ -1,6 +1,5 @@
 package no.nav.k9.gosys
 
-import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.hentCorrelationId
@@ -69,9 +68,10 @@ class GosysOppgaveService(
                     .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                     .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                     .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
-                    .retrieve()
-                    .toEntity(String::class.java)
-                    .awaitFirst()
+                    .exchange().flatMap { clientResponse ->
+                        clientResponse.body { clientHttpResponse, context -> clientHttpResponse.body }
+                        clientResponse.bodyToMono(String::class.java)
+                    }
             logger.info(response.toString())
 
         } catch (e: Exception) {
