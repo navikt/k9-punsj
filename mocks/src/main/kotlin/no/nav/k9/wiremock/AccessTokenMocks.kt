@@ -46,7 +46,7 @@ fun WireMockServer.stubNavHeader(): WireMockServer {
 
 fun Azure.V2_0.saksbehandlerAccessToken() = generateJwt(
         clientId = "k9-punsj-frontend-oidc-auth-proxy",
-        audience = "k9-punfgdsj",
+        audience = "k9-punsj",
         overridingClaims = mapOf(
                 "sub" to "k9-punsj-frontend-oidc-auth-proxy"
         )
