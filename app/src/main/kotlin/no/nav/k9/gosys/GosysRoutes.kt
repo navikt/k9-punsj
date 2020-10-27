@@ -6,7 +6,6 @@ import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import no.nav.k9.journalpost.IkkeTilgang
-import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.pdl.PdlService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,22 +43,31 @@ internal class GosysRoutes(
                 val requestParameters = request.request()
                 try {
                     val identifikator = pdlService.identifikator(requestParameters.norskIdent)
-                    val aktørid = identifikator!!.aktøridPdl!!.data.hentIdenter!!.identer[0].ident
-                    val response = gosysOppgaveService.opprettOppgave(
-                            aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
-                    )
-                    if (response == null) {
+                    val hentIdenter = identifikator?.aktøridPdl?.data?.hentIdenter
+                    if (hentIdenter == null) {
+                        logger.warn("Kunne ikke finne person i pdl")
                         ServerResponse
                                 .notFound()
                                 .buildAndAwait()
                     } else {
-                        ServerResponse
-                                .ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValueAndAwait(response)
+                        val aktørid = hentIdenter.identer[0].ident
+                        val response = gosysOppgaveService.opprettOppgave(
+                                aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
+                        )
+                        if (response == null) {
+                            ServerResponse
+                                    .notFound()
+                                    .buildAndAwait()
+                        } else {
+                            ServerResponse
+                                    .ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValueAndAwait(response)
+                        }
+
                     }
 
-                }  catch (case: IkkeTilgang) {
+                } catch (case: IkkeTilgang) {
                     ServerResponse
                             .status(HttpStatus.FORBIDDEN)
                             .buildAndAwait()

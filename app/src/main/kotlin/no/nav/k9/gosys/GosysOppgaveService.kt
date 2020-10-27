@@ -3,17 +3,20 @@ package no.nav.k9.gosys
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.hentCorrelationId
 import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.time.LocalDate
+import kotlin.coroutines.coroutineContext
 
 @Service
 class GosysOppgaveService(
@@ -60,7 +63,9 @@ class GosysOppgaveService(
                 .post()
                 .uri { it.pathSegment("api", "v1", "oppgaver").build() }
                 .accept(MediaType.APPLICATION_JSON)
-               
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
                 .retrieve()
                 .toEntity(String::class.java)
