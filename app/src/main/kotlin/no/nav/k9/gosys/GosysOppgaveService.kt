@@ -25,6 +25,7 @@ class GosysOppgaveService(
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(GosysOppgaveService::class.java)
         private const val VariantType = "ARKIV"
@@ -59,18 +60,23 @@ class GosysOppgaveService(
                 oppgavetype = "JFR",
                 prioritet = Prioritet.NORM,
                 tema = "OMS")
-        val response = client
-                .post()
-                .uri { it.pathSegment("api", "v1", "oppgaver").build() }
-                .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
-                .retrieve()
-                .toEntity(String::class.java)
-                .awaitFirst()
-        logger.info(response.toString())
+        try {
+            val response = client
+                    .post()
+                    .uri { it.pathSegment("api", "v1", "oppgaver").build() }
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                    .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                    .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                    .bodyValue(objectMapper().writeValueAsString(opprettOppgaveRequest))
+                    .retrieve()
+                    .toEntity(String::class.java)
+                    .awaitFirst()
+            logger.info(response.toString())
+
+        } catch (e: Exception) {
+            logger.error("", e)
+        }
     }
 
 
