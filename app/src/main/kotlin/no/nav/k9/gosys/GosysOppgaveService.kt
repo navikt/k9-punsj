@@ -61,7 +61,7 @@ class GosysOppgaveService(
                 .getAccessToken(
                         scopes = scope
                 )
-        val df: DateFormat = SimpleDateFormat("yyyy-mm-dd")
+        val df: DateFormat = SimpleDateFormat("yyyy-MM-dd")
         val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = df.format(Date()),
                 aktoerId = aktørid,
                 journalpostId = joarnalpostId,
