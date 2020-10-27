@@ -3,7 +3,7 @@ package no.nav.k9.kafka
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
-import org.apache.kafka.common.serialization.StringSerializer
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -38,8 +38,8 @@ internal class KafkaConsumerConfig {
         val props: MutableMap<String, Any> = HashMap()
         props[CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[CommonClientConfigs.CLIENT_ID_CONFIG] = clientId
-        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
 
         setSecurity(username, props)
         setUsernameAndPassword(username, password, props)
