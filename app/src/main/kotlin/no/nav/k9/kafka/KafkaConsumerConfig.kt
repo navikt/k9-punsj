@@ -38,8 +38,8 @@ internal class KafkaConsumerConfig {
         val props: MutableMap<String, Any> = HashMap()
         props[CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[CommonClientConfigs.CLIENT_ID_CONFIG] = clientId
-        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_DOC] = StringSerializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_DOC] = StringSerializer::class.java
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
 
         setSecurity(username, props)
         setUsernameAndPassword(username, password, props)
