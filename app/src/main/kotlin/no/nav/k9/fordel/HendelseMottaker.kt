@@ -10,6 +10,7 @@ import no.nav.k9.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 class HendelseMottaker @Autowired constructor(
@@ -22,14 +23,14 @@ class HendelseMottaker @Autowired constructor(
     }
 
     suspend fun prosesser(journalpostId: JournalpostId, norskIdent :NorskIdent) {
-        val ulid = ULID().nextULID()
+        val uuid = UUID.randomUUID()
 
         hendelseProducer.send(topic,
-                objectMapper().writeValueAsString(PunsjEventDto(ulid,
+                objectMapper().writeValueAsString(PunsjEventDto(uuid.toString(),
                         journalpostId = journalpostId,
                         eventTid = LocalDateTime.now(),
                         aktørId = norskIdent
                 )),
-                ulid)
+                uuid.toString())
     }
 }
