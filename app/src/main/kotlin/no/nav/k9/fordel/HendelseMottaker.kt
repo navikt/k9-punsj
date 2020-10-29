@@ -18,7 +18,7 @@ class HendelseMottaker @Autowired constructor(
         val mappeRepository: MappeRepository
 ) {
     private companion object {
-        const val topic = "privat-k9punsj-aksjonspunkthendelse"
+        const val topic = "privat-k9punsj-aksjonspunkthendelse-v1"
     }
 
     suspend fun prosesser(journalpostId: JournalpostId, norskIdent :NorskIdent) {
