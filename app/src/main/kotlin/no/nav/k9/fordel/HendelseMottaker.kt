@@ -23,10 +23,6 @@ class HendelseMottaker @Autowired constructor(
 
     suspend fun prosesser(journalpostId: JournalpostId, norskIdent :NorskIdent) {
         val ulid = ULID().nextULID()
-        
-        // bytt ut med servicebrukertoken i stedet for on behalf
-        // val hentDokument = journalpostService.hentJournalpostInfo(journalpostId)
-        // val norskIdent = hentDokument!!.norskIdent
 
         hendelseProducer.send(topic,
                 objectMapper().writeValueAsString(PunsjEventDto(ulid,

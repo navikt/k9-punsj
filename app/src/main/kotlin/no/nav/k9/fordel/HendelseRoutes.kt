@@ -60,7 +60,7 @@ internal class HendelseRoutes(
         }
 
     }
-    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(HendelseRoutes.ProsesserHendelseRequest::class.java)).awaitFirst()
+    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(ProsesserHendelseRequest::class.java)).awaitFirst()
 
     data class ProsesserHendelseRequest(
             val norskIdent: no.nav.k9.NorskIdent,
