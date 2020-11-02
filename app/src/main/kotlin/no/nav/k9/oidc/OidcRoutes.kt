@@ -23,6 +23,7 @@ internal class OidcRoutes(
 ) {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val scope: Set<String> = setOf("openid")
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(OidcRoutes::class.java)
     }
@@ -34,15 +35,19 @@ internal class OidcRoutes(
     @Bean
     fun OidcRoutes() = Routes(authenticationHandler) {
         GET("/api${Urls.HentNavTokenHeader}") { request ->
-            val navHeader = cachedAccessTokenClient.getAccessToken(scope)
-                    .asAuthoriationHeader()
-
+            var navHeader = "Ikke funnet"
+            try {
+                navHeader = cachedAccessTokenClient.getAccessToken(scope)
+                        .asAuthoriationHeader()
+            } catch (e: IllegalStateException) {
+                logger.warn("", e)
+            }
             RequestContext(coroutineContext, request) {
                 val clientHeader = request.headers().header("Authorization")
                 ServerResponse
                         .ok()
                         .contentType(MediaType.TEXT_PLAIN)
-                        .bodyValueAndAwait(clientHeader.toString() + "\n" + navHeader)
+                        .bodyValueAndAwait(clientHeader[0] + "\n" + navHeader)
             }
         }
     }

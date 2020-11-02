@@ -1,9 +1,7 @@
 package no.nav.k9.gosys
 
-import java.time.LocalDate
-
 data class OpprettOppgaveRequest(
-        val aktivDato: LocalDate,
+        val aktivDato: String,
         val aktoerId: String,
         val journalpostId: String,
         val oppgavetype: String,

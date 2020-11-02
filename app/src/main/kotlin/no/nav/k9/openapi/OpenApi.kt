@@ -18,6 +18,8 @@ import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9.JournalpostInnhold
 import no.nav.k9.NorskIdent
 import no.nav.k9.fagsak.FagsakRoutes
+import no.nav.k9.fordel.HendelseRoutes
+import no.nav.k9.gosys.GosysRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.mappe.MappeId
 import no.nav.k9.mappe.PersonDTO
@@ -211,7 +213,7 @@ data class OasPleiepengerSyktBarSoknadMapperSvar(
         name = "BearerAuth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
-        bearerFormat = "jwt"
+        bearerFormat = "JWT"
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostController {
@@ -382,10 +384,10 @@ internal class PdlController {
                 description = "Personen eksisterer ikke"
         )
     ])
-    
-    @Operation(summary = "Henter aktørid fra fnummer", description = "Henter aktørid fra fnummer'")
+
+    @Operation(summary = "Henter aktørid fra fnummer", description = "Henter aktørid fra fnummer", security = [SecurityRequirement(name = "BearerAuth")])
     fun Hentident( @RequestBody body: PdlRoutes.NorskIdent) {
-        
+
     }
 }
 
@@ -393,3 +395,72 @@ data class AktørResponse(
         val norskIdent: NorskIdent,
         val aktørid: String
 )
+
+
+@RestController
+@Tag(name = "Gosys", description = "Opprett journalføringsoppgave")
+internal class GosysController {
+    @PostMapping(GosysRoutes.Urls.OpprettJournalføringsoppgave, consumes = ["application/json"], produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Oppretter journalføringsoppgave for fnummer og journalpostid",
+                content = [Content(
+                        schema = Schema(
+                                implementation = GosysRoutes.GosysOpprettJournalføringsOppgaveRequest::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til å opprette journalføringsoppgave"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Eksisterer ikke"
+        )
+    ])
+
+    @Operation(summary = "Oppretter journalføringsoppgave", description = "", security = [SecurityRequirement(name = "BearerAuth")])
+    fun OpprettJournalføringsoppgave( @RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
+
+    }
+}
+
+@RestController
+@Tag(name = "HendelseMottaker", description = "Prosesserer")
+internal class HendelseController {
+    @PostMapping(HendelseRoutes.Urls.ProsesserHendelse, consumes = ["application/json"], produces = ["application/json"])
+    @ApiResponses(value = [
+        ApiResponse(
+                responseCode = "200",
+                description = "Prosessert",
+                content = [Content(
+                        schema = Schema(
+                                implementation = HendelseRoutes.ProsesserHendelseRequest::class
+                        )
+                )]
+        ),
+        ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+        ),
+        ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til å opprette journalføringsoppgave"
+        ),
+        ApiResponse(
+                responseCode = "404",
+                description = "Eksisterer ikke"
+        )
+    ])
+
+    @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
+    fun ProsesserHendelse( @RequestBody body: HendelseRoutes.ProsesserHendelseRequest) {
+
+    }
+}

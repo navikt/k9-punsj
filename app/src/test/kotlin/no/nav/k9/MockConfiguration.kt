@@ -27,6 +27,7 @@ internal object MockConfiguration {
             "NAV_TRUSTSTORE_PASSWORD" to "changeit",
             "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
             "PDL_BASE_URL" to wireMockServer.getPdlBaseUrl(),
+            "GOSYS_BASE_URL" to wireMockServer.getPdlBaseUrl(),
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",

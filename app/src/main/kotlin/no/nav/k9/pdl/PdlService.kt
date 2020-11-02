@@ -1,5 +1,6 @@
 package no.nav.k9.pdl
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -7,6 +8,7 @@ import no.nav.k9.helsesjekk
 import no.nav.k9.hentAuthentication
 import no.nav.k9.hentCorrelationId
 import no.nav.k9.journalpost.SafGateway
+import no.nav.k9.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -22,22 +24,25 @@ import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Service
-class PdlService (
+class PdlService(
         @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
-        @Qualifier("sts")private val accessTokenClient: AccessTokenClient
-) : ReactiveHealthIndicator{
+        @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+) : ReactiveHealthIndicator {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val scope: Set<String> = setOf("openid")
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
+        private const val NavConsumerTokenHeaderKey = "Nav-Consumer-Token"
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
         private const val CorrelationIdHeader = "Nav-Callid"
         private const val MaxDokumentSize = 5 * 1024 * 1024
     }
+
     init {
         logger.info("PdlBaseUrl=$baseUrl")
         logger.info("PdlScopes=${scope.joinToString()}")
@@ -55,15 +60,14 @@ class PdlService (
                             }.build()
             )
             .build()
-    
+
     @Throws(IkkeTilgang::class)
     suspend fun identifikator(fnummer: String): PdlResponse? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
-                        scopes = scope,
-                        onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                        scopes = scope
                 )
-        val req =  QueryRequest(
+        val req = QueryRequest(
                 getStringFromResource("/pdl/hentIdent.graphql"),
                 mapOf(
                         "ident" to fnummer,
@@ -71,29 +75,33 @@ class PdlService (
                         "grupper" to listOf("AKTORID")
                 )
         )
+        val authentication = coroutineContext.hentAuthentication()
         val response = client
                 .post()
-                .uri { it.pathSegment("graphql").build() }
+                .uri { it.build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(TemaHeader, TemaHeaderValue)
-                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
+                .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
-                .toEntity(AktøridPdl::class.java)
+                .toEntity(String::class.java)
                 .awaitFirst()
-        val aktøridPdl = response.body ?: return null
-        if (aktøridPdl.data == null) {
-            throw IkkeTilgang()
+
+        val json = response.body ?: return null
+        val (data, errors) = objectMapper().readValue<AktøridPdl>(json)
+        if (errors!=null) {
+            logger.warn(objectMapper.writeValueAsString(errors))
         }
-        
-        return PdlResponse(false, aktorId = aktøridPdl)
+        return PdlResponse(false, aktøridPdl = AktøridPdl(data, errors))
 
     }
 
     private fun getStringFromResource(path: String) =
             PdlService::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
+
     data class QueryRequest(
             val query: String,
             val variables: Map<String, Any>,

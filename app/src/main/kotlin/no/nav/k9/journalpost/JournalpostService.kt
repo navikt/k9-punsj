@@ -28,7 +28,9 @@ class JournalpostService(
                 logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
                 throw IkkeStøttetJournalpost()
             } else if (!parsedJournalpost.harTilgang) {
-                logger.warn("Saksbehandler har ikke tilgang. ${safJournalpost.copy(bruker = SafDtos.Bruker(null, null))}")
+                logger.warn("Saksbehandler har ikke tilgang. ${
+                    safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null), bruker = SafDtos.Bruker(null, null))
+                }")
                 throw IkkeTilgang()
             } else {
                 val norskIdent: NorskIdent? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.FNR) {

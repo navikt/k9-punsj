@@ -3,11 +3,24 @@ package no.nav.k9.wiremock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
+import com.github.tomakehurst.wiremock.matching.AnythingPattern
+import com.github.tomakehurst.wiremock.matching.ContainsPattern
+import org.intellij.lang.annotations.Language
 
 
 private const val path = "/pdl-mock"
 
+typealias AktørId = String
+
 fun WireMockServer.getPdlBaseUrl() = baseUrl() + path
+
+object AktørIds {
+    const val Ok : AktørId = "200"
+    const val AbacError : AktørId = "500"
+    const val IkkeKomplettTilgang : AktørId = "403"
+    const val FinnesIkke : AktørId = "404"
+
+}
 
 fun WireMockServer.stubPdlHenteAktøridOk(): WireMockServer {
     WireMock.stubFor(
@@ -30,38 +43,29 @@ fun WireMockServer.stubPdlHenteAktøridOk(): WireMockServer {
                             .withStatus(200)
             )
     )
-    "{\n" +
-            "  \"errors\": [\n" +
-            "    {\n" +
-            "      \"message\": \"Fant ikke person\",\n" +
-            "      \"locations\": [\n" +
-            "        {\n" +
-            "          \"line\": 7,\n" +
-            "          \"column\": 5\n" +
-            "        }\n" +
-            "      ],\n" +
-            "      \"path\": [\n" +
-            "        \"hentIdenter\"\n" +
-            "      ],\n" +
-            "      \"extensions\": {\n" +
-            "        \"code\": \"not_found\",\n" +
-            "        \"classification\": \"ExecutionAborted\"\n" +
-            "      }\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"data\": {\n" +
-            "    \"hentIdenter\": null\n" +
-            "  }\n" +
-            "}"
     return this
 }
 
-private fun WireMockServer.stubPdlHenteDokumentError(
-        journalpostId: JournalpostId,
-        httpStatus: Int
+
+private fun WireMockServer.stubPdlHenteAktørId(
+        aktørId: AktørId? = null,
+        responseBody: String = PdlMockResponses.OkResponseHenteAktørId
 ): WireMockServer {
+    val contentBodyPattern = if (aktørId == null) AnythingPattern() else ContainsPattern(aktørId)
+    WireMock.stubFor(WireMock.post(urlPathMatching(".*$path/graphql.*"))
+            .withRequestBody(contentBodyPattern)
+            .willReturn(WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody)
+                    .withStatus(200)
+            )
+    )
+    return this
+}
+
+private fun WireMockServer.stubPdlHenteAktøridError(httpStatus: Int) : WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")).willReturn(
+            WireMock.get(urlPathMatching(".*$path/graphql")).willReturn(
                     WireMock.aResponse()
                             .withStatus(httpStatus)
             )
@@ -69,13 +73,87 @@ private fun WireMockServer.stubPdlHenteDokumentError(
     return this
 }
 
-fun WireMockServer.stubPdlHenteDokumentNotFound() = stubPdlHenteDokumentError(
-        journalpostId = JournalpostIds.FinnesIkke,
-        httpStatus = 404
+fun WireMockServer.stubPdlHenteAktøridFinnesIkke() = stubPdlHenteAktørId(
+        aktørId = AktørIds.FinnesIkke,
+        responseBody = PdlMockResponses.FinnesIkkeResponseHenteAktørId
 )
 
-fun WireMockServer.stubPdlHenteDokumentAbacError() = stubPdlHenteDokumentError(
-        journalpostId = JournalpostIds.AbacError,
-        httpStatus = 403
+fun WireMockServer.stubPdlHenteAktøridIkkeAutentisert() = stubPdlHenteAktørId(
+        aktørId = AktørIds.FinnesIkke,
+        responseBody = PdlMockResponses.IkkeAutentisertResponseHenteAktørId
 )
+
+private object PdlMockResponses {
+    @Language("JSON")
+    val OkResponseHenteAktørId = """
+    {
+      "data": {
+        "hentIdenter": {
+          "identer": [
+          {
+              "ident": "2002220522526",
+              "historisk": false,
+              "gruppe": "AKTORID"
+          }
+          ]
+        }
+      }
+    }
+    """.trimIndent()
+
+
+    @Language("JSON")
+    val FinnesIkkeResponseHenteAktørId = """
+    {
+      "errors": [
+        {
+          "message": "Fant ikke person",
+          "locations": [
+            {
+              "line": 7,
+              "column": 5
+            }
+          ],
+          "path": [
+            "hentIdenter"
+          ],
+          "extensions": {
+            "code": "not_found",
+            "classification": "ExecutionAborted"
+          }
+        }
+      ],
+      "data": {
+        "hentIdenter": null
+      }
+    }
+    """.trimIndent()
+
+    @Language("JSON")
+    val IkkeAutentisertResponseHenteAktørId = """
+    {
+      "errors": [
+        {
+          "message": "Ikke autentisert",
+          "locations": [
+            {
+              "line": 3,
+              "column": 5
+            }
+          ],
+          "path": [
+            "hentIdenter"
+          ],
+          "extensions": {
+            "code": "unauthenticated",
+            "classification": "ExecutionAborted"
+          }
+        }
+      ],
+      "data": {
+        "hentIdenter": null
+      }
+    }
+    """.trimIndent()
+}
 
