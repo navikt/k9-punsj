@@ -14,6 +14,7 @@ typealias JournalpostId = String
 typealias SøknadJson = MutableMap<String, Any?>
 typealias SøknadType = String
 typealias NorskIdent = String
+typealias AktørId = String
 
 internal fun SøknadJson.merge(nySøknad: SøknadJson) : SøknadJson {
     val før = objectMapper.valueToTree<ObjectNode>(this)

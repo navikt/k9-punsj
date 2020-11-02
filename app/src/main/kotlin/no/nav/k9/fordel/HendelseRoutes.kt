@@ -40,7 +40,7 @@ internal class HendelseRoutes(
             RequestContext(coroutineContext, request) {
                 val params = request.request()
                 try {
-                    val response = hendelseMottaker.prosesser(params.journalpostId, params.norskIdent)
+                    val response = hendelseMottaker.prosesser(params.journalpostId, params.aktørId)
                     if (response == null) {
                         ServerResponse
                                 .notFound()
@@ -63,7 +63,7 @@ internal class HendelseRoutes(
     private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(ProsesserHendelseRequest::class.java)).awaitFirst()
 
     data class ProsesserHendelseRequest(
-            val norskIdent: no.nav.k9.NorskIdent,
+            val aktørId: no.nav.k9.AktørId?,
             val journalpostId: JournalpostId
     )
 }
