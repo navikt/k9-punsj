@@ -441,7 +441,7 @@ internal class HendelseController {
                 description = "Prosessert",
                 content = [Content(
                         schema = Schema(
-                                implementation = HendelseRoutes.ProsesserHendelseRequest::class
+                                implementation = HendelseRoutes.FordelPunsjEventDto::class
                         )
                 )]
         ),
@@ -460,7 +460,7 @@ internal class HendelseController {
     ])
 
     @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
-    fun ProsesserHendelse( @RequestBody body: HendelseRoutes.ProsesserHendelseRequest) {
+    fun ProsesserHendelse( @RequestBody body: HendelseRoutes.FordelPunsjEventDto) {
 
     }
 }

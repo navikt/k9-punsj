@@ -5,7 +5,6 @@ import no.nav.k9.AuthenticationHandler
 import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
-import no.nav.k9.gosys.GosysRoutes
 import no.nav.k9.journalpost.IkkeTilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,9 +59,9 @@ internal class HendelseRoutes(
         }
 
     }
-    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(ProsesserHendelseRequest::class.java)).awaitFirst()
+    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(FordelPunsjEventDto::class.java)).awaitFirst()
 
-    data class ProsesserHendelseRequest(
+    data class FordelPunsjEventDto(
             val aktørId: no.nav.k9.AktørId?,
             val journalpostId: JournalpostId
     )
