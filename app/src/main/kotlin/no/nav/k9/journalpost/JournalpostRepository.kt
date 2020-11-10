@@ -20,7 +20,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 val json = tx.run(
                         queryOf(
                                 "select data from journalpost where JOURNALPOSTID = :id for update",
-                                mapOf("id" to journalpostId.uuid.toString())
+                                mapOf("id" to journalpostId.journalpostId)
                         )
                                 .map { row ->
                                     row.string("data")
@@ -40,7 +40,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                     values (:id, :data :: jsonb)
                     on conflict (JOURNALPOSTID) do update
                     set data = :data :: jsonb
-                 """, mapOf("id" to journalpostId.uuid.toString(), "data" to objectMapper.writeValueAsString(journalpost))
+                 """, mapOf("id" to journalpostId.journalpostId, "data" to objectMapper.writeValueAsString(journalpost))
                         ).asUpdate
                 )
                 return@transaction journalpost
