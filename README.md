@@ -16,6 +16,12 @@ Eventuelt om du har satt opp username password for server med id `github` i din 
 ## Starte lokalt
 Bruk klassen `K9PunsjApplicationWithMocks` som en del av `test`
 
+## Databasetilgang
+```
+export VAULT_ADDR=https://vault.adeo.no
+vault login -method=oidc
+vault read postgresql/preprod-fss/creds/k9-punsj-user
+```
 
 ## Swagger lokalt
 Bruk header fra Nav token header i authorize
@@ -34,6 +40,7 @@ Bruk header fra Nav token header i authorize.
 Husk å være logget inn på [dev](https://k9-punsj.dev.adeo.no/) først, så gå til 
 [Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/k9-punsj/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
+
 ## Åpne
 Link til ulike skjemaer:
 [http://localhost:8080](http://localhost:8080)
