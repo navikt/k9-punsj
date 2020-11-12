@@ -8,15 +8,14 @@ internal class OverførDagerConverter {
     companion object {
         fun map(dto: OverførDagerDTO): OverføreOmsorgsdagerBehov {
             val (journalpostIder, søknad) = dto
-            val (mottaksdato, identitetsnummer, arbeidssituasjon, borINorge, aleneOmOmsorgen, barn, omsorgenDelesMed) = søknad
+            val (mottaksdato, identitetsnummer, arbeidssituasjon, _, aleneOmOmsorgen, barn, omsorgenDelesMed) = søknad
             val jobberINorge = listOf(arbeidssituasjon.erArbeidstaker, arbeidssituasjon.erFrilanser, arbeidssituasjon.erSelvstendigNæringsdrivende)
                     .any { it == true }
 
             return OverføreOmsorgsdagerBehov(
                     fra = OverføreOmsorgsdagerBehov.OverførerFra(
                             identitetsnummer = identitetsnummer.toString(),
-                            jobberINorge = jobberINorge,
-                            borINorge = borINorge == JaNei.ja
+                            jobberINorge = jobberINorge
                     ),
                     til = OverføreOmsorgsdagerBehov.OverførerTil(
                             identitetsnummer = omsorgenDelesMed.identitetsnummer.toString(),
