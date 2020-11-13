@@ -43,7 +43,6 @@ internal class OverførDagerConverterTest {
 
         val mappet = OverførDagerConverter.map(overførDagerDTO)
 
-        assertThat(mappet.fra.borINorge).isTrue()
         assertThat(mappet.fra.identitetsnummer).isEqualTo(søknad.identitetsnummer.toString())
         assertThat(mappet.fra.jobberINorge).isTrue()
         assertThat(mappet.til.harBoddSammenMinstEttÅr).isTrue()
