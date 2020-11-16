@@ -3,7 +3,7 @@ package no.nav.k9.pdl
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.objectMapper
 import org.assertj.core.api.Assertions
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class PdlServiceTest {
     @Test
