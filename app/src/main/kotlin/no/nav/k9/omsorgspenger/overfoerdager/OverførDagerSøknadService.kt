@@ -1,6 +1,7 @@
 package no.nav.k9.omsorgspenger.overfoerdager
 
 import no.nav.k9.akjonspunkter.Aksjonspunkt
+import no.nav.k9.akjonspunkter.AksjonspunktStatus
 import no.nav.k9.fordel.PunsjEventDto
 import no.nav.k9.journalpost.JournalpostRepository
 import no.nav.k9.kafka.HendelseProducer
@@ -41,7 +42,8 @@ class OverførDagerSøknadService @Autowired constructor(
                     jornalpostId,
                     jpost.aktørId,
                     LocalDateTime.now(),
-                    mutableListOf(Aksjonspunkt.AVSLUTTET)))
+                    mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+            ))
             log.info(data)
             hendelseProducer.send(topicName = topicK9Los, data = data, key = id)
         }

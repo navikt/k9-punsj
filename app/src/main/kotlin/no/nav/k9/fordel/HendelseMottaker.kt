@@ -3,6 +3,7 @@ package no.nav.k9.fordel
 import no.nav.k9.AktørId
 import no.nav.k9.JournalpostId
 import no.nav.k9.akjonspunkter.Aksjonspunkt
+import no.nav.k9.akjonspunkter.AksjonspunktStatus
 import no.nav.k9.journalpost.Journalpost
 import no.nav.k9.journalpost.JournalpostRepository
 import no.nav.k9.kafka.HendelseProducer
@@ -26,13 +27,18 @@ class HendelseMottaker @Autowired constructor(
 
         journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
 
-        hendelseProducer.send(topic,
-                objectMapper().writeValueAsString(PunsjEventDto(uuid.toString(),
-                        journalpostId = journalpostId,
-                        eventTid = LocalDateTime.now(),
-                        aktørId = aktørId,
-                        aksjonspunkter = mutableListOf(Aksjonspunkt.OPPRETTET)
-                )),
-                uuid.toString())
+        hendelseProducer.send(
+            topic,
+            objectMapper().writeValueAsString(
+                PunsjEventDto(
+                    uuid.toString(),
+                    journalpostId = journalpostId,
+                    eventTid = LocalDateTime.now(),
+                    aktørId = aktørId,
+                    aksjonspunktKoderMedStatusListe = mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.OPPRETTET.kode)
+                )
+            ),
+            uuid.toString()
+        )
     }
 }

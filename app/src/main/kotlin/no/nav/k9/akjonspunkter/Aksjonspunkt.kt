@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 enum class Aksjonspunkt(override val kode: String, override val navn: String) : Kodeverdi {
-    OPPRETTET("OPPR", "Opprettet"),
-    AVSLUTTET("AVSLU", "Avsluttet");
+    PUNSJ("0001", "Punsj oppgave");
 
     override val kodeverk = "PUNSJ_OPPGAVE_STATUS"
 
