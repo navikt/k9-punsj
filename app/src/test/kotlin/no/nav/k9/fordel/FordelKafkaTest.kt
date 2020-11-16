@@ -2,6 +2,8 @@ package no.nav.k9.fordel
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.TestContext
+import no.nav.k9.journalpost.JournalpostRepository
 import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.objectMapper
 import org.assertj.core.api.Assertions
@@ -11,12 +13,13 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.doNothing
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [HendelseMottaker::class])
+@ActiveProfiles("test")
+@ContextConfiguration(classes = [HendelseMottaker::class, TestContext::class, JournalpostRepository::class])
 internal class FordelKafkaTest {
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
