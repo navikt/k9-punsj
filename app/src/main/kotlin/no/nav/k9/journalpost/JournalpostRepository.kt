@@ -48,7 +48,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hent(journalpostId: String): Journalpost {
+    suspend fun hent(journalpostId: String): Journalpost? {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 //language=PostgreSQL

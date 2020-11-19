@@ -37,15 +37,17 @@ class OverførDagerSøknadService @Autowired constructor(
 
         for (jornalpostId in søknad.journalpostIder) {
             val jpost = journalpostRepository.hent(jornalpostId)
-            val data = objectMapper().writeValueAsString(PunsjEventDto(
-                    jpost.uuid.toString(),
-                    jornalpostId,
-                    jpost.aktørId,
-                    LocalDateTime.now(),
-                    mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
-            ))
-            log.info(data)
-            hendelseProducer.send(topicName = topicK9Los, data = data, key = id)
+            if (jpost != null) {
+                val data = objectMapper().writeValueAsString(PunsjEventDto(
+                        jpost.uuid.toString(),
+                        jornalpostId,
+                        jpost.aktørId,
+                        LocalDateTime.now(),
+                        mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                ))
+                log.info(data)
+                hendelseProducer.send(topicName = topicK9Los, data = data, key = id)
+            }
         }
     }
 }

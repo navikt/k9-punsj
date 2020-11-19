@@ -1,9 +1,14 @@
 package no.nav.k9.fagsak
 
+import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.Innsending
+import no.nav.k9.NorskIdent
 import no.nav.k9.Routes
 import no.nav.k9.fagsak.FagsakRoutes.Urls.HenteFagsakinfo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.BodyExtractors
+import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
@@ -16,13 +21,14 @@ internal class FagsakRoutes {
     }
 
     internal object Urls {
-        internal const val HenteFagsakinfo = "/fagsak/{$NorskIdentKey}"
+        internal const val HenteFagsakinfo = "/fagsak/find"
     }
 
     @Bean
     fun FagsakRoutes() = Routes {
 
         GET("/api$HenteFagsakinfo", queryParam("ytelse") { it == "pleiepenger-sykt-barn" }) { request ->
+            val ident = request.norskIdent()
             ServerResponse
                     .ok()
                     .json()
@@ -54,4 +60,11 @@ internal class FagsakRoutes {
                     """.trimIndent())
         }
     }
+
+    private suspend fun ServerRequest.norskeIdenter() : Set<NorskIdent> {
+        val identer = mutableSetOf<NorskIdent>()
+        headers().header("X-Nav-NorskIdent").forEach { it -> identer.addAll(it.split(",").onEach { it.trim() }) }
+        return identer.toSet()
+    }
+    private suspend fun ServerRequest.norskIdent() : NorskIdent? = if(norskeIdenter().size != 1) null else norskeIdenter().first()
 }

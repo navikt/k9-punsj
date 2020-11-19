@@ -34,6 +34,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
 
         for (jornalpostId in melding.journalpostIder) {
             val jpost = journalpostRepository.hent(jornalpostId)
+            if (jpost != null) {
             hendelseProducer.send(
                 topicName = topicK9Los, data = objectMapper().writeValueAsString(
                     PunsjEventDto(
@@ -44,7 +45,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
                         mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
                     )
                 ), key = id
-            )
+            ) }
         }
     }
 }
