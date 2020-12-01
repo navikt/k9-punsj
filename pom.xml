@@ -28,7 +28,7 @@
         <k9-rapid.version>1.31aa518</k9-rapid.version>
 		<soknad-pleiepenger-barn.version>5.0.0-20200806083358-23cb01c</soknad-pleiepenger-barn.version>
 		<de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
-		<mockk.version>1.10.2</mockk.version>
+		<mockk.version>1.10.3</mockk.version>
 		<jsonassert.version>1.5.0</jsonassert.version>
 	</properties>
 
