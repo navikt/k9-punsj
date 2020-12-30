@@ -19,7 +19,7 @@
 		<revision>1.0.0</revision>
 		<sha1></sha1>
 		<changelist>-SNAPSHOT</changelist>
-		<kotlin.version>1.4.10</kotlin.version>
+		<kotlin.version>1.4.21-2</kotlin.version>
 		<springdoc.version>1.5.0</springdoc.version>
 		<kotlinx-coroutines.version>1.4.1</kotlinx-coroutines.version>
 		<logback.logstash.version>6.4</logback.logstash.version>
