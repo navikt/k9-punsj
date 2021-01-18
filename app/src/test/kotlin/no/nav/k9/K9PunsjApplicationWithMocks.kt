@@ -41,7 +41,7 @@ internal class K9PunsjApplicationWithMocks {
             startup(
                     wireMockServer = wireMockServer,
                     port = 8085,
-                    azureV2DiscoveryUrl = "http://localhost:8082/.well-known/openid-configuration"
+                    azureV2DiscoveryUrl = "http://azure-mock:8100/v2.0/.well-known/openid-configuration"
             )
         }
     }

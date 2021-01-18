@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9.objectMapper
 import org.springframework.stereotype.Repository
+import java.util.*
 import javax.sql.DataSource
 
 

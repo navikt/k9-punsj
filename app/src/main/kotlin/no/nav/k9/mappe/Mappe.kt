@@ -33,6 +33,22 @@ internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>): MappeSvarDT
     )
 }
 
+internal fun Mappe.dtoUtenMangler(): MappeSvarDTO {
+    val personer = mutableMapOf<NorskIdent, PersonDTO<SøknadJson>>()
+    person.forEach { (norskIdent) ->
+        personer[norskIdent] = PersonDTO(
+            innsendinger = person[norskIdent]!!.innsendinger,
+            soeknad = person[norskIdent]!!.soeknad,
+            mangler = setOf()
+        )
+    }
+
+    return MappeSvarDTO(
+        mappeId = mappeId,
+        personer = personer
+    )
+}
+
 internal fun Mappe.getFirstNorskIdent(): NorskIdent {
     return this.person.keys.first();
 }
