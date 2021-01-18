@@ -26,8 +26,8 @@ jobs:
       - name: Bygge JAR
         run: |
           ./mvnw clean package -DskipTests --settings ./.m2/settings.xml
-          echo "::set-env name=TAG::$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)"
-          echo "::set-env name=IMAGE::$BASE_IMAGE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)"
+          echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE=${IMAGE}$BASE_IMAGE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Bygg & last opp Docker image
         run: |
           docker build --tag ${IMAGE} --tag ${BASE_IMAGE}:latest  ./app/.
