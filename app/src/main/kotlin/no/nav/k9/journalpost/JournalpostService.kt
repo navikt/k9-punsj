@@ -89,8 +89,8 @@ private data class ParsedJournalpost(
         val avsenderMottakertype: SafDtos.AvsenderMottakertype?
 ) {
     val støttetJournalpost = listOfNotNull(
-            journalpostType, tema, journalpostType
-    ).size == 3
+        tema, journalpostType
+    ).size == 2
 }
 
 data class JournalpostInfo(
