@@ -24,7 +24,7 @@ class JournalpostService(
             null
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
-            if (!parsedJournalpost.støttetJournalpost) {
+            if (parsedJournalpost.støttetJournalpost) {
                 logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
                 throw IkkeStøttetJournalpost()
             } else if (!parsedJournalpost.harTilgang) {
@@ -63,7 +63,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
             }
 
     return ParsedJournalpost(
-            journalposttype = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
+            journalpostType = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
             brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
             avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
             tema = enumValueOfOrNull<SafDtos.Tema>(tema),
@@ -79,7 +79,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
 }
 
 private data class ParsedJournalpost(
-        val journalposttype: SafDtos.JournalpostType?,
+        val journalpostType: SafDtos.JournalpostType?,
         val brukerType: SafDtos.BrukerType?,
         val avsenderType: SafDtos.AvsenderType?,
         val tema: SafDtos.Tema?,
@@ -88,9 +88,7 @@ private data class ParsedJournalpost(
         val harTilgang: Boolean,
         val avsenderMottakertype: SafDtos.AvsenderMottakertype?
 ) {
-    val støttetJournalpost = listOfNotNull(
-            journalposttype, tema,
-    ).size == 2
+    val støttetJournalpost = (tema != null && journalpostType != null)
 }
 
 data class JournalpostInfo(
