@@ -63,7 +63,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
             }
 
     return ParsedJournalpost(
-            journalpostType = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
+            journalposttype = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
             brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
             avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
             tema = enumValueOfOrNull<SafDtos.Tema>(tema),
@@ -79,7 +79,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
 }
 
 private data class ParsedJournalpost(
-        val journalpostType: SafDtos.JournalpostType?,
+        val journalposttype: SafDtos.JournalpostType?,
         val brukerType: SafDtos.BrukerType?,
         val avsenderType: SafDtos.AvsenderType?,
         val tema: SafDtos.Tema?,
@@ -89,7 +89,7 @@ private data class ParsedJournalpost(
         val avsenderMottakertype: SafDtos.AvsenderMottakertype?
 ) {
     val støttetJournalpost = listOfNotNull(
-        tema, journalpostType
+            journalposttype, tema,
     ).size == 2
 }
 
