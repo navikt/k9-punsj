@@ -29,7 +29,8 @@ internal fun Mappe.dto(personMangler: Map<NorskIdent, Set<Mangel>>): MappeSvarDT
 
     return MappeSvarDTO(
             mappeId = mappeId,
-            personer = personer
+            personer = personer,
+            søknadType = søknadType
     )
 }
 
@@ -45,7 +46,8 @@ internal fun Mappe.dtoUtenMangler(): MappeSvarDTO {
 
     return MappeSvarDTO(
         mappeId = mappeId,
-        personer = personer
+        personer = personer,
+        søknadType = søknadType
     )
 }
 
