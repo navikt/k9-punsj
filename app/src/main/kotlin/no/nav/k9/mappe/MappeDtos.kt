@@ -1,9 +1,6 @@
 package no.nav.k9.mappe
 
-import no.nav.k9.JournalpostId
-import no.nav.k9.Mangel
-import no.nav.k9.NorskIdent
-import no.nav.k9.SøknadJson
+import no.nav.k9.*
 
 data class MapperSvarDTO(
         val mapper : List<MappeSvarDTO>
@@ -11,6 +8,7 @@ data class MapperSvarDTO(
 
 data class MappeSvarDTO(
         val mappeId: MappeId,
+        val søknadType: SøknadType,
         val personer: MutableMap<NorskIdent, PersonDTO<SøknadJson>>
 ) {
     internal fun erKomplett() = personer.all { it.value.mangler.isEmpty() }
