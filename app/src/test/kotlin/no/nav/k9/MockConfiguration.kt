@@ -20,7 +20,7 @@ internal object MockConfiguration {
             "AZURE_jwk" to ClientCredentials.ClientA.privateKeyJwk,
             "AZURE_token_endpoint" to wireMockServer.getAzureV2TokenUrl(),
             "AZURE_V1_discovery_url" to wireMockServer.getAzureV1WellKnownUrl(),
-            "AZURE_V2_discovery_url" to (azureV2DiscoveryUrl ?: wireMockServer.getAzureV2WellKnownUrl()),
+            "AZURE_V2_discovery_url" to "http://azure-mock:8100/v2.0/.well-known/openid-configuration",
             "SYSTEMBRUKER_USERNAME" to "vtp",
             "SYSTEMBRUKER_PASSWORD" to "vtp",
             "NAV_TRUSTSTORE_PATH" to "${System.getProperty("user.home")}/.modig/truststore.jks",

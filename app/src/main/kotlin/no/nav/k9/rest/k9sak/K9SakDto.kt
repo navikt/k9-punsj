@@ -1,4 +1,4 @@
-package no.nav.k9.pdl
+package no.nav.k9.rest.k9sak
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize

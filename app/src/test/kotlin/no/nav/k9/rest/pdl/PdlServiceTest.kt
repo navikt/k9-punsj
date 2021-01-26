@@ -1,4 +1,4 @@
-package no.nav.k9.pdl
+package no.nav.k9.rest.pdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.objectMapper

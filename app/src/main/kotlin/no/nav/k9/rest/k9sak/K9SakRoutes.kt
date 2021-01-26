@@ -1,4 +1,4 @@
-package no.nav.k9.pdl
+package no.nav.k9.rest.k9sak
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.AuthenticationHandler
@@ -20,13 +20,13 @@ import kotlin.coroutines.coroutineContext
 
 
 @Configuration
-internal class PdlRoutes(
+internal class K9SakRoutes(
         private val authenticationHandler: AuthenticationHandler,
-        private val pdlService: PdlService
+        private val k9SakService: K9SakService
 ) {
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(PdlRoutes::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(K9SakRoutes::class.java)
     }
 
     internal object Urls {
@@ -34,19 +34,19 @@ internal class PdlRoutes(
     }
 
     @Bean
-    fun PdlRoutes() = Routes(authenticationHandler) {
+    fun K9SakRoutes() = Routes(authenticationHandler) {
         POST("/api${Urls.HentIdent}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdentRequest()
                 try {
-                    val pdlResponse = pdlService.identifikator(
+                    val pdlResponse = k9SakService.hentSaksnummer(
                             fnummer = norskIdent.norskIdent
                     )
                     if (pdlResponse == null) {
                         ServerResponse
                                 .notFound()
                                 .buildAndAwait()
-                    } else {                        
+                    } else {
                         ServerResponse
                                 .ok()
                                 .contentType(MediaType.APPLICATION_JSON)

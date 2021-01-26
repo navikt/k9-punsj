@@ -6,7 +6,7 @@ import no.nav.k9.JournalpostId
 import no.nav.k9.RequestContext
 import no.nav.k9.Routes
 import no.nav.k9.journalpost.IkkeTilgang
-import no.nav.k9.pdl.PdlService
+import no.nav.k9.rest.pdl.PdlService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

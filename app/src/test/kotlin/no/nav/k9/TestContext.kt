@@ -11,7 +11,7 @@ import javax.sql.DataSource
 @TestConfiguration
 @Profile("test")
 class TestContext {
-    
+
     @Bean
     fun hendelseProducerBean() = hendelseProducerMock
     val hendelseProducerMock: HendelseProducer = object: HendelseProducer {
@@ -22,7 +22,7 @@ class TestContext {
 
     @Bean
     fun databaseInitializer(): DataSource {
-        val pg = EmbeddedPostgres.builder().setPort(5432).start()
+        val pg = EmbeddedPostgres.builder().setPort(5433).start()
         val dataSource = pg.postgresDatabase
         runMigration(dataSource)
         return dataSource

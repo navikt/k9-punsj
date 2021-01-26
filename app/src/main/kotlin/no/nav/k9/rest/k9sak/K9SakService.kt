@@ -1,4 +1,4 @@
-package no.nav.k9.pdl
+package no.nav.k9.rest.k9sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitFirst
@@ -24,7 +24,7 @@ import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Service
-class PdlService(
+class K9SakService(
         @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
         @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
@@ -62,7 +62,7 @@ class PdlService(
             .build()
 
     @Throws(IkkeTilgang::class)
-    suspend fun identifikator(fnummer: String): PdlResponse? {
+    suspend fun hentSaksnummer(fnummer: String): PdlResponse? {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = scope
@@ -100,7 +100,7 @@ class PdlService(
     }
 
     private fun getStringFromResource(path: String) =
-            PdlService::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
+            K9SakService::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
 
     data class QueryRequest(
             val query: String,

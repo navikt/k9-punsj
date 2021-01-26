@@ -14,7 +14,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     private val objectMapper = objectMapper();
 
-    suspend fun lagre(journalpostId: Journalpost, f: (Journalpost?) -> Journalpost): Journalpost {
+    suspend fun lagre(journalpostId: Journalpost, function: (Journalpost?) -> Journalpost): Journalpost {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val json = tx.run(
@@ -28,9 +28,9 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 )
 
                 val journalpost = if (!json.isNullOrEmpty()) {
-                    f(objectMapper.readValue(json, Journalpost::class.java))
+                    function(objectMapper.readValue(json, Journalpost::class.java))
                 } else {
-                    f(null)
+                    function(null)
                 }
                 //language=PostgreSQL
                 tx.run(
