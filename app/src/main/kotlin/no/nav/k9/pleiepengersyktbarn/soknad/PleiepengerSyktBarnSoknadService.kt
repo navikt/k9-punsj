@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9.JournalpostId
 import no.nav.k9.kafka.HendelseProducer
 import no.nav.k9.søknad.JsonUtils
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +24,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
         const val PLEIEPENGER_SYKT_BARN_TOPIC = "privat-punsjet-pleiepengesoknad"
     }
 
-    internal suspend fun sendSøknad(søknad: PleiepengerBarnSøknad, journalpostIder: MutableSet<JournalpostId>) {
+    internal suspend fun sendSøknad(søknad: PleiepengerSyktBarn, journalpostIder: MutableSet<JournalpostId>) {
         val dokumentfordelingMelding: String = toDokumentfordelingMelding(søknad, journalpostIder)
         hendelseProducer.send(topicName = PLEIEPENGER_SYKT_BARN_TOPIC, data = dokumentfordelingMelding, key = søknad.søknadId.id)
     }

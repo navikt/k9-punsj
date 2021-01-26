@@ -1,6 +1,7 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
 import no.nav.k9.NorskIdent
+import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.*
 import no.nav.k9.søknad.felles.Barn
 import no.nav.k9.søknad.felles.Periode
@@ -17,7 +18,7 @@ import java.util.*
 @Configuration
 internal class PleiepengerSyktBarnSoknadConverter {
 
-    fun convert(pleiepengerSyktBarnSoknad: PleiepengerSyktBarnSoknad, ident: NorskIdent): PleiepengerBarnSøknad {
+    fun convert(pleiepengerSyktBarnSoknad: PleiepengerSyktBarnSoknad, ident: NorskIdent): Søknad {
 
         var tilsynsordningBuilder = Tilsynsordning.builder().iTilsynsordning(when (pleiepengerSyktBarnSoknad.tilsynsordning?.iTilsynsordning) {
             JaNeiVetikke.ja -> TilsynsordningSvar.JA

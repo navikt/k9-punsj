@@ -23,7 +23,7 @@ import no.nav.k9.gosys.GosysRoutes
 import no.nav.k9.journalpost.JournalpostRoutes
 import no.nav.k9.mappe.MappeId
 import no.nav.k9.mappe.PersonDTO
-import no.nav.k9.pdl.PdlRoutes
+import no.nav.k9.rest.pdl.PdlRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnRoutes
 import no.nav.k9.pleiepengersyktbarn.soknad.PleiepengerSyktBarnSoknad
 import org.springframework.beans.factory.annotation.Value
