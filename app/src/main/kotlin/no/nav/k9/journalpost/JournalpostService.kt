@@ -24,10 +24,11 @@ class JournalpostService(
             null
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
-            if (parsedJournalpost.støttetJournalpost) {
+            /*if (parsedJournalpost.støttetJournalpost) {
                 logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
                 throw IkkeStøttetJournalpost()
-            } else if (!parsedJournalpost.harTilgang) {
+            } else */
+            if (!parsedJournalpost.harTilgang) {
                 logger.warn("Saksbehandler har ikke tilgang. ${
                     safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null), bruker = SafDtos.Bruker(null, null))
                 }")
