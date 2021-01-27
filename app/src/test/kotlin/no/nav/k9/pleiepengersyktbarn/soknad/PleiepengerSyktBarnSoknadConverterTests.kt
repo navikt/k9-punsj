@@ -1,5 +1,6 @@
 package no.nav.k9.pleiepengersyktbarn.soknad
 
+import no.nav.k9.pleiepengersyktbarn.PleiepengerSyktBarnYtelseMapper
 import no.nav.k9.søknad.pleiepengerbarn.TilsynsordningSvar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -71,11 +72,11 @@ class PleiepengerSyktBarnConverterTests {
     @Test
     fun `Konverterer søknad til riktig format`() {
 
-        val pleiepengerSyktBarnSoknadConverter = PleiepengerSyktBarnSoknadConverter()
+        val pleiepengerSyktBarnSoknadConverter = PleiepengerSyktBarnYtelseMapper()
 
         val soknad = genererSoknad()
 
-        val konvertertSoknad = pleiepengerSyktBarnSoknadConverter.convert(soknad, standardIdent)
+        val konvertertSoknad = pleiepengerSyktBarnSoknadConverter.mapTil(soknad, standardIdent)
 
         assertEquals(konvertertDato, konvertertSoknad.mottattDato)
         assert(konvertertSoknad.perioder.containsKey(konvertertPeriode))
@@ -98,7 +99,7 @@ class PleiepengerSyktBarnConverterTests {
     @Test
     fun `Konverterer tilsynsordningsopphold til riktig format når det er oppgitt flere tilsynsperioder`() {
 
-        val pleiepengerSyktBarnSoknadConverter = PleiepengerSyktBarnSoknadConverter()
+        val pleiepengerSyktBarnSoknadConverter = PleiepengerSyktBarnYtelseMapper()
 
         val fraOgMed1: LocalDate = LocalDate.of(2020, 3, 2)
         val tilOgMed1: LocalDate = LocalDate.of(2020, 3, 6)
@@ -147,7 +148,7 @@ class PleiepengerSyktBarnConverterTests {
         val tilsynsordning = Tilsynsordning(standardITilsynsordning, listOf(opphold1, opphold2, opphold3))
 
         val soknad: PleiepengerSyktBarnSoknad = genererSoknad(tilsynsordning = tilsynsordning)
-        val konvertertSoknad = pleiepengerSyktBarnSoknadConverter.convert(soknad, standardIdent)
+        val konvertertSoknad = pleiepengerSyktBarnSoknadConverter.mapTil(soknad, standardIdent)
         val konverterteOpphold = konvertertSoknad.tilsynsordning.opphold;
 
         assert(konverterteOpphold.containsKey(periode1Mandag)) // TODO: TSF-1185: feiler
