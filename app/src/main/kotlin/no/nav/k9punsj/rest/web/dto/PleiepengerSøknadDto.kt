@@ -23,7 +23,7 @@ data class PleiepengerSøknadDto(
         val nattevåk: NattevåkDto?,
         val tilsynsordning: TilsynsordningDto?,
         val lovbestemtFerie: LovbestemtFerieDto?,
-        val arbeid: ArbeidDto?,
+        val arbeidstid: ArbeidstidDto?,
         val uttak: UttakDto?,
         val omsorg: OmsorgDto?,
     ) {
@@ -58,11 +58,24 @@ data class PleiepengerSøknadDto(
 
             data class FrilanserDto(
                 val startdato: String?,
-                val jobberFortsattSomFrilans: Boolean?
+                val jobberFortsattSomFrilans: Boolean?,
 
                 )
 
-            data class ArbeidstakerDto(val ikkeFerdig: String?)
+            data class ArbeidstakerDto(
+                val norskIdentitetsnummer: String?,
+                val organisasjonsnummer: String?,
+                val arbeidstidInfo: ArbeidstidInfoDto,
+            ) {
+                data class ArbeidstidInfoDto(
+                    val jobberNormaltTimerPerDag: String?,
+                    val perioder: Map<String, ArbeidstidPeriodeInfoDto>?,
+                ) {
+                    data class ArbeidstidPeriodeInfoDto(
+                        val faktiskArbeidTimerPerDag: String?,
+                    )
+                }
+            }
         }
 
         data class DataBruktTilUtledningDto(
@@ -81,13 +94,63 @@ data class PleiepengerSøknadDto(
             )
         }
 
-        data class UtenlandsoppholdDto(val ikkeFerdig: String?)
-        data class BeredskapDto(val ikkeFerdig: String?)
-        data class NattevåkDto(val ikkeFerdig: String?)
-        data class TilsynsordningDto(val ikkeFerdig: String?)
-        data class LovbestemtFerieDto(val ikkeFerdig: String?)
-        data class ArbeidDto(val ikkeFerdig: String?)
-        data class UttakDto(val ikkeFerdig: String?)
-        data class OmsorgDto(val ikkeFerdig: String?)
+        data class UtenlandsoppholdDto(
+            val perioder: Map<String, UtenlandsoppholdPeriodeInfoDto>?,
+
+            ) {
+            data class UtenlandsoppholdPeriodeInfoDto(
+                val land: String?,
+                val årsak: String?,
+            )
+        }
+
+        data class BeredskapDto(
+            val perioder: Map<String, BeredskapPeriodeInfoDto>?,
+
+            ) {
+            data class BeredskapPeriodeInfoDto(
+                val tilleggsinformasjon: String?,
+            )
+        }
+
+        data class NattevåkDto(
+            val perioder: Map<String, NattevåkPeriodeInfoDto>?,
+        ) {
+            data class NattevåkPeriodeInfoDto(
+                val tilleggsinformasjon: String?,
+            )
+        }
+
+        data class TilsynsordningDto(
+            val perioder: Map<String, TilsynPeriodeInfoDto>?,
+        ) {
+            data class TilsynPeriodeInfoDto(
+                val etablertTilsynTimerPerDag: String?,
+            )
+        }
+
+        data class LovbestemtFerieDto(
+            val perioder: List<String>?,
+        )
+
+        data class ArbeidstidDto(
+            val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,
+            val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
+            val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
+        )
+
+        data class UttakDto(
+            val perioder: Map<String, UttakPeriodeInfoDto>,
+        ) {
+            data class UttakPeriodeInfoDto(
+                val timerPleieAvBarnetPerDag: String?,
+            )
+        }
+
+        data class OmsorgDto(
+            val relasjonTilBarnet: String?,
+            val samtykketOmsorgForBarnet: Boolean?,
+            val beskrivelseAvOmsorgsrollen: String?
+        )
     }
 }
