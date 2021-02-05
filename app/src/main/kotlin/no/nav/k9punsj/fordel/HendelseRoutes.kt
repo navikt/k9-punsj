@@ -2,10 +2,11 @@ package no.nav.k9punsj.fordel
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
-import no.nav.k9punsj.JournalpostId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -62,7 +63,7 @@ internal class HendelseRoutes(
     private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(FordelPunsjEventDto::class.java)).awaitFirst()
 
     data class FordelPunsjEventDto(
-            val aktørId: no.nav.k9punsj.AktørId?,
-            val journalpostId: JournalpostId
+            val aktørId: AktørIdDto?,
+            val journalpostId: JournalpostIdDto
     )
 }

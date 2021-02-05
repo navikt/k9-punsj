@@ -3,7 +3,7 @@ package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
-import no.nav.k9punsj.søknad.Barn
+import no.nav.k9punsj.omsorgspenger.overfoerdager.Barn
 import java.time.LocalDate
 
 enum class JaNei { ja, nei }

@@ -2,12 +2,12 @@ package no.nav.k9punsj.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
-import no.nav.k9punsj.JournalpostId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.person.Person
-import no.nav.k9punsj.rest.pdl.PdlService
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -43,8 +43,8 @@ internal class GosysRoutes(
             RequestContext(coroutineContext, request) {
                 val requestParameters = request.request()
                 try {
-                    val identifikator = pdlService.identifikator(requestParameters.norskIdent.personIdent.ident)
-                    val hentIdenter = identifikator?.aktøridPdl?.data?.hentIdenter
+                    val identifikator = pdlService.identifikator(requestParameters.norskIdent)
+                    val hentIdenter = identifikator?.identPdl?.data?.hentIdenter
                     if (hentIdenter == null) {
                         logger.warn("Kunne ikke finne person i pdl")
                         ServerResponse
@@ -81,7 +81,7 @@ internal class GosysRoutes(
     private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(GosysOpprettJournalføringsOppgaveRequest::class.java)).awaitFirst()
 
     data class GosysOpprettJournalføringsOppgaveRequest(
-            val norskIdent: Person,
-            val journalpostId: JournalpostId
+        val norskIdent: NorskIdent,
+        val journalpostId: JournalpostId
     )
 }

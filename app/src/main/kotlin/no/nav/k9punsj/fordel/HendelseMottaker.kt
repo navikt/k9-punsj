@@ -1,17 +1,17 @@
 package no.nav.k9punsj.fordel
 
-import no.nav.k9punsj.AktørId
-import no.nav.k9punsj.JournalpostId
 import no.nav.k9punsj.akjonspunkter.Aksjonspunkt
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 class HendelseMottaker @Autowired constructor(

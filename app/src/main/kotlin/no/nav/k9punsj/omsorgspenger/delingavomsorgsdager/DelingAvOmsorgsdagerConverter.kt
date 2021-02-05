@@ -31,8 +31,8 @@ internal class DelingAvOmsorgsdagerConverter {
                     omsorgsdagerÅOverføre = omsorgenDelesMed.antallOverførteDager,
                     barn = barn.map {
                         OverføreOmsorgsdagerBehov.Barn(
-                                identitetsnummer = it.identitetsnummer.toString(),
-                                fødselsdato = it.fødselsdato,
+                                identitetsnummer = it.norskIdent,
+                                fødselsdato = it.fødselsdato!!,
                                 aleneOmOmsorgen = aleneOmOmsorgen == JaNei.ja,
                                 utvidetRett = false
                         )

@@ -17,7 +17,7 @@ internal class OverførDagerConverter {
                             jobberINorge = jobberINorge
                     ),
                     til = OverføreOmsorgsdagerBehov.OverførerTil(
-                            identitetsnummer = omsorgenDelesMed.person.personIdent.ident,
+                            identitetsnummer = omsorgenDelesMed.norskIdent,
                             relasjon = when (omsorgenDelesMed.mottaker) {
                                 Mottaker.Samboer -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeSamboer
                                 Mottaker.Ektefelle -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeEktefelle
@@ -31,8 +31,8 @@ internal class OverførDagerConverter {
                     omsorgsdagerÅOverføre = omsorgenDelesMed.antallOverførteDager,
                     barn = barn.map {
                         OverføreOmsorgsdagerBehov.Barn(
-                                identitetsnummer = it.person.personIdent.ident.toString(),
-                                fødselsdato = it.fødselsdato,
+                                identitetsnummer = it.norskIdent,
+                                fødselsdato = it.fødselsdato!!,
                                 aleneOmOmsorgen = aleneOmOmsorgen == JaNei.ja,
                                 utvidetRett = false
                         )

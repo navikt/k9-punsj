@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.huxhorn.sulky.ulid.ULID
-import no.nav.k9punsj.person.Person
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import java.time.LocalDate
 
 enum class JaNei { ja, nei }
@@ -17,12 +17,12 @@ data class Arbeidssituasjon (
 )
 
 data class Barn (
-        val person: Person,
-        val fødselsdato: LocalDate
+        val norskIdent: NorskIdent,
+        val fødselsdato: LocalDate?
 )
 
 data class OmsorgenDelesMed (
-        val person: Person,
+        val norskIdent: NorskIdent,
         val mottaker: Mottaker,
         val antallOverførteDager: Int,
         val samboerSiden: LocalDate?
@@ -30,7 +30,7 @@ data class OmsorgenDelesMed (
 
 data class OverførDagerSøknad (
         val mottaksdato: LocalDate,
-        val person: Person,
+        val norskIdent: NorskIdent,
         val arbeidssituasjon: Arbeidssituasjon,
         val borINorge: JaNei,
         val aleneOmOmsorgen: JaNei,

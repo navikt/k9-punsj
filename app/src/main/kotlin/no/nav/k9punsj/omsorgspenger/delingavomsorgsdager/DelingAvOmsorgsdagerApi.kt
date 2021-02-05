@@ -3,7 +3,7 @@ package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.SøknadType
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -19,7 +19,7 @@ class DelingAvOmsorgsdagerApi(
         private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService,
 ) {
     companion object {
-        const val type: SøknadType = "omsorgspenger-deling-av-omsorgsdager-melding"
+        private const val type = FagsakYtelseTypeUri.OMSORGSPENGER_DELING
         private val logger: Logger = LoggerFactory.getLogger(DelingAvOmsorgsdagerApi::class.java)
     }
 
