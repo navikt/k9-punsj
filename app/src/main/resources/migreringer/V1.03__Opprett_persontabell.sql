@@ -1,8 +1,10 @@
-create table if not exists personer (
-    person_id    uuid primary key,
-    aktoer_ident char(20)  not null,
-    person_ident char(11)  not null,
-    sist_endret  timestamp not null
+CREATE TABLE IF NOT EXISTS PERSON
+(
+    ID           SERIAL PRIMARY KEY,
+    PERSON_ID    UUID      NOT NULL,
+    AKTOER_IDENT CHAR(20)  NOT NULL,
+    NORSK_IDENT CHAR(11)  NOT NULL,
+    SIST_ENDRET  TIMESTAMP NOT NULL
 );
 
-CREATE UNIQUE INDEX personer_uidx ON personer (aktoer_ident, person_ident)
+CREATE UNIQUE INDEX PERSON_UIDX ON PERSON (AKTOER_IDENT, NORSK_IDENT)

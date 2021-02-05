@@ -3,11 +3,11 @@ package no.nav.k9punsj
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import no.nav.k9punsj.db.DbConfiguration
-import no.nav.k9punsj.db.hikariConfig
-import org.springframework.beans.factory.annotation.Autowired
 import de.huxhorn.sulky.ulid.ULID
+import no.nav.k9punsj.db.config.DbConfiguration
+import no.nav.k9punsj.db.hikariConfig
 import no.nav.k9punsj.jackson.UlidDeserializer
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration

@@ -3,7 +3,7 @@ package no.nav.k9punsj.omsorgspenger.overfoerdager
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.SøknadType
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -19,14 +19,14 @@ class OverførDagerApi(
     private val overførDagerSøknadService: OverførDagerSøknadService,
 ) {
     companion object {
-        const val søknadType: SøknadType = "omsorgspenger-overfoer-dager-soknad"
+        const val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_OVERFØRING_DAGER
         private val logger: Logger = LoggerFactory.getLogger(OverførDagerApi::class.java)
     }
 
     @Bean
     fun overførDagerRoutes() = Routes {
 
-        POST("/api/$søknadType") { request ->
+        POST("/api/$søknadTypeUri") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.body(BodyExtractors.toMono(OverførDagerDTO::class.java)).awaitFirst()
                 val søknad = OverførDagerConverter.map(dto)

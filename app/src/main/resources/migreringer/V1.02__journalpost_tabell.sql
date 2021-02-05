@@ -1,4 +1,4 @@
-create table if not exists journalpost (
+CREATE TABLE IF NOT EXISTS JOURNALPOST (
    JOURNALPOSTID   VARCHAR(100) NOT NULL PRIMARY KEY,
-   DATA jsonb        NOT NULL
+   DATA JSONB        NOT NULL
 )

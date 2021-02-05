@@ -1,7 +1,8 @@
 package no.nav.k9punsj.journalpost
 
-import no.nav.k9punsj.JournalpostId
-import no.nav.k9punsj.NorskIdent
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -48,7 +49,7 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: Ytelse) {
+    internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
 }
@@ -94,21 +95,14 @@ private data class ParsedJournalpost(
 }
 
 data class JournalpostInfo(
-        val journalpostId: JournalpostId,
-        val norskIdent: NorskIdent?,
-        val dokumenter: List<DokumentInfo>
+    val journalpostId: JournalpostId,
+    val norskIdent: NorskIdent?,
+    val dokumenter: List<DokumentInfo>
 )
 
 data class DokumentInfo(
         val dokumentId: DokumentId
 )
-
-enum class Ytelse {
-    PleiepengerNærstående,
-    Omsorgspenger,
-    Opplæringspenger,
-    Annet
-}
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
 internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")

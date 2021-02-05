@@ -1,7 +1,6 @@
-drop table soknader;
-create table if not exists mappe
+CREATE TABLE IF NOT EXISTS MAPPE
 (
-    id          uuid primary key,
-    sist_endret timestamp not null,
-    data        jsonb
+    ID          UUID PRIMARY KEY,
+    SIST_ENDRET TIMESTAMP NOT NULL,
+    DATA        JSONB
 );

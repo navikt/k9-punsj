@@ -2,9 +2,10 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
-import no.nav.k9punsj.JournalpostId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -81,7 +82,7 @@ internal class JournalpostRoutes(
                     } else {
                         journalpostService.omfordelJournalpost(
                                 journalpostId = request.journalpostId(),
-                                ytelse = omfordelingRequest.ytelse
+                                ytelse = FagsakYtelseType.fromKode(omfordelingRequest.fagsakYtelseTypeKode)
                         )
                         ServerResponse
                                 .noContent()
@@ -135,6 +136,6 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.omfordelingRequest() = body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
     data class OmfordelingRequest(
-            val ytelse: Ytelse
+            val fagsakYtelseTypeKode: String
     )
 }

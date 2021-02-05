@@ -1,13 +1,13 @@
 package no.nav.k9punsj.fordel
 
-import no.nav.k9punsj.AktørId
-import no.nav.k9punsj.JournalpostId
+import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import java.time.LocalDateTime
 
 data class PunsjEventDto(
         val eksternId: String,
-        val journalpostId: JournalpostId,
-        val aktørId: AktørId?,
+        val journalpostId: JournalpostIdDto,
+        val aktørId: AktørIdDto?,
         val eventTid: LocalDateTime,
         val aksjonspunktKoderMedStatusListe: MutableMap<String, String>
 )
