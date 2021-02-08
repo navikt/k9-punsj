@@ -136,6 +136,10 @@
             <version>${flyway-core.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav</groupId>
             <artifactId>vault-jdbc</artifactId>
             <version>${vault-jdbc.version}</version>

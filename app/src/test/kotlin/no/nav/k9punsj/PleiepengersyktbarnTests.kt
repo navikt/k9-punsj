@@ -10,10 +10,9 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
-import org.apache.kafka.common.KafkaException
+import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
@@ -38,17 +37,22 @@ class PleiepengersyktbarnTests {
     private val standardIdent = "01122334410"
 
     private fun genererKomplettSøknad() : MutableMap<String, Any?> {
-        return objectMapper().readValue(lesFraFil())
+        return objectMapper().readValue(lesFraFil("komplett-søknad.json"))
+    }
+
+    private fun genererSøknadMedFeil() : MutableMap<String, Any?> {
+        return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
     }
 
 
-    private fun lesFraFil() : String{
+    private fun lesFraFil(filnavn: String): String{
         try {
-            return Files.readString(Path.of("src/test/resources/psb/komplett-søknad.json"))
+            return Files.readString(Path.of("src/test/resources/psb/$filnavn"))
         } catch (e: IOException) {
             throw IllegalStateException(e)
         }
     }
+
 
 
     @Test
@@ -158,13 +162,27 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
     }
 
-    @Disabled // TODO: TSF-1185: PleiepengerSyktBarnConverter mangler obligatorisk felt på output
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val gyldigSoeknad: SøknadJson = genererKomplettSøknad()
-        val res = opprettOgSendInnSoeknad(gyldigSoeknad)
-        assertNotNull(res.bodyToMono(KafkaException::class.java).block())
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, res.statusCode())
+        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
+
+        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+    }
+
+    @Test
+    fun `Skal fange opp feilen overlappendePerioder i søknaden`() {
+        val gyldigSoeknad: SøknadJson = genererSøknadMedFeil()
+        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
+
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        assertEquals("overlappendePerioder", response?.feil?.first()?.feilkode!!)
     }
 
 //    @Test
@@ -276,7 +294,7 @@ class PleiepengersyktbarnTests {
 
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
-        ident: String = standardIdent,
+        ident: String,
         journalpostid: String = "73369b5b-d50e-47ab-8fc2-31ef35a71993",
     ): ClientResponse {
 

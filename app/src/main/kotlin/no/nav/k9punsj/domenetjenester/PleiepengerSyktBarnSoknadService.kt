@@ -4,18 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 
 @Service
-class PleiepengerSyktBarnSoknadService @Autowired constructor(
+class PleiepengerSyktBarnSoknadService(
         var hendelseProducer: HendelseProducer
 ) {
 
@@ -32,7 +31,7 @@ class PleiepengerSyktBarnSoknadService @Autowired constructor(
 
     fun toDokumentfordelingMelding(søknad: Any, journalpostIder: MutableSet<JournalpostId>): String {
         // Midlertidig generering av meldings-JSON i påvente av et definert format.
-        val om: ObjectMapper = JsonUtils.getObjectMapper()
+        val om: ObjectMapper = objectMapper()
         val dokumentfordelingMelding: ObjectNode = om.createObjectNode()
         val data: ObjectNode = dokumentfordelingMelding.objectNode()
         data.set<JsonNode>("søknad", om.valueToTree(søknad))

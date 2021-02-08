@@ -1,6 +1,5 @@
 package no.nav.k9punsj.db.datamodell
 
-import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynsordningOpphold
 import java.time.Duration
 
 

@@ -17,3 +17,14 @@ data class PersonDTO<T>(
         val innsendinger: MutableSet<JournalpostIdDto>,
         val soeknad: T?,
 )
+
+data class MappeFeil(
+        val mappeId: MappeId,
+        val feil: List<SøknadFeilDto>
+) {
+        data class SøknadFeilDto(
+                val felt: String?,
+                val feilkode: String?,
+                val feilmelding: String?,
+        )
+}

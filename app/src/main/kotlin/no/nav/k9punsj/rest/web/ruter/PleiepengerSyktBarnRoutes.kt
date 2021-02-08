@@ -13,7 +13,9 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.web.Innsending
+import no.nav.k9punsj.rest.web.dto.MappeFeil
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -22,7 +24,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
-import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -31,9 +32,9 @@ internal class PleiepengerSyktBarnRoutes(
     private val mappeService: MappeService,
     private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
     private val personService: PersonService,
-    private val authenticationHandler: AuthenticationHandler
+    private val authenticationHandler: AuthenticationHandler,
 
-) {
+    ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
         private const val NorskIdentKey = "norsk_ident"
@@ -53,19 +54,18 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMapper}") { request ->
             RequestContext(coroutineContext, request) {
                 val personer = personService.finnPersoner(request.norskeIdenter())
-                val mapper = mappeService.hentMapper(
-                    personIder = personer.map { p -> p.norskIdent }.toSet(),
+                val mapperDto = mappeService.hentMapper(
+                    personIder = personer.map { p -> p.personId }.toSet(),
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 ).map { mappe ->
                     mappe.tilDto { personId ->
                         personer.first { p -> p.personId == personId }.norskIdent
                     }
                 }
-
                 ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(MapperSvarDTO(mapper))
+                    .bodyValueAndAwait(MapperSvarDTO(mapperDto))
             }
         }
 
@@ -132,25 +132,42 @@ internal class PleiepengerSyktBarnRoutes(
                 val mappe = mappeService.hent(mappeId)
 
                 if (mappe == null || norskIdent == null) {
-                    ServerResponse
+                    return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
                 } else {
                     try {
-                        val person = mappe.personInfo[norskIdent]
-                        val søknad: Søknad = objectMapper.convertValue(person!!.soeknad)
-                        val soknad = SøknadMapper.map(søknad.søknadId ?: UUID.randomUUID(), søknad.ytelse!!, norskIdent)
-                        pleiepengerSyktBarnSoknadService.sendSøknad(soknad, person.innsendinger)
+                        val personer = personService.finnPersonerVedPersonId(mappe.personInfo.keys)
+                        val person = mappe.personInfo[personer.first().personId]
+
+                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(person!!.soeknad)
+
+                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(søknad)
+                        if (søknadK9Format.second.isNotEmpty()) {
+                            val feil = søknadK9Format.second.map { feil ->
+                                MappeFeil.SøknadFeilDto(feil.felt,
+                                    feil.feilkode,
+                                    feil.feilmelding)
+                            }.toList()
+
+                            return@RequestContext ServerResponse
+                                .status(HttpStatus.BAD_REQUEST)
+                                .json()
+                                .bodyValueAndAwait(MappeFeil(mappeId, feil))
+                        }
+
+                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, person.innsendinger)
+
                         mappeService.fjern(
                             mappeId = mappeId,
                             norskIdent = norskIdent
                         )
-                        ServerResponse
+                        return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()
                     } catch (e: ValideringsFeil) {
                         logger.error("", e)
-                        ServerResponse
+                        return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .buildAndAwait()
                     }

@@ -46,7 +46,7 @@ internal class OpenApi {
         @Value("\${no.nav.beskrivelse}") beskrivelse: String,
         @Value("\${no.nav.versjon}") versjon: String,
         @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
-        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
+        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
     ): OpenAPI = OpenAPI()
         .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
         .info(
@@ -112,7 +112,7 @@ internal class PleiepengerSyktBarnSoknadController {
         ]
     )
     fun HenteMappe(
-        @PathVariable("mappe_id") mappeId: String
+        @PathVariable("mappe_id") mappeId: String,
     ) {
     }
 
@@ -147,7 +147,7 @@ internal class PleiepengerSyktBarnSoknadController {
     )
     fun OppdatereSøknad(
         @PathVariable("mappe_id") mappeId: String,
-        @RequestBody søknad: OasInnsending
+        @RequestBody søknad: OasInnsending,
     ) {
     }
 
@@ -174,7 +174,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innsending feilet grunnet mangler i søknaden.",
                 content = [Content(
                     schema = Schema(
-                        implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
+                        implementation = OasPleiepengerSyktBarnFeil::class
                     )
                 )]
             )
@@ -182,7 +182,7 @@ internal class PleiepengerSyktBarnSoknadController {
     )
     fun SendSøknad(
         @PathVariable("mappe_id") mappeId: String,
-        @RequestHeader("X-Nav-NorskIdent") norskIdenter: String
+        @RequestHeader("X-Nav-NorskIdent") norskIdenter: String,
     ) {
     }
 
@@ -206,24 +206,35 @@ internal class PleiepengerSyktBarnSoknadController {
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: OasInnsending
+        @RequestBody søknad: OasInnsending,
     ) {
     }
 }
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 data class OasInnsending(
-    val personer: Map<String, JournalpostInnhold<PleiepengerSøknadDto>>
+    val personer: Map<String, JournalpostInnhold<PleiepengerSøknadDto>>,
 )
 
 data class OasPleiepengerSyktBarSoknadMappeSvar(
     val mappeId: MappeId,
-    val personer: MutableMap<NorskIdent, PersonDTO<PleiepengerSøknadDto>>?
+    val personer: MutableMap<NorskIdent, PersonDTO<PleiepengerSøknadDto>>?,
 )
 
 data class OasPleiepengerSyktBarSoknadMapperSvar(
-    val mapper: List<OasPleiepengerSyktBarSoknadMappeSvar>
+    val mapper: List<OasPleiepengerSyktBarSoknadMappeSvar>,
 )
+
+data class OasPleiepengerSyktBarnFeil(
+    val mappeId: MappeId?,
+    val feil: List<FeilDto>?,
+){
+    data class FeilDto(
+        val felt: String?,
+        val feilkode: String?,
+        val feilmelding: String?,
+    )
+}
 
 @RestController
 @SecurityScheme(
@@ -265,7 +276,7 @@ internal class JournalpostController {
     )
     fun OmfordelJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
-        @RequestBody body: JournalpostRoutes.OmfordelingRequest
+        @RequestBody body: JournalpostRoutes.OmfordelingRequest,
     ) {
     }
 
@@ -304,7 +315,7 @@ internal class JournalpostController {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteJournalpostInfo(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 
@@ -335,17 +346,17 @@ internal class JournalpostController {
     )
     fun HenteDokument(
         @PathVariable("journalpost_id") journalpostId: String,
-        @PathVariable("dokument_id") dokumentId: String
+        @PathVariable("dokument_id") dokumentId: String,
     ) {
     }
 }
 
 data class OasDokumentInfo(
-    val dokument_id: String
+    val dokument_id: String,
 )
 
 data class OasJournalpostInfo(
-    val dokumenter: Set<OasDokumentInfo>
+    val dokumenter: Set<OasDokumentInfo>,
 )
 
 @RestController
@@ -371,13 +382,13 @@ internal class FagsakerController {
     )
     fun HenteFagsaker(
         @RequestParam("ytelse") ytelse: String,
-        @PathVariable("norsk_ident") norskIdent: String
+        @PathVariable("norsk_ident") norskIdent: String,
     ) {
     }
 }
 
 data class OasFagsakListe(
-    val fagsaker: Set<OasFagsak>
+    val fagsaker: Set<OasFagsak>,
 )
 
 data class OasFagsak(
@@ -385,12 +396,12 @@ data class OasFagsak(
     val url: String,
     val fra_og_med: LocalDate,
     val til_og_med: LocalDate?,
-    val barn: OasFagsakBarn
+    val barn: OasFagsakBarn,
 )
 
 data class OasFagsakBarn(
     val fødselsdato: LocalDate,
-    val navn: String
+    val navn: String,
 )
 
 @RestController
@@ -434,7 +445,7 @@ internal class PdlController {
 }
 
 data class AktørResponse(
-    val person: Person
+    val person: Person,
 )
 
 
