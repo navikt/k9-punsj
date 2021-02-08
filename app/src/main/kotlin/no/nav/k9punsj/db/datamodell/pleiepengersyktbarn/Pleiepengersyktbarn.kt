@@ -2,7 +2,6 @@ package no.nav.k9punsj.db.datamodell.pleiepengersyktbarn
 
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9punsj.db.datamodell.*
-import no.nav.k9punsj.domenetjenester.mappers.PleiepengerSyktBarnYtelseMapper
 
 
 data class Pleiepengersyktbarn(
@@ -37,7 +36,7 @@ data class Pleiepengersyktbarn(
     }
 
     override fun mapTilEksternYtelse(): no.nav.k9.søknad.ytelse.Ytelse {
-        return PleiepengerSyktBarnYtelseMapper.map(this)
+        TODO("Not yet implemented")
     }
 }
 

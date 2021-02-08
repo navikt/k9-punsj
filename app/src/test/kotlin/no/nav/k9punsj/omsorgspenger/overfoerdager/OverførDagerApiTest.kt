@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitExchange
-import java.util.*
+import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,7 +40,7 @@ internal class OverførDagerApiTest {
                 "466988237"
               ],
               "søknad": {
-                "identitetsnummer": "01010145265",
+                "norskIdent": "01010145265",
                 "arbeidssituasjon": {
                   "erArbeidstaker": true,
                   "erFrilanser": false,
@@ -49,7 +49,7 @@ internal class OverførDagerApiTest {
                 },
                 "borINorge": "ja",
                 "omsorgenDelesMed": {
-                  "identitetsnummer": "23098025855",
+                  "norskIdent": "23098025855",
                   "antallOverførteDager": 1,
                   "mottaker": "Ektefelle",
                   "samboerSiden": null
@@ -57,7 +57,7 @@ internal class OverførDagerApiTest {
                 "aleneOmOmsorgen": "ja",
                 "barn": [
                   {
-                    "identitetsnummer": "01011021154",
+                    "norskIdent": "01011021154",
                     "fødselsdato": "2020-09-04"
                   }
                 ],
@@ -121,7 +121,7 @@ internal class OverførDagerApiTest {
                 "466988237"
               ],
               "søknad": {
-                "identitetsnummer": "$fellesIdNummer",
+                "norskIdent": "$fellesIdNummer",
                 "arbeidssituasjon": {
                   "erArbeidstaker": true,
                   "erFrilanser": false,
@@ -130,7 +130,7 @@ internal class OverførDagerApiTest {
                 },
                 "borINorge": "ja",
                 "omsorgenDelesMed": {
-                  "identitetsnummer": "$fellesIdNummer",
+                  "norskIdent": "$fellesIdNummer",
                   "antallOverførteDager": 1,
                   "mottaker": "Ektefelle",
                   "samboerSiden": null
@@ -138,7 +138,7 @@ internal class OverførDagerApiTest {
                 "aleneOmOmsorgen": "ja",
                 "barn": [
                   {
-                    "identitetsnummer": "01011021154",
+                    "norskIdent": "01011021154",
                     "fødselsdato": "2020-09-04"
                   }
                 ],

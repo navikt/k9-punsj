@@ -19,6 +19,10 @@ class MappeService(
         return mappeRepository.hent(personIder)
     }
 
+    suspend fun hentAlleMapper(): List<Mappe> {
+        return mappeRepository.hentAlleMapper()
+    }
+
     suspend fun førsteInnsending(
         søknadType: FagsakYtelseType,
         innsending: Innsending

@@ -1,0 +1,139 @@
+{
+  "søknadId": "1",
+  "versjon": "2.0.0",
+  "mottattDato": "2020-10-12T12:53:21.046Z",
+  "søker": {
+    "norskIdentitetsnummer": "11111111111"
+  },
+  "ytelse": {
+    "type": "PLEIEPENGER_SYKT_BARN",
+    "søknadsperiode": "2018-12-30/2019-10-20",
+    "dataBruktTilUtledning": {
+      "harForståttRettigheterOgPlikter": true,
+      "harBekreftetOpplysninger": true,
+      "samtidigHjemme": false,
+      "harMedsøker": false,
+      "bekrefterPeriodeOver8Uker": true
+    },
+    "barn": {
+      "norskIdentitetsnummer": "11111111111",
+      "fødselsdato": null
+    },
+    "arbeidAktivitet": {
+      "selvstendigNæringsdrivende": [
+        {
+          "perioder": {
+            "2018-11-11/2018-11-30": {
+              "virksomhetstyper": [
+                "FISKE"
+              ]
+            }
+          },
+          "virksomhetNavn": "Test"
+        }
+      ],
+      "frilanser": {
+        "startdato": "2019-10-10",
+        "jobberFortsattSomFrilans": true
+      }
+    },
+    "beredskap": {
+      "perioder": {
+        "2018-12-30/2019-02-20": {
+          "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+        },
+        "2019-02-21/2019-05-21": {
+          "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+        }
+      }
+    },
+    "nattevåk": {
+      "perioder": {
+        "2018-12-30/2019-02-20": {
+          "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+        },
+        "2019-02-21/2019-05-21": {
+          "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+        }
+      }
+    },
+    "tilsynsordning": {
+      "perioder": {
+        "2019-01-01/2019-01-01": {
+          "etablertTilsynTimerPerDag": "PT7H30M"
+        },
+        "2019-01-02/2019-01-02": {
+          "etablertTilsynTimerPerDag": "PT7H30M"
+        },
+        "2019-01-03/2019-01-09": {
+          "etablertTilsynTimerPerDag": "PT7H30M"
+        }
+      }
+    },
+    "arbeidstid": {
+      "arbeidstakerList": [
+        {
+          "norskIdentitetsnummer": null,
+          "organisasjonsnummer": "999999999",
+          "arbeidstidInfo": {
+            "jobberNormaltTimerPerDag": "PT7H30M",
+            "perioder": {
+              "2018-12-30/2019-10-20": {
+                "faktiskArbeidTimerPerDag": "PT7H30M"
+              }
+            }
+          }
+        },
+        {
+          "norskIdentitetsnummer": null,
+          "organisasjonsnummer": "88888888",
+          "arbeidstidInfo": {
+            "jobberNormaltTimerPerDag": "PT7H30M",
+            "perioder": {
+              "2018-12-30/2019-10-20": {
+                "faktiskArbeidTimerPerDag": "PT7H30M"
+              },
+              "2019-01-06/2019-10-13": {
+                "faktiskArbeidTimerPerDag": "PT7H30M"
+              }
+            }
+          }
+        }
+      ],
+      "frilanserArbeidstidInfo": null,
+      "selvstendigNæringsdrivendeArbeidstidInfo": null
+    },
+    "uttak": {
+      "perioder": {
+        "2018-12-30/2019-10-20": {
+          "timerPleieAvBarnetPerDag": "PT7H30M"
+        }
+      }
+    },
+    "omsorg": {
+      "relasjonTilBarnet": "MORA",
+      "samtykketOmsorgForBarnet": true,
+      "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+    },
+    "lovbestemtFerie": {
+      "perioder": [
+        "2019-02-21/2019-05-21"
+      ]
+    },
+    "bosteder": {
+      "perioder": {
+        "2018-12-30/2019-10-20": {
+          "land": "DNK"
+        }
+      }
+    },
+    "utenlandsopphold": {
+      "perioder": {
+        "2018-12-30/2019-10-20": {
+          "land": "DNK",
+          "årsak": "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning"
+        }
+      }
+    }
+  }
+}

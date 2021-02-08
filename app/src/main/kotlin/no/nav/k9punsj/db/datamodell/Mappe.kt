@@ -11,29 +11,21 @@ typealias MappeId = String
 data class Mappe(
     val mappeId: MappeId,
     val søknadType: FagsakYtelseType,
-    val personInfo: MutableMap<PersonId, PersonInfo>
-) {
-    fun getFørstePerson(): PersonId {
-        return personInfo.keys.first()
-    }
-}
+    val personInfo: MutableMap<PersonId, PersonInfo>,
+)
 
 data class PersonInfo(
     val innsendinger: MutableSet<JournalpostId>,
-    val soeknad: SøknadJson
+    val soeknad: SøknadJson,
 )
 
-internal fun Mappe.tilDto(f:(PersonId) -> (NorskIdent)): MappeSvarDTO {
-    val map = personInfo.mapKeys { key -> f(key.key) }
+internal fun Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO {
+    val map = personInfo
+        .mapKeys { key -> f(key.key) }
         .mapValues { value -> PersonDTO(innsendinger = value.value.innsendinger, soeknad = value.value.soeknad) }
         .toMutableMap()
 
     return MappeSvarDTO(this.mappeId, map)
-}
-
-
-internal fun Mappe.getFirstPerson(): PersonInfo? {
-    return this.personInfo[this.getFørstePerson()];
 }
 
 private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(personInfo: PersonInfo?): PersonInfo {
@@ -46,12 +38,12 @@ private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(personInfo: PersonIn
 internal fun Innsending.leggIMappe(
     mappe: Mappe?,
     fagsakYtelseType: FagsakYtelseType? = null,
-    f: (NorskIdent) -> (PersonId)
+    f: (NorskIdent) -> (PersonId),
 ): Mappe {
     val personligInnholdUndermapper = mappe?.personInfo ?: mutableMapOf()
     this.personer.forEach { (personId, journalpostInnhold) ->
-        val f1 = f(personId)
-        personligInnholdUndermapper[f1] = journalpostInnhold.leggIUndermappe(personInfo = mappe?.personInfo?.get(f(personId)))
+        personligInnholdUndermapper[f(personId)] =
+            journalpostInnhold.leggIUndermappe(personInfo = mappe?.personInfo?.get(f(personId)))
     }
     return Mappe(
         mappeId = mappe?.mappeId ?: UUID.randomUUID().toString(),
