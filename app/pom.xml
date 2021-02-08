@@ -108,10 +108,6 @@
             <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kodeverk</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.k9.rapid</groupId>
             <artifactId>overfore-omsorgsdager</artifactId>
         </dependency>
