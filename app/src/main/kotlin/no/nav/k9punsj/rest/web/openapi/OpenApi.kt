@@ -22,6 +22,7 @@ import no.nav.k9punsj.fagsak.FagsakRoutes
 import no.nav.k9punsj.fordel.HendelseRoutes
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.JournalpostInnhold
 import no.nav.k9punsj.rest.web.dto.PersonDTO
@@ -207,6 +208,30 @@ internal class PleiepengerSyktBarnSoknadController {
     )
     fun NySøknad(
         @RequestBody søknad: OasInnsending,
+    ) {
+    }
+
+    @GetMapping(
+        PleiepengerSyktBarnRoutes.Urls.HentSøknadFraK9Sak,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @Operation(summary = "Hente siste psb søknad fra k9-sak")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Viser den siste gjeldene søknaden som ligger i k9-sak",
+                content = [Content(
+                    schema = Schema(
+                        implementation = PleiepengerSøknadDto::class
+                    )
+                )]
+            )
+        ]
+    )
+    fun HentSøknadFraK9Sak(
+        @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>
     ) {
     }
 }
@@ -509,6 +534,46 @@ internal class HendelseController {
                 content = [Content(
                     schema = Schema(
                         implementation = HendelseRoutes.FordelPunsjEventDto::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Ikke innlogget"
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til å opprette journalføringsoppgave"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Eksisterer ikke"
+            )
+        ]
+    )
+
+    @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
+    fun ProsesserHendelse(@RequestBody body: HendelseRoutes.FordelPunsjEventDto) {
+
+    }
+}
+
+@RestController
+@Tag(name = "K9Sak", description = "Håndtering kall mot k9Sak")
+internal class K9SakController {
+    @PostMapping(
+      K9SakRoutes.Urls.HentSisteVersjonAvPleiepengerSøknad,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Prosessert",
+                content = [Content(
+                    schema = Schema(
+                        implementation = K9SakRoutes.K9SakSøknadDto::class
                     )
                 )]
             ),

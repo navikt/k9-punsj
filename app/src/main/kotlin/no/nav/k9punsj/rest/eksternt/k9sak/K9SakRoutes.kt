@@ -17,6 +17,10 @@ internal class K9SakRoutes(
     }
 
     internal object Urls {
-        internal const val HentIdent = "/pdl/hentident/"
+        internal const val HentSisteVersjonAvPleiepengerSøknad = "/behandling/hentSøknad"
     }
+
+    data class K9SakSøknadDto(
+        val navn: String?
+    )
 }

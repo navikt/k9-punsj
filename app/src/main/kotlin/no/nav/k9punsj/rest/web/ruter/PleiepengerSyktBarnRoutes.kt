@@ -12,6 +12,7 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.dto.MappeFeil
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
@@ -32,6 +33,7 @@ internal class PleiepengerSyktBarnRoutes(
     private val mappeService: MappeService,
     private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
     private val personService: PersonService,
+    private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
 
     ) {
@@ -46,6 +48,8 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val HenteMapper = "/$søknadType/mapper"
         internal const val NySøknad = "/$søknadType"
         internal const val EksisterendeSøknad = "/$søknadType/mappe/{$MappeIdKey}"
+        //TODO(OJR) er det nok med bare FNR her? eller må vi slå opp mot k9-Sak med periode også?
+        internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType"
     }
 
     @Bean
@@ -205,10 +209,24 @@ internal class PleiepengerSyktBarnRoutes(
                 }
             }
         }
+
+        GET("/api${Urls.HentSøknadFraK9Sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.norskIdent()
+                val psbSøknad = k9SakService.hentSisteMottattePsbSøknad(norskIdent!!)
+                    ?: return@RequestContext ServerResponse.noContent().buildAndAwait()
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(psbSøknad)
+            }
+        }
     }
 
 
     private suspend fun ServerRequest.mappeId(): MappeId = pathVariable(MappeIdKey)
+
     private suspend fun ServerRequest.norskIdent(): NorskIdent? =
         if (norskeIdenter().size != 1) null else norskeIdenter().first()
 

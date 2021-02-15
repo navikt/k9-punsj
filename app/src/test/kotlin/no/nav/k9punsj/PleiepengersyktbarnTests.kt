@@ -1,6 +1,5 @@
 package no.nav.k9punsj
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -9,8 +8,10 @@ import no.nav.k9punsj.rest.web.JournalpostInnhold
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
+import no.nav.k9punsj.util.LesFraFilUtil
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.jupiter.api.Test
@@ -22,9 +23,6 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 class PleiepengersyktbarnTests {
@@ -35,24 +33,6 @@ class PleiepengersyktbarnTests {
 
     // Standardverdier for test
     private val standardIdent = "01122334410"
-
-    private fun genererKomplettSøknad() : MutableMap<String, Any?> {
-        return objectMapper().readValue(lesFraFil("komplett-søknad.json"))
-    }
-
-    private fun genererSøknadMedFeil() : MutableMap<String, Any?> {
-        return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
-    }
-
-
-    private fun lesFraFil(filnavn: String): String{
-        try {
-            return Files.readString(Path.of("src/test/resources/psb/$filnavn"))
-        } catch (e: IOException) {
-            throw IllegalStateException(e)
-        }
-    }
-
 
 
     @Test
@@ -108,7 +88,7 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Oppdaterer en søknad`() {
-        val søknad = genererKomplettSøknad()
+        val søknad = LesFraFilUtil.genererKomplettSøknad()
 
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
         val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
@@ -164,7 +144,7 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
-        val gyldigSoeknad: SøknadJson = genererKomplettSøknad()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
         val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
 
@@ -173,7 +153,7 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Skal fange opp feilen overlappendePerioder i søknaden`() {
-        val gyldigSoeknad: SøknadJson = genererSøknadMedFeil()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererSøknadMedFeil()
         val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
 
@@ -183,6 +163,25 @@ class PleiepengersyktbarnTests {
 
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         assertEquals("overlappendePerioder", response?.feil?.first()?.feilkode!!)
+    }
+
+
+    @Test
+    fun `Skal hente komplett søknad fra k9-sak`() {
+        val søknad = LesFraFilUtil.genererKomplettSøknad()
+        val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+
+        val res = client.get()
+            .uri{ it.pathSegment(api, "k9_sak", søknadTypeUri).build() }
+            .header("X-Nav-NorskIdent", norskIdent)
+            .awaitExchangeBlocking()
+
+        val søknadDto = res
+            .bodyToMono(PleiepengerSøknadDto::class.java)
+            .block()
+
+        assertEquals(HttpStatus.OK, res.statusCode())
+        assertEquals(søknadDto?.søker?.norskIdentitetsnummer, norskIdent)
     }
 
 //    @Test
