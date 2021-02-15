@@ -41,7 +41,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
                         jornalpostId,
                         jpost.aktørId,
                         LocalDateTime.now(),
-                        mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                        aksjonspunktKoderMedStatusListe = mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
                     )
                 ), key = id
             )
