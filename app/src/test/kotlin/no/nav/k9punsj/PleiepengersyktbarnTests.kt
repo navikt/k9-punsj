@@ -172,7 +172,7 @@ class PleiepengersyktbarnTests {
         val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
 
         val res = client.get()
-            .uri{ it.pathSegment(api, "k9_sak", søknadTypeUri).build() }
+            .uri{ it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
 
