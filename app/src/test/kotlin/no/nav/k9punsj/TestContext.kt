@@ -2,10 +2,15 @@ package no.nav.k9punsj
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.db.config.runMigration
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.SaksnummerDto
+import no.nav.k9punsj.util.LesFraFilUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -20,6 +25,18 @@ class TestContext {
     val hendelseProducerMock: HendelseProducer = object: HendelseProducer {
         override fun send(topicName: String, søknadString: String, søknadId: String) {
 
+        }
+    }
+
+    @Bean
+    fun k9ServiceBean() = k9ServiceMock
+    val k9ServiceMock: K9SakService = object: K9SakService{
+        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent): PleiepengerSøknadDto? {
+            return LesFraFilUtil.hentKomplettSøknad()
+        }
+
+        override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
+            TODO("Not yet implemented")
         }
     }
 

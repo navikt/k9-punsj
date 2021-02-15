@@ -15,9 +15,12 @@ class PdlServiceTest {
     }
     @Test
     fun deserialisereOk()  {
-        val s = """{"data":{"hentIdenter":{"identer":[{"ident":"2002220522526","historisk":false,"gruppe":"AKTORID"}]}}}"""
+        val aktørId = "2002220522526"
+        val s = """{"data":{"hentIdenter":{"identer":[{"ident":$aktørId,"historisk":false,"gruppe":"AKTORID"}]}}}"""
         val (data, errors) = objectMapper().readValue<IdentPdl>(s)
         Assertions.assertThat(data).isNotNull
+        val ident = data.hentIdenter?.identer?.get(0)?.ident!!
+        Assertions.assertThat(ident).isEqualTo(aktørId)
         Assertions.assertThat(errors).isNull()
     }
 }
