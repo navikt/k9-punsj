@@ -134,8 +134,8 @@
     <repositories>
         <repository>
             <id>github</id>
-            <name>GitHub dussseldorf-ktor Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/navikt/dusseldorf-ktor/</url>
+            <name>GitHub navikt Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/navikt/k9-punsj</url>
         </repository>
     </repositories>
 
