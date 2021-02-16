@@ -3,6 +3,7 @@ package no.nav.k9punsj
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.JournalpostInnhold
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -170,10 +171,12 @@ class PleiepengersyktbarnTests {
     fun `Skal hente komplett søknad fra k9-sak`() {
         val søknad = LesFraFilUtil.genererKomplettSøknad()
         val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        val hentSøknad = lagHentSøknad(norskIdent, "2018-12-30/2019-10-20")
 
-        val res = client.get()
+        val res = client.post()
             .uri{ it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
             .header("X-Nav-NorskIdent", norskIdent)
+            .body(BodyInserters.fromValue(hentSøknad))
             .awaitExchangeBlocking()
 
         val søknadDto = res
@@ -184,79 +187,25 @@ class PleiepengersyktbarnTests {
         assertEquals(søknadDto?.søker?.norskIdentitetsnummer, norskIdent)
     }
 
-//    @Test
-//    fun `Innsending av søknad uten perioder blir stoppet i første valideringsfase`() {
-//        val soeknadUtenPerioder: SøknadJson = genererKomplettSøknad(perioder = emptyList())
-//        val res = opprettOgSendInnSoeknad(soeknadUtenPerioder)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med periode uten startdato blir stoppet i første valideringsfase`() {
-//        val soeknadMedPeriodeUtenStartdato: SøknadJson = genererKomplettSøknad(perioder = listOf(Periode(fraOgMed = null, tilOgMed = standardTilOgMed)))
-//        val res = opprettOgSendInnSoeknad(soeknadMedPeriodeUtenStartdato)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med periode uten sluttdato blir stoppet i første valideringsfase`() {
-//        val soeknadMedPeriodeUtenSluttdato: SøknadJson = genererKomplettSøknad(perioder = listOf(Periode(fraOgMed = standardFraOgMed, tilOgMed = null)))
-//        val res = opprettOgSendInnSoeknad(soeknadMedPeriodeUtenSluttdato)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med periode med sluttdato før startdato blir stoppet i første valideringsfase`() {
-//        val soeknadMedPeriodeMedSluttdatoFoerStartdato: SøknadJson = genererKomplettSøknad(perioder = listOf(Periode(fraOgMed = standardTilOgMed, tilOgMed = standardFraOgMed)))
-//        val res = opprettOgSendInnSoeknad(soeknadMedPeriodeMedSluttdatoFoerStartdato)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad uten språk blir stoppet i første valideringsfase`() {
-//        val soeknadUtenSpraak: SøknadJson = genererKomplettSøknad(spraak = null)
-//        val res = opprettOgSendInnSoeknad(soeknadUtenSpraak)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad uten mottakelsesdato blir stoppet i første valideringsfase`() {
-//        val soeknadUtenMottakelsesdato: SøknadJson = genererKomplettSøknad(datoMottatt = null)
-//        val res = opprettOgSendInnSoeknad(soeknadUtenMottakelsesdato)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad uten barn blir stoppet i første valideringsfase`() {
-//        val soeknadUtenBarn: SøknadJson = genererKomplettSøknad(barn = null)
-//        val res = opprettOgSendInnSoeknad(soeknadUtenBarn)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med barn uten fødselsnummer og fødselsdato blir stoppet i første valideringsfase`() {
-//        val soeknadMedBarnUtenFoedselsnummerOgFoedselsdato: SøknadJson = genererKomplettSøknad(barn = Barn(null, null))
-//        val res = opprettOgSendInnSoeknad(soeknadMedBarnUtenFoedselsnummerOgFoedselsdato)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med overlappende perioder blir stoppet i første valideringsfase`() {
-//        val soeknadMedOverlappendePerioder: SøknadJson = genererKomplettSøknad(perioder = listOf(standardPeriode, standardPeriode))
-//        val res = opprettOgSendInnSoeknad(soeknadMedOverlappendePerioder)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med uidentifisert arbeidsgiver blir stoppet i første valideringsfase`() {
-//        val soeknadMedUidentifisertArbeidsgiver: SøknadJson = genererKomplettSøknad(arbeid = Arbeid(
-//                arbeidstaker = listOf(Arbeidsgiver(listOf(standardTilstedevaerelsesgrad), null, null)),
-//                frilanser = listOf(standardFrilanser),
-//                selvstendigNaeringsdrivende = listOf(standardSelvstendigNaeringsdrivende)
-//        ))
-//        val res = opprettOgSendInnSoeknad(soeknadMedUidentifisertArbeidsgiver)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
+    @Test
+    fun `Innsending av søknad med feil i perioden blir stoppet`() {
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
+
+        val ytelse = gyldigSoeknad["ytelse"] as MutableMap<String, Any>
+
+        //ødelegger perioden
+        ytelse.replace("søknadsperiode", "2019-12-30/2018-10-20")
+        gyldigSoeknad.replace("ytelse", ytelse)
+
+        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
+
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        assertEquals("ugyldigPeriode", response?.feil?.first()?.feilkode!!)
+    }
 //
 //    @Test
 //    fun `Innsending av søknad med både person og organisasjon som arbeidsgiver blir stoppet i første valideringsfase`() {
@@ -269,27 +218,6 @@ class PleiepengersyktbarnTests {
 //        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
 //    }
 //
-//    @Test
-//    fun `Innsending av søknad med for høy tilstedeværelsesgrad blir stoppet i første valideringsfase`() {
-//        val soeknadMedForHoeyTilstedevaerelsesgrad: SøknadJson = genererKomplettSøknad(arbeid = Arbeid(
-//                arbeidstaker = listOf(Arbeidsgiver(listOf(Tilstedevaerelsesgrad(standardPeriode, 100.1F)), standardOrganisasjonsnummer, null)),
-//                frilanser = listOf(standardFrilanser),
-//                selvstendigNaeringsdrivende = listOf(standardSelvstendigNaeringsdrivende)
-//        ))
-//        val res = opprettOgSendInnSoeknad(soeknadMedForHoeyTilstedevaerelsesgrad)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
-//
-//    @Test
-//    fun `Innsending av søknad med for lav tilstedeværelsesgrad blir stoppet i første valideringsfase`() {
-//        val soeknadMedForLavTilstedevaerelsesgrad: SøknadJson = genererKomplettSøknad(arbeid = Arbeid(
-//                arbeidstaker = listOf(Arbeidsgiver(listOf(Tilstedevaerelsesgrad(standardPeriode, -.1F)), standardOrganisasjonsnummer, null)),
-//                frilanser = listOf(standardFrilanser),
-//                selvstendigNaeringsdrivende = listOf(standardSelvstendigNaeringsdrivende)
-//        ))
-//        val res = opprettOgSendInnSoeknad(soeknadMedForLavTilstedevaerelsesgrad)
-//        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-//    }
 
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
@@ -313,7 +241,7 @@ class PleiepengersyktbarnTests {
 
         return client.post()
                 .uri{it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build()}
-                .header("X-Nav-NorskIdent", standardIdent)
+                .header("X-Nav-NorskIdent", ident)
                 .body(BodyInserters.fromValue(innsendingForInnsendingAvSoknad))
                 .awaitExchangeBlocking()
     }
@@ -327,4 +255,8 @@ private fun lagInnsending(personnummer: NorskIdentDto, journalpostId: String, s�
     personer[personnummer] = person
 
     return Innsending(personer)
+}
+
+private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: String): HentSøknad {
+    return HentSøknad(norskIdent = norskIdentDto, periode = periode)
 }

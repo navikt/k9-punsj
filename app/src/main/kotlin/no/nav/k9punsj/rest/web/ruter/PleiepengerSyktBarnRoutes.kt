@@ -13,6 +13,7 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
+import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.dto.MappeFeil
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
@@ -210,11 +211,11 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        GET("/api${Urls.HentSøknadFraK9Sak}") { request ->
+        POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.norskIdent()
-                val psbSøknad = k9SakService.hentSisteMottattePsbSøknad(norskIdent!!)
-                    ?: return@RequestContext ServerResponse.noContent().buildAndAwait()
+                val hentSøknad = request.hentSøknad()
+                val psbSøknad = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, hentSøknad.periode)
+                    ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
                 return@RequestContext ServerResponse
                     .ok()
@@ -238,4 +239,5 @@ internal class PleiepengerSyktBarnRoutes(
 
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
+    private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
 }

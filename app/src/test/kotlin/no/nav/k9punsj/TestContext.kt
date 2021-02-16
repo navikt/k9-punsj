@@ -31,7 +31,7 @@ class TestContext {
     @Bean
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object: K9SakService{
-        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent): PleiepengerSøknadDto? {
+        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: String): PleiepengerSøknadDto? {
             return LesFraFilUtil.hentKomplettSøknad()
         }
 
