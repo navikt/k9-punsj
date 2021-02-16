@@ -33,7 +33,7 @@ class K9SakServiceImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent): PleiepengerSøknadDto? {
+    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: String): PleiepengerSøknadDto? {
         val json = lesFraFil()
         return objectMapper().readValue<PleiepengerSøknadDto>(json)
     }

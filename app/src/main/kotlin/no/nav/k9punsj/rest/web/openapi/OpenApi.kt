@@ -25,6 +25,7 @@ import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.JournalpostInnhold
+import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.PersonDTO
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
@@ -211,7 +212,7 @@ internal class PleiepengerSyktBarnSoknadController {
     ) {
     }
 
-    @GetMapping(
+    @PostMapping(
         PleiepengerSyktBarnRoutes.Urls.HentSøknadFraK9Sak,
         consumes = ["application/json"],
         produces = ["application/json"]
@@ -227,16 +228,26 @@ internal class PleiepengerSyktBarnSoknadController {
                         implementation = PleiepengerSøknadDto::class
                     )
                 )]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Fant ingen gjeldene søknad"
             )
         ]
     )
     fun HentSøknadFraK9Sak(
-        @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>
+        @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>,
+        @RequestBody hentSøknad: OasHentSøknad,
     ) {
     }
 }
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
+data class OasHentSøknad(
+    val norskIdent: NorskIdentDto,
+    val periode: String
+)
+
 data class OasInnsending(
     val personer: Map<String, JournalpostInnhold<PleiepengerSøknadDto>>,
 )

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.springframework.http.HttpStatus
 
@@ -24,6 +25,11 @@ internal fun SøknadJson.mergeNy(nySøknad: SøknadJson) : SøknadJson {
 
 data class Innsending(
         val personer: Map<no.nav.k9punsj.db.datamodell.NorskIdent, JournalpostInnhold<SøknadJson>>
+)
+
+data class HentSøknad(
+    val norskIdent: NorskIdent,
+    val periode: String
 )
 
 data class JournalpostInnhold<T>(
