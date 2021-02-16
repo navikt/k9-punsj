@@ -9,7 +9,6 @@ object TestSetup {
     )
 
     private const val port = 9194
-
     val client = WebClient.create("http://localhost:$port/")
 
     private val app = K9PunsjApplicationWithMocks.startup(
