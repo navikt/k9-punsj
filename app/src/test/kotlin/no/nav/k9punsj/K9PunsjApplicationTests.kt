@@ -3,11 +3,15 @@ package no.nav.k9punsj
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.felles.type.Språk
+import no.nav.k9punsj.TestSetup.client
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.omsorgspenger.overfoerdager.Barn
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.client.ClientResponse
@@ -91,15 +95,15 @@ class K9PunsjApplicationTests {
 //
 //	val client = TestSetup.client
 //
-//	@Test
-//	fun `Endepunkt brukt for isReady og isAlive fungerer`() {
-//		val res =
-//		client.get().uri {
-//			it.pathSegment("internal", "actuator", "info").build()
-//		}.awaitExchangeBlocking()
-//
-//		assertEquals(HttpStatus.OK, res.statusCode())
-//	}
+	@Test
+	fun `Endepunkt brukt for isReady og isAlive fungerer`() {
+		val res =
+		client.get().uri {
+			it.pathSegment("internal", "actuator", "info").build()
+		}.awaitExchangeBlocking()
+
+		assertEquals(HttpStatus.OK, res.statusCode())
+	}
 //
 //	@Test
 //	fun `Hente et dokument fra Journalpost uten credentials feiler`() {
