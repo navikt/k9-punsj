@@ -49,7 +49,6 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val HenteMapper = "/$søknadType/mapper"
         internal const val NySøknad = "/$søknadType"
         internal const val EksisterendeSøknad = "/$søknadType/mappe/{$MappeIdKey}"
-        //TODO(OJR) er det nok med bare FNR her? eller må vi slå opp mot k9-Sak med periode også?
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType"
     }
 

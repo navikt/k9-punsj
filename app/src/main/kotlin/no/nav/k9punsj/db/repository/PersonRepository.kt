@@ -9,7 +9,6 @@ import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.db.datamodell.PersonId
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -58,12 +57,12 @@ class PersonRepository(private val dataSource: DataSource) {
     suspend fun lagre(norskIdent: String, aktørId: String): Person {
         val uuid = UUID.randomUUID()
 
-        val insert = "insert into person (person_id,  aktoer_ident, norsk_ident, sist_endret) values (?, ?, ?, ?)"
+        val insert = "insert into person (person_id,  aktoer_ident, norsk_ident) values (?, ?, ?)"
 
         using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 //language=PostgreSQL
-                return@transaction tx.update(queryOf(insert, uuid, aktørId, norskIdent, LocalDateTime.now()))
+                return@transaction tx.update(queryOf(insert, uuid, aktørId, norskIdent))
             }
         }
 
