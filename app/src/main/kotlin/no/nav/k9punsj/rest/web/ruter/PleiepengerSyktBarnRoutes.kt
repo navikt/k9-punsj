@@ -50,6 +50,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val NySøknad = "/$søknadType"
         internal const val EksisterendeSøknad = "/$søknadType/mappe/{$MappeIdKey}"
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType"
+        internal const val NySøknad2 = "/$søknadType/v2"
     }
 
     @Bean
