@@ -1,16 +1,13 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.Mappe
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.PersonInfo
-import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.UUID
@@ -34,11 +31,8 @@ internal class MappeRepositoryTest {
 
     @Test
     internal fun hentMapperMedIdenter(): Unit = runBlocking {
-        val pg = EmbeddedPostgres.start()
-        val dataSource = pg.postgresDatabase
-        runMigration(dataSource)
+        val repo = DatabaseUtil.getMappeRepo()
 
-        val repo = MappeRepository(dataSource = dataSource)
         val identer = setOf<NorskIdent>("89485489754745")
         val mappeId = UUID.randomUUID().toString()
 

@@ -63,7 +63,7 @@ data class PleiepengerSøknadDto(
                 )
 
             data class ArbeidstakerDto(
-                val norskIdentitetsnummer: String?,
+                val norskIdentitetsnummer: NorskIdentDto?,
                 val organisasjonsnummer: String?,
                 val arbeidstidInfo: ArbeidstidInfoDto,
             ) {

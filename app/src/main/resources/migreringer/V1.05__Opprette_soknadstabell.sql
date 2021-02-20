@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS SOKNAD
 (
-    SOKNAD_ID        SERIAL PRIMARY KEY,
-    ID_BUNKE         INTEGER                                NOT NULL,
+    SOKNAD_ID        UUID PRIMARY KEY,
+    ID_BUNKE         UUID                                   NOT NULL,
     ID_PERSON        UUID                                   NOT NULL,
     ID_PERSON_BARN   UUID,
     BARN_FODSELSDATO DATE,
-    SOKNAD           JSON,
-    JOURNALPOSTER    JSON,
+    SOKNAD           jsonb,
+    JOURNALPOSTER    jsonb,
     SENDT_INN        BOOLEAN      DEFAULT false             NOT NULL,
     OPPRETTET_AV     VARCHAR(20)  DEFAULT 'PUNSJ'           NOT NULL,
     OPPRETTET_TID    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS BUNKE
 (
-    BUNKE_ID      SERIAL PRIMARY KEY,
+    BUNKE_ID      UUID PRIMARY KEY,
     ID_MAPPE      UUID                                   NOT NULL,
     YTELSE_TYPE   VARCHAR(5)                             NOT NULL,
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'PUNSJ'           NOT NULL,

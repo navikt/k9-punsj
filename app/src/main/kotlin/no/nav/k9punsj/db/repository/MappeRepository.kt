@@ -62,8 +62,8 @@ class MappeRepository(private val dataSource: DataSource) {
     }
 
     suspend fun oppretteMappe(mappe: Mappe): Mappe {
-        return lagre(mappe.mappeId) {
-            mappe
+        return lagre(mappe.mappeId) { it: Mappe? ->
+            return@lagre mappe
         }
     }
 
@@ -131,5 +131,21 @@ class MappeRepository(private val dataSource: DataSource) {
         }
     }
 
-
+    suspend fun opprettMappeForPerson(person: Person): MappeId {
+        return using(sessionOf(dataSource)) {
+            return@using it.transaction { tx ->
+                val mappeId = UUID.randomUUID()
+                tx.run(
+                    queryOf(
+                        """
+                    insert into mappe as k (id, id_person)
+                    values (:id, :id_person)
+                    
+                 """, mapOf("id" to mappeId, "id_person" to UUID.fromString(person.personId))
+                    ).asUpdate
+                )
+                return@transaction mappeId.toString()
+            }
+        }
+    }
 }
