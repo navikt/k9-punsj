@@ -1,7 +1,5 @@
 package no.nav.k9punsj
 
-import OasPleiepengerSyktBarSoknadMappeSvar
-import OasPleiepengerSyktBarnFeil
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -12,6 +10,8 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
+import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
