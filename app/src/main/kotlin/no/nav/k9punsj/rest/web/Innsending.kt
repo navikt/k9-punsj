@@ -24,7 +24,7 @@ internal fun SøknadJson.mergeNy(nySøknad: SøknadJson) : SøknadJson {
 }
 
 data class Innsending(
-        val personer: Map<no.nav.k9punsj.db.datamodell.NorskIdent, JournalpostInnhold<SøknadJson>>
+        val personer: Map<NorskIdent, JournalpostInnhold<SøknadJson>>
 )
 
 data class HentSøknad(
@@ -35,11 +35,6 @@ data class HentSøknad(
 data class JournalpostInnhold<T>(
         val journalpostId: JournalpostIdDto,
         val soeknad: T
-)
-
-data class Mangel(
-        val attributt: String,
-        val melding: String
 )
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST

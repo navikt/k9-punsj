@@ -1,13 +1,17 @@
 package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9punsj.db.datamodell.*
+import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
+import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.rest.web.Innsending
 import org.springframework.stereotype.Service
 
 @Service
 class MappeService(
     val mappeRepository: MappeRepository,
+    val søknadRepository: SøknadRepository,
+    val bunkeRepository: BunkeRepository,
     val personService: PersonService
 ) {
 
@@ -23,10 +27,7 @@ class MappeService(
         return mappeRepository.hentAlleMapper()
     }
 
-    suspend fun førsteInnsending(
-        søknadType: FagsakYtelseType,
-        innsending: Innsending
-    ): Mappe {
+    suspend fun førsteInnsending(søknadType: FagsakYtelseType, innsending: Innsending): Mappe {
         val personer = innsending.personer.keys.map { p -> personService.finnEllerOpprettPersonVedNorskIdent(p) }
         val opprettetMappe = innsending.leggIMappe(
             mappe = null,
