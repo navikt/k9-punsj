@@ -29,7 +29,7 @@
 		<k9-sak.version>3.1.8</k9-sak.version>
         <soknad-pleiepenger-barn.version>5.1.16</soknad-pleiepenger-barn.version>
         <de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
-        <mockk.version>1.10.5</mockk.version>
+        <mockk.version>1.10.6</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
     </properties>
 
