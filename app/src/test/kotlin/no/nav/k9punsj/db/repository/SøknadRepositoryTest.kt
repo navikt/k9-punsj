@@ -40,10 +40,10 @@ internal class SøknadRepositoryTest {
         assertThat(barn.personId).isNotNull
 
         //oppretter en tom mappe til en person
-        val mappeId = mappeRepo.opprettMappeForPerson(person)
+        val mappeId = mappeRepo.opprettEllerHentMappeForPerson(person.personId)
 
         //oppretter en bunke i mappen for pleiepenger
-        val bunkeId = bunkeRepository.opprettBunke(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
         val genererKomplettSøknad = LesFraFilUtil.genererKomplettSøknad()
 
@@ -54,8 +54,8 @@ internal class SøknadRepositoryTest {
         val søknadEntitet = SøknadEntitet(
             søknadId = UUID.randomUUID().toString(),
             bunkeId = bunkeId,
-            person = person.personId,
-            barn = barn.personId,
+            søkerId = person.personId,
+            barnId = barn.personId,
             barnFødselsdato = barnFødselsdato,
             søknad = genererKomplettSøknad,
             journalposter = journalposter,

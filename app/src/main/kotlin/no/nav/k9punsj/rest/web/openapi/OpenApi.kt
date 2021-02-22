@@ -25,9 +25,10 @@ import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.JournalpostInnhold
+import no.nav.k9punsj.rest.web.dto.BunkeIdDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PersonDTO
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.SøknadDto
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -90,7 +91,8 @@ internal class PleiepengerSyktBarnSoknadController {
             )
         ]
     )
-    fun HenteMapper(@RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>) {    }
+    fun HenteMapper(@RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>) {
+    }
 
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.EksisterendeSøknad, produces = ["application/json"])
     @Operation(
@@ -245,7 +247,7 @@ internal class PleiepengerSyktBarnSoknadController {
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 data class OasHentSøknad(
     val norskIdent: NorskIdentDto,
-    val periode: String
+    val periode: String,
 )
 
 data class OasInnsending(
@@ -254,8 +256,15 @@ data class OasInnsending(
 
 data class OasPleiepengerSyktBarSoknadMappeSvar(
     val mappeId: MappeId,
-    val personer: MutableMap<NorskIdent, PersonDTO<PleiepengerSøknadDto>>?,
-)
+    val søker: NorskIdentDto,
+    val bunker: List<OasBunkeDto>?,
+) {
+    data class OasBunkeDto(
+        val bunkeId: BunkeIdDto,
+        val fagsakKode: String,
+        val søknader: List<SøknadDto<PleiepengerSøknadDto>>?,
+        )
+}
 
 data class OasPleiepengerSyktBarSoknadMapperSvar(
     val mapper: List<OasPleiepengerSyktBarSoknadMappeSvar>,
@@ -264,7 +273,7 @@ data class OasPleiepengerSyktBarSoknadMapperSvar(
 data class OasPleiepengerSyktBarnFeil(
     val mappeId: MappeId?,
     val feil: List<FeilDto>?,
-){
+) {
     data class FeilDto(
         val felt: String?,
         val feilkode: String?,
@@ -573,7 +582,7 @@ internal class HendelseController {
 @Tag(name = "K9Sak", description = "Håndtering kall mot k9Sak")
 internal class K9SakController {
     @PostMapping(
-      K9SakRoutes.Urls.HentSisteVersjonAvPleiepengerSøknad,
+        K9SakRoutes.Urls.HentSisteVersjonAvPleiepengerSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )

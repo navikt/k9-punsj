@@ -25,7 +25,7 @@ internal class MappeServiceTest {
     private lateinit var pdlService: PdlService
 
     @Test
-    fun `Skal teste`() : Unit = runBlocking {
+    fun `skal opprette mappe og lagre søknad`() : Unit = runBlocking {
         val mappeRepo = DatabaseUtil.getMappeRepo()
         val bunkeRepo = DatabaseUtil.getBunkeRepo()
         val søknadRepository = DatabaseUtil.getSøknadRepo()

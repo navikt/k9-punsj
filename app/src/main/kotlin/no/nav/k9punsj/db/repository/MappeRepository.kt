@@ -33,7 +33,7 @@ class MappeRepository(private val dataSource: DataSource) {
     suspend fun hentAlleMapper(): List<Mappe> {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
-                tx.run(
+                return@transaction tx.run(
                     queryOf(
                         "select data from mappe"
                     ).map { row ->
@@ -131,9 +131,39 @@ class MappeRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun opprettMappeForPerson(person: Person): MappeId {
+    suspend fun hentEierAvMappe(mappeId: MappeId): PersonId? {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
+                return@transaction tx.run(
+                    queryOf(
+                        "select id_person from mappe where id = :mappeId",
+                        mapOf("mappeId" to UUID.fromString(mappeId))
+                    )
+                        .map { row ->
+                            row.string("id_person")
+                        }.asSingle
+                )
+            }
+        }
+
+    }
+
+    suspend fun opprettEllerHentMappeForPerson(personId: PersonId): MappeId {
+        return using(sessionOf(dataSource)) {
+            return@using it.transaction { tx ->
+                val resultat = tx.run(
+                    queryOf(
+                        "select id from mappe where id_person = :id_person",
+                        mapOf("id_person" to UUID.fromString(personId))
+                    )
+                        .map { row ->
+                            row.string("id")
+                        }.asSingle
+                )
+                if (!resultat.isNullOrEmpty()) {
+                    return@transaction resultat
+                }
+
                 val mappeId = UUID.randomUUID()
                 tx.run(
                     queryOf(
@@ -141,7 +171,7 @@ class MappeRepository(private val dataSource: DataSource) {
                     insert into mappe as k (id, id_person)
                     values (:id, :id_person)
                     
-                 """, mapOf("id" to mappeId, "id_person" to UUID.fromString(person.personId))
+                 """, mapOf("id" to mappeId, "id_person" to UUID.fromString(personId))
                     ).asUpdate
                 )
                 return@transaction mappeId.toString()

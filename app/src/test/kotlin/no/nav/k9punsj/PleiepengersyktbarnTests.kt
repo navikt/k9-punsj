@@ -1,5 +1,6 @@
 package no.nav.k9punsj
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -8,6 +9,7 @@ import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.JournalpostInnhold
 import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.rest.web.dto.JournalposterDto
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
@@ -47,18 +49,9 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Opprette ny mappe uten person`() {
-        val innsending = Innsending(personer = mutableMapOf())
-        val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .body(BodyInserters.fromValue(innsending))
-            .awaitExchangeBlocking()
-        assertEquals(HttpStatus.CREATED, res.statusCode())
-    }
-
-    @Test
     fun `Opprette ny mappe på person`() {
-        val innsending = lagInnsending("01010050053", "999")
+        val norskIdent = "01010050053"
+        val innsending = lagInnsending(norskIdent, "999")
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }
             .body(BodyInserters.fromValue(innsending))
@@ -68,7 +61,6 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Hente eksisterende mappe på person`() {
-
         val norskIdent = "02020050163"
         val innsending = lagInnsending(norskIdent, "9999")
 
@@ -85,16 +77,18 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.OK, res.statusCode())
 
         val mapperSvar = runBlocking { res.awaitBody<MapperSvarDTO>() }
-        val personerSvar = mapperSvar.mapper.first().personer[norskIdent]
-        assertEquals("9999", personerSvar?.innsendinger?.first())
+        val journalJsonB = mapperSvar.mapper.first().bunker.first().søknader?.first()?.journalposter!!
+        val journalposterDto: JournalposterDto = objectMapper().convertValue(journalJsonB)
+        assertEquals("9999", journalposterDto.journalposter.first())
     }
 
     @Test
     fun `Oppdaterer en søknad`() {
         val søknad = LesFraFilUtil.genererKomplettSøknad()
+        val norskIdent = "02030050163"
+        endreSøkerIGenererSøknad(søknad, norskIdent)
 
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
-        val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
         val innsendingForOpprettelseAvMappe = lagInnsending(norskIdent, journalpostid)
 
         val opprettetMappe = client.post()
@@ -106,9 +100,9 @@ class PleiepengersyktbarnTests {
 
         assertNotNull(opprettetMappe)
         val mappeid: String = opprettetMappe!!.mappeId
+        val søknadId: String = opprettetMappe.bunker?.first()?.søknader?.first()?.søknadId!!
 
-
-        val innsendingForOppdateringAvSoeknad = lagInnsending(norskIdent, journalpostid, søknad)
+        val innsendingForOppdateringAvSoeknad = lagInnsending(norskIdent, journalpostid, søknad, søknadId)
 
         val res = client.put()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }
@@ -118,12 +112,16 @@ class PleiepengersyktbarnTests {
         val oppdatertSoeknad = res
             .bodyToMono(OasPleiepengerSyktBarSoknadMappeSvar::class.java)
             .block()
-            ?.personer
-            ?.get(norskIdent)
-            ?.soeknad
+
+        val søknad1 = oppdatertSoeknad?.bunker
+            ?.first()
+            ?.søknader
+            ?.first()
+            ?.søknad
+
 
         assertNotNull(oppdatertSoeknad)
-        assertEquals(oppdatertSoeknad?.søker?.norskIdentitetsnummer, norskIdent)
+        assertEquals(norskIdent, søknad1?.søker?.norskIdentitetsnummer)
 
         assertEquals(HttpStatus.OK, res.statusCode())
     }
@@ -147,8 +145,10 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
+        val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
-        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
+
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
 
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
@@ -156,8 +156,10 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Skal fange opp feilen overlappendePerioder i søknaden`() {
+        val norskIdent = "02020052121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererSøknadMedFeil()
-        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
+
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
 
         val response = res
@@ -167,7 +169,6 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         assertEquals("overlappendePerioder", response?.feil?.first()?.feilkode!!)
     }
-
 
     @Test
     fun `Skal hente komplett søknad fra k9-sak`() {
@@ -191,7 +192,9 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Innsending av søknad med feil i perioden blir stoppet`() {
+        val norskIdent = "02022352121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
+        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
 
         val ytelse = gyldigSoeknad["ytelse"] as MutableMap<String, Any>
 
@@ -199,7 +202,6 @@ class PleiepengersyktbarnTests {
         ytelse.replace("søknadsperiode", "2019-12-30/2018-10-20")
         gyldigSoeknad.replace("ytelse", ytelse)
 
-        val norskIdent = (gyldigSoeknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
 
         val response = res
@@ -226,8 +228,9 @@ class PleiepengersyktbarnTests {
 
         assertNotNull(opprettetMappe)
         val mappeid: String = opprettetMappe!!.mappeId
+        val søknadId = opprettetMappe!!.bunker!!.first().søknader?.first()?.søknadId!!
 
-        val innsendingForInnsendingAvSoknad = lagInnsending(ident, journalpostid)
+        val innsendingForInnsendingAvSoknad = lagInnsending(ident, journalpostid, søknadId = søknadId)
 
         return client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }
@@ -243,8 +246,9 @@ private fun lagInnsending(
     personnummer: NorskIdentDto,
     journalpostId: String,
     søknad: SøknadJson = mutableMapOf(),
+    søknadId: String? = null
 ): Innsending {
-    val person = JournalpostInnhold(journalpostId = journalpostId, soeknad = søknad)
+    val person = JournalpostInnhold(journalpostId = journalpostId, soeknad = søknad, søknadIdDto = søknadId)
     val personer = mutableMapOf<String, JournalpostInnhold<SøknadJson>>()
     personer[personnummer] = person
 
@@ -253,4 +257,13 @@ private fun lagInnsending(
 
 private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: Periode): HentSøknad {
     return HentSøknad(norskIdent = norskIdentDto, periode = periode)
+}
+
+private fun endreSøkerIGenererSøknad(
+    søknad: MutableMap<String, Any?>,
+    norskIdent: String,
+) {
+    val norskIdentMap = søknad["søker"] as MutableMap<String, Any>
+    norskIdentMap.replace("norskIdentitetsnummer", norskIdent)
+    søknad.replace("søker", norskIdentMap)
 }

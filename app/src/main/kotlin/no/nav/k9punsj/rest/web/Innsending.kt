@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.http.HttpStatus
 
 internal val objectMapper = jacksonObjectMapper()
@@ -35,7 +36,8 @@ data class HentSøknad(
 
 data class JournalpostInnhold<T>(
         val journalpostId: JournalpostIdDto,
-        val soeknad: T
+        val soeknad: T,
+        val søknadIdDto: SøknadIdDto? = null
 )
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST

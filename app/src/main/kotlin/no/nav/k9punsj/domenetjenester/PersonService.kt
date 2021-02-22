@@ -15,7 +15,7 @@ class PersonService(
     val pdlService: PdlService,
 ) {
 
-    suspend fun finnEllerOpprettPersonVedNorskIdent(norskIdent: NorskIdent): no.nav.k9punsj.db.datamodell.Person {
+    suspend fun finnEllerOpprettPersonVedNorskIdent(norskIdent: NorskIdent): Person {
         val person = personRepository.hentPersonVedPersonIdent(norskIdent)
 
         if (person != null) {

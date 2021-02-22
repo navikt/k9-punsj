@@ -1,17 +1,15 @@
 package no.nav.k9punsj.db.datamodell
 
 
-import no.nav.k9punsj.rest.web.*
-import no.nav.k9punsj.rest.web.dto.MappeSvarDTO
-import no.nav.k9punsj.rest.web.dto.PersonDTO
-import java.util.UUID
+import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.SøknadJson
 
 typealias MappeId = String
 
 data class Mappe(
     val mappeId: MappeId,
-    val søknadType: FagsakYtelseType,
-    val personInfo: MutableMap<PersonId, PersonInfo>,
+    val søker: Person,
+    val bunke: List<BunkeEntitet>,
 )
 
 data class PersonInfo(
@@ -19,40 +17,8 @@ data class PersonInfo(
     val soeknad: SøknadJson,
 )
 
-internal fun Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO {
-    val map = personInfo
-        .mapKeys { key -> f(key.key) }
-        .mapValues { value -> PersonDTO(innsendinger = value.value.innsendinger, soeknad = value.value.soeknad) }
-        .toMutableMap()
 
-    return MappeSvarDTO(this.mappeId, map)
-}
 
-private fun JournalpostInnhold<SøknadJson>.leggIUndermappe(personInfo: PersonInfo?): PersonInfo {
-    return PersonInfo(
-        innsendinger = personInfo?.innsendinger?.leggTil(journalpostId) ?: mutableSetOf(journalpostId),
-        soeknad = personInfo?.soeknad?.mergeNy(soeknad) ?: soeknad
-    )
-}
 
-internal fun Innsending.leggIMappe(
-    mappe: Mappe?,
-    fagsakYtelseType: FagsakYtelseType? = null,
-    f: (NorskIdent) -> (PersonId),
-): Mappe {
-    val personligInnholdUndermapper = mappe?.personInfo ?: mutableMapOf()
-    this.personer.forEach { (personId, journalpostInnhold) ->
-        personligInnholdUndermapper[f(personId)] =
-            journalpostInnhold.leggIUndermappe(personInfo = mappe?.personInfo?.get(f(personId)))
-    }
-    return Mappe(
-        mappeId = mappe?.mappeId ?: UUID.randomUUID().toString(),
-        søknadType = mappe?.søknadType ?: fagsakYtelseType!!,
-        personInfo = personligInnholdUndermapper
-    )
-}
 
-private fun <E> MutableSet<E>.leggTil(item: E): MutableSet<E> {
-    add(item)
-    return this
-}
+

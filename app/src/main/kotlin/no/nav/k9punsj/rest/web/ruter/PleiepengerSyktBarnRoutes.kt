@@ -7,7 +7,10 @@ import no.nav.k9.søknad.ValideringsFeil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.db.datamodell.*
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.db.datamodell.MappeId
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
@@ -15,9 +18,7 @@ import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
-import no.nav.k9punsj.rest.web.dto.MappeFeil
-import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -60,7 +61,7 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val personer = personService.finnPersoner(request.norskeIdenter())
                 val mapperDto = mappeService.hentMapper(
-                    personIder = personer.map { p -> p.personId }.toSet(),
+                    personer = personer,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 ).map { mappe ->
                     mappe.tilDto { personId ->
@@ -82,14 +83,9 @@ internal class PleiepengerSyktBarnRoutes(
                         .notFound()
                         .buildAndAwait()
                 } else {
-                    val personer = personService.finnPersonerVedPersonId(mappe.personInfo.keys)
-
-                    val mappeDTO = mappe.tilDto { personId: NorskIdent ->
-                        val norskIdent =
-                            personer.first { p -> p.personId == personId }.norskIdent
-                        norskIdent
+                    val mappeDTO = mappe.tilDto {
+                        mappe.søker.personId
                     }
-
                     ServerResponse
                         .ok()
                         .json()
@@ -104,7 +100,6 @@ internal class PleiepengerSyktBarnRoutes(
 
                 val mappe = mappeService.utfyllendeInnsending(
                     mappeId = request.mappeId(),
-                    fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                     innsending = innsending
                 )
 
@@ -113,12 +108,8 @@ internal class PleiepengerSyktBarnRoutes(
                         .notFound()
                         .buildAndAwait()
                 } else {
-                    val personer = personService.finnPersonerVedPersonId(mappe.personInfo.keys)
-
-                    val mappeDTO = mappe.tilDto { personId: NorskIdent ->
-                        val norskIdent =
-                            personer.first { p -> p.personId == personId }.norskIdent
-                        norskIdent
+                    val mappeDTO = mappe.tilDto {
+                        mappe.søker.personId
                     }
                     println(mappeDTO)
 
@@ -132,21 +123,24 @@ internal class PleiepengerSyktBarnRoutes(
 
         POST("/api${Urls.EksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.norskIdent()
+                val innsending = request.innsending()
+                val norskIdent = innsending.personer.keys.first()
+
+                val søknadIdDto = innsending.personer[norskIdent]?.søknadIdDto
+
                 val mappeId = request.mappeId()
                 val mappe = mappeService.hent(mappeId)
 
-                if (mappe == null || norskIdent == null) {
+                val søknadEntitet =
+                    mappe?.bunke?.flatMap { b -> b.søknader!! }?.toList()?.first { s -> s.søknadId == søknadIdDto }
+
+                if (søknadEntitet == null) {
                     return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
                 } else {
                     try {
-                        val personer = personService.finnPersonerVedPersonId(mappe.personInfo.keys)
-                        val person = mappe.personInfo[personer.first().personId]
-
-                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(person!!.soeknad)
-
+                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad)
                         val søknadK9Format = SøknadMapper.mapTilEksternFormat(søknad)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
@@ -161,12 +155,14 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(MappeFeil(mappeId, feil))
                         }
 
-                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, person.innsendinger)
+                        val convertValue: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter)
+                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, convertValue.journalposter)
 
-                        mappeService.fjern(
-                            mappeId = mappeId,
-                            norskIdent = norskIdent
-                        )
+                        //TODO(OJR) marker søknad som sendt_inn = TRUE
+//                        mappeService.fjern(
+//                            mappeId = mappeId,
+//                            norskIdent = norskIdent
+//                        )
                         return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()
@@ -187,12 +183,9 @@ internal class PleiepengerSyktBarnRoutes(
                     innsending = innsending,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 )
-                val personer = personService.finnPersonerVedPersonId(mappe.personInfo.keys)
-
-                val mappeDTO = mappe.tilDto { personId: NorskIdent ->
-                    return@tilDto personer.first { p -> p.personId == personId }.norskIdent
+                val mappeDTO = mappe.tilDto {
+                    mappe.søker.personId
                 }
-
                 return@RequestContext ServerResponse
                     .created(request.mappeLocation(mappe.mappeId))
                     .json()
@@ -203,7 +196,8 @@ internal class PleiepengerSyktBarnRoutes(
         DELETE("/api${Urls.EksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
-                    mappeService.slett(mappeid = request.mappeId())
+//                    mappeService.slett(mappeid = request.mappeId())
+                    throw IllegalStateException("støtter ikke lengre sletting av mapper")
                     ServerResponse.noContent().buildAndAwait()
                 } catch (e: Exception) {
                     ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).buildAndAwait()
