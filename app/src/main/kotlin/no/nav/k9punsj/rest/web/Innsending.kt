@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.springframework.http.HttpStatus
 
@@ -29,7 +30,7 @@ data class Innsending(
 
 data class HentSøknad(
     val norskIdent: NorskIdent,
-    val periode: String
+    val periode: Periode
 )
 
 data class JournalpostInnhold<T>(
