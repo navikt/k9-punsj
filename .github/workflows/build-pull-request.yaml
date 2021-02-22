@@ -25,7 +25,7 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn verify -e --batch-mode -DtrimStackTrace=false 
+          mvn verify -e --batch-mode -DtrimStackTrace=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          
+

@@ -51,6 +51,8 @@ no.nav:
       hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES}
   pdl:
     base_url: ${PDL_BASE_URL}
+  k9sak:
+    base_url: ${K9SAK_BASE_URL}
   gosys:
     base_url: ${GOSYS_BASE_URL}
   security:
