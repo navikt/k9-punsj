@@ -3,6 +3,7 @@ package no.nav.k9punsj
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.JournalpostInnhold
@@ -24,6 +25,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
+import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 class PleiepengersyktbarnTests {
@@ -171,7 +173,7 @@ class PleiepengersyktbarnTests {
     fun `Skal hente komplett søknad fra k9-sak`() {
         val søknad = LesFraFilUtil.genererKomplettSøknad()
         val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
-        val hentSøknad = lagHentSøknad(norskIdent, "2018-12-30/2019-10-20")
+        val hentSøknad = lagHentSøknad(norskIdent, Periode(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10,20)))
 
         val res = client.post()
             .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
@@ -249,6 +251,6 @@ private fun lagInnsending(
     return Innsending(personer)
 }
 
-private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: String): HentSøknad {
+private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: Periode): HentSøknad {
     return HentSøknad(norskIdent = norskIdentDto, periode = periode)
 }

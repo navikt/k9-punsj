@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
@@ -30,7 +31,7 @@ class K9SakServiceImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: String): PleiepengerSøknadDto? {
+    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): PleiepengerSøknadDto? {
         val json = lesFraFil()
         return objectMapper().readValue<PleiepengerSøknadDto>(json)
     }

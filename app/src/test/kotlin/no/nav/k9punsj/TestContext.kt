@@ -3,6 +3,7 @@ package no.nav.k9punsj
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
@@ -31,7 +32,7 @@ class TestContext {
     @Bean
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object: K9SakService{
-        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: String): PleiepengerSøknadDto? {
+        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): PleiepengerSøknadDto? {
             return LesFraFilUtil.hentKomplettSøknad()
         }
 
