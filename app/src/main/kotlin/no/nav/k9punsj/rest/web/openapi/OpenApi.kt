@@ -214,7 +214,11 @@ internal class PleiepengerSyktBarnSoknadController {
         consumes = ["application/json"],
         produces = ["application/json"]
     )
-    @Operation(summary = "Hente siste psb søknad fra k9-sak")
+    @Operation(
+        summary = "Hente siste psb søknad fra k9-sak",
+        description = "Henter aktørid fra fnummer",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
     @ApiResponses(
         value = [
             ApiResponse(
@@ -232,9 +236,7 @@ internal class PleiepengerSyktBarnSoknadController {
             )
         ]
     )
-    fun HentSøknadFraK9Sak(
-        @RequestBody hentSøknad: OasHentSøknad,
-    ) {
+    fun HentSøknadFraK9Sak(@RequestBody hentSøknad: OasHentSøknad) {
     }
 }
 
@@ -257,7 +259,7 @@ data class OasPleiepengerSyktBarSoknadMappeSvar(
         val bunkeId: BunkeIdDto,
         val fagsakKode: String,
         val søknader: List<SøknadDto<PleiepengerSøknadDto>>?,
-        )
+    )
 }
 
 data class OasPleiepengerSyktBarSoknadMapperSvar(
@@ -499,7 +501,7 @@ data class OasHentPerson(
 )
 
 data class OasPdlResponse(
-    val person: PersonDto
+    val person: PdlPersonDto
 )
 
 

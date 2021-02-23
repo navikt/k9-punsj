@@ -3,6 +3,7 @@ package no.nav.k9punsj
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
@@ -16,9 +17,11 @@ import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnSvarV2
 import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.Assert.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
@@ -37,12 +40,12 @@ class PleiepengersyktbarnTests {
 
     // Standardverdier for test
     private val standardIdent = "01122334410"
-
+    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
     fun `Hente eksisterende mapper`() {
         val res = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mapper").build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mapper").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
     }
@@ -52,7 +55,7 @@ class PleiepengersyktbarnTests {
         val norskIdent = "01010050053"
         val innsending = lagInnsending(norskIdent, "999")
         val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsending))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, res.statusCode())
@@ -64,13 +67,13 @@ class PleiepengersyktbarnTests {
         val innsending = lagInnsending(norskIdent, "9999")
 
         val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsending))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, resPost.statusCode())
 
         val res = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mapper").build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mapper").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
@@ -91,7 +94,7 @@ class PleiepengersyktbarnTests {
         val innsendingForOpprettelseAvMappe = lagInnsending(norskIdent, journalpostid)
 
         val opprettetMappe = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
             .awaitExchangeBlocking()
             .bodyToMono(OasPleiepengerSyktBarSoknadMappeSvar::class.java)
@@ -104,7 +107,7 @@ class PleiepengersyktbarnTests {
         val innsendingForOppdateringAvSoeknad = lagInnsending(norskIdent, journalpostid, søknad, søknadId)
 
         val res = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsendingForOppdateringAvSoeknad))
             .awaitExchangeBlocking()
 
@@ -134,7 +137,7 @@ class PleiepengersyktbarnTests {
         val innsending = lagInnsending(standardIdent, journalpostid)
 
         val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", standardIdent)
             .body(BodyInserters.fromValue(innsending))
             .awaitExchangeBlocking()
@@ -176,7 +179,7 @@ class PleiepengersyktbarnTests {
         val hentSøknad = lagHentSøknad(norskIdent, PeriodeDto(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10,20)))
 
         val res = client.post()
-            .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
+            .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(hentSøknad))
             .awaitExchangeBlocking()
 
@@ -222,7 +225,7 @@ class PleiepengersyktbarnTests {
         val innsendingForOpprettelseAvMappe = lagInnsending(ident, journalpostid, soeknadJson)
 
         val opprettetMappe: OasPleiepengerSyktBarSoknadMappeSvar? = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
             .awaitExchangeBlocking()
             .bodyToMono(OasPleiepengerSyktBarSoknadMappeSvar::class.java)
@@ -235,7 +238,7 @@ class PleiepengersyktbarnTests {
         val innsendingForInnsendingAvSoknad = lagInnsending(ident, journalpostid, søknadId = søknadId)
 
         return client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", mappeid).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", ident)
             .body(BodyInserters.fromValue(innsendingForInnsendingAvSoknad))
             .awaitExchangeBlocking()

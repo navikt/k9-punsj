@@ -13,7 +13,7 @@ typealias BunkeIdDto = String
 typealias SøknadIdDto = String
 typealias JournalpostIdDto = String
 
-data class PersonDto(
+data class PdlPersonDto(
     val norskIdent: NorskIdentDto,
     val aktørId: AktørIdDto
 )
@@ -74,7 +74,7 @@ data class HentPerson(
 )
 
 data class PdlResponseDto(
-    val person: PersonDto,
+    val person: PdlPersonDto,
 )
 
 data class PeriodeDto(

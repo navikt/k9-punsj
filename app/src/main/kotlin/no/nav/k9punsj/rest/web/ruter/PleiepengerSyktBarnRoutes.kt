@@ -52,7 +52,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     @Bean
-    fun pleiepengerSyktBarnSøknadRoutes() = Routes {
+    fun pleiepengerSyktBarnSøknadRoutes() = Routes(authenticationHandler) {
 
         GET("/api${Urls.HenteMapper}") { request ->
             RequestContext(coroutineContext, request) {

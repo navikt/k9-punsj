@@ -6,8 +6,8 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.rest.web.dto.HentPerson
+import no.nav.k9punsj.rest.web.dto.PdlPersonDto
 import no.nav.k9punsj.rest.web.dto.PdlResponseDto
-import no.nav.k9punsj.rest.web.dto.PersonDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -51,7 +51,7 @@ internal class PdlRoutes(
                                 .buildAndAwait()
                     } else {
                         val aktørIdDto = pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
-                        val pdlResponseDto = PdlResponseDto(PersonDto(norskIdent, aktørIdDto))
+                        val pdlResponseDto = PdlResponseDto(PdlPersonDto(norskIdent, aktørIdDto))
 
                         ServerResponse
                                 .ok()
