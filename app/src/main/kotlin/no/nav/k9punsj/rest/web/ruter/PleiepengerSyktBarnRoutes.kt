@@ -7,10 +7,7 @@ import no.nav.k9.søknad.ValideringsFeil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
@@ -208,7 +205,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, hentSøknad.periode)
+                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, Periode(hentSøknad.periode.fom, hentSøknad.periode.tom))
                     ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
                 val søknadIdDto =
@@ -217,9 +214,9 @@ internal class PleiepengerSyktBarnRoutes(
                 val søknadDto = SøknadDto(
                     søknadId = søknadIdDto,
                     søkerId = hentSøknad.norskIdent,
-                    søknad = psbUtfyltFraK9,
                     journalposter = null,
-                    erFraK9 = true
+                    erFraK9 = true,
+                    søknad = psbUtfyltFraK9
                 )
 
                 val svarDto =

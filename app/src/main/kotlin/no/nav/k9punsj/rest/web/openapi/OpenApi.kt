@@ -233,7 +233,6 @@ internal class PleiepengerSyktBarnSoknadController {
         ]
     )
     fun HentSøknadFraK9Sak(
-        @RequestHeader("X-Nav-NorskIdent") norskIdenter: Set<String>,
         @RequestBody hentSøknad: OasHentSøknad,
     ) {
     }

@@ -36,10 +36,10 @@ data class SøknadDto<T>(
     val søkerId: NorskIdentDto,
     val barnId: NorskIdentDto? = null,
     val barnFødselsdato: LocalDate? = null,
-    val søknad: T? = null,
     val journalposter: T? = null,
     val sendtInn: Boolean? = false,
-    val erFraK9: Boolean? = false
+    val erFraK9: Boolean? = false,
+    val søknad: T? = null,
 )
 
 data class JournalposterDto(
@@ -75,5 +75,10 @@ data class HentPerson(
 
 data class PdlResponseDto(
     val person: PersonDto,
+)
+
+data class PeriodeDto(
+    val fom: LocalDate,
+    val tom: LocalDate,
 )
 

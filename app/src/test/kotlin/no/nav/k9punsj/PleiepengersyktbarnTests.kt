@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.JournalpostInnhold
@@ -12,6 +11,7 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.JournalposterDto
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnSvarV2
@@ -173,11 +173,10 @@ class PleiepengersyktbarnTests {
     fun `Skal hente komplett søknad fra k9-sak`() {
         val søknad = LesFraFilUtil.genererKomplettSøknad()
         val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
-        val hentSøknad = lagHentSøknad(norskIdent, Periode(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10,20)))
+        val hentSøknad = lagHentSøknad(norskIdent, PeriodeDto(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10,20)))
 
         val res = client.post()
             .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
-            .header("X-Nav-NorskIdent", norskIdent)
             .body(BodyInserters.fromValue(hentSøknad))
             .awaitExchangeBlocking()
 
@@ -258,7 +257,7 @@ private fun lagInnsending(
     return Innsending(personer)
 }
 
-private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: Periode): HentSøknad {
+private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: PeriodeDto): HentSøknad {
     return HentSøknad(norskIdent = norskIdentDto, periode = periode)
 }
 
