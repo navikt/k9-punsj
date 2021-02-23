@@ -1,14 +1,11 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
-import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
@@ -20,11 +17,11 @@ import java.net.URI
 @Configuration
 @Profile("!test")
 class K9SakServiceImpl(
-        @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
-        @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
 ) : ReactiveHealthIndicator, K9SakService {
 
-    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+//    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+//    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
 
     override fun health(): Mono<Health> {
@@ -40,8 +37,8 @@ class K9SakServiceImpl(
         TODO("Not yet implemented")
     }
 
-    private fun lesFraFil(): String{
-       return "{\n" +
+    private fun lesFraFil(): String {
+        return "{\n" +
                 "  \"søknadId\": \"1\",\n" +
                 "  \"versjon\": \"2.0.0\",\n" +
                 "  \"mottattDato\": \"2020-10-12T12:53:21.046Z\",\n" +

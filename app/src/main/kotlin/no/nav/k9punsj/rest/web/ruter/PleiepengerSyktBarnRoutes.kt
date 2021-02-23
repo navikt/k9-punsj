@@ -209,10 +209,7 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
                 val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, hentSøknad.periode)
-
-                if(psbUtfyltFraK9 == null) {
-                    return@RequestContext ServerResponse.notFound().buildAndAwait()
-                }
+                    ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
                 val søknadIdDto =
                     mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
