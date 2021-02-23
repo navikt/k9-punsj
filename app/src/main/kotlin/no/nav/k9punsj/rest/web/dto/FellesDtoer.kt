@@ -25,19 +25,28 @@ data class BunkeDto(
     val søknader: List<SøknadDto<SøknadJson>>?,
 )
 
+
+data class SvarDto(
+    val søker: NorskIdentDto,
+    val fagsakKode: String,
+    val søknader: List<SøknadDto<SøknadJson>>?
+)
+
 data class SøknadDto<T>(
     val søknadId: SøknadIdDto,
     val søkerId: NorskIdentDto,
     val barnId: NorskIdentDto? = null,
     val barnFødselsdato: LocalDate? = null,
-    val søknad: T?,
-    val journalposter: T?,
-    val sendt_inn: Boolean? = null,
+    val søknad: T? = null,
+    val journalposter: T? = null,
+    val sendtInn: Boolean? = false,
+    val erFraK9: Boolean? = false
 )
 
 data class JournalposterDto(
     val journalposter: MutableSet<String>
 )
+
 
 internal fun Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO {
     val bunkerDto = this.bunke.map { bunkeEntitiet -> bunkeEntitiet.tilDto(f) }.toList()
@@ -52,7 +61,7 @@ internal fun SøknadEntitet.tilDto(f: (PersonId) -> (NorskIdent)): SøknadDto<S�
         barnFødselsdato = null,
         søknad = this.søknad,
         journalposter = this.journalposter,
-        sendt_inn = this.sendt_inn
+        sendtInn = this.sendtInn
     )
 }
 

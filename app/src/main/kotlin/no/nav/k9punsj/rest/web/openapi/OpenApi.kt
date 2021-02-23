@@ -25,10 +25,7 @@ import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.JournalpostInnhold
-import no.nav.k9punsj.rest.web.dto.BunkeIdDto
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.SøknadDto
+import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -227,7 +224,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Viser den siste gjeldene søknaden som ligger i k9-sak",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerSøknadDto::class
+                        implementation = OasPleiepengerSyktBarnSvarV2::class
                     )
                 )]
             ),
@@ -280,6 +277,18 @@ data class OasPleiepengerSyktBarnFeil(
         val feilmelding: String?,
     )
 }
+
+data class OasPleiepengerSyktBarnSvarV2(
+    val søker: NorskIdentDto,
+    val fagsakKode: String,
+    val søknader: List<OasPleiepengerSøknadDto<PleiepengerSøknadDto>>?,
+)
+
+data class OasPleiepengerSøknadDto<T>(
+    val søknadId: SøknadIdDto,
+    val erFraK9: Boolean = false,
+    val søknad: T,
+)
 
 @RestController
 @SecurityScheme(

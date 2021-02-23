@@ -59,7 +59,7 @@ internal class SøknadRepositoryTest {
             barnFødselsdato = barnFødselsdato,
             søknad = genererKomplettSøknad,
             journalposter = journalposter,
-            sendt_inn = false
+            sendtInn = false
         )
 
         val søknad = søknadRepository.opprettSøknad(søknadEntitet)

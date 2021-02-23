@@ -12,12 +12,11 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.JournalposterDto
 import no.nav.k9punsj.rest.web.dto.MapperSvarDTO
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
+import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnSvarV2
 import no.nav.k9punsj.util.LesFraFilUtil
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
@@ -183,11 +182,15 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         val søknadDto = res
-            .bodyToMono(PleiepengerSøknadDto::class.java)
+            .bodyToMono(OasPleiepengerSyktBarnSvarV2::class.java)
             .block()
 
         assertEquals(HttpStatus.OK, res.statusCode())
-        assertEquals(søknadDto?.søker?.norskIdentitetsnummer, norskIdent)
+        assertEquals(søknadDto?.søker, norskIdent)
+        assertEquals(søknadDto?.fagsakKode, "PSB")
+        assertTrue(søknadDto?.søknader?.size == 1)
+        assertTrue(søknadDto?.søknader?.get(0)?.søknadId.isNullOrBlank().not())
+        assertEquals(søknadDto?.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode, "2018-12-30/2019-10-20")
     }
 
     @Test

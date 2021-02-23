@@ -3,7 +3,6 @@ package no.nav.k9punsj.db.repository
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
 import no.nav.k9punsj.db.datamodell.BunkeId
-import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.db.datamodell.SøknadId
 import no.nav.k9punsj.objectMapper
@@ -100,6 +99,6 @@ class SøknadRepository(private val dataSource: DataSource) {
         barnFødselsdato = row.localDateOrNull("barn_fodselsdato"),
         søknad = objectMapper().readValue(row.string("soknad")),
         journalposter = objectMapper().readValue(row.string("journalposter")),
-        sendt_inn = row.boolean("sendt_inn")
+        sendtInn = row.boolean("sendt_inn")
     )
 }

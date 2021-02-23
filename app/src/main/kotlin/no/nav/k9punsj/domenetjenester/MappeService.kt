@@ -81,7 +81,7 @@ class MappeService(
         if (søknadIdDto != null) {
             val hentSøknad = søknadRepository.hentSøknad(søknadIdDto)!!
 
-            if (hentSøknad.sendt_inn.not()) {
+            if (hentSøknad.sendtInn.not()) {
                 val søknad = innsending.personer[norskIdent]?.soeknad
                 val journalposter = mutableMapOf<String, Any?>()
                 journalposter["journalposter"] = listOf(innsending.personer[norskIdent]?.journalpostId)
@@ -119,5 +119,22 @@ class MappeService(
                 hentAlleSøknaderForBunker.filter { s -> s.bunkeId == b.bunkeId }.toList())
         }
         return Mappe(mappeId, søker, bunkerMedSøknader)
+    }
+
+    suspend fun opprettTomSøknad(norskIdent: NorskIdent, type: FagsakYtelseType): SøknadId {
+        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, type)
+        val søknadId = UUID.randomUUID()
+
+        val tomSøknad = SøknadEntitet(
+            søknadId = søknadId.toString(),
+            bunkeId = bunkeId,
+            søkerId = søker.personId
+        )
+
+        val søknad = søknadRepository.opprettSøknad(tomSøknad)
+
+        return søknad.søknadId
     }
 }

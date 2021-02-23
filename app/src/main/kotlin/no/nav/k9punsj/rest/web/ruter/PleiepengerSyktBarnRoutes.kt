@@ -140,7 +140,7 @@ internal class PleiepengerSyktBarnRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad)
+                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                         val søknadK9Format = SøknadMapper.mapTilEksternFormat(søknad)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
@@ -155,7 +155,7 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(MappeFeil(mappeId, feil))
                         }
 
-                        val convertValue: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter)
+                        val convertValue: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter!!)
                         pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, convertValue.journalposter)
 
                         //TODO(OJR) marker søknad som sendt_inn = TRUE
@@ -208,13 +208,30 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val psbSøknad = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, hentSøknad.periode)
-                    ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
+                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, hentSøknad.periode)
+
+                if(psbUtfyltFraK9 == null) {
+                    return@RequestContext ServerResponse.notFound().buildAndAwait()
+                }
+
+                val søknadIdDto =
+                    mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+
+                val søknadDto = SøknadDto(
+                    søknadId = søknadIdDto,
+                    søkerId = hentSøknad.norskIdent,
+                    søknad = psbUtfyltFraK9,
+                    journalposter = null,
+                    erFraK9 = true
+                )
+
+                val svarDto =
+                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(søknadDto))
 
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(psbSøknad)
+                    .bodyValueAndAwait(svarDto)
             }
         }
     }

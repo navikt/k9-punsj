@@ -6,7 +6,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -31,9 +31,9 @@ class K9SakServiceImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): PleiepengerSøknadDto? {
+    override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): SøknadJson? {
         val json = lesFraFil()
-        return objectMapper().readValue<PleiepengerSøknadDto>(json)
+        return objectMapper().readValue<MutableMap<String, Any?>>(json)
     }
 
     override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {

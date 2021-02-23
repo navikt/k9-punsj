@@ -9,7 +9,7 @@ import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.springframework.boot.test.context.TestConfiguration
@@ -32,8 +32,8 @@ class TestContext {
     @Bean
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object: K9SakService{
-        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): PleiepengerSøknadDto? {
-            return LesFraFilUtil.hentKomplettSøknad()
+        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): SøknadJson? {
+            return LesFraFilUtil.genererKomplettSøknad()
         }
 
         override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
