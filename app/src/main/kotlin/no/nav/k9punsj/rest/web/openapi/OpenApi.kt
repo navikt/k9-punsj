@@ -16,8 +16,6 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.db.datamodell.NorskIdent
-import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.fagsak.FagsakRoutes
 import no.nav.k9punsj.fordel.HendelseRoutes
 import no.nav.k9punsj.gosys.GosysRoutes
@@ -469,7 +467,7 @@ internal class PdlController {
                 description = "Henter aktørid fra fnummer",
                 content = [Content(
                     schema = Schema(
-                        implementation = AktørResponse::class
+                        implementation = OasPdlResponse::class
                     )
                 )]
             ),
@@ -493,13 +491,16 @@ internal class PdlController {
         description = "Henter aktørid fra fnummer",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun Hentident(@RequestBody body: NorskIdent) {
-
+    fun Hentident(@RequestBody body: OasHentPerson) {
     }
 }
 
-data class AktørResponse(
-    val person: Person,
+data class OasHentPerson(
+    val norskIdent: NorskIdentDto,
+)
+
+data class OasPdlResponse(
+    val person: PersonDto
 )
 
 

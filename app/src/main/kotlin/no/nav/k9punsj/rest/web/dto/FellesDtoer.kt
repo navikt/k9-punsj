@@ -14,9 +14,8 @@ typealias SøknadIdDto = String
 typealias JournalpostIdDto = String
 
 data class PersonDto(
-    val personId: PersonIdDto,
     val norskIdent: NorskIdentDto,
-    val aktørId: AktørIdDto,
+    val aktørId: AktørIdDto
 )
 
 data class BunkeDto(
@@ -69,4 +68,12 @@ internal fun BunkeEntitet.tilDto(f: (PersonId) -> (NorskIdent)): BunkeDto {
     val søknaderDto = this.søknader?.map { søknadEntitet -> søknadEntitet.tilDto(f) }?.toList()
     return BunkeDto(this.bunkeId, this.fagsakYtelseType.kode, søknaderDto)
 }
+
+data class HentPerson(
+    val norskIdent: NorskIdentDto,
+)
+
+data class PdlResponseDto(
+    val person: PersonDto,
+)
 
