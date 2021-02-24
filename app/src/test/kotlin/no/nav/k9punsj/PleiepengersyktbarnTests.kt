@@ -13,7 +13,6 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarSoknadMappeSvar
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
-import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnSvarV2
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.Assert.*
@@ -194,7 +193,7 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         val søknadDto = res
-            .bodyToMono(OasPleiepengerSyktBarnSvarV2::class.java)
+            .bodyToMono(SvarDto::class.java)
             .block()
 
         assertEquals(HttpStatus.OK, res.statusCode())

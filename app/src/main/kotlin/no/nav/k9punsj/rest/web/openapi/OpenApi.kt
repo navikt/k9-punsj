@@ -226,7 +226,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Viser den siste gjeldene søknaden som ligger i k9-sak",
                 content = [Content(
                     schema = Schema(
-                        implementation = OasPleiepengerSyktBarnSvarV2::class
+                        implementation = SvarDto::class
                     )
                 )]
             ),
