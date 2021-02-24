@@ -189,7 +189,7 @@ class PleiepengersyktbarnTests {
 
         assertEquals(HttpStatus.OK, res.statusCode())
         assertEquals(søknadDto?.søker, norskIdent)
-        assertEquals(søknadDto?.fagsakKode, "PSB")
+        assertEquals(søknadDto?.fagsakTypeKode, "PSB")
         assertTrue(søknadDto?.søknader?.size == 1)
         assertTrue(søknadDto?.søknader?.get(0)?.søknadId.isNullOrBlank().not())
         assertEquals(søknadDto?.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode, "2018-12-30/2019-10-20")

@@ -211,12 +211,14 @@ internal class PleiepengerSyktBarnRoutes(
                 val søknadIdDto =
                     mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
+                val pleiepengerSøknadDto = objectMapper.convertValue<PleiepengerSøknadDto>(psbUtfyltFraK9)
+
                 val søknadDto = SøknadDto(
                     søknadId = søknadIdDto,
                     søkerId = hentSøknad.norskIdent,
                     journalposter = null,
                     erFraK9 = true,
-                    søknad = psbUtfyltFraK9
+                    søknad = pleiepengerSøknadDto
                 )
 
                 val svarDto =

@@ -279,7 +279,7 @@ data class OasPleiepengerSyktBarnFeil(
 
 data class OasPleiepengerSyktBarnSvarV2(
     val søker: NorskIdentDto,
-    val fagsakKode: String,
+    val fagsakTypeKode: String,
     val søknader: List<OasPleiepengerSøknadDto<PleiepengerSøknadDto>>?,
 )
 
