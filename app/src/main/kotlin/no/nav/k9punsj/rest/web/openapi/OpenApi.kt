@@ -247,7 +247,7 @@ data class OasHentSøknad(
 )
 
 data class OasInnsending(
-    val personer: Map<String, JournalpostInnhold<PleiepengerSøknadDto>>,
+    val personer: Map<String, JournalpostInnhold<PleiepengerSøknadVisningDto>>,
 )
 
 data class OasPleiepengerSyktBarSoknadMappeSvar(
@@ -258,7 +258,7 @@ data class OasPleiepengerSyktBarSoknadMappeSvar(
     data class OasBunkeDto(
         val bunkeId: BunkeIdDto,
         val fagsakKode: String,
-        val søknader: List<SøknadDto<PleiepengerSøknadDto>>?,
+        val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?,
     )
 }
 
@@ -280,7 +280,7 @@ data class OasPleiepengerSyktBarnFeil(
 data class OasPleiepengerSyktBarnSvarV2(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<OasPleiepengerSøknadDto<PleiepengerSøknadDto>>?,
+    val søknader: List<OasPleiepengerSøknadDto<PleiepengerSøknadVisningDto>>?,
 )
 
 data class OasPleiepengerSøknadDto<T>(

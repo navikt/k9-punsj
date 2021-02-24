@@ -28,7 +28,7 @@ data class BunkeDto(
 data class SvarDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<SøknadDto<PleiepengerSøknadDto>>?
+    val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?
 )
 
 data class SøknadDto<T>(

@@ -11,13 +11,13 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.*
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto.PleiepengerYtelseDto.DataBruktTilUtledningDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.PleiepengerYtelseDto.DataBruktTilUtledningDto
 
 internal class PleiepengerSyktBarnYtelseMapper {
     companion object {
         private val objectMapper = no.nav.k9punsj.objectMapper()
-        fun map(psb: PleiepengerSøknadDto.PleiepengerYtelseDto): PleiepengerSyktBarn {
+        fun map(psb: PleiepengerSøknadVisningDto.PleiepengerYtelseDto): PleiepengerSyktBarn {
             val barn = Barn(NorskIdentitetsnummer.of(psb.barn?.norskIdentitetsnummer), psb.barn?.fødselsdato)
             val søknadsperiode: Periode? = objectMapper.convertValue(psb.søknadsperiode!!)
             val arbeidAktivitet: ArbeidAktivitet? = objectMapper.convertValue(psb.arbeidAktivitet!!)

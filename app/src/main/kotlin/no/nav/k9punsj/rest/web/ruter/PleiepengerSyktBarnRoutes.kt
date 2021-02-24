@@ -137,7 +137,7 @@ internal class PleiepengerSyktBarnRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                         val søknadK9Format = SøknadMapper.mapTilEksternFormat(søknad)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
@@ -205,20 +205,22 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, Periode(hentSøknad.periode.fom, hentSøknad.periode.tom))
+                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, Periode(hentSøknad.periode.fom!!, hentSøknad.periode.tom!!))
                     ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
-                val søknadIdDto =
-                    mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+                val søknadIdDto = mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
-                val pleiepengerSøknadDto = objectMapper.convertValue<PleiepengerSøknadDto>(psbUtfyltFraK9)
+                val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
+
+                val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto)
+
 
                 val søknadDto = SøknadDto(
                     søknadId = søknadIdDto,
                     søkerId = hentSøknad.norskIdent,
                     journalposter = null,
                     erFraK9 = true,
-                    søknad = pleiepengerSøknadDto
+                    søknad = mapTilVisningFormat
                 )
 
                 val svarDto =
