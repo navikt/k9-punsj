@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.math.BigDecimal
@@ -8,6 +9,7 @@ import java.time.LocalDate
 data class PleiepengerSøknadVisningDto(
 
     val søker: SøkerDto?,
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate?,
     val ytelse: PleiepengerYtelseDto?,
 ) {
@@ -32,6 +34,7 @@ data class PleiepengerSøknadVisningDto(
     ) {
         data class BarnDto(
             val norskIdentitetsnummer: NorskIdentDto?,
+            @JsonFormat(pattern = "yyyy-MM-dd")
             val fødselsdato: LocalDate?,
         )
 
@@ -52,6 +55,7 @@ data class PleiepengerSøknadVisningDto(
                     val regnskapsførerNavn: String?,
                     val regnskapsførerTlf: String?,
                     val erVarigEndring: Boolean?,
+                    @JsonFormat(pattern = "yyyy-MM-dd")
                     val endringDato: LocalDate?,
                     val endringBegrunnelse: String?,
                     val bruttoInntekt: BigDecimal?,

@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.rest.web.SøknadJson
 import java.time.LocalDate
@@ -15,7 +16,7 @@ typealias JournalpostIdDto = String
 
 data class PdlPersonDto(
     val norskIdent: NorskIdentDto,
-    val aktørId: AktørIdDto
+    val aktørId: AktørIdDto,
 )
 
 data class BunkeDto(
@@ -28,7 +29,7 @@ data class BunkeDto(
 data class SvarDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?
+    val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?,
 )
 
 data class SøknadDto<T>(
@@ -43,7 +44,7 @@ data class SøknadDto<T>(
 )
 
 data class JournalposterDto(
-    val journalposter: MutableSet<String>
+    val journalposter: MutableSet<String>,
 )
 
 
@@ -78,7 +79,9 @@ data class PdlResponseDto(
 )
 
 data class PeriodeDto(
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate,
-    val tom: LocalDate,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val tom: LocalDate
 )
 

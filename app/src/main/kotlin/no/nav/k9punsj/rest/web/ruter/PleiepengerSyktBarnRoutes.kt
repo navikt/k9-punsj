@@ -214,7 +214,6 @@ internal class PleiepengerSyktBarnRoutes(
 
                 val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto)
 
-
                 val søknadDto = SøknadDto(
                     søknadId = søknadIdDto,
                     søkerId = hentSøknad.norskIdent,
