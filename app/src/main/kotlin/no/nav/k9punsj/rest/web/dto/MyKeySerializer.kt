@@ -14,8 +14,8 @@ class MyKeySerializer: JsonSerializer<PeriodeDto>() {
     @Throws(IOException::class, JsonProcessingException::class)
     override fun serialize(value: PeriodeDto?, gen: JsonGenerator?, serializers: SerializerProvider?) {
         gen?.let { jGen ->
-            value?.let { movie ->
-                jGen.writeFieldName(objectMapper().writeValueAsString(movie))
+            value?.let { periodeDto ->
+                jGen.writeFieldName(objectMapper().writeValueAsString(periodeDto))
             } ?: jGen.writeNull()
         }
     }

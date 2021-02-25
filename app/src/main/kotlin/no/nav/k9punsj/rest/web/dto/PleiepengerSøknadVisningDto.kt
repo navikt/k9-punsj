@@ -1,8 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -22,14 +20,14 @@ data class PleiepengerSøknadVisningDto(
         val søknadsperiode: PeriodeDto?,
         val arbeidAktivitet: ArbeidAktivitetDto?,
         val dataBruktTilUtledning: DataBruktTilUtledningDto?,
-        val bosteder: BostederDto?,
-        val utenlandsopphold: UtenlandsoppholdDto?,
-        val beredskap: BeredskapDto?,
-        val nattevåk: NattevåkDto?,
-        val tilsynsordning: TilsynsordningDto?,
+        val bosteder: List<BostederDto>?,
+        val utenlandsopphold: List<UtenlandsoppholdDto>?,
+        val beredskap: List<BeredskapDto>?,
+        val nattevåk: List<NattevåkDto>?,
+        val tilsynsordning: List<TilsynsordningDto>?,
         val lovbestemtFerie: LovbestemtFerieDto?,
         val arbeidstid: ArbeidstidDto?,
-        val uttak: UttakDto?,
+        val uttak: List<UttakDto>?,
         val omsorg: OmsorgDto?,
     ) {
         data class BarnDto(
@@ -44,13 +42,12 @@ data class PleiepengerSøknadVisningDto(
             val arbeidstaker: List<ArbeidstakerDto>?,
         ) {
             data class SelvstendigNæringsdrivendeDto(
-                @JsonSerialize(keyUsing = MyKeySerializer::class)
-                @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-                val perioder: Map<PeriodeDto, SelvstendigNæringsdrivendePeriodeInfoDto>?,
+                val perioder: List<SelvstendigNæringsdrivendePeriodeInfoDto>?,
                 val organisasjonsnummer: String?,
                 val virksomhetNavn: String?,
             ) {
                 data class SelvstendigNæringsdrivendePeriodeInfoDto(
+                    val periode: PeriodeDto,
                     val virksomhetstyper: List<String>?,
                     val regnskapsførerNavn: String?,
                     val regnskapsførerTlf: String?,
@@ -78,11 +75,10 @@ data class PleiepengerSøknadVisningDto(
             ) {
                 data class ArbeidstidInfoDto(
                     val jobberNormaltTimerPerDag: String?,
-                    @JsonSerialize(keyUsing = MyKeySerializer::class)
-                    @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-                    val perioder: Map<PeriodeDto, ArbeidstidPeriodeInfoDto>?,
+                    val perioder: List<ArbeidstidPeriodeInfoDto>?,
                 ) {
                     data class ArbeidstidPeriodeInfoDto(
+                        val periode: PeriodeDto,
                         val faktiskArbeidTimerPerDag: String?,
                     )
                 }
@@ -98,57 +94,32 @@ data class PleiepengerSøknadVisningDto(
         )
 
         data class BostederDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, BostedPeriodeInfoDto>?,
-        ) {
-            data class BostedPeriodeInfoDto(
-                val land: String?,
-            )
-        }
+            val periode: PeriodeDto,
+            val land: String?,
+        )
 
         data class UtenlandsoppholdDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, UtenlandsoppholdPeriodeInfoDto>?,
+            val periode: PeriodeDto,
+            val land: String?,
+            val årsak: String?,
 
-            ) {
-            data class UtenlandsoppholdPeriodeInfoDto(
-                val land: String?,
-                val årsak: String?,
             )
-        }
 
         data class BeredskapDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, BeredskapPeriodeInfoDto>?,
+            val periode: PeriodeDto,
+            val tilleggsinformasjon: String?,
 
-            ) {
-            data class BeredskapPeriodeInfoDto(
-                val tilleggsinformasjon: String?,
             )
-        }
 
         data class NattevåkDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, NattevåkPeriodeInfoDto>?,
-        ) {
-            data class NattevåkPeriodeInfoDto(
-                val tilleggsinformasjon: String?,
-            )
-        }
+            val periode: PeriodeDto,
+            val tilleggsinformasjon: String?,
+        )
 
         data class TilsynsordningDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, TilsynPeriodeInfoDto>?,
-        ) {
-            data class TilsynPeriodeInfoDto(
-                val etablertTilsynTimerPerDag: String?,
-            )
-        }
+            val periode: PeriodeDto,
+            val etablertTilsynTimerPerDag: String?,
+        )
 
         data class LovbestemtFerieDto(
             val perioder: List<PeriodeDto>?,
@@ -161,19 +132,14 @@ data class PleiepengerSøknadVisningDto(
         )
 
         data class UttakDto(
-            @JsonSerialize(keyUsing = MyKeySerializer::class)
-            @JsonDeserialize(keyUsing = MyKeyDeserializer::class)
-            val perioder: Map<PeriodeDto, UttakPeriodeInfoDto>?,
-        ) {
-            data class UttakPeriodeInfoDto(
-                val timerPleieAvBarnetPerDag: String?,
-            )
-        }
+            val periode: PeriodeDto,
+            val timerPleieAvBarnetPerDag: String?,
+        )
 
         data class OmsorgDto(
             val relasjonTilBarnet: String?,
             val samtykketOmsorgForBarnet: Boolean?,
-            val beskrivelseAvOmsorgsrollen: String?
+            val beskrivelseAvOmsorgsrollen: String?,
         )
     }
 }

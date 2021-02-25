@@ -18,7 +18,6 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.PleiepengerYtels
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.UUID
-import kotlin.streams.toList
 
 
 internal class SøknadMapper {
@@ -48,20 +47,21 @@ internal class SøknadMapper {
         private fun mapYtelse(ytelse: PleiepengerSøknadMottakDto.PleiepengerYtelseDto) : PleiepengerYtelseDto {
             val søknadsperiode: PeriodeDto? = if(ytelse.søknadsperiode != null) fromDatoStringToPeriodeDto(ytelse.søknadsperiode) else null
             val arbeidAktivitet: ArbeidAktivitetDto? = if(ytelse.arbeidAktivitet != null ) mapArbeidAktivitetDto(ytelse.arbeidAktivitet) else null
-            val bostederDto: BostederDto? = if(ytelse.bosteder != null) BostederDto(ytelse.bosteder.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }) else null
-            val utenlandsoppholdDto: UtenlandsoppholdDto? = if (ytelse.utenlandsopphold!= null) UtenlandsoppholdDto(ytelse.utenlandsopphold.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto( entry.key) }) else null
-            val beredskapDto: BeredskapDto? = if(ytelse.beredskap != null) BeredskapDto(ytelse.beredskap.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }) else null
-            val nattevåkDto: NattevåkDto? =if (ytelse.nattevåk != null) NattevåkDto(ytelse.nattevåk.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }) else null
-            val tilsynsordningDto: TilsynsordningDto? =if (ytelse.tilsynsordning != null) TilsynsordningDto(ytelse.tilsynsordning.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }) else null
-            val lovbestemtFerieDto: LovbestemtFerieDto? =if (ytelse.lovbestemtFerie != null) LovbestemtFerieDto(ytelse.lovbestemtFerie.perioder?.stream()?.map { p -> fromDatoStringToPeriodeDto(p) }?.toList()) else null
-            val uttakDto: UttakDto? =if (ytelse.uttak != null) UttakDto(ytelse.uttak.perioder.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }) else null
+            val bosteder: List<BostederDto>? = if(ytelse.bosteder != null) ytelse.bosteder.perioder?.map { entry -> BostederDto(fromDatoStringToPeriodeDto(entry.key), entry.value.land)}?.toList() else null
+            val utenlandsoppholdDto: List<UtenlandsoppholdDto>? = if(ytelse.utenlandsopphold != null) ytelse.utenlandsopphold.perioder?.map { entry -> UtenlandsoppholdDto(fromDatoStringToPeriodeDto(entry.key), entry.value.land, entry.value.årsak)}?.toList() else null
+            val beredskapDto: List<BeredskapDto>? = if(ytelse.beredskap != null) ytelse.beredskap.perioder?.map { entry -> BeredskapDto(fromDatoStringToPeriodeDto(entry.key), entry.value.tilleggsinformasjon)}?.toList() else null
+            val nattevåkDto: List<NattevåkDto>? = if(ytelse.nattevåk != null) ytelse.nattevåk.perioder?.map { entry -> NattevåkDto(fromDatoStringToPeriodeDto(entry.key), entry.value.tilleggsinformasjon)}?.toList() else null
+            val tilsynsordningDto: List<TilsynsordningDto>? = if(ytelse.tilsynsordning != null) ytelse.tilsynsordning.perioder?.map { entry -> TilsynsordningDto(fromDatoStringToPeriodeDto(entry.key), entry.value.etablertTilsynTimerPerDag)}?.toList() else null
+            val lovbestemtFerieDto: LovbestemtFerieDto? = if(ytelse.lovbestemtFerie != null) LovbestemtFerieDto(ytelse.lovbestemtFerie.perioder?.map { entry -> (fromDatoStringToPeriodeDto(entry)) }?.toList()) else null
+            val uttakDto: List<UttakDto>? = if(ytelse.uttak != null) ytelse.uttak.perioder.map { entry -> UttakDto(fromDatoStringToPeriodeDto(entry.key), entry.value.timerPleieAvBarnetPerDag)}.toList() else null
+            ytelse.arbeidstid
 
             return PleiepengerYtelseDto(
                 ytelse.barn,
                 søknadsperiode,
                 arbeidAktivitet,
                 ytelse.dataBruktTilUtledning,
-                bostederDto,
+                bosteder,
                 utenlandsoppholdDto,
                 beredskapDto,
                 nattevåkDto,
@@ -81,7 +81,21 @@ internal class SøknadMapper {
         }
 
         private fun mapSelvstendigNæringsdrivendeDto(s: PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto): ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto {
-            return ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(s.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }
+             return ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(s.perioder?.map { entry ->
+                 ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.SelvstendigNæringsdrivendePeriodeInfoDto(
+                     periode = fromDatoStringToPeriodeDto(entry.key),
+                     virksomhetstyper = entry.value.virksomhetstyper,
+                     regnskapsførerNavn = entry.value.regnskapsførerNavn,
+                     regnskapsførerTlf =  entry.value.regnskapsførerTlf,
+                     erVarigEndring =  entry.value.erVarigEndring,
+                     endringDato =  entry.value.endringDato,
+                     endringBegrunnelse =  entry.value.endringBegrunnelse,
+                     bruttoInntekt =  entry.value.bruttoInntekt,
+                     erNyoppstartet =  entry.value.erNyoppstartet,
+                     registrertIUtlandet =  entry.value.registrertIUtlandet,
+                     landkode =  entry.value.landkode
+                 )
+                  }?.toList()
                 , s.organisasjonsnummer
                 , s.virksomhetNavn)
         }
@@ -89,7 +103,8 @@ internal class SøknadMapper {
         private fun mapArbeidstaker(a : PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto): ArbeidAktivitetDto.ArbeidstakerDto {
             val arbeidstidInfoDto = ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
                 a.arbeidstidInfo.jobberNormaltTimerPerDag,
-                a.arbeidstidInfo.perioder?.mapKeys { entry -> fromDatoStringToPeriodeDto(entry.key) }
+                a.arbeidstidInfo.perioder?.map { entry -> ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
+                    fromDatoStringToPeriodeDto(entry.key), entry.value.faktiskArbeidTimerPerDag) }?.toList()
             )
 
             return ArbeidAktivitetDto.ArbeidstakerDto(a.norskIdentitetsnummer, a.organisasjonsnummer, arbeidstidInfoDto)
