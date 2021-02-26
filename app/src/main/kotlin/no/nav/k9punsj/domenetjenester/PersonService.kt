@@ -43,6 +43,10 @@ class PersonService(
         return personRepository.hentPersonVedPersonId(personId)!!
     }
 
+    suspend fun finnPersonVedNorskIdent(norskIdent: NorskIdent): Person? {
+        return personRepository.hentPersonVedPersonIdent(norskIdent)
+    }
+
     suspend fun finnPersoner(norskeIdenter: Set<NorskIdent>): List<Person> {
         return norskeIdenter
             .map { norskeIdent -> finnEllerOpprettPersonVedNorskIdent(norskeIdent) }

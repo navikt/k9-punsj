@@ -7,7 +7,9 @@ import no.nav.k9.søknad.ValideringsFeil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.db.datamodell.*
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
@@ -15,6 +17,7 @@ import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
+import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,98 +41,74 @@ internal class PleiepengerSyktBarnRoutes(
     ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
-        private const val NorskIdentKey = "norsk_ident"
-        private const val MappeIdKey = "mappe_id"
+
         private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
     }
 
     internal object Urls {
-        internal const val HenteMapper = "/$søknadType/mapper"
+        internal const val HenteMappe = "/$søknadType/mappe"
         internal const val NySøknad = "/$søknadType"
-        internal const val EksisterendeSøknad = "/$søknadType/mappe/{$MappeIdKey}"
+        internal const val SendEksisterendeSøknad = "/$søknadType/send"
+        internal const val HentEksisterendeSøknad = "/$søknadType/hent"
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater"
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType"
-        internal const val NySøknad2 = "/$søknadType/v2"
     }
 
     @Bean
     fun pleiepengerSyktBarnSøknadRoutes() = Routes(authenticationHandler) {
 
-        GET("/api${Urls.HenteMapper}") { request ->
+        GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
-                val personer = personService.finnPersoner(request.norskeIdenter())
-                val mapperDto = mappeService.hentMapper(
-                    personer = personer,
-                    søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                ).map { mappe ->
-                    mappe.tilDto { personId ->
-                        personer.first { p -> p.personId == personId }.norskIdent
+                val norskIdent = request.norskeIdent()
+                val person = personService.finnPersonVedNorskIdent(norskIdent)
+                if (person != null) {
+                    val mappeDto = mappeService.hentMappe(
+                        person = person,
+                        søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                    ).tilDto<PleiepengerSøknadVisningDto> {
+                        norskIdent
                     }
-                }
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(MapperSvarDTO(mapperDto))
-            }
-        }
-
-        GET("/api${Urls.EksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
-                val mappe = mappeService.hent(request.mappeId())
-                if (mappe == null) {
-                    ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-                } else {
-                    val mappeDTO = mappe.tilDto {
-                        mappe.søker.personId
-                    }
-                    ServerResponse
+                    return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(mappeDTO)
+                        .bodyValueAndAwait(mappeDto)
                 }
+                return@RequestContext ServerResponse
+                    .noContent()
+                    .buildAndAwait()
             }
         }
 
-        PUT("/api${Urls.EksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()
 
-                val mappe = mappeService.utfyllendeInnsending(
-                    mappeId = request.mappeId(),
+                val søknadEntitet = mappeService.utfyllendeInnsending(
                     innsending = innsending
                 )
 
-                if (mappe == null) {
+                if (søknadEntitet == null) {
                     ServerResponse
                         .notFound()
                         .buildAndAwait()
                 } else {
-                    val mappeDTO = mappe.tilDto {
-                        mappe.søker.personId
-                    }
-                    println(mappeDTO)
-
+                    val søknadOppdaterDto = SøknadOppdaterDto(
+                        innsending.norskIdent,
+                        søknadEntitet.first.søknadId,
+                        søknad = søknadEntitet.second
+                    )
                     ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(mappeDTO)
+                        .bodyValueAndAwait(søknadOppdaterDto)
                 }
             }
         }
 
-        POST("/api${Urls.EksisterendeSøknad}") { request ->
+        POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val innsending = request.innsending()
-                val norskIdent = innsending.personer.keys.first()
-
-                val søknadIdDto = innsending.personer[norskIdent]?.søknadIdDto
-
-                val mappeId = request.mappeId()
-                val mappe = mappeService.hent(mappeId)
-
-                val søknadEntitet =
-                    mappe?.bunke?.flatMap { b -> b.søknader!! }?.toList()?.first { s -> s.søknadId == søknadIdDto }
+                val sendSøknad = request.sendSøknad()
+                val søknadEntitet = mappeService.hentSøknad(sendSøknad.søknad)
 
                 if (søknadEntitet == null) {
                     return@RequestContext ServerResponse
@@ -138,10 +117,11 @@ internal class PleiepengerSyktBarnRoutes(
                 } else {
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(søknad)
+                        val format = SøknadMapper.mapTilMapFormat(søknad)
+                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
-                                MappeFeil.SøknadFeilDto(feil.felt,
+                                SøknadFeil.SøknadFeilDto(feil.felt,
                                     feil.feilkode,
                                     feil.feilmelding)
                             }.toList()
@@ -149,13 +129,13 @@ internal class PleiepengerSyktBarnRoutes(
                             return@RequestContext ServerResponse
                                 .status(HttpStatus.BAD_REQUEST)
                                 .json()
-                                .bodyValueAndAwait(MappeFeil(mappeId, feil))
+                                .bodyValueAndAwait(SøknadFeil(sendSøknad.søknad, feil))
                         }
 
-                        val convertValue: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter!!)
-                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, convertValue.journalposter)
+                        val journalposterDto: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter!!)
+                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, journalposterDto.journalposter)
 
-                        //TODO(OJR) marker søknad som sendt_inn = TRUE
+                        //TODO(OJR) marker søknad som sendt_inn = TRUE og journalposter som behandlet?
 //                        mappeService.fjern(
 //                            mappeId = mappeId,
 //                            norskIdent = norskIdent
@@ -176,21 +156,21 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()
-                val mappe = mappeService.førsteInnsending(
+                val søknadEntitet = mappeService.førsteInnsending(
                     innsending = innsending,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 )
-                val mappeDTO = mappe.tilDto {
-                    mappe.søker.personId
+                val søknadDto = søknadEntitet.tilDto<PleiepengerSøknadVisningDto> {
+                    innsending.norskIdent
                 }
                 return@RequestContext ServerResponse
-                    .created(request.mappeLocation(mappe.mappeId))
+                    .status(HttpStatus.CREATED)
                     .json()
-                    .bodyValueAndAwait(mappeDTO)
+                    .bodyValueAndAwait(søknadDto)
             }
         }
 
-        DELETE("/api${Urls.EksisterendeSøknad}") { request ->
+        DELETE("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
 //                    mappeService.slett(mappeid = request.mappeId())
@@ -205,10 +185,12 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent, Periode(hentSøknad.periode.fom!!, hentSøknad.periode.tom!!))
+                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent,
+                    Periode(hentSøknad.periode.fom!!, hentSøknad.periode.tom!!))
                     ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
-                val søknadIdDto = mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+                val søknadIdDto =
+                    mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
                 val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
 
@@ -233,19 +215,11 @@ internal class PleiepengerSyktBarnRoutes(
         }
     }
 
-
-    private suspend fun ServerRequest.mappeId(): MappeId = pathVariable(MappeIdKey)
-
-    private suspend fun ServerRequest.norskIdent(): NorskIdent? =
-        if (norskeIdenter().size != 1) null else norskeIdenter().first()
-
-    private suspend fun ServerRequest.norskeIdenter(): Set<NorskIdent> {
-        val identer = mutableSetOf<NorskIdent>()
-        headers().header("X-Nav-NorskIdent").forEach { it -> identer.addAll(it.split(",").onEach { it.trim() }) }
-        return identer.toSet()
+    private suspend fun ServerRequest.norskeIdent(): String {
+        return headers().header("X-Nav-NorskIdent").first()!!
     }
 
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
-    private fun ServerRequest.mappeLocation(mappeId: MappeId) = uriBuilder().pathSegment("mappe", mappeId).build()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
+    private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 }

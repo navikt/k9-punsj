@@ -3,12 +3,13 @@ package no.nav.k9punsj.rest.web.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 data class PleiepengerSøknadVisningDto(
 
     val søker: SøkerDto?,
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    val mottattDato: LocalDate?,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
+    val mottattDato: ZonedDateTime?,
     val ytelse: PleiepengerYtelseDto?,
 ) {
     data class SøkerDto(
@@ -17,6 +18,7 @@ data class PleiepengerSøknadVisningDto(
 
     data class PleiepengerYtelseDto(
         val barn: BarnDto?,
+
         val søknadsperiode: PeriodeDto?,
         val arbeidAktivitet: ArbeidAktivitetDto?,
         val dataBruktTilUtledning: DataBruktTilUtledningDto?,

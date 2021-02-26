@@ -2,7 +2,7 @@ package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,7 +25,7 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
         }
 
-        fun hentKomplettSøknad() : PleiepengerSøknadVisningDto{
+        fun hentKomplettSøknad() : PleiepengerSøknadMottakDto{
             val json = lesFraFil("komplett-søknad.json")
             return objectMapper().readValue(json)
         }

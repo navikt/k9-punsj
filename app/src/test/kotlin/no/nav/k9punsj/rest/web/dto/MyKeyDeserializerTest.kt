@@ -11,8 +11,7 @@ internal class MyKeyDeserializerTest {
         val periodeDto = PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1))
 
 
-
-
+        val test : String
 
     }
 

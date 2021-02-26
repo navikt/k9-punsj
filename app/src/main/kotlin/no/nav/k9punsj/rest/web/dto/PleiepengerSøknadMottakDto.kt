@@ -5,11 +5,12 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.*
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.PleiepengerYtelseDto.*
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 data class PleiepengerSøknadMottakDto(
 
     val søker: SøkerDto?,
-    val mottattDato: LocalDate?,
+    val mottattDato: ZonedDateTime?,
     val ytelse: PleiepengerYtelseDto?,
 ) {
 

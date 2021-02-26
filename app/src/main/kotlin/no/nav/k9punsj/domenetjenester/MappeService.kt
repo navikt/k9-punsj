@@ -1,11 +1,15 @@
 package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.Innsending
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.objectMapper
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -28,21 +32,20 @@ class MappeService(
         return null
     }
 
-    suspend fun hentMapper(personer: List<Person>, søknadType: FagsakYtelseType): List<Mappe> {
-        return personer.map { person ->
-            henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId),
-                person)
-        }.toList()
+    suspend fun hentMappe(person: Person, søknadType: FagsakYtelseType): Mappe {
+        return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
     }
 
-    suspend fun førsteInnsending(søknadType: FagsakYtelseType, innsending: Innsending): Mappe {
-        val norskIdent = innsending.personer.keys.first()
+
+    //TODO(OJR) hva settes egentlig i førte kall
+    suspend fun førsteInnsending(søknadType: FagsakYtelseType, innsending: Innsending): SøknadEntitet {
+        val norskIdent = innsending.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, søknadType)
         val søknadId = UUID.randomUUID()
-        val søknad = innsending.personer[norskIdent]?.soeknad
+        val søknad = innsending.soeknad
         val søknadTre = objectMapper.valueToTree<ObjectNode>(søknad)
         val barnNorskIdent = søknadTre.get("barn")?.get("norskIdentitetsnummer")?.toString()
         val barnBursdag = søknadTre.get("barn")?.get("fødselsdato")?.toString()
@@ -53,7 +56,7 @@ class MappeService(
 
 
         val journalposter = mutableMapOf<String, Any?>()
-        journalposter["journalposter"] = listOf(innsending.personer[norskIdent]?.journalpostId)
+        journalposter["journalposter"] = listOf(innsending.journalpostId)
 
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
@@ -63,33 +66,27 @@ class MappeService(
             søkerId = søker.personId,
             barnId = barnId,
             barnFødselsdato = dag,
-            søknad = søknad as JsonB,
+            søknad = søknad,
             journalposter = journalposter
         )
 
-        val opprettSøknad = søknadRepository.opprettSøknad(søknadEntitet)
-
-        return henterMappeMedAlleKoblinger(mappeId, søker, opprettSøknad.søknadId)
+        return søknadRepository.opprettSøknad(søknadEntitet);
     }
 
-    //TODO(OJR) skal vi kunne støtte delvis oppdatering går an ved json merging -> SøknadJson.mergeNy
-    //skriver over gammel søknad
-    suspend fun utfyllendeInnsending(mappeId: MappeId, innsending: Innsending): Mappe? {
-        val norskIdent = innsending.personer.keys.first()
-
-        val søknadIdDto = innsending.personer[norskIdent]?.søknadIdDto
+    suspend fun utfyllendeInnsending(innsending: Innsending): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
+        val søknadIdDto = innsending.søknadIdDto
         if (søknadIdDto != null) {
             val hentSøknad = søknadRepository.hentSøknad(søknadIdDto)!!
 
             if (hentSøknad.sendtInn.not()) {
-                val søknad = innsending.personer[norskIdent]?.soeknad
+                val søknad = innsending.soeknad
                 val journalposter = mutableMapOf<String, Any?>()
-                journalposter["journalposter"] = listOf(innsending.personer[norskIdent]?.journalpostId)
-                val oppdatertSøknad = hentSøknad.copy(søknad = søknad as JsonB, journalposter = journalposter)
+                journalposter["journalposter"] = listOf(innsending.journalpostId)
+                val oppdatertSøknad = hentSøknad.copy(søknad = søknad, journalposter = journalposter)
                 søknadRepository.oppdaterSøknad(oppdatertSøknad)
-                val person = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
-                return henterMappeMedAlleKoblinger(mappeId, person, søknadIdDto)
+                val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
+                return Pair(oppdatertSøknad, visningDto)
             } else {
                 throw IllegalStateException("Kan ikke endre på en søknad som er sendt inn")
             }
@@ -99,11 +96,11 @@ class MappeService(
     }
 
     private suspend fun henterMappeMedAlleKoblinger(
-        mappeId: MappeId,
+        mappeId: MappeId?,
         søker: Person,
         søknadId: SøknadId? = null,
     ): Mappe {
-        val alleBunker = bunkeRepository.hentAlleBunkerForMappe(mappeId)
+        val alleBunker = bunkeRepository.hentAlleBunkerForMappe(mappeId!!)
         val bunkerId = alleBunker.map { b -> b.bunkeId }.toList()
         val hentAlleSøknaderForBunker = bunkerId.flatMap { id -> søknadRepository.hentAlleSøknaderForBunker(id) }
 
@@ -136,5 +133,9 @@ class MappeService(
         val søknad = søknadRepository.opprettSøknad(tomSøknad)
 
         return søknad.søknadId
+    }
+
+    suspend fun hentSøknad(søknad: SøknadIdDto): SøknadEntitet? {
+        return søknadRepository.hentSøknad(søknad)
     }
 }

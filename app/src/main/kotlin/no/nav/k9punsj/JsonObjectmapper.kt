@@ -1,5 +1,6 @@
 package no.nav.k9punsj
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 internal fun objectMapper(): ObjectMapper {
     return jacksonObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .dusseldorfConfigured()
             .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
             .enable(SerializationFeature.INDENT_OUTPUT)

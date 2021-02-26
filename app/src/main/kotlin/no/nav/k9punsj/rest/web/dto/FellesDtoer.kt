@@ -1,8 +1,9 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.db.datamodell.*
-import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 
 
@@ -19,12 +20,11 @@ data class PdlPersonDto(
     val aktørId: AktørIdDto,
 )
 
-data class BunkeDto(
+data class BunkeDto<T>(
     val bunkeId: BunkeIdDto,
     val fagsakKode: String,
-    val søknader: List<SøknadDto<SøknadJson>>?,
+    val søknader: List<SøknadDto<T>>?,
 )
-
 
 data class SvarDto(
     val søker: NorskIdentDto,
@@ -32,12 +32,18 @@ data class SvarDto(
     val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?,
 )
 
+data class SøknadOppdaterDto<T>(
+    val søker: NorskIdentDto,
+    val søknadId: SøknadIdDto,
+    val søknad: T,
+)
+
 data class SøknadDto<T>(
     val søknadId: SøknadIdDto,
     val søkerId: NorskIdentDto,
     val barnId: NorskIdentDto? = null,
     val barnFødselsdato: LocalDate? = null,
-    val journalposter: T? = null,
+    val journalposter: JournalposterDto? = null,
     val sendtInn: Boolean? = false,
     val erFraK9: Boolean? = false,
     val søknad: T? = null,
@@ -47,26 +53,25 @@ data class JournalposterDto(
     val journalposter: MutableSet<String>,
 )
 
-
-internal fun Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO {
-    val bunkerDto = this.bunke.map { bunkeEntitiet -> bunkeEntitiet.tilDto(f) }.toList()
+internal inline fun <reified T> Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO<T> {
+    val bunkerDto = this.bunke.map { bunkeEntitiet -> bunkeEntitiet.tilDto<T>(f) }.toList()
     return MappeSvarDTO(this.mappeId, this.søker.norskIdent, bunkerDto)
 }
 
-internal fun SøknadEntitet.tilDto(f: (PersonId) -> (NorskIdent)): SøknadDto<SøknadJson> {
+internal inline fun <reified T> SøknadEntitet.tilDto(f: (PersonId) -> (NorskIdent)): SøknadDto<T> {
     return SøknadDto(
         søknadId = this.søknadId,
         søkerId = f(this.søkerId),
         barnId = if (this.barnId != null) f(this.barnId) else null,
         barnFødselsdato = null,
-        søknad = this.søknad,
-        journalposter = this.journalposter,
+        søknad = if(this.søknad!= null) objectMapper().convertValue<T>(this.søknad) else null,
+        journalposter = if (this.journalposter != null) objectMapper().convertValue(this.journalposter) else null,
         sendtInn = this.sendtInn
     )
 }
 
-internal fun BunkeEntitet.tilDto(f: (PersonId) -> (NorskIdent)): BunkeDto {
-    val søknaderDto = this.søknader?.map { søknadEntitet -> søknadEntitet.tilDto(f) }?.toList()
+internal inline fun <reified T>BunkeEntitet.tilDto(f: (PersonId) -> (NorskIdent)): BunkeDto<T> {
+    val søknaderDto = this.søknader?.map { søknadEntitet -> søknadEntitet.tilDto<T>(f) }?.toList()
     return BunkeDto(this.bunkeId, this.fagsakYtelseType.kode, søknaderDto)
 }
 

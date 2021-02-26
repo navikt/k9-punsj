@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.http.HttpStatus
@@ -26,7 +27,10 @@ internal fun SøknadJson.mergeNy(nySøknad: SøknadJson) : SøknadJson {
 }
 
 data class Innsending(
-        val personer: Map<NorskIdent, JournalpostInnhold<SøknadJson>>
+    val norskIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
+    val soeknad: SøknadJson,
+    val søknadIdDto: SøknadIdDto? = null
 )
 
 data class HentSøknad(
@@ -34,10 +38,9 @@ data class HentSøknad(
     val periode: PeriodeDto
 )
 
-data class JournalpostInnhold<T>(
-        val journalpostId: JournalpostIdDto,
-        val soeknad: T,
-        val søknadIdDto: SøknadIdDto? = null
+data class SendSøknad(
+    val norskIdent: NorskIdentDto,
+    val søknad: SøknadIdDto
 )
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST

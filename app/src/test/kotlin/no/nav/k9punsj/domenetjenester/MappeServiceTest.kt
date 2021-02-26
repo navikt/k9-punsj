@@ -7,7 +7,6 @@ import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.Innsending
-import no.nav.k9punsj.rest.web.JournalpostInnhold
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.util.DatabaseUtil
@@ -51,11 +50,9 @@ internal class MappeServiceTest {
         personnummer: NorskIdentDto,
         journalpostId: String,
         søknad: SøknadJson = mutableMapOf(),
+        søknadId: String? = null
     ): Innsending {
-        val person = JournalpostInnhold(journalpostId = journalpostId, soeknad = søknad)
-        val personer = mutableMapOf<String, JournalpostInnhold<SøknadJson>>()
-        personer[personnummer] = person
-
-        return Innsending(personer)
+        return Innsending(personnummer, journalpostId, søknad, søknadId)
     }
+
 }
