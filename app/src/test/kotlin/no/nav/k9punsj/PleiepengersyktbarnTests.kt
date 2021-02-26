@@ -15,7 +15,6 @@ import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.Assert.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
@@ -141,7 +140,6 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
     }
 
-    @Disabled
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val norskIdent = "02020050121"
@@ -159,7 +157,6 @@ class PleiepengersyktbarnTests {
         return objectMapper().convertValue(formatFraFrontend)
     }
 
-    @Disabled
     @Test
     fun `Skal fange opp feilen overlappendePerioder i søknaden`() {
         val norskIdent = "02020052121"
@@ -173,8 +170,7 @@ class PleiepengersyktbarnTests {
             .block()
 
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-        val overlappendePerioder = response?.feil?.filter { f -> f.feilkode == "overlappendePerioder" }?.toList()
-        assertEquals("overlappendePerioder", overlappendePerioder?.first()?.feilkode!!)
+        assertEquals("overlappendePerioder", response?.feil?.first()?.feilkode!!)
     }
 
     @Test
@@ -202,8 +198,6 @@ class PleiepengersyktbarnTests {
         assertEquals(søknadDto?.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.tom, LocalDate.of(2019, 10,20))
     }
 
-
-    @Disabled
     @Test
     fun `Innsending av søknad med feil i perioden blir stoppet`() {
         val norskIdent = "02022352121"
