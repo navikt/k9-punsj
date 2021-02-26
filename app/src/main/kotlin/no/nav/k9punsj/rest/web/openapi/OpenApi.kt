@@ -71,7 +71,8 @@ internal class PleiepengerSyktBarnSoknadController {
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter mappen til en person som inneholder søknader.",
-        description = "Sendes NorskIdente til person som headere."
+        description = "Sendes NorskIdente til person som headere.",
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -89,39 +90,15 @@ internal class PleiepengerSyktBarnSoknadController {
     fun HenteMappe(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
     }
 
-    @GetMapping(PleiepengerSyktBarnRoutes.Urls.HentEksisterendeSøknad, produces = ["application/json"])
-    @Operation(
-        summary = "Hente eksisterende mappe"
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Mappen",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasPleiepengerSyktBarSoknadMappeSvar::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Mappen finnes ikke"
-            )
-        ]
-    )
-    fun HenteMappe(
-        @RequestBody søknad: OasHentSøknad,
-    ) {
-    }
-
-
     @PutMapping(
         PleiepengerSyktBarnRoutes.Urls.OppdaterEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
-    @Operation(summary = "Oppdatere en søknad i en eksisterende mappe.")
+    @Operation(
+        summary = "Oppdatere en søknad i en eksisterende mappe.",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
     @ApiResponses(
         value = [
             ApiResponse(
@@ -155,7 +132,10 @@ internal class PleiepengerSyktBarnSoknadController {
         consumes = ["application/json"],
         produces = ["application/json"]
     )
-    @Operation(summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.")
+    @Operation(
+        summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
     @ApiResponses(
         value = [
             ApiResponse(
@@ -188,7 +168,10 @@ internal class PleiepengerSyktBarnSoknadController {
         consumes = ["application/json"],
         produces = ["application/json"]
     )
-    @Operation(summary = "Starte en helt ny søknad")
+    @Operation(
+        summary = "Starte en helt ny søknad",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
     @ApiResponses(
         value = [
             ApiResponse(

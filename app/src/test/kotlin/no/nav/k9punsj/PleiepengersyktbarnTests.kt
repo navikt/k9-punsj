@@ -33,9 +33,6 @@ class PleiepengersyktbarnTests {
     private val client = TestSetup.client
     private val api = "api"
     private val søknadTypeUri = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
-
-    // Standardverdier for test
-    private val standardIdent = "01122334410"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test

@@ -46,17 +46,15 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     internal object Urls {
-        internal const val HenteMappe = "/$søknadType/mappe"
-        internal const val NySøknad = "/$søknadType"
-        internal const val SendEksisterendeSøknad = "/$søknadType/send"
-        internal const val HentEksisterendeSøknad = "/$søknadType/hent"
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater"
-        internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType"
+        internal const val HenteMappe = "/$søknadType/mappe" //get
+        internal const val NySøknad = "/$søknadType" //post
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
+        internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
+        internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType" //post
     }
 
     @Bean
     fun pleiepengerSyktBarnSøknadRoutes() = Routes(authenticationHandler) {
-
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
@@ -217,6 +215,10 @@ internal class PleiepengerSyktBarnRoutes(
 
     private suspend fun ServerRequest.norskeIdent(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
+    }
+
+    private suspend fun ServerRequest.søknadId(): String {
+        return headers().header("Soeknad_id").first()!!
     }
 
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
