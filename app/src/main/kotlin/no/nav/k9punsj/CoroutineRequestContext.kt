@@ -12,7 +12,7 @@ import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.*
-import java.util.*
+import java.util.UUID
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
@@ -23,7 +23,7 @@ private const val CorrelationIdKey = "correlation_id"
 private const val AuthenticationKey = "authentication"
 
 
-private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
+private class CoroutineRequestContext() : AbstractCoroutineContextElement(Key) {
     internal companion object Key : CoroutineContext.Key<CoroutineRequestContext>
     internal val attributter: MutableMap<String, Any> = mutableMapOf()
 }

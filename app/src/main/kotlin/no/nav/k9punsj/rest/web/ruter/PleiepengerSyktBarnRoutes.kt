@@ -59,17 +59,18 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
+
                 if (person != null) {
-                    val mappeDto = mappeService.hentMappe(
+                    val svarDto = mappeService.hentMappe(
                         person = person,
                         søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                    ).tilDto<PleiepengerSøknadVisningDto> {
+                    ).tilDto<PleiepengerSøknadVisningDto>(FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                         norskIdent
                     }
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(mappeDto)
+                        .bodyValueAndAwait(svarDto)
                 }
                 return@RequestContext ServerResponse
                     .noContent()
@@ -80,6 +81,8 @@ internal class PleiepengerSyktBarnRoutes(
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()
+
+//                val accessToken = coroutineContext.hentAuthentication().accessToken
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     innsending = innsending
@@ -130,8 +133,10 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.søknad, feil))
                         }
 
-                        val journalposterDto: JournalposterDto = objectMapper.convertValue(søknadEntitet.journalposter!!)
-                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first, journalposterDto.journalposter)
+                        val journalposterDto: JournalposterDto =
+                            objectMapper.convertValue(søknadEntitet.journalposter!!)
+                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first,
+                            journalposterDto.journalposter)
 
                         //TODO(OJR) marker søknad som sendt_inn = TRUE og journalposter som behandlet?
 //                        mappeService.fjern(

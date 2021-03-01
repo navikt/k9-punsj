@@ -26,10 +26,10 @@ data class BunkeDto<T>(
     val søknader: List<SøknadDto<T>>?,
 )
 
-data class SvarDto(
+data class SvarDto<T>(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<SøknadDto<PleiepengerSøknadVisningDto>>?,
+    val søknader: List<SøknadDto<T>>?,
 )
 
 data class SøknadOppdaterDto<T>(
@@ -53,9 +53,10 @@ data class JournalposterDto(
     val journalposter: MutableSet<String>,
 )
 
-internal inline fun <reified T> Mappe.tilDto(f: (PersonId) -> (NorskIdent)): MappeSvarDTO<T> {
+internal inline fun <reified T> Mappe.tilDto(type: FagsakYtelseType, f: (PersonId) -> (NorskIdent)): SvarDto<T> {
     val bunkerDto = this.bunke.map { bunkeEntitiet -> bunkeEntitiet.tilDto<T>(f) }.toList()
-    return MappeSvarDTO(this.mappeId, this.søker.norskIdent, bunkerDto)
+    val first = bunkerDto.first { b -> b.fagsakKode == type.kode }
+    return SvarDto(this.søker.norskIdent, type.kode, first.søknader)
 }
 
 internal inline fun <reified T> SøknadEntitet.tilDto(f: (PersonId) -> (NorskIdent)): SøknadDto<T> {

@@ -1,6 +1,5 @@
 package no.nav.k9punsj.domenetjenester
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.db.repository.BunkeRepository
@@ -10,7 +9,6 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
-import no.nav.k9punsj.rest.web.objectMapper
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -37,7 +35,6 @@ class MappeService(
     }
 
 
-    //TODO(OJR) hva settes egentlig i førte kall
     suspend fun førsteInnsending(søknadType: FagsakYtelseType, innsending: Innsending): SøknadEntitet {
         val norskIdent = innsending.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
@@ -45,15 +42,6 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, søknadType)
         val søknadId = UUID.randomUUID()
-        val søknad = innsending.soeknad
-        val søknadTre = objectMapper.valueToTree<ObjectNode>(søknad)
-        val barnNorskIdent = søknadTre.get("barn")?.get("norskIdentitetsnummer")?.toString()
-        val barnBursdag = søknadTre.get("barn")?.get("fødselsdato")?.toString()
-
-        val barnId =
-            if (barnNorskIdent != null) personService.finnEllerOpprettPersonVedNorskIdent(barnNorskIdent).personId else null
-        val dag = if (barnBursdag != null) java.time.LocalDate.parse(barnBursdag) else null
-
 
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(innsending.journalpostId)
@@ -64,9 +52,6 @@ class MappeService(
             søknadId = søknadId.toString(),
             bunkeId = bunkeId,
             søkerId = søker.personId,
-            barnId = barnId,
-            barnFødselsdato = dag,
-            søknad = søknad,
             journalposter = journalposter
         )
 

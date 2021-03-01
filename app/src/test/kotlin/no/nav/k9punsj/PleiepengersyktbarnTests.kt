@@ -74,8 +74,8 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
 
-        val mappeSvar = runBlocking { res.awaitBody<MappeSvarDTO<PleiepengerSøknadVisningDto>>() }
-        val journalposterDto = mappeSvar.bunker.first().søknader?.first()?.journalposter
+        val mappeSvar = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
+        val journalposterDto = mappeSvar.søknader?.first()?.journalposter
         assertEquals("9999", journalposterDto?.journalposter?.first())
     }
 
@@ -182,17 +182,15 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(hentSøknad))
             .awaitExchangeBlocking()
 
-        val søknadDto = res
-            .bodyToMono(SvarDto::class.java)
-            .block()
+        val søknadDto = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
 
         assertEquals(HttpStatus.OK, res.statusCode())
-        assertEquals(søknadDto?.søker, norskIdent)
-        assertEquals(søknadDto?.fagsakTypeKode, "PSB")
-        assertTrue(søknadDto?.søknader?.size == 1)
-        assertTrue(søknadDto?.søknader?.get(0)?.søknadId.isNullOrBlank().not())
-        assertEquals(søknadDto?.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.fom, LocalDate.of(2018, 12,30))
-        assertEquals(søknadDto?.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.tom, LocalDate.of(2019, 10,20))
+        assertEquals(søknadDto.søker, norskIdent)
+        assertEquals(søknadDto.fagsakTypeKode, "PSB")
+        assertTrue(søknadDto.søknader?.size == 1)
+        assertTrue(søknadDto.søknader?.get(0)?.søknadId.isNullOrBlank().not())
+        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.fom, LocalDate.of(2018, 12,30))
+        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.tom, LocalDate.of(2019, 10,20))
     }
 
     @Test
@@ -221,19 +219,31 @@ class PleiepengersyktbarnTests {
         ident: String,
         journalpostid: String = "73369b5b-d50e-47ab-8fc2-31ef35a71993",
     ): ClientResponse {
-        val innsendingForOpprettelseAvMappe = lagInnsending(ident, journalpostid, soeknadJson)
+        val innsendingForOpprettelseAvMappe = lagInnsending(ident, journalpostid)
 
+        // oppretter en søknad
         val resPost = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
             .awaitExchangeBlocking()
 
         val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
-
         assertNotNull(søknadDto)
+
+        // fyller ut en søknad
+        val innsendingForUtfyllingAvSøknad = lagInnsending(ident, journalpostid, soeknadJson, søknadDto.søknadId)
+        val resPut = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForUtfyllingAvSøknad))
+            .awaitExchangeBlocking()
+
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<SøknadOppdaterDto<PleiepengerSøknadVisningDto>>() }
+        assertNotNull(søknadDtoFyltUt.søknad.søker)
+
         val søknadId = søknadDto.søknadId
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
 
+        // sender en søknad
         return client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "send").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
