@@ -135,7 +135,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                val søknadEntitet = mappeService.hentSøknad(sendSøknad.søknad)
+                val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
                     return@RequestContext ServerResponse
@@ -156,7 +156,7 @@ internal class PleiepengerSyktBarnRoutes(
                             return@RequestContext ServerResponse
                                 .status(HttpStatus.BAD_REQUEST)
                                 .json()
-                                .bodyValueAndAwait(SøknadFeil(sendSøknad.søknad, feil))
+                                .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
                         val journalposterDto: JournalposterDto =

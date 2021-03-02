@@ -45,7 +45,7 @@ data class HentSøknad(
 
 data class SendSøknad(
     val norskIdent: NorskIdentDto,
-    val søknad: SøknadIdDto,
+    val soeknadId: SøknadIdDto,
 )
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST

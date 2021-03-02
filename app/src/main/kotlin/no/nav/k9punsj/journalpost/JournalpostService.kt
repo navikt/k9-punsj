@@ -49,7 +49,8 @@ class JournalpostService(
                 val aktørId: AktørId? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.AKTOERID) {
                     safJournalpost.bruker?.id
                 } else null
-
+                //FIXME: fjern dette!
+                logger.info(safJournalpost.toString())
                 JournalpostInfo(
                     journalpostId = journalpostId,
                     dokumenter = safJournalpost.dokumenter.map { DokumentInfo(it.dokumentInfoId) },

@@ -262,7 +262,7 @@ data class OasInnsending(
 
 data class OasSendSøknad(
     val norskIdent: NorskIdentDto,
-    val søknad: SøknadIdDto
+    val soeknadId: SøknadIdDto
 )
 
 data class OasOpprettNySøknad(
