@@ -257,7 +257,7 @@ data class OasInnsending(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
     val soeknad: SøknadJson,
-    val søknadIdDto: SøknadIdDto? = null
+    val soeknadId: SøknadIdDto
 )
 
 data class OasSendSøknad(
