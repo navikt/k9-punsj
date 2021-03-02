@@ -7,6 +7,7 @@ import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.Innsending
+import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.stereotype.Service
@@ -35,8 +36,8 @@ class MappeService(
     }
 
 
-    suspend fun førsteInnsending(søknadType: FagsakYtelseType, innsending: Innsending): SøknadEntitet {
-        val norskIdent = innsending.norskIdent
+    suspend fun førsteInnsending(søknadType: FagsakYtelseType, nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
@@ -44,7 +45,7 @@ class MappeService(
         val søknadId = UUID.randomUUID()
 
         val journalposter = mutableMapOf<String, Any?>()
-        journalposter["journalposter"] = listOf(innsending.journalpostId)
+        journalposter["journalposter"] = listOf(nySøknad.journalpostId)
 
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
@@ -55,7 +56,7 @@ class MappeService(
             journalposter = journalposter
         )
 
-        return søknadRepository.opprettSøknad(søknadEntitet);
+        return søknadRepository.opprettSøknad(søknadEntitet)
     }
 
     suspend fun utfyllendeInnsending(innsending: Innsending, saksbehandler: String): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {

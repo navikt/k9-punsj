@@ -17,7 +17,7 @@ typealias JournalpostId = String
 
 typealias SøknadJson = MutableMap<String, Any?>
 
-internal fun SøknadJson.mergeNy(nySøknad: SøknadJson) : SøknadJson {
+internal fun SøknadJson.mergeNy(nySøknad: SøknadJson): SøknadJson {
     val før = objectMapper.valueToTree<ObjectNode>(this)
     val nytt = objectMapper.valueToTree<ObjectNode>(nySøknad)
     val merged = objectMapper.convertValue<SøknadJson>(merge(før, nytt))
@@ -30,17 +30,22 @@ data class Innsending(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
     val soeknad: SøknadJson,
-    val søknadIdDto: SøknadIdDto? = null
+    val søknadIdDto: SøknadIdDto? = null,
+)
+
+data class OpprettNySøknad(
+    val norskIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
 )
 
 data class HentSøknad(
     val norskIdent: NorskIdent,
-    val periode: PeriodeDto
+    val periode: PeriodeDto,
 )
 
 data class SendSøknad(
     val norskIdent: NorskIdentDto,
-    val søknad: SøknadIdDto
+    val søknad: SøknadIdDto,
 )
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST

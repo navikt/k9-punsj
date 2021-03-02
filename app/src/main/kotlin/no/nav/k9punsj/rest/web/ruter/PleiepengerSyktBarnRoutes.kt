@@ -18,6 +18,7 @@ import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
+import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
 import org.slf4j.Logger
@@ -163,13 +164,13 @@ internal class PleiepengerSyktBarnRoutes(
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val innsending = request.innsending()
+                val opprettNySøknad = request.opprettNy()
                 val søknadEntitet = mappeService.førsteInnsending(
-                    innsending = innsending,
+                    nySøknad = opprettNySøknad!!,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 )
                 val søknadDto = søknadEntitet.tilDto<PleiepengerSøknadVisningDto> {
-                    innsending.norskIdent
+                    opprettNySøknad.norskIdent
                 }
                 return@RequestContext ServerResponse
                     .status(HttpStatus.CREATED)
@@ -220,6 +221,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
+    private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 }

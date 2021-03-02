@@ -186,7 +186,7 @@ internal class PleiepengerSyktBarnSoknadController {
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: OasInnsending,
+        @RequestBody søknad: OasOpprettNySøknad,
     ) {
     }
 
@@ -237,6 +237,11 @@ data class OasInnsending(
 data class OasSendSøknad(
     val norskIdent: NorskIdentDto,
     val søknad: SøknadIdDto
+)
+
+data class OasOpprettNySøknad(
+    val norskIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
 )
 
 data class OasPleiepengerSyktBarSoknadMappeSvar(

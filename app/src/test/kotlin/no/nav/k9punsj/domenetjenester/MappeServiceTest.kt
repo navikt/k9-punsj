@@ -6,8 +6,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
-import no.nav.k9punsj.rest.web.Innsending
-import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.util.DatabaseUtil
 import org.junit.jupiter.api.Test
@@ -49,10 +48,8 @@ internal class MappeServiceTest {
     private fun lagInnsending(
         personnummer: NorskIdentDto,
         journalpostId: String,
-        søknad: SøknadJson = mutableMapOf(),
-        søknadId: String? = null
-    ): Innsending {
-        return Innsending(personnummer, journalpostId, søknad, søknadId)
+    ): OpprettNySøknad {
+        return OpprettNySøknad(personnummer, journalpostId)
     }
 
 }
