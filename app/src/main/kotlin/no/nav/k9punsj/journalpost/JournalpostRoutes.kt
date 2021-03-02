@@ -5,6 +5,7 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,8 +21,9 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class JournalpostRoutes(
-        private val authenticationHandler: AuthenticationHandler,
-        private val journalpostService: JournalpostService
+    private val authenticationHandler: AuthenticationHandler,
+    private val journalpostService: JournalpostService,
+    private val pdlService: PdlService,
 ) {
 
     private companion object {
@@ -43,27 +45,42 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 try {
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
-                            journalpostId = request.journalpostId()
+                        journalpostId = request.journalpostId()
                     )
                     if (journalpostInfo == null) {
                         ServerResponse
-                                .notFound()
-                                .buildAndAwait()
+                            .notFound()
+                            .buildAndAwait()
                     } else {
-                        ServerResponse
+                        if (journalpostInfo.norskIdent == null && journalpostInfo.aktørId != null) {
+                            val pdlResponse = pdlService.identifikatorMedAktørId(journalpostInfo.aktørId)
+                            val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+                            val journalpostInfoDto = JournalpostInfoDto(
+                                journalpostId = journalpostInfo.journalpostId,
+                                norskIdent = personIdent,
+                                dokumenter = journalpostInfo.dokumenter)
+                            ServerResponse
                                 .ok()
                                 .json()
-                                .bodyValueAndAwait(journalpostInfo)
+                                .bodyValueAndAwait(journalpostInfoDto)
+                        } else {
+                            ServerResponse
+                                .ok()
+                                .json()
+                                .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
+                                    norskIdent = journalpostInfo.norskIdent,
+                                    dokumenter = journalpostInfo.dokumenter))
+                        }
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
                     ServerResponse
-                            .badRequest()
-                            .buildAndAwait()
+                        .badRequest()
+                        .buildAndAwait()
                 } catch (case: IkkeTilgang) {
                     ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
                 }
             }
         }
@@ -73,30 +90,30 @@ internal class JournalpostRoutes(
                 val omfordelingRequest = request.omfordelingRequest()
                 try {
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
-                            journalpostId = request.journalpostId()
+                        journalpostId = request.journalpostId()
                     )
                     if (journalpostInfo == null) {
                         ServerResponse
-                                .notFound()
-                                .buildAndAwait()
+                            .notFound()
+                            .buildAndAwait()
                     } else {
                         journalpostService.omfordelJournalpost(
-                                journalpostId = request.journalpostId(),
-                                ytelse = FagsakYtelseType.fromKode(omfordelingRequest.fagsakYtelseTypeKode)
+                            journalpostId = request.journalpostId(),
+                            ytelse = FagsakYtelseType.fromKode(omfordelingRequest.fagsakYtelseTypeKode)
                         )
                         ServerResponse
-                                .noContent()
-                                .buildAndAwait()
+                            .noContent()
+                            .buildAndAwait()
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
                     ServerResponse
-                            .badRequest()
-                            .buildAndAwait()
+                        .badRequest()
+                        .buildAndAwait()
                 } catch (case: IkkeTilgang) {
                     ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
                 }
             }
         }
@@ -105,37 +122,39 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 try {
                     val dokument = journalpostService.hentDokument(
-                            journalpostId = request.journalpostId(),
-                            dokumentId = request.dokumentId()
+                        journalpostId = request.journalpostId(),
+                        dokumentId = request.dokumentId()
                     )
 
                     if (dokument == null) {
                         ServerResponse
-                                .notFound()
-                                .buildAndAwait()
+                            .notFound()
+                            .buildAndAwait()
                     } else {
                         ServerResponse
-                                .ok()
-                                .contentType(dokument.contentType)
-                                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=${request.dokumentId()}.${dokument.contentType.subtype}")
-                                .header("Content-Security-Policy", "frame-src;")
-                                .bodyValueAndAwait(dokument.dataBuffer)
+                            .ok()
+                            .contentType(dokument.contentType)
+                            .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "inline; filename=${request.dokumentId()}.${dokument.contentType.subtype}")
+                            .header("Content-Security-Policy", "frame-src;")
+                            .bodyValueAndAwait(dokument.dataBuffer)
                     }
                 } catch (cause: IkkeTilgang) {
                     ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
                 }
 
             }
         }
     }
 
-    private suspend fun ServerRequest.journalpostId() : JournalpostId = pathVariable(JournalpostIdKey)
-    private suspend fun ServerRequest.dokumentId() : DokumentId = pathVariable(DokumentIdKey)
-    private suspend fun ServerRequest.omfordelingRequest() = body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
+    private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
+    private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
+    private suspend fun ServerRequest.omfordelingRequest() =
+        body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
     data class OmfordelingRequest(
-            val fagsakYtelseTypeKode: String
+        val fagsakYtelseTypeKode: String,
     )
 }

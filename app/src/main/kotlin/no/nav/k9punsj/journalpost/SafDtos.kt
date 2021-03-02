@@ -53,8 +53,8 @@ internal object SafDtos {
     }
 
     internal enum class BrukerType(beskrivelse: String) {
-        FNR("Fødselsnummer")
-        //AKTOERID("AktørID på enten person eller organisasjon") // TODO: Må støtte at AktørID er satt
+        FNR("Fødselsnummer"),
+        AKTOERID("AKTOERID")
     }
 
     internal enum class AvsenderMottakertype(beskrivelse: String) {
