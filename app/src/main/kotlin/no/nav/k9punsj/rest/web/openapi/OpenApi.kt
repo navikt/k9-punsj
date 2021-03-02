@@ -176,7 +176,7 @@ internal class PleiepengerSyktBarnSoknadController {
         value = [
             ApiResponse(
                 responseCode = "201",
-                description = "Opprettet mappe for en ny søknad. Se 'Location' header for URL til mappen.",
+                description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
                 content = [Content(
                     schema = Schema(
                         implementation = SøknadDto::class
@@ -265,12 +265,6 @@ data class OasPleiepengerSyktBarnFeil(
         val feilmelding: String?,
     )
 }
-
-data class OasPleiepengerSyktBarnSvarV2(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<OasPleiepengerSøknadDto<PleiepengerSøknadVisningDto>>?,
-)
 
 data class OasPleiepengerSøknadDto<T>(
     val søknadId: SøknadIdDto,

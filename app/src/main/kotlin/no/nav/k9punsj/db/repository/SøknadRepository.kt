@@ -63,12 +63,13 @@ class SøknadRepository(private val dataSource: DataSource) {
                     set soknad = :soknad :: jsonb,
                     journalposter = :journalposter :: jsonb,
                     endret_tid = now(),
-                    endret_av = 'PUNSJ'
+                    endret_av = :endret_av
                     where soknad_id = :soknad_id
                     """, mapOf(
                             "soknad_id" to UUID.fromString(søknad.søknadId),
                             "soknad" to objectMapper().writeValueAsString(søknad.søknad),
-                            "journalposter" to objectMapper().writeValueAsString(søknad.journalposter))
+                            "journalposter" to objectMapper().writeValueAsString(søknad.journalposter),
+                            "endret_av" to objectMapper().writeValueAsString(søknad.endret_av))
                     ).asUpdate
                 )
             }

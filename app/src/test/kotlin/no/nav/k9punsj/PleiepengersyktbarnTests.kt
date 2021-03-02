@@ -36,13 +36,15 @@ class PleiepengersyktbarnTests {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
-    fun `Får 204 når personen ikke har en eksisterende mappe`() {
+    fun `Får tom liste når personen ikke har en eksisterende mappe`() {
         val norskIdent = "01110050053"
         val res = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
-        assertEquals(HttpStatus.NO_CONTENT, res.statusCode())
+        assertEquals(HttpStatus.OK, res.statusCode())
+        val svar = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
+        assertTrue(svar.søknader!!.isEmpty())
     }
 
     @Test
@@ -134,7 +136,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(sendSøknad))
             .awaitExchangeBlocking()
 
-        assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
     }
 
     @Test

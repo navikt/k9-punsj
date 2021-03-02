@@ -3,7 +3,6 @@ package no.nav.k9punsj.rest.web.ruter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9.søknad.ValideringsFeil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
@@ -14,7 +13,9 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
+import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -37,6 +38,7 @@ internal class PleiepengerSyktBarnRoutes(
     private val personService: PersonService,
     private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
+    private val tokenService: ITokenService
 
     ) {
     private companion object {
@@ -73,8 +75,9 @@ internal class PleiepengerSyktBarnRoutes(
                         .bodyValueAndAwait(svarDto)
                 }
                 return@RequestContext ServerResponse
-                    .noContent()
-                    .buildAndAwait()
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(SvarDto<PleiepengerSøknadVisningDto>(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
             }
         }
 
@@ -82,15 +85,17 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val innsending = request.innsending()
 
-//                val accessToken = coroutineContext.hentAuthentication().accessToken
+                val accessToken = coroutineContext.hentAuthentication().accessToken
+                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
-                    innsending = innsending
+                    innsending = innsending,
+                    saksbehandler = saksbehandler
                 )
 
                 if (søknadEntitet == null) {
                     ServerResponse
-                        .notFound()
+                        .badRequest()
                         .buildAndAwait()
                 } else {
                     val søknadOppdaterDto = SøknadOppdaterDto(
@@ -113,7 +118,7 @@ internal class PleiepengerSyktBarnRoutes(
 
                 if (søknadEntitet == null) {
                     return@RequestContext ServerResponse
-                        .notFound()
+                        .badRequest()
                         .buildAndAwait()
                 } else {
                     try {
@@ -146,7 +151,7 @@ internal class PleiepengerSyktBarnRoutes(
                         return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()
-                    } catch (e: ValideringsFeil) {
+                    } catch (e: Exception) {
                         logger.error("", e)
                         return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -173,23 +178,11 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        DELETE("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
-                try {
-//                    mappeService.slett(mappeid = request.mappeId())
-                    throw IllegalStateException("støtter ikke lengre sletting av mapper")
-                    ServerResponse.noContent().buildAndAwait()
-                } catch (e: Exception) {
-                    ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).buildAndAwait()
-                }
-            }
-        }
-
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
                 val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent,
-                    Periode(hentSøknad.periode.fom!!, hentSøknad.periode.tom!!))
+                    Periode(hentSøknad.periode.fom, hentSøknad.periode.tom))
                     ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
 
                 val søknadIdDto =

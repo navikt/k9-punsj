@@ -9,6 +9,9 @@ import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.info.IIdToken
+import no.nav.k9punsj.rest.info.ITokenService
+import no.nav.k9punsj.rest.info.IdTokenLocal
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import no.nav.k9punsj.util.LesFraFilUtil
@@ -26,6 +29,14 @@ class TestContext {
     val hendelseProducerMock: HendelseProducer = object: HendelseProducer {
         override fun send(topicName: String, søknadString: String, søknadId: String) {
 
+        }
+    }
+
+    @Bean
+    fun tokenServiceBean() = tokenService
+    val tokenService: ITokenService = object : ITokenService{
+        override fun decodeToken(accessToken: String): IIdToken {
+            return IdTokenLocal()
         }
     }
 
