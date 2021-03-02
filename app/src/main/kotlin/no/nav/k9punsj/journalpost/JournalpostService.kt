@@ -25,7 +25,7 @@ class JournalpostService(
             null
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
-            if (!parsedJournalpost.støttetJournalpost) {
+            if (false) {
                 logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
                 throw IkkeStøttetJournalpost()
             } else if (!parsedJournalpost.harTilgang) {
@@ -88,11 +88,7 @@ private data class ParsedJournalpost(
         val arkivDokumenter: List<SafDtos.Dokument>,
         val harTilgang: Boolean,
         val avsenderMottakertype: SafDtos.AvsenderMottakertype?
-) {
-    val støttetJournalpost = listOfNotNull(
-            journalpostType, tema, journalpostType
-    ).size == 3
-}
+)
 
 data class JournalpostInfo(
     val journalpostId: JournalpostId,
