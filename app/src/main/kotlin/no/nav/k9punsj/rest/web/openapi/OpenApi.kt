@@ -98,10 +98,10 @@ internal class PleiepengerSyktBarnSoknadController {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Mappen",
+                description = "Søknaden",
                 content = [Content(
                     schema = Schema(
-                        implementation = SvarDto::class
+                        implementation = SøknadDto::class
                     )
                 )]
             ),
