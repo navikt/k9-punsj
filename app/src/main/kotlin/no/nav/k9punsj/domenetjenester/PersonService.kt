@@ -22,9 +22,10 @@ class PersonService(
             return person
         }
         val pdlResponse = pdlService.identifikator(norskIdent)
-        val aktørId = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.get(0)?.ident
+        val aktørId = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+            ?: throw IllegalStateException("Fant ikke aktørId i PDL")
 
-        return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId!!)
+        return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
     }
 
     suspend fun finnEllerOpprettPersonVedAktørId(aktørId: AktørId): Person {
@@ -34,9 +35,10 @@ class PersonService(
             return person
         }
         val pdlResponse = pdlService.identifikatorMedAktørId(aktørId)
-        val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.get(0)?.ident
+        val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+            ?: throw IllegalStateException("Fant ikke personIdent i PDL")
 
-        return personRepository.lagre(personIdent!!, aktørId)
+        return personRepository.lagre(personIdent, aktørId)
     }
 
     suspend fun finnPerson(personId: PersonId): Person {
