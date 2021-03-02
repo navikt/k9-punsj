@@ -46,10 +46,12 @@ internal class PleiepengerSyktBarnRoutes(
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
 
         private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
+        private const val SøknadIdKey = "soeknad_id"
     }
 
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
+        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
@@ -79,6 +81,24 @@ internal class PleiepengerSyktBarnRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(SvarDto<PleiepengerSøknadVisningDto>(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
+            }
+        }
+
+        GET("/api${Urls.HenteSøknad}") { request ->
+            RequestContext(coroutineContext, request) {
+                val søknadId = request.søknadId()
+                val søknad = mappeService.hentSøknad(søknadId)
+
+                if (søknad != null) {
+                    val person = personService.finnPerson(søknad.søkerId)
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(søknad.tilDto<PleiepengerSøknadVisningDto> { person.norskIdent })
+                }
+                return@RequestContext ServerResponse
+                    .notFound()
+                    .buildAndAwait()
             }
         }
 
@@ -173,7 +193,7 @@ internal class PleiepengerSyktBarnRoutes(
                     opprettNySøknad.norskIdent
                 }
                 return@RequestContext ServerResponse
-                    .status(HttpStatus.CREATED)
+                    .created(request.søknadLocation(søknadDto.søknadId))
                     .json()
                     .bodyValueAndAwait(søknadDto)
             }
@@ -216,12 +236,12 @@ internal class PleiepengerSyktBarnRoutes(
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 
-    private suspend fun ServerRequest.søknadId(): String {
-        return headers().header("Soeknad_id").first()!!
-    }
-
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
+
+    private fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) = uriBuilder().pathSegment("mappe", søknadId).build()
+
+    private suspend fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 }

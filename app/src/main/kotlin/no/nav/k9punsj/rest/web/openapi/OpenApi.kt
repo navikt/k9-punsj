@@ -90,6 +90,32 @@ internal class PleiepengerSyktBarnSoknadController {
     fun HenteMappe(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
     }
 
+    @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteSøknad, produces = ["application/json"])
+    @Operation(
+        summary = "Hente eksisterende mappe"
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Mappen",
+                content = [Content(
+                    schema = Schema(
+                        implementation = SvarDto::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Mappen finnes ikke"
+            )
+        ]
+    )
+    fun HenteSøknad(
+        @PathVariable("soeknad_id") søknadId: String,
+    ) {
+    }
+
     @PutMapping(
         PleiepengerSyktBarnRoutes.Urls.OppdaterEksisterendeSøknad,
         consumes = ["application/json"],
