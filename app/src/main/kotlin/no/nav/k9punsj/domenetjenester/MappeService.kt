@@ -60,24 +60,20 @@ class MappeService(
     }
 
     suspend fun utfyllendeInnsending(innsending: Innsending, saksbehandler: String): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
-        val søknadIdDto = innsending.søknadIdDto
-        if (søknadIdDto != null) {
-            val hentSøknad = søknadRepository.hentSøknad(søknadIdDto)!!
+        val hentSøknad = søknadRepository.hentSøknad(innsending.soeknadId)!!
 
-            if (hentSøknad.sendtInn.not()) {
-                val søknad = innsending.soeknad
-                val journalposter = mutableMapOf<String, Any?>()
-                journalposter["journalposter"] = listOf(innsending.journalpostId)
-                val oppdatertSøknad = hentSøknad.copy(søknad = søknad, journalposter = journalposter, endret_av = saksbehandler)
-                søknadRepository.oppdaterSøknad(oppdatertSøknad)
+        if (hentSøknad.sendtInn.not()) {
+            val søknad = innsending.soeknad
+            val journalposter = mutableMapOf<String, Any?>()
+            journalposter["journalposter"] = listOf(innsending.journalpostId)
+            val oppdatertSøknad =
+                hentSøknad.copy(søknad = søknad, journalposter = journalposter, endret_av = saksbehandler)
+            søknadRepository.oppdaterSøknad(oppdatertSøknad)
 
-                val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
-                return Pair(oppdatertSøknad, visningDto)
-            } else {
-                throw IllegalStateException("Kan ikke endre på en søknad som er sendt inn")
-            }
+            val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
+            return Pair(oppdatertSøknad, visningDto)
         } else {
-            throw IllegalStateException("Forventer en søknadId")
+            throw IllegalStateException("Kan ikke endre på en søknad som er sendt inn")
         }
     }
 

@@ -6,10 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
-import no.nav.k9punsj.rest.web.HentSøknad
-import no.nav.k9punsj.rest.web.Innsending
-import no.nav.k9punsj.rest.web.SendSøknad
-import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.LesFraFilUtil
@@ -50,10 +47,10 @@ class PleiepengersyktbarnTests {
     @Test
     fun `Opprette ny mappe på person`() {
         val norskIdent = "01010050053"
-        val innsending = lagInnsending(norskIdent, "999")
+        val opprettNySøknad = opprettSøknad(norskIdent, "999")
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsending))
+            .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, res.statusCode())
     }
@@ -61,11 +58,11 @@ class PleiepengersyktbarnTests {
     @Test
     fun `Hente eksisterende mappe på person`() {
         val norskIdent = "02020050163"
-        val innsending = lagInnsending(norskIdent, "9999")
+        val opprettNySøknad = opprettSøknad(norskIdent, "9999")
 
         val resPost = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsending))
+            .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, resPost.statusCode())
 
@@ -82,17 +79,45 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
+    fun `Hent en søknad`() {
+        val søknad = LesFraFilUtil.genererKomplettSøknad()
+        val norskIdent = "02030050163"
+        endreSøkerIGenererSøknad(søknad, norskIdent)
+
+        val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitExchangeBlocking()
+
+        val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
+        assertNotNull(søknadDto)
+
+        val resHent = client.get()
+            .uri {it.pathSegment(api, søknadTypeUri, "mappe", søknadDto.søknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitExchangeBlocking()
+
+        val søknadViaGet = runBlocking { resHent.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
+        assertNotNull(søknadViaGet)
+
+    }
+
+    @Test
     fun `Oppdaterer en søknad`() {
         val søknad = LesFraFilUtil.genererKomplettSøknad()
         val norskIdent = "02030050163"
         endreSøkerIGenererSøknad(søknad, norskIdent)
 
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
-        val innsendingForOpprettelseAvMappeOgTomSøknad = lagInnsending(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
         val resPost = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappeOgTomSøknad))
+            .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
 
         val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
@@ -221,7 +246,7 @@ class PleiepengersyktbarnTests {
         ident: String,
         journalpostid: String = "73369b5b-d50e-47ab-8fc2-31ef35a71993",
     ): ClientResponse {
-        val innsendingForOpprettelseAvMappe = lagInnsending(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
         val resPost = client.post()
@@ -255,11 +280,19 @@ class PleiepengersyktbarnTests {
 
 private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
+
+private fun opprettSøknad(
+    personnummer: NorskIdentDto,
+    journalpostId: String
+): OpprettNySøknad {
+    return OpprettNySøknad(personnummer, journalpostId)
+}
+
 private fun lagInnsending(
     personnummer: NorskIdentDto,
     journalpostId: String,
     søknad: SøknadJson = mutableMapOf(),
-    søknadId: String? = null
+    søknadId: SøknadIdDto
 ): Innsending {
     return Innsending(personnummer, journalpostId, søknad, søknadId)
 }
