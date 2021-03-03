@@ -278,12 +278,14 @@ internal class SøknadMapper {
             return ArbeidAktivitetDto(selvstendigNæringsdrivende, frilanser, arbeidstaker)
         }
 
-        private fun mapTilMottakArbeidAktivitetDto(arbeidAktivitet: ArbeidAktivitetDto?): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto {
-            val frilanser: ArbeidAktivitetDto.FrilanserDto? = objectMapper().convertValue(arbeidAktivitet?.frilanser!!)
-            val selvstendigNæringsdrivende =
-                arbeidAktivitet.selvstendigNæringsdrivende?.map { s -> mapTilMottakSelvstendigNæringsdrivendeDto(s) }
-                    ?.toList()
-            val arbeidstaker = arbeidAktivitet.arbeidstaker?.map { a -> mapTilMottakArbeidstaker(a) }?.toList()
+        private fun mapTilMottakArbeidAktivitetDto(arbeidAktivitet: ArbeidAktivitetDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto {
+            val frilanser: ArbeidAktivitetDto.FrilanserDto? = if(arbeidAktivitet.frilanser != null )(objectMapper().convertValue(
+                arbeidAktivitet.frilanser)) else null
+            val selvstendigNæringsdrivende = if(arbeidAktivitet.selvstendigNæringsdrivende != null)
+                arbeidAktivitet.selvstendigNæringsdrivende.map { s -> mapTilMottakSelvstendigNæringsdrivendeDto(s) }
+                    .toList() else null
+            val arbeidstaker = if(arbeidAktivitet.arbeidstaker != null) arbeidAktivitet.arbeidstaker.map { a -> mapTilMottakArbeidstaker(a) }
+                .toList() else null
 
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto(selvstendigNæringsdrivende,
                 frilanser,
