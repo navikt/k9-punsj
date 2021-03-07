@@ -104,13 +104,13 @@ internal class PleiepengerSyktBarnRoutes(
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val innsending = request.innsending()
+                val søknad = request.pleiepengerSøknad()
 
                 val accessToken = coroutineContext.hentAuthentication().accessToken
                 val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
-                    innsending = innsending,
+                    søknad = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -119,15 +119,10 @@ internal class PleiepengerSyktBarnRoutes(
                         .badRequest()
                         .buildAndAwait()
                 } else {
-                    val søknadOppdaterDto = SøknadOppdaterDto(
-                        innsending.norskIdent,
-                        søknadEntitet.first.søknadId,
-                        søknad = søknadEntitet.second
-                    )
                     ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(søknadOppdaterDto)
+                        .bodyValueAndAwait(søknad)
                 }
             }
         }
@@ -144,7 +139,7 @@ internal class PleiepengerSyktBarnRoutes(
                 } else {
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val format = SøknadMapper.mapTilMapFormat(søknad)
+                        val format = SøknadMapper.mapTilSendingsformat(søknad)
                         val søknadK9Format = SøknadMapper.mapTilEksternFormat(format)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
@@ -189,13 +184,10 @@ internal class PleiepengerSyktBarnRoutes(
                     nySøknad = opprettNySøknad!!,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 )
-                val søknadDto = søknadEntitet.tilDto<PleiepengerSøknadVisningDto> {
-                    opprettNySøknad.norskIdent
-                }
+
                 return@RequestContext ServerResponse
-                    .created(request.søknadLocation(søknadDto.søknadId))
-                    .json()
-                    .bodyValueAndAwait(søknadDto)
+                    .created(request.søknadLocation(søknadEntitet.søknadId))
+                    .buildAndAwait()
             }
         }
 
@@ -237,6 +229,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
+    private suspend fun ServerRequest.pleiepengerSøknad() = body(BodyExtractors.toMono(PleiepengerSøknadVisningDto::class.java)).awaitFirst()
     private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()

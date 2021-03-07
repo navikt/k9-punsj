@@ -1,12 +1,12 @@
 package no.nav.k9punsj
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
-import no.nav.k9punsj.rest.web.*
+import no.nav.k9punsj.rest.web.OpprettNySøknad
+import no.nav.k9punsj.rest.web.SendSøknad
+import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.LesFraFilUtil
@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
+import java.net.URI
 import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
@@ -36,7 +37,8 @@ class PleiepengersyktbarnTests {
     fun `Får tom liste når personen ikke har en eksisterende mappe`() {
         val norskIdent = "01110050053"
         val res = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
@@ -49,7 +51,8 @@ class PleiepengersyktbarnTests {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, "999")
         val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, res.statusCode())
@@ -61,7 +64,8 @@ class PleiepengersyktbarnTests {
         val opprettNySøknad = opprettSøknad(norskIdent, "9999")
 
         val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.CREATED, resPost.statusCode())
@@ -80,11 +84,11 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Hent en søknad`() {
-        val søknad = LesFraFilUtil.genererKomplettSøknad()
+        val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
-        endreSøkerIGenererSøknad(søknad, norskIdent)
-
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
+        tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
+
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
         val resPost = client.post()
@@ -93,11 +97,12 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
 
-        val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
-        assertNotNull(søknadDto)
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
         val resHent = client.get()
-            .uri {it.pathSegment(api, søknadTypeUri, "mappe", søknadDto.søknadId).build() }
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
@@ -108,46 +113,42 @@ class PleiepengersyktbarnTests {
 
     @Test
     fun `Oppdaterer en søknad`() {
-        val søknad = LesFraFilUtil.genererKomplettSøknad()
+        val søknadFraFrontend = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
-        endreSøkerIGenererSøknad(søknad, norskIdent)
+        val journalpostid = "9999"
+        tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
         val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(opprettNySøknad))
             .awaitExchangeBlocking()
 
-        val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
-        assertNotNull(søknadDto)
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
-        val søknadPåRiktigFormat = søknadPåRiktigFormat(søknad)
-        val innsendingForOppdateringAvSoeknad = lagInnsending(norskIdent, journalpostid, søknadPåRiktigFormat, søknadDto.søknadId)
+        leggerPåNySøknadId(søknadFraFrontend, location)
 
         val res = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsendingForOppdateringAvSoeknad))
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(søknadFraFrontend))
             .awaitExchangeBlocking()
 
-        val oppdatertSoeknadDto = runBlocking { res.awaitBody<SøknadOppdaterDto<PleiepengerSøknadVisningDto>>() }
-        val pleiepengerSøknadVisningDto = oppdatertSoeknadDto.søknad
+        val oppdatertSoeknadDto = runBlocking { res.awaitBody<PleiepengerSøknadVisningDto>() }
 
-        assertNotNull(pleiepengerSøknadVisningDto)
-        assertEquals(norskIdent, pleiepengerSøknadVisningDto.søker?.norskIdentitetsnummer)
+        assertNotNull(oppdatertSoeknadDto)
+        assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
         assertEquals(PeriodeDto(
             LocalDate.of(2018, 12, 30),
             LocalDate.of(2019, 10, 20)),
-            pleiepengerSøknadVisningDto.ytelse?.søknadsperiode)
+            oppdatertSoeknadDto.soeknadsperiode)
         assertEquals(HttpStatus.OK, res.statusCode())
     }
 
-    private fun søknadPåRiktigFormat(søknad: MutableMap<String, Any?>): MutableMap<String, Any?> {
-        val convertValue = objectMapper().convertValue<PleiepengerSøknadMottakDto>(søknad)
-        val maped = SøknadMapper.mapTilVisningFormat(convertValue)
-        return objectMapper().convertValue(maped)
-    }
 
     @Test
     fun `Innsending av søknad returnerer 404 når mappe ikke finnes`() {
@@ -157,7 +158,8 @@ class PleiepengersyktbarnTests {
         val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = søknadId)
 
         val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
             .awaitExchangeBlocking()
 
@@ -167,72 +169,51 @@ class PleiepengersyktbarnTests {
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val norskIdent = "02020050121"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
-        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
-        val res = opprettOgSendInnSoeknad(soeknadJson = lagSøknadPåRiktigFormat(gyldigSoeknad), ident = norskIdent)
-
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
-    private fun lagSøknadPåRiktigFormat(gyldigSoeknad: SøknadJson): SøknadJson {
-        val mottatDto = objectMapper().convertValue<PleiepengerSøknadMottakDto>(gyldigSoeknad)
-        val formatFraFrontend = SøknadMapper.mapTilVisningFormat(mottatDto)
-        return objectMapper().convertValue(formatFraFrontend)
-    }
-
-    @Test
-    fun `Skal fange opp feilen overlappendePerioder i søknaden`() {
-        val norskIdent = "02020052121"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererSøknadMedFeil()
-        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
-
-        val res = opprettOgSendInnSoeknad(soeknadJson = lagSøknadPåRiktigFormat(gyldigSoeknad), ident = norskIdent)
-
-        val response = res
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
-            .block()
-
-        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-        assertEquals("overlappendePerioder", response?.feil?.first()?.feilkode!!)
-    }
-
-    @Test
-    fun `Skal hente komplett søknad fra k9-sak`() {
-        val søknad = LesFraFilUtil.genererKomplettSøknad()
-        val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
-        val hentSøknad = lagHentSøknad(norskIdent,
-            PeriodeDto(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10, 20)))
-
-        val res = client.post()
-            .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(hentSøknad))
-            .awaitExchangeBlocking()
-
-        val søknadDto = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
-
-        assertEquals(HttpStatus.OK, res.statusCode())
-        assertEquals(søknadDto.søker, norskIdent)
-        assertEquals(søknadDto.fagsakTypeKode, "PSB")
-        assertTrue(søknadDto.søknader?.size == 1)
-        assertTrue(søknadDto.søknader?.get(0)?.søknadId.isNullOrBlank().not())
-        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.fom, LocalDate.of(2018, 12,30))
-        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.tom, LocalDate.of(2019, 10,20))
-    }
+//    @Test
+//    fun `Skal hente komplett søknad fra k9-sak`() {
+//        val søknad = LesFraFilUtil.genererKomplettSøknad()
+//        val norskIdent = (søknad["søker"] as Map<*, *>)["norskIdentitetsnummer"] as String
+//        val hentSøknad = lagHentSøknad(norskIdent,
+//            PeriodeDto(LocalDate.of(2018, 12, 30), LocalDate.of(2019, 10, 20)))
+//
+//        val res = client.post()
+//            .uri { it.pathSegment(api, "k9-sak", søknadTypeUri).build() }
+//            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+//            .body(BodyInserters.fromValue(hentSøknad))
+//            .awaitExchangeBlocking()
+//
+//        val søknadDto = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
+//
+//        assertEquals(HttpStatus.OK, res.statusCode())
+//        assertEquals(søknadDto.søker, norskIdent)
+//        assertEquals(søknadDto.fagsakTypeKode, "PSB")
+//        assertTrue(søknadDto.søknader?.size == 1)
+//        assertTrue(søknadDto.søknader?.get(0)?.søknadId.isNullOrBlank().not())
+//        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.fom, LocalDate.of(2018, 12, 30))
+//        assertEquals(søknadDto.søknader?.get(0)?.søknad?.ytelse?.søknadsperiode?.tom, LocalDate.of(2019, 10, 20))
+//    }
 
     @Test
     fun `Innsending av søknad med feil i perioden blir stoppet`() {
         val norskIdent = "02022352121"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.genererKomplettSøknad()
-        endreSøkerIGenererSøknad(gyldigSoeknad, norskIdent)
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        val ytelse = gyldigSoeknad["ytelse"] as MutableMap<String, Any>
+        val periode = soeknad["soeknadsperiode"] as MutableMap<String, Any>
+        periode.replace("fom", "2019-12-30")
+        periode.replace("tom", "2018-10-20")
 
         //ødelegger perioden
-        ytelse.replace("søknadsperiode", "2019-12-30/2018-10-20")
-        gyldigSoeknad.replace("ytelse", ytelse)
+        soeknad.replace("soeknadsperiode", periode)
 
-        val res = opprettOgSendInnSoeknad(soeknadJson = lagSøknadPåRiktigFormat(gyldigSoeknad), ident = norskIdent)
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
@@ -250,29 +231,34 @@ class PleiepengersyktbarnTests {
 
         // oppretter en søknad
         val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
             .awaitExchangeBlocking()
 
-        val søknadDto = runBlocking { resPost.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
-        assertNotNull(søknadDto)
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
+
+        leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val innsendingForUtfyllingAvSøknad = lagInnsending(ident, journalpostid, soeknadJson, søknadDto.søknadId)
         val resPut = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsendingForUtfyllingAvSøknad))
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<SøknadOppdaterDto<PleiepengerSøknadVisningDto>>() }
-        assertNotNull(søknadDtoFyltUt.søknad.søker)
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadVisningDto>() }
+        assertNotNull(søknadDtoFyltUt.soekerId)
 
-        val søknadId = søknadDto.søknadId
+        val søknadId = søknadDtoFyltUt.soeknadId
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
 
         // sender en søknad
         return client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
             .awaitExchangeBlocking()
     }
@@ -283,36 +269,37 @@ private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientRespo
 
 private fun opprettSøknad(
     personnummer: NorskIdentDto,
-    journalpostId: String
+    journalpostId: String,
 ): OpprettNySøknad {
     return OpprettNySøknad(personnummer, journalpostId)
 }
 
-private fun lagInnsending(
-    personnummer: NorskIdentDto,
-    journalpostId: String,
-    søknad: SøknadJson = mutableMapOf(),
-    søknadId: SøknadIdDto
-): Innsending {
-    return Innsending(personnummer, journalpostId, søknad, søknadId)
-}
-
 private fun lagSendSøknad(
     norskIdent: NorskIdentDto,
-    søknadId: SøknadIdDto
-) : SendSøknad{
+    søknadId: SøknadIdDto,
+): SendSøknad {
     return SendSøknad(norskIdent, søknadId)
 }
 
-private fun lagHentSøknad(norskIdentDto: NorskIdentDto, periode: PeriodeDto): HentSøknad {
-    return HentSøknad(norskIdent = norskIdentDto, periode = periode)
-}
-
-private fun endreSøkerIGenererSøknad(
+private fun tilpasserSøknadsMalTilTesten(
     søknad: MutableMap<String, Any?>,
     norskIdent: String,
+    journalpostId: String? = null,
 ) {
-    val norskIdentMap = søknad["søker"] as MutableMap<String, Any>
-    norskIdentMap.replace("norskIdentitetsnummer", norskIdent)
-    søknad.replace("søker", norskIdentMap)
+    søknad.replace("soekerId", norskIdent)
+    if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
 }
+
+private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, location: URI?) {
+    val path = location?.path
+    val søknadId = path?.substring(path.lastIndexOf('/'))
+    val trim = søknadId?.trim('/')
+    søknadFraFrontend.replace("soeknadId", trim)
+}
+
+private fun hentSøknadId(location: URI?): String? {
+    val path = location?.path
+    val søknadId = path?.substring(path.lastIndexOf('/'))
+    return søknadId?.trim('/')
+}
+

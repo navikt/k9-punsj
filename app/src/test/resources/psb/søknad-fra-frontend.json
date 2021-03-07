@@ -1,0 +1,88 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "mottattDato": "2020-10-12T12:53:21.046Z",
+  "barn": {
+    "norskIdent": "22222222222",
+    "foedselsdato": null
+  },
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {
+    "fom": "2018-12-30",
+    "tom": "2019-10-20"
+  },
+  "arbeidAktivitet": {
+    "selvstendigNæringsdrivende": null,
+    "frilanser": {
+      "startdato": "2019-10-10",
+      "jobberFortsattSomFrilans": true
+    }
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "999999999",
+        "arbeidstidInfo": {
+          "jobberNormaltTimerPerDag": "PT7H30M",
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2018-12-30",
+                "tom": "2019-10-20"
+              },
+              "faktiskArbeidTimerPerDag": "PT7H30M"
+            }
+          ]
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": null,
+    "selvstendigNæringsdrivendeArbeidstidInfo": null
+  },
+  "beredskap": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+    }
+  ],
+  "nattevaak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+    }
+  ],
+  "tilsynsordning": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "etablertTilsynTimerPerDag": "PT7H30M"
+    }
+  ],
+  "uttak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "timerPleieAvBarnetPerDag": "PT7H30M"
+    }
+  ],
+  "omsorg": {
+    "relasjonTilBarnet": "MORA",
+    "samtykketOmsorgForBarnet": true,
+    "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+  }
+}

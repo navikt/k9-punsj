@@ -2,7 +2,6 @@ package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -17,17 +16,12 @@ class LesFraFilUtil {
             }
         }
 
-        fun genererKomplettSøknad() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraFil("komplett-søknad.json"))
-        }
-
         fun genererSøknadMedFeil() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
         }
 
-        fun hentKomplettSøknad() : PleiepengerSøknadMottakDto{
-            val json = lesFraFil("komplett-søknad.json")
-            return objectMapper().readValue(json)
+        fun søknadFraFrontend() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
         }
     }
 }

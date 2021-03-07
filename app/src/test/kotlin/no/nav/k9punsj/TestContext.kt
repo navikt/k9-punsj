@@ -44,7 +44,7 @@ class TestContext {
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object: K9SakService{
         override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): SøknadJson? {
-            return LesFraFilUtil.genererKomplettSøknad()
+            return LesFraFilUtil.søknadFraFrontend()
         }
 
         override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {

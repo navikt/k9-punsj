@@ -2,7 +2,6 @@ package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.*
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.PleiepengerYtelseDto.*
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -13,6 +12,10 @@ data class PleiepengerSøknadMottakDto(
     val mottattDato: ZonedDateTime?,
     val ytelse: PleiepengerYtelseDto?,
 ) {
+
+    data class SøkerDto(
+        val norskIdentitetsnummer: NorskIdentDto?,
+    )
 
     data class PleiepengerYtelseDto(
         val barn: BarnDto?,
@@ -29,9 +32,15 @@ data class PleiepengerSøknadMottakDto(
         val uttak: UttakDto?,
         val omsorg: OmsorgDto?,
     ) {
+
+        data class BarnDto(
+            val norskIdentitetsnummer: NorskIdentDto?,
+            @JsonFormat(pattern = "yyyy-MM-dd")
+            val fødselsdato: LocalDate?,
+        )
         data class ArbeidAktivitetDto(
             val selvstendigNæringsdrivende: List<SelvstendigNæringsdrivendeDto>?,
-            val frilanser: PleiepengerSøknadVisningDto.PleiepengerYtelseDto.ArbeidAktivitetDto.FrilanserDto?,
+            val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto?,
             val arbeidstaker: List<ArbeidstakerDto>?,
         ) {
             data class SelvstendigNæringsdrivendeDto(

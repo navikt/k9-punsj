@@ -45,7 +45,7 @@ internal class SøknadRepositoryTest {
         //oppretter en bunke i mappen for pleiepenger
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
-        val genererKomplettSøknad = LesFraFilUtil.genererKomplettSøknad()
+        val genererKomplettSøknad = LesFraFilUtil.søknadFraFrontend()
 
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(journalpostid1, journalpostid2)

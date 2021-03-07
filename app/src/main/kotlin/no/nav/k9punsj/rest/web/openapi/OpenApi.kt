@@ -132,23 +132,14 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                     schema = Schema(
-                        implementation = SøknadOppdaterDto::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Innhold på søknader er oppdatert, men inneholder fortsatt mangler.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasPleiepengerSyktBarSoknadMapperSvar::class
+                        implementation = PleiepengerSøknadVisningDto::class
                     )
                 )]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: OasInnsending,
+        @RequestBody søknad: PleiepengerSøknadVisningDto,
     ) {
     }
 
