@@ -135,7 +135,7 @@ data class PleiepengerSøknadMottakDto(
         )
 
         data class UttakDto(
-            val perioder: Map<String, UttakPeriodeInfoDto>,
+            val perioder: Map<String, UttakPeriodeInfoDto>?,
         ) {
             data class UttakPeriodeInfoDto(
                 val timerPleieAvBarnetPerDag: String?,

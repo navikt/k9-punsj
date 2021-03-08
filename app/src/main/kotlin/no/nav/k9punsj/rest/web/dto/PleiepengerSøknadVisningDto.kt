@@ -7,21 +7,21 @@ import java.time.ZonedDateTime
 
 data class PleiepengerSøknadVisningDto(
     val soeknadId: SøknadIdDto,
-    val soekerId: NorskIdentDto?,
+    val soekerId: NorskIdentDto? = null,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
-    val mottattDato: ZonedDateTime?,
-    val barn: BarnDto?,
-    val journalposter: List<JournalpostIdDto>,
-    val sendtInn: Boolean,
-    val erFraK9: Boolean,
-    val soeknadsperiode: PeriodeDto,
-    val arbeidAktivitet: ArbeidAktivitetDto?,
-    val arbeidstid: ArbeidstidDto?,
-    val beredskap: List<BeredskapDto>,
-    val nattevaak: List<NattevåkDto>,
-    val tilsynsordning: List<TilsynsordningDto>,
-    val uttak: List<UttakDto>,
-    val omsorg: OmsorgDto,
+    val mottattDato: ZonedDateTime? = null,
+    val barn: BarnDto? = null,
+    val journalposter: List<JournalpostIdDto>? = null,
+    val sendtInn: Boolean? = false,
+    val erFraK9: Boolean? = false,
+    val soeknadsperiode: PeriodeDto? = null,
+    val arbeidAktivitet: ArbeidAktivitetDto? = null,
+    val arbeidstid: ArbeidstidDto? = null,
+    val beredskap: List<BeredskapDto>? = null,
+    val nattevaak: List<NattevåkDto>? = null,
+    val tilsynsordning: List<TilsynsordningDto>? = null,
+    val uttak: List<UttakDto>? = null,
+    val omsorg: OmsorgDto? = null,
 ) {
     data class BarnDto(
         val norskIdent: NorskIdentDto?,
@@ -106,7 +106,7 @@ data class PleiepengerSøknadVisningDto(
         val periode: PeriodeDto,
         val tilleggsinformasjon: String?,
 
-    )
+        )
 
     data class NattevåkDto(
         val periode: PeriodeDto,

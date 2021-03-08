@@ -61,7 +61,7 @@ class MappeService(
     suspend fun utfyllendeInnsending(søknad: PleiepengerSøknadVisningDto, saksbehandler: String): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
         val hentSøknad = søknadRepository.hentSøknad(søknad.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(søknad.journalposter, hentSøknad.journalposter)
+            val journalposter = leggTilJournalpost(søknad.journalposter!!, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(søknad)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)

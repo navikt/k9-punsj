@@ -2,7 +2,9 @@ package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.*
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.Mappe
+import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 
@@ -26,10 +28,10 @@ data class BunkeDto<T>(
     val søknader: List<SøknadDto<T>>?,
 )
 
-data class SvarDto<T>(
+data class SvarDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<SøknadDto<T>>?,
+    val søknader: List<PleiepengerSøknadVisningDto>?,
 )
 
 data class SøknadOppdaterDto<T>(
@@ -53,27 +55,32 @@ data class JournalposterDto(
     val journalposter: MutableSet<String>,
 )
 
-internal inline fun <reified T> Mappe.tilDto(type: FagsakYtelseType, f: (PersonId) -> (NorskIdent)): SvarDto<T> {
-    val bunkerDto = this.bunke.map { bunkeEntitiet -> bunkeEntitiet.tilDto<T>(f) }.toList()
-    val first = bunkerDto.first { b -> b.fagsakKode == type.kode }
-    return SvarDto(this.søker.norskIdent, type.kode, first.søknader)
+internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
+    val bunke = this.bunke.first { b -> b.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN }
+    if (bunke.søknader.isNullOrEmpty()) {
+        return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
+    }
+    val søknader = bunke.søknader.mapNotNull { s ->
+        if (s.søknad != null) {
+            objectMapper().convertValue<PleiepengerSøknadVisningDto>(s.søknad)
+        } else {
+            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, journalposter = if (s.journalposter != null) {
+                val any = s.journalposter["journalposter"]!!
+                any as List<JournalpostIdDto>
+            } else null)
+        }
+    }
+    return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }
 
-internal inline fun <reified T> SøknadEntitet.tilDto(f: (PersonId) -> (NorskIdent)): SøknadDto<T> {
-    return SøknadDto(
-        søknadId = this.søknadId,
-        søkerId = f(this.søkerId),
-        barnId = if (this.barnId != null) f(this.barnId) else null,
-        barnFødselsdato = null,
-        søknad = if(this.søknad!= null) objectMapper().convertValue<T>(this.søknad) else null,
-        journalposter = if (this.journalposter != null) objectMapper().convertValue(this.journalposter) else null,
-        sendtInn = this.sendtInn
-    )
-}
-
-internal inline fun <reified T>BunkeEntitet.tilDto(f: (PersonId) -> (NorskIdent)): BunkeDto<T> {
-    val søknaderDto = this.søknader?.map { søknadEntitet -> søknadEntitet.tilDto<T>(f) }?.toList()
-    return BunkeDto(this.bunkeId, this.fagsakYtelseType.kode, søknaderDto)
+internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadVisningDto {
+    if (søknad == null) {
+       return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = if (this.journalposter != null) {
+            val any = this.journalposter["journalposter"]!!
+            any as List<JournalpostIdDto>
+        } else null)
+    }
+    return objectMapper().convertValue(søknad)
 }
 
 data class HentPerson(
@@ -88,6 +95,6 @@ data class PeriodeDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val tom: LocalDate
+    val tom: LocalDate,
 )
 

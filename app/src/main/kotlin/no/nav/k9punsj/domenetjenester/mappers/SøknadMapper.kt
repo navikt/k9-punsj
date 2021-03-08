@@ -54,23 +54,31 @@ internal class SøknadMapper {
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto(
                 barn = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BarnDto(søknad.barn?.norskIdent,
                     søknad.barn?.foedselsdato),
-                søknadsperiode = fromPeriodeDtoToString(søknad.soeknadsperiode),
+                søknadsperiode = if (søknad.soeknadsperiode != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
                 arbeidAktivitet = if (søknad.arbeidAktivitet != null) mapTilMottakArbeidAktivitetDto(søknad.arbeidAktivitet) else null,
                 //TODO(Hva med databruk=????)
                 dataBruktTilUtledning = null,
                 //TODO(Hva med bosteder??)
                 bosteder = null,
                 utenlandsopphold = null,
-                beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap.associate {
-                    Pair(fromPeriodeDtoToString(it.periode), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon)) }),
-                nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak.associate {
-                    Pair(fromPeriodeDtoToString(it.periode), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon)) }),
-                tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning.associate {
-                    Pair(fromPeriodeDtoToString(it.periode), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(it.etablertTilsynTimerPerDag)) }),
+                beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
+                    Pair(fromPeriodeDtoToString(it.periode),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
+                }),
+                nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak?.associate {
+                    Pair(fromPeriodeDtoToString(it.periode),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
+                }),
+                tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning?.associate {
+                    Pair(fromPeriodeDtoToString(it.periode),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(it.etablertTilsynTimerPerDag))
+                }),
                 lovbestemtFerie = null,
                 arbeidstid = mapTilMottatArbeidstid(søknad.arbeidstid),
-                uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak.associate {
-                    Pair(fromPeriodeDtoToString(it.periode), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag)) }),
+                uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak?.associate {
+                    Pair(fromPeriodeDtoToString(it.periode),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag))
+                }),
                 omsorg = søknad.omsorg
             )
         }
@@ -354,7 +362,9 @@ internal class SøknadMapper {
                 }?.toList()
             )
 
-            return PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto(a.norskIdentitetsnummer, a.organisasjonsnummer, arbeidstidInfoDto)
+            return PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto(a.norskIdentitetsnummer,
+                a.organisasjonsnummer,
+                arbeidstidInfoDto)
         }
 
         private fun mapTilMottakArbeidstaker(a: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto {

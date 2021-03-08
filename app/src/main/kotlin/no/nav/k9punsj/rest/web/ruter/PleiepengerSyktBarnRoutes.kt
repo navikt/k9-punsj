@@ -69,9 +69,7 @@ internal class PleiepengerSyktBarnRoutes(
                     val svarDto = mappeService.hentMappe(
                         person = person,
                         søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                    ).tilDto<PleiepengerSøknadVisningDto>(FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
-                        norskIdent
-                    }
+                    ).tilPsbVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
@@ -80,7 +78,7 @@ internal class PleiepengerSyktBarnRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(SvarDto<PleiepengerSøknadVisningDto>(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
+                    .bodyValueAndAwait(SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
             }
         }
 
@@ -90,11 +88,10 @@ internal class PleiepengerSyktBarnRoutes(
                 val søknad = mappeService.hentSøknad(søknadId)
 
                 if (søknad != null) {
-                    val person = personService.finnPerson(søknad.søkerId)
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(søknad.tilDto<PleiepengerSøknadVisningDto> { person.norskIdent })
+                        .bodyValueAndAwait(søknad.tilPsbvisning())
                 }
                 return@RequestContext ServerResponse
                     .notFound()
@@ -204,17 +201,10 @@ internal class PleiepengerSyktBarnRoutes(
                 val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
 
                 val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto)
-
-                val søknadDto = SøknadDto(
-                    søknadId = søknadIdDto,
-                    søkerId = hentSøknad.norskIdent,
-                    journalposter = null,
-                    erFraK9 = true,
-                    søknad = mapTilVisningFormat
-                )
+                val medId = mapTilVisningFormat.copy(soeknadId = søknadIdDto)
 
                 val svarDto =
-                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(søknadDto))
+                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(medId))
 
                 return@RequestContext ServerResponse
                     .ok()

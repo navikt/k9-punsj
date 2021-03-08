@@ -42,7 +42,7 @@ class PleiepengersyktbarnTests {
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
-        val svar = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
+        val svar = runBlocking { res.awaitBody<SvarDto>() }
         assertTrue(svar.søknader!!.isEmpty())
     }
 
@@ -77,9 +77,9 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
 
-        val mappeSvar = runBlocking { res.awaitBody<SvarDto<PleiepengerSøknadVisningDto>>() }
+        val mappeSvar = runBlocking { res.awaitBody<SvarDto>() }
         val journalposterDto = mappeSvar.søknader?.first()?.journalposter
-        assertEquals("9999", journalposterDto?.journalposter?.first())
+        assertEquals("9999", journalposterDto?.first())
     }
 
     @Test
@@ -106,9 +106,9 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<SøknadDto<PleiepengerSøknadVisningDto>>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
         assertNotNull(søknadViaGet)
-
+        assertEquals(journalpostid, søknadViaGet.journalposter?.first())
     }
 
     @Test
