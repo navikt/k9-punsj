@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 
 data class PleiepengerSøknadVisningDto(
-    val soeknadId: SøknadIdDto,
+    val soeknadId: SøknadIdDto?,
     val soekerId: NorskIdentDto? = null,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     val mottattDato: ZonedDateTime? = null,

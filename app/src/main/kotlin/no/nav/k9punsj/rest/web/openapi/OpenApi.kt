@@ -101,7 +101,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Søknaden",
                 content = [Content(
                     schema = Schema(
-                        implementation = SøknadDto::class
+                        implementation = PleiepengerSøknadVisningDto::class
                     )
                 )]
             ),
