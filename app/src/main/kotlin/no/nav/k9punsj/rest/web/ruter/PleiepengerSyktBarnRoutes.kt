@@ -184,7 +184,8 @@ internal class PleiepengerSyktBarnRoutes(
 
                 return@RequestContext ServerResponse
                     .created(request.søknadLocation(søknadEntitet.søknadId))
-                    .buildAndAwait()
+                    .json()
+                    .bodyValueAndAwait(søknadEntitet.tilPsbvisning())
             }
         }
 

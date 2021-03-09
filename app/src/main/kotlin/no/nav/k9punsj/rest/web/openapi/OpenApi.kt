@@ -196,7 +196,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
                 content = [Content(
                     schema = Schema(
-                        implementation = SøknadDto::class
+                        implementation = PleiepengerSøknadVisningDto::class
                     )
                 )]
             )
