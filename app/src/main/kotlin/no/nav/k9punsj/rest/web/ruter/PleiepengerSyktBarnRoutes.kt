@@ -6,9 +6,9 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
@@ -38,9 +38,10 @@ internal class PleiepengerSyktBarnRoutes(
     private val personService: PersonService,
     private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
-    private val tokenService: ITokenService
+    private val tokenService: ITokenService,
+    private val pepClient: IPepClient
 
-    ) {
+) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
 
@@ -139,9 +140,11 @@ internal class PleiepengerSyktBarnRoutes(
                         val søknadK9Format = SøknadMapper.mapTilEksternFormat(format)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
-                                SøknadFeil.SøknadFeilDto(feil.felt,
+                                SøknadFeil.SøknadFeilDto(
+                                    feil.felt,
                                     feil.feilkode,
-                                    feil.feilmelding)
+                                    feil.feilmelding
+                                )
                             }.toList()
 
                             return@RequestContext ServerResponse
@@ -152,8 +155,10 @@ internal class PleiepengerSyktBarnRoutes(
 
                         val from = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(from)
-                        pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first,
-                            journalposterDto.journalposter)
+                        pleiepengerSyktBarnSoknadService.sendSøknad(
+                            søknadK9Format.first,
+                            journalposterDto.journalposter
+                        )
 
                         //TODO(OJR) marker søknad som sendt_inn = TRUE og journalposter som behandlet?
 //                        mappeService.fjern(
@@ -191,20 +196,36 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent,
-                    Periode(hentSøknad.periode.fom!!, hentSøknad.periode.tom!!))
-                    ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
+                val saksbehandlerHarTilgang = pepClient.harBasisTilgang(hentSøknad.norskIdent)
+                if (!saksbehandlerHarTilgang) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .json()
+                        .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
+                }
 
-                val søknadIdDto =
-                    mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
-                val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
 
-                val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto)
-                val medId = mapTilVisningFormat.copy(soeknadId = søknadIdDto)
+/*   val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent,
+       Periode(hentSøknad.periode.fom, hentSøknad.periode.tom))
+       ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
+
+   val søknadIdDto =
+       mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+
+   val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
+
+   val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto) */
+
+                val søknadDto = PleiepengerSøknadVisningDto(
+                    soeknadId = "123",
+                    soekerId = hentSøknad.norskIdent,
+                    journalposter = null,
+                    erFraK9 = true
+                )
 
                 val svarDto =
-                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(medId))
+                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(søknadDto))
 
                 return@RequestContext ServerResponse
                     .ok()
@@ -213,18 +234,17 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
     }
-
     private suspend fun ServerRequest.norskeIdent(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 
-    private suspend fun ServerRequest.innsending() = body(BodyExtractors.toMono(Innsending::class.java)).awaitFirst()
     private suspend fun ServerRequest.pleiepengerSøknad() = body(BodyExtractors.toMono(PleiepengerSøknadVisningDto::class.java)).awaitFirst()
     private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 
-    private fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) = uriBuilder().pathSegment("mappe", søknadId).build()
+    private fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) =
+        uriBuilder().pathSegment("mappe", søknadId).build()
 
     private suspend fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 }

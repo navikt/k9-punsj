@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 internal class K9SakRoutes(
-        private val authenticationHandler: AuthenticationHandler,
-        private val k9SakService: K9SakService
+    private val authenticationHandler: AuthenticationHandler,
+    private val k9SakService: K9SakService
 ) {
 
     private companion object {

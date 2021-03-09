@@ -1,6 +1,8 @@
 package no.nav.k9punsj
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.abac.PepClient
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
@@ -37,6 +39,14 @@ class TestContext {
     val tokenService: ITokenService = object : ITokenService{
         override fun decodeToken(accessToken: String): IIdToken {
             return IdTokenLocal()
+        }
+    }
+
+    @Bean
+    fun pepClientBean() = pepClient
+    val pepClient: IPepClient = object : IPepClient{
+        override suspend fun harBasisTilgang(fnr: String): Boolean {
+            return true
         }
     }
 

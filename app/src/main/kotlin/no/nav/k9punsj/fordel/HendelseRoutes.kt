@@ -22,8 +22,8 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class HendelseRoutes(
-        private val hendelseMottaker: HendelseMottaker,
-        private val authenticationHandler: AuthenticationHandler,
+    private val hendelseMottaker: HendelseMottaker,
+    private val authenticationHandler: AuthenticationHandler,
 ) {
 
     private companion object {

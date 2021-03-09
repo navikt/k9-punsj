@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration
 import java.net.URI
 
 @Configuration
-internal class AccessTokenClients (
-        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
-        @Value("\${no.nav.security.jwt.client.azure.jwk}") azureJwk: String,
-        @Value("\${no.nav.security.jwt.client.azure.token_endpoint}") azureTokenEndpoint: URI,
+internal class AccessTokenClients(
+    @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
+    @Value("\${no.nav.security.jwt.client.azure.jwk}") azureJwk: String,
+    @Value("\${no.nav.security.jwt.client.azure.token_endpoint}") azureTokenEndpoint: URI,
 
-        @Value("\${systembruker.username}") clientId: String,
-        @Value("\${systembruker.password}") clientSecret: String,
-        @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI,
+    @Value("\${systembruker.username}") clientId: String,
+    @Value("\${systembruker.password}") clientSecret: String,
+    @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI,
 ) {
 
     private companion object {
@@ -39,13 +39,15 @@ internal class AccessTokenClients (
         throw IllegalArgumentException("Azure JWK på feil format.")
     }
 
-    private val naisStsClient  = ClientSecretAccessTokenClient(clientId = clientId, clientSecret = clientSecret, tokenEndpoint =stsTokenEndpoint)
+    private val naisStsClient = ClientSecretAccessTokenClient(clientId = clientId,
+        clientSecret = clientSecret,
+        tokenEndpoint = stsTokenEndpoint)
 
     private val signedJwtAzureAccessTokenClient = SignedJwtAccessTokenClient(
-            clientId = azureClientId,
-            privateKeyProvider = FromJwk(azureJwk),
-            keyIdProvider = DirectKeyId(keyId),
-            tokenEndpoint = azureTokenEndpoint
+        clientId = azureClientId,
+        tokenEndpoint = azureTokenEndpoint,
+        privateKeyProvider = FromJwk(azureJwk),
+        keyIdProvider = DirectKeyId(keyId)
     )
 
     @Bean
@@ -60,10 +62,10 @@ internal class AccessTokenClients (
 
 private val logger: Logger = LoggerFactory.getLogger("no.nav.k9.AccessTokenHelsesjekk")
 internal fun AccessTokenClient.helsesjekk(
-        scopes: Set<String>,
-        operasjon: String,
-        initialHealth: Health = Health.up().build()
-) : Health {
+    scopes: Set<String>,
+    operasjon: String,
+    initialHealth: Health = Health.up().build(),
+): Health {
     val builder = Health.Builder(initialHealth.status, initialHealth.details)
     return try {
         getAccessToken(scopes)

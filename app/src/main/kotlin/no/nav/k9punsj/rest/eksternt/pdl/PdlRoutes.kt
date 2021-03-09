@@ -24,8 +24,8 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class PdlRoutes(
-        private val authenticationHandler: AuthenticationHandler,
-        private val pdlService: PdlService
+    private val authenticationHandler: AuthenticationHandler,
+    private val pdlService: PdlService
 ) {
 
     private companion object {

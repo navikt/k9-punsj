@@ -39,5 +39,9 @@ internal object MockConfiguration {
         "DEFAULTDS_URL" to "jdbc:postgresql://127.0.0.1:5432/k9punsj_unit",
         "DEFAULTDS_VAULT_MOUNTPATH" to "",
         "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
+        "AUDITLOGGER_ENABLED" to "false",
+        "ABAC_PDP_ENDPOINT_URL" to "",
+        "AUDITLOGGER_VENDOR" to "",
+        "AUDITLOGGER_PRODUCT" to "",
     )
 }
