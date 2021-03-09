@@ -14,6 +14,8 @@ import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -45,7 +47,9 @@ internal class SøknadMapper {
             val ytelseDto = mapYtelseV2(søknad)
             return PleiepengerSøknadMottakDto(
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
-                mottattDato = søknad.mottattDato,
+                mottattDato = if (søknad.mottattDato != null) ZonedDateTime.of(søknad.mottattDato,
+                    LocalTime.now(),
+                    ZoneId.of("UTC")) else null,
                 ytelse = ytelseDto
             )
         }
