@@ -40,7 +40,7 @@ data class PleiepengerSøknadVisningDto(
             val virksomhetNavn: String?,
         ) {
             data class SelvstendigNæringsdrivendePeriodeInfoDto(
-                val periode: PeriodeDto,
+                val periode: PeriodeDto?,
                 val virksomhetstyper: List<String>?,
                 val regnskapsførerNavn: String?,
                 val regnskapsførerTlf: String?,
@@ -63,14 +63,14 @@ data class PleiepengerSøknadVisningDto(
         data class ArbeidstakerDto(
             val norskIdent: NorskIdentDto?,
             val organisasjonsnummer: String?,
-            val arbeidstidInfo: ArbeidstidInfoDto,
+            val arbeidstidInfo: ArbeidstidInfoDto?,
         ) {
             data class ArbeidstidInfoDto(
                 val jobberNormaltTimerPerDag: String?,
                 val perioder: List<ArbeidstidPeriodeInfoDto>?,
             ) {
                 data class ArbeidstidPeriodeInfoDto(
-                    val periode: PeriodeDto,
+                    val periode: PeriodeDto?,
                     val faktiskArbeidTimerPerDag: String?,
                 )
             }
@@ -92,29 +92,29 @@ data class PleiepengerSøknadVisningDto(
     )
 
     data class BostederDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val land: String?,
     )
 
     data class UtenlandsoppholdDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val land: String?,
         val årsak: String?,
     )
 
     data class BeredskapDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val tilleggsinformasjon: String?,
 
         )
 
     data class NattevåkDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val tilleggsinformasjon: String?,
     )
 
     data class TilsynsordningDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val etablertTilsynTimerPerDag: String?,
     )
 
@@ -123,7 +123,7 @@ data class PleiepengerSøknadVisningDto(
     )
 
     data class UttakDto(
-        val periode: PeriodeDto,
+        val periode: PeriodeDto?,
         val timerPleieAvBarnetPerDag: String?,
     )
 

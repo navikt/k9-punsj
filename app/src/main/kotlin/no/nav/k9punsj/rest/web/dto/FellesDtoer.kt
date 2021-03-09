@@ -92,8 +92,8 @@ data class PdlResponseDto(
 
 data class PeriodeDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val fom: LocalDate,
+    val fom: LocalDate?,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val tom: LocalDate,
+    val tom: LocalDate?,
 )
 
