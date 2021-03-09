@@ -56,29 +56,28 @@ data class JournalposterDto(
 )
 
 internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
-    val bunke = this.bunke.first { b -> b.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN }
-    if (bunke.søknader.isNullOrEmpty()) {
+    val bunke = this.bunke.firstOrNull { b -> b.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN }
+    if (bunke?.søknader.isNullOrEmpty()) {
         return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
     }
-    val søknader = bunke.søknader.mapNotNull { s ->
+    val søknader = bunke?.søknader?.map { s ->
         if (s.søknad != null) {
-            objectMapper().convertValue<PleiepengerSøknadVisningDto>(s.søknad)
+            objectMapper().convertValue(s.søknad)
         } else {
-            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, journalposter = if (s.journalposter != null) {
-                val any = s.journalposter["journalposter"]!!
-                any as List<JournalpostIdDto>
-            } else null)
+            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
         }
     }
     return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }
 
+private fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
+    val any = s.journalposter["journalposter"]!!
+    any as List<JournalpostIdDto>
+} else null
+
 internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadVisningDto {
     if (søknad == null) {
-       return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = if (this.journalposter != null) {
-            val any = this.journalposter["journalposter"]!!
-            any as List<JournalpostIdDto>
-        } else null)
+        return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = hentUtJournalposter(this))
     }
     return objectMapper().convertValue(søknad)
 }
