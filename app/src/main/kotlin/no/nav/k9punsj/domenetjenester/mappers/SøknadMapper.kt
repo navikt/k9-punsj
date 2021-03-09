@@ -62,21 +62,21 @@ internal class SøknadMapper {
                 bosteder = null,
                 utenlandsopphold = null,
                 beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode),
+                    Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
                 }),
                 nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode),
+                    Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
                 }),
                 tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode),
+                    Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(it.etablertTilsynTimerPerDag))
                 }),
                 lovbestemtFerie = null,
                 arbeidstid = mapTilMottatArbeidstid(søknad.arbeidstid),
                 uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode),
+                    Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag))
                 }),
                 omsorg = søknad.omsorg
@@ -262,9 +262,9 @@ internal class SøknadMapper {
                         arbeidstakerDto.norskIdent,
                         arbeidstakerDto.organisasjonsnummer,
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                            arbeidstakerDto.arbeidstidInfo.jobberNormaltTimerPerDag,
-                            arbeidstakerDto.arbeidstidInfo.perioder?.associate { periodeInfoDto ->
-                                Pair(fromPeriodeDtoToString(periodeInfoDto.periode),
+                            arbeidstakerDto.arbeidstidInfo?.jobberNormaltTimerPerDag,
+                            arbeidstakerDto.arbeidstidInfo?.perioder?.associate { periodeInfoDto ->
+                                Pair(fromPeriodeDtoToString(periodeInfoDto.periode!!),
                                     PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                                         periodeInfoDto.faktiskArbeidTimerPerDag))
                             }
@@ -276,7 +276,7 @@ internal class SøknadMapper {
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
                     arbeidstidDto.frilanserArbeidstidInfo.jobberNormaltTimerPerDag,
                     arbeidstidDto.frilanserArbeidstidInfo.perioder?.associate {
-                        Pair(fromPeriodeDtoToString(it.periode),
+                        Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                                 it.faktiskArbeidTimerPerDag))
                     }) else null
@@ -285,7 +285,7 @@ internal class SøknadMapper {
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
                     arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo.jobberNormaltTimerPerDag,
                     arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo.perioder?.associate {
-                        Pair(fromPeriodeDtoToString(it.periode),
+                        Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                                 it.faktiskArbeidTimerPerDag))
                     }) else null
@@ -334,7 +334,7 @@ internal class SøknadMapper {
 
         private fun mapTilMottakSelvstendigNæringsdrivendeDto(s: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto {
             val perioder = s.perioder?.associate {
-                Pair(fromPeriodeDtoToString(it.periode),
+                Pair(fromPeriodeDtoToString(it.periode!!),
                     PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendePeriodeInfoDto(
                         virksomhetstyper = it.virksomhetstyper,
                         regnskapsførerNavn = it.regnskapsførerNavn,
@@ -368,14 +368,14 @@ internal class SøknadMapper {
         }
 
         private fun mapTilMottakArbeidstaker(a: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto {
-            val perioder = a.arbeidstidInfo.perioder?.associate {
-                Pair(fromPeriodeDtoToString(it.periode),
+            val perioder = a.arbeidstidInfo?.perioder?.associate {
+                Pair(fromPeriodeDtoToString(it.periode!!),
                     PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                         it.faktiskArbeidTimerPerDag))
             }
             val arbeidstidInfoDto =
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                    a.arbeidstidInfo.jobberNormaltTimerPerDag,
+                    a.arbeidstidInfo?.jobberNormaltTimerPerDag,
                     perioder
                 )
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto(a.norskIdent,
