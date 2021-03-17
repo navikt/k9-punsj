@@ -73,16 +73,17 @@ class MappeService(
         }
     }
 
-    private suspend fun leggTilJournalpost(journalposter: List<JournalpostIdDto>?, jsob: JsonB?) : MutableMap<String, Any?>{
-        if (jsob != null) {
-            val list = jsob["journalposter"] as List<*>
+    private suspend fun leggTilJournalpost(nyeJournalposter: List<JournalpostIdDto>?, fraDatabasen: JsonB?) : MutableMap<String, Any?>{
+        if (fraDatabasen != null) {
+            val list = fraDatabasen["journalposter"] as List<*>
             val set = list.toSet()
-            val settMedAlleJPoster = set.plus(journalposter)
-            jsob.replace("journalposter", settMedAlleJPoster)
-            return jsob
+            val toSet = nyeJournalposter?.flatMap { set.plus(it) }?.toSet()
+
+            fraDatabasen.replace("journalposter", toSet)
+            return fraDatabasen
         }
         val jPoster = mutableMapOf<String, Any?>()
-        jPoster["journalposter"] = listOf(journalposter)
+        jPoster["journalposter"] = listOf(nyeJournalposter)
         return jPoster
 
     }

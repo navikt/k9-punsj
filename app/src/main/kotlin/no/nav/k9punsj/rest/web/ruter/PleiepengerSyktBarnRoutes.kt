@@ -72,7 +72,7 @@ internal class PleiepengerSyktBarnRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(svarDto.søknader!!)
+                        .bodyValueAndAwait(svarDto)
                 }
                 return@RequestContext ServerResponse
                     .ok()
@@ -150,8 +150,8 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        val journalposterDto: JournalposterDto =
-                            objectMapper.convertValue(søknadEntitet.journalposter!!)
+                        val from = søknadEntitet.journalposter!!
+                        val journalposterDto: JournalposterDto = objectMapper.convertValue(from)
                         pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first,
                             journalposterDto.journalposter)
 

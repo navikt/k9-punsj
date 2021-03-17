@@ -1,6 +1,5 @@
 package no.nav.k9punsj.wiremock
 
-import com.github.tomakehurst.wiremock.client.WireMockBuilder
 import com.github.tomakehurst.wiremock.core.Options
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 
