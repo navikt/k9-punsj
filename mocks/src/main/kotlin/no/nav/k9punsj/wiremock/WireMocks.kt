@@ -9,6 +9,7 @@ fun initWireMock(
 ) = WireMockBuilder()
         .withPort(port)
         .withAzureSupport()
+        .withNaisStsSupport()
         .wireMockConfiguration {
             it.withRootDirectory(rootDirectory)
             it.useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
@@ -31,4 +32,9 @@ fun initWireMock(
         .stubPdlHenteAktøridOk()
         .stubPdlHenteAktøridFinnesIkke()
         .stubPdlHenteAktøridIkkeAutentisert()
+        .stubNaisStsTokenResponseGet()
+        .stubNaisStsTokenResponsePost()
+        .stubNaisStsTokenResponsePut()
+        .stubPdlHenteAktøridOkPost()
+
 

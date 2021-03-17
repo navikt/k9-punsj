@@ -25,6 +25,68 @@ fun WireMockServer.stubSaksbehandlerAccessToken(): WireMockServer {
     return this
 }
 
+fun WireMockServer.stubNaisStsTokenResponseGet(): WireMockServer {
+
+    val jwt = Azure.V2_0.saksbehandlerAccessToken()
+
+    WireMock.stubFor(
+        WireMock.get(WireMock.urlPathEqualTo("/nais-sts/token")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                                {
+                                    "token_type": "Bearer",
+                                    "access_token": "$jwt"
+                                }
+                            """.trimIndent())
+                .withStatus(200)
+        )
+    )
+    return this
+}
+
+fun WireMockServer.stubNaisStsTokenResponsePost(): WireMockServer {
+
+    val jwt = Azure.V2_0.saksbehandlerAccessToken()
+
+    WireMock.stubFor(
+        WireMock.post(WireMock.urlPathEqualTo("/nais-sts/token")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                                {
+                                    "token_type": "Bearer",
+                                    "access_token": "$jwt"
+                                }
+                            """.trimIndent())
+                .withStatus(200)
+        )
+    )
+    return this
+}
+
+fun WireMockServer.stubNaisStsTokenResponsePut(): WireMockServer {
+
+    val jwt = Azure.V2_0.saksbehandlerAccessToken()
+
+    WireMock.stubFor(
+        WireMock.put(WireMock.urlPathEqualTo("/nais-sts/token")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                                {   
+                                    "token_type": "Bearer",
+                                    "access_token": "$jwt"
+                                }
+                            """.trimIndent())
+                .withStatus(200)
+        )
+    )
+
+    return this
+}
+
+
 fun WireMockServer.stubNavHeader(): WireMockServer {
 
     val jwt = Azure.V2_0.navHeader()

@@ -64,7 +64,7 @@ internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
         if (s.søknad != null) {
             objectMapper().convertValue(s.søknad)
         } else {
-            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, soekerId = norskIdent, journalposter = hentUtJournalposter(s))
         }
     }
     return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)

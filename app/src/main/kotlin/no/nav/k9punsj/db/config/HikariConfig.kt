@@ -1,10 +1,8 @@
-package no.nav.k9punsj.db
+package no.nav.k9punsj.db.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.k9punsj.db.config.DbConfiguration
-import no.nav.k9punsj.db.config.getDataSource
-import no.nav.k9punsj.db.config.migrate
+import org.springframework.core.env.Environment
 
 fun createHikariConfig(
         jdbcUrl: String,
@@ -24,5 +22,10 @@ fun createHikariConfig(
 
 fun hikariConfig(hikariConfig: DbConfiguration): HikariDataSource {
     migrate(hikariConfig)
+    return getDataSource(hikariConfig)
+}
+
+fun hikariConfigLocal(hikariConfig: DbConfiguration, environment: Environment): HikariDataSource {
+    runMigrationLocal(hikariConfig, environment)
     return getDataSource(hikariConfig)
 }

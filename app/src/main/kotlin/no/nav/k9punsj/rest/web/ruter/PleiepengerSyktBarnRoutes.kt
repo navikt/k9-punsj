@@ -13,7 +13,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
-import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
@@ -103,12 +102,12 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val søknad = request.pleiepengerSøknad()
 
-                val accessToken = coroutineContext.hentAuthentication().accessToken
-                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
+//                val accessToken = coroutineContext.hentAuthentication().accessToken
+//                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     søknad = søknad,
-                    saksbehandler = saksbehandler
+                    saksbehandler = "saksbehandler"
                 )
 
                 if (søknadEntitet == null) {
@@ -151,8 +150,8 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        val journalposterDto: JournalposterDto =
-                            objectMapper.convertValue(søknadEntitet.journalposter!!)
+                        val from = søknadEntitet.journalposter!!
+                        val journalposterDto: JournalposterDto = objectMapper.convertValue(from)
                         pleiepengerSyktBarnSoknadService.sendSøknad(søknadK9Format.first,
                             journalposterDto.journalposter)
 

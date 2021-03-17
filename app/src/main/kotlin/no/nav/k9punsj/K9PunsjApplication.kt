@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.db.config.DbConfiguration
-import no.nav.k9punsj.db.hikariConfig
+import no.nav.k9punsj.db.config.hikariConfig
+import no.nav.k9punsj.db.config.hikariConfigLocal
 import no.nav.k9punsj.jackson.UlidDeserializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.Banner
@@ -17,11 +18,13 @@ import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
 import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import javax.sql.DataSource
 
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class, FlywayAutoConfiguration::class])
-class K9PunsjApplication @Autowired constructor(var dbConfiguration: DbConfiguration) {
+class K9PunsjApplication @Autowired constructor(var dbConfiguration: DbConfiguration, val environment: Environment) {
+
 	@Bean
 	fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
 		return Jackson2ObjectMapperBuilder()
@@ -37,9 +40,15 @@ class K9PunsjApplication @Autowired constructor(var dbConfiguration: DbConfigura
 	}
 
 	@Bean
-	@Profile("!test")
+	@Profile("!test & !local")
 	fun databaseInitializer(): DataSource {
 		return hikariConfig(dbConfiguration)
+	}
+
+	@Bean
+	@Profile("local")
+	fun databaseInitializerLocal(): DataSource {
+		return hikariConfigLocal(dbConfiguration, environment)
 	}
 }
 
