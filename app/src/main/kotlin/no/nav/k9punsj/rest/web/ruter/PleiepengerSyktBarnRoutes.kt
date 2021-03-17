@@ -13,7 +13,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
-import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
@@ -73,7 +72,7 @@ internal class PleiepengerSyktBarnRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(svarDto)
+                        .bodyValueAndAwait(svarDto.søknader!!)
                 }
                 return@RequestContext ServerResponse
                     .ok()
@@ -103,12 +102,12 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val søknad = request.pleiepengerSøknad()
 
-                val accessToken = coroutineContext.hentAuthentication().accessToken
-                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
+//                val accessToken = coroutineContext.hentAuthentication().accessToken
+//                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     søknad = søknad,
-                    saksbehandler = saksbehandler
+                    saksbehandler = "saksbehandler"
                 )
 
                 if (søknadEntitet == null) {

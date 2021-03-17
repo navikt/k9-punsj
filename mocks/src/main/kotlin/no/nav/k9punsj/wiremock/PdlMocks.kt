@@ -2,6 +2,7 @@ package no.nav.k9punsj.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
@@ -45,6 +46,31 @@ fun WireMockServer.stubPdlHenteAktøridOk(): WireMockServer {
     )
     return this
 }
+
+fun WireMockServer.stubPdlHenteAktøridOkPost(): WireMockServer {
+    WireMock.stubFor(
+        WireMock.post(urlEqualTo("/pdl-mock")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\n" +
+                        "  \"data\": {\n" +
+                        "    \"hentIdenter\": {\n" +
+                        "      \"identer\": [\n" +
+                        "        {\n" +
+                        "          \"ident\": \"2002220522526\",\n" +
+                        "          \"historisk\": false,\n" +
+                        "          \"gruppe\": \"AKTORID\"\n" +
+                        "        }\n" +
+                        "      ]\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}")
+                .withStatus(200)
+        )
+    )
+    return this
+}
+
 
 
 private fun WireMockServer.stubPdlHenteAktørId(

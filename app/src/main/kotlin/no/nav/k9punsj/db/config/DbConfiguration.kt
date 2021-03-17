@@ -1,6 +1,5 @@
 package no.nav.k9punsj.db.config
 
-import no.nav.k9punsj.db.createHikariConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -24,7 +23,7 @@ class DbConfiguration(
 
     @Bean
     fun isVaultEnabled(): Boolean {
-        return !vaultMountpath.isBlank()
+        return vaultMountpath.isNotBlank()
     }
 
     @Bean

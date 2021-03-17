@@ -21,7 +21,6 @@ internal object MockConfiguration {
         "AZURE_jwk" to ClientCredentials.ClientA.privateKeyJwk,
         "AZURE_token_endpoint" to wireMockServer.getAzureV2TokenUrl(),
         "AZURE_V1_discovery_url" to wireMockServer.getAzureV1WellKnownUrl(),
-//        "AZURE_V2_discovery_url" to "http://azure-mock:8100/v2.0/.well-known/openid-configuration",
         "AZURE_V2_discovery_url" to (azureV2DiscoveryUrl ?: wireMockServer.getAzureV2WellKnownUrl()),
         "SYSTEMBRUKER_USERNAME" to "vtp",
         "SYSTEMBRUKER_PASSWORD" to "vtp",
@@ -39,6 +38,6 @@ internal object MockConfiguration {
         "DEFAULTDS_PASSWORD" to "k9punsj_unit",
         "DEFAULTDS_URL" to "jdbc:postgresql://127.0.0.1:5432/k9punsj_unit",
         "DEFAULTDS_VAULT_MOUNTPATH" to "",
-        "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl()
+        "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
     )
 }

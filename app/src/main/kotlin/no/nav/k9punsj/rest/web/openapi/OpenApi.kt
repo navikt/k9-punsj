@@ -81,7 +81,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Henter mappen til en person som inneholder alle søknader",
                 content = [Content(
                     schema = Schema(
-                        implementation = SvarDto::class
+                        implementation = PleiepengerSøknadVisningDto::class
                     )
                 )]
             )
