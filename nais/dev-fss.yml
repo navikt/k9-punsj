@@ -77,3 +77,11 @@ spec:
       value: postgresql/preprod-fss/
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-punsj
+    - name: ABAC_PDP_ENDPOINT_URL
+      value: https://abac-k9.nais.preprod.local/application/authorize
+    - name: AUDITLOGGER_ENABLED
+      value: "true"
+    - name: AUDITLOGGER_VENDOR
+      value: "k9"
+    - name: AUDITLOGGER_PRODUCT
+      value: "k9-punsj"

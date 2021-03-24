@@ -24,9 +24,9 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class GosysRoutes(
-        private val authenticationHandler: AuthenticationHandler,
-        private val gosysOppgaveService: GosysOppgaveService,
-        private val pdlService: PdlService
+    private val authenticationHandler: AuthenticationHandler,
+    private val gosysOppgaveService: GosysOppgaveService,
+    private val pdlService: PdlService
 ) {
 
     private companion object {

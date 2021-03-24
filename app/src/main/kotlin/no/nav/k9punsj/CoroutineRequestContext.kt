@@ -39,8 +39,8 @@ internal fun CoroutineContext.hentAuthentication() : Authentication = hentAttrib
 internal typealias CorrelationId = String
 
 internal fun Routes(
-        authenticationHandler: AuthenticationHandler? = null,
-        routes : CoRouterFunctionDsl.() -> Unit
+    authenticationHandler: AuthenticationHandler? = null,
+    routes : CoRouterFunctionDsl.() -> Unit
 ) = coRouter {
     before { serverRequest ->
         val requestId = serverRequest
