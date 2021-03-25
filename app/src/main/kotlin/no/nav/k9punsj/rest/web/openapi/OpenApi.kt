@@ -240,8 +240,7 @@ internal class PleiepengerSyktBarnSoknadController {
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 data class OasHentSøknad(
-    val norskIdent: NorskIdentDto,
-    val periode: PeriodeDto,
+    val norskIdent: NorskIdentDto
 )
 
 data class OasInnsending(
