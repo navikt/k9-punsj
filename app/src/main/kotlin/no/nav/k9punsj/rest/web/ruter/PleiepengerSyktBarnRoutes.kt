@@ -16,7 +16,6 @@ import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
-import no.nav.k9punsj.rest.web.Innsending
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
@@ -63,8 +62,9 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
-                val person = personService.finnPersonVedNorskIdent(norskIdent)
+                harInnloggetBrukerTilgangTilSøker(norskIdent)?.let { return@RequestContext it }
 
+                val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
                         person = person,
@@ -102,7 +102,6 @@ internal class PleiepengerSyktBarnRoutes(
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.pleiepengerSøknad()
-
 //                val accessToken = coroutineContext.hentAuthentication().accessToken
 //                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
 
@@ -127,6 +126,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
+                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -181,6 +181,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
+                harInnloggetBrukerTilgangTilSøker(opprettNySøknad.norskIdent)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.førsteInnsending(
                     nySøknad = opprettNySøknad!!,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
@@ -196,27 +197,9 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                val saksbehandlerHarTilgang = pepClient.harBasisTilgang(hentSøknad.norskIdent)
-                if (!saksbehandlerHarTilgang) {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.FORBIDDEN)
-                        .json()
-                        .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
-                }
+                harInnloggetBrukerTilgangTilSøker(hentSøknad.norskIdent)?.let { return@RequestContext it }
 
-
-
-/*   val psbUtfyltFraK9 = k9SakService.hentSisteMottattePsbSøknad(hentSøknad.norskIdent,
-       Periode(hentSøknad.periode.fom, hentSøknad.periode.tom))
-       ?: return@RequestContext ServerResponse.notFound().buildAndAwait()
-
-   val søknadIdDto =
-       mappeService.opprettTomSøknad(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-
-   val mottatDto = objectMapper.convertValue<PleiepengerSøknadMottakDto>(psbUtfyltFraK9)
-
-   val mapTilVisningFormat = SøknadMapper.mapTilVisningFormat(mottatDto) */
-
+                //TODO(OJR) koble på mot endepunkt i k9-sak
                 val søknadDto = PleiepengerSøknadVisningDto(
                     soeknadId = "123",
                     soekerId = hentSøknad.norskIdent,
@@ -234,6 +217,18 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
     }
+
+    private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto)
+        if (!saksbehandlerHarTilgang) {
+            return ServerResponse
+                .status(HttpStatus.FORBIDDEN)
+                .json()
+                .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
+        }
+        return null
+    }
+
     private suspend fun ServerRequest.norskeIdent(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
     }

@@ -1,17 +1,17 @@
 package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 
+import no.nav.k9.rapid.behov.Behovssekvens
+import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
 import no.nav.k9punsj.akjonspunkter.Aksjonspunkt
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
-import no.nav.k9.rapid.behov.Behovssekvens
-import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
@@ -23,6 +23,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
         const val topicK9Los = "privat-k9punsj-aksjonspunkthendelse-v1"
     }
 
+    //TODO(OJR) lagre i databasen? + oppdatering av journalpost? + abac
     internal suspend fun send(melding: OverføreOmsorgsdagerBehov, dedupKey: String) {
         val (id, overføring) = Behovssekvens(
             id = dedupKey,

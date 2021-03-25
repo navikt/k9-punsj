@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AppConfiguration
+import no.nav.k9punsj.audit.*
 import no.nav.k9punsj.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.utils.Cache
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 
@@ -27,8 +29,11 @@ private const val DOMENE = "k9"
 
 @Configuration
 @Profile("!test & !local")
-class PepClient(private val config: AppConfiguration,
-                private val azureGraphService: AzureGraphService): IPepClient {
+class PepClient(
+    private val config: AppConfiguration,
+    private val azureGraphService: AzureGraphService,
+    private val auditlogger: Auditlogger,
+) : IPepClient {
 
     private val url = config.abacEndpointUrl()
     private val log: Logger = LoggerFactory.getLogger(PepClient::class.java)
@@ -42,29 +47,29 @@ class PepClient(private val config: AppConfiguration,
             .addActionAttribute(ACTION_ID, "read")
             .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
-            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los")
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
             .addResourceAttribute(RESOURCE_FNR, fnr)
 
         val decision = evaluate(requestBuilder)
 
-        /*  auditlogger.logg(
-              Auditdata(
-                  header = AuditdataHeader(
-                      vendor = auditlogger.defaultVendor,
-                      product = auditlogger.defaultProduct,
-                      eventClassId = EventClassId.AUDIT_SEARCH,
-                      name = "ABAC Sporingslogg",
-                      severity = "INFO"
-                  ), fields = setOf(
-                      CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
-                      CefField(CefFieldName.REQUEST, "read"),
-                      CefField(CefFieldName.ABAC_RESOURCE_TYPE, TILGANG_SAK),
-                      CefField(CefFieldName.ABAC_ACTION, "read"),
-                      CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
-                      CefField(CefFieldName.BERORT_BRUKER_ID, aktørid),
-                  )
-              )
-          ) */
+        auditlogger.logg(
+            Auditdata(
+                header = AuditdataHeader(
+                    vendor = auditlogger.defaultVendor,
+                    product = auditlogger.defaultProduct,
+                    eventClassId = EventClassId.AUDIT_SEARCH,
+                    name = "ABAC Sporingslogg",
+                    severity = "INFO"
+                ), fields = setOf(
+                    CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
+                    CefField(CefFieldName.REQUEST, "read"),
+                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
+                    CefField(CefFieldName.ABAC_ACTION, "read"),
+                    CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
+                    CefField(CefFieldName.BERORT_BRUKER_ID, "aktørid"),
+                )
+            )
+        )
 
         return decision
     }
@@ -72,7 +77,7 @@ class PepClient(private val config: AppConfiguration,
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {
         val xacmlJson = gson.toJson(xacmlRequestBuilder.build())
         val get = cache.get(xacmlJson)
-        var result = false
+
         if (get == null) {
             val client: WebClient = WebClient.builder()
                 .filter(basicAuthentication(config.abacUsername(), config.abacPassword()))
@@ -89,10 +94,8 @@ class PepClient(private val config: AppConfiguration,
                 .toEntity(String::class.java)
                 .awaitFirst()
 
-            try {
-                val json = response.body ?: ""
-                result = objectMapper().readValue<Response>(json).response[0].decision == "Permit"
-                return result
+            val result = try {
+                objectMapper().readValue<Response>(response.body ?: "").response[0].decision == "Permit"
             } catch (e: Exception) {
                 log.error(
                     "Feilet deserialisering", e
@@ -101,7 +104,6 @@ class PepClient(private val config: AppConfiguration,
             }
             cache.set(xacmlJson, CacheObject(result, LocalDateTime.now().plusHours(1)))
             return result
-
         } else {
             return get.value
         }

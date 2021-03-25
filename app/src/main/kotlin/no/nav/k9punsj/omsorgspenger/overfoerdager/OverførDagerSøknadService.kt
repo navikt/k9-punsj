@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 class OverførDagerSøknadService @Autowired constructor(
@@ -26,6 +26,7 @@ class OverførDagerSøknadService @Autowired constructor(
         private val log: Logger = LoggerFactory.getLogger(OverførDagerSøknadService::class.java)
     }
 
+    //TODO(OJR) lagre i databasen? + oppdatering av journalpost? + abac
     internal suspend fun sendSøknad(søknad: OverføreOmsorgsdagerBehov, dedupKey: String) {
         val (id, overføring) = Behovssekvens(
                 id = dedupKey,
