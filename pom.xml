@@ -90,6 +90,12 @@
                 <artifactId>kotlinx-coroutines-slf4j</artifactId>
                 <version>${kotlinx-coroutines.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.papertrailapp</groupId>
+                <artifactId>logback-syslog4j</artifactId>
+                <version>1.0.0</version>
+            </dependency>
             <!-- Meldingsformater -->
             <dependency>
                 <groupId>org.skyscreamer</groupId>
