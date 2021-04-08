@@ -36,7 +36,7 @@ class OverførDagerSøknadService @Autowired constructor(
 
         hendelseProducer.send(topicName = rapidTopic, key = id, data = overføring)
 
-        for (jornalpostId in søknad.journalpostIder) {
+   /*     for (jornalpostId in søknad.journalpostIder) {
             val jpost = journalpostRepository.hent(jornalpostId)
             val data = objectMapper().writeValueAsString(PunsjEventDto(
                     jpost.uuid.toString(),
@@ -47,6 +47,6 @@ class OverførDagerSøknadService @Autowired constructor(
             ))
             log.info(data)
             hendelseProducer.send(topicName = topicK9Los, data = data, key = id)
-        }
+        } */
     }
 }

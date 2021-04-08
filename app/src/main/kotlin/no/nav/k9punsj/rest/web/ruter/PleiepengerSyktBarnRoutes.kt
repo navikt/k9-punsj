@@ -197,7 +197,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val hentSøknad = request.hentSøknad()
-                harInnloggetBrukerTilgangTilSøker(hentSøknad.norskIdent)?.let { return@RequestContext it }
+           /*     harInnloggetBrukerTilgangTilSøker(hentSøknad.norskIdent)?.let { return@RequestContext it }
 
                 //TODO(OJR) koble på mot endepunkt i k9-sak
                 val søknadDto = PleiepengerSøknadVisningDto(
@@ -213,7 +213,8 @@ internal class PleiepengerSyktBarnRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(svarDto)
+                    .bodyValueAndAwait(svarDto) */
+                return@RequestContext ServerResponse.status(HttpStatus.FORBIDDEN).json().bodyValueAndAwait(emptyList<SvarDto>())
             }
         }
     }
