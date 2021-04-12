@@ -66,12 +66,12 @@ data class PleiepengerSøknadVisningDto(
             val arbeidstidInfo: ArbeidstidInfoDto?,
         ) {
             data class ArbeidstidInfoDto(
-                val jobberNormaltTimerPerDag: String?,
                 val perioder: List<ArbeidstidPeriodeInfoDto>?,
             ) {
                 data class ArbeidstidPeriodeInfoDto(
                     val periode: PeriodeDto?,
                     val faktiskArbeidTimerPerDag: String?,
+                    val jobberNormaltTimerPerDag: String?,
                 )
             }
         }

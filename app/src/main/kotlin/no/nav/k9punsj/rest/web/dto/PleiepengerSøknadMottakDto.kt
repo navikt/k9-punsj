@@ -38,6 +38,7 @@ data class PleiepengerSøknadMottakDto(
             @JsonFormat(pattern = "yyyy-MM-dd")
             val fødselsdato: LocalDate?,
         )
+
         data class ArbeidAktivitetDto(
             val selvstendigNæringsdrivende: List<SelvstendigNæringsdrivendeDto>?,
             val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto?,
@@ -69,10 +70,10 @@ data class PleiepengerSøknadMottakDto(
                 val arbeidstidInfo: ArbeidstidInfoDto,
             ) {
                 data class ArbeidstidInfoDto(
-                    val jobberNormaltTimerPerDag: String?,
                     val perioder: Map<String, ArbeidstidPeriodeInfoDto>?,
                 ) {
                     data class ArbeidstidPeriodeInfoDto(
+                        val jobberNormaltTimerPerDag: String?,
                         val faktiskArbeidTimerPerDag: String?,
                     )
                 }

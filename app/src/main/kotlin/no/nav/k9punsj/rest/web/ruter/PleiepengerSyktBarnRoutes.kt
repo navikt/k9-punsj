@@ -137,7 +137,7 @@ internal class PleiepengerSyktBarnRoutes(
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                         val format = SøknadMapper.mapTilSendingsformat(søknad)
-                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format)
+                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(

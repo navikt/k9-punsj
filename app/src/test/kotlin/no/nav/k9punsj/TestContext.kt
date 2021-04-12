@@ -2,8 +2,8 @@ package no.nav.k9punsj
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.abac.IPepClient
-import no.nav.k9punsj.abac.PepClient
 import no.nav.k9punsj.db.config.runMigration
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -58,6 +58,14 @@ class TestContext {
         }
 
         override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun hentPerioderSomFinnesIK9(
+            søker: NorskIdent,
+            barn: NorskIdent,
+            fagsakYtelseType: FagsakYtelseType,
+        ) {
             TODO("Not yet implemented")
         }
     }

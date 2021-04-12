@@ -28,13 +28,13 @@
         "norskIdent": null,
         "organisasjonsnummer": "999999999",
         "arbeidstidInfo": {
-          "jobberNormaltTimerPerDag": "PT7H30M",
           "perioder": [
             {
               "periode": {
                 "fom": "2018-12-30",
                 "tom": "2019-10-20"
               },
+              "jobberNormaltTimerPerDag" : "PT7H30M",
               "faktiskArbeidTimerPerDag": "PT7H30M"
             }
           ]
