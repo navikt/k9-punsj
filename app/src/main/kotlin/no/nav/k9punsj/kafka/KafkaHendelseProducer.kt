@@ -16,7 +16,6 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.support.SendResult
 import org.springframework.util.concurrent.ListenableFuture
 import org.springframework.util.concurrent.ListenableFutureCallback
-import java.util.*
 
 
 @Configuration
@@ -88,6 +87,22 @@ class KafkaHendelseProducer: HendelseProducer {
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
                 logger.info("Melding sendt på Kafka-topic: $topicName")
+            }
+
+            override fun onFailure(ex: Throwable) {
+                //TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
+                logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
+                throw KafkaException("Kunne ikke sende sende til topic: $topicName")
+            }
+        })
+    }
+
+    override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {
+        val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate()!!.send(topicName, key, data)
+        future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
+            override fun onSuccess(result: SendResult<String?, String?>?) {
+                logger.info("Melding sendt på Kafka-topic: $topicName")
+                onSuccess.invoke()
             }
 
             override fun onFailure(ex: Throwable) {

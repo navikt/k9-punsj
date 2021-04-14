@@ -1,8 +1,7 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9.søknad.felles.LovbestemtFerie
-import no.nav.k9.søknad.felles.aktivitet.ArbeidAktivitet
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
@@ -20,7 +19,7 @@ internal class PleiepengerSyktBarnYtelseMapper {
             val barn = Barn(NorskIdentitetsnummer.of(psb.barn?.norskIdentitetsnummer), psb.barn?.fødselsdato)
             val søknadsperiode: Periode? =
                 if (psb.søknadsperiode != null) objectMapper.convertValue(psb.søknadsperiode) else null
-            val arbeidAktivitet: ArbeidAktivitet? =
+            val opptjeningAktivitet: OpptjeningAktivitet? =
                 if (psb.arbeidAktivitet != null) objectMapper.convertValue(psb.arbeidAktivitet) else null
             val databruktTilUtledning: DataBruktTilUtledning? =
                 if (psb.dataBruktTilUtledning != null) objectMapper.convertValue(psb.dataBruktTilUtledning) else null
@@ -41,7 +40,7 @@ internal class PleiepengerSyktBarnYtelseMapper {
             return PleiepengerSyktBarn(søknadsperiode,
                 databruktTilUtledning,
                 barn,
-                arbeidAktivitet,
+                opptjeningAktivitet,
                 beredskap,
                 nattevåk,
                 tilsynsordning,

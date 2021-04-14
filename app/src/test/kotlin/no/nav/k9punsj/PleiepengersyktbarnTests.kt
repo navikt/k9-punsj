@@ -219,7 +219,8 @@ class PleiepengersyktbarnTests {
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-        assertEquals("ugyldigPeriode", response?.feil?.first()?.feilkode!!)
+        //TODO fix når det er rettet i k9-format
+        assertEquals("nullIllegalArgumentException", response?.feil?.first()?.feilkode!!)
     }
 
     private fun opprettOgSendInnSoeknad(

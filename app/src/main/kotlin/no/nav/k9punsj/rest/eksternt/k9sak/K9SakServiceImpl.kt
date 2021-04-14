@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.objectMapper
@@ -34,6 +35,14 @@ class K9SakServiceImpl(
     }
 
     override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentPerioderSomFinnesIK9(
+        søker: NorskIdent,
+        barn: NorskIdent,
+        fagsakYtelseType: FagsakYtelseType,
+    ) {
         TODO("Not yet implemented")
     }
 

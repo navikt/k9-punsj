@@ -2,8 +2,9 @@ package no.nav.k9punsj
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.abac.IPepClient
-import no.nav.k9punsj.abac.PepClient
+import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.config.runMigration
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -28,23 +29,38 @@ class TestContext {
 
     @Bean
     fun hendelseProducerBean() = hendelseProducerMock
-    val hendelseProducerMock: HendelseProducer = object: HendelseProducer {
-        override fun send(topicName: String, søknadString: String, søknadId: String) {
+    val hendelseProducerMock: HendelseProducer = object : HendelseProducer {
+        override fun send(topicName: String, data: String, key: String) {
+        }
+
+        override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {
 
         }
     }
 
     @Bean
     fun tokenServiceBean() = tokenService
-    val tokenService: ITokenService = object : ITokenService{
+    val tokenService: ITokenService = object : ITokenService {
         override fun decodeToken(accessToken: String): IIdToken {
             return IdTokenLocal()
         }
     }
 
     @Bean
+    fun azureGraphServiceBean() = azureGraphService
+    val azureGraphService: IAzureGraphService = object : IAzureGraphService {
+        override suspend fun hentIdentTilInnloggetBruker(): String {
+            return "saksbehandler"
+        }
+
+        override suspend fun hentEnhetForInnloggetBruker(): String {
+            return "Hjemmekontor"
+        }
+    }
+
+    @Bean
     fun pepClientBean() = pepClient
-    val pepClient: IPepClient = object : IPepClient{
+    val pepClient: IPepClient = object : IPepClient {
         override suspend fun harBasisTilgang(fnr: String): Boolean {
             return true
         }
@@ -52,7 +68,7 @@ class TestContext {
 
     @Bean
     fun k9ServiceBean() = k9ServiceMock
-    val k9ServiceMock: K9SakService = object: K9SakService{
+    val k9ServiceMock: K9SakService = object : K9SakService {
         override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): SøknadJson? {
             return LesFraFilUtil.søknadFraFrontend()
         }
@@ -60,11 +76,19 @@ class TestContext {
         override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
             TODO("Not yet implemented")
         }
+
+        override suspend fun hentPerioderSomFinnesIK9(
+            søker: NorskIdent,
+            barn: NorskIdent,
+            fagsakYtelseType: FagsakYtelseType,
+        ) {
+            TODO("Not yet implemented")
+        }
     }
 
     @Bean
     fun pdlServiceBean() = pdlServiceMock
-    val pdlServiceMock: PdlService = object: PdlService{
+    val pdlServiceMock: PdlService = object : PdlService {
         val dummyFnr = "11111111111"
         val dummyAktørId = "1000000000000"
 
