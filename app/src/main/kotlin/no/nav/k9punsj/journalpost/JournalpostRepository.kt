@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.springframework.stereotype.Repository
 import javax.sql.DataSource
 
@@ -69,6 +70,29 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun opprettJournalpost(jp: Journalpost): Journalpost {
         return lagre(jp) {
             jp
+        }
+    }
+
+    suspend fun settBehandletFerdig(journalpostIder: MutableSet<JournalpostId>) {
+        journalpostIder.forEach { ferdig(it) }
+    }
+
+    suspend fun ferdig(journalpostId: String) {
+        return using(sessionOf(dataSource)) {
+            it.transaction { tx ->
+                //language=PostgreSQL
+                val json = tx.run(
+                    queryOf(
+                        """
+                    insert into journalpost as k (journalpost_id, data, ferdig_behandlet)
+                    values (:id, :data :: jsonb, :ferdig)
+                    on conflict (JOURNALPOST_ID) do update
+                    set ferdig_behandlet = :ferdig
+                    
+                 """, mapOf("id" to journalpostId, "ferdig" to true)
+                    ).asUpdate
+                )
+            }
         }
     }
 }

@@ -7,14 +7,13 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
-import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
-import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -35,10 +34,9 @@ internal class PleiepengerSyktBarnRoutes(
     private val mappeService: MappeService,
     private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
     private val personService: PersonService,
-    private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
-    private val tokenService: ITokenService,
-    private val pepClient: IPepClient
+    private val pepClient: IPepClient,
+    private val azureGraphService: IAzureGraphService
 
 ) {
     private companion object {
@@ -102,12 +100,11 @@ internal class PleiepengerSyktBarnRoutes(
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.pleiepengerSøknad()
-//                val accessToken = coroutineContext.hentAuthentication().accessToken
-//                val saksbehandler = tokenService.decodeToken(accessToken).getUsername()
+                val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     søknad = søknad,
-                    saksbehandler = "saksbehandler"
+                    saksbehandler = saksbehandler
                 )
 
                 if (søknadEntitet == null) {
@@ -153,18 +150,13 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        val from = søknadEntitet.journalposter!!
-                        val journalposterDto: JournalposterDto = objectMapper.convertValue(from)
+                        val journalPoster = søknadEntitet.journalposter!!
+                        val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
                         pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
                             journalposterDto.journalposter
                         )
 
-                        //TODO(OJR) marker søknad som sendt_inn = TRUE og journalposter som behandlet?
-//                        mappeService.fjern(
-//                            mappeId = mappeId,
-//                            norskIdent = norskIdent
-//                        )
                         return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()

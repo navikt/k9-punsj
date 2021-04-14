@@ -102,4 +102,21 @@ class SøknadRepository(private val dataSource: DataSource) {
         journalposter = objectMapper().readValue(row.string("journalposter")),
         sendtInn = row.boolean("sendt_inn")
     )
+
+    suspend fun markerSomSendtInn(søknadId: SøknadId) {
+        return using(sessionOf(dataSource)) {
+            return@using it.transaction { tx ->
+                tx.run(
+                    queryOf(
+                        """
+                    update soknad
+                    set SENDT_INN = true
+                    where soknad_id = :soknad_id
+                    """, mapOf(
+                            "soknad_id" to UUID.fromString(søknadId))
+                    ).asUpdate
+                )
+            }
+        }
+    }
 }
