@@ -1,5 +1,8 @@
 package no.nav.k9punsj.gosys
 
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -27,7 +30,7 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class GosysOppgaveService(
-        @Value("\${no.nav.gosys.base_url}") safBaseUrl: URI,
+        @Value("\${no.nav.gosys.base_url}") gosysBaseUrl: URI,
         @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) {
 
@@ -45,7 +48,7 @@ class GosysOppgaveService(
 
     private val client = WebClient
             .builder()
-            .baseUrl(safBaseUrl.toString())
+            .baseUrl(gosysBaseUrl.toString())
             .exchangeStrategies(
                     ExchangeStrategies.builder()
                             .codecs { configurer ->
@@ -56,7 +59,10 @@ class GosysOppgaveService(
             )
             .build()
 
+    val url = "$gosysBaseUrl/api/v1/oppgaver"
+
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String) {
+
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = scope
@@ -69,28 +75,29 @@ class GosysOppgaveService(
                 prioritet = Prioritet.NORM,
                 tema = "OMS")
         try {
-            logger.info(coroutineContext.hentCorrelationId())
             val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
-            logger.info(body)
-            val response = client
-                    .post()
-                    .uri { it.pathSegment("api", "v1", "oppgaver").build() }
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                    .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-                    .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                    .bodyValue(body)
+            logger.info("Sender request for å opprette journalføringsoppgave: $body")
+            val (request, _, result) = url
+                .httpPost()
+                .body(body)
+                .header(
+                    HttpHeaders.ACCEPT to "application/json",
+                    HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader(),
+                    CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                    ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON
+                ).awaitStringResponseResult()
 
-                    .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError) {
-                        it.body { clientHttpResponse, context -> logger.error(it.toString()) }
-                        return@onStatus Mono.error(IllegalStateException())
-                    }
-                    .toEntity(String::class.java)
-                    .awaitFirst()
-            logger.info(response.toString())
-
+            result.fold(
+                { success -> success },
+                { error ->
+                    logger.error(
+                        "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                    )
+                    logger.error(error.toString())
+                    throw IllegalStateException("Feil ved opprettelse av Gosys-oppgave")
+                }
+            )
         } catch (e: Exception) {
             logger.error("", e)
         }
