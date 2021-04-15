@@ -3,6 +3,7 @@ package no.nav.k9punsj.gosys
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
@@ -83,14 +84,10 @@ class GosysOppgaveService(
 
                     .retrieve()
                     .onStatus(HttpStatus::is4xxClientError) {
-                        it.bodyToFlux<String>().flatMap {
-                            logger.info(it)
-                            Mono.just(it)
-                        }
+                        it.body { clientHttpResponse, context -> logger.error(it.toString()) }
                         return@onStatus Mono.error(IllegalStateException())
                     }
                     .toEntity(String::class.java)
-
                     .awaitFirst()
             logger.info(response.toString())
 
@@ -98,6 +95,4 @@ class GosysOppgaveService(
             logger.error("", e)
         }
     }
-
-
 }
