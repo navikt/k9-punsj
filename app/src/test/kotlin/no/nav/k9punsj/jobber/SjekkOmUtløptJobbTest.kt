@@ -19,9 +19,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 import java.util.UUID
 
-
-
-
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 internal class SjekkOmUtløptJobbTest {
@@ -59,7 +56,8 @@ internal class SjekkOmUtløptJobbTest {
         val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
         assertThat(hentAlleAksjonspunkter).hasSize(2)
 
-        val venterPåInformasjon = hentAlleAksjonspunkter.first { it.aksjonspunktKode == AksjonspunktKode.VENTER_PÅ_INFORMASJON }
+        val venterPåInformasjon =
+            hentAlleAksjonspunkter.first { it.aksjonspunktKode == AksjonspunktKode.VENTER_PÅ_INFORMASJON }
         assertThat(venterPåInformasjon.aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)
 
         val harUtløpt = hentAlleAksjonspunkter.first { it.aksjonspunktKode == AksjonspunktKode.PUNSJ_HAR_UTLØPT }

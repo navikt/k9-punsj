@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 enum class AksjonspunktKode(override val kode: String, override val navn: String, val type: AksjonspunktType) : Kodeverdi {
-    PUNSJ("0001", "Punsj oppgave", AksjonspunktType.AKSJONSPUNKT),
-    PUNSJ_HAR_UTLØPT("0002", "Utløpt oppgave", AksjonspunktType.AKSJONSPUNKT),
-    VENTER_PÅ_INFORMASJON("0010", "Venter på informasjon", AksjonspunktType.VENTEPUNKT);
+    PUNSJ("PUNSJ", "Punsj oppgave", AksjonspunktType.AKSJONSPUNKT),
+    PUNSJ_HAR_UTLØPT("UTLØPT", "Utløpt oppgave", AksjonspunktType.AKSJONSPUNKT),
+    VENTER_PÅ_INFORMASJON("MER_INFORMASJON", "Venter på informasjon", AksjonspunktType.VENTEPUNKT);
 
     override val kodeverk = "PUNSJ_OPPGAVE_STATUS"
 
