@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
-import no.nav.k9punsj.akjonspunkter.Aksjonspunkt
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -22,6 +22,8 @@ class OverførDagerSøknadService @Autowired constructor(
 ){
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
+
+        //TODO(OJR) lag en tjeneste som sender og avslutter aksjonspunkter mot los
         const val topicK9Los = "privat-k9punsj-aksjonspunkthendelse-v1"
         private val log: Logger = LoggerFactory.getLogger(OverførDagerSøknadService::class.java)
     }
@@ -43,7 +45,7 @@ class OverførDagerSøknadService @Autowired constructor(
                     jornalpostId,
                     jpost.aktørId,
                     LocalDateTime.now(),
-                    aksjonspunktKoderMedStatusListe = mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                    aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
             ))
             log.info(data)
             hendelseProducer.send(topicName = topicK9Los, data = data, key = id)

@@ -95,7 +95,7 @@ class MappeService(
     ): Mappe {
         val alleBunker = bunkeRepository.hentAlleBunkerForMappe(mappeId!!)
         val bunkerId = alleBunker.map { b -> b.bunkeId }.toList()
-        val hentAlleSøknaderForBunker = bunkerId.flatMap { id -> søknadRepository.hentAlleSøknaderForBunker(id) }
+        val hentAlleSøknaderForBunker = bunkerId.flatMap { id -> søknadRepository.hentAlleSøknaderForBunke(id) }
 
         if (søknadId != null) {
             val harFeilet = hentAlleSøknaderForBunker.map { s -> s.søknadId }.contains(søknadId).not()

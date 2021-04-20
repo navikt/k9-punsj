@@ -27,6 +27,9 @@ import javax.sql.DataSource
 @Profile("test")
 class TestContext {
 
+    val dummyFnr = "11111111111"
+    val dummyAktørId = "1000000000000"
+
     @Bean
     fun hendelseProducerBean() = hendelseProducerMock
     val hendelseProducerMock: HendelseProducer = object : HendelseProducer {
@@ -89,13 +92,10 @@ class TestContext {
     @Bean
     fun pdlServiceBean() = pdlServiceMock
     val pdlServiceMock: PdlService = object : PdlService {
-        val dummyFnr = "11111111111"
-        val dummyAktørId = "1000000000000"
 
         override suspend fun identifikator(fnummer: String): PdlResponse? {
             val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "AKTORID", false, dummyAktørId)
             val identPdl = IdentPdl(IdentPdl.Data(IdentPdl.Data.HentIdenter(identer = listOf(identer))), null)
-
             return PdlResponse(false, identPdl)
         }
 

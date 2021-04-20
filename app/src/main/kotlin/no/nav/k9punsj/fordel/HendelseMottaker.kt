@@ -1,6 +1,6 @@
 package no.nav.k9punsj.fordel
 
-import no.nav.k9punsj.akjonspunkter.Aksjonspunkt
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.journalpost.Journalpost
@@ -35,7 +35,7 @@ class HendelseMottaker @Autowired constructor(
                     journalpostId = journalpostId,
                     eventTid = LocalDateTime.now(),
                     aktørId = aktørId,
-                    aksjonspunktKoderMedStatusListe = mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.OPPRETTET.kode)
+                    aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.OPPRETTET.kode)
                 )
             ),
             uuid.toString()

@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 
 import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
-import no.nav.k9punsj.akjonspunkter.Aksjonspunkt
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -42,7 +42,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
                         jornalpostId,
                         jpost.aktørId,
                         LocalDateTime.now(),
-                        aksjonspunktKoderMedStatusListe = mutableMapOf(Aksjonspunkt.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                        aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
                     )
                 ), key = id
             )
