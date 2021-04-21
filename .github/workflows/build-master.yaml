@@ -42,6 +42,45 @@ jobs:
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push $BASE_IMAGE:latest
           docker push $IMAGE
+
+      - name: Lukk gamle issues
+          uses: actions/github-script@v3
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              github.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: ['deployment']
+              }).then(response => {
+                response.data.forEach(issue => {
+                  github.issues.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    state: 'closed'
+                  });
+                });
+              });
+
+            - name: Opprett deployment issue
+              id: createdeployissue
+              if: success()
+              uses: actions/github-script@v3
+              with:
+                github-token: ${{secrets.GITHUB_TOKEN}}
+                script: |
+                  github.issues.create( {
+                    owner: context.issue.owner,
+                    repo: context.issue.repo,
+                    labels: ['deployment'],
+                    body: 'Kommenter enten "/promote dev-fss" eller "/promote prod-fss"',
+                    title: 'Deploy av ${{ env.TAG }}'})
+                  .then(response => {
+                          core.setOutput('number', response.data.number);
+                   });
+
       - name: Deploy til preprod
         uses: nais/deploy/actions/deploy@v1
         env:
