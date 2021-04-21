@@ -5,4 +5,8 @@ enum class AksjonspunktStatus(val kode: String, val navn: String) {
     OPPRETTET("OPPR", "Opprettet"),
     UTFØRT ("UTFO", "Utført");
 
+
+    companion object {
+        fun fraKode(kode: String): AksjonspunktStatus = values().find { it.kode == kode }!!
+    }
 }

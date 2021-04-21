@@ -37,7 +37,7 @@ class SøknadRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun hentAlleSøknaderForBunker(bunkerId: BunkeId): List<SøknadEntitet> {
+    fun hentAlleSøknaderForBunke(bunkerId: BunkeId): List<SøknadEntitet> {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 tx.run(
