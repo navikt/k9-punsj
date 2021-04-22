@@ -14,7 +14,9 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.HentSøknad
+import no.nav.k9punsj.rest.web.Matchfagsak
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
@@ -36,7 +38,8 @@ internal class PleiepengerSyktBarnRoutes(
     private val personService: PersonService,
     private val authenticationHandler: AuthenticationHandler,
     private val pepClient: IPepClient,
-    private val azureGraphService: IAzureGraphService
+    private val azureGraphService: IAzureGraphService,
+    private val k9SakService: K9SakService
 
 ) {
     private companion object {
@@ -53,6 +56,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType" //post
+        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
     }
 
     @Bean
@@ -208,6 +212,34 @@ internal class PleiepengerSyktBarnRoutes(
                     .bodyValueAndAwait(svarDto)
             }
         }
+
+        POST("/api${Urls.HentInfoFraK9sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val matchfagsak = request.matchFagsak()
+                harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent))?.let { return@RequestContext it }
+
+                val hentPerioderSomFinnesIK9 = k9SakService.hentPerioderSomFinnesIK9(
+                    matchfagsak.brukerIdent,
+                    matchfagsak.barnIdent,
+                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(hentPerioderSomFinnesIK9)
+            }
+        }
+    }
+
+    private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto)
+        if (!saksbehandlerHarTilgang) {
+            return ServerResponse
+                .status(HttpStatus.FORBIDDEN)
+                .json()
+                .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
+        }
+        return null
     }
 
     private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto): ServerResponse? {
@@ -229,6 +261,7 @@ internal class PleiepengerSyktBarnRoutes(
     private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
+    private suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
 
     private fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) =
         uriBuilder().pathSegment("mappe", søknadId).build()

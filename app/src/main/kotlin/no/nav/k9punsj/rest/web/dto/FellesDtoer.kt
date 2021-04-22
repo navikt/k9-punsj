@@ -34,6 +34,10 @@ data class SvarDto(
     val søknader: List<PleiepengerSøknadVisningDto>?,
 )
 
+data class PerioderDto(
+    val periodeDto: List<PeriodeDto>
+)
+
 data class SøknadOppdaterDto<T>(
     val søker: NorskIdentDto,
     val søknadId: SøknadIdDto,

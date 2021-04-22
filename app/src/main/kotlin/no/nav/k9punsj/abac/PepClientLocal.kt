@@ -9,4 +9,8 @@ class PepClientLocal : IPepClient {
     override suspend fun harBasisTilgang(fnr: String): Boolean {
         return true
     }
+
+    override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
+        return true
+    }
 }

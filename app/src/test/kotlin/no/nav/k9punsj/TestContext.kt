@@ -65,6 +65,10 @@ class TestContext {
         override suspend fun harBasisTilgang(fnr: String): Boolean {
             return true
         }
+
+        override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
+            return true
+        }
     }
 
     @Bean
@@ -80,7 +84,7 @@ class TestContext {
             barn: NorskIdent,
             fagsakYtelseType: FagsakYtelseType,
         ): List<PeriodeDto> {
-            TODO("Not yet implemented")
+            return listOf()
         }
     }
 
