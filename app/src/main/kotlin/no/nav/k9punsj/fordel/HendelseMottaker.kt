@@ -8,6 +8,8 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -15,30 +17,36 @@ import java.util.UUID
 
 @Service
 class HendelseMottaker @Autowired constructor(
-        val hendelseProducer: HendelseProducer,
-        val journalpostRepository: JournalpostRepository,
+    val hendelseProducer: HendelseProducer,
+    val journalpostRepository: JournalpostRepository,
 ) {
     private companion object {
         const val topic = "privat-k9punsj-aksjonspunkthendelse-v1"
+
+        private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
     }
 
     suspend fun prosesser(journalpostId: JournalpostId, aktørId: AktørId?) {
-        val uuid = UUID.randomUUID()
+        val kanMottas = journalpostRepository.kanMottas(journalpostId)
 
-        journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
+        if (kanMottas) {
+            val uuid = UUID.randomUUID()
+            journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
 
-        hendelseProducer.send(
-            topic,
-            objectMapper().writeValueAsString(
-                PunsjEventDto(
-                    uuid.toString(),
-                    journalpostId = journalpostId,
-                    eventTid = LocalDateTime.now(),
-                    aktørId = aktørId,
-                    aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.OPPRETTET.kode)
-                )
-            ),
-            uuid.toString()
-        )
+            hendelseProducer.send(
+                topic,
+                objectMapper().writeValueAsString(
+                    PunsjEventDto(
+                        uuid.toString(),
+                        journalpostId = journalpostId,
+                        eventTid = LocalDateTime.now(),
+                        aktørId = aktørId,
+                        aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.OPPRETTET.kode)
+                    )
+                ),
+                uuid.toString()
+            )
+        }
+        log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
     }
 }
