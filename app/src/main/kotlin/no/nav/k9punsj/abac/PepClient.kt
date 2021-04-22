@@ -41,15 +41,7 @@ class PepClient(
 
     override suspend fun harBasisTilgang(fnr: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val requestBuilder = XacmlRequestBuilder()
-            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
-            .addResourceAttribute(RESOURCE_TYPE, BASIS_TILGANG)
-            .addActionAttribute(ACTION_ID, "read")
-            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
-            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
-            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
-            .addResourceAttribute(RESOURCE_FNR, fnr)
-
+        val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
 
         auditlogger.logg(
@@ -72,6 +64,26 @@ class PepClient(
         )
 
         return decision
+    }
+
+    private fun basisTilgangRequest(
+        identTilInnloggetBruker: String,
+        fnr: String,
+    ): XacmlRequestBuilder {
+        val requestBuilder = XacmlRequestBuilder()
+            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
+            .addResourceAttribute(RESOURCE_TYPE, BASIS_TILGANG)
+            .addActionAttribute(ACTION_ID, "read")
+            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
+            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
+            .addResourceAttribute(RESOURCE_FNR, fnr)
+        return requestBuilder
+    }
+
+    override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.any { !it }
     }
 
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {

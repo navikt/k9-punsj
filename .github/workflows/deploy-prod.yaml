@@ -1,14 +1,6 @@
-name: Build Master
+name: Deploy til preprod
 
-on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'LICENCE'
-      - 'CODEOWNERS'
+on: [workflow_dispatch]
 
 env:
   BASE_IMAGE: docker.pkg.github.com/${{ github.repository }}/k9-punsj
@@ -25,10 +17,10 @@ jobs:
       - uses: actions/setup-java@v1.4.3
         with:
           java-version: 15
-      - uses: actions/cache@v2.1.4
+      - uses: actions/cache@v2.1.3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: -maven-pr-
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Bygge JAR
@@ -42,11 +34,9 @@ jobs:
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push $BASE_IMAGE:latest
           docker push $IMAGE
-
-      - name: Deploy til preprod
+      - name: Deploy til prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: nais/dev-fss.yml
-
+          CLUSTER: prod-fss
+          RESOURCE: nais/prod-fss.yml

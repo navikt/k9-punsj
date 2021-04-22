@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class JournalpostService(
     private val safGateway: SafGateway,
+    private val journalpostRepository: JournalpostRepository
 ) {
 
     private companion object {

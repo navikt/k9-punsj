@@ -6,7 +6,6 @@ import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
-import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
@@ -15,9 +14,8 @@ import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.info.IdTokenLocal
-import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
-import no.nav.k9punsj.util.LesFraFilUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -67,14 +65,15 @@ class TestContext {
         override suspend fun harBasisTilgang(fnr: String): Boolean {
             return true
         }
+
+        override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
+            return true
+        }
     }
 
     @Bean
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object : K9SakService {
-        override suspend fun hentSisteMottattePsbSøknad(norskIdent: NorskIdent, periode: Periode): SøknadJson? {
-            return LesFraFilUtil.søknadFraFrontend()
-        }
 
         override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
             TODO("Not yet implemented")
@@ -84,8 +83,8 @@ class TestContext {
             søker: NorskIdent,
             barn: NorskIdent,
             fagsakYtelseType: FagsakYtelseType,
-        ) {
-            TODO("Not yet implemented")
+        ): List<PeriodeDto> {
+            return listOf()
         }
     }
 

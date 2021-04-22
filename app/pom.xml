@@ -27,6 +27,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
+
         <!-- spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

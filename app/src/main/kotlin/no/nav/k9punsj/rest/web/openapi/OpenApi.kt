@@ -236,23 +236,59 @@ internal class PleiepengerSyktBarnSoknadController {
     )
     fun HentSøknadFraK9Sak(@RequestBody hentSøknad: OasHentSøknad) {
     }
+
+
+    @PostMapping(
+        PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Henter perioder som ligger i k9-sak",
+        description = "Henter perioder som ligger i k9-sak",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Henter siste pleiepengersøknad fra k9-sak og gjør den tilgjengelig for visning",
+                content = [Content(
+                    schema = Schema(
+                        implementation = PerioderDto::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Fant ingen gjeldene søknad"
+            )
+        ]
+    )
+    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsak) {
+    }
 }
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 data class OasHentSøknad(
-    val norskIdent: NorskIdentDto
+    val norskIdent: NorskIdentDto,
+)
+
+data class OasMatchfagsak(
+    val brukerIdent: NorskIdentDto,
+    val barnIdent: NorskIdentDto,
 )
 
 data class OasInnsending(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
     val soeknad: SøknadJson,
-    val soeknadId: SøknadIdDto
+    val soeknadId: SøknadIdDto,
 )
 
 data class OasSendSøknad(
     val norskIdent: NorskIdentDto,
-    val soeknadId: SøknadIdDto
+    val soeknadId: SøknadIdDto,
 )
 
 data class OasOpprettNySøknad(
@@ -505,7 +541,7 @@ data class OasHentPerson(
 )
 
 data class OasPdlResponse(
-    val person: PdlPersonDto
+    val person: PdlPersonDto,
 )
 
 

@@ -46,6 +46,11 @@ data class SendSøknad(
     val soeknadId: SøknadIdDto,
 )
 
+data class Matchfagsak(
+    val brukerIdent: NorskIdentDto,
+    val barnIdent: NorskIdentDto,
+)
+
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST
 
 private fun merge(mainNode: JsonNode, updateNode: JsonNode): JsonNode {

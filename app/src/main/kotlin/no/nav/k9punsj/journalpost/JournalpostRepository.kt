@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.springframework.stereotype.Repository
@@ -19,13 +20,13 @@ class JournalpostRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val json = tx.run(
-                        queryOf(
-                                "select data from journalpost where JOURNALPOST_ID = :id for update",
-                                mapOf("id" to journalpostId.journalpostId)
-                        )
-                                .map { row ->
-                                    row.string("data")
-                                }.asSingle
+                    queryOf(
+                        "select data from journalpost where JOURNALPOST_ID = :id for update",
+                        mapOf("id" to journalpostId.journalpostId)
+                    )
+                        .map { row ->
+                            row.string("data")
+                        }.asSingle
                 )
 
                 val journalpost = if (!json.isNullOrEmpty()) {
@@ -35,14 +36,14 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 }
                 //language=PostgreSQL
                 tx.run(
-                        queryOf(
-                                """
+                    queryOf(
+                        """
                     insert into journalpost as k (journalpost_id, data)
                     values (:id, :data :: jsonb)
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
                  """, mapOf("id" to journalpostId.journalpostId, "data" to objectMapper.writeValueAsString(journalpost))
-                        ).asUpdate
+                    ).asUpdate
                 )
                 return@transaction journalpost
             }
@@ -54,16 +55,43 @@ class JournalpostRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 //language=PostgreSQL
                 val json = tx.run(
-                        queryOf(
-                                "select data from journalpost where journalpost_id = :journalpostId",
-                                mapOf("journalpostId" to journalpostId)
-                        )
-                                .map { row ->
-                                    row.string("data")
-                                }.asSingle
+                    queryOf(
+                        "select data from journalpost where journalpost_id = :journalpostId",
+                        mapOf("journalpostId" to journalpostId)
+                    )
+                        .map { row ->
+                            row.string("data")
+                        }.asSingle
                 )
                 return@transaction objectMapper.readValue(json, Journalpost::class.java)
             }
+        }
+    }
+
+    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostId> {
+        return using(sessionOf(dataSource)) {
+            val statement = queryOf(
+                "select journalpost_id from journalpost where data ->> 'aktørId' = '$aktørId'"
+            )
+            val resultat = it.run(
+                statement
+                    .map { row ->
+                        row.string("journalpost_id")
+                    }.asList
+            )
+            resultat
+        }
+    }
+
+    suspend fun kanMottas(journalpostId: String): Boolean {
+        return using(sessionOf(dataSource)) {
+            val run = it.run(
+                queryOf(
+                    "select journalpost_id from journalpost where journalpost_id = :journalpostId",
+                    mapOf("journalpostId" to journalpostId)
+                ).map { row -> row.string("journalpostId") }.asSingle
+            )
+            run.isNullOrEmpty()
         }
     }
 
