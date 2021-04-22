@@ -65,10 +65,26 @@ fun runMigrationLocal(configuration: DbConfiguration, environment: Environment):
 }
 
 fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
-    return Flyway.configure()
+    //    return Flyway.configure()
+//        .locations("migreringer/")
+//        .dataSource(dataSource)
+//        .initSql(initSql)
+//        .load()
+//        .migrate()
+    val load = Flyway.configure()
         .locations("migreringer/")
         .dataSource(dataSource)
         .initSql(initSql)
         .load()
-        .migrate()
+    return try {
+        load.migrate()
+    } catch (fwe: FlywayException) {
+        //prøver igjen siden kjører lokalt
+        load.clean()
+        try {
+            load.migrate()
+        } catch (fwe: FlywayException) {
+            throw IllegalStateException("Migrering feiler", fwe)
+        }
+    }
 }
