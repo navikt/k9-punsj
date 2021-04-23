@@ -286,6 +286,10 @@ data class OasInnsending(
     val soeknadId: SøknadIdDto,
 )
 
+data class OasIdentDto(
+    val norskIdent: NorskIdentDto
+)
+
 data class OasSendSøknad(
     val norskIdent: NorskIdentDto,
     val soeknadId: SøknadIdDto,
@@ -370,6 +374,33 @@ internal class JournalpostController {
     fun OmfordelJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
         @RequestBody body: JournalpostRoutes.OmfordelingRequest,
+    ) {
+    }
+
+    @PostMapping(
+        JournalpostRoutes.Urls.HentJournalposter,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hent journalposter som ikke er ferdig behandlet på person",
+                content = [Content(
+                    schema = Schema(
+                        implementation = PerioderDto::class
+                    )
+                )]
+            ),
+        ]
+    )
+    @Operation(
+        summary = "Hent journalposter som ikke er ferdig behandlet på person",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun HentJournalposter(
+        @RequestBody body: OasIdentDto
     ) {
     }
 

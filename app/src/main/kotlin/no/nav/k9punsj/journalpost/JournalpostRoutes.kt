@@ -7,6 +7,7 @@ import no.nav.k9punsj.Routes
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.dto.IdentDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -36,6 +37,7 @@ internal class JournalpostRoutes(
         internal const val JournalpostInfo = "/journalpost/{$JournalpostIdKey}"
         internal const val OmfordelJournalpost = "$JournalpostInfo/omfordel"
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
+        internal const val HentJournalposter = "/journalpost/hent"
     }
 
     @Bean
@@ -82,6 +84,22 @@ internal class JournalpostRoutes(
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
+            }
+        }
+
+        POST("/api${Urls.HentJournalposter}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.ident()
+                val pdlResponse = pdlService.identifikator(norskIdent.norskIdent)
+                val aktørId = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+                    ?: throw IllegalStateException("Fant ikke aktørId i PDL")
+
+                val finnJournalposterPåPerson = journalpostService.finnJournalposterPåPerson(aktørId)
+
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(finnJournalposterPåPerson)
             }
         }
 
@@ -153,6 +171,8 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
     private suspend fun ServerRequest.omfordelingRequest() =
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,

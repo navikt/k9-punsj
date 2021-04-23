@@ -59,6 +59,10 @@ data class JournalposterDto(
     val journalposter: MutableSet<String>,
 )
 
+data class IdentDto(
+    val norskIdent: NorskIdentDto
+)
+
 internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
     val bunke = this.bunke.firstOrNull { b -> b.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN }
     if (bunke?.søknader.isNullOrEmpty()) {

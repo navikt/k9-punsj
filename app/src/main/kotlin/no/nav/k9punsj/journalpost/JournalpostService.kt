@@ -62,6 +62,11 @@ class JournalpostService(
         }
     }
 
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostId> {
+        val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(aktørId)
+        return finnJournalposterPåPerson
+    }
+
     internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
@@ -91,6 +96,8 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
         avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.type)
     )
 }
+
+
 
 private data class ParsedJournalpost(
     val journalpostType: SafDtos.JournalpostType?,

@@ -32,7 +32,6 @@ internal class JournalpostRepositoryTest {
         val hent2 = journalpostRepository.hent(journalpost2.journalpostId)
         assertThat(hent2.aktørId!!).isEqualTo(dummyAktørId)
 
-
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(2)
     }
