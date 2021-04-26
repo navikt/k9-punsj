@@ -1,4 +1,4 @@
-FROM navikt/java:13-appdynamics
+FROM navikt/java:16-appdynamics
 
 ENV APPD_ENABLED=true
 
