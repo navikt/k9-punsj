@@ -8,6 +8,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.IdentDto
+import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -95,11 +96,12 @@ internal class JournalpostRoutes(
                     ?: throw IllegalStateException("Fant ikke aktørId i PDL")
 
                 val finnJournalposterPåPerson = journalpostService.finnJournalposterPåPerson(aktørId)
+                val dto = OasJournalpostIder(finnJournalposterPåPerson)
 
                 ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(finnJournalposterPåPerson)
+                    .bodyValueAndAwait(dto)
             }
         }
 

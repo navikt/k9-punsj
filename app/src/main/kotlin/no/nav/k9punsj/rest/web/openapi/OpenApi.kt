@@ -389,7 +389,7 @@ internal class JournalpostController {
                 description = "Hent journalposter som ikke er ferdig behandlet på person",
                 content = [Content(
                     schema = Schema(
-                        implementation = PerioderDto::class
+                        implementation = OasJournalpostIder::class
                     )
                 )]
             ),
@@ -481,6 +481,10 @@ data class OasDokumentInfo(
 
 data class OasJournalpostInfo(
     val dokumenter: Set<OasDokumentInfo>,
+)
+
+data class OasJournalpostIder(
+    val poster : List<JournalpostIdDto>
 )
 
 @RestController
