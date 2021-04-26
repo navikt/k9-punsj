@@ -83,7 +83,7 @@
       }
     },
     "omsorg" : {
-      "relasjonTilBarnet" : "MORA",
+      "relasjonTilBarnet" : "MOR",
       "samtykketOmsorgForBarnet" : true,
       "beskrivelseAvOmsorgsrollen" : "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
     },

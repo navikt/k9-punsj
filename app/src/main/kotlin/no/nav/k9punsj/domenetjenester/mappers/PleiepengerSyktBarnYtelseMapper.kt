@@ -16,7 +16,7 @@ internal class PleiepengerSyktBarnYtelseMapper {
     companion object {
         private val objectMapper = no.nav.k9punsj.objectMapper()
         fun map(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto): PleiepengerSyktBarn {
-            val barn = Barn(NorskIdentitetsnummer.of(psb.barn?.norskIdentitetsnummer), psb.barn?.fødselsdato)
+            val barn: Barn? = Barn(NorskIdentitetsnummer.of(psb.barn?.norskIdentitetsnummer), psb.barn?.fødselsdato)
             val søknadsperiode: Periode? =
                 if (psb.søknadsperiode != null) objectMapper.convertValue(psb.søknadsperiode) else null
             val opptjeningAktivitet: OpptjeningAktivitet? =
@@ -35,21 +35,34 @@ internal class PleiepengerSyktBarnYtelseMapper {
             val arbeidstid: Arbeidstid? =
                 if (psb.arbeidstid != null) objectMapper.convertValue(psb.arbeidstid) else null
             val uttak: Uttak? = if (psb.uttak != null) objectMapper.convertValue(psb.uttak) else null
+
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
-            return PleiepengerSyktBarn(søknadsperiode,
-                databruktTilUtledning,
-                barn,
-                opptjeningAktivitet,
-                beredskap,
-                nattevåk,
-                tilsynsordning,
-                arbeidstid,
-                uttak,
-                omsorg,
-                lovbestemtFerie,
-                bosteder,
-                utenlandsopphold)
+            //TODO(OJR) fikse med ekte data
+            val infoFraPunsj: InfoFraPunsj? = InfoFraPunsj().medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(true)
+
+            val pleiepengerSyktBarn = PleiepengerSyktBarn()
+            barn?.let { pleiepengerSyktBarn.medBarn(it) }
+            søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
+
+            //TODO(OJR) koble på endringsperioder - hent fra k9-sak
+            pleiepengerSyktBarn.medEndringsperiode(listOf())
+
+            opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
+            databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
+            infoFraPunsj?.let { pleiepengerSyktBarn.medInfoFraPunsj(it) }
+            bosteder?.let { pleiepengerSyktBarn.medBosteder(it) }
+            utenlandsopphold?.let { pleiepengerSyktBarn.medUtenlandsopphold(it) }
+
+            beredskap?.let { pleiepengerSyktBarn.medBeredskap(it) }
+            nattevåk?.let { pleiepengerSyktBarn.medNattevåk(it) }
+            tilsynsordning?.let { pleiepengerSyktBarn.medTilsynsordning(it) }
+            lovbestemtFerie?.let { pleiepengerSyktBarn.medLovbestemtFerie(it) }
+            arbeidstid?.let { pleiepengerSyktBarn.medArbeidstid(it) }
+            uttak?.let { pleiepengerSyktBarn.medUttak(it) }
+            omsorg?.let { pleiepengerSyktBarn.medOmsorg(it) }
+
+            return pleiepengerSyktBarn
         }
     }
 }
