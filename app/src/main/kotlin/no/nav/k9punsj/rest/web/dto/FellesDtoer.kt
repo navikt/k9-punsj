@@ -78,9 +78,9 @@ internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
     return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }
 
-private fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
-    val any = s.journalposter["journalposter"]!!
-    any as List<JournalpostIdDto>
+internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
+    val journalposter = objectMapper().convertValue<JournalposterDto>(s.journalposter)
+    journalposter.journalposter.toList()
 } else null
 
 internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadVisningDto {

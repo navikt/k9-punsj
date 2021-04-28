@@ -6,7 +6,9 @@ import kotliquery.using
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
+import java.util.UUID
 import javax.sql.DataSource
 
 
@@ -16,7 +18,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     private val objectMapper = objectMapper();
 
-    suspend fun lagre(journalpostId: Journalpost, function: (Journalpost?) -> Journalpost): Journalpost {
+    suspend fun lagre(journalpostId: Journalpost, kilde: KildeType = KildeType.FORDEL, function: (Journalpost?) -> Journalpost): Journalpost {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val json = tx.run(
@@ -38,11 +40,11 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into journalpost as k (journalpost_id, data)
-                    values (:id, :data :: jsonb)
+                    insert into journalpost as k (journalpost_id, data, kilde)
+                    values (:id, :data :: jsonb, :kilde)
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
-                 """, mapOf("id" to journalpostId.journalpostId, "data" to objectMapper.writeValueAsString(journalpost))
+                 """, mapOf("id" to journalpostId.journalpostId, "data" to objectMapper.writeValueAsString(journalpost), "kilde" to kilde.kode)
                     ).asUpdate
                 )
                 return@transaction journalpost
@@ -83,13 +85,13 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun kanMottas(journalpostId: String): Boolean {
+    suspend fun fantIkke(journalpostId: String): Boolean {
         return using(sessionOf(dataSource)) {
             val run = it.run(
                 queryOf(
                     "select journalpost_id from journalpost where journalpost_id = :journalpostId",
                     mapOf("journalpostId" to journalpostId)
-                ).map { row -> row.string("journalpostId") }.asSingle
+                ).map { row -> row.string("journalpost_Id") }.asSingle
             )
             run.isNullOrEmpty()
         }
@@ -120,6 +122,17 @@ class JournalpostRepository(private val dataSource: DataSource) {
                  """, mapOf("id" to journalpostId, "ferdig" to true)
                     ).asUpdate
                 )
+            }
+        }
+    }
+
+    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<JournalpostIdDto>?, aktørId: AktørId) {
+        journalposter?.forEach {
+            if (fantIkke(it)) {
+                val journalpost = Journalpost(UUID.randomUUID(), it, aktørId)
+                lagre(journalpost, KildeType.SAKSBEHANDLER) {
+                    journalpost
+                }
             }
         }
     }
