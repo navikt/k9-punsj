@@ -1,9 +1,11 @@
 package no.nav.k9punsj
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -164,6 +166,18 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+    }
+
+    @Test
+    fun `sjekker at mapping fungre hele veien`(){
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+
+        val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
+        val mapTilSendingsformat = SøknadMapper.mapTilSendingsformat(visningDto)
+        assertNotNull(mapTilSendingsformat)
+
+        val tilbake = objectMapper().convertValue<SøknadJson>(visningDto)
+//        assertEquals(gyldigSoeknad, tilbake)
     }
 
     @Test

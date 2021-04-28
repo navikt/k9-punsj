@@ -14,6 +14,7 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Matchfagsak
@@ -39,7 +40,8 @@ internal class PleiepengerSyktBarnRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val pepClient: IPepClient,
     private val azureGraphService: IAzureGraphService,
-    private val k9SakService: K9SakService
+    private val k9SakService: K9SakService,
+    private val journalpostRepository: JournalpostRepository
 
 ) {
     private companion object {
@@ -116,6 +118,8 @@ internal class PleiepengerSyktBarnRoutes(
                         .badRequest()
                         .buildAndAwait()
                 } else {
+                    val søker = personService.finnPerson(søknadEntitet.first.søkerId)
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(søknadEntitet.first), søker.aktørId)
                     ServerResponse
                         .ok()
                         .json()

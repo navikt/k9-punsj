@@ -20,8 +20,8 @@ data class PleiepengerSøknadMottakDto(
     data class PleiepengerYtelseDto(
         val barn: BarnDto?,
         val søknadsperiode: String?,
-        val arbeidAktivitet: ArbeidAktivitetDto?,
-        val dataBruktTilUtledning: DataBruktTilUtledningDto?,
+        val opptjeningAktivitet: ArbeidAktivitetDto?,
+        val soknadsinfo: DataBruktTilUtledningDto?,
         val bosteder: BostederDto?,
         val utenlandsopphold: UtenlandsoppholdDto?,
         val beredskap: BeredskapDto?,
@@ -54,10 +54,7 @@ data class PleiepengerSøknadMottakDto(
                 val virksomhetstyper: List<String>?,
                 val regnskapsførerNavn: String?,
                 val regnskapsførerTlf: String?,
-                val erVarigEndring: Boolean?,
                 @JsonFormat(pattern = "yyyy-MM-dd")
-                val endringDato: LocalDate?,
-                val endringBegrunnelse: String?,
                 val bruttoInntekt: BigDecimal?,
                 val erNyoppstartet: Boolean?,
                 val registrertIUtlandet: Boolean?,
@@ -126,8 +123,12 @@ data class PleiepengerSøknadMottakDto(
         }
 
         data class LovbestemtFerieDto(
-            val perioder: List<String>?,
-        )
+            val perioder: Map<String, TilsynLovbestemtFerieInfoDto>?,
+        ) {
+            data class TilsynLovbestemtFerieInfoDto(
+                val land: String?,
+            )
+        }
 
         data class ArbeidstidDto(
             val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,

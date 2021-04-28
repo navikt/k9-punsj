@@ -7,21 +7,24 @@ import java.time.LocalDate
 data class PleiepengerSøknadVisningDto(
     val soeknadId: SøknadIdDto,
     val soekerId: NorskIdentDto? = null,
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
+    val journalposter: List<JournalpostIdDto>? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     val barn: BarnDto? = null,
-    val journalposter: List<JournalpostIdDto>? = null,
     val sendtInn: Boolean? = false,
     val erFraK9: Boolean? = false,
     val soeknadsperiode: PeriodeDto? = null,
-    val arbeidAktivitet: ArbeidAktivitetDto? = null,
+    val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
     val beredskap: List<BeredskapDto>? = null,
     val nattevaak: List<NattevåkDto>? = null,
-    val tilsynsordning: List<TilsynsordningDto>? = null,
+    val tilsynsordning: TilsynsordningDto? = null,
     val uttak: List<UttakDto>? = null,
     val omsorg: OmsorgDto? = null,
+    val bosteder: List<BostederDto>? = null,
+    val lovbestemtFerie: List<LovbestemtFerieDto>? = null,
+    val soknadsinfo: DataBruktTilUtledningDto? = null,
+
 ) {
     data class BarnDto(
         val norskIdent: NorskIdentDto?,
@@ -35,23 +38,19 @@ data class PleiepengerSøknadVisningDto(
         val arbeidstaker: List<ArbeidstakerDto>?,
     ) {
         data class SelvstendigNæringsdrivendeDto(
-            val perioder: List<SelvstendigNæringsdrivendePeriodeInfoDto>?,
             val organisasjonsnummer: String?,
             val virksomhetNavn: String?,
+            val perioder: List<SelvstendigNæringsdrivendePeriodeInfoDto>?,
         ) {
             data class SelvstendigNæringsdrivendePeriodeInfoDto(
                 val periode: PeriodeDto?,
                 val virksomhetstyper: List<String>?,
-                val regnskapsførerNavn: String?,
-                val regnskapsførerTlf: String?,
-                val erVarigEndring: Boolean?,
-                @JsonFormat(pattern = "yyyy-MM-dd")
-                val endringDato: LocalDate?,
-                val endringBegrunnelse: String?,
-                val bruttoInntekt: BigDecimal?,
-                val erNyoppstartet: Boolean?,
                 val registrertIUtlandet: Boolean?,
                 val landkode: String?,
+                val regnskapsførerNavn: String?,
+                val regnskapsførerTlf: String?,
+                val bruttoInntekt: BigDecimal?,
+                val erNyoppstartet: Boolean?
             )
         }
 
@@ -67,11 +66,11 @@ data class PleiepengerSøknadVisningDto(
         ) {
             data class ArbeidstidInfoDto(
                 val perioder: List<ArbeidstidPeriodeInfoDto>?,
+                val jobberNormaltTimerPerDag: String?,
             ) {
                 data class ArbeidstidPeriodeInfoDto(
                     val periode: PeriodeDto?,
                     val faktiskArbeidTimerPerDag: String?,
-                    val jobberNormaltTimerPerDag: String?,
                 )
             }
         }
@@ -79,16 +78,13 @@ data class PleiepengerSøknadVisningDto(
 
     data class ArbeidstidDto(
         val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,
-        val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
-        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
+        val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto?,
+        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto?,
     )
 
     data class DataBruktTilUtledningDto(
-        val harForståttRettigheterOgPlikter: Boolean?,
-        val harBekreftetOpplysninger: Boolean?,
-        val samtidigHjemme: Boolean?,
-        val harMedsøker: Boolean?,
-        val bekrefterPeriodeOver8Uker: Boolean?,
+        val samtidigHjemme: Boolean? = null,
+        val harMedsøker: Boolean? = null,
     )
 
     data class BostederDto(
@@ -114,12 +110,18 @@ data class PleiepengerSøknadVisningDto(
     )
 
     data class TilsynsordningDto(
+        val perioder: List<TilsynsordningInfoDto>?,
+    )
+
+    data class TilsynsordningInfoDto(
         val periode: PeriodeDto?,
-        val etablertTilsynTimerPerDag: String?,
+        val timer: Int,
+        val minutter: Int
     )
 
     data class LovbestemtFerieDto(
-        val perioder: List<PeriodeDto>?,
+        val periode: PeriodeDto?,
+        val land: String?,
     )
 
     data class UttakDto(

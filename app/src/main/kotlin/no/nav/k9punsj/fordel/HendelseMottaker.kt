@@ -27,9 +27,9 @@ class HendelseMottaker @Autowired constructor(
     }
 
     suspend fun prosesser(journalpostId: JournalpostId, aktørId: AktørId?) {
-        val kanMottas = journalpostRepository.kanMottas(journalpostId)
+        val fantIkke = journalpostRepository.fantIkke(journalpostId)
 
-        if (kanMottas) {
+        if (fantIkke) {
             val uuid = UUID.randomUUID()
             journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
 

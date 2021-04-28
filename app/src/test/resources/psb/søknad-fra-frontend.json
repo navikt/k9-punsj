@@ -15,12 +15,40 @@
     "fom": "2018-12-30",
     "tom": "2019-10-20"
   },
-  "arbeidAktivitet": {
-    "selvstendigNæringsdrivende": null,
+  "opptjeningAktivitet": {
+    "selvstendigNæringsdrivende": [
+      {
+        "organisasjonsnummer": "999999999",
+        "virksomhetNavn": "Fisker AS",
+        "perioder": [
+          {
+            "periode": {
+              "fom": "2018-12-30",
+              "tom": "2019-10-20"
+            },
+            "virksomhetstyper": [
+              "FISKE"
+            ],
+            "registrertIUtlandet": false,
+            "landkode": null,
+            "regnskapsførerNavn": null,
+            "regnskapsførerTlf": null,
+            "bruttoInntekt": "450000",
+            "erNyoppstartet": false
+          }
+        ]
+      }
+    ],
     "frilanser": {
       "startdato": "2019-10-10",
       "jobberFortsattSomFrilans": true
-    }
+    },
+    "arbeidstaker": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "999999999"
+      }
+    ]
   },
   "arbeidstid": {
     "arbeidstakerList": [
@@ -28,21 +56,40 @@
         "norskIdent": null,
         "organisasjonsnummer": "999999999",
         "arbeidstidInfo": {
+          "jobberNormaltTimerPerDag": "PT7H30M",
           "perioder": [
             {
               "periode": {
                 "fom": "2018-12-30",
                 "tom": "2019-10-20"
               },
-              "jobberNormaltTimerPerDag" : "PT7H30M",
               "faktiskArbeidTimerPerDag": "PT7H30M"
             }
           ]
         }
       }
     ],
-    "frilanserArbeidstidInfo": null,
-    "selvstendigNæringsdrivendeArbeidstidInfo": null
+    "frilanserArbeidstidInfo": {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "faktiskArbeidTimerPerDag": "PT7H30M"
+    },
+    "selvstendigNæringsdrivendeArbeidstidInfo": {
+      "arbeidstidInfo": {
+        "jobberNormaltTimerPerDag": "PT7H30M",
+        "perioder": [
+          {
+            "periode": {
+              "fom": "2018-12-30",
+              "tom": "2019-10-20"
+            },
+            "faktiskArbeidTimerPerDag": "PT7H30M"
+          }
+        ]
+      }
+    }
   },
   "beredskap": [
     {
@@ -62,15 +109,18 @@
       "tilleggsinformasjon": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
     }
   ],
-  "tilsynsordning": [
-    {
-      "periode": {
-        "fom": "2018-12-30",
-        "tom": "2019-10-20"
-      },
-      "etablertTilsynTimerPerDag": "PT7H30M"
-    }
-  ],
+  "tilsynsordning": {
+    "perioder": [
+      {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": "2019-10-20"
+        },
+        "timer": "7",
+        "minutter": "30"
+      }
+    ]
+  },
   "uttak": [
     {
       "periode": {
@@ -84,5 +134,27 @@
     "relasjonTilBarnet": "MOR",
     "samtykketOmsorgForBarnet": true,
     "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+  },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "lovbestemtFerie": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "USA"
+    }
+  ],
+  "soknadsinfo": {
+    "samtidigHjemme": true,
+    "harMedsoeker": true
   }
 }

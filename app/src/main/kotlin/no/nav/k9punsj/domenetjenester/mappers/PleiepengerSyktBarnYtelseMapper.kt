@@ -20,9 +20,9 @@ internal class PleiepengerSyktBarnYtelseMapper {
             val søknadsperiode: Periode? =
                 if (psb.søknadsperiode != null) objectMapper.convertValue(psb.søknadsperiode) else null
             val opptjeningAktivitet: OpptjeningAktivitet? =
-                if (psb.arbeidAktivitet != null) objectMapper.convertValue(psb.arbeidAktivitet) else null
+                if (psb.opptjeningAktivitet != null) objectMapper.convertValue(psb.opptjeningAktivitet) else null
             val databruktTilUtledning: DataBruktTilUtledning? =
-                if (psb.dataBruktTilUtledning != null) objectMapper.convertValue(psb.dataBruktTilUtledning) else null
+                if (psb.soknadsinfo != null) objectMapper.convertValue(psb.soknadsinfo) else null
             val bosteder: Bosteder? = if (psb.bosteder != null) objectMapper.convertValue(psb.bosteder) else null
             val utenlandsopphold: Utenlandsopphold? =
                 if (psb.utenlandsopphold != null) objectMapper.convertValue(psb.utenlandsopphold) else null
