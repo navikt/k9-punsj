@@ -14,7 +14,7 @@ import java.io.IOException
 class FordelConsumer @Autowired constructor(val hendelseMottaker: HendelseMottaker) {
     private val logger: Logger = LoggerFactory.getLogger(FordelConsumer::class.java)
 
-    @KafkaListener(topics = ["privat-k9-fordel-journalforing-v1"], groupId = "k9-punsj-2", properties = ["auto.offset.reset:earliest"])
+    @KafkaListener(topics = ["privat-k9-fordel-journalforing-v1"], groupId = "k9-punsj-3", properties = ["auto.offset.reset:earliest"])
     @Throws(IOException::class)
     fun consume(message: String?) {
         logger.info(String.format("#### -> Consumed message -> %s", message))
