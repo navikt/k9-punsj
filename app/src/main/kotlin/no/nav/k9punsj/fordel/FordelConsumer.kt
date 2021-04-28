@@ -1,5 +1,6 @@
 package no.nav.k9punsj.fordel
 
+import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,9 +16,11 @@ class FordelConsumer @Autowired constructor(val hendelseMottaker: HendelseMottak
 
     @KafkaListener(topics = ["privat-k9-fordel-journalforing-v1"], groupId = "k9-punsj")
     @Throws(IOException::class)
-    suspend fun consume(message: String?) {
+    fun consume(message: String?) {
         logger.info(String.format("#### -> Consumed message -> %s", message))
         val fordelPunsjEventDto = objectMapper().readValue(message, FordelPunsjEventDto::class.java)
-        hendelseMottaker.prosesser(fordelPunsjEventDto.journalpostId, fordelPunsjEventDto.aktørId)
+        runBlocking {
+            hendelseMottaker.prosesser(fordelPunsjEventDto.journalpostId, fordelPunsjEventDto.aktørId)
+        }
     }
 }
