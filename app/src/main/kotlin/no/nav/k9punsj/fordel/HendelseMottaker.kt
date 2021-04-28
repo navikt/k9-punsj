@@ -46,7 +46,8 @@ class HendelseMottaker @Autowired constructor(
                 ),
                 uuid.toString()
             )
+        } else {
+            log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
         }
-        log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
     }
 }
