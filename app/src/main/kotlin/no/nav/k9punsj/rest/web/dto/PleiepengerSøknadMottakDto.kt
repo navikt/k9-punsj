@@ -123,12 +123,12 @@ data class PleiepengerSøknadMottakDto(
         }
 
         data class LovbestemtFerieDto(
-            val perioder: Map<String, TilsynLovbestemtFerieInfoDto>?,
-        ) {
-            data class TilsynLovbestemtFerieInfoDto(
-                val land: String?,
-            )
-        }
+            val perioder: Map<String, LovbestemtFerieInfoDto>?,
+        )
+
+        data class LovbestemtFerieInfoDto(
+            val info: String?
+        )
 
         data class ArbeidstidDto(
             val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,

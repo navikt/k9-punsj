@@ -63,7 +63,10 @@ internal class SøknadMapper {
                     Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto.BostedPeriodeInfoDto(it.land))
                 }),
-                utenlandsopphold = null,
+                utenlandsopphold = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto(søknad.utenlandsopphold?.associate {
+                    Pair(fromPeriodeDtoToString(it.periode!!),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto.UtenlandsoppholdPeriodeInfoDto(it.land, null))
+                }),
                 beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
@@ -79,9 +82,7 @@ internal class SøknadMapper {
                                 .plus(java.time.Duration.ofMinutes(Integer.toUnsignedLong(it.minutter))).toString()))
                 }),
                 lovbestemtFerie = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(søknad.lovbestemtFerie?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto.TilsynLovbestemtFerieInfoDto(
-                            it.land))
+                    Pair(fromPeriodeDtoToString(it.periode!!), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
                 }),
                 arbeidstid = mapTilMottatArbeidstid(søknad.arbeidstid),
                 uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak?.associate {

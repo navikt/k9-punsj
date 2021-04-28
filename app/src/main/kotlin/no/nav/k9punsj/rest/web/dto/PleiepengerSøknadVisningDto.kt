@@ -24,6 +24,7 @@ data class PleiepengerSøknadVisningDto(
     val bosteder: List<BostederDto>? = null,
     val lovbestemtFerie: List<LovbestemtFerieDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
+    val utenlandsopphold : List<UtenlandsoppholdDto>? = null
 
 ) {
     data class BarnDto(
@@ -92,6 +93,10 @@ data class PleiepengerSøknadVisningDto(
         val land: String?,
     )
 
+    data class LovbestemtFerieDto(
+        val periode: PeriodeDto?,
+    )
+
     data class UtenlandsoppholdDto(
         val periode: PeriodeDto?,
         val land: String?,
@@ -117,11 +122,6 @@ data class PleiepengerSøknadVisningDto(
         val periode: PeriodeDto?,
         val timer: Int,
         val minutter: Int
-    )
-
-    data class LovbestemtFerieDto(
-        val periode: PeriodeDto?,
-        val land: String?,
     )
 
     data class UttakDto(

@@ -149,8 +149,16 @@
       "periode": {
         "fom": "2018-12-30",
         "tom": "2019-10-20"
+      }
+    }
+  ],
+  "utenlandsopphold": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
       },
-      "land": "USA"
+      "land" : "RU"
     }
   ],
   "soknadsinfo": {
