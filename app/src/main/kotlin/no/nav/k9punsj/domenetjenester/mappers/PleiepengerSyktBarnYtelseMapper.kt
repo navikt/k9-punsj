@@ -16,7 +16,8 @@ internal class PleiepengerSyktBarnYtelseMapper {
     companion object {
         private val objectMapper = no.nav.k9punsj.objectMapper()
         fun map(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto): PleiepengerSyktBarn {
-            val barn: Barn? = Barn(NorskIdentitetsnummer.of(psb.barn?.norskIdentitetsnummer), psb.barn?.fødselsdato)
+            val barn: Barn? = if(psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
+                psb.barn.fødselsdato) else null
             val søknadsperiode: Periode? =
                 if (psb.søknadsperiode != null) objectMapper.convertValue(psb.søknadsperiode) else null
             val opptjeningAktivitet: OpptjeningAktivitet? =

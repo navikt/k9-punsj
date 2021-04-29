@@ -1,0 +1,32 @@
+{
+  "soeknadId": "0df10260-c763-47d2-a348-158738cbec99",
+  "soekerId": "",
+  "journalposter": [
+    "200"
+  ],
+  "mottattDato": "2021-04-15",
+  "barn": {},
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {},
+  "opptjeningAktivitet": {
+    "arbeidstaker": [],
+    "selvstendigNaeringsdrivende": [],
+    "frilanser": {}
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [],
+    "frilanserArbeidstidInfo": {},
+    "selvstendigNæringsdrivendeArbeidstidInfo": {}
+  },
+  "beredskap": [],
+  "nattevaak": [],
+  "tilsynsordning": {
+    "perioder": []
+  },
+  "uttak": [],
+  "utenlandsopphold": [],
+  "lovbestemtFerie": [],
+  "omsorg": {},
+  "bosteder": []
+}

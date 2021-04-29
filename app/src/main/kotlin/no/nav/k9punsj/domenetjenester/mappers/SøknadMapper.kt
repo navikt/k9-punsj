@@ -56,7 +56,7 @@ internal class SøknadMapper {
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto(
                 barn = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BarnDto(søknad.barn?.norskIdent,
                     søknad.barn?.foedselsdato),
-                søknadsperiode = if (søknad.soeknadsperiode != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
+                søknadsperiode = if (søknad.soeknadsperiode?.fom != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
                 opptjeningAktivitet = if (søknad.opptjeningAktivitet != null) mapTilMottakArbeidAktivitetDto(søknad.opptjeningAktivitet) else null,
                 soknadsinfo = søknad.soknadsinfo,
                 bosteder = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(søknad.bosteder?.associate {
@@ -114,9 +114,9 @@ internal class SøknadMapper {
                     )
                 } else null
 
-            val arbeidstidInfoFrilans = if (arbeidstidDto.frilanserArbeidstidInfo != null)
+            val arbeidstidInfoFrilans = if (arbeidstidDto.frilanserArbeidstidInfo?.periode != null)
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                    mapOf(Pair(fromPeriodeDtoToString(arbeidstidDto.frilanserArbeidstidInfo.periode!!),
+                    mapOf(Pair(fromPeriodeDtoToString(arbeidstidDto.frilanserArbeidstidInfo.periode),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                             arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag,
                             arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag

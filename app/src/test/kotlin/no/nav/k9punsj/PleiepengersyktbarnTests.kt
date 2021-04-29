@@ -237,6 +237,22 @@ class PleiepengersyktbarnTests {
         assertEquals("nullIllegalArgumentException", response?.feil?.first()?.feilkode!!)
     }
 
+    @Test
+    fun `Skal kunne lagre ned minimal søknad`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        //7 feil
+        assertEquals(response?.feil?.size, 7)
+    }
+
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
