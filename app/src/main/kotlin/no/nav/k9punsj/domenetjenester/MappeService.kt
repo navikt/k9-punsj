@@ -46,15 +46,17 @@ class MappeService(
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(nySøknad.journalpostId)
 
+        val pleiepengerSøknadVisningDto =
+            PleiepengerSøknadVisningDto(søknadId.toString(), norskIdent, listOf(nySøknad.journalpostId))
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
-        val søknadEntitet = no.nav.k9punsj.db.datamodell.SøknadEntitet(
+        val søknadEntitet = SøknadEntitet(
             søknadId = søknadId.toString(),
             bunkeId = bunkeId,
             søkerId = søker.personId,
-            journalposter = journalposter
+            journalposter = journalposter,
+            søknad = objectMapper().convertValue<JsonB>(pleiepengerSøknadVisningDto)
         )
-
         return søknadRepository.opprettSøknad(søknadEntitet)
     }
 
