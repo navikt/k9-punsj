@@ -3,6 +3,7 @@ package no.nav.k9punsj.rest.web.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.*
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
@@ -70,8 +71,8 @@ data class PleiepengerSøknadMottakDto(
                     val perioder: Map<String, ArbeidstidPeriodeInfoDto>?,
                 ) {
                     data class ArbeidstidPeriodeInfoDto(
-                        val jobberNormaltTimerPerDag: String?,
-                        val faktiskArbeidTimerPerDag: String?,
+                        val jobberNormaltTimerPerDag: Duration?,
+                        val faktiskArbeidTimerPerDag: Duration?,
                     )
                 }
             }
@@ -118,7 +119,7 @@ data class PleiepengerSøknadMottakDto(
             val perioder: Map<String, TilsynPeriodeInfoDto>?,
         ) {
             data class TilsynPeriodeInfoDto(
-                val etablertTilsynTimerPerDag: String?,
+                val etablertTilsynTimerPerDag: Duration?,
             )
         }
 

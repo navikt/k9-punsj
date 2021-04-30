@@ -1,0 +1,70 @@
+{
+  "soeknadId": "54dc7996-907e-4a98-8c99-ee2c68df74fc",
+  "soekerId": "29099000129",
+  "journalposter": [
+    "200"
+  ],
+  "mottattDato": "2021-04-14",
+  "barn": {
+    "norskIdent": "",
+    "foedselsdato": null
+  },
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {
+    "fom": "2021-05-09",
+    "tom": "2021-04-28"
+  },
+  "opptjeningAktivitet": {
+    "selvstendigNæringsdrivende": null,
+    "frilanser": {
+      "startdato": null,
+      "jobberFortsattSomFrilans": false
+    },
+    "arbeidstaker": []
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "65765969708",
+        "arbeidstidInfo": {
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2021-04-06",
+                "tom": "2021-05-09"
+              },
+              "faktiskArbeidTimerPerDag": ""
+            },
+            {
+              "periode": {
+                "fom": "2021-04-20",
+                "tom": "2021-05-09"
+              },
+              "faktiskArbeidTimerPerDag": ""
+            }
+          ],
+          "jobberNormaltTimerPerDag": "56"
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": null,
+    "selvstendigNæringsdrivendeArbeidstidInfo": null
+  },
+  "beredskap": [],
+  "nattevaak": [],
+  "tilsynsordning": {
+    "perioder": []
+  },
+  "uttak": [],
+  "omsorg": {
+    "relasjonTilBarnet": "",
+    "samtykketOmsorgForBarnet": null,
+    "beskrivelseAvOmsorgsrollen": ""
+  },
+  "bosteder": [],
+  "lovbestemtFerie": [],
+  "soknadsinfo": null,
+  "utenlandsopphold": []
+}

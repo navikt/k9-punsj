@@ -254,6 +254,22 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
+    fun `Skal kunne lagre med tid søknad`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        //7 feil
+        assertEquals(response?.feil?.size, 7)
+    }
+
+    @Test
     fun `Skal kunne lagre ned ferie fra søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.ferieSøknad()
