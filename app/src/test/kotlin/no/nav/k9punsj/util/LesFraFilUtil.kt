@@ -27,5 +27,9 @@ class LesFraFilUtil {
         fun minimalSøknad() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("tom-søknad.json"))
         }
+
+        fun ferieSøknad() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("ferie-søknad.json"))
+        }
     }
 }

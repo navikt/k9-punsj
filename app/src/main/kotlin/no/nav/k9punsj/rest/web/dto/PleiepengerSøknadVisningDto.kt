@@ -22,7 +22,7 @@ data class PleiepengerSøknadVisningDto(
     val uttak: List<UttakDto>? = null,
     val omsorg: OmsorgDto? = null,
     val bosteder: List<BostederDto>? = null,
-    val lovbestemtFerie: List<LovbestemtFerieDto>? = null,
+    val lovbestemtFerie: List<PeriodeDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null
 
@@ -91,10 +91,6 @@ data class PleiepengerSøknadVisningDto(
     data class BostederDto(
         val periode: PeriodeDto?,
         val land: String?,
-    )
-
-    data class LovbestemtFerieDto(
-        val periode: PeriodeDto?,
     )
 
     data class UtenlandsoppholdDto(

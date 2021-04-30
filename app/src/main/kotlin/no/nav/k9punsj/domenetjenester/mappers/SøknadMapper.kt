@@ -82,7 +82,7 @@ internal class SøknadMapper {
                                 .plus(java.time.Duration.ofMinutes(Integer.toUnsignedLong(it.minutter))).toString()))
                 }),
                 lovbestemtFerie = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(søknad.lovbestemtFerie?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
+                    Pair(fromPeriodeDtoToString(it), PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
                 }),
                 arbeidstid = mapTilMottatArbeidstid(søknad.arbeidstid),
                 uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak?.associate {

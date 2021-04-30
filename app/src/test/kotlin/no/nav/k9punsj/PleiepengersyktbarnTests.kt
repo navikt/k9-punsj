@@ -169,7 +169,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `sjekker at mapping fungre hele veien`(){
+    fun `sjekker at mapping fungre hele veien`() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
         val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
@@ -253,6 +253,25 @@ class PleiepengersyktbarnTests {
         assertEquals(response?.feil?.size, 7)
     }
 
+    @Test
+    fun `Skal kunne lagre ned ferie fra søknad`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.ferieSøknad()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val resHent = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe",oppdatertSoeknadDto.soeknadId ).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitExchangeBlocking()
+
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+
+        assertNotNull(søknadViaGet)
+        assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
+    }
+
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
@@ -293,7 +312,41 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(sendSøknad))
             .awaitExchangeBlocking()
     }
+
+    private fun opprettOgLagreSoeknad(
+        soeknadJson: SøknadJson,
+        ident: String,
+        journalpostid: String = "73369b5b-d50e-47ab-8fc2-31ef35a71993",
+    ): PleiepengerSøknadVisningDto {
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+
+        // oppretter en søknad
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
+
+        leggerPåNySøknadId(soeknadJson, location)
+
+        // fyller ut en søknad
+        val resPut = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknadJson))
+            .awaitExchangeBlocking()
+
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadVisningDto>() }
+        assertNotNull(søknadDtoFyltUt.soekerId)
+
+        return søknadDtoFyltUt
+    }
 }
+
 
 private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
