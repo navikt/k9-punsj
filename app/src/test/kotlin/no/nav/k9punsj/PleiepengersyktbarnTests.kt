@@ -250,7 +250,7 @@ class PleiepengersyktbarnTests {
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //7 feil
-        assertEquals(response?.feil?.size, 7)
+        assertEquals(response?.feil?.size, 5)
     }
 
     @Test
@@ -267,6 +267,17 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //7 feil
         assertEquals(response?.feil?.size, 7)
+    }
+
+    @Test
+    fun `Skal kunne lagre og sette uttak`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
     @Test

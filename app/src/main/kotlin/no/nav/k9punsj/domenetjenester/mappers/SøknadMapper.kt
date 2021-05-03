@@ -18,6 +18,7 @@ import java.time.Duration
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 import java.util.UUID
 
 
@@ -58,7 +59,8 @@ internal class SøknadMapper {
                 barn = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BarnDto(søknad.barn?.norskIdent,
                     søknad.barn?.foedselsdato),
                 søknadsperiode = if (søknad.soeknadsperiode?.fom != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
-                opptjeningAktivitet = if (søknad.opptjeningAktivitet != null) mapTilMottakArbeidAktivitetDto(søknad.opptjeningAktivitet) else null,
+                opptjeningAktivitet = if (erNullEllerTom(søknad.opptjeningAktivitet)) mapTilMottakArbeidAktivitetDto(
+                    søknad.opptjeningAktivitet!!) else null,
                 soknadsinfo = søknad.soknadsinfo,
                 bosteder = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(søknad.bosteder?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
@@ -84,28 +86,62 @@ internal class SøknadMapper {
                             zeroTimerHvisTomString(it.timer.toString())
                                 .plus(zeroMinutterHvisTomString(it.minutter.toString()))))
                 }),
-                lovbestemtFerie = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(søknad.lovbestemtFerie?.associate {
+                lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty()) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(søknad.lovbestemtFerie?.associate {
                     Pair(fromPeriodeDtoToString(it),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
-                }),
+                }) else null,
                 arbeidstid = mapTilMottatArbeidstid(søknad.arbeidstid),
-                uttak = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag))
-                }),
-                omsorg = if(søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg
+                uttak = lagUttak(søknad),
+                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg
             )
         }
 
-        private fun zeroTimerHvisTomString(input : String?) : Duration {
-            if(input.isNullOrEmpty()) {
+        private fun lagUttak(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? {
+            var uttakDto : PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? = null
+            if (!søknad.uttak.isNullOrEmpty()) {
+                uttakDto = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak.associate {
+                    Pair(fromPeriodeDtoToString(it.periode!!),
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag))
+                })
+            }
+            if (uttakDto != null) {
+                return uttakDto
+            }
+            if (søknad.soeknadsperiode?.fom == null) {
+                return null
+            }
+            return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(
+                mapOf(Pair(fromPeriodeDtoToString(søknad.soeknadsperiode),
+                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto("PT7H30M"))))
+        }
+
+        private fun erNullEllerTom(opptjeningAktivitet: PleiepengerSøknadVisningDto.ArbeidAktivitetDto?): Boolean {
+            if (opptjeningAktivitet == null) {
+                return false
+            }
+
+            if (opptjeningAktivitet.arbeidstaker.isNullOrEmpty()
+                && (opptjeningAktivitet.frilanser?.jobberFortsattSomFrilans == null)
+                && opptjeningAktivitet.selvstendigNæringsdrivende.isNullOrEmpty()
+            ) {
+                return false
+            }
+            return true
+        }
+
+        private fun zeroTimerHvisTomString(input: String?): Duration {
+            if (input.isNullOrEmpty()) {
                 return Duration.ofHours(0L)
+            }
+            try {
+                return Duration.parse(input)
+            } catch (e : DateTimeParseException) {
             }
             return Duration.ofHours(input.toLong())
         }
 
-        private fun zeroMinutterHvisTomString(input : String?) : Duration {
-            if(input.isNullOrEmpty()) {
+        private fun zeroMinutterHvisTomString(input: String?): Duration {
+            if (input.isNullOrEmpty()) {
                 return Duration.ofHours(0L)
             }
             return Duration.ofMinutes(input.toLong())
@@ -138,7 +174,7 @@ internal class SøknadMapper {
                     mapOf(Pair(fromPeriodeDtoToString(arbeidstidDto.frilanserArbeidstidInfo.periode),
                         PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                             zeroTimerHvisTomString(arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag),
-                        zeroTimerHvisTomString(arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag)
+                            zeroTimerHvisTomString(arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag)
                         )))
                 ) else null
 

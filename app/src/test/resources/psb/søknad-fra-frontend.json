@@ -146,10 +146,8 @@
   ],
   "lovbestemtFerie": [
     {
-      "periode": {
-        "fom": "2018-12-30",
-        "tom": "2019-10-20"
-      }
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
     }
   ],
   "utenlandsopphold": [
@@ -158,7 +156,7 @@
         "fom": "2018-12-30",
         "tom": "2019-10-20"
       },
-      "land" : "RU"
+      "land": "RU"
     }
   ],
   "soknadsinfo": {
