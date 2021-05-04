@@ -83,7 +83,11 @@ class PepClient(
 
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.any { !it }
+        val map = fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }
+        val map1 = map.map { evaluate(it) }
+        log.info("DEBUGG123$map$map1")
+
+        return map1.all { true }
     }
 
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {
