@@ -153,7 +153,7 @@ internal class SøknadMapper {
             }
 
             val arbeidstaker =
-                if (arbeidstidDto.arbeidstakerList != null) arbeidstidDto.arbeidstakerList.map { arbeidstakerDto ->
+                if (!arbeidstidDto.arbeidstakerList.isNullOrEmpty()) arbeidstidDto.arbeidstakerList.map { arbeidstakerDto ->
                     PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto(
                         arbeidstakerDto.norskIdent,
                         arbeidstakerDto.organisasjonsnummer,
@@ -178,9 +178,9 @@ internal class SøknadMapper {
                         )))
                 ) else null
 
-            val arbeidstidInfoSn = if (arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo != null)
+            val arbeidstidInfoSn = if (arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo?.arbeidstidInfo != null)
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                    arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo.arbeidstidInfo?.perioder?.associate {
+                    arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo.arbeidstidInfo.perioder?.associate {
                         Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                                 faktiskArbeidTimerPerDag = zeroTimerHvisTomString(it.faktiskArbeidTimerPerDag),

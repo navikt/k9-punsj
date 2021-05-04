@@ -1,0 +1,57 @@
+{
+  "soeknadId": "c5040ae4-6c33-4a40-a8a7-a8ad97406f3b",
+  "soekerId": "15026819005",
+  "journalposter": [
+    "493358778"
+  ],
+  "mottattDato": "2021-05-10",
+  "barn": {
+    "norskIdent": "15026819005"
+  },
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {
+    "fom": "2021-05-10",
+    "tom": "2021-05-30"
+  },
+  "opptjeningAktivitet": {
+    "arbeidstaker": [],
+    "selvstendigNaeringsdrivende": [],
+    "frilanser": null
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "arbeidstidInfo": {
+          "jobberNormaltTimerPerDag": "34",
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2021-05-10",
+                "tom": "2021-05-30"
+              },
+              "faktiskArbeidTimerPerDag": ""
+            }
+          ]
+        },
+        "organisasjonsnummer": null,
+        "norskIdent": "15026819005"
+      }
+    ],
+    "frilanserArbeidstidInfo": null,
+    "selvstendigNæringsdrivendeArbeidstidInfo": {}
+  },
+  "beredskap": [],
+  "nattevaak": [],
+  "tilsynsordning": {
+    "perioder": []
+  },
+  "uttak": [],
+  "utenlandsopphold": [],
+  "lovbestemtFerie": [],
+  "omsorg": {
+    "relasjonTilBarnet": "",
+    "beskrivelseAvOmsorgsrollen": ""
+  },
+  "bosteder": []
+}

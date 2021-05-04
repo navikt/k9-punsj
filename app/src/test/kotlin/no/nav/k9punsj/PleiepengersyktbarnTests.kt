@@ -280,6 +280,18 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
+
+    @Test
+    fun `Skal kunne lagre med ferie null`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+    }
+
     @Test
     fun `Skal kunne lagre ned ferie fra søknad`() {
         val norskIdent = "02022352121"

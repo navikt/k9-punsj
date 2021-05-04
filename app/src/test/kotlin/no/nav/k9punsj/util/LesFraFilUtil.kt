@@ -39,5 +39,9 @@ class LesFraFilUtil {
         fun utenUttak() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("uten-uttak-søknad.json"))
         }
+
+        fun ferieNull() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("ferie-null-søknad.json"))
+        }
     }
 }
