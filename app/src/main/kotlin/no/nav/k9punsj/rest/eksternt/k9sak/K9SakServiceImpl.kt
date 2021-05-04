@@ -49,6 +49,8 @@ class K9SakServiceImpl(
 
         val body = objectMapper().writeValueAsString(MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode), søker, listOf(barn)))
 
+        log.info("slik ser bodyen ut$body")
+
         val (request, _, result) = "${baseUrl}/fagsak/match"
             .httpPost()
             .body(
