@@ -58,6 +58,7 @@ class PepClient(
                     CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
                     CefField(CefFieldName.ABAC_ACTION, "read"),
                     CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
+                    //TODO(FIXME!!!) legg på ekte aktørId her
                     CefField(CefFieldName.BERORT_BRUKER_ID, "aktørid"),
                 )
             )
@@ -83,11 +84,7 @@ class PepClient(
 
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val map = fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }
-        val map1 = map.map { evaluate(it) }
-        log.info("DEBUGG123$map$map1")
-
-        return map1.all { true }
+        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {

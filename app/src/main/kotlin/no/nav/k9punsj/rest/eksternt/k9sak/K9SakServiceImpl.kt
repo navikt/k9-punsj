@@ -7,7 +7,6 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
 import no.nav.k9punsj.abac.NavHeaders
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
@@ -45,10 +44,10 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9(
         søker: NorskIdent,
         barn: NorskIdent,
-        fagsakYtelseType: FagsakYtelseType,
+        fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): List<PeriodeDto> {
 
-        val body = objectMapper().writeValueAsString(MatchDto(fagsakYtelseType, søker, listOf(barn)))
+        val body = objectMapper().writeValueAsString(MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode), søker, listOf(barn)))
 
         val (request, _, result) = "${baseUrl}/fagsak/match"
             .httpPost()
@@ -84,7 +83,7 @@ class K9SakServiceImpl(
     }
 
     data class MatchDto(
-        val ytelseType: FagsakYtelseType,
+        val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
         val brukerIdent: NorskIdent,
         val pleietrengendeIdenter: List<NorskIdent>,
     )
