@@ -20,6 +20,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import java.util.UUID
+import kotlin.streams.toList
 
 
 internal class SøknadMapper {
@@ -28,9 +29,14 @@ internal class SøknadMapper {
         const val ÅPEN = ".."
         private val validator = Validator()
 
-        fun mapTilEksternFormat(søknad: PleiepengerSøknadMottakDto, soeknadId: SøknadIdDto): Pair<Søknad, List<Feil>> {
+        fun mapTilEksternFormat(
+            søknad: PleiepengerSøknadMottakDto,
+            soeknadId: SøknadIdDto,
+            hentPerioderSomFinnesIK9: List<PeriodeDto>
+        ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
-            val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!)
+            val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!,
+                hentPerioderSomFinnesIK9.stream().map { fromPeriodeDtoToString(it) }.toList())
 
             val søknadK9Format = opprettSøknad(
                 søknadId = UUID.fromString(soeknadId),

@@ -15,7 +15,7 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 internal class PleiepengerSyktBarnYtelseMapper {
     companion object {
         private val objectMapper = no.nav.k9punsj.objectMapper()
-        fun map(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto): PleiepengerSyktBarn {
+        fun map(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto, endringsperioder: List<String>): PleiepengerSyktBarn {
             val barn: Barn? = if(psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
                 psb.barn.fødselsdato) else null
             val søknadsperiode: Periode? =
@@ -46,9 +46,10 @@ internal class PleiepengerSyktBarnYtelseMapper {
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
             søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
 
-            //TODO(OJR) koble på endringsperioder - hent fra k9-sak
-            pleiepengerSyktBarn.medEndringsperiode(listOf())
-
+            if (endringsperioder.isNotEmpty()) {
+                val endrignsperioder: List<Periode> = endringsperioder.map { objectMapper.convertValue(it) }
+                pleiepengerSyktBarn.medEndringsperiode(endrignsperioder)
+            }
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
             infoFraPunsj?.let { pleiepengerSyktBarn.medInfoFraPunsj(it) }

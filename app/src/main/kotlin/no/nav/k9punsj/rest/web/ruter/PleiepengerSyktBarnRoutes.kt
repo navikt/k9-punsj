@@ -142,7 +142,10 @@ internal class PleiepengerSyktBarnRoutes(
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                         val format = SøknadMapper.mapTilSendingsformat(søknad)
-                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId)
+
+                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)
+
+                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
@@ -233,6 +236,16 @@ internal class PleiepengerSyktBarnRoutes(
                     .bodyValueAndAwait(hentPerioderSomFinnesIK9)
             }
         }
+    }
+
+    private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): List<PeriodeDto> {
+        if (format.søker?.norskIdentitetsnummer == null || format.ytelse?.barn?.norskIdentitetsnummer == null) {
+            return emptyList()
+        }
+
+        return k9SakService.hentPerioderSomFinnesIK9(format.søker.norskIdentitetsnummer,
+            format.ytelse.barn.norskIdentitetsnummer,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     }
 
     private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>): ServerResponse? {
