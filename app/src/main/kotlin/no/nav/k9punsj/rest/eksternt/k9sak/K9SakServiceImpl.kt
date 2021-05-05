@@ -48,14 +48,11 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): List<PeriodeDto> {
 
-        val matchFagsak = no.nav.k9.sak.kontrakt.fagsak.MatchFagsak(
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            null,
-            PersonIdent(søker),
-            listOf(PersonIdent(barn)),
-            null
-        )
-        val body = objectMapper().writeValueAsString(matchFagsak)
+        val matchDto = MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            MatchDto.PersonIdent(søker),
+            listOf(MatchDto.PersonIdent(barn)))
+
+        val body = objectMapper().writeValueAsString(matchDto)
 
         log.info("slik ser bodyen ut$body")
 
@@ -90,5 +87,16 @@ class K9SakServiceImpl(
             )
             listOf()
         }
+    }
+
+    //TODO(OJR) benytt kontrakt fra k9-sak
+    data class MatchDto(
+        val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
+        val bruker: PersonIdent,
+        val pleietrengendeIdenter: List<PersonIdent>,
+    ) {
+        data class PersonIdent(
+            val ident: String
+        )
     }
 }
