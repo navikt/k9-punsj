@@ -6,7 +6,6 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
-import no.nav.k9.sak.typer.PersonIdent
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
@@ -49,8 +48,8 @@ class K9SakServiceImpl(
     ): List<PeriodeDto> {
 
         val matchDto = MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            MatchDto.PersonIdent(søker),
-            listOf(MatchDto.PersonIdent(barn)))
+            søker,
+            listOf(barn))
 
         val body = objectMapper().writeValueAsString(matchDto)
 
@@ -92,11 +91,7 @@ class K9SakServiceImpl(
     //TODO(OJR) benytt kontrakt fra k9-sak
     data class MatchDto(
         val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
-        val bruker: PersonIdent,
-        val pleietrengendeIdenter: List<PersonIdent>,
-    ) {
-        data class PersonIdent(
-            val ident: String
-        )
-    }
+        val bruker: String,
+        val pleietrengendeIdenter: List<String>,
+    )
 }
