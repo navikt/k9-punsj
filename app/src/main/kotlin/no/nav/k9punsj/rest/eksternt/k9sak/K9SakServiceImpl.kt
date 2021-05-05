@@ -84,9 +84,10 @@ class K9SakServiceImpl(
         }
     }
 
+    //TODO(OJR) benytt kontrakt fra k9-sak
     data class MatchDto(
         val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
-        val brukerIdent: NorskIdent,
+        val bruker: NorskIdent,
         val pleietrengendeIdenter: List<NorskIdent>,
     )
 }
