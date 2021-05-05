@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
+import no.nav.k9.sak.typer.PersonIdent
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
@@ -47,7 +48,14 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): List<PeriodeDto> {
 
-        val body = objectMapper().writeValueAsString(MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode), søker, listOf(barn)))
+        val matchFagsak = no.nav.k9.sak.kontrakt.fagsak.MatchFagsak(
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            null,
+            PersonIdent(søker),
+            listOf(PersonIdent(barn)),
+            null
+        )
+        val body = objectMapper().writeValueAsString(matchFagsak)
 
         log.info("slik ser bodyen ut$body")
 
@@ -83,11 +91,4 @@ class K9SakServiceImpl(
             listOf()
         }
     }
-
-    //TODO(OJR) benytt kontrakt fra k9-sak
-    data class MatchDto(
-        val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
-        val bruker: NorskIdent,
-        val pleietrengendeIdenter: List<NorskIdent>,
-    )
 }
