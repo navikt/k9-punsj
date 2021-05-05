@@ -26,31 +26,28 @@
   "arbeidstid": {
     "arbeidstakerList": [
       {
-        "norskIdent": null,
-        "organisasjonsnummer": "65765969708",
+        "norskIdent": "24058120878",
+        "organisasjonsnummer": null,
         "arbeidstidInfo": {
           "perioder": [
             {
               "periode": {
-                "fom": "2021-04-06",
-                "tom": "2021-05-09"
+                "fom": "2021-05-03",
+                "tom": "2021-05-23"
               },
-              "faktiskArbeidTimerPerDag": ""
-            },
-            {
-              "periode": {
-                "fom": "2021-04-20",
-                "tom": "2021-05-09"
-              },
-              "faktiskArbeidTimerPerDag": ""
+              "faktiskArbeidTimerPerDag": "15",
+              "jobberNormaltTimerPerDag": "23"
             }
-          ],
-          "jobberNormaltTimerPerDag": "56"
+          ]
         }
       }
     ],
     "frilanserArbeidstidInfo": null,
-    "selvstendigNæringsdrivendeArbeidstidInfo": null
+    "selvstendigNæringsdrivendeArbeidstidInfo": {
+      "norskIdent": null,
+      "organisasjonsnummer": null,
+      "arbeidstidInfo": null
+    }
   },
   "beredskap": [],
   "nattevaak": [],
