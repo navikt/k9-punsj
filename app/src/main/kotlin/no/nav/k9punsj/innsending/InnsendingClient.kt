@@ -5,13 +5,13 @@ import de.huxhorn.sulky.ulid.ULID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
-import no.nav.k9.søknad.JsonUtils
+import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface InnsendingClient {
-    private fun mapSøknad(søknadId: String, søknad: Any, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
-        val søknad: Map<String,*> = objectMapper.convertValue(søknad)
+    fun mapSøknad(søknadId: String, søknad: Any, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
+        val søknad: Map<String, *> = objectMapper.convertValue(søknad)
         val behovssekvensId = ulid.nextULID()
         val correlationId = "${tilleggsOpplysninger.getOrDefault(CorrelationIdKey, UUID.randomUUID())}"
 
@@ -40,7 +40,7 @@ interface InnsendingClient {
 
     companion object {
         private val logger = LoggerFactory.getLogger(InnsendingClient::class.java)
-        private val objectMapper = JsonUtils.getObjectMapper()
+        private val objectMapper = objectMapper()
         private val ulid = ULID()
         private const val BehovNavn = "PunsjetSøknad"
         private const val SøknadKey = "søknad"
