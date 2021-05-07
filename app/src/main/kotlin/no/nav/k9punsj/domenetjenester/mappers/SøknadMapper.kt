@@ -7,6 +7,7 @@ import no.nav.k9.søknad.Validator
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.Versjon
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.SøknadId
 import no.nav.k9punsj.objectMapper
@@ -22,7 +23,6 @@ import java.time.format.DateTimeParseException
 import java.util.UUID
 import kotlin.streams.toList
 
-
 internal class SøknadMapper {
     companion object {
         const val SKILLE = "/"
@@ -32,7 +32,8 @@ internal class SøknadMapper {
         fun mapTilEksternFormat(
             søknad: PleiepengerSøknadMottakDto,
             soeknadId: SøknadIdDto,
-            hentPerioderSomFinnesIK9: List<PeriodeDto>
+            hentPerioderSomFinnesIK9: List<PeriodeDto>,
+            journalpostIder: Set<String>
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
             val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!,
@@ -43,7 +44,7 @@ internal class SøknadMapper {
                 mottattDato = søknad.mottattDato!!,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
                 ytelse = pleiepengerSyktBarn
-            )
+            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it) })
             val feil = validator.valider(søknadK9Format)
 
             return Pair(søknadK9Format, feil)
@@ -274,7 +275,7 @@ internal class SøknadMapper {
             versjon: Versjon = Versjon.of("1.0.0"),
             mottattDato: ZonedDateTime,
             søker: Søker,
-            ytelse: no.nav.k9.søknad.ytelse.Ytelse,
+            ytelse: no.nav.k9.søknad.ytelse.Ytelse
         ): Søknad {
             return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
         }

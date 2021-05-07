@@ -13,6 +13,7 @@ import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions
 import org.junit.Assert.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -190,6 +191,8 @@ class PleiepengersyktbarnTests {
         val response = res
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
+
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
@@ -213,7 +216,7 @@ class PleiepengersyktbarnTests {
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //TODO fix når det er rettet i k9-format
-        assertEquals("nullIllegalArgumentException", response?.feil?.first()?.feilkode!!)
+        assertEquals("IllegalArgumentException", response?.feil?.first()?.feilkode!!)
     }
 
     @Test
@@ -256,6 +259,11 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
@@ -268,6 +276,11 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
@@ -293,7 +306,7 @@ class PleiepengersyktbarnTests {
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = "73369b5b-d50e-47ab-8fc2-31ef35a71993",
+        journalpostid: String = "9999",
     ): ClientResponse {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
