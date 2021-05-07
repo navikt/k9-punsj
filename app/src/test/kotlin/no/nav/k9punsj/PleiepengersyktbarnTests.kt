@@ -187,6 +187,9 @@ class PleiepengersyktbarnTests {
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
