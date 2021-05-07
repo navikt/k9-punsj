@@ -81,11 +81,11 @@ internal class SøknadMapper {
                 }),
                 beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(""))
                 }),
                 nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(""))
                 }),
                 tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning?.perioder?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
@@ -99,7 +99,8 @@ internal class SøknadMapper {
                 }) else null,
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
-                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg
+                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg,
+                infoFraPunsj = søknad.infoFraPunsj
             )
         }
 

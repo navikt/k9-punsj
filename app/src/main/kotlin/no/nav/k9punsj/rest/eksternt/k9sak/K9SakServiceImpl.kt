@@ -53,8 +53,6 @@ class K9SakServiceImpl(
 
         val body = objectMapper().writeValueAsString(matchDto)
 
-        log.info("slik ser bodyen ut$body")
-
         val (request, _, result) = "${baseUrl}/fagsak/match"
             .httpPost()
             .body(
@@ -78,7 +76,6 @@ class K9SakServiceImpl(
             }
         )
         return try {
-            log.info("slik ser json ut$json")
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
             resultat.map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
         } catch (e: Exception) {
