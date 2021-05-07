@@ -2,6 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,15 +14,15 @@ internal class JournalpostRepositoryTest {
 
     @Test
     fun `Skal finne alle journalposter på personen`(): Unit = runBlocking {
-        val dummyAktørId = "1000000000000"
+        val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-        val journalpost1 = Journalpost(uuid = UUID.randomUUID(), journalpostId = "466988237", aktørId = dummyAktørId)
+        val journalpost1 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost1) {
             journalpost1
         }
 
-        val journalpost2 = Journalpost(uuid = UUID.randomUUID(), journalpostId = "466988234", aktørId = dummyAktørId)
+        val journalpost2 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost2) {
             journalpost2
         }

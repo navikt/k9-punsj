@@ -2,6 +2,7 @@ package no.nav.k9punsj.util
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.db.config.loadFlyway
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
@@ -17,7 +18,9 @@ class DatabaseUtil {
             true -> io.zonky.test.db.postgres.embedded.EmbeddedPostgres.start().postgresDatabase
             false -> EmbeddedPostgres.start().postgresDatabase
         }.also { dataSource -> 
-            runMigration(dataSource)
+            val flyway = loadFlyway(dataSource)
+            flyway.clean()
+            flyway.migrate()
         }
 
         fun getMappeRepo(): MappeRepository {
