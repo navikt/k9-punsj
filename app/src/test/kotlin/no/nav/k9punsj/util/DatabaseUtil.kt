@@ -2,6 +2,7 @@ package no.nav.k9punsj.util
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.db.config.loadFlyway
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
@@ -13,41 +14,37 @@ import javax.sql.DataSource
 class DatabaseUtil {
 
     companion object {
-        private var dataSource: DataSource? = null
-
-        private fun getDataSource(): DataSource {
-            if (dataSource != null) {
-                return dataSource!!
-            }
-            val pg = EmbeddedPostgres.start()
-            val postgresDatabase = pg.postgresDatabase
-            runMigration(postgresDatabase)
-            dataSource = postgresDatabase
-            return dataSource!!
+        internal val dataSource: DataSource = when ("ZONKY" == System.getenv("EMBEDDED_POSTGRES_TYPE")) {
+            true -> io.zonky.test.db.postgres.embedded.EmbeddedPostgres.start().postgresDatabase
+            false -> EmbeddedPostgres.start().postgresDatabase
+        }.also { dataSource -> 
+            val flyway = loadFlyway(dataSource)
+            flyway.clean()
+            flyway.migrate()
         }
 
         fun getMappeRepo(): MappeRepository {
-            return MappeRepository(getDataSource())
+            return MappeRepository(dataSource)
         }
 
         fun getSøknadRepo(): SøknadRepository {
-            return SøknadRepository(getDataSource())
+            return SøknadRepository(dataSource)
         }
 
         fun getPersonRepo(): PersonRepository {
-            return PersonRepository(getDataSource())
+            return PersonRepository(dataSource)
         }
 
         fun getBunkeRepo(): BunkeRepository {
-            return BunkeRepository(getDataSource())
+            return BunkeRepository(dataSource)
         }
 
         fun getJournalpostRepo() :JournalpostRepository {
-            return JournalpostRepository(getDataSource())
+            return JournalpostRepository(dataSource)
         }
 
         fun getAksjonspunktRepo() : AksjonspunktRepository {
-            return AksjonspunktRepository(getDataSource())
+            return AksjonspunktRepository(dataSource)
         }
     }
 }

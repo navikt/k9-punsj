@@ -64,11 +64,13 @@ fun runMigrationLocal(configuration: DbConfiguration, environment: Environment):
     throw IllegalStateException("HEI!!!! Du prøver å kjøre flyway(migrate->clean->migrate) som sletter innholdet i databasen hvis migrering feiler! Må bare kjøres lokalt")
 }
 
-fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
-    return Flyway.configure()
+fun loadFlyway(dataSource: DataSource, initSql: String? = null) =
+    Flyway.configure()
         .locations("migreringer/")
         .dataSource(dataSource)
         .initSql(initSql)
         .load()
-        .migrate()
+
+fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
+    return loadFlyway(dataSource, initSql).migrate()
 }
