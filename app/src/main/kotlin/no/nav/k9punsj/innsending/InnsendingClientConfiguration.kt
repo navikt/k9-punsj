@@ -22,7 +22,7 @@ class InnsendingClientConfiguration {
     private fun kafkaPropertiesOrNull(environment: Map<String, String> = System.getenv()): Properties? {
         val kafkaEnvironmentVariables = environment.filterKeys { it in RequiredKafkaEnvironmentVariables  }
         if (!kafkaEnvironmentVariables.keys.containsAll(RequiredKafkaEnvironmentVariables)) {
-            logger.warn("Mangler EnvironmentVariables=[${RequiredKafkaEnvironmentVariables.minus(kafkaEnvironmentVariables.keys)}]")
+            logger.warn("Mangler EnvironmentVariables=${RequiredKafkaEnvironmentVariables.minus(kafkaEnvironmentVariables.keys)}")
             return null
         }
 

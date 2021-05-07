@@ -7,6 +7,7 @@ import no.nav.k9.søknad.Validator
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.Versjon
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.SøknadId
 import no.nav.k9punsj.objectMapper
@@ -21,7 +22,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import java.util.UUID
 import kotlin.streams.toList
-
 
 internal class SøknadMapper {
     companion object {
@@ -39,12 +39,12 @@ internal class SøknadMapper {
             val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!,
                 hentPerioderSomFinnesIK9.stream().map { fromPeriodeDtoToString(it) }.toList())
 
-            // TODO: Legge journalpostIder inn i søknaden når ny k9-format er releaset.
             val søknadK9Format = opprettSøknad(
                 søknadId = UUID.fromString(soeknadId),
                 mottattDato = søknad.mottattDato!!,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
-                ytelse = pleiepengerSyktBarn
+                ytelse = pleiepengerSyktBarn,
+                journalpostIder = journalpostIder
             )
             val feil = validator.valider(søknadK9Format)
 
@@ -276,8 +276,11 @@ internal class SøknadMapper {
             mottattDato: ZonedDateTime,
             søker: Søker,
             ytelse: no.nav.k9.søknad.ytelse.Ytelse,
+            journalpostIder: Set<String>
         ): Søknad {
-            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
+            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse).medJournalposter(
+                journalpostIder.map { Journalpost().medJournalpostId(it) }
+            )
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
