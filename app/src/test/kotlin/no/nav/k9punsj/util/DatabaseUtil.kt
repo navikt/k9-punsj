@@ -1,6 +1,6 @@
 package no.nav.k9punsj.util
 
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.repository.BunkeRepository
