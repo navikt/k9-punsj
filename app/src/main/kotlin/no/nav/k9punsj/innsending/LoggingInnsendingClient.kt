@@ -2,7 +2,7 @@ package no.nav.k9punsj.innsending
 
 import org.slf4j.LoggerFactory
 
-internal class LoggingInnsendingClient : InnsendingClient {
+class LoggingInnsendingClient : InnsendingClient {
     override fun send(pair: Pair<String, String>) {
         logger.warn("Sender Key=[${pair.first}], Value=[${pair.second}]")
     }

@@ -7,7 +7,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 import java.util.Properties
 
-internal class KafkaInnsendingClient(kafkaProperties: Properties) : InnsendingClient {
+class KafkaInnsendingClient(kafkaProperties: Properties) : InnsendingClient {
     private val clientId = kafkaProperties.getValue(ProducerConfig.CLIENT_ID_CONFIG)
     private val kafkaProducer = KafkaProducer(
         kafkaProperties,

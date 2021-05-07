@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.db.datamodell.SøknadId
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
@@ -22,7 +23,7 @@ class PleiepengerSyktBarnSoknadService(
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val søknadRepository: SøknadRepository,
-) {
+    val innsendingClient: InnsendingClient) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
@@ -39,7 +40,14 @@ class PleiepengerSyktBarnSoknadService(
         hendelseProducer.sendMedOnSuccess(topicName = PLEIEPENGER_SYKT_BARN_TOPIC,
             data = dokumentfordelingMelding,
             key = søknad.søknadId.id,
-            onSuccess = onSuccess)
+            onSuccess = onSuccess
+        )
+
+        // TODO: Fjerne dobbelsending når verifisert
+        innsendingClient.sendSøknad(
+            søknadId = "${søknad.søknadId}",
+            søknad = søknad
+        )
     }
 
     fun toDokumentfordelingMelding(søknad: Any, journalpostIder: MutableSet<JournalpostId>): String {

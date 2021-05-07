@@ -11,10 +11,10 @@ import java.net.InetAddress
 import java.util.*
 
 @Configuration
-internal class InnsendingClientConfiguration {
+class InnsendingClientConfiguration {
 
     @Bean
-    internal fun InnsendingClient() = when (val kafkaProperties = kafkaPropertiesOrNull()) {
+    fun innsendingClient() = when (val kafkaProperties = kafkaPropertiesOrNull()) {
         null -> LoggingInnsendingClient()
         else -> KafkaInnsendingClient(kafkaProperties)
     }
@@ -23,6 +23,7 @@ internal class InnsendingClientConfiguration {
         val kafkaEnvironmentVariables = environment.filterKeys { it in RequiredKafkaEnvironmentVariables  }
         if (!kafkaEnvironmentVariables.keys.containsAll(RequiredKafkaEnvironmentVariables)) {
             logger.warn("Mangler EnvironmentVariables=[${RequiredKafkaEnvironmentVariables.minus(kafkaEnvironmentVariables.keys)}]")
+            return null
         }
 
         return Properties().apply {

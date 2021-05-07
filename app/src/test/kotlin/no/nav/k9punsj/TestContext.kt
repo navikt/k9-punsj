@@ -1,6 +1,6 @@
 package no.nav.k9punsj
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.config.runMigration

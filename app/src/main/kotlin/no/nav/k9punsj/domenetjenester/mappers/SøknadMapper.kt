@@ -32,12 +32,14 @@ internal class SøknadMapper {
         fun mapTilEksternFormat(
             søknad: PleiepengerSøknadMottakDto,
             soeknadId: SøknadIdDto,
-            hentPerioderSomFinnesIK9: List<PeriodeDto>
+            hentPerioderSomFinnesIK9: List<PeriodeDto>,
+            journalpostIder: Set<String>
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
             val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!,
                 hentPerioderSomFinnesIK9.stream().map { fromPeriodeDtoToString(it) }.toList())
 
+            // TODO: Legge journalpostIder inn i søknaden når ny k9-format er releaset.
             val søknadK9Format = opprettSøknad(
                 søknadId = UUID.fromString(soeknadId),
                 mottattDato = søknad.mottattDato!!,

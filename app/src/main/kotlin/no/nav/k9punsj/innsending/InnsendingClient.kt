@@ -9,7 +9,7 @@ import no.nav.k9.rapid.behov.Behovssekvens
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal interface InnsendingClient {
+interface InnsendingClient {
     private fun mapSøknad(søknadId: String, søknad: Any, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
         val søknad: Map<String,*> = objectMapper.convertValue(søknad)
         val behovssekvensId = ulid.nextULID()
