@@ -43,8 +43,7 @@ internal class SøknadMapper {
                 søknadId = UUID.fromString(soeknadId),
                 mottattDato = søknad.mottattDato!!,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
-                ytelse = pleiepengerSyktBarn,
-                journalpostIder = journalpostIder
+                ytelse = pleiepengerSyktBarn
             )
             val feil = validator.valider(søknadK9Format)
 
@@ -275,12 +274,9 @@ internal class SøknadMapper {
             versjon: Versjon = Versjon.of("1.0.0"),
             mottattDato: ZonedDateTime,
             søker: Søker,
-            ytelse: no.nav.k9.søknad.ytelse.Ytelse,
-            journalpostIder: Set<String>
+            ytelse: no.nav.k9.søknad.ytelse.Ytelse
         ): Søknad {
-            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse).medJournalposter(
-                journalpostIder.map { Journalpost().medJournalpostId(it) }
-            )
+            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
