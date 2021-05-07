@@ -98,7 +98,8 @@ internal class SøknadMapper {
                 }) else null,
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
-                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg
+                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg,
+                infoFraPunsj = søknad.infoFraPunsj
             )
         }
 

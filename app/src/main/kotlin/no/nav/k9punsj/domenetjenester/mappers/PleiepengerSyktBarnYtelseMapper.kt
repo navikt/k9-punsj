@@ -15,8 +15,11 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 internal class PleiepengerSyktBarnYtelseMapper {
     companion object {
         private val objectMapper = no.nav.k9punsj.objectMapper()
-        fun map(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto, endringsperioder: List<String>): PleiepengerSyktBarn {
-            val barn: Barn? = if(psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
+        fun map(
+            psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto,
+            endringsperioder: List<String>,
+        ): PleiepengerSyktBarn {
+            val barn: Barn? = if (psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
                 psb.barn.fødselsdato) else null
             val søknadsperiode: Periode? =
                 if (psb.søknadsperiode != null) objectMapper.convertValue(psb.søknadsperiode) else null
@@ -39,8 +42,9 @@ internal class PleiepengerSyktBarnYtelseMapper {
 
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
-            //TODO(OJR) fikse med ekte data
-            val infoFraPunsj: InfoFraPunsj? = InfoFraPunsj().medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(true)
+
+            val infoFraPunsj: InfoFraPunsj? = if (psb.infoFraPunsj != null)
+                InfoFraPunsj().medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.infoFraPunsj) else null
 
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
