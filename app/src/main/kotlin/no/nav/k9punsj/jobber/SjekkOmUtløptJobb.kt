@@ -9,6 +9,7 @@ import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +26,6 @@ class SjekkOmUtløptJobb @Autowired constructor(
 ) {
 
     private val logger = LoggerFactory.getLogger(SjekkOmUtløptJobb::class.java)
-    val topic = "privat-k9punsj-aksjonspunkthendelse-v1"
 
     //kjører klokken 04:00
     @Scheduled(cron = "0 0 4 * * *")
@@ -39,7 +39,8 @@ class SjekkOmUtløptJobb @Autowired constructor(
             }
 
             val nyeAksjonspunkter = aksjonspunkter.map {
-                aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
+                aksjonspunktRepository.opprettAksjonspunkt(
+                    AksjonspunktEntitet(
                     aksjonspunktId = UUID.randomUUID().toString(),
                     aksjonspunktKode = AksjonspunktKode.PUNSJ_HAR_UTLØPT,
                     journalpostId = it.journalpostId,
@@ -56,7 +57,7 @@ class SjekkOmUtløptJobb @Autowired constructor(
 
     private fun sendTilLos(journalpost: Journalpost, aksjonspunkt: AksjonspunktEntitet) {
         hendelseProducer.send(
-            topic,
+            Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             objectMapper().writeValueAsString(
                 PunsjEventDto(
                     journalpost.uuid.toString(),

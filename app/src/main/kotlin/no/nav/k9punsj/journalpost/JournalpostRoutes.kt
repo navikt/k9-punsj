@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
@@ -26,6 +27,7 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
+    private val aksjonspunktService: AksjonspunktService
 ) {
 
     private companion object {
@@ -39,6 +41,7 @@ internal class JournalpostRoutes(
         internal const val OmfordelJournalpost = "$JournalpostInfo/omfordel"
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
+        internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -102,6 +105,18 @@ internal class JournalpostRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(dto)
+            }
+        }
+
+        POST("/api${Urls.SettPåVent}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpost = request.journalpostId()
+                //TODO burde flagge søknad også? indikere at den også venter?
+                aksjonspunktService.settPåVent(journalpost)
+
+                ServerResponse
+                    .ok()
+                    .buildAndAwait()
             }
         }
 

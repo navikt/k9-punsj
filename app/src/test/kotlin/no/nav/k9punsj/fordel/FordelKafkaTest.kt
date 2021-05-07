@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestContext
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -40,7 +41,7 @@ internal class FordelKafkaTest {
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
+        Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo(melding.aktørId)
@@ -60,7 +61,7 @@ internal class FordelKafkaTest {
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
+        Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isNull()

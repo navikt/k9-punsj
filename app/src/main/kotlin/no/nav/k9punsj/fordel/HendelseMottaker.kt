@@ -6,6 +6,7 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
@@ -18,11 +19,9 @@ import java.util.UUID
 @Service
 class HendelseMottaker @Autowired constructor(
     val hendelseProducer: HendelseProducer,
-    val journalpostRepository: JournalpostRepository,
+    val journalpostRepository: JournalpostRepository
 ) {
     private companion object {
-        const val topic = "privat-k9punsj-aksjonspunkthendelse-v1"
-
         private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
     }
 
@@ -33,8 +32,9 @@ class HendelseMottaker @Autowired constructor(
             val uuid = UUID.randomUUID()
             journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
 
+            //TODO bytt ut med kall til IAksjonspunktService.opprettAksjonspunktOgSendTilK9Los
             hendelseProducer.send(
-                topic,
+                Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
                 objectMapper().writeValueAsString(
                     PunsjEventDto(
                         uuid.toString(),

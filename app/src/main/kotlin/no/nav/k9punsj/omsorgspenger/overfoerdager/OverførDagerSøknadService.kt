@@ -7,6 +7,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,8 +24,6 @@ class OverførDagerSøknadService @Autowired constructor(
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
 
-        //TODO(OJR) lag en tjeneste som sender og avslutter aksjonspunkter mot los
-        const val topicK9Los = "privat-k9punsj-aksjonspunkthendelse-v1"
         private val log: Logger = LoggerFactory.getLogger(OverførDagerSøknadService::class.java)
     }
 
@@ -48,7 +47,7 @@ class OverførDagerSøknadService @Autowired constructor(
                     aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
             ))
             log.info(data)
-            hendelseProducer.send(topicName = topicK9Los, data = data, key = id)
+            hendelseProducer.send(topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS, data = data, key = id)
         }
     }
 }

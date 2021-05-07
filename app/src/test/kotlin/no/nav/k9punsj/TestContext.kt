@@ -1,6 +1,9 @@
 package no.nav.k9punsj
 
 import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -44,6 +47,36 @@ class TestContext {
         override fun decodeToken(accessToken: String): IIdToken {
             return IdTokenLocal()
         }
+    }
+
+    @Bean
+    fun aksjonspunktService() = aksjonspunktService
+    val aksjonspunktService: AksjonspunktService = object : AksjonspunktService {
+        override suspend fun opprettAksjonspunktOgSendTilK9Los(
+            journalpostId: String,
+            aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        ) {
+
+        }
+
+        override suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(
+            journalpostId: String,
+            aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        ) {
+
+        }
+
+        override suspend fun settPåVent(journalpostId: String) {
+
+        }
+
+        override suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
+            journalpostId: List<String>,
+            aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        ) {
+
+        }
+
     }
 
     @Bean

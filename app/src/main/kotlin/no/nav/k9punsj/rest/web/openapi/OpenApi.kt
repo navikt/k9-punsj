@@ -443,6 +443,16 @@ internal class JournalpostController {
     ) {
     }
 
+    @PostMapping(JournalpostRoutes.Urls.SettPåVent, produces = ["application/json"])
+    @Operation(
+        summary = "Hente informasjon om en journalpost",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun SettPåVent(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
+
     @GetMapping(JournalpostRoutes.Urls.Dokument, produces = ["application/pdf"])
     @ApiResponses(
         value = [

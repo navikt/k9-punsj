@@ -78,4 +78,21 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
         frist_tid = row.localDateTimeOrNull("frist_tid"),
         vent_årsak = if (row.stringOrNull("vent_aarsak") != null) VentÅrsakType.fraKode(row.string("vent_aarsak")) else null
     )
+
+    fun hentAksjonspunkt(journalpostId: String, kode: String): AksjonspunktEntitet? {
+        return using(sessionOf(dataSource)) {
+            it.run(
+                queryOf("""
+                        select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
+                        from aksjonspunkt
+                        where id_journalpost = :journalpostId and aksjonspunkt_kode = :kode
+                    """, mapOf("journalpostId" to journalpostId),
+                    "kode" to kode
+                )
+                    .map { row ->
+                        aksjonspunktEntitet(row)
+                    }.asSingle
+            )
+        }
+    }
 }
