@@ -29,7 +29,7 @@ internal class FordelKafkaTest {
 
     @Test
     fun `motta melding om journalføringsoppgave fra fordel`() {
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "201")
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
@@ -49,7 +49,7 @@ internal class FordelKafkaTest {
 
     @Test
     fun `motta melding om journalføringsoppgave fra fordel ukjent aktør`() {
-        val melding = FordelPunsjEventDto(journalpostId = "200")
+        val melding = FordelPunsjEventDto(journalpostId = "6666")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
