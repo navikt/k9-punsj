@@ -1,11 +1,11 @@
 package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import de.huxhorn.sulky.ulid.ULID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
+import no.nav.k9.søknad.JsonUtils
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -40,7 +40,7 @@ interface InnsendingClient {
 
     companion object {
         private val logger = LoggerFactory.getLogger(InnsendingClient::class.java)
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = JsonUtils.getObjectMapper()
         private val ulid = ULID()
         private const val BehovNavn = "PunsjetSøknad"
         private const val SøknadKey = "søknad"
