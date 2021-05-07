@@ -26,6 +26,8 @@ class KafkaInnsendingClient(kafkaProperties: Properties) : InnsendingClient {
         }
     }
 
+    override fun toString() = "KafkaInnsendingClient: Innsendinger sendes på Topic=[$TOPIC], ClientId=[$clientId]"
+
     private companion object {
         private val logger = LoggerFactory.getLogger(KafkaInnsendingClient::class.java)
         private const val TOPIC = "omsorgspenger.k9-rapid-v2"

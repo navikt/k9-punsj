@@ -15,14 +15,14 @@ class InnsendingClientConfiguration {
 
     @Bean
     fun innsendingClient() = when (val kafkaProperties = kafkaPropertiesOrNull()) {
-        null -> LoggingInnsendingClient()
-        else -> KafkaInnsendingClient(kafkaProperties)
+        null -> LoggingInnsendingClient().also { logger.error("$it") }
+        else -> KafkaInnsendingClient(kafkaProperties).also { logger.info("$it") }
     }
 
     private fun kafkaPropertiesOrNull(environment: Map<String, String> = System.getenv()): Properties? {
         val kafkaEnvironmentVariables = environment.filterKeys { it in RequiredKafkaEnvironmentVariables  }
         if (!kafkaEnvironmentVariables.keys.containsAll(RequiredKafkaEnvironmentVariables)) {
-            logger.warn("Mangler EnvironmentVariables=${RequiredKafkaEnvironmentVariables.minus(kafkaEnvironmentVariables.keys)}")
+            logger.error("Mangler EnvironmentVariables=${RequiredKafkaEnvironmentVariables.minus(kafkaEnvironmentVariables.keys)} for å gjøre innsendinger.")
             return null
         }
 
