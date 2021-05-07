@@ -145,7 +145,10 @@ internal class PleiepengerSyktBarnRoutes(
 
                         val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)
 
-                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9)
+                        val journalPoster = søknadEntitet.journalposter!!
+                        val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+
+                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9, journalposterDto.journalposter)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
@@ -161,8 +164,6 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        val journalPoster = søknadEntitet.journalposter!!
-                        val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
                         pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
                             journalposterDto.journalposter

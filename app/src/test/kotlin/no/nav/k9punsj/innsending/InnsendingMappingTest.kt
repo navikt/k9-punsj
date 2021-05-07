@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -19,7 +20,8 @@ internal class InnsendingMappingTest {
         val k9Format = SøknadMapper.mapTilEksternFormat(
             søknad = SøknadMapper.mapTilSendingsformat(dto),
             soeknadId = "${UUID.randomUUID()}",
-            hentPerioderSomFinnesIK9 = emptyList()
+            hentPerioderSomFinnesIK9 = emptyList(),
+            journalpostIder = setOf(IdGenerator.nesteId(), IdGenerator.nesteId())
         ).first
 
         val (_, value) = innsendingClient.mapSøknad(
