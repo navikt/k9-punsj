@@ -1,6 +1,5 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
-
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.Validator
@@ -36,8 +35,10 @@ internal class SøknadMapper {
             journalpostIder: Set<String>
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
-            val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(ytelse!!,
-                hentPerioderSomFinnesIK9.stream().map { fromPeriodeDtoToString(it) }.toList())
+            val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(
+                psb = ytelse!!,
+                endringsperioder = hentPerioderSomFinnesIK9.map { fromPeriodeDtoToString(it) }
+            )
 
             val søknadK9Format = opprettSøknad(
                 søknadId = UUID.fromString(soeknadId),

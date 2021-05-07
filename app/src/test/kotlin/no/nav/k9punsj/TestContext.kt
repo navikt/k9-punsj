@@ -1,9 +1,7 @@
 package no.nav.k9punsj
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.azuregraph.IAzureGraphService
-import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -16,6 +14,7 @@ import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.info.IdTokenLocal
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
+import no.nav.k9punsj.util.DatabaseUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -109,9 +108,6 @@ class TestContext {
 
     @Bean
     fun databaseInitializer(): DataSource {
-        val pg = EmbeddedPostgres.builder().setPort(5433).start()
-        val dataSource = pg.postgresDatabase
-        runMigration(dataSource)
-        return dataSource
+        return DatabaseUtil.dataSource
     }
 }
