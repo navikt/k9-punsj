@@ -46,6 +46,8 @@ spec:
       - mountPath: /var/run/secrets/nais.io/appdynamics
         kvPath: /apikey/appdynamics/prod
   webproxy: true
+  kafka:
+    pool: nav-prod
   env:
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.nais.adeo.no
