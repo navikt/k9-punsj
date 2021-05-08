@@ -7,6 +7,8 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,6 +19,10 @@ class AksjonspunktServiceImpl(
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,
 ) : AksjonspunktService {
+
+    private companion object {
+        private val log: Logger = LoggerFactory.getLogger(AksjonspunktServiceImpl::class.java)
+    }
 
     override suspend fun opprettAksjonspunktOgSendTilK9Los(
         journalpostId: String,
@@ -41,6 +47,7 @@ class AksjonspunktServiceImpl(
 
             runBlocking {
                 aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
+                log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
             }
         }
     }
@@ -64,6 +71,7 @@ class AksjonspunktServiceImpl(
 
             runBlocking {
                 aksjonspunktRepository.settStatus(aksjonspunktEntitet.aksjonspunktId, AksjonspunktStatus.UTFØRT)
+                log.info("Setter aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ") til UTFØRT")
             }
         }
     }
@@ -101,12 +109,15 @@ class AksjonspunktServiceImpl(
 
                 runBlocking {
                     aksjonspunktRepository.settStatus(nåVærendeAp.aksjonspunktId, AksjonspunktStatus.UTFØRT)
+                    log.info("Setter aksjonspunkt("+nåVærendeAp.aksjonspunktId+") med kode (" + nåVærendeAp.aksjonspunktKode.kode + ") til UTFØRT")
                     aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
+                    log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
                 }
             }
         } else {
             // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent
             aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
+            log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
         }
     }
 

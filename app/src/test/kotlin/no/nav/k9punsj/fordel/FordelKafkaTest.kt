@@ -3,6 +3,10 @@ package no.nav.k9punsj.fordel
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestContext
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
+import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -20,10 +24,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [HendelseMottaker::class, TestContext::class, JournalpostRepository::class])
+@ContextConfiguration(classes = [HendelseMottaker::class, AksjonspunktServiceImpl::class, TestContext::class, JournalpostRepository::class, AksjonspunktRepository::class])
 internal class FordelKafkaTest {
+
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
+
+    @Autowired
+    private lateinit var aksjonspunktService: AksjonspunktServiceImpl
 
     @Autowired
     private lateinit var hendelseMottaker: HendelseMottaker
@@ -35,11 +43,13 @@ internal class FordelKafkaTest {
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
+        val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
+        doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
 
-        doNothing().`when`(hendelseProducer).send(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor))
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(melding.journalpostId, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
@@ -55,11 +65,12 @@ internal class FordelKafkaTest {
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
+        val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-
-        doNothing().`when`(hendelseProducer).send(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor))
+        doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(melding.journalpostId, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
@@ -71,5 +82,10 @@ internal class FordelKafkaTest {
     private fun captureString(valueCaptor: ArgumentCaptor<String>): String {
         valueCaptor.capture()
         return ""
+    }
+
+    private fun captureFun(valueCaptor: ArgumentCaptor<Any>): () -> Unit {
+        valueCaptor.capture()
+        return {}
     }
 }
