@@ -7,6 +7,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -21,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
@@ -49,7 +51,9 @@ internal class FordelKafkaTest {
 
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(melding.journalpostId, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
+            val journalpost =
+                Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
@@ -70,7 +74,9 @@ internal class FordelKafkaTest {
         doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         runBlocking {
             hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(melding.journalpostId, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
+            val journalpost =
+                Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value

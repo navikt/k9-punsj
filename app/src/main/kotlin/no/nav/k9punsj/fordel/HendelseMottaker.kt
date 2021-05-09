@@ -27,8 +27,9 @@ class HendelseMottaker @Autowired constructor(
 
         if (fantIkke) {
             val uuid = UUID.randomUUID()
-            journalpostRepository.opprettJournalpost(Journalpost(uuid, journalpostId, aktørId))
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpostId, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
+            val journalpost = Journalpost(uuid, journalpostId, aktørId)
+            journalpostRepository.opprettJournalpost(journalpost)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
         } else {
             log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
         }

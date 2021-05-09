@@ -2,6 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.PunsjEventDto
+import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -25,10 +26,9 @@ class AksjonspunktServiceImpl(
     }
 
     override suspend fun opprettAksjonspunktOgSendTilK9Los(
-        journalpostId: String,
+        journalpost: Journalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
     ) {
-        val journalpost = journalpostRepository.hent(journalpostId)
         val eksternId = journalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),
@@ -39,7 +39,7 @@ class AksjonspunktServiceImpl(
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             lagPunsjDto(eksternId,
-                journalpostId,
+                journalpost.journalpostId,
                 journalpost.aktørId,
                 mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode)
             ),

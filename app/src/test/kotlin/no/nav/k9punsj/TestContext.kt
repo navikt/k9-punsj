@@ -2,11 +2,12 @@ package no.nav.k9punsj
 
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
-import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
@@ -53,10 +54,9 @@ class TestContext {
     fun aksjonspunktService() = aksjonspunktService
     val aksjonspunktService: AksjonspunktService = object : AksjonspunktService {
         override suspend fun opprettAksjonspunktOgSendTilK9Los(
-            journalpostId: String,
+            journalpost: Journalpost,
             aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         ) {
-
         }
 
         override suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(
