@@ -47,7 +47,7 @@ class AksjonspunktServiceImpl(
 
             runBlocking {
                 aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+                log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
             }
         }
     }
@@ -71,7 +71,7 @@ class AksjonspunktServiceImpl(
 
             runBlocking {
                 aksjonspunktRepository.settStatus(aksjonspunktEntitet.aksjonspunktId, AksjonspunktStatus.UTFØRT)
-                log.info("Setter aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ") til UTFØRT")
+                log.info("Setter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ") til UTFØRT")
             }
         }
     }
@@ -97,7 +97,7 @@ class AksjonspunktServiceImpl(
 
         val nåVærendeAp = aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.PUNSJ.kode)
 
-        if (nåVærendeAp != null) {
+        if (nåVærendeAp != null && nåVærendeAp.aksjonspunktStatus != AksjonspunktStatus.UTFØRT) {
             hendelseProducer.sendMedOnSuccess(
                 Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
                 lagPunsjDto(eksternId,
@@ -109,15 +109,21 @@ class AksjonspunktServiceImpl(
 
                 runBlocking {
                     aksjonspunktRepository.settStatus(nåVærendeAp.aksjonspunktId, AksjonspunktStatus.UTFØRT)
-                    log.info("Setter aksjonspunkt("+nåVærendeAp.aksjonspunktId+") med kode (" + nåVærendeAp.aksjonspunktKode.kode + ") til UTFØRT")
+                    log.info("Setter aksjonspunkt(" + nåVærendeAp.aksjonspunktId + ") med kode (" + nåVærendeAp.aksjonspunktKode.kode + ") til UTFØRT")
                     aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                    log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+                    log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
                 }
             }
         } else {
             // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent
-            aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-            log.info("Opprettet aksjonspunkt("+aksjonspunktEntitet.aksjonspunktId+") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+            val ventePunkt =
+                aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
+            if (ventePunkt != null && ventePunkt.aksjonspunktStatus != AksjonspunktStatus.OPPRETTET) {
+                aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
+                log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+            } else {
+                log.info("Denne journalposten($journalpostId) venter allerede - venter til ${ventePunkt?.frist_tid}")
+            }
         }
     }
 
