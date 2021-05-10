@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.web.openapi
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -494,7 +495,14 @@ data class OasJournalpostInfo(
 )
 
 data class OasJournalpostIder(
-    val poster : List<JournalpostIdDto>
+    val poster : List<OasJournalpostDto>
+)
+
+data class OasJournalpostDto(
+    val journalpostId: JournalpostIdDto,
+    val dokumenter: Set<OasDokumentInfo>?,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val dato: LocalDate
 )
 
 @RestController

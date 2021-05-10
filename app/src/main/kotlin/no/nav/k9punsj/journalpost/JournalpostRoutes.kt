@@ -9,6 +9,8 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.IdentDto
+import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
+import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -99,12 +101,22 @@ internal class JournalpostRoutes(
                     ?: throw IllegalStateException("Fant ikke aktørId i PDL")
 
                 val finnJournalposterPåPerson = journalpostService.finnJournalposterPåPerson(aktørId)
-                val dto = OasJournalpostIder(finnJournalposterPåPerson)
+
+                val journalpostMap = finnJournalposterPåPerson.map { journalpostService.hentJournalpostInfo(it.journalpostId) }
+                    .filter { it?.journalpostId != null }
+                    .groupBy { it?.journalpostId }
+
+                val dto = finnJournalposterPåPerson.map { it ->
+                    val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
+                        ?.map { OasDokumentInfo(it.dokumentId) }?.toSet()
+
+                    OasJournalpostDto(it.journalpostId, dok, it.dato)
+                }.toList()
 
                 ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(dto)
+                    .bodyValueAndAwait(OasJournalpostIder(dto))
             }
         }
 

@@ -62,9 +62,8 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostId> {
-        val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(aktørId)
-        return finnJournalposterPåPerson
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostRepository.JournalIdMedDato> {
+        return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
     internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {

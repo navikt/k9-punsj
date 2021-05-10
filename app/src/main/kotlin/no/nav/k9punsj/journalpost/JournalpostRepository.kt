@@ -8,6 +8,7 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -18,7 +19,11 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     private val objectMapper = objectMapper();
 
-    suspend fun lagre(journalpostId: Journalpost, kilde: KildeType = KildeType.FORDEL, function: (Journalpost?) -> Journalpost): Journalpost {
+    suspend fun lagre(
+        journalpostId: Journalpost,
+        kilde: KildeType = KildeType.FORDEL,
+        function: (Journalpost?) -> Journalpost,
+    ): Journalpost {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val json = tx.run(
@@ -44,7 +49,10 @@ class JournalpostRepository(private val dataSource: DataSource) {
                     values (:id, :data :: jsonb, :kilde)
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
-                 """, mapOf("id" to journalpostId.journalpostId, "data" to objectMapper.writeValueAsString(journalpost), "kilde" to kilde.kode)
+                 """,
+                        mapOf("id" to journalpostId.journalpostId,
+                            "data" to objectMapper.writeValueAsString(journalpost),
+                            "kilde" to kilde.kode)
                     ).asUpdate
                 )
                 return@transaction journalpost
@@ -70,15 +78,18 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostId> {
+    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalIdMedDato> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "select journalpost_id from journalpost where data ->> 'aktørId' = '$aktørId'"
+                "SELECT JOURNALPOST_ID, OPPRETTET_TID FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
             )
             val resultat = it.run(
                 statement
                     .map { row ->
-                        row.string("journalpost_id")
+                        JournalIdMedDato(
+                            row.string("journalpost_id"),
+                            row.localDate("opprettet_tid")
+                        )
                     }.asList
             )
             resultat
@@ -136,4 +147,9 @@ class JournalpostRepository(private val dataSource: DataSource) {
             }
         }
     }
+
+    data class JournalIdMedDato(
+        val journalpostId: JournalpostId,
+        val dato: LocalDate,
+    )
 }
