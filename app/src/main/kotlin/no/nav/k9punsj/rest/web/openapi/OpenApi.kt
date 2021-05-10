@@ -492,6 +492,7 @@ data class OasDokumentInfo(
 
 data class OasJournalpostInfo(
     val dokumenter: Set<OasDokumentInfo>,
+    val venter : OasVentDto?
 )
 
 data class OasJournalpostIder(
@@ -503,6 +504,12 @@ data class OasJournalpostDto(
     val dokumenter: Set<OasDokumentInfo>?,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate
+)
+
+data class OasVentDto(
+    val venteÅrsak : String,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val venterTil : LocalDate
 )
 
 @RestController

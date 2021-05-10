@@ -8,6 +8,7 @@ import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
@@ -77,6 +78,9 @@ class TestContext {
 
         }
 
+        override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
+            return null
+        }
     }
 
     @Bean

@@ -99,7 +99,8 @@ class K9PunsjApplicationTests {
 					"dokumentId": "470164680"
 				},{
 					"dokumentId": "470164681"
-				}]
+				}],
+                "venter" : null
 			}
 		""".trimIndent(), responseEntity, true)
     }

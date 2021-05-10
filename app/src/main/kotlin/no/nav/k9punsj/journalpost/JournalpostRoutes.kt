@@ -63,10 +63,13 @@ internal class JournalpostRoutes(
                         if (journalpostInfo.norskIdent == null && journalpostInfo.aktørId != null) {
                             val pdlResponse = pdlService.identifikatorMedAktørId(journalpostInfo.aktørId)
                             val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+
                             val journalpostInfoDto = JournalpostInfoDto(
                                 journalpostId = journalpostInfo.journalpostId,
                                 norskIdent = personIdent,
-                                dokumenter = journalpostInfo.dokumenter)
+                                dokumenter = journalpostInfo.dokumenter,
+                                aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())
+                            )
                             ServerResponse
                                 .ok()
                                 .json()
@@ -77,7 +80,8 @@ internal class JournalpostRoutes(
                                 .json()
                                 .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
                                     norskIdent = journalpostInfo.norskIdent,
-                                    dokumenter = journalpostInfo.dokumenter))
+                                    dokumenter = journalpostInfo.dokumenter,
+                                    aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())))
                         }
                     }
 

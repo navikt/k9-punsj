@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
@@ -81,6 +82,14 @@ class AksjonspunktServiceImpl(
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
     ) {
         journalpostId.forEach { settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(it, aksjonspunkt) }
+    }
+
+    override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
+        val aksjonspunkt = aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
+        if (aksjonspunkt != null && aksjonspunkt.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET) {
+           return VentDto(aksjonspunkt.vent_årsak?.navn!!, aksjonspunkt.frist_tid!!.toLocalDate())
+        }
+        return null
     }
 
     override suspend fun settPåVent(journalpostId: String) {

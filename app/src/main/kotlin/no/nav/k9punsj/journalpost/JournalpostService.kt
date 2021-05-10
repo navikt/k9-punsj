@@ -1,5 +1,6 @@
 package no.nav.k9punsj.journalpost
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -7,6 +8,7 @@ import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class JournalpostService(
@@ -119,7 +121,14 @@ data class JournalpostInfo(
 data class JournalpostInfoDto(
     val journalpostId: JournalpostId,
     val norskIdent: NorskIdent?,
-    val dokumenter: List<DokumentInfo>
+    val dokumenter: List<DokumentInfo>,
+    val venter : VentDto?
+)
+
+data class VentDto(
+    val venteÅrsak : String,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val venterTil : LocalDate
 )
 
 data class DokumentInfo(

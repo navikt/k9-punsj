@@ -1,6 +1,7 @@
 package no.nav.k9punsj.akjonspunkter
 
 import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.VentDto
 
 interface AksjonspunktService {
 
@@ -19,4 +20,6 @@ interface AksjonspunktService {
         journalpostId: List<String>,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>
     )
+
+    suspend fun sjekkOmDenErPåVent(journalpostId: String) : VentDto?
 }
