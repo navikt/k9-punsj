@@ -5,15 +5,14 @@ import de.huxhorn.sulky.ulid.ULID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
+import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
-import java.util.*
 
 interface InnsendingClient {
-    fun mapSøknad(søknadId: String, søknad: Any, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
+    fun mapSøknad(søknadId: String, søknad: Any, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
         val søknad: Map<String, *> = objectMapper.convertValue(søknad)
         val behovssekvensId = ulid.nextULID()
-        val correlationId = "${tilleggsOpplysninger.getOrDefault(CorrelationIdKey, UUID.randomUUID())}"
 
         logger.info("Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",
             keyValue("soknad_id", søknadId),
@@ -25,15 +24,15 @@ interface InnsendingClient {
             correlationId = correlationId,
             behov = arrayOf(Behov(
                 navn = BehovNavn,
-                input = tilleggsOpplysninger.plus(
-                    SøknadKey to søknad
-                )
+                input = tilleggsOpplysninger
+                    .plus(SøknadKey to søknad)
+                    .plus(VersjonKey to Versjon)
             ))
         ).keyValue
     }
 
-    fun sendSøknad(søknadId: String, søknad: Any, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
-        send(mapSøknad(søknadId, søknad, tilleggsOpplysninger))
+    fun sendSøknad(søknadId: String, søknad: Any, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
+        send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 
     fun send(pair: Pair<String, String>)
@@ -44,6 +43,7 @@ interface InnsendingClient {
         private val ulid = ULID()
         private const val BehovNavn = "PunsjetSøknad"
         private const val SøknadKey = "søknad"
-        private const val CorrelationIdKey = "correlationId"
+        private const val VersjonKey = "versjon"
+        private const val Versjon = "1.0.0"
     }
 }

@@ -10,6 +10,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -19,6 +20,7 @@ import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import kotlin.coroutines.coroutineContext
 
 
 @Service
@@ -53,7 +55,8 @@ class PleiepengerSyktBarnSoknadService(
         // TODO: Fjern dobbel innsending
         innsendingClient.sendSøknad(
             søknadId = søknad.søknadId.id,
-            søknad = søknad
+            søknad = søknad,
+            correlationId = coroutineContext.hentCorrelationId()
         )
     }
 

@@ -27,7 +27,8 @@ internal class InnsendingMappingTest {
         val (_, value) = innsendingClient.mapSøknad(
             søknadId = k9Format.søknadId.id,
             søknad = k9Format,
-            tilleggsOpplysninger = emptyMap()
+            tilleggsOpplysninger = emptyMap(),
+            correlationId = "${UUID.randomUUID()}"
         )
 
         println(value)
