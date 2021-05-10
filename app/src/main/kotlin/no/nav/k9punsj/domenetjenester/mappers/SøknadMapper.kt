@@ -100,9 +100,16 @@ internal class SøknadMapper {
                 }) else null,
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
-                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else søknad.omsorg,
+                omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else mapOmsorg(søknad.omsorg!!),
                 infoFraPunsj = søknad.infoFraPunsj
             )
+        }
+
+        private fun mapOmsorg(omsorg: PleiepengerSøknadVisningDto.OmsorgDto): PleiepengerSøknadVisningDto.OmsorgDto {
+            return PleiepengerSøknadVisningDto.OmsorgDto(
+                omsorg.relasjonTilBarnet!!.toUpperCase(),
+                omsorg.samtykketOmsorgForBarnet,
+                omsorg.beskrivelseAvOmsorgsrollen)
         }
 
         private fun lagUttak(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? {
