@@ -6,4 +6,6 @@ interface PdlService {
 
     suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse?
 
+    suspend fun aktørIdFor(fnummer: String): String?
+
 }

@@ -136,6 +136,10 @@ class TestContext {
 
             return PdlResponse(false, identPdl)
         }
+
+        override suspend fun aktørIdFor(fnummer: String): String? {
+            return dummyAktørId
+        }
     }
 
 

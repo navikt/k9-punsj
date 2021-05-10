@@ -139,6 +139,44 @@ class PdlServiceImpl(
 
     }
 
+    @Throws(IkkeTilgang::class)
+    override suspend fun aktørIdFor(fnummer: String): String? {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = scope
+            )
+        val req = QueryRequest(
+            getStringFromResource("/pdl/hentIdent.graphql"),
+            mapOf(
+                "ident" to fnummer,
+                "historikk" to "false",
+                "grupper" to listOf("AKTORID")
+            )
+        )
+        val authentication = coroutineContext.hentAuthentication()
+        val response = client
+            .post()
+            .uri { it.build() }
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(TemaHeader, TemaHeaderValue)
+            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
+            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(req)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        val json = response.body ?: return null
+        val (data, errors) = objectMapper().readValue<IdentPdl>(json)
+        if (errors != null) {
+            logger.warn(objectMapper().writeValueAsString(errors))
+        }
+        val pdlResponse = PdlResponse(false, identPdl = IdentPdl(data, errors))
+        return pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
+    }
+
     private fun getStringFromResource(path: String) =
         PdlServiceImpl::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
 

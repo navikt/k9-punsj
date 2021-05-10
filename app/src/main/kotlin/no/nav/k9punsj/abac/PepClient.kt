@@ -7,6 +7,7 @@ import no.nav.k9punsj.AppConfiguration
 import no.nav.k9punsj.audit.*
 import no.nav.k9punsj.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.Logger
@@ -33,6 +34,7 @@ class PepClient(
     private val config: AppConfiguration,
     private val azureGraphService: AzureGraphService,
     private val auditlogger: Auditlogger,
+    private val pdlService: PdlService,
 ) : IPepClient {
 
     private val url = config.abacEndpointUrl()
@@ -43,27 +45,7 @@ class PepClient(
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
-
-        auditlogger.logg(
-            Auditdata(
-                header = AuditdataHeader(
-                    vendor = auditlogger.defaultVendor,
-                    product = auditlogger.defaultProduct,
-                    eventClassId = EventClassId.AUDIT_SEARCH,
-                    name = "ABAC Sporingslogg",
-                    severity = "INFO"
-                ), fields = setOf(
-                    CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
-                    CefField(CefFieldName.REQUEST, "read"),
-                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
-                    CefField(CefFieldName.ABAC_ACTION, "read"),
-                    CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
-                    //TODO(FIXME!!!) legg på ekte aktørId her
-                    CefField(CefFieldName.BERORT_BRUKER_ID, "aktørid"),
-                )
-            )
-        )
-
+        loggTilAudit(identTilInnloggetBruker, fnr)
         return decision
     }
 
@@ -84,7 +66,32 @@ class PepClient(
 
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+
+        fnr.forEach {
+            loggTilAudit(identTilInnloggetBruker, it)
+        }
         return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+    }
+
+    private suspend fun loggTilAudit(identTilInnloggetBruker: String, it: String) {
+        auditlogger.logg(
+            Auditdata(
+                header = AuditdataHeader(
+                    vendor = auditlogger.defaultVendor,
+                    product = auditlogger.defaultProduct,
+                    eventClassId = EventClassId.AUDIT_SEARCH,
+                    name = "ABAC Sporingslogg",
+                    severity = "INFO"
+                ), fields = setOf(
+                    CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
+                    CefField(CefFieldName.REQUEST, "read"),
+                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
+                    CefField(CefFieldName.ABAC_ACTION, "read"),
+                    CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
+                    CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(it)),
+                )
+            )
+        )
     }
 
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {
