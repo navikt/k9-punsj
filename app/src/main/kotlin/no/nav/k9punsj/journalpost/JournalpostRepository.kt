@@ -120,20 +120,8 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun ferdig(journalpostId: String) {
         return using(sessionOf(dataSource)) {
-            it.transaction { tx ->
-                //language=PostgreSQL
-                val json = tx.run(
-                    queryOf(
-                        """
-                    insert into journalpost as k (journalpost_id, data, ferdig_behandlet)
-                    values (:id, :data :: jsonb, :ferdig)
-                    on conflict (JOURNALPOST_ID) do update
-                    set ferdig_behandlet = :ferdig
-                    
-                 """, mapOf("id" to journalpostId, "ferdig" to true)
-                    ).asUpdate
-                )
-            }
+            it.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true where JOURNALPOST_ID = ?",
+                journalpostId).asUpdate)
         }
     }
 
