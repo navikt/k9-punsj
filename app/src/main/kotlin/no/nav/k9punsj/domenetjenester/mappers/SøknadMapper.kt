@@ -70,32 +70,37 @@ internal class SøknadMapper {
                 opptjeningAktivitet = if (erNullEllerTom(søknad.opptjeningAktivitet)) mapTilMottakArbeidAktivitetDto(
                     søknad.opptjeningAktivitet!!) else null,
                 soknadsinfo = søknad.soknadsinfo,
-                bosteder = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(søknad.bosteder?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto.BostedPeriodeInfoDto(it.land))
-                }),
-                utenlandsopphold = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto(søknad.utenlandsopphold?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto.UtenlandsoppholdPeriodeInfoDto(
-                            it.land,
-                            null))
-                }),
-                beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
-                }),
-                nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
-                }),
-                tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning?.perioder?.associate {
-                    Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(
-                            zeroTimerHvisTomString(it.timer.toString())
-                                .plus(zeroMinutterHvisTomString(it.minutter.toString()))))
-                }),
+                bosteder = if (!søknad.bosteder.isNullOrEmpty() && søknad.bosteder[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(
+                    søknad.bosteder.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto.BostedPeriodeInfoDto(it.land))
+                    }) else null,
+                utenlandsopphold = if (!søknad.utenlandsopphold.isNullOrEmpty() && søknad.utenlandsopphold[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto(
+                    søknad.utenlandsopphold.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UtenlandsoppholdDto.UtenlandsoppholdPeriodeInfoDto(
+                                it.land,
+                                null))
+                    }) else null,
+                beredskap = if (!søknad.beredskap.isNullOrEmpty() && søknad.beredskap[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(
+                    søknad.beredskap.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
+                    }) else null,
+                nattevåk = if (!søknad.nattevaak.isNullOrEmpty() && søknad.nattevaak[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(
+                    søknad.nattevaak.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
+                    }) else null,
+                tilsynsordning = if (!søknad.tilsynsordning?.perioder.isNullOrEmpty() && søknad.tilsynsordning?.perioder?.get(0)?.periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(
+                    søknad.tilsynsordning.perioder.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(
+                                zeroTimerHvisTomString(it.timer.toString())
+                                    .plus(zeroMinutterHvisTomString(it.minutter.toString()))))
+                    }) else null,
                 lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty()) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(
-                    søknad.lovbestemtFerie?.associate {
+                    søknad.lovbestemtFerie.associate {
                         Pair(fromPeriodeDtoToString(it),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
                     }) else null,
@@ -130,7 +135,8 @@ internal class SøknadMapper {
             }
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(
                 mapOf(Pair(fromPeriodeDtoToString(søknad.soeknadsperiode),
-                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(zeroTimerHvisTomString("PT7H30M")))))
+                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(zeroTimerHvisTomString(
+                        "PT7H30M")))))
         }
 
         private fun erNullEllerTom(opptjeningAktivitet: PleiepengerSøknadVisningDto.ArbeidAktivitetDto?): Boolean {
