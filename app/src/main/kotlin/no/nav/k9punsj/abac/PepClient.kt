@@ -53,7 +53,7 @@ class PepClient(
         identTilInnloggetBruker: String,
         fnr: String,
     ): XacmlRequestBuilder {
-        val requestBuilder = XacmlRequestBuilder()
+        return XacmlRequestBuilder()
             .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
             .addResourceAttribute(RESOURCE_TYPE, BASIS_TILGANG)
             .addActionAttribute(ACTION_ID, "read")
@@ -61,7 +61,6 @@ class PepClient(
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
             .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
             .addResourceAttribute(RESOURCE_FNR, fnr)
-        return requestBuilder
     }
 
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
@@ -115,6 +114,8 @@ class PepClient(
                 .awaitFirst()
 
             val result = try {
+                // for test
+                log.info(response.body)
                 objectMapper().readValue<Response>(response.body ?: "").response[0].decision == "Permit"
             } catch (e: Exception) {
                 log.error(
