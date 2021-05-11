@@ -119,8 +119,8 @@ class TestContext {
             søker: NorskIdent,
             barn: NorskIdent,
             fagsakYtelseType: FagsakYtelseType,
-        ): List<PeriodeDto> {
-            return listOf()
+        ): Pair<List<PeriodeDto>?, String?> {
+            return Pair(emptyList(), null)
         }
     }
 

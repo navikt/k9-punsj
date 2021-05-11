@@ -9,6 +9,6 @@ interface K9SakService {
 
     suspend fun opprettEllerHentFagsakNummer() : SaksnummerDto
 
-    suspend fun hentPerioderSomFinnesIK9(søker: NorskIdent, barn: NorskIdent, fagsakYtelseType: FagsakYtelseType) : List<PeriodeDto>
+    suspend fun hentPerioderSomFinnesIK9(søker: NorskIdent, barn: NorskIdent, fagsakYtelseType: FagsakYtelseType) : Pair<List<PeriodeDto>?, String?>
 
 }

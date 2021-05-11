@@ -45,7 +45,7 @@ class K9SakServiceImpl(
         søker: NorskIdent,
         barn: NorskIdent,
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
-    ): List<PeriodeDto> {
+    ): Pair<List<PeriodeDto>?, String?> {
 
         val matchDto = MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
@@ -77,13 +77,13 @@ class K9SakServiceImpl(
         )
         return try {
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
-            resultat.map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
+            val liste = resultat.map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
+            Pair(liste, null)
         } catch (e: Exception) {
-            throw IllegalStateException("Feilet deserialisering", e)
+            Pair(null, "Feilet deserialisering $e")
         }
     }
 
-    //TODO(OJR) benytt kontrakt fra k9-sak
     data class MatchDto(
         val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
         val bruker: String,

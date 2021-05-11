@@ -143,7 +143,7 @@ internal class PleiepengerSyktBarnRoutes(
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                         val format = SøknadMapper.mapTilSendingsformat(søknad)
 
-                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)
+                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -224,26 +224,35 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.matchFagsak()
-                harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent))?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
+                    matchfagsak.barnIdent))?.let { return@RequestContext it }
 
                 val hentPerioderSomFinnesIK9 = k9SakService.hentPerioderSomFinnesIK9(
                     matchfagsak.brukerIdent,
                     matchfagsak.barnIdent,
                     FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(hentPerioderSomFinnesIK9)
+                return@RequestContext if (hentPerioderSomFinnesIK9.first != null) {
+                    val body = hentPerioderSomFinnesIK9.first!!
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(body)
+
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .buildAndAwait()
+                }
             }
         }
     }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): List<PeriodeDto> {
+    private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): Pair<List<PeriodeDto>?, String?>? {
         if (format.søker?.norskIdentitetsnummer == null || format.ytelse?.barn?.norskIdentitetsnummer == null) {
-            return emptyList()
+            return null
         }
-
         return k9SakService.hentPerioderSomFinnesIK9(format.søker.norskIdentitetsnummer,
             format.ytelse.barn.norskIdentitetsnummer,
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
