@@ -174,7 +174,9 @@ class PdlServiceImpl(
             logger.warn(objectMapper().writeValueAsString(errors))
         }
         val pdlResponse = PdlResponse(false, identPdl = IdentPdl(data, errors))
-        return pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
+
+        return pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+            ?: throw IllegalStateException("Fant ikke aktørId i PDL")
     }
 
     private fun getStringFromResource(path: String) =

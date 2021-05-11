@@ -79,10 +79,7 @@ class K9SakServiceImpl(
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
             resultat.map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
         } catch (e: Exception) {
-            log.error(
-                "Feilet deserialisering", e
-            )
-            listOf()
+            throw IllegalStateException("Feilet deserialisering", e)
         }
     }
 

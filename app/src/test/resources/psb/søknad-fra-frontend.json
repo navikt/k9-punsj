@@ -62,8 +62,8 @@
                 "fom": "2018-12-30",
                 "tom": "2019-10-20"
               },
-              "faktiskArbeidTimerPerDag": "PT7H30M",
-              "jobberNormaltTimerPerDag": "PT7H30M"
+              "faktiskArbeidTimerPerDag": "37,5",
+              "jobberNormaltTimerPerDag": "37,5"
             }
           ]
         }
@@ -74,7 +74,7 @@
         "fom": "2018-12-30",
         "tom": "2019-10-20"
       },
-      "faktiskArbeidTimerPerDag": "PT7H30M"
+      "faktiskArbeidTimerPerDag": "37,5"
     },
     "selvstendigNæringsdrivendeArbeidstidInfo": {
       "arbeidstidInfo": {
@@ -85,8 +85,8 @@
               "fom": "2018-12-30",
               "tom": "2019-10-20"
             },
-            "faktiskArbeidTimerPerDag": "PT7H30M",
-            "jobberNormaltTimerPerDag": "PT7H30M"
+            "faktiskArbeidTimerPerDag": "37,5",
+            "jobberNormaltTimerPerDag": "37,5"
           }
         ]
       }
@@ -97,7 +97,8 @@
       "periode": {
         "fom": "2018-12-30",
         "tom": "2019-10-20"
-      }
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
     }
   ],
   "nattevaak": [
@@ -105,7 +106,8 @@
       "periode": {
         "fom": "2018-12-30",
         "tom": "2019-10-20"
-      }
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
     }
   ],
   "tilsynsordning": {
@@ -126,7 +128,7 @@
         "fom": "2018-12-30",
         "tom": "2019-10-20"
       },
-      "timerPleieAvBarnetPerDag": "PT7H30M"
+      "timerPleieAvBarnetPerDag": "37,5"
     }
   ],
   "omsorg": {

@@ -32,7 +32,7 @@ internal class SøknadMapper {
             søknad: PleiepengerSøknadMottakDto,
             soeknadId: SøknadIdDto,
             hentPerioderSomFinnesIK9: List<PeriodeDto>,
-            journalpostIder: Set<String>
+            journalpostIder: Set<String>,
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
             val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(
@@ -82,11 +82,11 @@ internal class SøknadMapper {
                 }),
                 beredskap = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto(søknad.beredskap?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(""))
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BeredskapDto.BeredskapPeriodeInfoDto(it.tilleggsinformasjon))
                 }),
                 nattevåk = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto(søknad.nattevaak?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(""))
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
                 }),
                 tilsynsordning = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(søknad.tilsynsordning?.perioder?.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
@@ -94,10 +94,11 @@ internal class SøknadMapper {
                             zeroTimerHvisTomString(it.timer.toString())
                                 .plus(zeroMinutterHvisTomString(it.minutter.toString()))))
                 }),
-                lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty()) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(søknad.lovbestemtFerie?.associate {
-                    Pair(fromPeriodeDtoToString(it),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
-                }) else null,
+                lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty()) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(
+                    søknad.lovbestemtFerie?.associate {
+                        Pair(fromPeriodeDtoToString(it),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
+                    }) else null,
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
                 omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else mapOmsorg(søknad.omsorg!!),
@@ -113,11 +114,12 @@ internal class SøknadMapper {
         }
 
         private fun lagUttak(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? {
-            var uttakDto : PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? = null
+            var uttakDto: PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto? = null
             if (!søknad.uttak.isNullOrEmpty()) {
                 uttakDto = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(søknad.uttak.associate {
                     Pair(fromPeriodeDtoToString(it.periode!!),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(it.timerPleieAvBarnetPerDag))
+                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(
+                            zeroTimerHvisTomString(it.timerPleieAvBarnetPerDag)))
                 })
             }
             if (uttakDto != null) {
@@ -128,7 +130,7 @@ internal class SøknadMapper {
             }
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto(
                 mapOf(Pair(fromPeriodeDtoToString(søknad.soeknadsperiode),
-                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto("PT7H30M"))))
+                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.UttakDto.UttakPeriodeInfoDto(zeroTimerHvisTomString("PT7H30M")))))
         }
 
         private fun erNullEllerTom(opptjeningAktivitet: PleiepengerSøknadVisningDto.ArbeidAktivitetDto?): Boolean {
@@ -165,9 +167,26 @@ internal class SøknadMapper {
             }
             try {
                 return Duration.parse(input)
-            } catch (e : DateTimeParseException) {
+            } catch (e: DateTimeParseException) {
             }
-            return Duration.ofHours(input.toLong())
+            try {
+                return Duration.ofHours(input.toLong())
+            } catch (e: NumberFormatException) {
+            }
+            if (input.contains('.')) {
+                val split = input.split('.')
+                return Duration.ofHours(split[0].toLong()).plusMinutes(finnMinutter(split[1]))
+            }
+            if (input.contains(',')) {
+                val split = input.split(',')
+                return Duration.ofHours(split[0].toLong()).plusMinutes(finnMinutter(split[1]))
+            }
+            throw IllegalStateException("Klarer ikke parse $input")
+        }
+
+        private fun finnMinutter(split: String): Long {
+            val div = split.toDouble().div(10)
+            return div.times(60).toLong()
         }
 
         private fun zeroMinutterHvisTomString(input: String?): Duration {

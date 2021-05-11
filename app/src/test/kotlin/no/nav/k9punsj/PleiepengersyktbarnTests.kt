@@ -14,6 +14,7 @@ import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions
 import org.junit.Assert.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -191,6 +192,7 @@ class PleiepengersyktbarnTests {
         val response = res
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
@@ -257,6 +259,10 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
@@ -269,6 +275,10 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
