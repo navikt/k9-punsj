@@ -76,21 +76,27 @@
       },
       "faktiskArbeidTimerPerDag": "37,5"
     },
-    "selvstendigNæringsdrivendeArbeidstidInfo": {
-      "arbeidstidInfo": {
-
+    "selvstendigNaeringsdrivende": [
+      {
+        "virksomhetNavn": "ASASAS",
+        "organisasjonsnummer": "45376",
         "perioder": [
           {
             "periode": {
-              "fom": "2018-12-30",
-              "tom": "2019-10-20"
+              "fom": "",
+              "tom": ""
             },
-            "faktiskArbeidTimerPerDag": "37,5",
-            "jobberNormaltTimerPerDag": "37,5"
+            "virksomhetstyper": [],
+            "landkode": "",
+            "regnskapsførerNavn": "",
+            "regnskapsførerTlf": "",
+            "registrertIUtlandet": false,
+            "bruttoInntekt": "",
+            "erNyoppstartet": false
           }
         ]
       }
-    }
+    ]
   },
   "beredskap": [
     {

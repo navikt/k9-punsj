@@ -1,0 +1,77 @@
+{
+  "soeknadId": "471706cb-0a5b-4de7-9aa1-1efda532a4fa",
+  "soekerId": "",
+  "journalposter": [
+    "200"
+  ],
+  "mottattDato": "",
+  "barn": {},
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {
+    "fom": "",
+    "tom": ""
+  },
+  "opptjeningAktivitet": {
+    "arbeidstaker": [],
+    "selvstendigNaeringsdrivende": [
+      {
+        "virksomhetNavn": "ASASAS",
+        "organisasjonsnummer": "45376",
+        "perioder": [
+          {
+            "periode": {
+              "fom": "",
+              "tom": ""
+            },
+            "virksomhetstyper": [],
+            "landkode": "",
+            "regnskapsførerNavn": "",
+            "regnskapsførerTlf": "",
+            "registrertIUtlandet": false,
+            "bruttoInntekt": "",
+            "erNyoppstartet": false
+          }
+        ]
+      }
+    ],
+    "frilanser": null
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [],
+    "frilanserArbeidstidInfo": null,
+    "selvstendigNæringsdrivendeArbeidstidInfo": {}
+  },
+  "beredskap": [],
+  "nattevaak": [
+    {
+      "periode": {
+        "fom": "2021-04-02",
+        "tom": "2021-05-13"
+      },
+      "tilleggsinformasjon": "Her er tillegsinfo"
+    }
+  ],
+  "tilsynsordning": {
+    "perioder": [
+      {
+        "periode": {
+          "fom": "2021-04-02",
+          "tom": "2021-05-01"
+        },
+        "timer": 7,
+        "minutter": 30
+      }
+    ]
+  },
+  "uttak": [],
+  "utenlandsopphold": [],
+  "lovbestemtFerie": [],
+  "omsorg": {},
+  "bosteder": [],
+  "soknadsinfo": {
+    "samtidigHjemme": null,
+    "harMedsøker": null
+  },
+  "harInfoSomIkkeKanPunsjes": false
+}

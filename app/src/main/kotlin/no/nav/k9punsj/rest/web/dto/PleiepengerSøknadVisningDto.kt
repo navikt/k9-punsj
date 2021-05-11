@@ -35,7 +35,7 @@ data class PleiepengerSøknadVisningDto(
     )
 
     data class ArbeidAktivitetDto(
-        val selvstendigNæringsdrivende: List<SelvstendigNæringsdrivendeDto>?,
+        val selvstendigNaeringsdrivende: List<SelvstendigNæringsdrivendeDto>?,
         val frilanser: FrilanserDto?,
         val arbeidstaker: List<ArbeidstakerDto>?,
     ) {

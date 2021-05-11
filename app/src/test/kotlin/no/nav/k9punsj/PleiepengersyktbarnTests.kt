@@ -301,6 +301,25 @@ class PleiepengersyktbarnTests {
         assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
     }
 
+    @Test
+    fun `Skal kunne lagre ned sn fra søknad`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.sn()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val resHent = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe",oppdatertSoeknadDto.soeknadId ).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitExchangeBlocking()
+
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+
+        assertNotNull(søknadViaGet)
+        Assertions.assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("ASASAS")
+    }
+
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,

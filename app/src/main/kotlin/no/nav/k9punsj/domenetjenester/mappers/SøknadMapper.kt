@@ -146,7 +146,7 @@ internal class SøknadMapper {
 
             if (opptjeningAktivitet.arbeidstaker.isNullOrEmpty()
                 && (opptjeningAktivitet.frilanser?.jobberFortsattSomFrilans == null)
-                && opptjeningAktivitet.selvstendigNæringsdrivende.isNullOrEmpty()
+                && opptjeningAktivitet.selvstendigNaeringsdrivende.isNullOrEmpty()
             ) {
                 return false
             }
@@ -252,8 +252,8 @@ internal class SøknadMapper {
             val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto? =
                 if (arbeidAktivitet.frilanser != null) (objectMapper().convertValue(
                     arbeidAktivitet.frilanser)) else null
-            val selvstendigNæringsdrivende = if (arbeidAktivitet.selvstendigNæringsdrivende != null)
-                arbeidAktivitet.selvstendigNæringsdrivende.map { s -> mapTilMottakSelvstendigNæringsdrivendeDto(s) }
+            val selvstendigNæringsdrivende = if (arbeidAktivitet.selvstendigNaeringsdrivende != null)
+                arbeidAktivitet.selvstendigNaeringsdrivende.map { s -> mapTilMottakSelvstendigNæringsdrivendeDto(s) }
                     .toList() else null
             val arbeidstaker = if (arbeidAktivitet.arbeidstaker != null) arbeidAktivitet.arbeidstaker.map { a ->
                 mapTilMottakArbeidstaker(a)
