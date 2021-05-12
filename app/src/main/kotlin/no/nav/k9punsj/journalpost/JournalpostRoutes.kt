@@ -128,7 +128,7 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val journalpost = request.journalpostId()
                 //TODO burde flagge søknad også? indikere at den også venter?
-                aksjonspunktService.settPåVent(journalpost)
+                aksjonspunktService.settPåVentOgSendTilLos(journalpost)
 
                 ServerResponse
                     .ok()

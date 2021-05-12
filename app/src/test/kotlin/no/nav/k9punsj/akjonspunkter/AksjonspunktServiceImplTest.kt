@@ -60,11 +60,11 @@ internal class AksjonspunktServiceImplTest {
         assertThat(hentAlleAksjonspunkter).hasSize(1)
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
-        aksjonspunktService.settPåVent(melding.journalpostId)
+        aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId)
 
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
-        assertThat(verdiFraKafka.aksjonspunktKoderMedStatusListe).isEqualTo(mutableMapOf(Pair("PUNSJ", "UTFO")))
+        assertThat(verdiFraKafka.aksjonspunktKoderMedStatusListe).isEqualTo(mutableMapOf(Pair("PUNSJ", "UTFO"), Pair("MER_INFORMASJON", "OPPR")))
 
     }
 

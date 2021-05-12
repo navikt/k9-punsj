@@ -89,15 +89,6 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
         }
     }
 
-    private fun aksjonspunktEntitet(row: Row) = AksjonspunktEntitet(
-        aksjonspunktId = row.string("aksjonspunkt_id"),
-        aksjonspunktKode = AksjonspunktKode.fraKode(row.string("aksjonspunkt_kode")),
-        journalpostId = row.string("id_journalpost"),
-        aksjonspunktStatus = AksjonspunktStatus.fraKode(row.string("aksjonspunkt_status")),
-        frist_tid = row.localDateTimeOrNull("frist_tid"),
-        vent_årsak = if (row.stringOrNull("vent_aarsak") != null) VentÅrsakType.fraKode(row.string("vent_aarsak")) else null
-    )
-
     fun hentAksjonspunkt(journalpostId: String, kode: String): AksjonspunktEntitet? {
         return using(sessionOf(dataSource)) {
             it.run(
@@ -111,4 +102,13 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
             )
         }
     }
+
+    private fun aksjonspunktEntitet(row: Row) = AksjonspunktEntitet(
+        aksjonspunktId = row.string("aksjonspunkt_id"),
+        aksjonspunktKode = AksjonspunktKode.fraKode(row.string("aksjonspunkt_kode")),
+        journalpostId = row.string("id_journalpost"),
+        aksjonspunktStatus = AksjonspunktStatus.fraKode(row.string("aksjonspunkt_status")),
+        frist_tid = row.localDateTimeOrNull("frist_tid"),
+        vent_årsak = if (row.stringOrNull("vent_aarsak") != null) VentÅrsakType.fraKode(row.string("vent_aarsak")) else null
+    )
 }

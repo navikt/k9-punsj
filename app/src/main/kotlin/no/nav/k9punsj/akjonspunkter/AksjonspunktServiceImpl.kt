@@ -92,7 +92,7 @@ class AksjonspunktServiceImpl(
         return null
     }
 
-    override suspend fun settPåVent(journalpostId: String) {
+    override suspend fun settPåVentOgSendTilLos(journalpostId: String) {
         val journalpost = journalpostRepository.hent(journalpostId)
         val eksternId = journalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
@@ -112,7 +112,10 @@ class AksjonspunktServiceImpl(
                 lagPunsjDto(eksternId,
                     journalpostId,
                     journalpost.aktørId,
-                    mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                    mutableMapOf(
+                        AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
+                        AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
+                    )
                 ),
                 eksternId.toString()) {
 
@@ -124,12 +127,26 @@ class AksjonspunktServiceImpl(
                 }
             }
         } else {
-            // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent
+            // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent, det finnes altså ingen punsje oppgave opprinnelig
             val ventePunkt =
                 aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
             if (ventePunkt != null && ventePunkt.aksjonspunktStatus != AksjonspunktStatus.OPPRETTET) {
-                aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+                hendelseProducer.sendMedOnSuccess(
+                    Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                    lagPunsjDto(eksternId,
+                        journalpostId,
+                        journalpost.aktørId,
+                        mutableMapOf(
+                            AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
+                        )
+                    ),
+                    eksternId.toString()) {
+
+                    runBlocking {
+                        aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
+                        log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+                    }
+                }
             } else {
                 log.info("Denne journalposten($journalpostId) venter allerede - venter til ${ventePunkt?.frist_tid}")
             }
