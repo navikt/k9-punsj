@@ -1,0 +1,90 @@
+{
+  "soeknadId": "1f3fe1c2-9e11-47d0-a279-7cf674108bbf",
+  "soekerId": "24126622895",
+  "journalposter": [
+    "493390038"
+  ],
+  "mottattDato": "2021-05-11",
+  "barn": {
+    "norskIdent": "11020777569",
+    "foedselsdato": null
+  },
+  "sendtInn": false,
+  "erFraK9": false,
+  "soeknadsperiode": {
+    "fom": "2021-05-01",
+    "tom": "2021-05-31"
+  },
+  "opptjeningAktivitet": {
+    "selvstendigNaeringsdrivende": [],
+    "frilanser": null,
+    "arbeidstaker": []
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "972674818",
+        "arbeidstidInfo": {
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2021-05-01",
+                "tom": "2021-05-31"
+              },
+              "faktiskArbeidTimerPerDag": "10",
+              "jobberNormaltTimerPerDag": "40"
+            }
+          ]
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": null,
+    "selvstendigNæringsdrivendeArbeidstidInfo": {
+      "norskIdent": null,
+      "organisasjonsnummer": null,
+      "arbeidstidInfo": null
+    }
+  },
+  "beredskap": [],
+  "nattevaak": [],
+  "tilsynsordning": {
+    "perioder": []
+  },
+  "uttak": [],
+  "omsorg": {
+    "relasjonTilBarnet": "Mor",
+    "samtykketOmsorgForBarnet": null,
+    "beskrivelseAvOmsorgsrollen": ""
+  },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2021-05-01",
+        "tom": "2021-05-09"
+      },
+      "land": "SWE"
+    }
+  ],
+  "lovbestemtFerie": [
+    {
+      "fom": "2021-05-17",
+      "tom": "2021-05-19"
+    }
+  ],
+  "soknadsinfo": {
+    "samtidigHjemme": null,
+    "harMedsøker": null
+  },
+  "utenlandsopphold": [
+    {
+      "periode": {
+        "fom": "2021-05-03",
+        "tom": "2021-05-09"
+      },
+      "land": "SWE",
+      "årsak": "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning"
+    }
+  ],
+  "infoFraPunsj": null
+}

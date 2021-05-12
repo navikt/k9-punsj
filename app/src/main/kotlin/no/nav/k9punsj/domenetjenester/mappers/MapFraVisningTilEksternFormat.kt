@@ -1,58 +1,26 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9.søknad.Søknad
-import no.nav.k9.søknad.Validator
-import no.nav.k9.søknad.felles.Feil
-import no.nav.k9.søknad.felles.Versjon
-import no.nav.k9.søknad.felles.personopplysninger.Søker
-import no.nav.k9.søknad.felles.type.Journalpost
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
-import no.nav.k9.søknad.felles.type.SøknadId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
-import java.util.UUID
 
 
-internal class SøknadMapper {
+/** Mapper fra visning format (GUI format) til backend format slik at dette letter kan gjøres om til k9-format senere
+ *
+ */
+internal class MapFraVisningTilEksternFormat {
     companion object {
         const val SKILLE = "/"
-        const val ÅPEN = ".."
-        private val validator = Validator()
-
-        fun mapTilEksternFormat(
-            søknad: PleiepengerSøknadMottakDto,
-            soeknadId: SøknadIdDto,
-            hentPerioderSomFinnesIK9: List<PeriodeDto>,
-            journalpostIder: Set<String>,
-        ): Pair<Søknad, List<Feil>> {
-            val ytelse = søknad.ytelse
-            val pleiepengerSyktBarn = PleiepengerSyktBarnYtelseMapper.map(
-                psb = ytelse!!,
-                endringsperioder = hentPerioderSomFinnesIK9.map { fromPeriodeDtoToString(it) }
-            )
-
-            val søknadK9Format = opprettSøknad(
-                søknadId = UUID.fromString(soeknadId),
-                mottattDato = søknad.mottattDato,
-                søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
-                ytelse = pleiepengerSyktBarn
-            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it) })
-            val feil = validator.valider(søknadK9Format)
-
-            return Pair(søknadK9Format, feil)
-        }
 
         fun mapTilSendingsformat(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto {
-            val ytelseDto = mapYtelseV2(søknad)
+            val ytelseDto = mapYtelse(søknad)
             return PleiepengerSøknadMottakDto(
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
                 mottattDato = if (søknad.mottattDato != null) ZonedDateTime.of(søknad.mottattDato,
@@ -62,7 +30,7 @@ internal class SøknadMapper {
             )
         }
 
-        private fun mapYtelseV2(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto {
+        private fun mapYtelse(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto {
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto(
                 barn = PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BarnDto(søknad.barn?.norskIdent,
                     søknad.barn?.foedselsdato),
@@ -299,18 +267,6 @@ internal class SøknadMapper {
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto(a.norskIdent,
                 a.organisasjonsnummer,
                 arbeidstidInfoDto)
-        }
-
-
-        private fun opprettSøknad(
-            søknadId: UUID,
-            // TODO(OJR) hva skal versjonen være her? bruke samme som k9-format?
-            versjon: Versjon = Versjon.of("1.0.0"),
-            mottattDato: ZonedDateTime?,
-            søker: Søker,
-            ytelse: no.nav.k9.søknad.ytelse.Ytelse,
-        ): Søknad {
-            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {

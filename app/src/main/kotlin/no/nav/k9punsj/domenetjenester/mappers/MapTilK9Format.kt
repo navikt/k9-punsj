@@ -1,21 +1,65 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.Validator
+import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Versjon
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder
+import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
+import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Periode
+import no.nav.k9.søknad.felles.type.SøknadId
 import no.nav.k9.søknad.ytelse.psb.v1.*
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
+import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
+import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import java.time.ZonedDateTime
+import java.util.UUID
 
-internal class PleiepengerSyktBarnYtelseMapper {
+
+/**  Mapper til k9-format
+ *   og bruker deres validering
+ */
+internal class MapTilK9Format {
+
     companion object {
+        private val validator = Validator()
+        private const val SKILLE = "/"
         private val objectMapper = no.nav.k9punsj.objectMapper()
-        fun map(
+
+        internal fun mapTilEksternFormat(
+            søknad: PleiepengerSøknadMottakDto,
+            soeknadId: SøknadIdDto,
+            hentPerioderSomFinnesIK9: List<PeriodeDto>,
+            journalpostIder: Set<String>,
+        ): Pair<Søknad, List<Feil>> {
+            val ytelse = søknad.ytelse
+            val pleiepengerSyktBarn = map(
+                psb = ytelse!!,
+                endringsperioder = hentPerioderSomFinnesIK9.map {
+                    fromPeriodeDtoToString(it)
+                }
+            )
+
+            val søknadK9Format = opprettSøknad(
+                søknadId = UUID.fromString(soeknadId),
+                mottattDato = søknad.mottattDato,
+                søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
+                ytelse = pleiepengerSyktBarn
+            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it) })
+            val feil = validator.valider(søknadK9Format)
+
+            return Pair(søknadK9Format, feil)
+        }
+
+        private fun map(
             psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto,
             endringsperioder: List<String>,
         ): PleiepengerSyktBarn {
@@ -69,6 +113,20 @@ internal class PleiepengerSyktBarnYtelseMapper {
             omsorg?.let { pleiepengerSyktBarn.medOmsorg(it) }
 
             return pleiepengerSyktBarn
+        }
+
+        private fun opprettSøknad(
+            søknadId: UUID,
+            versjon: Versjon = Versjon.of("1.0.0"),
+            mottattDato: ZonedDateTime?,
+            søker: Søker,
+            ytelse: no.nav.k9.søknad.ytelse.Ytelse,
+        ): Søknad {
+            return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
+        }
+
+        private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
+            return dato.fom.toString() + SKILLE + dato.tom.toString()
         }
     }
 }

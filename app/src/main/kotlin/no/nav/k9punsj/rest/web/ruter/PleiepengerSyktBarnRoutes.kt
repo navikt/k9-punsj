@@ -13,7 +13,8 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
-import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.web.HentSøknad
@@ -141,14 +142,14 @@ internal class PleiepengerSyktBarnRoutes(
                 } else {
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val format = SøknadMapper.mapTilSendingsformat(søknad)
+                        val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknad)
 
                         val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
-                        val søknadK9Format = SøknadMapper.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9, journalposterDto.journalposter)
+                        val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9, journalposterDto.journalposter)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(

@@ -1,13 +1,14 @@
 package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class InnsendingMappingTest {
     private val innsendingClient = LoggingInnsendingClient()
@@ -17,8 +18,8 @@ internal class InnsendingMappingTest {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val dto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
 
-        val k9Format = SøknadMapper.mapTilEksternFormat(
-            søknad = SøknadMapper.mapTilSendingsformat(dto),
+        val k9Format = MapTilK9Format.mapTilEksternFormat(
+            søknad = MapFraVisningTilEksternFormat.mapTilSendingsformat(dto),
             soeknadId = "${UUID.randomUUID()}",
             hentPerioderSomFinnesIK9 = emptyList(),
             journalpostIder = setOf(IdGenerator.nesteId(), IdGenerator.nesteId())
@@ -30,7 +31,6 @@ internal class InnsendingMappingTest {
             tilleggsOpplysninger = emptyMap(),
             correlationId = "${UUID.randomUUID()}"
         )
-
         println(value)
     }
 }

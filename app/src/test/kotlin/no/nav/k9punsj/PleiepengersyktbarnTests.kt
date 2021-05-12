@@ -5,7 +5,7 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.domenetjenester.mappers.SøknadMapper
+import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -175,7 +175,7 @@ class PleiepengersyktbarnTests {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
         val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
-        val mapTilSendingsformat = SøknadMapper.mapTilSendingsformat(visningDto)
+        val mapTilSendingsformat = MapFraVisningTilEksternFormat.mapTilSendingsformat(visningDto)
         assertNotNull(mapTilSendingsformat)
 
         val tilbake = objectMapper().convertValue<SøknadJson>(visningDto)
@@ -233,6 +233,21 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //6 feil
         assertEquals(response?.feil?.size, 6)
+    }
+
+    @Test
+    fun `Skal kunne lagre ned tomt land søknad`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val response = res
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        Assertions.assertThat(response?.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
     @Test
