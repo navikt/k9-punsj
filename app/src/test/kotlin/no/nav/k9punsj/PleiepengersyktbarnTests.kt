@@ -231,8 +231,8 @@ class PleiepengersyktbarnTests {
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-        //7 feil
-        assertEquals(response?.feil?.size, 5)
+        //6 feil
+        assertEquals(response?.feil?.size, 6)
     }
 
     @Test

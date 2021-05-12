@@ -42,7 +42,7 @@ internal class SøknadMapper {
 
             val søknadK9Format = opprettSøknad(
                 søknadId = UUID.fromString(soeknadId),
-                mottattDato = søknad.mottattDato!!,
+                mottattDato = søknad.mottattDato,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
                 ytelse = pleiepengerSyktBarn
             ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it) })
@@ -306,7 +306,7 @@ internal class SøknadMapper {
             søknadId: UUID,
             // TODO(OJR) hva skal versjonen være her? bruke samme som k9-format?
             versjon: Versjon = Versjon.of("1.0.0"),
-            mottattDato: ZonedDateTime,
+            mottattDato: ZonedDateTime?,
             søker: Søker,
             ytelse: no.nav.k9.søknad.ytelse.Ytelse,
         ): Søknad {
