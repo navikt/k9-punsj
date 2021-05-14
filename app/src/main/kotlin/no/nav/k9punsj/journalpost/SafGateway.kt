@@ -81,6 +81,8 @@ class SafGateway(
                 .awaitFirst()
 
         val safResponse = response.body
+        logger.info("safResponse$safResponse")
+
         val errors = safResponse?.errors
         val journalpost = response.body?.data?.journalpost
 

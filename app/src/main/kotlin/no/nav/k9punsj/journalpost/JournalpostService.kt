@@ -25,6 +25,8 @@ class JournalpostService(
 
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
+        logger.info("safJournalpost$safJournalpost")
+
         return if (safJournalpost == null) {
             null
         } else {
