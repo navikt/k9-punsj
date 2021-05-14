@@ -108,5 +108,25 @@ internal class JournalpostRepositoryTest {
 
         assertThat(kanSendeInn2).isFalse
     }
+
+    @Test
+    fun `skal sette kilde hvis journalposten ikke finnes i databasen fra før`(): Unit = runBlocking {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost2) {
+            journalpost2
+        }
+
+        assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(1)
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+
+        journalpostRepository.settKildeHvisIkkeFinnesFraFør(listOf(journalpost1.journalpostId, journalpost2.journalpostId), dummyAktørId)
+
+        assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(2)
+    }
 }
 

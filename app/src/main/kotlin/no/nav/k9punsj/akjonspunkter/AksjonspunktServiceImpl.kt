@@ -77,6 +77,37 @@ class AksjonspunktServiceImpl(
         }
     }
 
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String) {
+        val aksjonspunkterSomSkalLukkes = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId)
+            .filter { it.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET }
+
+        if (aksjonspunkterSomSkalLukkes.isNullOrEmpty()) {
+            val mutableMap = mutableMapOf<String, String>()
+            aksjonspunkterSomSkalLukkes.forEach {
+                mutableMap.plus(Pair(it.aksjonspunktKode.kode, AksjonspunktStatus.UTFØRT))
+            }
+
+            val journalpost = journalpostRepository.hent(journalpostId)
+            val eksternId = journalpost.uuid
+            hendelseProducer.sendMedOnSuccess(
+                Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                lagPunsjDto(
+                    eksternId,
+                    journalpostId,
+                    journalpost.aktørId,
+                    mutableMap
+                ),
+                eksternId.toString()) {
+                runBlocking {
+                    aksjonspunkterSomSkalLukkes.forEach {
+                        aksjonspunktRepository.settStatus(it.aksjonspunktId, AksjonspunktStatus.UTFØRT)
+                        log.info("Setter aksjonspunkt(" + it.aksjonspunktId + ") med kode (" + it.aksjonspunktKode.kode + ") til UTFØRT")
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
         journalpostId: List<String>,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
@@ -85,9 +116,10 @@ class AksjonspunktServiceImpl(
     }
 
     override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
-        val aksjonspunkt = aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
+        val aksjonspunkt =
+            aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
         if (aksjonspunkt != null && aksjonspunkt.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET) {
-           return VentDto(aksjonspunkt.vent_årsak?.navn!!, aksjonspunkt.frist_tid!!.toLocalDate())
+            return VentDto(aksjonspunkt.vent_årsak?.navn!!, aksjonspunkt.frist_tid!!.toLocalDate())
         }
         return null
     }

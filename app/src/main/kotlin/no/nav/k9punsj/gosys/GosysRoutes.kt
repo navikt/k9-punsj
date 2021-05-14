@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
@@ -26,7 +27,9 @@ import kotlin.coroutines.coroutineContext
 internal class GosysRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val gosysOppgaveService: GosysOppgaveService,
-    private val pdlService: PdlService
+    private val pdlService: PdlService,
+    private val aksjonspunktService: AksjonspunktService
+
 ) {
 
     private companion object {
@@ -60,6 +63,7 @@ internal class GosysRoutes(
                                     .notFound()
                                     .buildAndAwait()
                         } else {
+                            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId)
                             ServerResponse
                                     .ok()
                                     .contentType(MediaType.APPLICATION_JSON)
