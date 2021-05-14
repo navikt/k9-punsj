@@ -55,6 +55,7 @@ internal class JournalpostRoutes(
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
                         journalpostId = request.journalpostId()
                     )
+                    logger.info("jornalpostInfo" + journalpostInfo?.toString())
                     if (journalpostInfo == null) {
                         logger.info("nr1")
                         ServerResponse
