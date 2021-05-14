@@ -108,7 +108,7 @@ internal object SafDtos {
         val data: JournalpostResponse?,
         val errors : List<Any>?
     ) {
-        internal val journalpostFinnesIkke = errors?.toString()?.contains("Journalpost med journalpostId ikke funnet")?:false
+        internal val journalpostFinnesIkke = errors?.toString()?.contains("ikke funnet")?:false
         internal val manglerTilgang = errors?.toString()?.contains("AbacException")?:false
     }
 }
