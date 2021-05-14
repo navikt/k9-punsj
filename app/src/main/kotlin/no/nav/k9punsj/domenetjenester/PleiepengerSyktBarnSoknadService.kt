@@ -23,15 +23,19 @@ class PleiepengerSyktBarnSoknadService(
     val aksjonspunktService: AksjonspunktService) {
 
     internal suspend fun sendSøknad(søknad: Søknad, journalpostIder: MutableSet<JournalpostId>) {
-        innsendingClient.sendSøknad(
-            søknadId = søknad.søknadId.id,
-            søknad = søknad,
-            correlationId = coroutineContext.hentCorrelationId()
-        )
+        if (journalpostRepository.kanSendeInn(journalpostIder.toList())) {
+            innsendingClient.sendSøknad(
+                søknadId = søknad.søknadId.id,
+                søknad = søknad,
+                correlationId = coroutineContext.hentCorrelationId()
+            )
 
-        journalpostRepository.settBehandletFerdig(journalpostIder)
-        søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-        aksjonspunktService.settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(journalpostIder.toList(),
-            Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.UTFØRT))
+            journalpostRepository.settBehandletFerdig(journalpostIder)
+            søknadRepository.markerSomSendtInn(søknad.søknadId.id)
+            aksjonspunktService.settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(journalpostIder.toList(),
+                Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.UTFØRT))
+        } else {
+            throw IllegalStateException("En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
+        }
     }
 }

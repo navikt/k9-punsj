@@ -68,7 +68,9 @@ internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
     if (bunke?.søknader.isNullOrEmpty()) {
         return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
     }
-    val søknader = bunke?.søknader?.map { s ->
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
         if (s.søknad != null) {
             objectMapper().convertValue(s.søknad)
         } else {

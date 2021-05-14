@@ -136,6 +136,20 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun kanSendeInn(journalpostIder: List<JournalpostId>): Boolean {
+        val using = using(sessionOf(dataSource)) {
+            it.run(queryOf("select ferdig_behandlet from journalpost where journalpost_id in (${
+                IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
+            })",
+                IntRange(0,
+                    journalpostIder.size - 1).associate { t -> "p$t" to journalpostIder[t] as Any }).map { row ->
+                row.boolean("ferdig_behandlet")
+            }.asList)
+        }
+
+        return !using.contains(true)
+    }
+
     data class JournalIdMedDato(
         val journalpostId: JournalpostId,
         val dato: LocalDate,

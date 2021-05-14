@@ -108,17 +108,16 @@ class AksjonspunktServiceImpl(
 
         if (nåVærendeAp != null && nåVærendeAp.aksjonspunktStatus != AksjonspunktStatus.UTFØRT) {
             hendelseProducer.sendMedOnSuccess(
-                Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-                lagPunsjDto(eksternId,
-                    journalpostId,
-                    journalpost.aktørId,
-                    mutableMapOf(
+                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                data = lagPunsjDto(eksternId,
+                    journalpostId = journalpostId,
+                    aktørId = journalpost.aktørId,
+                    aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     )
                 ),
-                eksternId.toString()) {
-
+                key = eksternId.toString()) {
                 runBlocking {
                     aksjonspunktRepository.settStatus(nåVærendeAp.aksjonspunktId, AksjonspunktStatus.UTFØRT)
                     log.info("Setter aksjonspunkt(" + nåVærendeAp.aksjonspunktId + ") med kode (" + nåVærendeAp.aksjonspunktKode.kode + ") til UTFØRT")

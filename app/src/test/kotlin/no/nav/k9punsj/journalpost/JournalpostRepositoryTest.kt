@@ -17,12 +17,14 @@ internal class JournalpostRepositoryTest {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-        val journalpost1 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost1) {
             journalpost1
         }
 
-        val journalpost2 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost2) {
             journalpost2
         }
@@ -42,12 +44,14 @@ internal class JournalpostRepositoryTest {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-        val journalpost1 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost1) {
             journalpost1
         }
 
-        val journalpost2 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
         journalpostRepository.lagre(journalpost2) {
             journalpost2
         }
@@ -65,6 +69,44 @@ internal class JournalpostRepositoryTest {
 
         val finnJournalposterPåPersonSkalGiTom = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPersonSkalGiTom).isEmpty()
+    }
+
+    @Test
+    fun `Skal sjekke om punsj kan sende inn`(): Unit = runBlocking {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost1) {
+            journalpost1
+        }
+
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost2) {
+            journalpost2
+        }
+
+        val hent = journalpostRepository.hent(journalpost1.journalpostId)
+        assertThat(hent.aktørId!!).isEqualTo(dummyAktørId)
+
+        val hent2 = journalpostRepository.hent(journalpost2.journalpostId)
+        assertThat(hent2.aktørId!!).isEqualTo(dummyAktørId)
+
+        val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
+        assertThat(finnJournalposterPåPerson).hasSize(2)
+
+        val kanSendeInn =
+            journalpostRepository.kanSendeInn(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
+        assertThat(kanSendeInn).isTrue
+
+        journalpostRepository.settBehandletFerdig(mutableSetOf(journalpost1.journalpostId, journalpost2.journalpostId))
+
+        val kanSendeInn2 =
+            journalpostRepository.kanSendeInn(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
+
+        assertThat(kanSendeInn2).isFalse
     }
 }
 

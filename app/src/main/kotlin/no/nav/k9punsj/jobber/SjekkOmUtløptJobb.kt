@@ -64,7 +64,10 @@ class SjekkOmUtløptJobb @Autowired constructor(
                     journalpostId = journalpost.journalpostId,
                     eventTid = LocalDateTime.now(),
                     aktørId = journalpost.aktørId,
-                    aksjonspunktKoderMedStatusListe = mutableMapOf(aksjonspunkt.aksjonspunktKode.kode to aksjonspunkt.aksjonspunktStatus.kode)
+                    aksjonspunktKoderMedStatusListe = mutableMapOf(
+                        aksjonspunkt.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode,
+                        AksjonspunktKode.PUNSJ_HAR_UTLØPT.kode to AksjonspunktStatus.OPPRETTET.kode
+                    )
                 )
             ),
             journalpost.uuid.toString()
