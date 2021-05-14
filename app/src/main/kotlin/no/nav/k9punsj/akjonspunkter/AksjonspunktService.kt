@@ -19,6 +19,7 @@ interface AksjonspunktService {
 
     suspend fun settPåVentOgSendTilLos(journalpostId: String)
 
+    suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>)
 
     suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
         journalpostId: List<String>,

@@ -272,7 +272,7 @@ private object SafMockResponses {
     {
       "errors": [
         {
-          "message": "Feilet ved henting av data (/journalpost) : null",
+          "message": "ikke funnet",
           "locations": [
             {
               "line": 3,

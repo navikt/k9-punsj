@@ -1,9 +1,7 @@
 package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -29,11 +27,9 @@ class PleiepengerSyktBarnSoknadService(
                 søknad = søknad,
                 correlationId = coroutineContext.hentCorrelationId()
             )
-
             journalpostRepository.settBehandletFerdig(journalpostIder)
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-            aksjonspunktService.settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(journalpostIder.toList(),
-                Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.UTFØRT))
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList())
         } else {
             throw IllegalStateException("En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
         }

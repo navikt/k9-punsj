@@ -108,6 +108,10 @@ class AksjonspunktServiceImpl(
         }
     }
 
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>) {
+        journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it) }
+    }
+
     override suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
         journalpostId: List<String>,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,

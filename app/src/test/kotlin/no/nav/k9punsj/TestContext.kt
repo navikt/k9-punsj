@@ -71,6 +71,10 @@ class TestContext {
 
         }
 
+        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>) {
+
+        }
+
         override suspend fun settPåVentOgSendTilLos(journalpostId: String) {
 
         }
