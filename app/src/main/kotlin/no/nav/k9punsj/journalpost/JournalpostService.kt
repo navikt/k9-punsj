@@ -13,7 +13,7 @@ import java.time.LocalDate
 @Service
 class JournalpostService(
     private val safGateway: SafGateway,
-    private val journalpostRepository: JournalpostRepository
+    private val journalpostRepository: JournalpostRepository,
 ) {
 
     private companion object {
@@ -29,10 +29,7 @@ class JournalpostService(
             null
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
-            if (false) {
-                logger.warn("Oppslag på journalpost som ikke støttes. $safJournalpost")
-                throw IkkeStøttetJournalpost()
-            } else if (!parsedJournalpost.harTilgang) {
+            if (!parsedJournalpost.harTilgang) {
                 logger.warn("Saksbehandler har ikke tilgang. ${
                     safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
                         bruker = SafDtos.Bruker(null, null))
@@ -52,8 +49,6 @@ class JournalpostService(
                 val aktørId: AktørId? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.AKTOERID) {
                     safJournalpost.bruker?.id
                 } else null
-                //FIXME: fjern dette!
-                logger.info(safJournalpost.toString())
                 JournalpostInfo(
                     journalpostId = journalpostId,
                     dokumenter = safJournalpost.dokumenter.map { DokumentInfo(it.dokumentInfoId) },
@@ -99,7 +94,6 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
 }
 
 
-
 private data class ParsedJournalpost(
     val journalpostType: SafDtos.JournalpostType?,
     val brukerType: SafDtos.BrukerType?,
@@ -122,13 +116,13 @@ data class JournalpostInfoDto(
     val journalpostId: JournalpostId,
     val norskIdent: NorskIdent?,
     val dokumenter: List<DokumentInfo>,
-    val venter : VentDto?
+    val venter: VentDto?,
 )
 
 data class VentDto(
-    val venteÅrsak : String,
+    val venteÅrsak: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil : LocalDate
+    val venterTil: LocalDate,
 )
 
 data class DokumentInfo(

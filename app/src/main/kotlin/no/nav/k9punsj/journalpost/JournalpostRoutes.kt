@@ -56,6 +56,7 @@ internal class JournalpostRoutes(
                         journalpostId = request.journalpostId()
                     )
                     if (journalpostInfo == null) {
+                        logger.info("nr1")
                         ServerResponse
                             .notFound()
                             .buildAndAwait()
@@ -70,11 +71,13 @@ internal class JournalpostRoutes(
                                 dokumenter = journalpostInfo.dokumenter,
                                 aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())
                             )
+                            logger.info("nr2")
                             ServerResponse
                                 .ok()
                                 .json()
                                 .bodyValueAndAwait(journalpostInfoDto)
                         } else {
+                            logger.info("nr3")
                             ServerResponse
                                 .ok()
                                 .json()
@@ -86,10 +89,12 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
+                    logger.info("nr4")
                     ServerResponse
                         .badRequest()
                         .buildAndAwait()
                 } catch (case: IkkeTilgang) {
+                    logger.info("nr5")
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
