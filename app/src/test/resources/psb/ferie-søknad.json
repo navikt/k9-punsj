@@ -17,7 +17,7 @@
   },
   "opptjeningAktivitet": {
     "arbeidstaker": [],
-    "selvstendigNaeringsdrivende": [],
+    "selvstendigNaeringsdrivende": null,
     "frilanser": {
       "startDato": "",
       "jobberFortsattSomFrilans": false

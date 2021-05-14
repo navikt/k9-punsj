@@ -5,10 +5,7 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
-import java.time.Duration
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.format.DateTimeParseException
 
 
@@ -60,7 +57,9 @@ internal class MapFraVisningTilEksternFormat {
                         Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.NattevåkDto.NattevåkPeriodeInfoDto(it.tilleggsinformasjon))
                     }) else null,
-                tilsynsordning = if (!søknad.tilsynsordning?.perioder.isNullOrEmpty() && søknad.tilsynsordning?.perioder?.get(0)?.periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(
+                tilsynsordning = if (!søknad.tilsynsordning?.perioder.isNullOrEmpty() && søknad.tilsynsordning?.perioder?.get(
+                        0)?.periode != null
+                ) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto(
                     søknad.tilsynsordning.perioder.associate {
                         Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.TilsynsordningDto.TilsynPeriodeInfoDto(
@@ -114,7 +113,7 @@ internal class MapFraVisningTilEksternFormat {
 
             if (opptjeningAktivitet.arbeidstaker.isNullOrEmpty()
                 && (opptjeningAktivitet.frilanser?.jobberFortsattSomFrilans == null)
-                && opptjeningAktivitet.selvstendigNaeringsdrivende.isNullOrEmpty()
+                && opptjeningAktivitet.selvstendigNaeringsdrivende == null
             ) {
                 return false
             }
@@ -220,34 +219,32 @@ internal class MapFraVisningTilEksternFormat {
             val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto? =
                 if (arbeidAktivitet.frilanser != null) (objectMapper().convertValue(
                     arbeidAktivitet.frilanser)) else null
-            val selvstendigNæringsdrivende = if (arbeidAktivitet.selvstendigNaeringsdrivende != null)
-                arbeidAktivitet.selvstendigNaeringsdrivende.map { s -> mapTilMottakSelvstendigNæringsdrivendeDto(s) }
-                    .toList() else null
+            val selvstendigNæringsdrivende = if (arbeidAktivitet.selvstendigNaeringsdrivende != null && arbeidAktivitet.selvstendigNaeringsdrivende.info?.periode?.fom != null)
+                mapTilMottakSelvstendigNæringsdrivendeDto(arbeidAktivitet.selvstendigNaeringsdrivende) else null
             val arbeidstaker = if (arbeidAktivitet.arbeidstaker != null) arbeidAktivitet.arbeidstaker.map { a ->
                 mapTilMottakArbeidstaker(a)
             }
                 .toList() else null
 
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto(
-                selvstendigNæringsdrivende,
+                if (selvstendigNæringsdrivende != null) listOf(selvstendigNæringsdrivende) else null,
                 frilanser,
                 arbeidstaker)
         }
 
         private fun mapTilMottakSelvstendigNæringsdrivendeDto(s: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto {
-            val perioder = s.perioder?.associate {
-                Pair(fromPeriodeDtoToString(it.periode!!),
-                    PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendePeriodeInfoDto(
-                        virksomhetstyper = it.virksomhetstyper,
-                        regnskapsførerNavn = it.regnskapsførerNavn,
-                        regnskapsførerTlf = it.regnskapsførerTlf,
-                        bruttoInntekt = it.bruttoInntekt,
-                        erNyoppstartet = it.erNyoppstartet,
-                        registrertIUtlandet = it.registrertIUtlandet,
-                        landkode = it.landkode))
-            }
+            val pair = Pair(fromPeriodeDtoToString(s.info?.periode!!),
+                PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendePeriodeInfoDto(
+                    virksomhetstyper = s.info.virksomhetstyper,
+                    regnskapsførerNavn = s.info.regnskapsførerNavn,
+                    regnskapsførerTlf = s.info.regnskapsførerTlf,
+                    bruttoInntekt = s.info.bruttoInntekt,
+                    erNyoppstartet = s.info.periode.fom!!.isAfter(LocalDate.now().minusYears(4L)),
+                    registrertIUtlandet = s.info.registrertIUtlandet,
+                    landkode = s.info.landkode))
+
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(
-                perioder = perioder,
+                perioder = mapOf(pair),
                 organisasjonsnummer = s.organisasjonsnummer,
                 virksomhetNavn = s.virksomhetNavn)
         }

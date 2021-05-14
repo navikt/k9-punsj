@@ -11,7 +11,7 @@
   "soeknadsperiode": {},
   "opptjeningAktivitet": {
     "arbeidstaker": [],
-    "selvstendigNaeringsdrivende": [],
+    "selvstendigNaeringsdrivende": {},
     "frilanser": {}
   },
   "arbeidstid": {

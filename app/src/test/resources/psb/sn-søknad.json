@@ -14,27 +14,23 @@
   },
   "opptjeningAktivitet": {
     "arbeidstaker": [],
-    "selvstendigNaeringsdrivende": [
-      {
-        "virksomhetNavn": "ASASAS",
-        "organisasjonsnummer": "45376",
-        "perioder": [
-          {
-            "periode": {
-              "fom": "",
-              "tom": ""
-            },
-            "virksomhetstyper": [],
-            "landkode": "",
-            "regnskapsførerNavn": "",
-            "regnskapsførerTlf": "",
-            "registrertIUtlandet": false,
-            "bruttoInntekt": "",
-            "erNyoppstartet": false
-          }
-        ]
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "ASASAS",
+      "organisasjonsnummer": "45376",
+      "info": {
+        "periode": {
+          "fom": "",
+          "tom": ""
+        },
+        "virksomhetstyper": [],
+        "landkode": "",
+        "regnskapsførerNavn": "",
+        "regnskapsførerTlf": "",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "",
+        "erNyoppstartet": false
       }
-    ],
+    },
     "frilanser": null
   },
   "arbeidstid": {

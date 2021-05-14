@@ -16,7 +16,7 @@
   },
   "opptjeningAktivitet": {
     "arbeidstaker": [],
-    "selvstendigNaeringsdrivende": [],
+    "selvstendigNaeringsdrivende": null,
     "frilanser": null
   },
   "arbeidstid": {

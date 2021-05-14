@@ -16,7 +16,7 @@
     "tom": "2021-05-31"
   },
   "opptjeningAktivitet": {
-    "selvstendigNaeringsdrivende": [],
+    "selvstendigNaeringsdrivende": null,
     "frilanser": null,
     "arbeidstaker": []
   },

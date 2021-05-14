@@ -16,29 +16,23 @@
     "tom": "2019-10-20"
   },
   "opptjeningAktivitet": {
-    "selvstendigNæringsdrivende": [
-      {
-        "organisasjonsnummer": "999999999",
-        "virksomhetNavn": "Fisker AS",
-        "perioder": [
-          {
-            "periode": {
-              "fom": "2018-12-30",
-              "tom": "2019-10-20"
-            },
-            "virksomhetstyper": [
-              "FISKE"
-            ],
-            "registrertIUtlandet": false,
-            "landkode": null,
-            "regnskapsførerNavn": null,
-            "regnskapsførerTlf": null,
-            "bruttoInntekt": "450000",
-            "erNyoppstartet": false
-          }
-        ]
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "ASASAS",
+      "organisasjonsnummer": "45376",
+      "info": {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": "2019-10-20"
+        },
+        "virksomhetstyper": ["FISKE"],
+        "landkode": "",
+        "regnskapsførerNavn": "Ole",
+        "regnskapsførerTlf": "666",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "",
+        "erNyoppstartet": false
       }
-    ],
+    },
     "frilanser": {
       "startdato": "2019-10-10",
       "jobberFortsattSomFrilans": true

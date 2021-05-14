@@ -232,7 +232,7 @@ class PleiepengersyktbarnTests {
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //6 feil
-        assertEquals(response?.feil?.size, 6)
+        assertEquals(response?.feil?.size, 8)
     }
 
     @Test
@@ -332,7 +332,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
 
         assertNotNull(søknadViaGet)
-        Assertions.assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("ASASAS")
+        Assertions.assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("ASASAS")
     }
 
     private fun opprettOgSendInnSoeknad(
