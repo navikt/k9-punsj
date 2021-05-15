@@ -113,6 +113,14 @@ class TestContext {
         override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
             return true
         }
+
+        override suspend fun auditUpdate(aktørId: String) {
+
+        }
+
+        override suspend fun updateTilgangRequest(fnr: String): Boolean {
+           return true
+        }
     }
 
     @Bean

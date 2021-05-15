@@ -169,6 +169,8 @@ internal class PleiepengerSyktBarnRoutes(
                             søknadK9Format.first,
                             journalposterDto.journalposter
                         )
+                        val person = personService.finnPersonVedNorskIdent(sendSøknad.norskIdent)
+                        pepClient.auditUpdate(person!!.aktørId)
 
                         return@RequestContext ServerResponse
                             .accepted()

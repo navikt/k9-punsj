@@ -44,7 +44,9 @@ class PepClient(
     override suspend fun harBasisTilgang(fnr: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
-        val decision = evaluate(requestBuilder)
+        val kode6 = kode6(identTilInnloggetBruker, fnr)
+        val evaluate = evaluate(kode6, "kode6")
+        val decision = evaluate(requestBuilder, "vanlig")
         loggTilAudit(identTilInnloggetBruker, fnr)
         return decision
     }
@@ -63,22 +65,71 @@ class PepClient(
             .addResourceAttribute(RESOURCE_FNR, fnr)
     }
 
+    private fun kode6(
+        identTilInnloggetBruker: String,
+        fnr: String,
+    ): XacmlRequestBuilder {
+        return XacmlRequestBuilder()
+            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
+            .addResourceAttribute(RESOURCE_TYPE, TILGANG_SAK_KODE6)
+            .addAccessSubjectAttribute(SUBJECT_TYPE, NONE)
+            .addAccessSubjectAttribute(SUBJECTID, NONE)
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
+            .addResourceAttribute(RESOURCE_FNR, fnr)
+    }
+
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
 
         fnr.forEach {
             loggTilAudit(identTilInnloggetBruker, it)
         }
-        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it, "") }.all { true }
     }
 
-    private suspend fun loggTilAudit(identTilInnloggetBruker: String, it: String) {
+    override suspend fun updateTilgangRequest(fnr: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+        val requestBuilder = XacmlRequestBuilder()
+            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
+            .addResourceAttribute(RESOURCE_TYPE, BASIS_TILGANG)
+            .addActionAttribute(ACTION_ID, "update")
+            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
+            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
+            .addResourceAttribute(RESOURCE_FNR, fnr)
+
+        return evaluate(requestBuilder, "")
+    }
+
+    override suspend fun auditUpdate(aktørId: String) {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         auditlogger.logg(
             Auditdata(
                 header = AuditdataHeader(
                     vendor = auditlogger.defaultVendor,
                     product = auditlogger.defaultProduct,
-                    eventClassId = EventClassId.AUDIT_SEARCH,
+                    eventClassId = EventClassId.AUDIT_UPDATE,
+                    name = "ABAC Sporingslogg",
+                    severity = "INFO"
+                ), fields = setOf(
+                    CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
+                    CefField(CefFieldName.REQUEST, "update"),
+                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, ANSVARLIG_SAKSBEHANDLER),
+                    CefField(CefFieldName.ABAC_ACTION, "update"),
+                    CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
+                    CefField(CefFieldName.BERORT_BRUKER_ID, aktørId),
+                )
+            )
+        )
+    }
+
+    private suspend fun loggTilAudit(identTilInnloggetBruker: String, søkerFnr: String) {
+        auditlogger.logg(
+            Auditdata(
+                header = AuditdataHeader(
+                    vendor = auditlogger.defaultVendor,
+                    product = auditlogger.defaultProduct,
+                    eventClassId = EventClassId.AUDIT_ACCESS,
                     name = "ABAC Sporingslogg",
                     severity = "INFO"
                 ), fields = setOf(
@@ -87,13 +138,13 @@ class PepClient(
                     CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
                     CefField(CefFieldName.ABAC_ACTION, "read"),
                     CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
-                    CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(it)),
+                    CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(søkerFnr)),
                 )
             )
         )
     }
 
-    private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {
+    private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder, string: String): Boolean {
         val xacmlJson = gson.toJson(xacmlRequestBuilder.build())
         val get = cache.get(xacmlJson)
 
@@ -115,7 +166,9 @@ class PepClient(
 
             val result = try {
                 // for test
-                log.info(response.body)
+                log.info(string + response.body)
+
+
                 objectMapper().readValue<Response>(response.body ?: "").response[0].decision == "Permit"
             } catch (e: Exception) {
                 log.error(
