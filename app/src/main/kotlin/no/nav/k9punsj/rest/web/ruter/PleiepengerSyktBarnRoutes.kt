@@ -42,9 +42,9 @@ internal class PleiepengerSyktBarnRoutes(
     private val pepClient: IPepClient,
     private val azureGraphService: IAzureGraphService,
     private val k9SakService: K9SakService,
-    private val journalpostRepository: JournalpostRepository
+    private val journalpostRepository: JournalpostRepository,
 
-) {
+    ) {
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
 
@@ -109,9 +109,28 @@ internal class PleiepengerSyktBarnRoutes(
                 val søknad = request.pleiepengerSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
+                val hentSøknad = mappeService.hentSøknad(søknad.soeknadId)
+
+                var saksnummer: String? = null
+
+                if (hentSøknad?.saksnummerK9Sak == null
+                    && (søknad.mottattDato != null || søknad.soeknadsperiode?.fom != null)
+                    && søknad.soekerId != null
+                    && søknad.barn?.norskIdent != null
+                ) {
+
+                    val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(søknad.soekerId).aktørId
+                    val barnAktørId = personService.finnEllerOpprettPersonVedNorskIdent(søknad.barn.norskIdent).aktørId
+
+                    saksnummer = k9SakService.opprettEllerHentFagsaksnummer(søker = søkerAktørId, barn = barnAktørId,
+                        søknad.soeknadsperiode ?: PeriodeDto(søknad.mottattDato, søknad.mottattDato)).saksnummer
+
+                }
+
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     søknad = søknad,
-                    saksbehandler = saksbehandler
+                    saksbehandler = saksbehandler,
+                    saksnummer = saksnummer
                 )
 
                 if (søknadEntitet == null) {
@@ -120,7 +139,8 @@ internal class PleiepengerSyktBarnRoutes(
                         .buildAndAwait()
                 } else {
                     val søker = personService.finnPerson(søknadEntitet.first.søkerId)
-                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(søknadEntitet.first), søker.aktørId)
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(søknadEntitet.first),
+                        søker.aktørId)
                     ServerResponse
                         .ok()
                         .json()
@@ -149,7 +169,10 @@ internal class PleiepengerSyktBarnRoutes(
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
-                        val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format, søknad.soeknadId, hentPerioderSomFinnesIK9, journalposterDto.journalposter)
+                        val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format,
+                            søknad.soeknadId,
+                            hentPerioderSomFinnesIK9,
+                            journalposterDto.journalposter)
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
@@ -285,8 +308,12 @@ internal class PleiepengerSyktBarnRoutes(
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 
-    private suspend fun ServerRequest.pleiepengerSøknad() = body(BodyExtractors.toMono(PleiepengerSøknadVisningDto::class.java)).awaitFirst()
-    private suspend fun ServerRequest.opprettNy() = body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
+    private suspend fun ServerRequest.pleiepengerSøknad() =
+        body(BodyExtractors.toMono(PleiepengerSøknadVisningDto::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.opprettNy() =
+        body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
+
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()

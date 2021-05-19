@@ -5,6 +5,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.Journalpost
@@ -31,6 +32,7 @@ class TestContext {
 
     val dummyFnr = "11111111111"
     val dummyAktørId = "1000000000000"
+    val dummySaksnummer = "133742069666"
 
     @Bean
     fun hendelseProducerBean() = hendelseProducerMock
@@ -119,9 +121,7 @@ class TestContext {
     fun k9ServiceBean() = k9ServiceMock
     val k9ServiceMock: K9SakService = object : K9SakService {
 
-        override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
-            TODO("Not yet implemented")
-        }
+
 
         override suspend fun hentPerioderSomFinnesIK9(
             søker: NorskIdent,
@@ -130,26 +130,34 @@ class TestContext {
         ): Pair<List<PeriodeDto>?, String?> {
             return Pair(emptyList(), null)
         }
+
+        override suspend fun opprettEllerHentFagsaksnummer(
+            søker: AktørId,
+            barn: AktørId,
+            periodeDto: PeriodeDto,
+        ): SaksnummerDto {
+            return SaksnummerDto(dummySaksnummer)
+        }
     }
 
     @Bean
     fun pdlServiceBean() = pdlServiceMock
     val pdlServiceMock: PdlService = object : PdlService {
 
-        override suspend fun identifikator(fnummer: String): PdlResponse? {
+        override suspend fun identifikator(fnummer: String): PdlResponse {
             val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "AKTORID", false, dummyAktørId)
             val identPdl = IdentPdl(IdentPdl.Data(IdentPdl.Data.HentIdenter(identer = listOf(identer))), null)
             return PdlResponse(false, identPdl)
         }
 
-        override suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse? {
+        override suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse {
             val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "FOLKEREGISTERIDENT", false, dummyFnr)
             val identPdl = IdentPdl(IdentPdl.Data(IdentPdl.Data.HentIdenter(identer = listOf(identer))), null)
 
             return PdlResponse(false, identPdl)
         }
 
-        override suspend fun aktørIdFor(fnummer: String): String? {
+        override suspend fun aktørIdFor(fnummer: String): String {
             return dummyAktørId
         }
     }

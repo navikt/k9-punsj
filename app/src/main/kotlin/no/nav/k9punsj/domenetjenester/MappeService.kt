@@ -60,13 +60,13 @@ class MappeService(
         return søknadRepository.opprettSøknad(søknadEntitet)
     }
 
-    suspend fun utfyllendeInnsending(søknad: PleiepengerSøknadVisningDto, saksbehandler: String): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
+    suspend fun utfyllendeInnsending(søknad: PleiepengerSøknadVisningDto, saksbehandler: String, saksnummer: String?): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
         val hentSøknad = søknadRepository.hentSøknad(søknad.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(søknad.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(søknad)
             val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler, saksnummerK9Sak = saksnummer)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = søknad.copy(journalposter = journalposter.values.toList() as List<JournalpostIdDto>)
             Pair(oppdatertSøknad, nySøknad)
@@ -75,7 +75,7 @@ class MappeService(
         }
     }
 
-    private suspend fun leggTilJournalpost(nyeJournalposter: List<JournalpostIdDto>?, fraDatabasen: JsonB?) : MutableMap<String, Any?>{
+    private fun leggTilJournalpost(nyeJournalposter: List<JournalpostIdDto>?, fraDatabasen: JsonB?) : MutableMap<String, Any?>{
         if (fraDatabasen != null) {
             val list = fraDatabasen["journalposter"] as List<*>
             val set = list.toSet()
@@ -111,23 +111,6 @@ class MappeService(
                 hentAlleSøknaderForBunker.filter { s -> s.bunkeId == b.bunkeId }.toList())
         }
         return Mappe(mappeId, søker, bunkerMedSøknader)
-    }
-
-    suspend fun opprettTomSøknad(norskIdent: NorskIdent, type: FagsakYtelseType): SøknadId {
-        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
-        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, type)
-        val søknadId = UUID.randomUUID()
-
-        val tomSøknad = SøknadEntitet(
-            søknadId = søknadId.toString(),
-            bunkeId = bunkeId,
-            søkerId = søker.personId
-        )
-
-        val søknad = søknadRepository.opprettSøknad(tomSøknad)
-
-        return søknad.søknadId
     }
 
     suspend fun hentSøknad(søknad: SøknadIdDto): SøknadEntitet? {

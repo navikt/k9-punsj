@@ -11,6 +11,7 @@ import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
@@ -189,11 +190,17 @@ class PleiepengersyktbarnTests {
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         Assertions.assertThat(response?.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+        assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+
+        val søknadEntitet = runBlocking {
+            val hentSøknad = DatabaseUtil.getSøknadRepo().hentSøknad(res.first)
+            hentSøknad
+        }
+        Assertions.assertThat(søknadEntitet?.saksnummerK9Sak).isNotNull
     }
 
     @Test
@@ -211,10 +218,10 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
         //TODO fix når det er rettet i k9-format
         assertEquals("IllegalArgumentException", response?.feil?.first()?.feilkode!!)
     }
@@ -227,10 +234,10 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
         //6 feil
         assertEquals(response?.feil?.size, 8)
     }
@@ -243,11 +250,11 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         Assertions.assertThat(response?.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+        assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
     @Test
@@ -258,10 +265,10 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
+        assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
         //7 feil
         assertEquals(response?.feil?.size, 7)
     }
@@ -275,10 +282,10 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .second.bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         Assertions.assertThat(response?.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+        assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
 
@@ -290,11 +297,11 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
+        val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         Assertions.assertThat(response?.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+        assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
     @Test
@@ -339,7 +346,7 @@ class PleiepengersyktbarnTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): ClientResponse {
+    ): Pair<SøknadIdDto, ClientResponse> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -369,11 +376,11 @@ class PleiepengersyktbarnTests {
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
 
         // sender en søknad
-        return client.post()
+        return Pair(søknadId, client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
-            .awaitExchangeBlocking()
+            .awaitExchangeBlocking())
     }
 
     private fun opprettOgLagreSoeknad(

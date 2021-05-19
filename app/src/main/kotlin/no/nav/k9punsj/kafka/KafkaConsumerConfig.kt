@@ -13,7 +13,9 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
-import java.util.*
+import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.listener.ContainerStoppingErrorHandler
+import java.time.Duration
 
 @Profile("!test")
 @Configuration
@@ -31,6 +33,8 @@ internal class KafkaConsumerConfig {
     val trustStorePath = ""
     @Value("\${javax.net.ssl.trustStorePassword}")
     val trustStorePassword = ""
+
+    val RETRY_INTERVAL = 1000L;
 
     @Bean
     fun consumerConfigs(): Map<String, Any?> {
@@ -73,6 +77,11 @@ internal class KafkaConsumerConfig {
     @Bean
     fun kafkaListenerContainerFactory(): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.containerProperties.apply {
+            ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
+            authorizationExceptionRetryInterval = Duration.ofMillis(RETRY_INTERVAL)
+        }
+        factory.setErrorHandler(ContainerStoppingErrorHandler())
         factory.consumerFactory = consumerFactory()
         return factory
     }

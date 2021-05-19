@@ -5,8 +5,10 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
 import no.nav.k9punsj.abac.NavHeaders
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
@@ -37,9 +39,44 @@ class K9SakServiceImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun opprettEllerHentFagsakNummer(): SaksnummerDto {
-        TODO("Not yet implemented")
+
+    override suspend fun opprettEllerHentFagsaksnummer(søker: AktørId, barn: AktørId, periodeDto: PeriodeDto): SaksnummerDto {
+        val opprettEllerHentFagsakDto =
+            OpprettEllerHentFagsakDto(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, søker, barn, periodeDto)
+
+        val body = objectMapper().writeValueAsString(opprettEllerHentFagsakDto)
+
+        val (request, _, result) = "${baseUrl}/fordel/fagsak/opprett"
+            .httpPost()
+            .body(
+                body
+            )
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.CallId to UUID.randomUUID().toString()
+            ).awaitStringResponseResult()
+
+        val json = result.fold(
+            { success -> success },
+            { error ->
+                log.error(
+                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                )
+                log.error(error.toString())
+                throw IllegalStateException("Feil ved henting av fagsaker fra k9-sak")
+            }
+        )
+
+        try {
+            return objectMapper().readValue(json)
+        } catch (e: Exception) {
+            log.error("Feilet deserialisering $e")
+            throw IllegalStateException("Feilet deserialisering $e")
+        }
     }
+
 
     override suspend fun hentPerioderSomFinnesIK9(
         søker: NorskIdent,
@@ -89,4 +126,12 @@ class K9SakServiceImpl(
         val bruker: String,
         val pleietrengendeIdenter: List<String>,
     )
+
+    data class OpprettEllerHentFagsakDto(
+            val ytelseType : no.nav.k9.kodeverk.behandling.FagsakYtelseType,
+            val aktørId : String,
+            val pleietrengendeAktørId: String,
+            val periode: PeriodeDto
+    )
+
 }
