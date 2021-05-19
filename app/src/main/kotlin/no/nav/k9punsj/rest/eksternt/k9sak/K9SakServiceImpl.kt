@@ -42,7 +42,7 @@ class K9SakServiceImpl(
 
     override suspend fun opprettEllerHentFagsaksnummer(søker: AktørId, barn: AktørId, periodeDto: PeriodeDto): SaksnummerDto {
         val opprettEllerHentFagsakDto =
-            OpprettEllerHentFagsakDto(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, søker, barn, periodeDto)
+            OpprettEllerHentFagsakDto(FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søker, barn, periodeDto)
 
         val body = objectMapper().writeValueAsString(opprettEllerHentFagsakDto)
 
@@ -84,7 +84,7 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
 
-        val matchDto = MatchDto(no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+        val matchDto = MatchDto(FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
             listOf(barn))
 
@@ -122,13 +122,13 @@ class K9SakServiceImpl(
     }
 
     data class MatchDto(
-        val ytelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType,
+        val ytelseType: FagsakYtelseType,
         val bruker: String,
         val pleietrengendeIdenter: List<String>,
     )
 
     data class OpprettEllerHentFagsakDto(
-            val ytelseType : no.nav.k9.kodeverk.behandling.FagsakYtelseType,
+            val ytelseType : String,
             val aktørId : String,
             val pleietrengendeAktørId: String,
             val periode: PeriodeDto
