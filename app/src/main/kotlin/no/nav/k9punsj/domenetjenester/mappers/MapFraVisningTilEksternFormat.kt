@@ -74,7 +74,8 @@ internal class MapFraVisningTilEksternFormat {
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
                 omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else mapOmsorg(søknad.omsorg!!),
-                infoFraPunsj = søknad.infoFraPunsj
+                harInfoSomIkkeKanPunsjes = søknad.harInfoSomIkkeKanPunsjes,
+                harMedisinskeOpplysninger = søknad.harMedisinskeOpplysninger,
             )
         }
 

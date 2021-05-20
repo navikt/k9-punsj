@@ -163,5 +163,7 @@
   "soknadsinfo": {
     "samtidigHjemme": true,
     "harMedsoeker": true
-  }
+  },
+  "harInfoSomIkkeKanPunsjes" : true,
+  "harMedisinskeOpplysninger" : true
 }

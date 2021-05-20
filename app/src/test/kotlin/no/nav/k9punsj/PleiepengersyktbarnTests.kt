@@ -335,6 +335,26 @@ class PleiepengersyktbarnTests {
         Assertions.assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("ASASAS")
     }
 
+    @Test
+    fun `Skal kunne lagre flagg om medisinske og punsjet`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val resHent = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe",oppdatertSoeknadDto.soeknadId ).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitExchangeBlocking()
+
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+
+        assertNotNull(søknadViaGet)
+        Assertions.assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
+        Assertions.assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(true)
+    }
+
     private fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,

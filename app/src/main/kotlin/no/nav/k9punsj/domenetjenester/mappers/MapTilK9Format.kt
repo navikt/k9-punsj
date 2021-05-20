@@ -87,8 +87,17 @@ internal class MapTilK9Format {
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
 
-            val infoFraPunsj: InfoFraPunsj? = if (psb.infoFraPunsj != null)
-                InfoFraPunsj().medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.infoFraPunsj) else null
+            var infoFraPunsj: InfoFraPunsj? = null
+
+            if (psb.harInfoSomIkkeKanPunsjes != null || psb.harMedisinskeOpplysninger != null) {
+                infoFraPunsj = InfoFraPunsj()
+                if (psb.harInfoSomIkkeKanPunsjes != null) {
+                    infoFraPunsj.medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
+                }
+                if (psb.harMedisinskeOpplysninger != null) {
+                    infoFraPunsj.medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
+                }
+            }
 
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
             barn?.let { pleiepengerSyktBarn.medBarn(it) }

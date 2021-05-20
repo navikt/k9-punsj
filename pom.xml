@@ -27,7 +27,7 @@
         <dusseldorf-ktor.version>1.4.1.4754df6</dusseldorf-ktor.version>
         <k9-rapid.version>1.31aa518</k9-rapid.version>
 		<k9-sak.version>3.1.28</k9-sak.version>
-        <soknad-pleiepenger-barn.version>5.1.39</soknad-pleiepenger-barn.version>
+        <soknad-pleiepenger-barn.version>5.1.40</soknad-pleiepenger-barn.version>
         <de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
         <mockk.version>1.10.5</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
