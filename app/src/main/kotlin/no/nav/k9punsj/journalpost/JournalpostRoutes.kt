@@ -34,7 +34,7 @@ internal class JournalpostRoutes(
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
-    private val punsjbolleService: PunsjbolleService
+    private val punsjbolleService: PunsjbolleService,
 ) {
 
     private companion object {
@@ -50,6 +50,7 @@ internal class JournalpostRoutes(
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
+        internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -112,9 +113,10 @@ internal class JournalpostRoutes(
 
                 val finnJournalposterPåPerson = journalpostService.finnJournalposterPåPerson(aktørId)
 
-                val journalpostMap = finnJournalposterPåPerson.map { journalpostService.hentJournalpostInfo(it.journalpostId) }
-                    .filter { it?.journalpostId != null }
-                    .groupBy { it?.journalpostId }
+                val journalpostMap =
+                    finnJournalposterPåPerson.map { journalpostService.hentJournalpostInfo(it.journalpostId) }
+                        .filter { it?.journalpostId != null }
+                        .groupBy { it?.journalpostId }
 
                 val dto = finnJournalposterPåPerson.map { it ->
                     val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
@@ -148,10 +150,10 @@ internal class JournalpostRoutes(
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
 
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
-                   return@RequestContext ServerResponse
+                    return@RequestContext ServerResponse
                         .ok()
-                       .json()
-                       .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
+                        .json()
+                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
                 }
 
                 val saksnummerDto =
@@ -166,6 +168,25 @@ internal class JournalpostRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(OasSkalTilInfotrygdSvar(skalTilK9))
+            }
+        }
+
+        POST("/api${Urls.LukkJournalpost}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+                val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(journalpostId)
+
+                if (hentHvisJournalpostMedId == null) {
+                    return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+                }
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId)
+                journalpostService.settTilFerdig(journalpostId)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .buildAndAwait()
             }
         }
 
@@ -258,7 +279,8 @@ internal class JournalpostRoutes(
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
-    private suspend fun ServerRequest.punsjbolleDto() = body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
+    private suspend fun ServerRequest.punsjbolleDto() =
+        body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,

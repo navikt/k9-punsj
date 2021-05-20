@@ -437,6 +437,28 @@ internal class JournalpostController {
     ) {
     }
 
+    @PostMapping(JournalpostRoutes.Urls.LukkJournalpost, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Lukket ok",
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Hente informasjon om en journalpost",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun LukkJournalpost(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
+
     @PostMapping(JournalpostRoutes.Urls.SkalTilK9sak, produces = ["application/json"])
     @ApiResponses(
         value = [

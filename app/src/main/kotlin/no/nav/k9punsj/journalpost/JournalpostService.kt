@@ -77,6 +77,10 @@ class JournalpostService(
     internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
+
+    internal suspend fun settTilFerdig(journalpostId: JournalpostId) {
+        journalpostRepository.ferdig(journalpostId)
+    }
 }
 
 private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
