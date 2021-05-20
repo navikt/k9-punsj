@@ -22,7 +22,7 @@ import java.util.UUID
 
 
 @Configuration
-@Profile("!test")
+@Profile("!test & !local")
 class PunsjbolleServiceImpl(
     @Value("\${no.nav.k9punsjbolle.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9punsjbolle.scope}") private val scope: String,
