@@ -7,5 +7,6 @@ import java.util.UUID
 data class Journalpost(
         val uuid: UUID,
         val journalpostId: JournalpostId,
-        val aktørId: AktørId?
+        val aktørId: AktørId?,
+        val skalTilK9 : Boolean? = null
 )
