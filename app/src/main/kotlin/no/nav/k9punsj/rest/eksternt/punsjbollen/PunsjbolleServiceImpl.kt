@@ -74,7 +74,7 @@ class PunsjbolleServiceImpl(
                         "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
                     )
                     log.error(error.toString())
-                    throw IllegalStateException("Feil ved henting av fagsaker fra k9-sak")
+                    throw IllegalStateException("Feil ved request av saksnummer fra k9-punsjbolle")
                 }
             }
         )
