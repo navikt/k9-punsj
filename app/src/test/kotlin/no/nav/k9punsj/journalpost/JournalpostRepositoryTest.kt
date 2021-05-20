@@ -128,5 +128,19 @@ internal class JournalpostRepositoryTest {
 
         assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(2)
     }
+
+    @Test
+    fun `skal vise om journalposten må til infotrygd`(): Unit = runBlocking {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, skalTilK9 = false)
+        journalpostRepository.lagre(journalpost2) {
+            journalpost2
+        }
+
+        assertThat(journalpostRepository.hent(journalpost2.journalpostId).skalTilK9).isFalse()
+    }
 }
 

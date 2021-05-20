@@ -11,7 +11,6 @@ data class SøknadEntitet(
     val bunkeId: BunkeId,
     val søkerId: PersonId,
     val barnId: PersonId? = null,
-    val saksnummerK9Sak : String? = null,
     val barnFødselsdato: LocalDate? = null,
     val søknad : JsonB? = null,
     val journalposter: JsonB? = null,

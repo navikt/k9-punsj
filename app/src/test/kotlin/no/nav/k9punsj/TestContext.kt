@@ -5,7 +5,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.azuregraph.IAzureGraphService
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.Journalpost
@@ -116,7 +115,7 @@ class TestContext {
             barn: NorskIdentDto,
             journalpostIdDto: JournalpostIdDto,
         ): SaksnummerDto? {
-            return SaksnummerDto("")
+            return SaksnummerDto(dummySaksnummer)
         }
     }
 
@@ -145,14 +144,6 @@ class TestContext {
             fagsakYtelseType: FagsakYtelseType,
         ): Pair<List<PeriodeDto>?, String?> {
             return Pair(emptyList(), null)
-        }
-
-        override suspend fun opprettEllerHentFagsaksnummer(
-            søker: AktørId,
-            barn: AktørId,
-            periodeDto: PeriodeDto,
-        ): SaksnummerDto {
-            return SaksnummerDto(dummySaksnummer)
         }
     }
 
