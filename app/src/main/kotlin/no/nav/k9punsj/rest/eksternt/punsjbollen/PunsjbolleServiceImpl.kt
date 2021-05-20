@@ -6,7 +6,9 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.abac.NavHeaders
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import org.slf4j.LoggerFactory
@@ -16,7 +18,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import java.net.URI
-import java.time.LocalDate
 import java.util.UUID
 
 
@@ -24,7 +25,9 @@ import java.util.UUID
 @Profile("!test")
 class PunsjbolleServiceImpl(
     @Value("\${no.nav.k9punsjbolle.base_url}") private val baseUrl: URI,
+    @Value("\${no.nav.k9punsjbolle.scope}") private val scope: String,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    private val personService: PersonService,
 ) : PunsjbolleService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -33,14 +36,16 @@ class PunsjbolleServiceImpl(
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        fraOgMed: LocalDate,
+        journalpostIdDto: JournalpostIdDto,
     ): SaksnummerDto? {
+        val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
+        val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
 
         val punsjbollSaksnummerDto = PunsjbollSaksnummerDto(
-            søker = PunsjbollSaksnummerDto.PunsjbollePersonDto("", ""),
-            pleietrengende = PunsjbollSaksnummerDto.PunsjbollePersonDto("", ""),
-            søknadstype = "PleiepengerSyktBarn", "",
-            fraOgMed = LocalDate.now())
+            søker = PunsjbollSaksnummerDto.PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
+            pleietrengende = PunsjbollSaksnummerDto.PunsjbollePersonDto(barnPerson.norskIdent, barnPerson.aktørId),
+            søknadstype = "PleiepengerSyktBarn", journalpostIdDto
+        )
 
         val body = objectMapper().writeValueAsString(punsjbollSaksnummerDto)
 
@@ -51,7 +56,8 @@ class PunsjbolleServiceImpl(
             )
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope))
+                    .asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.XCorrelationId to UUID.randomUUID().toString()
             ).awaitStringResponseResult()
@@ -89,11 +95,10 @@ class PunsjbolleServiceImpl(
         val pleietrengende: PunsjbollePersonDto,
         val søknadstype: String,
         val journalpostId: String,
-        val fraOgMed: LocalDate,
 
         ) {
         data class PunsjbollePersonDto(
-            val identitetsnumme: String,
+            val identitetsnummer: String,
             val aktørId: String,
         )
     }

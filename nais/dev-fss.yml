@@ -92,3 +92,6 @@ spec:
       value: https://k9-sak.nais.preprod.local/k9/sak/api
     - name: K9PUNSJBOLLE_BASE_URL
       value: https://k9-punsjbolle.dev.intern.nav.no/api
+    - name : K9PUNSJBOLLE_SCOPE
+      value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
+

@@ -150,7 +150,8 @@ internal class JournalpostRoutes(
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
                    return@RequestContext ServerResponse
                         .ok()
-                        .buildAndAwait()
+                       .json()
+                       .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
                 }
 
                 val saksnummerDto =
@@ -158,15 +159,13 @@ internal class JournalpostRoutes(
                         barn = dto.barnIdent,
                         journalpostIdDto = dto.journalpostId)
 
-                // skal til infotrygd
-                }
-
-                lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, tsaksnummerDto == null)
+                val skalTilK9 = saksnummerDto != null
+                lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
 
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(saksnummerDto != null))
+                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(skalTilK9))
             }
         }
 
