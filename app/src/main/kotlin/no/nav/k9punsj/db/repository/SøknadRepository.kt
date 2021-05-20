@@ -45,7 +45,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "select soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, saksnummer from soknad where id_bunke = :id_bunke",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn FROM soknad WHERE id_bunke = :id_bunke",
                         mapOf("id_bunke" to UUID.fromString(bunkerId))
                     )
                         .map { row ->
@@ -66,16 +66,15 @@ class SøknadRepository(private val dataSource: DataSource) {
                     set soknad = :soknad :: jsonb,
                     journalposter = :journalposter :: jsonb,
                     endret_tid = now(),
-                    endret_av = :endret_av,
-                    saksnummer = :saksnummer
+                    endret_av = :endret_av
                     where soknad_id = :soknad_id
                     """,
                         mapOf(
                             "soknad_id" to UUID.fromString(søknad.søknadId),
                             "soknad" to objectMapper().writeValueAsString(søknad.søknad),
                             "journalposter" to objectMapper().writeValueAsString(søknad.journalposter),
-                            "endret_av" to objectMapper().writeValueAsString(søknad.endret_av),
-                            "saksnummer" to søknad.saksnummerK9Sak),
+                            "endret_av" to objectMapper().writeValueAsString(søknad.endret_av)
+                        ),
                     ).asUpdate
                 )
             }
@@ -87,7 +86,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "select soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, saksnummer from soknad where soknad_id = :soknad_id",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn FROM soknad WHERE soknad_id = :soknad_id",
                         mapOf("soknad_id" to UUID.fromString(søknadId))
                     )
                         .map { row ->
@@ -106,8 +105,7 @@ class SøknadRepository(private val dataSource: DataSource) {
         barnFødselsdato = row.localDateOrNull("barn_fodselsdato"),
         søknad = objectMapper().readValue(row.string("soknad")),
         journalposter = objectMapper().readValue(row.string("journalposter")),
-        sendtInn = row.boolean("sendt_inn"),
-        saksnummerK9Sak = row.stringOrNull("saksnummer")
+        sendtInn = row.boolean("sendt_inn")
     )
 
     suspend fun markerSomSendtInn(søknadId: SøknadId) {

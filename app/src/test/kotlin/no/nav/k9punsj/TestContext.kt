@@ -5,7 +5,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.azuregraph.IAzureGraphService
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.Journalpost
@@ -15,9 +14,12 @@ import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.info.IdTokenLocal
+import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import no.nav.k9punsj.util.DatabaseUtil
@@ -106,6 +108,19 @@ class TestContext {
     }
 
     @Bean
+    fun punsjBolleServiceBean() = punsjbolleService
+    val punsjbolleService : PunsjbolleService = object : PunsjbolleService {
+        override suspend fun opprettEllerHentFagsaksnummer(
+            søker: NorskIdentDto,
+            barn: NorskIdentDto,
+            journalpostIdDto: JournalpostIdDto,
+        ): SaksnummerDto? {
+            return SaksnummerDto(dummySaksnummer)
+        }
+    }
+
+
+    @Bean
     fun pepClientBean() = pepClient
     val pepClient: IPepClient = object : IPepClient {
         override suspend fun harBasisTilgang(fnr: String): Boolean {
@@ -129,14 +144,6 @@ class TestContext {
             fagsakYtelseType: FagsakYtelseType,
         ): Pair<List<PeriodeDto>?, String?> {
             return Pair(emptyList(), null)
-        }
-
-        override suspend fun opprettEllerHentFagsaksnummer(
-            søker: AktørId,
-            barn: AktørId,
-            periodeDto: PeriodeDto,
-        ): SaksnummerDto {
-            return SaksnummerDto(dummySaksnummer)
         }
     }
 

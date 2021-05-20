@@ -78,6 +78,28 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    suspend fun hentHvis(journalpostId: String): Journalpost? {
+        return using(sessionOf(dataSource)) {
+            it.transaction { tx ->
+                //language=PostgreSQL
+                val json = tx.run(
+                    queryOf(
+                        "select data from journalpost where journalpost_id = :journalpostId",
+                        mapOf("journalpostId" to journalpostId)
+                    )
+                        .map { row ->
+                            row.string("data")
+                        }.asSingle
+                )
+                if (json != null) {
+                    return@transaction objectMapper.readValue(json, Journalpost::class.java)
+
+                }
+                return@transaction null
+            }
+        }
+    }
+
     suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalIdMedDato> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(

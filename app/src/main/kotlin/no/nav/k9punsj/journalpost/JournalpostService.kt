@@ -64,6 +64,16 @@ class JournalpostService(
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
+    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): Journalpost? {
+        return journalpostRepository.hentHvis(journalpostId)
+    }
+
+    internal suspend fun lagre(journalpost: Journalpost, kilde: KildeType = KildeType.FORDEL) {
+        journalpostRepository.lagre(journalpost, kilde) {
+            journalpost
+        }
+    }
+
     internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }

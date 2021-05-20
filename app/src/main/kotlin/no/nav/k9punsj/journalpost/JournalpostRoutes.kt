@@ -7,11 +7,14 @@ import no.nav.k9punsj.Routes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
 import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
+import no.nav.k9punsj.rest.web.openapi.OasSkalTilInfotrygdSvar
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -21,6 +24,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 
@@ -29,7 +33,8 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
-    private val aksjonspunktService: AksjonspunktService
+    private val aksjonspunktService: AksjonspunktService,
+    private val punsjbolleService: PunsjbolleService
 ) {
 
     private companion object {
@@ -44,6 +49,7 @@ internal class JournalpostRoutes(
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
+        internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
     }
 
     @Bean
@@ -136,6 +142,33 @@ internal class JournalpostRoutes(
             }
         }
 
+        POST("/api${Urls.SkalTilK9sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val dto = request.punsjbolleDto()
+                val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
+
+                if (hentHvisJournalpostMedId?.skalTilK9 != null) {
+                   return@RequestContext ServerResponse
+                        .ok()
+                       .json()
+                       .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
+                }
+
+                val saksnummerDto =
+                    punsjbolleService.opprettEllerHentFagsaksnummer(søker = dto.brukerIdent,
+                        barn = dto.barnIdent,
+                        journalpostIdDto = dto.journalpostId)
+
+                val skalTilK9 = saksnummerDto != null
+                lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(skalTilK9))
+            }
+        }
+
         POST("/api${Urls.OmfordelJournalpost}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val omfordelingRequest = request.omfordelingRequest()
@@ -200,12 +233,32 @@ internal class JournalpostRoutes(
         }
     }
 
+    private suspend fun lagreHvorJournalpostSkal(
+        hentHvisJournalpostMedId: Journalpost?,
+        dto: PunsjBolleDto,
+        skalTilK9: Boolean,
+    ) {
+        if (hentHvisJournalpostMedId != null) {
+            journalpostService.lagre(hentHvisJournalpostMedId.copy(skalTilK9 = skalTilK9))
+        } else {
+            val journalpost = Journalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = dto.journalpostId,
+                pdlService.aktørIdFor(dto.brukerIdent),
+                skalTilK9 = skalTilK9
+            )
+            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
+        }
+    }
+
     private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
     private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
     private suspend fun ServerRequest.omfordelingRequest() =
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.punsjbolleDto() = body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,

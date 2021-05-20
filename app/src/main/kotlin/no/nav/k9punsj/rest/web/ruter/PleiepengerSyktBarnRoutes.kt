@@ -109,28 +109,10 @@ internal class PleiepengerSyktBarnRoutes(
                 val søknad = request.pleiepengerSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-                val hentSøknad = mappeService.hentSøknad(søknad.soeknadId)
-
-                var saksnummer: String? = null
-
-                if (hentSøknad?.saksnummerK9Sak == null
-                    && (søknad.mottattDato != null || søknad.soeknadsperiode?.fom != null)
-                    && søknad.soekerId != null
-                    && søknad.barn?.norskIdent != null
-                ) {
-
-                    val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(søknad.soekerId).aktørId
-                    val barnAktørId = personService.finnEllerOpprettPersonVedNorskIdent(søknad.barn.norskIdent).aktørId
-
-                    saksnummer = k9SakService.opprettEllerHentFagsaksnummer(søker = søkerAktørId, barn = barnAktørId,
-                        søknad.soeknadsperiode ?: PeriodeDto(søknad.mottattDato, søknad.mottattDato)).saksnummer
-
-                }
 
                 val søknadEntitet = mappeService.utfyllendeInnsending(
                     søknad = søknad,
-                    saksbehandler = saksbehandler,
-                    saksnummer = saksnummer
+                    saksbehandler = saksbehandler
                 )
 
                 if (søknadEntitet == null) {

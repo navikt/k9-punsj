@@ -11,7 +11,6 @@ import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
-import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
@@ -195,12 +194,6 @@ class PleiepengersyktbarnTests {
             .block()
         Assertions.assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
-
-        val søknadEntitet = runBlocking {
-            val hentSøknad = DatabaseUtil.getSøknadRepo().hentSøknad(res.first)
-            hentSøknad
-        }
-        Assertions.assertThat(søknadEntitet?.saksnummerK9Sak).isNotNull
     }
 
     @Test

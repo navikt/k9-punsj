@@ -23,7 +23,6 @@ import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
-import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
 import org.springframework.beans.factory.annotation.Value
@@ -280,13 +279,6 @@ data class OasMatchfagsak(
     val barnIdent: NorskIdentDto,
 )
 
-data class OasInnsending(
-    val norskIdent: NorskIdentDto,
-    val journalpostId: JournalpostIdDto,
-    val soeknad: SøknadJson,
-    val soeknadId: SøknadIdDto,
-)
-
 data class OasIdentDto(
     val norskIdent: NorskIdentDto
 )
@@ -313,9 +305,6 @@ data class OasPleiepengerSyktBarSoknadMappeSvar(
     )
 }
 
-data class OasPleiepengerSyktBarSoknadMapperSvar(
-    val mapper: List<OasPleiepengerSyktBarSoknadMappeSvar>,
-)
 
 data class OasPleiepengerSyktBarnFeil(
     val mappeId: MappeId?,
@@ -327,12 +316,6 @@ data class OasPleiepengerSyktBarnFeil(
         val feilmelding: String?,
     )
 }
-
-data class OasPleiepengerSøknadDto<T>(
-    val søknadId: SøknadIdDto,
-    val erFraK9: Boolean = false,
-    val søknad: T,
-)
 
 @RestController
 @SecurityScheme(
@@ -454,6 +437,37 @@ internal class JournalpostController {
     ) {
     }
 
+    @PostMapping(JournalpostRoutes.Urls.SkalTilK9sak, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "True når den skal til k9sak, false hvis den skal til infotrygd",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasSkalTilInfotrygdSvar::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang til journalposten"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Sjekker om jornalposten må behandles av infotrygd",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun SkalTilK9Sak(
+        @RequestBody body: OasPunsjBolleDto
+    ) {
+    }
+
     @GetMapping(JournalpostRoutes.Urls.Dokument, produces = ["application/pdf"])
     @ApiResponses(
         value = [
@@ -510,6 +524,16 @@ data class OasVentDto(
     val venteÅrsak : String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val venterTil : LocalDate
+)
+
+data class OasPunsjBolleDto(
+    val brukerIdent: NorskIdentDto,
+    val barnIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
+)
+
+data class OasSkalTilInfotrygdSvar(
+    val k9sak : Boolean
 )
 
 @RestController
