@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
 import no.nav.k9punsj.abac.NavHeaders
@@ -73,7 +74,9 @@ class K9SakServiceImpl(
         )
         return try {
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
-            val liste = resultat.map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
+            val liste = resultat
+                .filter { f -> f.status == FagsakStatus.LØPENDE || f.status == FagsakStatus.UNDER_BEHANDLING}
+                .map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
             Pair(liste, null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")

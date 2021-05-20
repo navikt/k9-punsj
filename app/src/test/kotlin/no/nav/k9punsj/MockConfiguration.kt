@@ -6,6 +6,7 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
+import no.nav.k9punsj.wiremock.getK9PunsjbolleBaseUrl
 import no.nav.k9punsj.wiremock.getK9sakBaseUrl
 import no.nav.k9punsj.wiremock.getPdlBaseUrl
 import no.nav.k9punsj.wiremock.getSafBaseUrl
@@ -43,5 +44,7 @@ internal object MockConfiguration {
         "ABAC_PDP_ENDPOINT_URL" to "",
         "AUDITLOGGER_VENDOR" to "",
         "AUDITLOGGER_PRODUCT" to "",
+        "K9PUNSJBOLLE_BASE_URL" to wireMockServer.getK9PunsjbolleBaseUrl(),
+        "K9PUNSJBOLLE_SCOPE" to "k9-punsjbolle-id/.default"
     )
 }
