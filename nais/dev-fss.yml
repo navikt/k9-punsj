@@ -94,4 +94,5 @@ spec:
       value: https://k9-punsjbolle.dev.intern.nav.no/api
     - name : K9PUNSJBOLLE_SCOPE
       value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
-
+    - name : PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
