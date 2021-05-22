@@ -1,6 +1,8 @@
 package no.nav.k9punsj.akjonspunkter
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -9,6 +11,8 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -20,6 +24,7 @@ class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,
+    val søknadRepository: SøknadRepository
 ) : AksjonspunktService {
 
     private companion object {
@@ -66,7 +71,7 @@ class AksjonspunktServiceImpl(
             lagPunsjDto(eksternId,
                 journalpostId,
                 journalpost.aktørId,
-                mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode)
+                mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode),
             ),
             eksternId.toString()) {
 
@@ -128,8 +133,15 @@ class AksjonspunktServiceImpl(
         return null
     }
 
-    override suspend fun settPåVentOgSendTilLos(journalpostId: String) {
+    override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto) {
         val journalpost = journalpostRepository.hent(journalpostId)
+        val søknad = søknadRepository.hentSøknad(søknadId = søknadId)?.søknad
+        val barnIdent  = if (søknad != null) {
+            val vising: PleiepengerSøknadVisningDto = objectMapper().convertValue(søknad)
+            val norskIdent = vising.barn?.norskIdent
+            norskIdent
+        } else null
+
         val eksternId = journalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),
@@ -151,7 +163,8 @@ class AksjonspunktServiceImpl(
                     aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
-                    )
+                    ),
+                    barnIdent = barnIdent
                 ),
                 key = eksternId.toString()) {
                 runBlocking {
@@ -167,16 +180,16 @@ class AksjonspunktServiceImpl(
                 aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
             if (ventePunkt != null && ventePunkt.aksjonspunktStatus != AksjonspunktStatus.OPPRETTET) {
                 hendelseProducer.sendMedOnSuccess(
-                    Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-                    lagPunsjDto(eksternId,
-                        journalpostId,
-                        journalpost.aktørId,
-                        mutableMapOf(
+                    topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                    data = lagPunsjDto(eksternId,
+                        journalpostId = journalpostId,
+                        aktørId = journalpost.aktørId,
+                        aksjonspunkter = mutableMapOf(
                             AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
-                        )
+                        ),
+                        barnIdent = barnIdent
                     ),
-                    eksternId.toString()) {
-
+                    key = eksternId.toString()) {
                     runBlocking {
                         aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
                         log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -193,13 +206,15 @@ class AksjonspunktServiceImpl(
         journalpostId: String,
         aktørId: AktørIdDto?,
         aksjonspunkter: MutableMap<String, String>,
+        barnIdent: String? = null,
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId.toString(),
             journalpostId = journalpostId,
             eventTid = LocalDateTime.now(),
             aktørId = aktørId,
-            aksjonspunktKoderMedStatusListe = aksjonspunkter
+            aksjonspunktKoderMedStatusListe = aksjonspunkter,
+            pleietrengendeAktørId = barnIdent
         )
         return objectMapper().writeValueAsString(punsjEventDto)
     }

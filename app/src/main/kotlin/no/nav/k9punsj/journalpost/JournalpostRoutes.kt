@@ -10,6 +10,7 @@ import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.PunsjBolleDto
+import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
 import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
@@ -135,8 +136,9 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SettPåVent}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpost = request.journalpostId()
-                //TODO burde flagge søknad også? indikere at den også venter?
-                aksjonspunktService.settPåVentOgSendTilLos(journalpost)
+                val dto = request.søknadId()
+
+                aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
 
                 ServerResponse
                     .ok()
@@ -278,6 +280,8 @@ internal class JournalpostRoutes(
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.søknadId() = body(BodyExtractors.toMono(SettPåVentDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.punsjbolleDto() =
         body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()

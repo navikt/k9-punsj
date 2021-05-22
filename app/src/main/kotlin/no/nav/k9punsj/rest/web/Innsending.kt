@@ -38,6 +38,9 @@ data class PunsjBolleDto(
     val journalpostId: JournalpostIdDto,
 )
 
+data class SettPåVentDto(
+    val soeknadId: SøknadIdDto
+)
 
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST
 

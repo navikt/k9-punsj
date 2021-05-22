@@ -280,7 +280,11 @@ data class OasMatchfagsak(
 )
 
 data class OasIdentDto(
-    val norskIdent: NorskIdentDto
+    val norskIdent: NorskIdentDto,
+)
+
+data class OasSøknadId(
+    val soeknadId: SøknadIdDto,
 )
 
 data class OasSendSøknad(
@@ -384,7 +388,7 @@ internal class JournalpostController {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentJournalposter(
-        @RequestBody body: OasIdentDto
+        @RequestBody body: OasIdentDto,
     ) {
     }
 
@@ -434,6 +438,7 @@ internal class JournalpostController {
     )
     fun SettPåVent(
         @PathVariable("journalpost_id") journalpostId: String,
+        @RequestBody body: OasSøknadId,
     ) {
     }
 
@@ -486,7 +491,7 @@ internal class JournalpostController {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun SkalTilK9Sak(
-        @RequestBody body: OasPunsjBolleDto
+        @RequestBody body: OasPunsjBolleDto,
     ) {
     }
 
@@ -528,24 +533,24 @@ data class OasDokumentInfo(
 
 data class OasJournalpostInfo(
     val dokumenter: Set<OasDokumentInfo>,
-    val venter : OasVentDto?
+    val venter: OasVentDto?,
 )
 
 data class OasJournalpostIder(
-    val poster : List<OasJournalpostDto>
+    val poster: List<OasJournalpostDto>,
 )
 
 data class OasJournalpostDto(
     val journalpostId: JournalpostIdDto,
     val dokumenter: Set<OasDokumentInfo>?,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val dato: LocalDate
+    val dato: LocalDate,
 )
 
 data class OasVentDto(
-    val venteÅrsak : String,
+    val venteÅrsak: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil : LocalDate
+    val venterTil: LocalDate,
 )
 
 data class OasPunsjBolleDto(
@@ -555,7 +560,7 @@ data class OasPunsjBolleDto(
 )
 
 data class OasSkalTilInfotrygdSvar(
-    val k9sak : Boolean
+    val k9sak: Boolean,
 )
 
 @RestController
