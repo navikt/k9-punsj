@@ -76,6 +76,7 @@ class K9SakServiceImpl(
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
             val liste = resultat
                 .filter { f -> f.status == FagsakStatus.LØPENDE || f.status == FagsakStatus.UNDER_BEHANDLING}
+                .filter { f -> f.person.ident == søker }
                 .map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
             Pair(liste, null)
         } catch (e: Exception) {
