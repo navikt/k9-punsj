@@ -25,7 +25,7 @@ import java.net.URI
 import java.util.UUID
 
 @Configuration
-@Profile("!test")
+@Profile("!test & !local")
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,

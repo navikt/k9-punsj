@@ -1,0 +1,168 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999",
+    "10000"
+  ],
+  "mottattDato": "2020-10-12",
+  "barn": {
+    "norskIdent": "22222222222",
+    "foedselsdato": null
+  },
+  "soeknadsperiode": {
+    "fom": "2018-12-30",
+    "tom": "2019-10-20"
+  },
+  "opptjeningAktivitet": {
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "ASASAS",
+      "organisasjonsnummer": "45376",
+      "info": {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": "2019-10-20"
+        },
+        "virksomhetstyper": ["FISKE"],
+        "landkode": "",
+        "regnskapsførerNavn": "Ole",
+        "regnskapsførerTlf": "666",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "30000",
+        "erNyoppstartet": false
+      }
+    },
+    "frilanser": {
+      "startdato": "2019-10-10",
+      "jobberFortsattSomFrilans": true
+    },
+    "arbeidstaker": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "999999999"
+      }
+    ]
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "999999999",
+        "arbeidstidInfo": {
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2018-12-30",
+                "tom": "2019-10-20"
+              },
+              "faktiskArbeidTimerPerDag": "37,5",
+              "jobberNormaltTimerPerDag": "37,5"
+            }
+          ]
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "faktiskArbeidTimerPerDag": "37,5"
+    },
+    "selvstendigNaeringsdrivende": [
+      {
+        "virksomhetNavn": "ASASAS",
+        "organisasjonsnummer": "45376",
+        "perioder": [
+          {
+            "periode": {
+              "fom": "",
+              "tom": ""
+            },
+            "virksomhetstyper": [],
+            "landkode": "",
+            "regnskapsførerNavn": "",
+            "regnskapsførerTlf": "",
+            "registrertIUtlandet": false,
+            "bruttoInntekt": "",
+            "erNyoppstartet": false
+          }
+        ]
+      }
+    ]
+  },
+  "beredskap": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
+    }
+  ],
+  "nattevaak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
+    }
+  ],
+  "tilsynsordning": {
+    "perioder": [
+      {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": "2019-10-20"
+        },
+        "timer": "7",
+        "minutter": "30"
+      }
+    ]
+  },
+  "uttak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "timerPleieAvBarnetPerDag": "37,5"
+    }
+  ],
+  "omsorg": {
+    "relasjonTilBarnet": "MOR",
+    "samtykketOmsorgForBarnet": true,
+    "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+  },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "lovbestemtFerie": [
+    {
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
+    }
+  ],
+  "utenlandsopphold": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "soknadsinfo": {
+    "samtidigHjemme": true,
+    "harMedsoeker": true
+  },
+  "harInfoSomIkkeKanPunsjes" : true,
+  "harMedisinskeOpplysninger" : true
+}
