@@ -13,7 +13,9 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
@@ -191,12 +193,45 @@ class PleiepengersyktbarnTests {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
-        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent)
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = "9999")
         val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
+    }
+
+    @Test
+    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før`() {
+        val norskIdent = "02020050121"
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        val journalpostId = "34234234"
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
+        val response = res.second
+            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .block()
+        assertThat(response?.feil).isNull()
+
+        assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostId))).isFalse
+
+        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = res.first)
+
+        val res2 = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(sendSøknad))
+            .awaitExchangeBlocking()
+
+        assertEquals(HttpStatus.CONFLICT, res2.statusCode())
+        val response2 = res2
+            .bodyToMono(OasFeil::class.java)
+            .block()
+        assertThat(response2!!.feil).isEqualTo("En eller alle journalpostene[34234234] har blitt sendt inn fra før")
     }
 
     @Test
@@ -234,9 +269,10 @@ class PleiepengersyktbarnTests {
     fun `Skal kunne lagre ned minimal søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+        val journalpostId = IdGenerator.nesteId()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostId)
 
-        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
 
         val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
@@ -574,6 +610,11 @@ class PleiepengersyktbarnTests {
 
         val søknadId = søknadDtoFyltUt.soeknadId
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
+
+        val journalposter = søknadDtoFyltUt.journalposter!!
+
+        val kanSendeInn = DatabaseUtil.getJournalpostRepo().kanSendeInn(journalposter)
+        assertThat(kanSendeInn).isTrue
 
         // sender en søknad
         return Pair(søknadId, client.post()

@@ -8,6 +8,7 @@ import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext
 
@@ -27,13 +28,17 @@ class PleiepengerSyktBarnSoknadService(
                 søknad = søknad,
                 correlationId = coroutineContext.hentCorrelationId()
             )
-            journalpostRepository.settBehandletFerdig(journalpostIder)
+            journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
+            logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
             aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList())
             null
-
         } else {
             "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før"
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
     }
 }

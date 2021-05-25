@@ -22,6 +22,7 @@ import no.nav.k9punsj.rest.web.Matchfagsak
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -171,6 +172,11 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
+                        if (!søknadK9Format.first.journalposter.map { j -> j.journalpostId }
+                                .containsAll(journalposterDto.journalposter)) {
+                            throw IllegalStateException("missmatch mellom journalposter -> Dette skal ikke skje")
+                        }
+
                         val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
                             journalposterDto.journalposter
@@ -180,17 +186,18 @@ internal class PleiepengerSyktBarnRoutes(
                             return@RequestContext ServerResponse
                                 .status(HttpStatus.CONFLICT)
                                 .json()
-                                .bodyValueAndAwait(feil)
+                                .bodyValueAndAwait(OasFeil(feil))
                         }
-
                         return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()
+
                     } catch (e: Exception) {
                         logger.error("", e)
                         return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .buildAndAwait()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(e.message!!))
                     }
                 }
             }

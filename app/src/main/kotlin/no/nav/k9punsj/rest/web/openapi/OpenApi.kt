@@ -172,6 +172,23 @@ internal class PleiepengerSyktBarnSoknadController {
                         implementation = SøknadFeil::class
                     )
                 )]
+            ), ApiResponse(
+                responseCode = "409",
+                description = "En eller flere journalposter har blitt sendt inn fra før",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasFeil::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Hvis det feiler uventet på server",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasFeil::class
+                    )
+                )]
             )
         ]
     )
@@ -181,9 +198,9 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
-    PleiepengerSyktBarnRoutes.Urls.ValiderSøknad,
-    consumes = ["application/json"],
-    produces = ["application/json"]
+        PleiepengerSyktBarnRoutes.Urls.ValiderSøknad,
+        consumes = ["application/json"],
+        produces = ["application/json"]
     )
     @Operation(
         summary = "Valider søknad mot k9-format sin kontrakt",
@@ -317,6 +334,10 @@ data class OasMatchfagsak(
 
 data class OasIdentDto(
     val norskIdent: NorskIdentDto,
+)
+
+data class OasFeil(
+    val feil: String,
 )
 
 data class OasSøknadId(

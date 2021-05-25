@@ -136,14 +136,27 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun settBehandletFerdig(journalpostIder: MutableSet<JournalpostId>) {
-        journalpostIder.forEach { ferdig(it) }
-    }
-
     suspend fun ferdig(journalpostId: String) {
         return using(sessionOf(dataSource)) {
             it.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true where JOURNALPOST_ID = ?",
                 journalpostId).asUpdate)
+        }
+    }
+
+    suspend fun settAlleTilFerdigBehandlet(journalpostIder: List<JournalpostId>) {
+        return using(sessionOf(dataSource)) {
+            it.transaction { tx ->
+                val antallUpdates = using(sessionOf(dataSource)) {
+                    tx.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true where JOURNALPOST_ID in (${
+                        IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
+                    })",
+                        IntRange(0,
+                            journalpostIder.size - 1).associate { t -> "p$t" to journalpostIder[t] as Any }).asUpdate)
+                }
+                if (antallUpdates != journalpostIder.size) {
+                    throw IllegalStateException("Klarte ikke sette alle til ferdig")
+                }
+            }
         }
     }
 
