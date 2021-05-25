@@ -34,7 +34,7 @@ internal class MapFraVisningTilEksternFormat {
                 søknadsperiode = if (søknad.soeknadsperiode?.fom != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
                 opptjeningAktivitet = if (erNullEllerTom(søknad.opptjeningAktivitet)) mapTilMottakArbeidAktivitetDto(
                     søknad.opptjeningAktivitet!!) else null,
-                soknadsinfo = søknad.soknadsinfo,
+                soknadsinfo = if(søknad.soknadsinfo != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.DataBruktTilUtledningDto(samtidigHjemme = søknad.soknadsinfo.samtidigHjemme, harMedsøker = søknad.soknadsinfo.harMedsoeker) else null,
                 bosteder = if (!søknad.bosteder.isNullOrEmpty() && søknad.bosteder[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(
                     søknad.bosteder.associate {
                         Pair(fromPeriodeDtoToString(it.periode!!),

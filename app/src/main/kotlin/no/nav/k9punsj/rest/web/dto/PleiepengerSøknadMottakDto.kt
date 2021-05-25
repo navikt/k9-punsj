@@ -42,6 +42,11 @@ data class PleiepengerSøknadMottakDto(
             val fødselsdato: LocalDate?,
         )
 
+        data class DataBruktTilUtledningDto(
+            val samtidigHjemme: Boolean? = null,
+            val harMedsøker: Boolean? = null,
+        )
+
         data class ArbeidAktivitetDto(
             val selvstendigNæringsdrivende: List<SelvstendigNæringsdrivendeDto>?,
             val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto?,

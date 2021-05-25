@@ -86,7 +86,7 @@ data class PleiepengerSøknadVisningDto(
 
     data class DataBruktTilUtledningDto(
         val samtidigHjemme: Boolean? = null,
-        val harMedsøker: Boolean? = null,
+        val harMedsoeker: Boolean? = null,
     )
 
     data class BostederDto(

@@ -468,6 +468,11 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
         assertThat(søknadViaGet.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("37,5")
         assertThat(søknadViaGet.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
+        assertThat(søknadViaGet.bosteder!![0].land).isEqualTo("RU")
+        assertThat(søknadViaGet.lovbestemtFerie!![0].fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.utenlandsopphold!![0].periode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soknadsinfo!!.harMedsoeker).isEqualTo(true)
+        assertThat(søknadViaGet.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
 
 
         // punsj backend format
@@ -491,6 +496,11 @@ class PleiepengersyktbarnTests {
         assertThat(sendingsformat.ytelse?.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(sendingsformat.ytelse?.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
         assertThat(sendingsformat.ytelse?.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
+        assertThat(sendingsformat.ytelse?.bosteder?.perioder?.values?.first()?.land).isEqualTo("RU")
+        assertThat(sendingsformat.ytelse?.lovbestemtFerie?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(sendingsformat.ytelse?.utenlandsopphold?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(sendingsformat.ytelse?.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
+        assertThat(sendingsformat.ytelse?.soknadsinfo!!.harMedsøker).isEqualTo(true)
 
 
         // k9-format, faktisk søknad format
@@ -523,6 +533,13 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.tilsynsordning?.perioder?.values?.first()?.etablertTilsynTimerPerDag.toString()).isEqualTo("PT7H30M")
         assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
         assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
+        assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
+        assertThat(ytelse.lovbestemtFerie!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.infoFraPunsj!!.get().inneholderMedisinskeOpplysninger).isEqualTo(true)
+        assertThat(ytelse.infoFraPunsj!!.get().søknadenInneholderInfomasjonSomIkkeKanPunsjes).isEqualTo(true)
+        assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
+        assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
     }
 
     private fun opprettOgSendInnSoeknad(
