@@ -14,7 +14,7 @@ import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -192,7 +192,7 @@ class PleiepengersyktbarnTests {
         val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        Assertions.assertThat(response?.feil).isNull()
+        assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
@@ -209,12 +209,20 @@ class PleiepengersyktbarnTests {
         //ødelegger perioden
         soeknad.replace("soeknadsperiode", periode)
 
-        val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res.second
+        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
+
+        val res = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(sendSøknad))
+            .awaitExchangeBlocking()
+
+        val response = res
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
+        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
         //TODO fix når det er rettet i k9-format
         assertEquals("IllegalArgumentException", response?.feil?.first()?.feilkode!!)
     }
@@ -246,7 +254,7 @@ class PleiepengersyktbarnTests {
         val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        Assertions.assertThat(response?.feil).isNull()
+        assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
@@ -277,7 +285,7 @@ class PleiepengersyktbarnTests {
         val response = res
             .second.bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        Assertions.assertThat(response?.feil).isNull()
+        assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
@@ -293,7 +301,7 @@ class PleiepengersyktbarnTests {
         val response = res.second
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
-        Assertions.assertThat(response?.feil).isNull()
+        assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
@@ -332,7 +340,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
 
         assertNotNull(søknadViaGet)
-        Assertions.assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("ASASAS")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("ASASAS")
     }
 
     @Test
@@ -351,8 +359,56 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
 
         assertNotNull(søknadViaGet)
-        Assertions.assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
-        Assertions.assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(true)
+        assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
+        assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(true)
+    }
+
+    @Test
+    fun `Skal verifisere at søknad er ok`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
+
+        val res = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(sendSøknad))
+            .awaitExchangeBlocking()
+
+        assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+    }
+
+    @Test
+    fun `Skal verifisere at alle felter blir lagret`() {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val resHent = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe",oppdatertSoeknadDto.soeknadId ).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitExchangeBlocking()
+
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        assertNotNull(søknadViaGet)
+
+        assertThat(søknadViaGet.soekerId).isEqualTo(norskIdent)
+        assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
+        assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
+        assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
+        assertThat(søknadViaGet.soeknadsperiode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soeknadsperiode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
+        assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
+        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.periode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
     }
 
     private fun opprettOgSendInnSoeknad(

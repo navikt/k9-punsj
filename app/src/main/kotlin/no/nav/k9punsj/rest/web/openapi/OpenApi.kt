@@ -181,6 +181,42 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
+    PleiepengerSyktBarnRoutes.Urls.ValiderSøknad,
+    consumes = ["application/json"],
+    produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Valider søknad mot k9-format sin kontrakt",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "202",
+                description = "Søknaden er valider ok.",
+                content = [Content(
+                    schema = Schema(
+                        implementation = Void::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Innsending feilet grunnet mangler i søknaden.",
+                content = [Content(
+                    schema = Schema(
+                        implementation = SøknadFeil::class
+                    )
+                )]
+            )
+        ]
+    )
+    fun ValiderSøknad(
+        @RequestBody søknad: OasSendSøknad,
+    ) {
+    }
+
+    @PostMapping(
         PleiepengerSyktBarnRoutes.Urls.NySøknad,
         consumes = ["application/json"],
         produces = ["application/json"]

@@ -9,8 +9,6 @@
     "norskIdent": "22222222222",
     "foedselsdato": null
   },
-  "sendtInn": false,
-  "erFraK9": false,
   "soeknadsperiode": {
     "fom": "2018-12-30",
     "tom": "2019-10-20"
@@ -29,7 +27,7 @@
         "regnskapsførerNavn": "Ole",
         "regnskapsførerTlf": "666",
         "registrertIUtlandet": false,
-        "bruttoInntekt": "",
+        "bruttoInntekt": "30000",
         "erNyoppstartet": false
       }
     },

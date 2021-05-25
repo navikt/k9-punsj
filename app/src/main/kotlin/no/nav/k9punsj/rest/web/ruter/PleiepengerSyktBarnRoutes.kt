@@ -58,6 +58,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
+        internal const val ValiderSøknad = "/$søknadType/valider" //post
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType" //post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
     }
@@ -214,7 +215,6 @@ internal class PleiepengerSyktBarnRoutes(
                     soeknadId = "123",
                     soekerId = hentSøknad.norskIdent,
                     journalposter = null,
-                    erFraK9 = true
                 )
 
                 val svarDto =
@@ -226,6 +226,49 @@ internal class PleiepengerSyktBarnRoutes(
                     .bodyValueAndAwait(svarDto)
             }
         }
+
+        POST("/api${Urls.ValiderSøknad}") { request ->
+            RequestContext(coroutineContext, request) {
+                val sendSøknad = request.sendSøknad()
+                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent)?.let { return@RequestContext it }
+                val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+                    ?: return@RequestContext ServerResponse
+                        .badRequest()
+                        .buildAndAwait()
+
+                val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknad)
+
+                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
+                val journalPoster = søknadEntitet.journalposter!!
+                val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+
+                val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format,
+                    søknad.soeknadId,
+                    hentPerioderSomFinnesIK9,
+                    journalposterDto.journalposter)
+
+                if (søknadK9Format.second.isNotEmpty()) {
+                    val feil = søknadK9Format.second.map { feil ->
+                        SøknadFeil.SøknadFeilDto(
+                            feil.felt,
+                            feil.feilkode,
+                            feil.feilmelding
+                        )
+                    }.toList()
+
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
+                }
+
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.ACCEPTED)
+                    .buildAndAwait()
+            }
+        }
+
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
