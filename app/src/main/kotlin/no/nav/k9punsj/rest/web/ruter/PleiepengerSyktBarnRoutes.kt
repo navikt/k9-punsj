@@ -171,10 +171,17 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        pleiepengerSyktBarnSoknadService.sendSøknad(
+                        val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
                             journalposterDto.journalposter
                         )
+
+                        if (feil != null) {
+                            return@RequestContext ServerResponse
+                                .status(HttpStatus.CONFLICT)
+                                .json()
+                                .bodyValueAndAwait(feil)
+                        }
 
                         return@RequestContext ServerResponse
                             .accepted()

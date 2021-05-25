@@ -20,8 +20,8 @@ class PleiepengerSyktBarnSoknadService(
     val innsendingClient: InnsendingClient,
     val aksjonspunktService: AksjonspunktService) {
 
-    internal suspend fun sendSøknad(søknad: Søknad, journalpostIder: MutableSet<JournalpostId>) {
-        if (journalpostRepository.kanSendeInn(journalpostIder.toList())) {
+    internal suspend fun sendSøknad(søknad: Søknad, journalpostIder: MutableSet<JournalpostId>) : String? {
+        return if (journalpostRepository.kanSendeInn(journalpostIder.toList())) {
             innsendingClient.sendSøknad(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
@@ -30,8 +30,10 @@ class PleiepengerSyktBarnSoknadService(
             journalpostRepository.settBehandletFerdig(journalpostIder)
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
             aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList())
+            null
+
         } else {
-            throw IllegalStateException("En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
+            "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før"
         }
     }
 }
