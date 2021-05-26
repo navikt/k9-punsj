@@ -58,7 +58,7 @@ internal class GosysRoutes(
                         val response = gosysOppgaveService.opprettOppgave(
                             aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
                         )
-                        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId)
+                        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId, false)
                         ServerResponse
                             .ok()
                             .contentType(MediaType.APPLICATION_JSON)

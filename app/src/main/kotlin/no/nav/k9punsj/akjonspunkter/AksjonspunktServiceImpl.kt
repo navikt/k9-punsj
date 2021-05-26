@@ -87,7 +87,7 @@ class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String) {
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean) {
         val aksjonspunkterSomSkalLukkes = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId)
             .filter { it.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET }
 
@@ -102,10 +102,11 @@ class AksjonspunktServiceImpl(
             hendelseProducer.sendMedOnSuccess(
                 Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
                 lagPunsjDto(
-                    eksternId,
-                    journalpostId,
-                    journalpost.aktørId,
-                    mutableMap
+                    eksternId = eksternId,
+                    journalpostId = journalpostId,
+                    aktørId = journalpost.aktørId,
+                    aksjonspunkter = mutableMap,
+                    sendtInn = erSendtInn
                 ),
                 eksternId.toString()) {
                 runBlocking {
@@ -118,8 +119,8 @@ class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>) {
-        journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it) }
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>, erSendtInn: Boolean) {
+        journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it, erSendtInn) }
     }
 
     override suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
@@ -213,7 +214,8 @@ class AksjonspunktServiceImpl(
         aksjonspunkter: MutableMap<String, String>,
         ytelse: String? = null,
         type: String? = null,
-        barnIdent: String? = null
+        barnIdent: String? = null,
+        sendtInn : Boolean? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId.toString(),
@@ -223,7 +225,8 @@ class AksjonspunktServiceImpl(
             aksjonspunktKoderMedStatusListe = aksjonspunkter,
             pleietrengendeAktørId = barnIdent,
             ytelse = ytelse,
-            type = type
+            type = type,
+            sendtInn = sendtInn
         )
         return objectMapper().writeValueAsString(punsjEventDto)
     }

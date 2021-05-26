@@ -70,14 +70,6 @@ class TestContext {
 
         }
 
-        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String) {
-
-        }
-
-        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>) {
-
-        }
-
         override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto) {
 
         }
@@ -91,6 +83,12 @@ class TestContext {
 
         override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
             return null
+        }
+
+        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>, erSendtInn: Boolean) {
+        }
+
+        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean) {
         }
     }
 
@@ -167,7 +165,6 @@ class TestContext {
             return dummyAktørId
         }
     }
-
 
     @Bean
     fun databaseInitializer(): DataSource {

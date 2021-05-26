@@ -19,13 +19,7 @@ interface AksjonspunktService {
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>
     )
 
-    suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(
-        journalpostId: String
-    )
-
     suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto)
-
-    suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>)
 
     suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
         journalpostId: List<String>,
@@ -33,4 +27,6 @@ interface AksjonspunktService {
     )
 
     suspend fun sjekkOmDenErPåVent(journalpostId: String) : VentDto?
+    suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>, erSendtInn: Boolean)
+    suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean)
 }

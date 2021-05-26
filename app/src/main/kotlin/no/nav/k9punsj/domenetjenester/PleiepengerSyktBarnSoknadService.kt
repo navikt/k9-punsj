@@ -31,7 +31,7 @@ class PleiepengerSyktBarnSoknadService(
             journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList())
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList(), true)
             null
         } else {
             "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før"

@@ -183,7 +183,7 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
                 }
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId)
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
                 journalpostService.settTilFerdig(journalpostId)
 
                 return@RequestContext ServerResponse
