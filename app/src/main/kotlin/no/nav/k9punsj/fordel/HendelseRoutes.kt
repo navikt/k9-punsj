@@ -5,8 +5,6 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.rest.web.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -38,9 +36,9 @@ internal class HendelseRoutes(
     fun HendelseRoutes() = Routes(authenticationHandler) {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val params = request.request()
+                val fordelPunsjEventDto = request.request()
                 try {
-                    val response = hendelseMottaker.prosesser(params.journalpostId, params.aktørId)
+                    val response = hendelseMottaker.prosesser(fordelPunsjEventDto)
                     if (response == null) {
                         ServerResponse
                                 .notFound()
@@ -62,8 +60,4 @@ internal class HendelseRoutes(
     }
     private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(FordelPunsjEventDto::class.java)).awaitFirst()
 
-    data class FordelPunsjEventDto(
-            val aktørId: AktørIdDto?,
-            val journalpostId: JournalpostIdDto
-    )
 }

@@ -11,4 +11,6 @@ data class PunsjEventDto(
         val eventTid: LocalDateTime,
         val aksjonspunktKoderMedStatusListe: MutableMap<String, String>,
         val pleietrengendeAktørId: String? = null,
+        val type : String? = null,
+        val ytelse : String? = null
 )

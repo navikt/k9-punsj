@@ -18,6 +18,7 @@ import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.fagsak.FagsakRoutes
+import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseRoutes
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
@@ -772,7 +773,7 @@ internal class HendelseController {
                 description = "Prosessert",
                 content = [Content(
                     schema = Schema(
-                        implementation = HendelseRoutes.FordelPunsjEventDto::class
+                        implementation = FordelPunsjEventDto::class
                     )
                 )]
             ),
@@ -792,8 +793,7 @@ internal class HendelseController {
     )
 
     @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
-    fun ProsesserHendelse(@RequestBody body: HendelseRoutes.FordelPunsjEventDto) {
-
+    fun ProsesserHendelse(@RequestBody body: FordelPunsjEventDto) {
     }
 }
 
@@ -832,7 +832,7 @@ internal class K9SakController {
     )
 
     @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
-    fun ProsesserHendelse(@RequestBody body: HendelseRoutes.FordelPunsjEventDto) {
+    fun ProsesserHendelse(@RequestBody body: FordelPunsjEventDto) {
 
     }
 }

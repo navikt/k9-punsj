@@ -34,6 +34,8 @@ class AksjonspunktServiceImpl(
     override suspend fun opprettAksjonspunktOgSendTilK9Los(
         journalpost: Journalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        type: String?,
+        ytelse: String?,
     ) {
         val eksternId = journalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
@@ -45,9 +47,11 @@ class AksjonspunktServiceImpl(
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             lagPunsjDto(eksternId,
-                journalpost.journalpostId,
-                journalpost.aktørId,
-                mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode)
+                journalpostId = journalpost.journalpostId,
+                aktørId = journalpost.aktørId,
+                aksjonspunkter = mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode),
+                ytelse = ytelse,
+                type = type
             ),
             eksternId.toString()) {
 
@@ -72,6 +76,7 @@ class AksjonspunktServiceImpl(
                 journalpostId,
                 journalpost.aktørId,
                 mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode),
+
             ),
             eksternId.toString()) {
 
@@ -206,7 +211,9 @@ class AksjonspunktServiceImpl(
         journalpostId: String,
         aktørId: AktørIdDto?,
         aksjonspunkter: MutableMap<String, String>,
-        barnIdent: String? = null,
+        ytelse: String? = null,
+        type: String? = null,
+        barnIdent: String? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId.toString(),
@@ -214,7 +221,9 @@ class AksjonspunktServiceImpl(
             eventTid = LocalDateTime.now(),
             aktørId = aktørId,
             aksjonspunktKoderMedStatusListe = aksjonspunkter,
-            pleietrengendeAktørId = barnIdent
+            pleietrengendeAktørId = barnIdent,
+            ytelse = ytelse,
+            type = type
         )
         return objectMapper().writeValueAsString(punsjEventDto)
     }

@@ -20,7 +20,7 @@ class FordelConsumer @Autowired constructor(val hendelseMottaker: HendelseMottak
         logger.info(String.format("#### -> Consumed message -> %s", message))
         val fordelPunsjEventDto = objectMapper().readValue(message, FordelPunsjEventDto::class.java)
         runBlocking {
-            hendelseMottaker.prosesser(fordelPunsjEventDto.journalpostId, fordelPunsjEventDto.aktørId)
+            hendelseMottaker.prosesser(fordelPunsjEventDto)
         }
     }
 }

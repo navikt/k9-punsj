@@ -7,7 +7,12 @@ import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 interface AksjonspunktService {
 
 
-    suspend fun opprettAksjonspunktOgSendTilK9Los(journalpost: Journalpost, aksjonspunkt : Pair<AksjonspunktKode, AksjonspunktStatus>)
+    suspend fun opprettAksjonspunktOgSendTilK9Los(
+        journalpost: Journalpost,
+        aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        type: String?,
+        ytelse: String?
+    )
 
     suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(
         journalpostId: String,

@@ -58,6 +58,8 @@ class TestContext {
         override suspend fun opprettAksjonspunktOgSendTilK9Los(
             journalpost: Journalpost,
             aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+            type: String?,
+            ytelse: String?,
         ) {
         }
 
