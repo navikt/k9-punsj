@@ -3,6 +3,8 @@ package no.nav.k9punsj.rest.web.ruter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
@@ -257,13 +259,22 @@ internal class PleiepengerSyktBarnRoutes(
                 val journalPoster = søknadEntitet.journalposter!!
                 val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
-                val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format,
-                    søknad.soeknadId,
-                    hentPerioderSomFinnesIK9,
-                    journalposterDto.journalposter)
+                val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
-                if (søknadK9Format.second.isNotEmpty()) {
-                    val feil = søknadK9Format.second.map { feil ->
+                try {
+                    mapTilEksternFormat = MapTilK9Format.mapTilEksternFormat(format,
+                        søknad.soeknadId,
+                        hentPerioderSomFinnesIK9,
+                        journalposterDto.journalposter)
+                } catch (e: Exception) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(e.message!!))
+                }
+
+                if (mapTilEksternFormat.second.isNotEmpty()) {
+                    val feil = mapTilEksternFormat.second.map { feil ->
                         SøknadFeil.SøknadFeilDto(
                             feil.felt,
                             feil.feilkode,

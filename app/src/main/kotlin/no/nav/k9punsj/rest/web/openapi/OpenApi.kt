@@ -226,6 +226,15 @@ internal class PleiepengerSyktBarnSoknadController {
                         implementation = SøknadFeil::class
                     )
                 )]
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Hvis det feiler uventet på server",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasFeil::class
+                    )
+                )]
             )
         ]
     )
