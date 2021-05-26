@@ -28,11 +28,16 @@ import kotlin.coroutines.coroutineContext
 @Profile("!test")
 class PdlServiceImpl(
     @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Value("\${no.nav.pdl.scope}") scope: String,
+    @Qualifier("sts") private val stsAccessTokenClient: AccessTokenClient,
+    @Qualifier("azure") private val azureAccessTokenClient: AccessTokenClient
+
 ) : ReactiveHealthIndicator, PdlService {
 
-    private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    private val scope: Set<String> = setOf("openid")
+    private val cachedStsAccessTokenClient = CachedAccessTokenClient(stsAccessTokenClient)
+    private val cachedAzureAccessTokenClient = CachedAccessTokenClient(azureAccessTokenClient)
+    private val StsScopes = setOf("openid")
+    private val AzureScopes = setOf(scope)
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
@@ -47,7 +52,7 @@ class PdlServiceImpl(
 
     init {
         logger.info("PdlBaseUrl=$baseUrl")
-        logger.info("PdlScopes=${scope.joinToString()}")
+        logger.info("PdlScopes=${StsScopes.joinToString()}")
     }
 
     private val client = WebClient
@@ -65,9 +70,10 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikator(fnummer: String): PdlResponse? {
-        val accessToken = cachedAccessTokenClient
+        authorizationHeader()
+        val accessToken = cachedStsAccessTokenClient
             .getAccessToken(
-                scopes = scope
+                scopes = StsScopes
             )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
@@ -103,9 +109,10 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse? {
-        val accessToken = cachedAccessTokenClient
+        authorizationHeader()
+        val accessToken = cachedStsAccessTokenClient
             .getAccessToken(
-                scopes = scope
+                scopes = StsScopes
             )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
@@ -141,9 +148,9 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun aktørIdFor(fnummer: String): String? {
-        val accessToken = cachedAccessTokenClient
+        val accessToken = cachedStsAccessTokenClient
             .getAccessToken(
-                scopes = scope
+                scopes = StsScopes
             )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
@@ -192,13 +199,25 @@ class PdlServiceImpl(
         )
     }
 
+    private suspend fun authorizationHeader() = kotlin.runCatching {
+        cachedAzureAccessTokenClient.getAccessToken(
+            scopes = AzureScopes,
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        ).asAuthoriationHeader()
+    }.fold(onSuccess = {
+        logger.info("Veksling av Azure token OK!")
+    }, onFailure = {throwable ->
+        logger.error("Veksling av Azure token Feilet.", throwable)
+    })
+
+
     override fun health() = Mono.just(
-        accessTokenClient.helsesjekk(
-            operasjon = "hente-aktørid",
-            scopes = scope,
-            initialHealth = accessTokenClient.helsesjekk(
-                operasjon = "hente-aktørid",
-                scopes = scope
+        stsAccessTokenClient.helsesjekk(
+            operasjon = "pdl-integrasjon",
+            scopes = StsScopes,
+            initialHealth = stsAccessTokenClient.helsesjekk(
+                operasjon = "pdl-integrasjon",
+                scopes = StsScopes
             )
         )
     )

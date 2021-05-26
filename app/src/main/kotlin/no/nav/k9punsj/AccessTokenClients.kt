@@ -39,9 +39,11 @@ internal class AccessTokenClients(
         throw IllegalArgumentException("Azure JWK på feil format.")
     }
 
-    private val naisStsClient = ClientSecretAccessTokenClient(clientId = clientId,
+    private val naisStsClient = ClientSecretAccessTokenClient(
+        clientId = clientId,
         clientSecret = clientSecret,
-        tokenEndpoint = stsTokenEndpoint)
+        tokenEndpoint = stsTokenEndpoint
+    )
 
     private val signedJwtAzureAccessTokenClient = SignedJwtAccessTokenClient(
         clientId = azureClientId,

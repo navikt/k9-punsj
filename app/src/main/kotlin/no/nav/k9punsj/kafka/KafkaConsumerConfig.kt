@@ -13,7 +13,6 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
-import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.ContainerStoppingErrorHandler
 import java.time.Duration
 
@@ -78,7 +77,6 @@ internal class KafkaConsumerConfig {
     fun kafkaListenerContainerFactory(): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.apply {
-            ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
             authorizationExceptionRetryInterval = Duration.ofMillis(RETRY_INTERVAL)
         }
         factory.setErrorHandler(ContainerStoppingErrorHandler())
