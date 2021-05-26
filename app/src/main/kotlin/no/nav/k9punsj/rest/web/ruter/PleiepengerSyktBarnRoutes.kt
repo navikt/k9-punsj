@@ -186,9 +186,9 @@ internal class PleiepengerSyktBarnRoutes(
 
                         if (feil != null) {
                             return@RequestContext ServerResponse
-                                .status(HttpStatus.CONFLICT)
+                                .status(feil.first)
                                 .json()
-                                .bodyValueAndAwait(OasFeil(feil))
+                                .bodyValueAndAwait(OasFeil(feil.second))
                         }
                         return@RequestContext ServerResponse
                             .accepted()

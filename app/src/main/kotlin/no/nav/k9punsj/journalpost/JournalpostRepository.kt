@@ -138,7 +138,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun ferdig(journalpostId: String) {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true where JOURNALPOST_ID = ?",
+            it.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID = ?",
                 journalpostId).asUpdate)
         }
     }
@@ -147,7 +147,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 val antallUpdates = using(sessionOf(dataSource)) {
-                    tx.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true where JOURNALPOST_ID in (${
+                    tx.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID in (${
                         IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
                     })",
                         IntRange(0,

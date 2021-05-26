@@ -9,6 +9,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext
 
@@ -19,22 +20,30 @@ class PleiepengerSyktBarnSoknadService(
     val journalpostRepository: JournalpostRepository,
     val søknadRepository: SøknadRepository,
     val innsendingClient: InnsendingClient,
-    val aksjonspunktService: AksjonspunktService) {
+    val aksjonspunktService: AksjonspunktService,
+) {
 
-    internal suspend fun sendSøknad(søknad: Søknad, journalpostIder: MutableSet<JournalpostId>) : String? {
+    internal suspend fun sendSøknad(
+        søknad: Søknad,
+        journalpostIder: MutableSet<JournalpostId>,
+    ): Pair<HttpStatus, String>? {
         return if (journalpostRepository.kanSendeInn(journalpostIder.toList())) {
-            innsendingClient.sendSøknad(
-                søknadId = søknad.søknadId.id,
-                søknad = søknad,
-                correlationId = coroutineContext.hentCorrelationId()
-            )
+            try {
+                innsendingClient.sendSøknad(
+                    søknadId = søknad.søknadId.id,
+                    søknad = søknad,
+                    correlationId = coroutineContext.hentCorrelationId()
+                )
+            } catch (e: Exception) {
+                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.message!!)
+            }
             journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
             aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList(), true)
             null
         } else {
-            "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før"
+            Pair(HttpStatus.CONFLICT, "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
         }
     }
 
