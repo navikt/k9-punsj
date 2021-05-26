@@ -66,6 +66,8 @@ spec:
       value: c7adbfbb-1b1e-41f6-9b7a-af9627c04998/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.nais.preprod.local/graphql
+    - name : PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
     - name: GOSYS_BASE_URL
       value: https://oppgave.nais.preprod.local
     - name: SAF_HENTE_DOKUMENT_SCOPES
@@ -94,4 +96,3 @@ spec:
       value: https://k9-punsjbolle.dev.intern.nav.no/api
     - name : K9PUNSJBOLLE_SCOPE
       value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
-

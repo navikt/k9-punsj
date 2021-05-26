@@ -28,26 +28,24 @@ import kotlin.coroutines.coroutineContext
 @Profile("!test")
 class PdlServiceImpl(
     @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
+    @Value("\${no.nav.pdl.scope}") private val scope: String,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator, PdlService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    private val scope: Set<String> = setOf("openid")
+    private val scopes: Set<String> = setOf(scope)
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
-        private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
-        private const val ConsumerIdHeaderValue = "k9-punsj"
-        private const val NavConsumerTokenHeaderKey = "Nav-Consumer-Token"
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
-        private const val CorrelationIdHeader = "Nav-Callid"
+        private const val CorrelationIdHeader = "Nav-Call-Id"
         private const val MaxDokumentSize = 5 * 1024 * 1024
     }
 
     init {
         logger.info("PdlBaseUrl=$baseUrl")
-        logger.info("PdlScopes=${scope.joinToString()}")
+        logger.info("PdlScopes=${scopes.joinToString()}")
     }
 
     private val client = WebClient
@@ -65,10 +63,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikator(fnummer: String): PdlResponse? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = scope
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -77,15 +71,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("AKTORID")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -103,10 +94,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = scope
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -115,15 +102,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("FOLKEREGISTERIDENT")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -141,10 +125,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun aktørIdFor(fnummer: String): String? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = scope
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -153,15 +133,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("AKTORID")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -182,6 +159,11 @@ class PdlServiceImpl(
     private fun getStringFromResource(path: String) =
         PdlServiceImpl::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
 
+    private suspend fun authorizationHeader() = cachedAccessTokenClient.getAccessToken(
+        scopes = scopes,
+        onBehalfOf = coroutineContext.hentAuthentication().accessToken
+    ).asAuthoriationHeader()
+
     data class QueryRequest(
         val query: String,
         val variables: Map<String, Any>,
@@ -194,11 +176,11 @@ class PdlServiceImpl(
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
-            operasjon = "hente-aktørid",
-            scopes = scope,
+            operasjon = "pdl-integrasjon",
+            scopes = scopes,
             initialHealth = accessTokenClient.helsesjekk(
-                operasjon = "hente-aktørid",
-                scopes = scope
+                operasjon = "pdl-integrasjon",
+                scopes = scopes
             )
         )
     )
