@@ -7,6 +7,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -26,7 +27,7 @@ import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [HendelseMottaker::class, AksjonspunktServiceImpl::class, TestContext::class, JournalpostRepository::class, AksjonspunktRepository::class])
+@ContextConfiguration(classes = [HendelseMottaker::class, AksjonspunktServiceImpl::class, TestContext::class, JournalpostRepository::class, AksjonspunktRepository::class, SøknadRepository::class])
 internal class FordelKafkaTest {
 
     @MockBean
@@ -40,7 +41,7 @@ internal class FordelKafkaTest {
 
     @Test
     fun `motta melding om journalføringsoppgave fra fordel`() {
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666")
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
@@ -50,16 +51,21 @@ internal class FordelKafkaTest {
         doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
 
         runBlocking {
-            hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
+            hendelseMottaker.prosesser(melding)
             val journalpost =
                 Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost,
+                Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                melding.type,
+                melding.ytelse)
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo(melding.aktørId)
         Assertions.assertThat(verdiFraKafka.journalpostId).isEqualTo(melding.journalpostId)
+        Assertions.assertThat(verdiFraKafka.ytelse).isEqualTo(melding.ytelse)
+        Assertions.assertThat(verdiFraKafka.type).isEqualTo(melding.type)
     }
 
     @Test
@@ -73,10 +79,13 @@ internal class FordelKafkaTest {
 
         doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         runBlocking {
-            hendelseMottaker.prosesser(melding.journalpostId, melding.aktørId)
+            hendelseMottaker.prosesser(melding)
             val journalpost =
                 Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET))
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost,
+                Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                melding.type,
+                melding.ytelse)
         }
         Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
         val value = valueCaptor.value

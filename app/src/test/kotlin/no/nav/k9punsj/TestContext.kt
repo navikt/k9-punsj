@@ -18,10 +18,7 @@ import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
 import no.nav.k9punsj.rest.info.IdTokenLocal
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.SaksnummerDto
+import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.util.DatabaseUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -61,6 +58,8 @@ class TestContext {
         override suspend fun opprettAksjonspunktOgSendTilK9Los(
             journalpost: Journalpost,
             aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+            type: String?,
+            ytelse: String?,
         ) {
         }
 
@@ -71,15 +70,7 @@ class TestContext {
 
         }
 
-        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String) {
-
-        }
-
-        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>) {
-
-        }
-
-        override suspend fun settPåVentOgSendTilLos(journalpostId: String) {
+        override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto) {
 
         }
 
@@ -92,6 +83,12 @@ class TestContext {
 
         override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
             return null
+        }
+
+        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>, erSendtInn: Boolean) {
+        }
+
+        override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean) {
         }
     }
 
@@ -168,7 +165,6 @@ class TestContext {
             return dummyAktørId
         }
     }
-
 
     @Bean
     fun databaseInitializer(): DataSource {

@@ -3,6 +3,7 @@ package no.nav.k9punsj.akjonspunkter
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestContext
+import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
@@ -24,7 +25,7 @@ import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [AksjonspunktServiceImpl::class, TestContext::class, JournalpostRepository::class, AksjonspunktRepository::class])
+@ContextConfiguration(classes = [AksjonspunktServiceImpl::class, TestContext::class, JournalpostRepository::class, AksjonspunktRepository::class, SøknadRepository::class])
 internal class AksjonspunktServiceImplTest {
 
     @MockBean
@@ -60,12 +61,11 @@ internal class AksjonspunktServiceImplTest {
         assertThat(hentAlleAksjonspunkter).hasSize(1)
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
-        aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId)
+        aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId, "21707da8-a13b-4927-8776-c53399727b29")
 
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         assertThat(verdiFraKafka.aksjonspunktKoderMedStatusListe).isEqualTo(mutableMapOf(Pair("PUNSJ", "UTFO"), Pair("MER_INFORMASJON", "OPPR")))
-
     }
 
     private fun captureString(valueCaptor: ArgumentCaptor<String>): String {

@@ -1,5 +1,6 @@
 package no.nav.k9punsj.db.datamodell.pleiepengersyktbarn
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.db.datamodell.*
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -59,7 +60,8 @@ data class PleiepengersyktbarnEntitet(
             }
 
             data class FrilanserDto(
-                val startdato: String?,
+                @JsonFormat(pattern = "yyyy-MM-dd")
+                val startdato: LocalDate?,
                 val jobberFortsattSomFrilans: Boolean?,
 
                 )

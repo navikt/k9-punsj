@@ -24,6 +24,10 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
         }
 
+        fun søknadFraFrontendMed2() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("søknad-fra-frontend_med_2.json"))
+        }
+
         fun minimalSøknad() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("tom-søknad.json"))
         }
@@ -50,6 +54,10 @@ class LesFraFilUtil {
 
         fun tomtLand() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
+        }
+
+        fun zero() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("søknad_med_null_periode.json"))
         }
     }
 }

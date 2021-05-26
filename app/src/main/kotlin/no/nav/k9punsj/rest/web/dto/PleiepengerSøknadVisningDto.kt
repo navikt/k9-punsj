@@ -12,8 +12,6 @@ data class PleiepengerSøknadVisningDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     val barn: BarnDto? = null,
-    val sendtInn: Boolean? = false,
-    val erFraK9: Boolean? = false,
     val soeknadsperiode: PeriodeDto? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
@@ -88,7 +86,7 @@ data class PleiepengerSøknadVisningDto(
 
     data class DataBruktTilUtledningDto(
         val samtidigHjemme: Boolean? = null,
-        val harMedsøker: Boolean? = null,
+        val harMedsoeker: Boolean? = null,
     )
 
     data class BostederDto(

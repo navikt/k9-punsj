@@ -3,6 +3,8 @@ package no.nav.k9punsj.rest.web.ruter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
@@ -22,6 +24,7 @@ import no.nav.k9punsj.rest.web.Matchfagsak
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -58,6 +61,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
+        internal const val ValiderSøknad = "/$søknadType/valider" //post
         internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType" //post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
     }
@@ -170,19 +174,32 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        pleiepengerSyktBarnSoknadService.sendSøknad(
+                        if (!søknadK9Format.first.journalposter.map { j -> j.journalpostId }
+                                .containsAll(journalposterDto.journalposter)) {
+                            throw IllegalStateException("missmatch mellom journalposter -> Dette skal ikke skje")
+                        }
+
+                        val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
                             journalposterDto.journalposter
                         )
 
+                        if (feil != null) {
+                            return@RequestContext ServerResponse
+                                .status(feil.first)
+                                .json()
+                                .bodyValueAndAwait(OasFeil(feil.second))
+                        }
                         return@RequestContext ServerResponse
                             .accepted()
                             .buildAndAwait()
+
                     } catch (e: Exception) {
                         logger.error("", e)
                         return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .buildAndAwait()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(e.message!!))
                     }
                 }
             }
@@ -214,7 +231,6 @@ internal class PleiepengerSyktBarnRoutes(
                     soeknadId = "123",
                     soekerId = hentSøknad.norskIdent,
                     journalposter = null,
-                    erFraK9 = true
                 )
 
                 val svarDto =
@@ -226,6 +242,58 @@ internal class PleiepengerSyktBarnRoutes(
                     .bodyValueAndAwait(svarDto)
             }
         }
+
+        POST("/api${Urls.ValiderSøknad}") { request ->
+            RequestContext(coroutineContext, request) {
+                val sendSøknad = request.sendSøknad()
+                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent)?.let { return@RequestContext it }
+                val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+                    ?: return@RequestContext ServerResponse
+                        .badRequest()
+                        .buildAndAwait()
+
+                val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknad)
+
+                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
+                val journalPoster = søknadEntitet.journalposter!!
+                val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+
+                val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
+
+                try {
+                    mapTilEksternFormat = MapTilK9Format.mapTilEksternFormat(format,
+                        søknad.soeknadId,
+                        hentPerioderSomFinnesIK9,
+                        journalposterDto.journalposter)
+                } catch (e: Exception) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(e.message!!))
+                }
+
+                if (mapTilEksternFormat.second.isNotEmpty()) {
+                    val feil = mapTilEksternFormat.second.map { feil ->
+                        SøknadFeil.SøknadFeilDto(
+                            feil.felt,
+                            feil.feilkode,
+                            feil.feilmelding
+                        )
+                    }.toList()
+
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
+                }
+
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.ACCEPTED)
+                    .buildAndAwait()
+            }
+        }
+
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {

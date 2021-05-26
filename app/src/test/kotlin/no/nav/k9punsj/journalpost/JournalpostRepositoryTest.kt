@@ -65,7 +65,7 @@ internal class JournalpostRepositoryTest {
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(2)
 
-        journalpostRepository.settBehandletFerdig(mutableSetOf(journalpost1.journalpostId, journalpost2.journalpostId))
+        journalpostRepository.settAlleTilFerdigBehandlet(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
 
         val finnJournalposterPåPersonSkalGiTom = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPersonSkalGiTom).isEmpty()
@@ -101,7 +101,7 @@ internal class JournalpostRepositoryTest {
             journalpostRepository.kanSendeInn(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
         assertThat(kanSendeInn).isTrue
 
-        journalpostRepository.settBehandletFerdig(mutableSetOf(journalpost1.journalpostId, journalpost2.journalpostId))
+        journalpostRepository.settAlleTilFerdigBehandlet(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
 
         val kanSendeInn2 =
             journalpostRepository.kanSendeInn(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
@@ -141,6 +141,51 @@ internal class JournalpostRepositoryTest {
         }
 
         assertThat(journalpostRepository.hent(journalpost2.journalpostId).skalTilK9).isFalse()
+    }
+
+    @Test
+    fun `skal kunne sette alle til ferdig`(): Unit = runBlocking  {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost1) {
+            journalpost1
+        }
+
+        val journalpost2 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost2) {
+            journalpost2
+        }
+
+        journalpostRepository.settAlleTilFerdigBehandlet(listOf(journalpost1.journalpostId, journalpost2.journalpostId))
+        assertThat(journalpostRepository.kanSendeInn(listOf(journalpost1.journalpostId, journalpost2.journalpostId))).isFalse()
+    }
+
+    @Test
+    fun `skal feil hvis ikke alle kan settes til ferdig`(): Unit = runBlocking  {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        journalpostRepository.lagre(journalpost1) {
+            journalpost1
+        }
+
+        val journalpost2 = Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+
+        var harFåttEx = false
+        try {
+            journalpostRepository.settAlleTilFerdigBehandlet(listOf(journalpost1.journalpostId,
+                journalpost2.journalpostId))
+        } catch (e: IllegalStateException) {
+            assertThat(e.message).isEqualTo("Klarte ikke sette alle til ferdig")
+            harFåttEx = true
+        }
+        assertThat(harFåttEx).isTrue()
     }
 }
 
