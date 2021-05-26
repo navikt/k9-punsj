@@ -1,8 +1,9 @@
 package no.nav.k9punsj.util
 
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.db.config.loadFlyway
+import no.nav.k9punsj.db.config.runMigration
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.PersonRepository
@@ -13,7 +14,10 @@ import javax.sql.DataSource
 class DatabaseUtil {
 
     companion object {
-        internal val dataSource: DataSource = EmbeddedPostgres.start().postgresDatabase.also { dataSource ->
+        internal val dataSource: DataSource = when ("ZONKY" == System.getenv("EMBEDDED_POSTGRES_TYPE")) {
+            true -> io.zonky.test.db.postgres.embedded.EmbeddedPostgres.start().postgresDatabase
+            false -> EmbeddedPostgres.start().postgresDatabase
+        }.also { dataSource -> 
             val flyway = loadFlyway(dataSource)
             flyway.clean()
             flyway.migrate()

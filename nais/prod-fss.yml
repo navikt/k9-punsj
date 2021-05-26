@@ -66,8 +66,6 @@ spec:
       value: feb9588b-a3d6-4d2f-8809-97284046ae72/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.nais.adeo.no/graphql
-    - name: PDL_SCOPE
-      value: api://prod-fss.pdl.pdl-api/.default
     - name: GOSYS_BASE_URL
       value: https://oppgave.nais.adeo.no
     - name: SAF_HENTE_DOKUMENT_SCOPES
