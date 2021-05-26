@@ -131,7 +131,7 @@ data class PleiepengerSøknadMottakDto(
         }
 
         data class LovbestemtFerieDto(
-            val perioder: Map<String, LovbestemtFerieInfoDto>?,
+            val perioder: Map<String, LovbestemtFerieInfoDto?>?,
         )
 
         data class LovbestemtFerieInfoDto(

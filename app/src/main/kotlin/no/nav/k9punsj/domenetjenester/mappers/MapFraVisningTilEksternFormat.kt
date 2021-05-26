@@ -66,11 +66,11 @@ internal class MapFraVisningTilEksternFormat {
                                 zeroTimerHvisTomString(it.timer.toString())
                                     .plus(zeroMinutterHvisTomString(it.minutter.toString()))))
                     }) else null,
-                lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty()) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(
+                lovbestemtFerie = if (!søknad.lovbestemtFerie.isNullOrEmpty() && søknad.lovbestemtFerie.first().fom != null && søknad.lovbestemtFerie.first().tom != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieDto(
                     søknad.lovbestemtFerie.associate {
-                        Pair(fromPeriodeDtoToString(it),
-                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.LovbestemtFerieInfoDto(""))
+                        Pair(fromPeriodeDtoToString(it), null)
                     }) else null,
+
                 arbeidstid = if (erNullEllerTom(søknad.arbeidstid)) mapTilMottatArbeidstid(søknad.arbeidstid) else null,
                 uttak = lagUttak(søknad),
                 omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else mapOmsorg(søknad.omsorg!!),

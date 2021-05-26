@@ -9,7 +9,6 @@ import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 
 
-typealias PersonIdDto = String
 typealias NorskIdentDto = String
 typealias MappeIdDto = String
 typealias AktørIdDto = String
@@ -36,12 +35,6 @@ data class SvarDto(
 
 data class PerioderDto(
     val periodeDto: List<PeriodeDto>
-)
-
-data class SøknadOppdaterDto<T>(
-    val søker: NorskIdentDto,
-    val søknadId: SøknadIdDto,
-    val søknad: T,
 )
 
 data class SøknadDto<T>(

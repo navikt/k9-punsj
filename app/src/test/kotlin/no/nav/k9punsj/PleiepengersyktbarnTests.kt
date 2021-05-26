@@ -266,29 +266,6 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Skal vise feil 500 opp til gui`() {
-        val norskIdent = "02022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.zero()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
-
-        val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
-            .awaitExchangeBlocking()
-
-        val response = res
-            .bodyToMono(OasFeil::class.java)
-            .block()
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, res.statusCode())
-        assertThat(response?.feil).contains("no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie[\"perioder\"]")
-    }
-
-    @Test
     fun `Skal kunne lagre ned minimal søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
