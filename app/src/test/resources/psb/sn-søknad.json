@@ -15,19 +15,22 @@
   "opptjeningAktivitet": {
     "arbeidstaker": [],
     "selvstendigNaeringsdrivende": {
-      "virksomhetNavn": "ASASAS",
-      "organisasjonsnummer": "45376",
+      "virksomhetNavn": "FiskerAS",
+      "organisasjonsnummer": "890508087",
       "info": {
         "periode": {
-          "fom": "",
-          "tom": ""
+          "fom": "2021-05-10",
+          "tom": "2021-05-30"
         },
-        "virksomhetstyper": [],
+        "virksomhetstyper": [
+          "Fisker",
+          "Jordbruker"
+        ],
         "landkode": "",
-        "regnskapsførerNavn": "",
-        "regnskapsførerTlf": "",
+        "regnskapsførerNavn": "Regskapsfører",
+        "regnskapsførerTlf": "88888889",
         "registrertIUtlandet": false,
-        "bruttoInntekt": "",
+        "bruttoInntekt": "1200000",
         "erNyoppstartet": false
       }
     },
