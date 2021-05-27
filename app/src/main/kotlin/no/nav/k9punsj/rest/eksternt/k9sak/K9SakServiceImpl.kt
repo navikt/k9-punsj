@@ -75,7 +75,7 @@ class K9SakServiceImpl(
         return try {
             val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
             log.info("svar fra k9-sak")
-            resultat.forEach { log.info(it.toString() + it.person.ident + it.person.aktørId) }
+            resultat.forEach { log.info(it.toString() + it.relatertPersonAktørId.ident) }
             val liste = resultat
                 .filter { f -> f.status == FagsakStatus.LØPENDE || f.status == FagsakStatus.UNDER_BEHANDLING}
                 .filter { f -> f.person.ident == søker }
