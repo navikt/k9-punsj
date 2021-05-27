@@ -29,21 +29,14 @@ import kotlin.coroutines.coroutineContext
 class PdlServiceImpl(
     @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
     @Value("\${no.nav.pdl.scope}") scope: String,
-    @Qualifier("sts") private val stsAccessTokenClient: AccessTokenClient,
     @Qualifier("azure") private val azureAccessTokenClient: AccessTokenClient
-
 ) : ReactiveHealthIndicator, PdlService {
 
-    private val cachedStsAccessTokenClient = CachedAccessTokenClient(stsAccessTokenClient)
     private val cachedAzureAccessTokenClient = CachedAccessTokenClient(azureAccessTokenClient)
-    private val StsScopes = setOf("openid")
     private val AzureScopes = setOf(scope)
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
-        private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
-        private const val ConsumerIdHeaderValue = "k9-punsj"
-        private const val NavConsumerTokenHeaderKey = "Nav-Consumer-Token"
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
         private const val CorrelationIdHeader = "Nav-Callid"
@@ -52,7 +45,7 @@ class PdlServiceImpl(
 
     init {
         logger.info("PdlBaseUrl=$baseUrl")
-        logger.info("PdlScopes=${StsScopes.joinToString()}")
+        logger.info("PdlScopes=${AzureScopes.joinToString()}")
     }
 
     private val client = WebClient
@@ -70,11 +63,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikator(fnummer: String): PdlResponse? {
-        authorizationHeader()
-        val accessToken = cachedStsAccessTokenClient
-            .getAccessToken(
-                scopes = StsScopes
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -83,15 +71,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("AKTORID")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -109,11 +94,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikatorMedAktørId(aktørId: String): PdlResponse? {
-        authorizationHeader()
-        val accessToken = cachedStsAccessTokenClient
-            .getAccessToken(
-                scopes = StsScopes
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -122,15 +102,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("FOLKEREGISTERIDENT")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -148,10 +125,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun aktørIdFor(fnummer: String): String? {
-        val accessToken = cachedStsAccessTokenClient
-            .getAccessToken(
-                scopes = StsScopes
-            )
         val req = QueryRequest(
             getStringFromResource("/pdl/hentIdent.graphql"),
             mapOf(
@@ -160,15 +133,12 @@ class PdlServiceImpl(
                 "grupper" to listOf("AKTORID")
             )
         )
-        val authentication = coroutineContext.hentAuthentication()
         val response = client
             .post()
             .uri { it.build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, """${authentication.tokenType} ${authentication.accessToken}""")
-            .header(NavConsumerTokenHeaderKey, accessToken.asAuthoriationHeader())
+            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(req)
             .retrieve()
@@ -199,25 +169,19 @@ class PdlServiceImpl(
         )
     }
 
-    private suspend fun authorizationHeader() = kotlin.runCatching {
-        cachedAzureAccessTokenClient.getAccessToken(
-            scopes = AzureScopes,
-            onBehalfOf = coroutineContext.hentAuthentication().accessToken
-        ).asAuthoriationHeader()
-    }.fold(onSuccess = {
-        logger.info("Veksling av Azure token OK!")
-    }, onFailure = {throwable ->
-        logger.error("Veksling av Azure token Feilet.", throwable)
-    })
+    private suspend fun authorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+        scopes = AzureScopes,
+        onBehalfOf = coroutineContext.hentAuthentication().accessToken
+    ).asAuthoriationHeader()
 
 
     override fun health() = Mono.just(
-        stsAccessTokenClient.helsesjekk(
+        azureAccessTokenClient.helsesjekk(
             operasjon = "pdl-integrasjon",
-            scopes = StsScopes,
-            initialHealth = stsAccessTokenClient.helsesjekk(
+            scopes = AzureScopes,
+            initialHealth = azureAccessTokenClient.helsesjekk(
                 operasjon = "pdl-integrasjon",
-                scopes = StsScopes
+                scopes = AzureScopes
             )
         )
     )
