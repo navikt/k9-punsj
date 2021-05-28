@@ -127,6 +127,10 @@ class TestContext {
         override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
             return true
         }
+
+        override suspend fun sendeInnTilgang(fnr: String): Boolean {
+            return true
+        }
     }
 
     @Bean
