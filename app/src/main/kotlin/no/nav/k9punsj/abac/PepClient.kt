@@ -114,8 +114,6 @@ class PepClient(
                 .awaitFirst()
 
             val result = try {
-                // for test
-                log.info(response.body)
                 objectMapper().readValue<Response>(response.body ?: "").response[0].decision == "Permit"
             } catch (e: Exception) {
                 log.error(
