@@ -137,7 +137,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -338,6 +338,17 @@ internal class PleiepengerSyktBarnRoutes(
                 .status(HttpStatus.FORBIDDEN)
                 .json()
                 .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
+        }
+        return null
+    }
+
+    private suspend fun harInnloggetBrukerTilgangTilOgSendeInn(norskIdentDto: NorskIdentDto): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto)
+        if (!saksbehandlerHarTilgang) {
+            return ServerResponse
+                .status(HttpStatus.FORBIDDEN)
+                .json()
+                .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
         }
         return null
     }

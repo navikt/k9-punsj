@@ -45,7 +45,15 @@ class PepClient(
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
-        loggTilAudit(identTilInnloggetBruker, fnr)
+        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read")
+        return decision
+    }
+
+    override suspend fun sendeInnTilgang(fnr: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+        val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
+        val decision = evaluate(requestBuilder)
+        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create")
         return decision
     }
 
@@ -63,29 +71,45 @@ class PepClient(
             .addResourceAttribute(RESOURCE_FNR, fnr)
     }
 
+    private fun sendeInnTilgangRequest(
+        identTilInnloggetBruker: String,
+        fnr: String,
+    ): XacmlRequestBuilder {
+        return XacmlRequestBuilder()
+            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
+            .addResourceAttribute(RESOURCE_TYPE, TILGANG_SAK)
+            .addActionAttribute(ACTION_ID, "create")
+            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
+            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
+            .addResourceAttribute(RESOURCE_FNR, fnr)
+    }
+
     override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
 
         fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it)
+            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read")
         }
         return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
-    private suspend fun loggTilAudit(identTilInnloggetBruker: String, it: String) {
+    private suspend fun loggTilAudit(
+        identTilInnloggetBruker: String, it: String, eventClassId: EventClassId, type: String, action: String
+    ) {
         auditlogger.logg(
             Auditdata(
                 header = AuditdataHeader(
                     vendor = auditlogger.defaultVendor,
                     product = auditlogger.defaultProduct,
-                    eventClassId = EventClassId.AUDIT_SEARCH,
+                    eventClassId = eventClassId,
                     name = "ABAC Sporingslogg",
                     severity = "INFO"
                 ), fields = setOf(
                     CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
-                    CefField(CefFieldName.REQUEST, "read"),
-                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, BASIS_TILGANG),
-                    CefField(CefFieldName.ABAC_ACTION, "read"),
+                    CefField(CefFieldName.REQUEST, action),
+                    CefField(CefFieldName.ABAC_RESOURCE_TYPE, type),
+                    CefField(CefFieldName.ABAC_ACTION, action),
                     CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
                     CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(it)),
                 )
