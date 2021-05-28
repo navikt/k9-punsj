@@ -55,7 +55,8 @@ class MappeService(
                 soeknadId = søknadId.toString(),
                 soekerId = norskIdent,
                 journalposter = listOf(nySøknad.journalpostId),
-                mottattDatoV2 = mottattDato
+                mottattDato = mottattDato?.toLocalDate(),
+                klokkeslett = mottattDato?.toLocalTime()
             )
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?

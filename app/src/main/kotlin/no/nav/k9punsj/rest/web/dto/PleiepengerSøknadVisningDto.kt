@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.db.datamodell.pleiepengersyktbarn.PleiepengersyktbarnEntitet
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class PleiepengerSøknadVisningDto(
     val soeknadId: SøknadIdDto,
@@ -12,7 +12,8 @@ data class PleiepengerSøknadVisningDto(
     val journalposter: List<JournalpostIdDto>? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
-    val mottattDatoV2 : LocalDateTime? = null,
+    @JsonFormat(pattern = "HH:mm:ss")
+    val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
     val soeknadsperiode: PeriodeDto? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,

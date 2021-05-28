@@ -5,7 +5,10 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
-import java.time.*
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 
 
@@ -20,13 +23,10 @@ internal class MapFraVisningTilEksternFormat {
             val ytelseDto = mapYtelse(søknad)
             return PleiepengerSøknadMottakDto(
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
-                mottattDato = when {
-                    søknad.mottattDatoV2 != null -> ZonedDateTime.of(søknad.mottattDatoV2,
-                        ZoneId.of("UTC"))
-                    søknad.mottattDato != null -> ZonedDateTime.of(søknad.mottattDato, LocalTime.now(),
-                        ZoneId.of("UTC"))
-                    else -> null
-                },
+                mottattDato = if (søknad.mottattDato != null && søknad.klokkeslett != null) ZonedDateTime.of(søknad.mottattDato,
+                    søknad.klokkeslett,
+                    ZoneId.of("UTC"))
+                else null,
                 ytelse = ytelseDto
             )
         }
@@ -38,7 +38,9 @@ internal class MapFraVisningTilEksternFormat {
                 søknadsperiode = if (søknad.soeknadsperiode?.fom != null) fromPeriodeDtoToString(søknad.soeknadsperiode) else null,
                 opptjeningAktivitet = if (erNullEllerTom(søknad.opptjeningAktivitet)) mapTilMottakArbeidAktivitetDto(
                     søknad.opptjeningAktivitet!!) else null,
-                soknadsinfo = if(søknad.soknadsinfo != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.DataBruktTilUtledningDto(samtidigHjemme = søknad.soknadsinfo.samtidigHjemme, harMedsøker = søknad.soknadsinfo.harMedsoeker) else null,
+                soknadsinfo = if (søknad.soknadsinfo != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.DataBruktTilUtledningDto(
+                    samtidigHjemme = søknad.soknadsinfo.samtidigHjemme,
+                    harMedsøker = søknad.soknadsinfo.harMedsoeker) else null,
                 bosteder = if (!søknad.bosteder.isNullOrEmpty() && søknad.bosteder[0].periode != null) PleiepengerSøknadMottakDto.PleiepengerYtelseDto.BostederDto(
                     søknad.bosteder.associate {
                         Pair(fromPeriodeDtoToString(it.periode!!),
@@ -224,8 +226,9 @@ internal class MapFraVisningTilEksternFormat {
             val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto? =
                 if (arbeidAktivitet.frilanser != null) (objectMapper().convertValue(
                     arbeidAktivitet.frilanser)) else null
-            val selvstendigNæringsdrivende = if (arbeidAktivitet.selvstendigNaeringsdrivende != null && arbeidAktivitet.selvstendigNaeringsdrivende.info?.periode?.fom != null)
-                mapTilMottakSelvstendigNæringsdrivendeDto(arbeidAktivitet.selvstendigNaeringsdrivende) else null
+            val selvstendigNæringsdrivende =
+                if (arbeidAktivitet.selvstendigNaeringsdrivende != null && arbeidAktivitet.selvstendigNaeringsdrivende.info?.periode?.fom != null)
+                    mapTilMottakSelvstendigNæringsdrivendeDto(arbeidAktivitet.selvstendigNaeringsdrivende) else null
             val arbeidstaker = if (arbeidAktivitet.arbeidstaker != null) arbeidAktivitet.arbeidstaker.map { a ->
                 mapTilMottakArbeidstaker(a)
             }
