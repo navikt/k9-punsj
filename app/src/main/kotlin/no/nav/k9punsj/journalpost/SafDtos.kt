@@ -1,13 +1,19 @@
 package no.nav.k9punsj.journalpost
 
+import java.util.Date
+
 internal object SafDtos {
     internal open class GraphqlQuery(val query: String, val variables: Any? = null)
     internal data class JournalpostQuery(val journalpostId: String) : GraphqlQuery(
-            query = """ 
+        query = """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
                 tema
                 journalposttype
+                relevanteDatoer {
+                  dato
+                  datotype
+                }
                 journalstatus
                 bruker {
                   type
@@ -27,7 +33,7 @@ internal object SafDtos {
               }
             }
             """.trimIndent(),
-            variables = null
+        variables = null
     )
 
     /*
@@ -67,27 +73,27 @@ internal object SafDtos {
 
     internal data class Bruker(
         val id: String?,
-        val type: String?
+        val type: String?,
     )
 
     internal data class Avsender(
         val id: String?,
-        val type: String?
+        val type: String?,
     )
 
     internal data class AvsenderMottaker(
         val id: String?,
-        val type: String?
+        val type: String?,
     )
 
     internal data class DokumentVariant(
         val variantformat: String,
-        val saksbehandlerHarTilgang: Boolean
+        val saksbehandlerHarTilgang: Boolean,
     )
 
     internal data class Dokument(
         val dokumentInfoId: String,
-        val dokumentvarianter: MutableList<DokumentVariant>?
+        val dokumentvarianter: MutableList<DokumentVariant>?,
     )
 
     internal data class Journalpost(
@@ -97,18 +103,34 @@ internal object SafDtos {
         val bruker: Bruker?,
         val avsender: Avsender?,
         val avsenderMottaker: AvsenderMottaker?,
-        val dokumenter: List<Dokument>
+        val dokumenter: List<Dokument>,
+        val relevanteDatoer: List<RelevantDato>,
     )
 
+    internal data class RelevantDato(
+        val dato: Date,
+        val datotype: Datotype,
+    )
+
+    internal enum class Datotype(beskrivelse: String) {
+        DATO_OPPRETTET("DATO_OPPRETTET"),
+        DATO_SENDT_PRINT("DATO_SENDT_PRINT"),
+        DATO_EKSPEDERT("DATO_EKSPEDERT"),
+        DATO_JOURNALFOERT("DATO_JOURNALFOERT"),
+        DATO_REGISTRERT("DATO_REGISTRERT"),
+        DATO_AVS_RETUR("DATO_AVS_RETUR"),
+        DATO_DOKUMENT("DATO_DOKUMENT");
+    }
+
     internal data class JournalpostResponse(
-        val journalpost: Journalpost?
+        val journalpost: Journalpost?,
     )
 
     data class JournalpostResponseWrapper(
         val data: JournalpostResponse?,
-        val errors : List<Any>?
+        val errors: List<Any>?,
     ) {
-        internal val journalpostFinnesIkke = errors?.toString()?.contains("ikke funnet")?:false
-        internal val manglerTilgang = errors?.toString()?.contains("AbacException")?:false
+        internal val journalpostFinnesIkke = errors?.toString()?.contains("ikke funnet") ?: false
+        internal val manglerTilgang = errors?.toString()?.contains("AbacException") ?: false
     }
 }

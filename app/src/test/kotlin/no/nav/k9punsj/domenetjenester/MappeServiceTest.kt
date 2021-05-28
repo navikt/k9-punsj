@@ -31,7 +31,7 @@ internal class MappeServiceTest {
         val mappeService = MappeService(mappeRepo,
             søknadRepository,
             bunkeRepo,
-            PersonService(personRepo, pdlService))
+            PersonService(personRepo, pdlService), DatabaseUtil.getJournalpostRepo())
         val innsending = lagInnsending("01010050053", "999")
         val dummyAktørId = "1000000000000"
         val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "AKTORID", false, dummyAktørId)

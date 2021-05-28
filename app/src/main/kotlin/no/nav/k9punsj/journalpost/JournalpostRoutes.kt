@@ -5,6 +5,7 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
@@ -64,7 +66,7 @@ internal class JournalpostRoutes(
                         journalpostId = request.journalpostId()
                     )
                     if (journalpostInfo == null) {
-                        ServerResponse
+                        return@RequestContext ServerResponse
                             .notFound()
                             .buildAndAwait()
                     } else {
@@ -78,12 +80,14 @@ internal class JournalpostRoutes(
                                 dokumenter = journalpostInfo.dokumenter,
                                 aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())
                             )
-                            ServerResponse
+                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId, journalpostInfo.mottattDato, journalpostInfo.aktørId)
+                            return@RequestContext ServerResponse
                                 .ok()
                                 .json()
                                 .bodyValueAndAwait(journalpostInfoDto)
                         } else {
-                            ServerResponse
+                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId, journalpostInfo.mottattDato, journalpostInfo.aktørId)
+                            return@RequestContext ServerResponse
                                 .ok()
                                 .json()
                                 .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
@@ -94,11 +98,11 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
-                    ServerResponse
+                    return@RequestContext ServerResponse
                         .badRequest()
                         .buildAndAwait()
                 } catch (case: IkkeTilgang) {
-                    ServerResponse
+                    return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
@@ -253,6 +257,24 @@ internal class JournalpostRoutes(
                 }
 
             }
+        }
+    }
+
+    private suspend fun utvidJournalpostMedMottattDato(jornalpostId : JournalpostId, mottattDato : LocalDateTime, aktørId: AktørId?) {
+        val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(jornalpostId)
+        if (journalpostFraBasen?.mottattDato != null) {
+            return
+        }
+        if (journalpostFraBasen != null) {
+            journalpostService.lagre(journalpostFraBasen.copy(mottattDato = mottattDato))
+        } else {
+            val journalpost = Journalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = jornalpostId,
+                aktørId,
+                mottattDato = mottattDato
+            )
+            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
         }
     }
 

@@ -9,6 +9,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class JournalpostService(
@@ -50,14 +52,34 @@ class JournalpostService(
                 val aktørId: AktørId? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.AKTOERID) {
                     safJournalpost.bruker?.id
                 } else null
+
+                val mottattDato = utledMottattDato(parsedJournalpost)
+
                 JournalpostInfo(
                     journalpostId = journalpostId,
                     dokumenter = safJournalpost.dokumenter.map { DokumentInfo(it.dokumentInfoId) },
                     norskIdent = norskIdent,
-                    aktørId = aktørId
+                    aktørId = aktørId,
+                    mottattDato = mottattDato
                 )
             }
         }
+    }
+
+    private fun utledMottattDato(parsedJournalpost: ParsedJournalpost) : LocalDateTime {
+        return if (parsedJournalpost.journalpostType == SafDtos.JournalpostType.I) {
+            hentRelevantDato(parsedJournalpost, SafDtos.Datotype.DATO_REGISTRERT)
+        } else {
+            hentRelevantDato(parsedJournalpost, SafDtos.Datotype.DATO_JOURNALFOERT)
+        }
+    }
+
+    private fun hentRelevantDato(parsedJournalpost: ParsedJournalpost, datotype: SafDtos.Datotype): LocalDateTime {
+        return parsedJournalpost.relevanteDatoer.first { d -> d.datotype == datotype }
+            .dato
+            .toInstant()
+            .atZone(ZoneId.of("Europe/Oslo"))
+            .toLocalDateTime()
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostRepository.JournalIdMedDato> {
@@ -104,10 +126,10 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
                 !it.saksbehandlerHarTilgang
             }
         },
-        avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.type)
+        avsenderMottakertype = enumValueOfOrNull<SafDtos.AvsenderMottakertype>(avsenderMottaker?.type),
+        relevanteDatoer = relevanteDatoer
     )
 }
-
 
 private data class ParsedJournalpost(
     val journalpostType: SafDtos.JournalpostType?,
@@ -118,6 +140,7 @@ private data class ParsedJournalpost(
     val arkivDokumenter: List<SafDtos.Dokument>,
     val harTilgang: Boolean,
     val avsenderMottakertype: SafDtos.AvsenderMottakertype?,
+    val relevanteDatoer: List<SafDtos.RelevantDato>,
 )
 
 data class JournalpostInfo(
@@ -125,6 +148,7 @@ data class JournalpostInfo(
     val norskIdent: NorskIdent?,
     val aktørId: AktørId?,
     val dokumenter: List<DokumentInfo>,
+    val mottattDato: LocalDateTime,
 )
 
 data class JournalpostInfoDto(

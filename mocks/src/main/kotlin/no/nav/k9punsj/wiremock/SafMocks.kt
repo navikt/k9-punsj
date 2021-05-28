@@ -15,26 +15,27 @@ fun WireMockServer.getSafBaseUrl() = baseUrl() + path
 
 fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBodyFile("dummy_soknad.pdf")
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${JournalpostIds.Ok}.*")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBodyFile("dummy_soknad.pdf")
+                .withStatus(200)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/201.+")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Førsteside.pdf").readAllBytes())
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/201.+")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Førsteside.pdf")
+                    .readAllBytes())
+                .withStatus(200)
+        )
     )
     return this
 }
@@ -42,52 +43,56 @@ fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
 
 fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164680.*")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf").readAllBytes())
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164680.*")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf")
+                    .readAllBytes())
+                .withStatus(200)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdagerSamværserklæring(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164681.*")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/Samværserklæring.pdf").readAllBytes())
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/202/470164681.*")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/Samværserklæring.pdf")
+                    .readAllBytes())
+                .withStatus(200)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/203.+")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn.pdf").readAllBytes())
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/203.+")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn.pdf")
+                    .readAllBytes())
+                .withStatus(200)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler(): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/204.+")).willReturn(
-                    WireMock.aResponse()
-                            .withHeader("Content-Type", "application/pdf")
-                            .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                            .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler.pdf").readAllBytes())
-                            .withStatus(200)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/204.+")).willReturn(
+            WireMock.aResponse()
+                .withHeader("Content-Type", "application/pdf")
+                .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
+                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler.pdf")
+                    .readAllBytes())
+                .withStatus(200)
+        )
     )
     return this
 }
@@ -95,63 +100,64 @@ fun WireMockServer.stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler(): WireMock
 
 private fun WireMockServer.stubSafHenteDokumentError(
     journalpostId: JournalpostId,
-    httpStatus: Int
+    httpStatus: Int,
 ): WireMockServer {
     WireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")).willReturn(
-                    WireMock.aResponse()
-                            .withStatus(httpStatus)
-            )
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")).willReturn(
+            WireMock.aResponse()
+                .withStatus(httpStatus)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
-        journalpostId = JournalpostIds.FinnesIkke,
-        httpStatus = 404
+    journalpostId = JournalpostIds.FinnesIkke,
+    httpStatus = 404
 )
 
 fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
-        journalpostId = JournalpostIds.AbacError,
-        httpStatus = 403
+    journalpostId = JournalpostIds.AbacError,
+    httpStatus = 403
 )
 
 private fun WireMockServer.stubSafHenteJournalpost(
     journalpostId: JournalpostId? = null,
-    responseBody: String = SafMockResponses.OkResponseHenteJournalpost
+    responseBody: String = SafMockResponses.OkResponseHenteJournalpost,
 ): WireMockServer {
     val contentBodyPattern = if (journalpostId == null) AnythingPattern() else ContainsPattern(journalpostId)
     WireMock.stubFor(WireMock.post(WireMock.urlPathMatching(".*$path/graphql.*"))
-            .withRequestBody(contentBodyPattern)
-            .willReturn(WireMock.aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody(responseBody)
-                .withStatus(200)
-            )
+        .withRequestBody(contentBodyPattern)
+        .willReturn(WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(responseBody)
+            .withStatus(200)
+        )
     )
     return this
 }
 
 fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
 fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
-        journalpostId = JournalpostIds.AbacError,
-        responseBody = SafMockResponses.AbacErrorResponseHenteJournalpost
+    journalpostId = JournalpostIds.AbacError,
+    responseBody = SafMockResponses.AbacErrorResponseHenteJournalpost
 )
+
 fun WireMockServer.stubSafHentJournalpostIkkeKomplettTilgang() = stubSafHenteJournalpost(
-        journalpostId = JournalpostIds.IkkeKomplettTilgang,
-        responseBody = SafMockResponses.IkkeKomplettTilgangResponseHenteJournalpost
+    journalpostId = JournalpostIds.IkkeKomplettTilgang,
+    responseBody = SafMockResponses.IkkeKomplettTilgangResponseHenteJournalpost
 )
 
 fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJournalpost(
-        journalpostId = JournalpostIds.FinnesIkke,
-        responseBody = SafMockResponses.FinnesIkkeResponseHenteJournalpost
+    journalpostId = JournalpostIds.FinnesIkke,
+    responseBody = SafMockResponses.FinnesIkkeResponseHenteJournalpost
 )
 
 object JournalpostIds {
-    const val Ok : JournalpostId = "200"
-    const val AbacError : JournalpostId = "500"
-    const val IkkeKomplettTilgang : JournalpostId = "403"
-    const val FinnesIkke : JournalpostId = "404"
+    const val Ok: JournalpostId = "200"
+    const val AbacError: JournalpostId = "500"
+    const val IkkeKomplettTilgang: JournalpostId = "403"
+    const val FinnesIkke: JournalpostId = "404"
 
 }
 
@@ -164,6 +170,12 @@ private object SafMockResponses {
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
+          "relevanteDatoer" : [
+          {
+            "dato" : "2020-10-12T12:53:21.046Z",
+            "datotype" : "DATO_REGISTRERT"
+          }
+          ],
           "bruker": {
             "type": "FNR",
             "id": "29099000129"
@@ -234,6 +246,12 @@ private object SafMockResponses {
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
+          "relevanteDatoer" : [
+          {
+            "dato" : "2020-10-12T12:53:21.046Z",
+            "datotype" : "DATO_REGISTRERT"
+          }
+          ],
           "bruker": {
             "type": "FNR",
             "id": "29099000129"

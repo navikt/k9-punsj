@@ -5,12 +5,14 @@ import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -19,6 +21,7 @@ class MappeService(
     val søknadRepository: SøknadRepository,
     val bunkeRepository: BunkeRepository,
     val personService: PersonService,
+    val journalpostRepository: JournalpostRepository,
 ) {
 
     suspend fun hent(mappeId: MappeId): Mappe? {
@@ -46,8 +49,14 @@ class MappeService(
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(nySøknad.journalpostId)
 
+        val mottattDato = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
         val pleiepengerSøknadVisningDto =
-            PleiepengerSøknadVisningDto(søknadId.toString(), norskIdent, listOf(nySøknad.journalpostId))
+            PleiepengerSøknadVisningDto(
+                soeknadId = søknadId.toString(),
+                soekerId = norskIdent,
+                journalposter = listOf(nySøknad.journalpostId),
+                mottattDatoV2 = mottattDato
+            )
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
         val søknadEntitet = SøknadEntitet(
@@ -60,7 +69,14 @@ class MappeService(
         return søknadRepository.opprettSøknad(søknadEntitet)
     }
 
-    suspend fun utfyllendeInnsending(søknad: PleiepengerSøknadVisningDto, saksbehandler: String): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
+    private suspend fun hentTidligsteMottattDatoFraJournalposter(journalpostIdDto: JournalpostIdDto): LocalDateTime? {
+        return journalpostRepository.hentHvis(journalpostIdDto)?.mottattDato
+    }
+
+    suspend fun utfyllendeInnsending(
+        søknad: PleiepengerSøknadVisningDto,
+        saksbehandler: String,
+    ): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
         val hentSøknad = søknadRepository.hentSøknad(søknad.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(søknad.journalposter, hentSøknad.journalposter)
@@ -75,7 +91,10 @@ class MappeService(
         }
     }
 
-    private fun leggTilJournalpost(nyeJournalposter: List<JournalpostIdDto>?, fraDatabasen: JsonB?) : MutableMap<String, Any?>{
+    private fun leggTilJournalpost(
+        nyeJournalposter: List<JournalpostIdDto>?,
+        fraDatabasen: JsonB?,
+    ): MutableMap<String, Any?> {
         if (fraDatabasen != null) {
             val list = fraDatabasen["journalposter"] as List<*>
             val set = list.toSet()

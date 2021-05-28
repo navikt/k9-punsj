@@ -20,9 +20,13 @@ internal class MapFraVisningTilEksternFormat {
             val ytelseDto = mapYtelse(søknad)
             return PleiepengerSøknadMottakDto(
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
-                mottattDato = if (søknad.mottattDato != null) ZonedDateTime.of(søknad.mottattDato,
-                    LocalTime.now(),
-                    ZoneId.of("UTC")) else null,
+                mottattDato = when {
+                    søknad.mottattDatoV2 != null -> ZonedDateTime.of(søknad.mottattDatoV2,
+                        ZoneId.of("UTC"))
+                    søknad.mottattDato != null -> ZonedDateTime.of(søknad.mottattDato, LocalTime.now(),
+                        ZoneId.of("UTC"))
+                    else -> null
+                },
                 ytelse = ytelseDto
             )
         }
