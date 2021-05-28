@@ -55,7 +55,9 @@ data class PleiepengerSøknadVisningDto(
                 val regnskapsførerNavn: String?,
                 val regnskapsførerTlf: String?,
                 val bruttoInntekt: BigDecimal?,
-                val erNyoppstartet: Boolean?
+                val erNyoppstartet: Boolean?,
+                val erVarigEndring: Boolean?,
+                val endringInntekt: BigDecimal?
             )
         }
 

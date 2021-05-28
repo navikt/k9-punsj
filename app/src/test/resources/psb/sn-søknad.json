@@ -21,7 +21,7 @@
       "info": {
         "periode": {
           "fom": "2021-05-10",
-          "tom": "2021-05-30"
+          "tom": null
         },
         "virksomhetstyper": [
           "Fisker",
@@ -32,7 +32,9 @@
         "regnskapsførerTlf": "88888889",
         "registrertIUtlandet": false,
         "bruttoInntekt": "1200000",
-        "erNyoppstartet": false
+        "erNyoppstartet": false,
+        "erVarigEndring": true,
+        "endringInntekt": "74750000"
       }
     },
     "frilanser": null

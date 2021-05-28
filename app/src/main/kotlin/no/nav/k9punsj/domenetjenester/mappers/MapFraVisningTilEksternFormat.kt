@@ -17,7 +17,8 @@ import java.time.format.DateTimeParseException
  */
 internal class MapFraVisningTilEksternFormat {
     companion object {
-        const val SKILLE = "/"
+        private const val SKILLE = "/"
+        private const val ÅPEN = ".."
 
         fun mapTilSendingsformat(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto {
             val ytelseDto = mapYtelse(søknad)
@@ -246,7 +247,7 @@ internal class MapFraVisningTilEksternFormat {
                     virksomhetstyper = s.info.virksomhetstyper,
                     regnskapsførerNavn = s.info.regnskapsførerNavn,
                     regnskapsførerTlf = s.info.regnskapsførerTlf,
-                    bruttoInntekt = s.info.bruttoInntekt,
+                    bruttoInntekt = if(s.info.erVarigEndring != null && s.info.erVarigEndring) s.info.endringInntekt else s.info.bruttoInntekt,
                     erNyoppstartet = s.info.periode.fom!!.isAfter(LocalDate.now().minusYears(4L)),
                     registrertIUtlandet = s.info.registrertIUtlandet,
                     landkode = s.info.landkode))
@@ -275,7 +276,9 @@ internal class MapFraVisningTilEksternFormat {
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
-            return dato.fom.toString() + SKILLE + dato.tom.toString()
+            val fom = if(dato.fom != null) dato.fom.toString() else ÅPEN
+            val tom = if(dato.tom != null) dato.tom.toString() else ÅPEN
+            return fom + SKILLE + tom
         }
     }
 }

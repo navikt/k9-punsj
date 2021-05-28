@@ -491,8 +491,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.soeknadsperiode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
-        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isEqualTo(
-            LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
         assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
         assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
@@ -526,7 +525,7 @@ class PleiepengersyktbarnTests {
         assertThat(sendingsformat.ytelse?.barn?.norskIdentitetsnummer).isEqualTo("22222222222")
         assertThat(sendingsformat.ytelse?.søknadsperiode).isEqualTo("2018-12-30/2019-10-20")
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()).isEqualTo(
-            "2018-12-30/2019-10-20")
+            "2018-12-30/..")
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
@@ -563,7 +562,7 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.barn.personIdent.verdi).isEqualTo("22222222222")
         assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
-            "2018-12-30/2019-10-20")
+            "2018-12-30/..")
         assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(ytelse.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer.verdi).isEqualTo("999999999")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("999999999")

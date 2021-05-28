@@ -32,6 +32,7 @@ internal class MapTilK9Format {
     companion object {
         private val validator = Validator()
         private const val SKILLE = "/"
+        private const val ÅPEN = ".."
         private val objectMapper = no.nav.k9punsj.objectMapper()
 
         internal fun mapTilEksternFormat(
@@ -135,7 +136,9 @@ internal class MapTilK9Format {
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
-            return dato.fom.toString() + SKILLE + dato.tom.toString()
+            val fom = if(dato.fom != null) dato.fom.toString() else ÅPEN
+            val tom = if(dato.tom != null) dato.tom.toString() else ÅPEN
+            return fom + SKILLE + tom
         }
     }
 }

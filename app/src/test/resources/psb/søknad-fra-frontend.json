@@ -21,7 +21,7 @@
       "info": {
         "periode": {
           "fom": "2018-12-30",
-          "tom": "2019-10-20"
+          "tom": null
         },
         "virksomhetstyper": ["FISKE"],
         "landkode": "",
