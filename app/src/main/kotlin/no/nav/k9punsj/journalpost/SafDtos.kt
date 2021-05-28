@@ -131,6 +131,7 @@ internal object SafDtos {
         val errors: List<Any>?,
     ) {
         internal val journalpostFinnesIkke = errors?.toString()?.contains("ikke funnet") ?: false
-        internal val manglerTilgang = errors?.toString()?.contains("AbacException") ?: false
+        internal val manglerTilgang = errors?.toString()?.contains("har ikke tilgang") ?: false
+        internal val abacException = errors?.toString()?.contains("AbacException") ?: false
     }
 }

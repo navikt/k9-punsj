@@ -62,7 +62,6 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
         internal const val ValiderSøknad = "/$søknadType/valider" //post
-        internal const val HentSøknadFraK9Sak = "/k9-sak/$søknadType" //post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
     }
 
@@ -217,28 +216,6 @@ internal class PleiepengerSyktBarnRoutes(
                     .created(request.søknadLocation(søknadEntitet.søknadId))
                     .json()
                     .bodyValueAndAwait(søknadEntitet.tilPsbvisning())
-            }
-        }
-
-        POST("/api${Urls.HentSøknadFraK9Sak}") { request ->
-            RequestContext(coroutineContext, request) {
-                val hentSøknad = request.hentSøknad()
-                harInnloggetBrukerTilgangTilSøker(hentSøknad.norskIdent)?.let { return@RequestContext it }
-
-                //TODO(OJR) koble på mot endepunkt i k9-sak
-                val søknadDto = PleiepengerSøknadVisningDto(
-                    soeknadId = "123",
-                    soekerId = hentSøknad.norskIdent,
-                    journalposter = null,
-                )
-
-                val svarDto =
-                    SvarDto(hentSøknad.norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf(søknadDto))
-
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(svarDto)
             }
         }
 

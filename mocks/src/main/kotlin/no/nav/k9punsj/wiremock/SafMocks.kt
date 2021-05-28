@@ -218,7 +218,7 @@ private object SafMockResponses {
     {
       "errors": [
         {
-          "message": "Feilet ved henting av data (/journalpost) : Kunne ikke evaluere tilgang for saksbehandler. Kall mot abac feilet teknisk med statusKode=500 INTERNAL_SERVER_ERROR. Feilmelding=500 Internal Server Error",
+          "message": "Tilgang til ressurs ble avvist. Saksbehandler eller system har ikke tilgang til ressurs tilhørende bruker som har kode 6/7, egen ansatt eller utenfor tillatt geografisk område",
           "locations": [
             {
               "line": 3,

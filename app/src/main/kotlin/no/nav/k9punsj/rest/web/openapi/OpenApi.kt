@@ -271,37 +271,6 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
-        PleiepengerSyktBarnRoutes.Urls.HentSøknadFraK9Sak,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @Operation(
-        summary = "Hente siste psb søknad fra k9-sak",
-        description = "Hente siste psb søknad fra k9-sak",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Henter siste pleiepengersøknad fra k9-sak og gjør den tilgjengelig for visning",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SvarDto::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Fant ingen gjeldene søknad"
-            )
-        ]
-    )
-    fun HentSøknadFraK9Sak(@RequestBody hentSøknad: OasHentSøknad) {
-    }
-
-
-    @PostMapping(
         PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak,
         consumes = ["application/json"],
         produces = ["application/json"]
