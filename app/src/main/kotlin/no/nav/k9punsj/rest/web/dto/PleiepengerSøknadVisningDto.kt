@@ -12,7 +12,7 @@ data class PleiepengerSøknadVisningDto(
     val journalposter: List<JournalpostIdDto>? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm")
     val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
     val soeknadsperiode: PeriodeDto? = null,
