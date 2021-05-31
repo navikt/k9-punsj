@@ -67,6 +67,10 @@ data class PleiepengerSøknadMottakDto(
                 val erNyoppstartet: Boolean?,
                 val registrertIUtlandet: Boolean?,
                 val landkode: String?,
+                @JsonFormat(pattern = "yyyy-MM-dd")
+                val endringDato: LocalDate?,
+                val erVarigEndring: Boolean?,
+                val endringBegrunnelse: String?,
             )
 
             data class ArbeidstakerDto(

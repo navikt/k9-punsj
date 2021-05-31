@@ -1,6 +1,7 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.søknad.felles.type.VirksomhetType
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
@@ -244,18 +245,51 @@ internal class MapFraVisningTilEksternFormat {
         private fun mapTilMottakSelvstendigNæringsdrivendeDto(s: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto {
             val pair = Pair(fromPeriodeDtoToString(s.info?.periode!!),
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendePeriodeInfoDto(
-                    virksomhetstyper = s.info.virksomhetstyper,
+                    virksomhetstyper = mapTilKoder(s.info.virksomhetstyper),
                     regnskapsførerNavn = s.info.regnskapsførerNavn,
                     regnskapsførerTlf = s.info.regnskapsførerTlf,
-                    bruttoInntekt = if(s.info.erVarigEndring != null && s.info.erVarigEndring) s.info.endringInntekt else s.info.bruttoInntekt,
+                    bruttoInntekt = if (s.info.erVarigEndring != null && s.info.erVarigEndring) s.info.endringInntekt else s.info.bruttoInntekt,
                     erNyoppstartet = s.info.periode.fom!!.isAfter(LocalDate.now().minusYears(4L)),
                     registrertIUtlandet = s.info.registrertIUtlandet,
-                    landkode = s.info.landkode))
+                    landkode = s.info.landkode,
+                    erVarigEndring = s.info.erVarigEndring,
+                    endringDato = s.info.endringDato,
+                    endringBegrunnelse = s.info.endringBegrunnelse))
 
             return PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(
                 perioder = mapOf(pair),
                 organisasjonsnummer = s.organisasjonsnummer,
                 virksomhetNavn = s.virksomhetNavn)
+        }
+
+        private fun mapTilKoder(virksomhetstyper: List<String>?): List<String>? {
+            if (virksomhetstyper == null) {
+                return null
+            }
+            var virksomhetstyperMappetTilKoder = listOf<String>()
+            virksomhetstyper.forEach {
+                when {
+                    it.toLowerCase().contains("dagmamma") -> {
+                        virksomhetstyperMappetTilKoder =
+                            virksomhetstyperMappetTilKoder.plus(VirksomhetType.DAGMAMMA.kode)
+                    }
+                    it.toLowerCase().contains("fiske") -> {
+                        virksomhetstyperMappetTilKoder = virksomhetstyperMappetTilKoder.plus(VirksomhetType.FISKE.kode)
+                    }
+                    it.toLowerCase().contains("jordbruk") -> {
+                        virksomhetstyperMappetTilKoder =
+                            virksomhetstyperMappetTilKoder.plus(VirksomhetType.JORDBRUK_SKOGBRUK.kode)
+                    }
+                    it.toLowerCase().contains("annen") -> {
+                        virksomhetstyperMappetTilKoder = virksomhetstyperMappetTilKoder.plus(VirksomhetType.ANNEN.kode)
+                    }
+                    else -> {
+                        virksomhetstyperMappetTilKoder =
+                            virksomhetstyperMappetTilKoder.plus(VirksomhetType.UDEFINERT.kode)
+                    }
+                }
+            }
+            return virksomhetstyperMappetTilKoder
         }
 
         private fun mapTilMottakArbeidstaker(a: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto {
@@ -276,8 +310,8 @@ internal class MapFraVisningTilEksternFormat {
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
-            val fom = if(dato.fom != null) dato.fom.toString() else ÅPEN
-            val tom = if(dato.tom != null) dato.tom.toString() else ÅPEN
+            val fom = if (dato.fom != null) dato.fom.toString() else ÅPEN
+            val tom = if (dato.tom != null) dato.tom.toString() else ÅPEN
             return fom + SKILLE + tom
         }
     }

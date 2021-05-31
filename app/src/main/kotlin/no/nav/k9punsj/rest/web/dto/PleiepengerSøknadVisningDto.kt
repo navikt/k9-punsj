@@ -57,7 +57,10 @@ data class PleiepengerSøknadVisningDto(
                 val bruttoInntekt: BigDecimal?,
                 val erNyoppstartet: Boolean?,
                 val erVarigEndring: Boolean?,
-                val endringInntekt: BigDecimal?
+                val endringInntekt: BigDecimal?,
+                @JsonFormat(pattern = "yyyy-MM-dd")
+                val endringDato: LocalDate?,
+                val endringBegrunnelse: String?,
             )
         }
 

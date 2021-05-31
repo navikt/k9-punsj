@@ -24,8 +24,10 @@
           "tom": null
         },
         "virksomhetstyper": [
-          "Fisker",
-          "Jordbruker"
+          "Fiske",
+          "Jordbruk",
+          "Dagmamma i eget hjem/familiebarnehage",
+          "Annen næringsvirksomhet"
         ],
         "landkode": "",
         "regnskapsførerNavn": "Regskapsfører",
@@ -34,7 +36,8 @@
         "bruttoInntekt": "1200000",
         "erNyoppstartet": false,
         "erVarigEndring": true,
-        "endringInntekt": "74750000"
+        "endringInntekt": "74750000",
+        "endringDato" : "2021-05-10"
       }
     },
     "frilanser": null

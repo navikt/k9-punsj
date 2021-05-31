@@ -388,7 +388,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(false)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(false)
-        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(listOf("Fisker", "Jordbruker"))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(listOf("Fiske", "Jordbruk"))
     }
 
     @Test
@@ -492,6 +492,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).hasSize(4)
         assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
         assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
@@ -526,6 +527,7 @@ class PleiepengersyktbarnTests {
         assertThat(sendingsformat.ytelse?.søknadsperiode).isEqualTo("2018-12-30/2019-10-20")
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()).isEqualTo(
             "2018-12-30/..")
+        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
@@ -563,6 +565,7 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
             "2018-12-30/..")
+        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
         assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(ytelse.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer.verdi).isEqualTo("999999999")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("999999999")

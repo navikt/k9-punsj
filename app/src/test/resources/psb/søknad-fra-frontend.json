@@ -16,20 +16,29 @@
   },
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
-      "virksomhetNavn": "ASASAS",
-      "organisasjonsnummer": "45376",
+      "virksomhetNavn": "FiskerAS",
+      "organisasjonsnummer": "890508087",
       "info": {
         "periode": {
           "fom": "2018-12-30",
           "tom": null
         },
-        "virksomhetstyper": ["FISKE"],
+        "virksomhetstyper": [
+          "Fiske",
+          "Jordbruk",
+          "Dagmamma i eget hjem/familiebarnehage",
+          "Annen næringsvirksomhet"
+        ],
         "landkode": "",
-        "regnskapsførerNavn": "Ole",
-        "regnskapsførerTlf": "666",
+        "regnskapsførerNavn": "Regskapsfører",
+        "regnskapsførerTlf": "88888889",
         "registrertIUtlandet": false,
-        "bruttoInntekt": "30000",
-        "erNyoppstartet": false
+        "bruttoInntekt": "1200000",
+        "erNyoppstartet": false,
+        "erVarigEndring": true,
+        "endringInntekt": "1300000",
+        "endringDato" : "2018-12-30",
+        "endringBegrunnelse" : "Dota2 er best"
       }
     },
     "frilanser": {
