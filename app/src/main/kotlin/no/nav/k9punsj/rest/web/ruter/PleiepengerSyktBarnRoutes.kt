@@ -246,7 +246,7 @@ internal class PleiepengerSyktBarnRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
-                        .bodyValueAndAwait(OasFeil(e.message!!))
+                        .bodyValueAndAwait(OasFeil(e.stackTrace.toString()))
                 }
 
                 if (mapTilEksternFormat.second.isNotEmpty()) {
