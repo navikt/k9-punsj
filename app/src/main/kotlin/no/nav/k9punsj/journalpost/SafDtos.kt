@@ -1,6 +1,6 @@
 package no.nav.k9punsj.journalpost
 
-import java.util.Date
+import java.time.LocalDateTime
 
 internal object SafDtos {
     internal open class GraphqlQuery(val query: String, val variables: Any? = null)
@@ -108,7 +108,7 @@ internal object SafDtos {
     )
 
     internal data class RelevantDato(
-        val dato: Date,
+        val dato: LocalDateTime,
         val datotype: Datotype,
     )
 

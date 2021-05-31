@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 @Service
 class JournalpostService(
@@ -75,11 +74,7 @@ class JournalpostService(
     }
 
     private fun hentRelevantDato(parsedJournalpost: ParsedJournalpost, datotype: SafDtos.Datotype): LocalDateTime {
-        return parsedJournalpost.relevanteDatoer.first { d -> d.datotype == datotype }
-            .dato
-            .toInstant()
-            .atZone(ZoneId.of("Europe/Oslo"))
-            .toLocalDateTime()
+        return parsedJournalpost.relevanteDatoer.first { d -> d.datotype == datotype }.dato
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostRepository.JournalIdMedDato> {
