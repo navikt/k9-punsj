@@ -8,6 +8,7 @@ enum class PunsjInnsendingType(val kode: String, val erScanning: Boolean) {
     INNLOGGET_CHAT("INNLOGGET_CHAT", false),
     SKRIV_TIL_OSS_SPØRMSÅL("SKRIV_TIL_OSS_SPØRMSÅL", false),
     SKRIV_TIL_OSS_SVAR("SKRIV_TIL_OSS_SVAR", false),
+    SAMTALEREFERAT("SAMTALEREFERAT", false),
     UKJENT("UKJENT", true);
 
 
