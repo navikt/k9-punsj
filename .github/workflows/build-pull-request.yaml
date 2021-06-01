@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 16
-      - uses: actions/cache@v2
+      - uses: actions/cache@v2.1.6
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-pr-${{ hashFiles('**/pom.xml') }}
