@@ -13,6 +13,7 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.UUID
 
 @Service
@@ -50,13 +51,14 @@ class MappeService(
         journalposter["journalposter"] = listOf(nySøknad.journalpostId)
 
         val mottattDato = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
+        val klokkeslett = if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour, mottattDato.toLocalTime().minute) else null
         val pleiepengerSøknadVisningDto =
             PleiepengerSøknadVisningDto(
                 soeknadId = søknadId.toString(),
                 soekerId = norskIdent,
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = mottattDato?.toLocalDate(),
-                klokkeslett = mottattDato?.toLocalTime()
+                klokkeslett = klokkeslett
             )
 
         //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
