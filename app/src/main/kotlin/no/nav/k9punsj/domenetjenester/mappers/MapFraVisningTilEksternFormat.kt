@@ -198,7 +198,7 @@ internal class MapFraVisningTilEksternFormat {
                             }
                         )
                     )
-                } else null
+                } else emptyList()
 
             val arbeidstidInfoFrilans = if (!arbeidstidDto.frilanserArbeidstidInfo?.perioder.isNullOrEmpty())
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
