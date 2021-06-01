@@ -36,9 +36,10 @@ jobs:
         run: |
           mvn clean package -DskipTests
           echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE=${IMAGE}$IMAGE_BASE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Bygg & last opp Docker image
         run: |
-          docker build --pull --tag ${IMAGE_BASE}:${TAG} --tag ${IMAGE_BASE}:latest --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest ./app/.
+          docker build --pull --tag ${IMAGE} --tag ${IMAGE_BASE}:latest --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest ./app/.
           echo "${GITHUB_TOKEN}" | docker login -u ${GITHUB_REPOSITORY} --password-stdin  docker.pkg.github.com 
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u "x-access-token" --password-stdin ghcr.io
           docker push ${IMAGE_BASE_CR} --all-tags
