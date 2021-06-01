@@ -135,8 +135,8 @@ internal class MapFraVisningTilEksternFormat {
             }
 
             if (arbeidstid.arbeidstakerList.isNullOrEmpty()
-                && (arbeidstid.frilanserArbeidstidInfo?.periode == null)
-                && arbeidstid.selvstendigNæringsdrivendeArbeidstidInfo?.arbeidstidInfo == null
+                && (arbeidstid.frilanserArbeidstidInfo?.perioder.isNullOrEmpty())
+                && arbeidstid.selvstendigNæringsdrivendeArbeidstidInfo?.perioder.isNullOrEmpty()
             ) {
                 return false
             }
@@ -200,18 +200,18 @@ internal class MapFraVisningTilEksternFormat {
                     )
                 } else null
 
-            val arbeidstidInfoFrilans = if (arbeidstidDto.frilanserArbeidstidInfo?.periode != null)
+            val arbeidstidInfoFrilans = if (!arbeidstidDto.frilanserArbeidstidInfo?.perioder.isNullOrEmpty())
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                    mapOf(Pair(fromPeriodeDtoToString(arbeidstidDto.frilanserArbeidstidInfo.periode),
-                        PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
-                            zeroTimerHvisTomString(arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag),
-                            zeroTimerHvisTomString(arbeidstidDto.frilanserArbeidstidInfo.faktiskArbeidTimerPerDag)
-                        )))
-                ) else null
+                    arbeidstidDto.frilanserArbeidstidInfo?.perioder?.associate {
+                        Pair(fromPeriodeDtoToString(it.periode!!),
+                            PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
+                                faktiskArbeidTimerPerDag = zeroTimerHvisTomString(it.faktiskArbeidTimerPerDag),
+                                jobberNormaltTimerPerDag = zeroTimerHvisTomString(it.jobberNormaltTimerPerDag)))
+                    }) else null
 
-            val arbeidstidInfoSn = if (arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo?.arbeidstidInfo != null)
+            val arbeidstidInfoSn = if (!arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo?.perioder.isNullOrEmpty())
                 PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
-                    arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo.arbeidstidInfo.perioder?.associate {
+                    arbeidstidDto.selvstendigNæringsdrivendeArbeidstidInfo?.perioder?.associate {
                         Pair(fromPeriodeDtoToString(it.periode!!),
                             PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                                 faktiskArbeidTimerPerDag = zeroTimerHvisTomString(it.faktiskArbeidTimerPerDag),

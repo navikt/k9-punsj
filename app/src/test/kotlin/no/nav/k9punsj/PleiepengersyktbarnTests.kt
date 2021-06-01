@@ -32,6 +32,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
+import java.time.Duration
 import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
@@ -504,9 +505,10 @@ class PleiepengersyktbarnTests {
             "37,5")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].jobberNormaltTimerPerDag).isEqualTo(
             "37,5")
-        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.periode?.fom).isEqualTo(LocalDate.of(2018,
+        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(LocalDate.of(2018,
             12,
             30))
+        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo("4")
         assertThat(søknadViaGet.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
@@ -537,6 +539,7 @@ class PleiepengersyktbarnTests {
             "PT37H30M")
         assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
             "PT37H30M")
+        assertThat(sendingsformat.ytelse?.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(4))
         assertThat(sendingsformat.ytelse?.arbeidstid?.frilanserArbeidstidInfo?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
         assertThat(sendingsformat.ytelse?.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(sendingsformat.ytelse?.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
@@ -574,6 +577,7 @@ class PleiepengersyktbarnTests {
             "PT37H30M")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
             "PT37H30M")
+        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(4))
         assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")

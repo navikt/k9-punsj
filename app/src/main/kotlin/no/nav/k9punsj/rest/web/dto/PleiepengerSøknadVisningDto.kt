@@ -88,8 +88,8 @@ data class PleiepengerSøknadVisningDto(
 
     data class ArbeidstidDto(
         val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,
-        val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto?,
-        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto?,
+        val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
+        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
     )
 
     data class DataBruktTilUtledningDto(
