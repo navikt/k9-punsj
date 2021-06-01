@@ -10,5 +10,6 @@ data class Journalpost(
         val journalpostId: JournalpostId,
         val aktørId: AktørId?,
         val skalTilK9 : Boolean? = null,
-        val mottattDato : LocalDateTime? = null
+        val mottattDato : LocalDateTime? = null,
+        val type : String? = null,
 )

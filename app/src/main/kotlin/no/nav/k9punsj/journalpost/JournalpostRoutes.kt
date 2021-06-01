@@ -266,7 +266,8 @@ internal class JournalpostRoutes(
             return
         }
         if (journalpostFraBasen != null) {
-            journalpostService.lagre(journalpostFraBasen.copy(mottattDato = mottattDato))
+            val justertDato : LocalDateTime = VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(journalpostFraBasen.type, mottattDato)
+            journalpostService.lagre(journalpostFraBasen.copy(mottattDato = justertDato))
         } else {
             val journalpost = Journalpost(
                 uuid = UUID.randomUUID(),

@@ -27,7 +27,12 @@ class HendelseMottaker @Autowired constructor(
 
         if (fantIkke) {
             val uuid = UUID.randomUUID()
-            val journalpost = Journalpost(uuid, journalpostId, aktørId)
+            val journalpost = Journalpost(
+                uuid = uuid,
+                journalpostId = journalpostId,
+                aktørId = aktørId,
+                type = fordelPunsjEventDto.type
+            )
             journalpostRepository.opprettJournalpost(journalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET), fordelPunsjEventDto.type, fordelPunsjEventDto.ytelse)
         } else {
