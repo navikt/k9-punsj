@@ -33,6 +33,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -193,11 +195,13 @@ internal class PleiepengerSyktBarnRoutes(
                             .buildAndAwait()
 
                     } catch (e: Exception) {
-                        logger.error("", e)
+                        val sw = StringWriter()
+                        e.printStackTrace(PrintWriter(sw))
+                        val exceptionAsString = sw.toString()
                         return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .json()
-                            .bodyValueAndAwait(OasFeil(e.message!!))
+                            .bodyValueAndAwait(OasFeil(exceptionAsString))
                     }
                 }
             }
@@ -243,10 +247,13 @@ internal class PleiepengerSyktBarnRoutes(
                         hentPerioderSomFinnesIK9,
                         journalposterDto.journalposter)
                 } catch (e: Exception) {
+                    val sw = StringWriter()
+                    e.printStackTrace(PrintWriter(sw))
+                    val exceptionAsString = sw.toString()
                     return@RequestContext ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
-                        .bodyValueAndAwait(OasFeil(e.stackTrace.toString()))
+                        .bodyValueAndAwait(OasFeil(exceptionAsString))
                 }
 
                 if (mapTilEksternFormat.second.isNotEmpty()) {
