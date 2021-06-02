@@ -7,6 +7,7 @@ import no.nav.k9punsj.Routes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
@@ -74,26 +75,37 @@ internal class JournalpostRoutes(
                             val pdlResponse = pdlService.identifikatorMedAktørId(journalpostInfo.aktørId)
                             val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
 
+                            val punsjInnsendingType =
+                                journalpostService.hentHvisJournalpostMedId(journalpostId = request.journalpostId())?.type
                             val journalpostInfoDto = JournalpostInfoDto(
                                 journalpostId = journalpostInfo.journalpostId,
                                 norskIdent = personIdent,
                                 dokumenter = journalpostInfo.dokumenter,
-                                aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())
+                                aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                                if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null
                             )
-                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId, journalpostInfo.mottattDato, journalpostInfo.aktørId)
+                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
+                                journalpostInfo.mottattDato,
+                                journalpostInfo.aktørId)
                             return@RequestContext ServerResponse
                                 .ok()
                                 .json()
                                 .bodyValueAndAwait(journalpostInfoDto)
                         } else {
-                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId, journalpostInfo.mottattDato, journalpostInfo.aktørId)
+                            val punsjInnsendingType =
+                                journalpostService.hentHvisJournalpostMedId(journalpostId = request.journalpostId())?.type
+
+                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
+                                journalpostInfo.mottattDato,
+                                journalpostInfo.aktørId)
                             return@RequestContext ServerResponse
                                 .ok()
                                 .json()
                                 .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
                                     norskIdent = journalpostInfo.norskIdent,
                                     dokumenter = journalpostInfo.dokumenter,
-                                    aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId())))
+                                    aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                                    if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null))
                         }
                     }
 
@@ -260,13 +272,18 @@ internal class JournalpostRoutes(
         }
     }
 
-    private suspend fun utvidJournalpostMedMottattDato(jornalpostId : JournalpostId, mottattDato : LocalDateTime, aktørId: AktørId?) {
+    private suspend fun utvidJournalpostMedMottattDato(
+        jornalpostId: JournalpostId,
+        mottattDato: LocalDateTime,
+        aktørId: AktørId?,
+    ) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(jornalpostId)
         if (journalpostFraBasen?.mottattDato != null) {
             return
         }
         if (journalpostFraBasen != null) {
-            val justertDato : LocalDateTime = VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(journalpostFraBasen.type, mottattDato)
+            val justertDato: LocalDateTime =
+                VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(journalpostFraBasen.type, mottattDato)
             journalpostService.lagre(journalpostFraBasen.copy(mottattDato = justertDato))
         } else {
             val journalpost = Journalpost(

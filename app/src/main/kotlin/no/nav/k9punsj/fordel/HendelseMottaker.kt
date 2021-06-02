@@ -31,10 +31,14 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
-                type = fordelPunsjEventDto.type
+                type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null
             )
             journalpostRepository.opprettJournalpost(journalpost)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost, Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET), fordelPunsjEventDto.type, fordelPunsjEventDto.ytelse)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                journalpost = journalpost,
+                aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
+                ytelse = fordelPunsjEventDto.ytelse)
         } else {
             log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
         }

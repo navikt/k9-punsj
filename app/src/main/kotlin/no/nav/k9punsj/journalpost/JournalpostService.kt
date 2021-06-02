@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -151,6 +152,7 @@ data class JournalpostInfoDto(
     val norskIdent: NorskIdent?,
     val dokumenter: List<DokumentInfo>,
     val venter: VentDto?,
+    val punsjInnsendingType: PunsjInnsendingType?
 )
 
 data class VentDto(
