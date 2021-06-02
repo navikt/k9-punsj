@@ -5,9 +5,8 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto
+import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
@@ -46,11 +45,11 @@ class K9SakServiceImpl(
 
         val matchDto = MatchDto(FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
-            listOf(barn))
+            barn)
 
         val body = objectMapper().writeValueAsString(matchDto)
 
-        val (request, _, result) = "${baseUrl}/fagsak/match"
+        val (request, _, result) = "${baseUrl}/behandling/soknad/perioder"
             .httpPost()
             .body(
                 body
@@ -63,21 +62,23 @@ class K9SakServiceImpl(
             ).awaitStringResponseResult()
 
         val json = result.fold(
-            { success -> success },
+            { success ->
+                Pair(success, null) },
             { error ->
                 log.error(
                     "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
                 )
                 log.error(error.toString())
-                throw IllegalStateException("Feil ved henting av fagsaker fra k9-sak")
+                Pair(null, "Feil ved henting av peridoer fra k9-sak")
             }
         )
         return try {
-            val resultat = objectMapper().readValue<List<FagsakInfoDto>>(json)
+            if (json.first == null) {
+                return Pair(null, json.second!!)
+            }
+            val resultat = objectMapper().readValue<List<Periode>>(json.first!!)
             val liste = resultat
-                .filter { f -> f.status == FagsakStatus.LØPENDE || f.status == FagsakStatus.UNDER_BEHANDLING}
-                .filter { f -> f.person.ident == søker }
-                .map { r -> PeriodeDto(r.gyldigPeriode.fom, r.gyldigPeriode.tom) }.toList()
+                .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
             Pair(liste, null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
@@ -87,6 +88,6 @@ class K9SakServiceImpl(
     data class MatchDto(
         val ytelseType: FagsakYtelseType,
         val bruker: String,
-        val pleietrengendeIdenter: List<String>,
+        val pleietrengende: String,
     )
 }

@@ -297,10 +297,11 @@ internal class PleiepengerSyktBarnRoutes(
                         .bodyValueAndAwait(body)
 
                 } else {
+                    logger.error("TESTAV" + hentPerioderSomFinnesIK9.second)
                     ServerResponse
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .ok()
                         .json()
-                        .buildAndAwait()
+                        .bodyValueAndAwait(listOf<PeriodeDto>())
                 }
             }
         }
