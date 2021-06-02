@@ -28,7 +28,7 @@ jobs:
         run: |
           mvn clean package -DskipTests
           echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "IMAGE=${IMAGE}$BASE_IMAGE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)-q" >> $GITHUB_ENV
+          echo "IMAGE=${IMAGE}$IMAGE_BASE_CR:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)-q" >> $GITHUB_ENV
       - name: Bygg & last opp Docker image
         run: |
           docker build --pull --tag ${IMAGE}  ./app/.
