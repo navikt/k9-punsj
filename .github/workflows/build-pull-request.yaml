@@ -1,6 +1,6 @@
 name: Build Pull Request
 
-on: [pull_request]
+on: [pull_request_target]
 
 env:
   GITHUB_USERNAME: x-access-token
