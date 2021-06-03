@@ -139,7 +139,12 @@ internal class JournalpostRoutes(
                     val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
                         ?.map { OasDokumentInfo(it.dokumentId) }?.toSet()
 
-                    OasJournalpostDto(it.journalpostId, dok, it.dato)
+                    OasJournalpostDto(
+                        journalpostId = it.journalpostId,
+                        dokumenter = dok,
+                        it.mottattDato?.toLocalDate(),
+                        it.mottattDato?.toLocalTime(),
+                        if (it.type != null) PunsjInnsendingType.fraKode(it.type) else null)
                 }.toList()
 
                 ServerResponse

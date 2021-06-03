@@ -78,7 +78,7 @@ class JournalpostService(
         return parsedJournalpost.relevanteDatoer.first { d -> d.datotype == datotype }.dato
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalpostRepository.JournalIdMedDato> {
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 

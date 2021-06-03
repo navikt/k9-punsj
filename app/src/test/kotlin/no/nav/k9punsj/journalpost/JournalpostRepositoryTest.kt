@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -18,13 +19,13 @@ internal class JournalpostRepositoryTest {
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val journalpost1 =
-            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
         journalpostRepository.lagre(journalpost1) {
             journalpost1
         }
 
         val journalpost2 =
-            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
         journalpostRepository.lagre(journalpost2) {
             journalpost2
         }
@@ -37,6 +38,7 @@ internal class JournalpostRepositoryTest {
 
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(2)
+        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(PunsjInnsendingType.PAPIRSØKNAD.kode)
     }
 
     @Test

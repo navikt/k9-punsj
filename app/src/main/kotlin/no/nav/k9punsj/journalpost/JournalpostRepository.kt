@@ -100,21 +100,18 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<JournalIdMedDato> {
+    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT JOURNALPOST_ID, OPPRETTET_TID FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
+                "SELECT DATA FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
             )
             val resultat = it.run(
                 statement
                     .map { row ->
-                        JournalIdMedDato(
-                            row.string("journalpost_id"),
-                            row.localDate("opprettet_tid")
-                        )
+                        row.string("data")
                     }.asList
             )
-            resultat
+            resultat.map { res ->  objectMapper.readValue(res, Journalpost::class.java) }
         }
     }
 

@@ -20,6 +20,7 @@ import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.fagsak.FagsakRoutes
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseRoutes
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.time.LocalDate
+import java.time.LocalTime
 
 @Component
 internal class OpenApi {
@@ -580,7 +582,10 @@ data class OasJournalpostDto(
     val journalpostId: JournalpostIdDto,
     val dokumenter: Set<OasDokumentInfo>?,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val dato: LocalDate,
+    val dato: LocalDate?,
+    @JsonFormat(pattern = "HH:mm")
+    val klokkeslett : LocalTime?,
+    val punsjInnsendingType: PunsjInnsendingType?
 )
 
 data class OasVentDto(
