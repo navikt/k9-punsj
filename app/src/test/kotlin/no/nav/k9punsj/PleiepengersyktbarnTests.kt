@@ -495,7 +495,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).hasSize(4)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
-        assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
+        assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.fom).isEqualTo(
@@ -594,6 +594,9 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.infoFraPunsj!!.get().søknadenInneholderInfomasjonSomIkkeKanPunsjes).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
+        assertThat(ytelse.opptjeningAktivitet.frilanser.jobberFortsattSomFrilans).isEqualTo(true)
+        assertThat(ytelse.opptjeningAktivitet.frilanser.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
+        assertThat(ytelse.opptjeningAktivitet.frilanser.sluttdato).isEqualTo(LocalDate.of(2019, 11, 10))
     }
 
     private fun opprettOgSendInnSoeknad(

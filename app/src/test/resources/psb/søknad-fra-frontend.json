@@ -8,7 +8,7 @@
   "klokkeslett": "12:53",
   "barn": {
     "norskIdent": "22222222222",
-    "foedselsdato": null
+    "foedselsdato": "2018-10-30"
   },
   "soeknadsperiode": {
     "fom": "2018-12-30",
@@ -43,6 +43,7 @@
     },
     "frilanser": {
       "startdato": "2019-10-10",
+      "sluttdato": "2019-11-10",
       "jobberFortsattSomFrilans": true
     },
     "arbeidstaker": [

@@ -1,7 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.db.datamodell.pleiepengersyktbarn.PleiepengersyktbarnEntitet
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
@@ -39,7 +38,7 @@ data class PleiepengerSøknadVisningDto(
 
     data class ArbeidAktivitetDto(
         val selvstendigNaeringsdrivende: SelvstendigNæringsdrivendeDto?,
-        val frilanser: PleiepengersyktbarnEntitet.PleiepengerYtelse.ArbeidAktivitet.FrilanserDto?,
+        val frilanser: FrilanserDto?,
         val arbeidstaker: List<ArbeidstakerDto>?,
     ) {
         data class SelvstendigNæringsdrivendeDto(
@@ -65,7 +64,10 @@ data class PleiepengerSøknadVisningDto(
         }
 
         data class FrilanserDto(
+            @JsonFormat(pattern = "yyyy-MM-dd")
             val startdato: String?,
+            @JsonFormat(pattern = "yyyy-MM-dd")
+            val sluttdato: String?,
             val jobberFortsattSomFrilans: Boolean?,
         )
 

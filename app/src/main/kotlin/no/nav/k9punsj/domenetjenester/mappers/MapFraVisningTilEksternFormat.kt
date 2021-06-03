@@ -1,8 +1,6 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.VirksomhetType
-import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadMottakDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
@@ -225,9 +223,7 @@ internal class MapFraVisningTilEksternFormat {
         }
 
         private fun mapTilMottakArbeidAktivitetDto(arbeidAktivitet: PleiepengerSøknadVisningDto.ArbeidAktivitetDto): PleiepengerSøknadMottakDto.PleiepengerYtelseDto.ArbeidAktivitetDto {
-            val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto? =
-                if (arbeidAktivitet.frilanser != null) (objectMapper().convertValue(
-                    arbeidAktivitet.frilanser)) else null
+            val frilanser: PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto? = arbeidAktivitet.frilanser
             val selvstendigNæringsdrivende =
                 if (arbeidAktivitet.selvstendigNaeringsdrivende != null && arbeidAktivitet.selvstendigNaeringsdrivende.info?.periode?.fom != null)
                     mapTilMottakSelvstendigNæringsdrivendeDto(arbeidAktivitet.selvstendigNaeringsdrivende) else null
