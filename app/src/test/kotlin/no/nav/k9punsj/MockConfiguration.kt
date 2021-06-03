@@ -6,10 +6,7 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
-import no.nav.k9punsj.wiremock.getK9PunsjbolleBaseUrl
-import no.nav.k9punsj.wiremock.getK9sakBaseUrl
-import no.nav.k9punsj.wiremock.getPdlBaseUrl
-import no.nav.k9punsj.wiremock.getSafBaseUrl
+import no.nav.k9punsj.wiremock.*
 
 internal object MockConfiguration {
     internal fun config(
@@ -29,6 +26,7 @@ internal object MockConfiguration {
         "NAV_TRUSTSTORE_PASSWORD" to "changeit",
         "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
         "PDL_BASE_URL" to wireMockServer.getPdlBaseUrl(),
+        "PDL_SCOPE" to wireMockServer.getPdlScope(),
         "K9SAK_BASE_URL" to wireMockServer.getK9sakBaseUrl(),
         "GOSYS_BASE_URL" to wireMockServer.getPdlBaseUrl(),
         "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",

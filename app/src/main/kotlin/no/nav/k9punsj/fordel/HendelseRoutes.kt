@@ -1,27 +1,25 @@
 package no.nav.k9punsj.fordel
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
-import no.nav.k9punsj.journalpost.IkkeTilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
+@Profile("local")
 internal class HendelseRoutes(
     private val hendelseMottaker: HendelseMottaker,
-    private val authenticationHandler: AuthenticationHandler,
 ) {
 
     private companion object {
@@ -33,31 +31,26 @@ internal class HendelseRoutes(
     }
 
     @Bean
-    fun HendelseRoutes() = Routes(authenticationHandler) {
+    fun HendelseRoutes() = Routes {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val fordelPunsjEventDto = request.request()
                 try {
-                    val response = hendelseMottaker.prosesser(fordelPunsjEventDto)
-                    if (response == null) {
-                        ServerResponse
-                                .notFound()
-                                .buildAndAwait()
-                    } else {
-                        ServerResponse
-                                .ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValueAndAwait(response)
-                    }
-                    } catch (case: IkkeTilgang) {
+                    hendelseMottaker.prosesser(fordelPunsjEventDto)
                     ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .buildAndAwait()
+
+                } catch (e: Exception) {
+                    ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .buildAndAwait()
                 }
             }
         }
-
     }
-    private suspend fun ServerRequest.request() = body(BodyExtractors.toMono(FordelPunsjEventDto::class.java)).awaitFirst()
 
+    private suspend fun ServerRequest.request() =
+        body(BodyExtractors.toMono(FordelPunsjEventDto::class.java)).awaitFirst()
 }
