@@ -163,7 +163,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Søknaden er lukket for endring og sendt til behandling.",
                 content = [Content(
                     schema = Schema(
-                        implementation = Void::class
+                        implementation = no.nav.k9.søknad.Søknad::class
                     )
                 )]
             ),

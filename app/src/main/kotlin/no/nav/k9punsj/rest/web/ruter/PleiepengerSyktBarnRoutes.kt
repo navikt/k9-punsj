@@ -192,7 +192,8 @@ internal class PleiepengerSyktBarnRoutes(
                         }
                         return@RequestContext ServerResponse
                             .accepted()
-                            .buildAndAwait()
+                            .json()
+                            .bodyValueAndAwait(søknadK9Format.first)
 
                     } catch (e: Exception) {
                         val sw = StringWriter()
