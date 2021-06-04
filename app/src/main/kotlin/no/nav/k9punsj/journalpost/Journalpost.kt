@@ -12,4 +12,5 @@ data class Journalpost(
         val skalTilK9 : Boolean? = null,
         val mottattDato : LocalDateTime? = null,
         val type : String? = null,
+        val payload : String? = null
 )

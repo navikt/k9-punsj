@@ -115,7 +115,8 @@ class SøknadRepository(private val dataSource: DataSource) {
                     queryOf(
                         """
                     update soknad
-                    set SENDT_INN = true
+                    set SENDT_INN = true,
+                    SENDT_INN_TIDSPUNKT = now()
                     where soknad_id = :soknad_id
                     """, mapOf(
                             "soknad_id" to UUID.fromString(søknadId))

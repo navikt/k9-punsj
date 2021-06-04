@@ -7,6 +7,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -37,6 +38,8 @@ class PleiepengerSyktBarnSoknadService(
             } catch (e: Exception) {
                 return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.message!!)
             }
+
+            leggerVedPayload(søknad, journalpostIder)
             journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
@@ -44,6 +47,21 @@ class PleiepengerSyktBarnSoknadService(
             null
         } else {
             Pair(HttpStatus.CONFLICT, "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
+        }
+    }
+
+    private suspend fun leggerVedPayload(
+        søknad: Søknad,
+        journalpostIder: MutableSet<JournalpostId>,
+    ) {
+        val writeValueAsString = objectMapper().writeValueAsString(søknad)
+
+        journalpostIder.forEach {
+            val journalpost = journalpostRepository.hent(it)
+            val medPayload = journalpost.copy(payload = writeValueAsString)
+            journalpostRepository.lagre(medPayload) {
+                medPayload
+            }
         }
     }
 
