@@ -298,7 +298,6 @@ internal class PleiepengerSyktBarnRoutes(
                         .bodyValueAndAwait(body)
 
                 } else {
-                    logger.error("TESTAV" + hentPerioderSomFinnesIK9.second)
                     ServerResponse
                         .ok()
                         .json()
