@@ -111,6 +111,7 @@ class TestContext {
             søker: NorskIdentDto,
             barn: NorskIdentDto,
             journalpostIdDto: JournalpostIdDto,
+            annenPart: NorskIdentDto?
         ): SaksnummerDto? {
             return SaksnummerDto(dummySaksnummer)
         }

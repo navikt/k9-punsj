@@ -4,6 +4,8 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
+import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.abac.PepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
@@ -38,8 +40,9 @@ internal class JournalpostRoutes(
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
+    private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-) {
+    private val safGateway: SafGateway) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -55,6 +58,8 @@ internal class JournalpostRoutes(
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
+        internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
+
     }
 
     @Bean
@@ -275,6 +280,12 @@ internal class JournalpostRoutes(
 
             }
         }
+
+        kopierJournalpostRoute(
+            pepClient = pepClient,
+            punsjbolleService = punsjbolleService,
+            safGateway = safGateway
+        )
     }
 
     private suspend fun utvidJournalpostMedMottattDato(
