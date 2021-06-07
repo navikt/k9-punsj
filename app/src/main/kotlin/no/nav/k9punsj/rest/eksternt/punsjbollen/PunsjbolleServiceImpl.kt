@@ -5,11 +5,13 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -18,7 +20,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import java.net.URI
-import java.util.UUID
+import java.time.LocalDate
 
 @Configuration
 @Profile("!test & !local")
@@ -30,36 +32,59 @@ class PunsjbolleServiceImpl(
 ) : PunsjbolleService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    val log = LoggerFactory.getLogger("PunsjbollenService")
 
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        journalpostIdDto: JournalpostIdDto
-    ): SaksnummerDto? {
+        journalpostId: JournalpostIdDto,
+        correlationId: CorrelationId
+    ) = opprettEllerHentFagsaksnummer(
+        dto = punsjbolleDto(søker, barn, journalpostId, null),
+        correlationId = correlationId
+    )
+    override suspend fun opprettEllerHentFagsaksnummer(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        periode: PeriodeDto,
+        correlationId: CorrelationId
+    ) = opprettEllerHentFagsaksnummer(
+        dto = punsjbolleDto(søker, barn, null, periode),
+        correlationId = correlationId
+    )
+
+    private suspend fun punsjbolleDto(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostIdDto: JournalpostIdDto?,
+        periode: PeriodeDto?) : PunsjbollSaksnummerDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
-
-        val punsjbollSaksnummerDto = PunsjbollSaksnummerDto(
+        return PunsjbollSaksnummerDto(
             søker = PunsjbollSaksnummerDto.PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = PunsjbollSaksnummerDto.PunsjbollePersonDto(barnPerson.norskIdent, barnPerson.aktørId),
+            periode = periode?.let {
+               require(it.fom != null || it.tom != null) { "Må sette enten fom eller tom" }
+                "${it.fom.iso8601()}/${it.tom.iso8601()}"
+            },
             søknadstype = "PleiepengerSyktBarn",
             journalpostId = journalpostIdDto
         )
+    }
 
-        val body = objectMapper().writeValueAsString(punsjbollSaksnummerDto)
+    private suspend fun opprettEllerHentFagsaksnummer(
+        dto: PunsjbollSaksnummerDto,
+        correlationId: CorrelationId
+    ): SaksnummerDto? {
+        val body = objectMapper().writeValueAsString(dto)
 
         val (request, _, result) = "${baseUrl}/saksnummer"
             .httpPost()
-            .body(
-                body
-            )
+            .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope))
-                    .asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.XCorrelationId to UUID.randomUUID().toString()
+                NavHeaders.XCorrelationId to correlationId
             ).awaitStringResponseResult()
 
 
@@ -94,10 +119,22 @@ class PunsjbolleServiceImpl(
         val søker: PunsjbollePersonDto,
         val pleietrengende: PunsjbollePersonDto,
         val søknadstype: String,
-        val journalpostId: String) {
+        val journalpostId: String? = null,
+        val periode: String? = null) {
+        init { require(journalpostId != null || periode != null) {
+            "Må sette enten journalpostId eller periode"
+        }}
         data class PunsjbollePersonDto(
             val identitetsnummer: String,
             val aktørId: String,
         )
+    }
+
+    private companion object {
+        private fun LocalDate?.iso8601() = when (this) {
+            null -> ".."
+            else -> "$this"
+        }
+        private val log = LoggerFactory.getLogger(PunsjbolleServiceImpl::class.java)
     }
 }

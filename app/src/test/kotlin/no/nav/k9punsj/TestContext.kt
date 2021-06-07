@@ -110,12 +110,17 @@ class TestContext {
         override suspend fun opprettEllerHentFagsaksnummer(
             søker: NorskIdentDto,
             barn: NorskIdentDto,
-            journalpostIdDto: JournalpostIdDto
-        ): SaksnummerDto? {
-            return SaksnummerDto(dummySaksnummer)
-        }
-    }
+            journalpostId: JournalpostIdDto,
+            correlationId: CorrelationId
+        ) = SaksnummerDto(dummySaksnummer)
 
+        override suspend fun opprettEllerHentFagsaksnummer(
+            søker: NorskIdentDto,
+            barn: NorskIdentDto,
+            periode: PeriodeDto,
+            correlationId: CorrelationId
+        ) = SaksnummerDto(dummySaksnummer)
+    }
 
     @Bean
     fun pepClientBean() = pepClient

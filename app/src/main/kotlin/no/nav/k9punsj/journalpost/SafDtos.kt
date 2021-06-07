@@ -50,7 +50,7 @@ internal object SafDtos {
         OMS("Journalposter tilknyttet Kapittel 9 ytelsene (OMS)")
     }
 
-    internal enum class JournalpostType(beskrivelse: String) {
+    enum class JournalpostType(beskrivelse: String) {
         I("Inngående")
     }
 

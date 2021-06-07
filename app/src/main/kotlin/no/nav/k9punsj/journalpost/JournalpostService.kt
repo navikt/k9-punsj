@@ -60,7 +60,8 @@ class JournalpostService(
                     dokumenter = safJournalpost.dokumenter.map { DokumentInfo(it.dokumentInfoId) },
                     norskIdent = norskIdent,
                     aktørId = aktørId,
-                    mottattDato = mottattDato
+                    mottattDato = mottattDato,
+                    erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType
                 )
             }
         }
@@ -145,6 +146,7 @@ data class JournalpostInfo(
     val aktørId: AktørId?,
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
+    val erInngående: Boolean
 )
 
 data class JournalpostInfoDto(

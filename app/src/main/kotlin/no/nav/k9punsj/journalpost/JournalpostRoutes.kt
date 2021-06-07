@@ -5,11 +5,11 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.abac.IPepClient
-import no.nav.k9punsj.abac.PepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -34,7 +34,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
-
 @Configuration
 internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
@@ -43,7 +42,6 @@ internal class JournalpostRoutes(
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-    private val safGateway: SafGateway,
     private val innsendingClient: InnsendingClient) {
 
     private companion object {
@@ -186,10 +184,12 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
                 }
 
-                val saksnummerDto =
-                    punsjbolleService.opprettEllerHentFagsaksnummer(søker = dto.brukerIdent,
-                        barn = dto.barnIdent,
-                        journalpostIdDto = dto.journalpostId)
+                val saksnummerDto = punsjbolleService.opprettEllerHentFagsaksnummer(
+                    søker = dto.brukerIdent,
+                    barn = dto.barnIdent,
+                    journalpostId = dto.journalpostId,
+                    correlationId = coroutineContext.hentCorrelationId()
+                )
 
                 val skalTilK9 = saksnummerDto != null
                 lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
@@ -286,7 +286,7 @@ internal class JournalpostRoutes(
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,
-            safGateway = safGateway,
+            journalpostService = journalpostService,
             innsendingClient = innsendingClient
         )
     }
