@@ -12,6 +12,7 @@ import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.UUID
@@ -34,10 +35,18 @@ internal class InnsendingMappingTest {
         val (_, value) = innsendingClient.mapSøknad(
             søknadId = k9Format.søknadId.id,
             søknad = k9Format,
-            tilleggsOpplysninger = emptyMap(),
+            tilleggsOpplysninger = mapOf(
+                "foo" to "bar",
+                "bar" to 2
+            ),
             correlationId = "${UUID.randomUUID()}"
         )
-        println(value)
+
+        val behov = JSONObject(value).getJSONObject("@behov").getJSONObject("PunsjetSøknad")
+        assertTrue(behov.has("søknad") && behov.get("søknad") is JSONObject)
+        assertEquals( "bar", behov.getString("foo"))
+        assertEquals( 2, behov.getInt("bar"))
+        assertEquals("1.0.0", behov.getString("versjon"))
     }
 
     @Test
