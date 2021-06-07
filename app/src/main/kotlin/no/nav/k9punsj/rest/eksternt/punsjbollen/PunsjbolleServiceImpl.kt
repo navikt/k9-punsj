@@ -37,14 +37,18 @@ class PunsjbolleServiceImpl(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         journalpostIdDto: JournalpostIdDto,
+        annenPart: NorskIdentDto?
     ): SaksnummerDto? {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
+        val annenPartPerson = annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(annenPart) }
 
         val punsjbollSaksnummerDto = PunsjbollSaksnummerDto(
             søker = PunsjbollSaksnummerDto.PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = PunsjbollSaksnummerDto.PunsjbollePersonDto(barnPerson.norskIdent, barnPerson.aktørId),
-            søknadstype = "PleiepengerSyktBarn", journalpostIdDto
+            annenPart = annenPartPerson?.let { PunsjbollSaksnummerDto.PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) },
+            søknadstype = "PleiepengerSyktBarn",
+            journalpostId = journalpostIdDto
         )
 
         val body = objectMapper().writeValueAsString(punsjbollSaksnummerDto)
@@ -93,6 +97,7 @@ class PunsjbolleServiceImpl(
     data class PunsjbollSaksnummerDto(
         val søker: PunsjbollePersonDto,
         val pleietrengende: PunsjbollePersonDto,
+        val annenPart: PunsjbollePersonDto?,
         val søknadstype: String,
         val journalpostId: String,
 
