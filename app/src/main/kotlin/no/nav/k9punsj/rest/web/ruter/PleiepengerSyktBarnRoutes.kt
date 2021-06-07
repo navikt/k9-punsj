@@ -19,7 +19,6 @@ import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
-import no.nav.k9punsj.rest.web.HentSøknad
 import no.nav.k9punsj.rest.web.Matchfagsak
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -72,7 +71,7 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
-                harInnloggetBrukerTilgangTilSøker(norskIdent)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilSøker(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
@@ -138,7 +137,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent, Urls.SendEksisterendeSøknad)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -211,7 +210,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
-                harInnloggetBrukerTilgangTilSøker(opprettNySøknad.norskIdent)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilSøker(opprettNySøknad.norskIdent, Urls.NySøknad)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.førsteInnsending(
                     nySøknad = opprettNySøknad!!,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
@@ -227,7 +226,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent, Urls.ValiderSøknad)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
@@ -283,7 +282,7 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.matchFagsak()
                 harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
-                    matchfagsak.barnIdent))?.let { return@RequestContext it }
+                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak)?.let { return@RequestContext it }
 
                 val hentPerioderSomFinnesIK9 = k9SakService.hentPerioderSomFinnesIK9(
                     matchfagsak.brukerIdent,
@@ -316,8 +315,8 @@ internal class PleiepengerSyktBarnRoutes(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     }
 
-    private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto)
+    private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>, url : String): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -327,8 +326,8 @@ internal class PleiepengerSyktBarnRoutes(
         return null
     }
 
-    private suspend fun harInnloggetBrukerTilgangTilOgSendeInn(norskIdentDto: NorskIdentDto): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto)
+    private suspend fun harInnloggetBrukerTilgangTilOgSendeInn(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -338,8 +337,8 @@ internal class PleiepengerSyktBarnRoutes(
         return null
     }
 
-    private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto)
+    private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -349,7 +348,7 @@ internal class PleiepengerSyktBarnRoutes(
         return null
     }
 
-    private suspend fun ServerRequest.norskeIdent(): String {
+    private fun ServerRequest.norskeIdent(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 
@@ -359,12 +358,11 @@ internal class PleiepengerSyktBarnRoutes(
     private suspend fun ServerRequest.opprettNy() =
         body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
 
-    private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
     private suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
 
     private fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) =
         uriBuilder().pathSegment("mappe", søknadId).build()
 
-    private suspend fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+    private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 }
