@@ -10,6 +10,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
@@ -42,7 +43,8 @@ internal class JournalpostRoutes(
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-    private val safGateway: SafGateway) {
+    private val safGateway: SafGateway,
+    private val innsendingClient: InnsendingClient) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -284,7 +286,8 @@ internal class JournalpostRoutes(
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,
-            safGateway = safGateway
+            safGateway = safGateway,
+            innsendingClient = innsendingClient
         )
     }
 
