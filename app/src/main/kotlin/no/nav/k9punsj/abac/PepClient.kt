@@ -41,19 +41,19 @@ class PepClient(
     private val log: Logger = LoggerFactory.getLogger(PepClient::class.java)
     private val cache = Cache<Boolean>()
 
-    override suspend fun harBasisTilgang(fnr: String): Boolean {
+    override suspend fun harBasisTilgang(fnr: String, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
-        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read")
+        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
         return decision
     }
 
-    override suspend fun sendeInnTilgang(fnr: String): Boolean {
+    override suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
-        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create")
+        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
         return decision
     }
 
@@ -85,17 +85,22 @@ class PepClient(
             .addResourceAttribute(RESOURCE_FNR, fnr)
     }
 
-    override suspend fun harBasisTilgang(fnr: List<String>): Boolean {
+    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
 
         fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read")
+            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
         }
         return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
     private suspend fun loggTilAudit(
-        identTilInnloggetBruker: String, it: String, eventClassId: EventClassId, type: String, action: String
+        identTilInnloggetBruker: String,
+        it: String,
+        eventClassId: EventClassId,
+        type: String,
+        action: String,
+        url: String
     ) {
         auditlogger.logg(
             Auditdata(
@@ -107,7 +112,7 @@ class PepClient(
                     severity = "INFO"
                 ), fields = setOf(
                     CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
-                    CefField(CefFieldName.REQUEST, action),
+                    CefField(CefFieldName.REQUEST, url),
                     CefField(CefFieldName.ABAC_RESOURCE_TYPE, type),
                     CefField(CefFieldName.ABAC_ACTION, action),
                     CefField(CefFieldName.USER_ID, identTilInnloggetBruker),

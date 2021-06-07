@@ -34,9 +34,9 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     safGateway: SafGateway) {
 
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
-        pepClient.sendeInnTilgang(dto.fra).also { tilgang -> if (!tilgang) { return false }}
-        pepClient.sendeInnTilgang(dto.til).also { tilgang -> if (!tilgang) { return false }}
-        return pepClient.sendeInnTilgang(dto.barn)
+        pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
+        pepClient.sendeInnTilgang(dto.til, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
+        return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
     suspend fun kanRutesTilK9(dto: KopierJournalpostDto, journalpostId: JournalpostId) = punsjbolleService.opprettEllerHentFagsaksnummer(
@@ -64,7 +64,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
 internal object KopierJournalpost {
     internal val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
-    
+
     internal suspend fun ikkeTilgang() = ServerResponse
         .status(HttpStatus.FORBIDDEN)
         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
