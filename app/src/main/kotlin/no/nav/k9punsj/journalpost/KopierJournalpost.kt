@@ -2,8 +2,12 @@ package no.nav.k9punsj.journalpost
 
 import de.huxhorn.sulky.ulid.ULID
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.innsending.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
@@ -31,7 +35,8 @@ data class KopierJournalpostDto(
 internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     pepClient: IPepClient,
     punsjbolleService: PunsjbolleService,
-    safGateway: SafGateway) {
+    safGateway: SafGateway,
+    innsendingClient: InnsendingClient) {
 
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
         pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
@@ -56,7 +61,15 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             val dto = request.kopierJournalpostDto()
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
             if (!kanRutesTilK9(dto, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rute til K9.")}
-            // TODO: Sende journalpost til kopiering.
+            innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
+                id = dto.dedupKey,
+                journalpostId = journalpostId,
+                fra = dto.fra,
+                til = dto.til,
+                pleietrengende = dto.barn,
+                correlationId = coroutineContext.hentCorrelationId(),
+                ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            ))
             return@RequestContext sendtTilKopiering()
         }
     }
