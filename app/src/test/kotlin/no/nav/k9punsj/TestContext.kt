@@ -110,8 +110,7 @@ class TestContext {
         override suspend fun opprettEllerHentFagsaksnummer(
             søker: NorskIdentDto,
             barn: NorskIdentDto,
-            journalpostIdDto: JournalpostIdDto,
-            annenPart: NorskIdentDto?
+            journalpostIdDto: JournalpostIdDto
         ): SaksnummerDto? {
             return SaksnummerDto(dummySaksnummer)
         }

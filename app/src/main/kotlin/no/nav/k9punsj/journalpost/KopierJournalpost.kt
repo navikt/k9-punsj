@@ -44,11 +44,10 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
-    suspend fun kanRutesTilK9(dto: KopierJournalpostDto, journalpostId: JournalpostId) = punsjbolleService.opprettEllerHentFagsaksnummer(
-        søker = dto.fra,
+    suspend fun kanRutesTilK9(person: NorskIdentDto, barn: NorskIdentDto, journalpostId: JournalpostId) = punsjbolleService.opprettEllerHentFagsaksnummer(
+        søker = person,
         journalpostIdDto = journalpostId,
-        barn = dto.barn,
-        annenPart = dto.til
+        barn = barn
     ) != null
 
     fun erInngåendeJournalpost(journalpost: SafDtos.Journalpost) = journalpost.journalposttype == "I"
@@ -60,7 +59,8 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             if (!erInngåendeJournalpost(journalpost)) { return@RequestContext kanIkkeKopieres("Kan kun kopiere inngående journalposter.") }
             val dto = request.kopierJournalpostDto()
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
-            if (!kanRutesTilK9(dto, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rute til K9.")}
+            if (!kanRutesTilK9(dto.fra, dto.barn, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
+            if (!kanRutesTilK9(dto.til, dto.barn, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 id = dto.dedupKey,
                 journalpostId = journalpostId,

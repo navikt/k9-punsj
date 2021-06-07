@@ -20,7 +20,6 @@ import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.util.UUID
 
-
 @Configuration
 @Profile("!test & !local")
 class PunsjbolleServiceImpl(
@@ -36,17 +35,14 @@ class PunsjbolleServiceImpl(
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        journalpostIdDto: JournalpostIdDto,
-        annenPart: NorskIdentDto?
+        journalpostIdDto: JournalpostIdDto
     ): SaksnummerDto? {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
-        val annenPartPerson = annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(annenPart) }
 
         val punsjbollSaksnummerDto = PunsjbollSaksnummerDto(
             søker = PunsjbollSaksnummerDto.PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = PunsjbollSaksnummerDto.PunsjbollePersonDto(barnPerson.norskIdent, barnPerson.aktørId),
-            annenPart = annenPartPerson?.let { PunsjbollSaksnummerDto.PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) },
             søknadstype = "PleiepengerSyktBarn",
             journalpostId = journalpostIdDto
         )
@@ -97,11 +93,8 @@ class PunsjbolleServiceImpl(
     data class PunsjbollSaksnummerDto(
         val søker: PunsjbollePersonDto,
         val pleietrengende: PunsjbollePersonDto,
-        val annenPart: PunsjbollePersonDto?,
         val søknadstype: String,
-        val journalpostId: String,
-
-        ) {
+        val journalpostId: String) {
         data class PunsjbollePersonDto(
             val identitetsnummer: String,
             val aktørId: String,
