@@ -12,6 +12,8 @@ import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.coroutines.coroutineContext
 
 
@@ -36,7 +38,7 @@ class PleiepengerSyktBarnSoknadService(
                     correlationId = coroutineContext.hentCorrelationId()
                 )
             } catch (e: Exception) {
-                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.message!!)
+                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
             }
 
             leggerVedPayload(søknad, journalpostIder)
@@ -48,6 +50,12 @@ class PleiepengerSyktBarnSoknadService(
         } else {
             Pair(HttpStatus.CONFLICT, "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
         }
+    }
+
+    private fun printStackTrace(e: Exception): String {
+        val sw = StringWriter()
+        e.printStackTrace(PrintWriter(sw))
+        return sw.toString()
     }
 
     private suspend fun leggerVedPayload(
