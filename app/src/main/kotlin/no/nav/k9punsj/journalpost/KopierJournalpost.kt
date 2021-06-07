@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import de.huxhorn.sulky.ulid.ULID
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.hentCorrelationId
@@ -16,6 +17,7 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
@@ -35,7 +37,7 @@ data class KopierJournalpostDto(
 internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     pepClient: IPepClient,
     punsjbolleService: PunsjbolleService,
-    safGateway: SafGateway,
+    journalpostService: JournalpostService,
     innsendingClient: InnsendingClient) {
 
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
@@ -44,23 +46,29 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
-    suspend fun kanRutesTilK9(person: NorskIdentDto, barn: NorskIdentDto, journalpostId: JournalpostId) = punsjbolleService.opprettEllerHentFagsaksnummer(
-        søker = person,
-        journalpostIdDto = journalpostId,
-        barn = barn
+    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.opprettEllerHentFagsaksnummer(
+        søker = dto.fra,
+        barn = dto.barn,
+        journalpostId = journalpost.journalpostId,
+        correlationId = correlationId
     ) != null
 
-    fun erInngåendeJournalpost(journalpost: SafDtos.Journalpost) = journalpost.journalposttype == "I"
+    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.opprettEllerHentFagsaksnummer(
+        søker = dto.til,
+        barn = dto.barn,
+        periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
+        correlationId = correlationId
+    ) != null
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
             val journalpostId = request.journalpostId()
-            val journalpost = safGateway.hentJournalpostInfo(journalpostId)?:return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
-            if (!erInngåendeJournalpost(journalpost)) { return@RequestContext kanIkkeKopieres("Kan kun kopiere inngående journalposter.") }
+            val journalpost = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+            if (!journalpost.erInngående) { return@RequestContext kanIkkeKopieres("Kan kun kopiere inngående journalposter.") }
             val dto = request.kopierJournalpostDto()
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
-            if (!kanRutesTilK9(dto.fra, dto.barn, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
-            if (!kanRutesTilK9(dto.til, dto.barn, journalpostId)) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+            if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
+            if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 id = dto.dedupKey,
                 journalpostId = journalpostId,
