@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerContainerFactory
+import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -71,32 +72,47 @@ class KafkaConfig {
         put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
     }
 
-    private fun kafkaListenerContainerFactory(baseProperties: Properties) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
+    private fun kafkaConsumerFactory(baseProperties: Properties): ConsumerFactory<String, String> =
+        DefaultKafkaConsumerFactory(baseProperties.medConsumerConfig().springMap())
+
+    private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.apply {
             authorizationExceptionRetryInterval = Duration.ofMillis(RETRY_INTERVAL)
         }
         factory.setErrorHandler(ContainerStoppingErrorHandler())
-        factory.consumerFactory = DefaultKafkaConsumerFactory(baseProperties.medConsumerConfig().springMap())
+        factory.consumerFactory = consumerFactory
         return factory
     }
+
+    private fun kafkaTemplate(baseProperties: Properties) : KafkaTemplate<String, String> =
+        KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig().springMap()))
+
+    @Bean
+    @Qualifier(ON_PREM)
+    fun onPremKafkaConsumerFactory(
+        @Qualifier(ON_PREM) baseProperties: Properties
+    ) = kafkaConsumerFactory(baseProperties)
+
+    @Bean
+    @Qualifier(AIVEN)
+    fun aivenKafkaConsumerFactory(
+        @Qualifier(AIVEN) baseProperties: Properties
+    ) = kafkaConsumerFactory(baseProperties)
 
     @Bean(ON_PREM_CONTAINER_FACTORY)
     @Qualifier(ON_PREM)
     fun onPremKafkaListenerContainerFactory(
-        @Qualifier(ON_PREM) baseProperties: Properties
+        @Qualifier(ON_PREM) consumerFactory: ConsumerFactory<String, String>
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
-        kafkaListenerContainerFactory(baseProperties)
+        kafkaListenerContainerFactory(consumerFactory)
 
     @Bean(AIVEN_CONTAINER_FACTORY)
     @Qualifier(AIVEN)
     fun aivenKafkaListenerContainerFactory(
-        @Qualifier(AIVEN) baseProperties: Properties
+        @Qualifier(AIVEN) consumerFactory: ConsumerFactory<String, String>
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
-        kafkaListenerContainerFactory(baseProperties)
-
-    private fun kafkaTemplate(baseProperties: Properties) : KafkaTemplate<String, String> =
-        KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig().springMap()))
+        kafkaListenerContainerFactory(consumerFactory)
 
     @Bean
     @Qualifier(ON_PREM)
