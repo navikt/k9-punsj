@@ -6,11 +6,16 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Journalpost(
-        val uuid: UUID,
-        val journalpostId: JournalpostId,
-        val aktørId: AktørId?,
-        val skalTilK9 : Boolean? = null,
-        val mottattDato : LocalDateTime? = null,
-        val type : String? = null,
-        val payload : String? = null
-)
+    val uuid: UUID,
+    val journalpostId: JournalpostId,
+    val aktørId: AktørId?,
+    val skalTilK9: Boolean? = null,
+    val mottattDato: LocalDateTime? = null,
+    val type: String? = null,
+    val payload: String? = null,
+    val opprinneligJournalpost: OpprinneligJournalpost? = null,
+) {
+    data class OpprinneligJournalpost(
+        val journalpostId: JournalpostId?,
+    )
+}
