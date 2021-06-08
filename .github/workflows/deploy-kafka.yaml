@@ -1,0 +1,37 @@
+name: Deploy kafka
+
+on:
+  push:
+    paths:
+      - 'kafka/kafkarator.yaml'
+      - 'kafka/dev.json'
+      - 'kafka/prod.json'
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: kafka/kafkarator.yaml
+          VARS: kafka/dev.json
+
+  deploy-prod:
+    name: Deploy to prod
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: kafka/kafkarator.yaml
+          VARS: kafka/prod.json
