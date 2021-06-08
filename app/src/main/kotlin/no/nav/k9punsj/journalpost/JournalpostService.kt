@@ -39,19 +39,12 @@ class JournalpostService(
                 }")
                 throw IkkeTilgang()
             } else {
-                val norskIdent: NorskIdent? = when {
-                    parsedJournalpost.brukerType == SafDtos.BrukerType.FNR -> {
-                        safJournalpost.bruker?.id
-                    }
-                    parsedJournalpost.avsenderMottakertype == SafDtos.AvsenderMottakertype.FNR -> {
-                        safJournalpost.avsenderMottaker?.id
-                    }
-                    else -> null
+                val (norskIdent, aktørId) = when {
+                    SafDtos.BrukerType.FNR == parsedJournalpost.brukerType -> safJournalpost.bruker?.id to null
+                    SafDtos.BrukerType.AKTOERID == parsedJournalpost.brukerType -> null to safJournalpost.bruker?.id
+                    SafDtos.AvsenderMottakertype.FNR == parsedJournalpost.avsenderMottakertype -> safJournalpost.avsenderMottaker?.id to null
+                    else -> null to null
                 }
-
-                val aktørId: AktørId? = if (parsedJournalpost.brukerType == SafDtos.BrukerType.AKTOERID) {
-                    safJournalpost.bruker?.id
-                } else null
 
                 val mottattDato = utledMottattDato(parsedJournalpost)
 
