@@ -1,16 +1,29 @@
 package no.nav.k9punsj.innsending
 
+import no.nav.k9punsj.kafka.KafkaConfig.Companion.AIVEN
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import java.util.Properties
 
-class KafkaInnsendingClient(kafkaProperties: Properties) : InnsendingClient {
-    private val clientId = kafkaProperties.getValue(ProducerConfig.CLIENT_ID_CONFIG)
+@Configuration
+@Profile("!test")
+class KafkaInnsendingClient(
+    @Qualifier(AIVEN) kafkaBaseProperties: Properties
+) : InnsendingClient {
+    private val clientId = kafkaBaseProperties.getValue(CommonClientConfigs.CLIENT_ID_CONFIG)
     private val kafkaProducer = KafkaProducer(
-        kafkaProperties,
+        kafkaBaseProperties.apply {
+            put(ProducerConfig.ACKS_CONFIG, "1")
+            put(ProducerConfig.LINGER_MS_CONFIG, "0")
+            put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+        },
         StringSerializer(),
         StringSerializer()
     )
