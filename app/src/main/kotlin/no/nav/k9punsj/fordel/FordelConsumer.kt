@@ -1,7 +1,7 @@
 package no.nav.k9punsj.fordel
 
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.kafka.KafkaConfig.Companion.ON_PREM
+import no.nav.k9punsj.kafka.KafkaConfig.Companion.ON_PREM_CONTAINER_FACTORY
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ class FordelConsumer @Autowired constructor(val hendelseMottaker: HendelseMottak
         topics = ["privat-k9-fordel-journalforing-v1"],
         groupId = "k9-punsj-3",
         properties = ["auto.offset.reset:earliest"],
-        containerFactory = ON_PREM
+        containerFactory = ON_PREM_CONTAINER_FACTORY
     )
     @Throws(IOException::class)
     fun consume(message: String?) {

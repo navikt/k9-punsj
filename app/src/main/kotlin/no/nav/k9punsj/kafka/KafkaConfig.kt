@@ -81,14 +81,14 @@ class KafkaConfig {
         return factory
     }
 
-    @Bean
+    @Bean(ON_PREM_CONTAINER_FACTORY)
     @Qualifier(ON_PREM)
     fun onPremKafkaListenerContainerFactory(
         @Qualifier(ON_PREM) baseProperties: Properties
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
         kafkaListenerContainerFactory(baseProperties)
 
-    @Bean
+    @Bean(AIVEN_CONTAINER_FACTORY)
     @Qualifier(AIVEN)
     fun aivenKafkaListenerContainerFactory(
         @Qualifier(AIVEN) baseProperties: Properties
@@ -112,7 +112,10 @@ class KafkaConfig {
 
     internal companion object {
         internal const val AIVEN = "aiven"
+        internal const val AIVEN_CONTAINER_FACTORY = "aivenKafkaListenerContainerFactory"
         internal const val ON_PREM = "onPrem"
+        internal const val ON_PREM_CONTAINER_FACTORY = "onPremKafkaListenerContainerFactory"
+
         private const val RETRY_INTERVAL = 1000L
 
         private fun requireNotBlank(verdi: String, feilmelding:() -> String) = verdi.also {
