@@ -51,7 +51,7 @@ class KafkaConfig {
         properties[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = requireNotBlank(trustStorePath) {"Mangler trustStorePath"}
         properties[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"}
         val jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";"
-        val jaasCfg = String.format(jaasTemplate, requireNotBlank(username) {"Mangler username"}, requireNotBlank("password") {"Mangler password"})
+        val jaasCfg = String.format(jaasTemplate, requireNotBlank(username) {"Mangler username"}, requireNotBlank(password) {"Mangler password"})
         properties[SaslConfigs.SASL_MECHANISM] = "PLAIN"
         properties[SaslConfigs.SASL_JAAS_CONFIG] = jaasCfg
     }
