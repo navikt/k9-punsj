@@ -8,6 +8,7 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -27,20 +28,13 @@ import java.util.*
 
 @Profile("!test")
 @Configuration
-class KafkaConfig {
-
-    @Value("\${kafka.bootstrap.server}")
-    private val bootstrapServers = ""
-    @Value("\${kafka.clientId}")
-    private val clientId = ""
-    @Value("\${systembruker.username}")
-    private val username = ""
-    @Value("\${systembruker.password}")
-    private val password = ""
-    @Value("\${javax.net.ssl.trustStore}")
-    private val trustStorePath = ""
-    @Value("\${javax.net.ssl.trustStorePassword}")
-    private val trustStorePassword = ""
+class KafkaConfig(
+    @Value("\${kafka.bootstrap.server}") private val bootstrapServers: String,
+    @Value("\${kafka.clientId}") private val clientId: String,
+    @Value("\${systembruker.username}") private val username: String,
+    @Value("\${systembruker.password}") private val password: String,
+    @Value("\${javax.net.ssl.trustStore}") private val trustStorePath: String,
+    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String) {
 
     @Bean
     @Qualifier(ON_PREM)
@@ -49,10 +43,14 @@ class KafkaConfig {
         properties[CommonClientConfigs.CLIENT_ID_CONFIG] = requireNotBlank(clientId) {"Mangler clientId"}
         properties[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
         properties[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = requireNotBlank(trustStorePath) {"Mangler trustStorePath"}
-        properties[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"}
+        properties[SaslConfigs.SASL_MECHANISM] = "PLAIN"
+
         val jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";"
         val jaasCfg = String.format(jaasTemplate, requireNotBlank(username) {"Mangler username"}, requireNotBlank(password) {"Mangler password"})
-        properties[SaslConfigs.SASL_MECHANISM] = "PLAIN"
+
+        logger.info("OnPremKafkaBaseProperties=$properties")
+        // Logge properties før secrets legges til
+        properties[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"}
         properties[SaslConfigs.SASL_JAAS_CONFIG] = jaasCfg
     }
 
@@ -67,8 +65,11 @@ class KafkaConfig {
         put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
         put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
         put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env.getValue(AIVEN_KAFKA_TRUSTSTORE_PATH))
-        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
         put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env.getValue(AIVEN_KAFKA_KEYSTORE_PATH))
+
+        logger.info("AivenKafkaBaseProperties=$this")
+        // Logge properties før secrets legges til
+        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
         put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
     }
 
@@ -127,6 +128,8 @@ class KafkaConfig {
     ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)
 
     internal companion object {
+        private val logger = LoggerFactory.getLogger(KafkaConfig::class.java)
+
         internal const val AIVEN = "aiven"
         internal const val AIVEN_CONTAINER_FACTORY = "aivenKafkaListenerContainerFactory"
         internal const val ON_PREM = "onPrem"
