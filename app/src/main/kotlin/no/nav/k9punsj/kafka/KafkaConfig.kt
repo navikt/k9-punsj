@@ -151,6 +151,6 @@ class KafkaConfig {
             properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
             properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         }
-        private fun Properties.springMap() = toMap().mapKeys { "$it" }
+        private fun Properties.springMap() = toMap().mapKeys { "${it.key}" }
     }
 }
