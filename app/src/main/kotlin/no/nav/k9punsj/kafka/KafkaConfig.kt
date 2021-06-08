@@ -8,7 +8,6 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -24,7 +23,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerStoppingErrorHandler
 import java.net.InetAddress
 import java.time.Duration
-import java.util.*
 
 @Profile("!test")
 @Configuration
@@ -38,43 +36,41 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(ON_PREM)
-    fun onPremKafkaBaseProperties() = Properties().also { properties ->
-        properties[CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG] = requireNotBlank(bootstrapServers) {"Mangler bootstrapServers"}
-        properties[CommonClientConfigs.CLIENT_ID_CONFIG] = requireNotBlank(clientId) {"Mangler clientId"}
-        properties[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
-        properties[SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG] = requireNotBlank(trustStorePath) {"Mangler trustStorePath"}
-        properties[SaslConfigs.SASL_MECHANISM] = "PLAIN"
-
-        val jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";"
-        val jaasCfg = String.format(jaasTemplate, requireNotBlank(username) {"Mangler username"}, requireNotBlank(password) {"Mangler password"})
-
-        logger.info("OnPremKafkaBaseProperties=$properties")
-        // Logge properties før secrets legges til
-        properties[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"}
-        properties[SaslConfigs.SASL_JAAS_CONFIG] = jaasCfg
+    fun onPremKafkaBaseProperties() : Map<String, Any> {
+        requireNotBlank(username) {"Mangler username"}
+        requireNotBlank(password) {"Mangler password"}
+        return mapOf(
+            CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to requireNotBlank(bootstrapServers) {"Mangler bootstrapServers"},
+            CommonClientConfigs.CLIENT_ID_CONFIG to requireNotBlank(clientId) {"Mangler clientId"},
+            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
+            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to requireNotBlank(trustStorePath) {"Mangler trustStorePath"},
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"},
+            SaslConfigs.SASL_MECHANISM to "PLAIN",
+            SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"${username}\" password=\"${password}\";"
+        )
     }
 
     @Bean
     @Qualifier(AIVEN)
-    fun aivenKafkaBaseProperties() = Properties().apply {
+    fun aivenKafkaBaseProperties() : Map<String, Any> {
         val env = System.getenv()
-        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env.getValue(AIVEN_KAFKA_BOKERS))
-        put(CommonClientConfigs.CLIENT_ID_CONFIG, "k9-punsj-${InetAddress.getLocalHost().hostName}")
-        put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
-        put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")
-        put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
-        put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
-        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env.getValue(AIVEN_KAFKA_TRUSTSTORE_PATH))
-        put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env.getValue(AIVEN_KAFKA_KEYSTORE_PATH))
 
-        logger.info("AivenKafkaBaseProperties=$this")
-        // Logge properties før secrets legges til
-        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
-        put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD))
+        return mapOf(
+            CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to env.getValue(AIVEN_KAFKA_BOKERS),
+            CommonClientConfigs.CLIENT_ID_CONFIG to "k9-punsj-${InetAddress.getLocalHost().hostName}",
+            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to SecurityProtocol.SSL.name,
+            SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "",
+            SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "jks",
+            SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
+            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_TRUSTSTORE_PATH),
+            SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_KEYSTORE_PATH),
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD),
+            SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD)
+        )
     }
 
-    private fun kafkaConsumerFactory(baseProperties: Properties): ConsumerFactory<String, String> =
-        DefaultKafkaConsumerFactory(baseProperties.medConsumerConfig().springMap())
+    private fun kafkaConsumerFactory(baseProperties: Map<String, Any>): ConsumerFactory<String, String> =
+        DefaultKafkaConsumerFactory(baseProperties.medConsumerConfig())
 
     private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
@@ -86,19 +82,19 @@ class KafkaConfig(
         return factory
     }
 
-    private fun kafkaTemplate(baseProperties: Properties) : KafkaTemplate<String, String> =
-        KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig().springMap()))
+    private fun kafkaTemplate(baseProperties: Map<String, Any>) : KafkaTemplate<String, String> =
+        KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig()))
 
     @Bean
     @Qualifier(ON_PREM)
     fun onPremKafkaConsumerFactory(
-        @Qualifier(ON_PREM) baseProperties: Properties
+        @Qualifier(ON_PREM) baseProperties: Map<String, Any>
     ) = kafkaConsumerFactory(baseProperties)
 
     @Bean
     @Qualifier(AIVEN)
     fun aivenKafkaConsumerFactory(
-        @Qualifier(AIVEN) baseProperties: Properties
+        @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ) = kafkaConsumerFactory(baseProperties)
 
     @Bean(ON_PREM_CONTAINER_FACTORY)
@@ -118,17 +114,16 @@ class KafkaConfig(
     @Bean
     @Qualifier(ON_PREM)
     fun onPremKafkaTemplate(
-        @Qualifier(ON_PREM) baseProperties: Properties
+        @Qualifier(ON_PREM) baseProperties: Map<String, Any>
     ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)
 
     @Bean
     @Qualifier(AIVEN)
     fun aivenKafkaTemplate(
-        @Qualifier(AIVEN) baseProperties: Properties
+        @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)
 
     internal companion object {
-        private val logger = LoggerFactory.getLogger(KafkaConfig::class.java)
 
         internal const val AIVEN = "aiven"
         internal const val AIVEN_CONTAINER_FACTORY = "aivenKafkaListenerContainerFactory"
@@ -146,14 +141,14 @@ class KafkaConfig(
         private const val AIVEN_KAFKA_KEYSTORE_PATH = "KAFKA_KEYSTORE_PATH"
         private const val AIVEN_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDSTORE_PASSWORD"
 
-        private fun Properties.medProducerConfig() = also { properties ->
-            properties[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-            properties[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        private fun Map<String, Any>.medProducerConfig() = toMutableMap().also {
+            it[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+            it[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         }
-        private fun Properties.medConsumerConfig() = also { properties ->
-            properties[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-            properties[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+
+        private fun Map<String, Any>.medConsumerConfig() = toMutableMap().also {
+            it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+            it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         }
-        private fun Properties.springMap() = toMap().mapKeys { "${it.key}" }
     }
 }

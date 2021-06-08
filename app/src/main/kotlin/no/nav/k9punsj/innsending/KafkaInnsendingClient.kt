@@ -10,19 +10,18 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.util.Properties
 
 @Component
 @Profile("!test")
 class KafkaInnsendingClient(
-    @Qualifier(AIVEN) kafkaBaseProperties: Properties
+    @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>
 ) : InnsendingClient {
     private val clientId = kafkaBaseProperties.getValue(CommonClientConfigs.CLIENT_ID_CONFIG)
     private val kafkaProducer = KafkaProducer(
-        kafkaBaseProperties.apply {
-            put(ProducerConfig.ACKS_CONFIG, "1")
-            put(ProducerConfig.LINGER_MS_CONFIG, "0")
-            put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+        kafkaBaseProperties.toMutableMap().also {
+            it[ProducerConfig.ACKS_CONFIG] = "1"
+            it[ProducerConfig.LINGER_MS_CONFIG] = "0"
+            it[ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION] = "1"
         },
         StringSerializer(),
         StringSerializer()
