@@ -31,7 +31,9 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
-                type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null
+                type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
+                opprinneligJournalpost = if(fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
+                    fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
             )
             journalpostRepository.opprettJournalpost(journalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
