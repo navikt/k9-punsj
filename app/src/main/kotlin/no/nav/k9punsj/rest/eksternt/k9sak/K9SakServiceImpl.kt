@@ -49,6 +49,8 @@ class K9SakServiceImpl(
 
         val body = objectMapper().writeValueAsString(matchDto)
 
+        log.info("body:$body")
+
         val (request, _, result) = "${baseUrl}/behandling/soknad/perioder"
             .httpPost()
             .body(
