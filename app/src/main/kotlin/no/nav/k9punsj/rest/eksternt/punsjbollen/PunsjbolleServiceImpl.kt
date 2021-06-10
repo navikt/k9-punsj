@@ -36,19 +36,11 @@ class PunsjbolleServiceImpl(
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        journalpostId: JournalpostIdDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
         correlationId: CorrelationId
     ) = opprettEllerHentFagsaksnummer(
-        dto = punsjbolleDto(søker, barn, journalpostId, null),
-        correlationId = correlationId
-    )
-    override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        barn: NorskIdentDto,
-        periode: PeriodeDto,
-        correlationId: CorrelationId
-    ) = opprettEllerHentFagsaksnummer(
-        dto = punsjbolleDto(søker, barn, null, periode),
+        dto = punsjbolleDto(søker, barn, journalpostId, periode),
         correlationId = correlationId
     )
 
@@ -122,7 +114,7 @@ class PunsjbolleServiceImpl(
         val journalpostId: String? = null,
         val periode: String? = null) {
         init { require(journalpostId != null || periode != null) {
-            "Må sette enten journalpostId eller periode"
+            "Må sette minst en av journalpostId og periode"
         }}
         data class PunsjbollePersonDto(
             val identitetsnummer: String,

@@ -188,6 +188,7 @@ internal class JournalpostRoutes(
                     søker = dto.brukerIdent,
                     barn = dto.barnIdent,
                     journalpostId = dto.journalpostId,
+                    periode = null, // Utledes fra journalposten i Punsjbollen
                     correlationId = coroutineContext.hentCorrelationId()
                 )
 

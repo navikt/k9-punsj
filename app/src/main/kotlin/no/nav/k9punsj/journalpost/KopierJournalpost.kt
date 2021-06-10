@@ -50,12 +50,14 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         søker = dto.fra,
         barn = dto.barn,
         journalpostId = journalpost.journalpostId,
+        periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId
     ) != null
 
     suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.opprettEllerHentFagsaksnummer(
         søker = dto.til,
         barn = dto.barn,
+        journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId
     ) != null
@@ -103,6 +105,5 @@ internal object KopierJournalpost {
         body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
 
     internal fun ServerRequest.journalpostId(): JournalpostId = pathVariable("journalpost_id")
-
 }
 
