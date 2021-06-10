@@ -110,16 +110,12 @@ class TestContext {
         override suspend fun opprettEllerHentFagsaksnummer(
             søker: NorskIdentDto,
             barn: NorskIdentDto,
-            journalpostId: JournalpostIdDto,
+            journalpostId: JournalpostIdDto?,
+            periode: PeriodeDto?,
             correlationId: CorrelationId
-        ) = SaksnummerDto(dummySaksnummer)
-
-        override suspend fun opprettEllerHentFagsaksnummer(
-            søker: NorskIdentDto,
-            barn: NorskIdentDto,
-            periode: PeriodeDto,
-            correlationId: CorrelationId
-        ) = SaksnummerDto(dummySaksnummer)
+        ) = require(journalpostId != null || periode != null) {
+            "Må sette minst en av journalpostId og periode"
+        }.let { SaksnummerDto(dummySaksnummer) }
     }
 
     @Bean

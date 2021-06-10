@@ -1,7 +1,6 @@
 package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
@@ -51,8 +50,7 @@ internal class InnsendingMappingTest {
 
     @Test
     fun `mappe kopiering av journalpost for pleiepenger syk barn`() {
-        val (id, value) = innsendingClient.mapKopierJournalpost(KopierJournalpostInfo(
-            id = ULID.parseULID("01F7KCGX2WKTJ2C0PXNGHFNBNT"),
+        val (_, value) = innsendingClient.mapKopierJournalpost(KopierJournalpostInfo(
             correlationId = "5bc73106-a0b1-46a4-a297-54541265934e",
             journalpostId = "11111111111",
             fra = "22222222222",
@@ -61,7 +59,6 @@ internal class InnsendingMappingTest {
             ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
         ))
 
-        assertEquals(id, "01F7KCGX2WKTJ2C0PXNGHFNBNT")
         val behov = JSONObject(value).getJSONObject("@behov").getJSONObject("KopierPunsjbarJournalpost").toString()
 
         @Language("JSON")

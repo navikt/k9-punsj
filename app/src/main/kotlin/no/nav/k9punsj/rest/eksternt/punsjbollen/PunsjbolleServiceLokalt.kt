@@ -15,14 +15,10 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        journalpostId: JournalpostIdDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
         correlationId: CorrelationId
-    ) = SaksnummerDto("SAK1")
-
-    override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        barn: NorskIdentDto,
-        periode: PeriodeDto,
-        correlationId: CorrelationId
-    ) = SaksnummerDto("SAK2")
+    ) = require(journalpostId != null || periode != null) {
+        "Må sette minst en av journalpostId og periode"
+    }.let { SaksnummerDto("SAK1") }
 }
