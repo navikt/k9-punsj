@@ -5,8 +5,10 @@ import no.nav.k9punsj.fordel.FordelPunsjEventDto.Companion.somFordelPunsjEventDt
 import no.nav.k9punsj.kafka.KafkaConfig
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.stereotype.Component
 import java.io.IOException
 
+@Component
 @Profile("!test")
 class OnPremConsumer(
     val hendelseMottaker: HendelseMottaker) {
