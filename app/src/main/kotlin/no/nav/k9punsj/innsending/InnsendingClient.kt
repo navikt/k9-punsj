@@ -37,7 +37,7 @@ interface InnsendingClient {
     }
 
     fun mapKopierJournalpost(info: KopierJournalpostInfo) : Pair<String, String> {
-        val behovssekvensId = "${info.id}"
+        val behovssekvensId = ulid.nextULID()
         logger.info("Sender journalpost til kopiering.",
             keyValue("journalpost_id", info.journalpostId),
             keyValue("correlation_id", info.correlationId),

@@ -1,6 +1,5 @@
 package no.nav.k9punsj.journalpost
 
-import de.huxhorn.sulky.ulid.ULID
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
@@ -28,7 +27,6 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import kotlin.coroutines.coroutineContext
 
 data class KopierJournalpostDto(
-    val dedupKey: ULID.Value,
     val fra: NorskIdentDto,
     val til: NorskIdentDto,
     val barn: NorskIdentDto
@@ -72,7 +70,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
             if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
-                id = dto.dedupKey,
                 journalpostId = journalpostId,
                 fra = dto.fra,
                 til = dto.til,
