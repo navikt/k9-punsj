@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!test")
+@Profile("!test & !local")
 class KafkaInnsendingClient(
     @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>
 ) : InnsendingClient {
