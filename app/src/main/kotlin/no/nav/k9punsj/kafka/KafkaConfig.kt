@@ -52,6 +52,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
+    @Profile("!local")
     fun aivenKafkaBaseProperties() : Map<String, Any> {
         val env = System.getenv()
 
@@ -93,6 +94,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
+    @Profile("!local")
     fun aivenKafkaConsumerFactory(
         @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ) = kafkaConsumerFactory(baseProperties)
@@ -106,6 +108,7 @@ class KafkaConfig(
 
     @Bean(AIVEN_CONTAINER_FACTORY)
     @Qualifier(AIVEN)
+    @Profile("!local")
     fun aivenKafkaListenerContainerFactory(
         @Qualifier(AIVEN) consumerFactory: ConsumerFactory<String, String>
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
@@ -119,6 +122,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
+    @Profile("!local")
     fun aivenKafkaTemplate(
         @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)

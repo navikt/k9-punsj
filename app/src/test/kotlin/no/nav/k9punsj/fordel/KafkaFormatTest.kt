@@ -1,6 +1,6 @@
 package no.nav.k9punsj.fordel
 
-import no.nav.k9punsj.fordel.FordelConsumer.Companion.somFordelPunsjEventDto
+import no.nav.k9punsj.fordel.FordelPunsjEventDto.Companion.somFordelPunsjEventDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
