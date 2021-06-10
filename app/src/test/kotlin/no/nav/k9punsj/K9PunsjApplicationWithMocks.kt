@@ -1,6 +1,7 @@
 package no.nav.k9punsj
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -40,6 +41,12 @@ internal class K9PunsjApplicationWithMocks {
                     port = 8084,
                     rootDirectory = "mock-server/src/main/resources"
             )
+
+            Runtime.getRuntime().addShutdownHook(Thread {
+                DatabaseUtil.embeddedPostgres.close()
+                wireMockServer.stop()
+            })
+
             startup(
                     wireMockServer = wireMockServer,
                     port = 8085,

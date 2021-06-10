@@ -11,9 +11,9 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import javax.sql.DataSource
 
 class DatabaseUtil {
-
     companion object {
-        internal val dataSource: DataSource = EmbeddedPostgres.start().postgresDatabase.also { dataSource ->
+        internal val embeddedPostgres = EmbeddedPostgres.start()
+        internal val dataSource: DataSource = embeddedPostgres.postgresDatabase.also { dataSource ->
             val flyway = loadFlyway(dataSource)
             flyway.clean()
             flyway.migrate()
