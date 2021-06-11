@@ -147,7 +147,8 @@ data class JournalpostInfoDto(
     val norskIdent: NorskIdent?,
     val dokumenter: List<DokumentInfo>,
     val venter: VentDto?,
-    val punsjInnsendingType: PunsjInnsendingType?
+    val punsjInnsendingType: PunsjInnsendingType?,
+    val kanSendeInn: Boolean
 )
 
 data class VentDto(
