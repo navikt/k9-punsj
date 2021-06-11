@@ -11,9 +11,9 @@ import no.nav.k9punsj.wiremock.*
 
 internal object MockConfiguration {
     internal fun config(
-            wireMockServer: WireMockServer,
-            port: Int,
-            azureV2DiscoveryUrl: String?,
+        wireMockServer: WireMockServer,
+        port: Int,
+        azureV2DiscoveryUrl: String?,
     ): Map<String, String> = mapOf(
         "PORT" to "$port",
         "AZURE_client_id" to "k9-punsj",
@@ -27,7 +27,7 @@ internal object MockConfiguration {
         "NAV_TRUSTSTORE_PASSWORD" to "changeit",
         "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
         "PDL_BASE_URL" to wireMockServer.getPdlBaseUrl(),
-        "PDL_SCOPE" to wireMockServer.getPdlScope(),
+        "PDL_SCOPE" to "pdl/.default",
         "K9SAK_BASE_URL" to wireMockServer.getK9sakBaseUrl(),
         "GOSYS_BASE_URL" to wireMockServer.getPdlBaseUrl(),
         "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
