@@ -42,7 +42,8 @@ internal class JournalpostRoutes(
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-    private val innsendingClient: InnsendingClient) {
+    private val innsendingClient: InnsendingClient,
+    private val journalpostRepository: JournalpostRepository) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -71,6 +72,7 @@ internal class JournalpostRoutes(
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
                         journalpostId = request.journalpostId()
                     )
+                    val kanSendeInn = journalpostRepository.kanSendeInn(listOf(request.journalpostId()))
                     if (journalpostInfo == null) {
                         return@RequestContext ServerResponse
                             .notFound()
@@ -79,15 +81,15 @@ internal class JournalpostRoutes(
                         if (journalpostInfo.norskIdent == null && journalpostInfo.aktørId != null) {
                             val pdlResponse = pdlService.identifikatorMedAktørId(journalpostInfo.aktørId)
                             val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
-
                             val punsjInnsendingType =
                                 journalpostService.hentHvisJournalpostMedId(journalpostId = request.journalpostId())?.type
                             val journalpostInfoDto = JournalpostInfoDto(
                                 journalpostId = journalpostInfo.journalpostId,
                                 norskIdent = personIdent,
                                 dokumenter = journalpostInfo.dokumenter,
-                                aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null
+                                kanSendeInn = kanSendeInn,
+                                venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                                punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null
                             )
                             utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
@@ -109,8 +111,10 @@ internal class JournalpostRoutes(
                                 .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
                                     norskIdent = journalpostInfo.norskIdent,
                                     dokumenter = journalpostInfo.dokumenter,
-                                    aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                    if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null))
+                                    venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                                    punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
+                                    kanSendeInn = kanSendeInn
+                                ))
                         }
                     }
 
