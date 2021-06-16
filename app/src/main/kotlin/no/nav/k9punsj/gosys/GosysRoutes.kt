@@ -7,8 +7,10 @@ import no.nav.k9punsj.Routes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -16,10 +18,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
 
 
@@ -29,6 +28,7 @@ internal class GosysRoutes(
     private val gosysOppgaveService: GosysOppgaveService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
+    private val journalpostService: JournalpostService
 
     ) {
 
@@ -58,11 +58,20 @@ internal class GosysRoutes(
                         val response = gosysOppgaveService.opprettOppgave(
                             aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
                         )
+
+                        if (response.second != null) {
+                            return@RequestContext ServerResponse
+                                .status(response.first)
+                                .json()
+                                .bodyValueAndAwait(OasFeil(response.second!!))
+                        }
                         aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId, false)
-                        ServerResponse
-                            .ok()
+                        journalpostService.settTilFerdig(requestParameters.journalpostId)
+
+                        return@RequestContext ServerResponse
+                            .status(response.first)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValueAndAwait(response)
+                            .buildAndAwait()
                     }
 
                 } catch (case: IkkeTilgang) {

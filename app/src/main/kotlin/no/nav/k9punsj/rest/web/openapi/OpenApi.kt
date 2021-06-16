@@ -584,8 +584,8 @@ data class OasJournalpostDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate?,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime?,
-    val punsjInnsendingType: PunsjInnsendingType?
+    val klokkeslett: LocalTime?,
+    val punsjInnsendingType: PunsjInnsendingType?,
 )
 
 data class OasVentDto(
@@ -709,12 +709,7 @@ internal class GosysController {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Oppretter journalføringsoppgave for fnummer og journalpostid",
-                content = [Content(
-                    schema = Schema(
-                        implementation = GosysRoutes.GosysOpprettJournalføringsOppgaveRequest::class
-                    )
-                )]
+                description = "Oppretter journalføringsoppgave for fnummer og journalpostid"
             ),
             ApiResponse(
                 responseCode = "401",
@@ -727,6 +722,16 @@ internal class GosysController {
             ApiResponse(
                 responseCode = "404",
                 description = "Eksisterer ikke"
+            ),
+
+            ApiResponse(
+                responseCode = "500",
+                description = "Eksisterer ikke",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasFeil::class
+                    )
+                )]
             )
         ]
     )

@@ -17,10 +17,12 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.net.URI
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.coroutineContext
 
 
@@ -34,7 +36,6 @@ class GosysOppgaveService(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(GosysOppgaveService::class.java)
-        private const val VariantType = "ARKIV"
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
@@ -55,7 +56,7 @@ class GosysOppgaveService(
             )
             .build()
 
-    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String) {
+    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String): Pair<HttpStatus, String?> {
         val accessToken = cachedAccessTokenClient
                 .getAccessToken(
                         scopes = scope
@@ -68,9 +69,7 @@ class GosysOppgaveService(
                 prioritet = Prioritet.NORM,
                 tema = "OMS")
         try {
-            logger.info(coroutineContext.hentCorrelationId())
             val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
-            logger.info(body)
             val response = client
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
@@ -90,14 +89,14 @@ class GosysOppgaveService(
                         return@onStatus Mono.error(IllegalStateException())
                     }
                     .toEntity(String::class.java)
-
                     .awaitFirst()
-            logger.info(response.toString())
+            return Pair<HttpStatus, String?>(response.statusCode, null)
 
         } catch (e: Exception) {
-            logger.error("", e)
+            val sw = StringWriter()
+            e.printStackTrace(PrintWriter(sw))
+            val exceptionAsString = sw.toString()
+            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, exceptionAsString)
         }
     }
-
-
 }
