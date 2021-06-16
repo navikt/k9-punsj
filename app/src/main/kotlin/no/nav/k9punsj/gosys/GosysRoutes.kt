@@ -69,7 +69,7 @@ internal class GosysRoutes(
                         journalpostService.settTilFerdig(requestParameters.journalpostId)
 
                         return@RequestContext ServerResponse
-                            .status(response.first)
+                            .status(HttpStatus.OK)
                             .contentType(MediaType.APPLICATION_JSON)
                             .buildAndAwait()
                     }
