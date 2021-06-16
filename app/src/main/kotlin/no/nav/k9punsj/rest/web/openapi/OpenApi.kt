@@ -216,7 +216,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Søknaden er valider ok.",
                 content = [Content(
                     schema = Schema(
-                        implementation = Void::class
+                        implementation = no.nav.k9.søknad.Søknad::class
                     )
                 )]
             ),

@@ -273,10 +273,10 @@ internal class PleiepengerSyktBarnRoutes(
 
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
-                    .buildAndAwait()
+                    .json()
+                    .bodyValueAndAwait(mapTilEksternFormat.first)
             }
         }
-
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {

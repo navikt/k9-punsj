@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
+import kotlin.math.pow
 
 
 /** Mapper fra visning format (GUI format) til backend format slik at dette letter kan gjøres om til k9-format senere
@@ -141,7 +142,7 @@ internal class MapFraVisningTilEksternFormat {
             return true
         }
 
-        private fun zeroTimerHvisTomString(input: String?): Duration {
+        internal fun zeroTimerHvisTomString(input: String?): Duration {
             if (input.isNullOrEmpty()) {
                 return Duration.ofHours(0L)
             }
@@ -165,7 +166,8 @@ internal class MapFraVisningTilEksternFormat {
         }
 
         private fun finnMinutter(split: String): Long {
-            val div = split.toDouble().div(10)
+            val delePå = "10".toDouble().pow(split.length)
+            val div = split.toDouble().div(delePå)
             return div.times(60).toLong()
         }
 
