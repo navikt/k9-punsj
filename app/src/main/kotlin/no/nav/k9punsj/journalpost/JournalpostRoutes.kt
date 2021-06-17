@@ -17,6 +17,7 @@ import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
+import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
@@ -179,6 +180,8 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.punsjbolleDto()
+                harInnloggetBrukerTilgangTilOgOpprettesak(dto.brukerIdent, Urls.SkalTilK9sak)?.let { return@RequestContext it }
+
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
 
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
@@ -336,6 +339,17 @@ internal class JournalpostRoutes(
             )
             journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
         }
+    }
+
+    private suspend fun harInnloggetBrukerTilgangTilOgOpprettesak(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
+        if (!saksbehandlerHarTilgang) {
+            return ServerResponse
+                .status(HttpStatus.FORBIDDEN)
+                .json()
+                .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
+        }
+        return null
     }
 
     private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
