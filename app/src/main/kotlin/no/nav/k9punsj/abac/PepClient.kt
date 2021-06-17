@@ -94,6 +94,15 @@ class PepClient(
         return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
+    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+
+        fnr.forEach {
+            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
+        }
+        return fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+    }
+
     private suspend fun loggTilAudit(
         identTilInnloggetBruker: String,
         it: String,

@@ -132,6 +132,10 @@ class TestContext {
         override suspend fun sendeInnTilgang(fnr: String, urlKallet : String): Boolean {
             return true
         }
+
+        override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
+            return true
+        }
     }
 
     @Bean

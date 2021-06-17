@@ -24,8 +24,6 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -50,8 +48,6 @@ internal class PleiepengerSyktBarnRoutes(
 
     ) {
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
-
         private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
         private const val SøknadIdKey = "soeknad_id"
     }
@@ -71,7 +67,7 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
-                harInnloggetBrukerTilgangTilSøker(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
@@ -210,7 +206,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
-                harInnloggetBrukerTilgangTilSøker(opprettNySøknad.norskIdent, Urls.NySøknad)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent, Urls.NySøknad)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.førsteInnsending(
                     nySøknad = opprettNySøknad!!,
                     søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
@@ -226,7 +222,7 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                harInnloggetBrukerTilgangTilSøker(sendSøknad.norskIdent, Urls.ValiderSøknad)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent, Urls.ValiderSøknad)?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
@@ -316,7 +312,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>, url : String): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
+        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -337,16 +333,16 @@ internal class PleiepengerSyktBarnRoutes(
         return null
     }
 
-    private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
-        if (!saksbehandlerHarTilgang) {
-            return ServerResponse
-                .status(HttpStatus.FORBIDDEN)
-                .json()
-                .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
-        }
-        return null
-    }
+//    private suspend fun harInnloggetBrukerTilgangTilSøker(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
+//        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
+//        if (!saksbehandlerHarTilgang) {
+//            return ServerResponse
+//                .status(HttpStatus.FORBIDDEN)
+//                .json()
+//                .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
+//        }
+//        return null
+//    }
 
     private fun ServerRequest.norskeIdent(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
