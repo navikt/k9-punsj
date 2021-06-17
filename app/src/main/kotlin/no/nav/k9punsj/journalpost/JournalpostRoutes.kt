@@ -189,7 +189,7 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
                 }
 
-                val saksnummerDto = punsjbolleService.opprettEllerHentFagsaksnummer(
+                val skalTilK9 = punsjbolleService.kanRutesTilK9Sak(
                     søker = dto.brukerIdent,
                     barn = dto.barnIdent,
                     journalpostId = dto.journalpostId,
@@ -197,7 +197,6 @@ internal class JournalpostRoutes(
                     correlationId = coroutineContext.hentCorrelationId()
                 )
 
-                val skalTilK9 = saksnummerDto != null
                 lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
 
                 return@RequestContext ServerResponse

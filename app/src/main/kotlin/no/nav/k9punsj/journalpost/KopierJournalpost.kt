@@ -44,21 +44,21 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
-    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.opprettEllerHentFagsaksnummer(
+    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.kanRutesTilK9Sak(
         søker = dto.fra,
         barn = dto.barn,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId
-    ) != null
+    )
 
-    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.opprettEllerHentFagsaksnummer(
+    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.kanRutesTilK9Sak(
         søker = dto.til,
         barn = dto.barn,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId
-    ) != null
+    )
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
