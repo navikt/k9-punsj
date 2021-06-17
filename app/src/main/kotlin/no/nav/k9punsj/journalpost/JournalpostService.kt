@@ -80,6 +80,10 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
+    internal suspend fun kanSendeInn(journalpostId: JournalpostId): Boolean {
+        return journalpostRepository.kanSendeInn(listOf(journalpostId))
+    }
+
     internal suspend fun lagre(journalpost: Journalpost, kilde: KildeType = KildeType.FORDEL) {
         journalpostRepository.lagre(journalpost, kilde) {
             journalpost
@@ -148,7 +152,8 @@ data class JournalpostInfoDto(
     val dokumenter: List<DokumentInfo>,
     val venter: VentDto?,
     val punsjInnsendingType: PunsjInnsendingType?,
-    val kanSendeInn: Boolean
+    val kanSendeInn: Boolean,
+    val erSaksbehandler: Boolean? = null
 )
 
 data class VentDto(

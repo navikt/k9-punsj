@@ -57,6 +57,12 @@ class PepClient(
         return decision
     }
 
+    override suspend fun erSaksbehandler(): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+        val erSaksbehandlerIK9Sak = erSaksbehandlerIK9Sak(identTilInnloggetBruker)
+        return evaluate(erSaksbehandlerIK9Sak)
+    }
+
     private fun basisTilgangRequest(
         identTilInnloggetBruker: String,
         fnr: String,
@@ -83,6 +89,16 @@ class PepClient(
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
             .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
             .addResourceAttribute(RESOURCE_FNR, fnr)
+    }
+
+    private fun erSaksbehandlerIK9Sak(identTilInnloggetBruker: String): XacmlRequestBuilder {
+        return XacmlRequestBuilder()
+            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
+            .addResourceAttribute(RESOURCE_TYPE, TILGANG_SAK)
+            .addActionAttribute(ACTION_ID, "create")
+            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
+            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los")
     }
 
     override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {

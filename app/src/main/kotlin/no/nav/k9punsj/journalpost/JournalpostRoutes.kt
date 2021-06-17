@@ -22,8 +22,6 @@ import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
 import no.nav.k9punsj.rest.web.openapi.OasSkalTilInfotrygdSvar
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -43,11 +41,10 @@ internal class JournalpostRoutes(
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-    private val innsendingClient: InnsendingClient,
-    private val journalpostRepository: JournalpostRepository) {
+    private val innsendingClient: InnsendingClient
+) {
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
     }
@@ -73,7 +70,6 @@ internal class JournalpostRoutes(
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
                         journalpostId = request.journalpostId()
                     )
-                    val kanSendeInn = journalpostRepository.kanSendeInn(listOf(request.journalpostId()))
                     if (journalpostInfo == null) {
                         return@RequestContext ServerResponse
                             .notFound()
@@ -88,9 +84,10 @@ internal class JournalpostRoutes(
                                 journalpostId = journalpostInfo.journalpostId,
                                 norskIdent = personIdent,
                                 dokumenter = journalpostInfo.dokumenter,
-                                kanSendeInn = kanSendeInn,
+                                kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                 venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null
+                                punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
+                                erSaksbehandler = pepClient.erSaksbehandler()
                             )
                             utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
@@ -114,7 +111,8 @@ internal class JournalpostRoutes(
                                     dokumenter = journalpostInfo.dokumenter,
                                     venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
                                     punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
-                                    kanSendeInn = kanSendeInn
+                                    kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
+                                    erSaksbehandler = pepClient.erSaksbehandler()
                                 ))
                         }
                     }

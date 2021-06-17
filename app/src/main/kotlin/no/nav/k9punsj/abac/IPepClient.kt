@@ -10,4 +10,6 @@ interface IPepClient {
     suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean
 
     suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean
+
+    suspend fun erSaksbehandler(): Boolean
 }
