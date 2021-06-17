@@ -214,11 +214,13 @@ internal class PleiepengerSyktBarnRoutes(
                     Urls.NySøknad)?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
-                punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                    opprettNySøknad.barnIdent,
-                    opprettNySøknad.journalpostId,
-                    null,
-                    coroutineContext.hentCorrelationId())
+                if (opprettNySøknad.barnIdent != null) {
+                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
+                        opprettNySøknad.barnIdent,
+                        opprettNySøknad.journalpostId,
+                        null,
+                        coroutineContext.hentCorrelationId())
+                }
 
                 val søknadEntitet = mappeService.førsteInnsending(
                     nySøknad = opprettNySøknad!!,
