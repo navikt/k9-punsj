@@ -169,6 +169,6 @@
     "samtidigHjemme": true,
     "harMedsoeker": true
   },
-  "harInfoSomIkkeKanPunsjes" : true,
-  "harMedisinskeOpplysninger" : true
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
 }

@@ -409,7 +409,7 @@ class PleiepengersyktbarnTests {
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
-        assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(true)
+        assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(false)
     }
 
     @Test
@@ -590,7 +590,7 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
         assertThat(ytelse.lovbestemtFerie!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
-        assertThat(ytelse.infoFraPunsj!!.get().inneholderMedisinskeOpplysninger).isEqualTo(true)
+        assertThat(ytelse.infoFraPunsj!!.get().inneholderMedisinskeOpplysninger).isEqualTo(false)
         assertThat(ytelse.infoFraPunsj!!.get().søknadenInneholderInfomasjonSomIkkeKanPunsjes).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
