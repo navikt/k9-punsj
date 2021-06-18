@@ -49,7 +49,7 @@ internal class MappeServiceTest {
         personnummer: NorskIdentDto,
         journalpostId: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId)
+        return OpprettNySøknad(personnummer, journalpostId, null)
     }
 
 }

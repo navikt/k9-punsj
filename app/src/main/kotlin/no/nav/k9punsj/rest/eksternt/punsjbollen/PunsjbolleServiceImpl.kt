@@ -44,6 +44,17 @@ class PunsjbolleServiceImpl(
         correlationId = correlationId
     )
 
+    override suspend fun kanRutesTilK9Sak(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
+        correlationId: CorrelationId
+    ) = ruting(
+        dto = punsjbolleDto(søker, barn, journalpostId, periode),
+        correlationId = correlationId
+    ).destinasjon == "K9Sak"
+
     private suspend fun punsjbolleDto(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
@@ -66,7 +77,7 @@ class PunsjbolleServiceImpl(
     private suspend fun opprettEllerHentFagsaksnummer(
         dto: PunsjbollSaksnummerDto,
         correlationId: CorrelationId
-    ): SaksnummerDto? {
+    ): SaksnummerDto {
         val body = objectMapper().writeValueAsString(dto)
 
         val (request, _, result) = "${baseUrl}/saksnummer"
@@ -83,29 +94,52 @@ class PunsjbolleServiceImpl(
         val json = result.fold(
             { success -> success },
             { error ->
-                // conflict
-                if (error.response.statusCode == 409) {
-                    null
-                } else {
-                    log.error(
-                        "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
-                    )
-                    log.error(error.toString())
-                    throw IllegalStateException("Feil ved request av saksnummer fra k9-punsjbolle")
-                }
+                log.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}', $error")
+                throw IllegalStateException("Feil ved henting av saksnummer fra k9-punsjbolle")
             }
         )
 
         try {
-            if (json == null) {
-                return null
-            }
             return objectMapper().readValue(json)
         } catch (e: Exception) {
             log.error("Feilet deserialisering $e")
             throw IllegalStateException("Feilet deserialisering $e")
         }
     }
+
+    private suspend fun ruting(
+        dto: PunsjbollSaksnummerDto,
+        correlationId: CorrelationId
+    ): RutingResponse {
+        val body = objectMapper().writeValueAsString(dto)
+
+        val (request, _, result) = "${baseUrl}/ruting"
+            .httpPost()
+            .body(body)
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.XCorrelationId to correlationId
+            ).awaitStringResponseResult()
+
+
+        val json = result.fold(
+            { success -> success },
+            { error ->
+                log.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}', $error")
+                throw IllegalStateException("Feil ved henting av ruting fra k9-punsjbolle")
+            }
+        )
+
+        try {
+            return objectMapper().readValue(json)
+        } catch (e: Exception) {
+            log.error("Feilet deserialisering $e")
+            throw IllegalStateException("Feilet deserialisering $e")
+        }
+    }
+
 
     data class PunsjbollSaksnummerDto(
         val søker: PunsjbollePersonDto,
@@ -121,6 +155,11 @@ class PunsjbolleServiceImpl(
             val aktørId: String,
         )
     }
+
+    data class RutingResponse(
+        val destinasjon: String
+    )
+
 
     private companion object {
         private fun LocalDate?.iso8601() = when (this) {

@@ -16,6 +16,7 @@ typealias SøknadJson = MutableMap<String, Any?>
 data class OpprettNySøknad(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
+    val barnIdent: NorskIdentDto?,
 )
 
 data class HentSøknad(

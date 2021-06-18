@@ -708,7 +708,7 @@ private fun opprettSøknad(
     personnummer: NorskIdentDto,
     journalpostId: String,
 ): OpprettNySøknad {
-    return OpprettNySøknad(personnummer, journalpostId)
+    return OpprettNySøknad(personnummer, journalpostId, null)
 }
 
 private fun lagSendSøknad(

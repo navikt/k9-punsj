@@ -21,4 +21,12 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
+
+    override suspend fun kanRutesTilK9Sak(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
+        correlationId: CorrelationId
+    ) = true
 }
