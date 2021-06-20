@@ -87,12 +87,12 @@ internal class MapTilK9Format {
 
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
-
             val infoFraPunsj = InfoFraPunsj()
-            infoFraPunsj.medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
-            infoFraPunsj.medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
+                .medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
+                .medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
 
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
+            pleiepengerSyktBarn.medInfoFraPunsj(infoFraPunsj)
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
             søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
 
@@ -102,7 +102,7 @@ internal class MapTilK9Format {
             }
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
-            infoFraPunsj.let { pleiepengerSyktBarn.medInfoFraPunsj(it) }
+
             bosteder?.let { pleiepengerSyktBarn.medBosteder(it) }
             utenlandsopphold?.let { pleiepengerSyktBarn.medUtenlandsopphold(it) }
 
