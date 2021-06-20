@@ -88,17 +88,9 @@ internal class MapTilK9Format {
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
 
-            var infoFraPunsj: InfoFraPunsj? = null
-
-            if (psb.harInfoSomIkkeKanPunsjes != null || psb.harMedisinskeOpplysninger != null) {
-                infoFraPunsj = InfoFraPunsj()
-                if (psb.harInfoSomIkkeKanPunsjes != null) {
-                    infoFraPunsj.medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
-                }
-                if (psb.harMedisinskeOpplysninger != null) {
-                    infoFraPunsj.medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
-                }
-            }
+            val infoFraPunsj = InfoFraPunsj()
+            infoFraPunsj.medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
+            infoFraPunsj.medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
 
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
@@ -110,7 +102,7 @@ internal class MapTilK9Format {
             }
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
-            infoFraPunsj?.let { pleiepengerSyktBarn.medInfoFraPunsj(it) }
+            infoFraPunsj.let { pleiepengerSyktBarn.medInfoFraPunsj(it) }
             bosteder?.let { pleiepengerSyktBarn.medBosteder(it) }
             utenlandsopphold?.let { pleiepengerSyktBarn.medUtenlandsopphold(it) }
 
@@ -136,8 +128,8 @@ internal class MapTilK9Format {
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {
-            val fom = if(dato.fom != null) dato.fom.toString() else ÅPEN
-            val tom = if(dato.tom != null) dato.tom.toString() else ÅPEN
+            val fom = if (dato.fom != null) dato.fom.toString() else ÅPEN
+            val tom = if (dato.tom != null) dato.tom.toString() else ÅPEN
             return fom + SKILLE + tom
         }
     }

@@ -26,8 +26,8 @@ data class PleiepengerSøknadVisningDto(
     val lovbestemtFerie: List<PeriodeDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
-    val harInfoSomIkkeKanPunsjes : Boolean? = null,
-    val harMedisinskeOpplysninger : Boolean? = null
+    val harInfoSomIkkeKanPunsjes : Boolean,
+    val harMedisinskeOpplysninger : Boolean
 
 ) {
     data class BarnDto(

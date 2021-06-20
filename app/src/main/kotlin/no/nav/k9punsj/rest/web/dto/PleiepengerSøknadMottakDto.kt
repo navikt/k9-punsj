@@ -32,8 +32,8 @@ data class PleiepengerSøknadMottakDto(
         val arbeidstid: ArbeidstidDto?,
         val uttak: UttakDto?,
         val omsorg: OmsorgDto?,
-        val harInfoSomIkkeKanPunsjes : Boolean?,
-        val harMedisinskeOpplysninger : Boolean?
+        val harInfoSomIkkeKanPunsjes : Boolean,
+        val harMedisinskeOpplysninger : Boolean
     ) {
 
         data class BarnDto(

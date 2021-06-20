@@ -67,7 +67,7 @@ internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
         if (s.søknad != null) {
             objectMapper().convertValue(s.søknad)
         } else {
-            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, soekerId = norskIdent, journalposter = hentUtJournalposter(s))
+            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, soekerId = norskIdent, journalposter = hentUtJournalposter(s), harMedisinskeOpplysninger = false, harInfoSomIkkeKanPunsjes = false)
         }
     }
     return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
@@ -80,7 +80,7 @@ internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != nul
 
 internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadVisningDto {
     if (søknad == null) {
-        return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = hentUtJournalposter(this))
+        return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = hentUtJournalposter(this), harInfoSomIkkeKanPunsjes = false, harMedisinskeOpplysninger = false)
     }
     return objectMapper().convertValue(søknad)
 }
