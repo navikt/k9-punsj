@@ -41,6 +41,7 @@ class MappeService(
 
     suspend fun førsteInnsending(søknadType: FagsakYtelseType, nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
+        val barnIdent = nySøknad.barnIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
@@ -56,6 +57,7 @@ class MappeService(
             PleiepengerSøknadVisningDto(
                 soeknadId = søknadId.toString(),
                 soekerId = norskIdent,
+                barn = PleiepengerSøknadVisningDto.BarnDto(barnIdent, null),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = mottattDato?.toLocalDate(),
                 klokkeslett = klokkeslett,
