@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.net.URI
@@ -40,7 +39,6 @@ class PdlServiceImpl(
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
         private const val CorrelationIdHeader = "Nav-Callid"
-        private const val MaxDokumentSize = 5 * 1024 * 1024
     }
 
     init {
@@ -51,14 +49,6 @@ class PdlServiceImpl(
     private val client = WebClient
         .builder()
         .baseUrl(baseUrl.toString())
-        .exchangeStrategies(
-            ExchangeStrategies.builder()
-                .codecs { configurer ->
-                    configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(MaxDokumentSize)
-                }.build()
-        )
         .build()
 
     @Throws(IkkeTilgang::class)

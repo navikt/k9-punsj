@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
 import reactor.core.publisher.Mono
@@ -40,20 +39,11 @@ class GosysOppgaveService(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
         private val scope: Set<String> = setOf("openid")
-        private const val MaxDokumentSize = 5 * 1024 * 1024
     }
 
     private val client = WebClient
             .builder()
             .baseUrl(safBaseUrl.toString())
-            .exchangeStrategies(
-                    ExchangeStrategies.builder()
-                            .codecs { configurer ->
-                                configurer
-                                        .defaultCodecs()
-                                        .maxInMemorySize(MaxDokumentSize)
-                            }.build()
-            )
             .build()
 
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String): Pair<HttpStatus, String?> {
