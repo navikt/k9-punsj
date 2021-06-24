@@ -255,7 +255,7 @@ class PleiepengersyktbarnTests {
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
+            .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
         val response = res
@@ -424,7 +424,7 @@ class PleiepengersyktbarnTests {
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
+            .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
