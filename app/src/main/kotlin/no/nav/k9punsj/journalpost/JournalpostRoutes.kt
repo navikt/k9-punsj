@@ -87,7 +87,8 @@ internal class JournalpostRoutes(
                                 kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                 venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
                                 punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
-                                erSaksbehandler = pepClient.erSaksbehandler()
+                                erSaksbehandler = pepClient.erSaksbehandler(),
+                                erInngående = journalpostInfo.erInngående
                             )
                             utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
@@ -106,13 +107,15 @@ internal class JournalpostRoutes(
                             return@RequestContext ServerResponse
                                 .ok()
                                 .json()
-                                .bodyValueAndAwait(JournalpostInfoDto(journalpostId = journalpostInfo.journalpostId,
+                                .bodyValueAndAwait(JournalpostInfoDto(
+                                    journalpostId = journalpostInfo.journalpostId,
                                     norskIdent = journalpostInfo.norskIdent,
                                     dokumenter = journalpostInfo.dokumenter,
                                     venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
                                     punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
                                     kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
-                                    erSaksbehandler = pepClient.erSaksbehandler()
+                                    erSaksbehandler = pepClient.erSaksbehandler(),
+                                    erInngående = journalpostInfo.erInngående
                                 ))
                         }
                     }
