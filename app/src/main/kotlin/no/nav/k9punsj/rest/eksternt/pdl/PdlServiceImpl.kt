@@ -146,6 +146,14 @@ class PdlServiceImpl(
             ?: throw IllegalStateException("Fant ikke aktørId i PDL")
     }
 
+    override suspend fun hentBarn(identitetsnummer: String): Set<String> {
+        return emptySet()
+    }
+
+    override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>): Set<Personopplysninger> {
+        return emptySet()
+    }
+
     private fun getStringFromResource(path: String) =
         PdlServiceImpl::class.java.getResourceAsStream(path).bufferedReader().use { it.readText() }
 

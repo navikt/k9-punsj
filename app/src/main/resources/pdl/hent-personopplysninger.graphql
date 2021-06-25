@@ -1,0 +1,17 @@
+query($identer: [ID!]!) {
+    hentPersonBolk(identer: $identer) {
+        ident,
+        person {
+            navn(historikk: false) {
+                fornavn, mellomnavn, etternavn
+            },
+            foedsel {
+                foedselsdato
+            },
+            adressebeskyttelse(historikk: false) {
+                gradering
+            }
+        },
+        code
+    }
+}

@@ -14,6 +14,7 @@ import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.eksternt.pdl.Personopplysninger
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
@@ -185,6 +186,10 @@ class TestContext {
         override suspend fun aktørIdFor(fnummer: String): String {
             return dummyAktørId
         }
+
+        override suspend fun hentBarn(identitetsnummer: String) = emptySet<String>()
+
+        override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = emptySet<Personopplysninger>()
     }
 
     @Bean
