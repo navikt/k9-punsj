@@ -24,6 +24,7 @@ import no.nav.k9punsj.util.DatabaseUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
+import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestConfiguration
@@ -169,6 +170,8 @@ class TestContext {
     @Bean
     fun pdlServiceBean() = pdlServiceMock
     val pdlServiceMock: PdlService = object : PdlService {
+        private val harBarn = "66666666666"
+        private val barn = setOf("77777777777","88888888888","99999999999")
 
         override suspend fun identifikator(fnummer: String): PdlResponse {
             val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "AKTORID", false, dummyAktørId)
@@ -187,9 +190,40 @@ class TestContext {
             return dummyAktørId
         }
 
-        override suspend fun hentBarn(identitetsnummer: String) = emptySet<String>()
+        override suspend fun hentBarn(identitetsnummer: String) = when (identitetsnummer == harBarn) {
+            true -> barn
+            false -> emptySet()
+        }
 
-        override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = emptySet<Personopplysninger>()
+        override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = when (identitetsnummer == barn) {
+            true -> setOf(
+                Personopplysninger(
+                    identitetsnummer = "77777777777",
+                    fødselsdato = LocalDate.parse("2005-12-12"),
+                    fornavn = "Ola",
+                    mellomnavn = null,
+                    etternavn = "Nordmann",
+                    gradering = Personopplysninger.Gradering.STRENGT_FORTROLIG
+                ),
+                Personopplysninger(
+                    identitetsnummer = "88888888888",
+                    fødselsdato = LocalDate.parse("2005-12-12"),
+                    fornavn = "Kari",
+                    mellomnavn = "Mellomste",
+                    etternavn = "Nordmann",
+                    gradering = Personopplysninger.Gradering.UGRADERT
+                ),
+                Personopplysninger(
+                    identitetsnummer = "99999999999",
+                    fødselsdato = LocalDate.parse("2004-06-24"),
+                    fornavn = "Pål",
+                    mellomnavn = null,
+                    etternavn = "Nordmann",
+                    gradering = Personopplysninger.Gradering.UGRADERT
+                )
+            )
+            false -> setOf()
+        }
     }
 
     @Bean
