@@ -563,6 +563,28 @@ internal class JournalpostController {
         @PathVariable("dokument_id") dokumentId: String,
     ) {
     }
+
+    @PostMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Når resett er gjennomført",
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Sjekker om jornalposten må behandles av infotrygd",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun ResettInfoOmJournalpost(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
 }
 
 data class OasDokumentInfo(

@@ -41,7 +41,7 @@ internal class JournalpostRoutes(
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
-    private val innsendingClient: InnsendingClient
+    private val innsendingClient: InnsendingClient,
 ) {
 
     private companion object {
@@ -58,7 +58,7 @@ internal class JournalpostRoutes(
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
-
+        internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -86,7 +86,8 @@ internal class JournalpostRoutes(
                                 dokumenter = journalpostInfo.dokumenter,
                                 kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                 venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
+                                punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
+                                    punsjInnsendingType) else null,
                                 erSaksbehandler = pepClient.erSaksbehandler(),
                                 erInngående = journalpostInfo.erInngående
                             )
@@ -112,7 +113,8 @@ internal class JournalpostRoutes(
                                     norskIdent = journalpostInfo.norskIdent,
                                     dokumenter = journalpostInfo.dokumenter,
                                     venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                    punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(punsjInnsendingType) else null,
+                                    punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
+                                        punsjInnsendingType) else null,
                                     kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                     erSaksbehandler = pepClient.erSaksbehandler(),
                                     erInngående = journalpostInfo.erInngående
@@ -181,7 +183,8 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.punsjbolleDto()
-                harInnloggetBrukerTilgangTilOgOpprettesak(dto.brukerIdent, Urls.SkalTilK9sak)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgOpprettesak(dto.brukerIdent,
+                    Urls.SkalTilK9sak)?.let { return@RequestContext it }
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
 
@@ -258,6 +261,24 @@ internal class JournalpostRoutes(
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
+            }
+        }
+
+        POST("/api${Urls.ResettInfoOmJournalpost}", contentType(MediaType.APPLICATION_JSON)) { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+
+                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+
+                val nyVerdi = journalpost.copy(skalTilK9 = null)
+                journalpostService.lagre(nyVerdi)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .buildAndAwait()
             }
         }
 
@@ -341,7 +362,10 @@ internal class JournalpostRoutes(
         }
     }
 
-    private suspend fun harInnloggetBrukerTilgangTilOgOpprettesak(norskIdentDto: NorskIdentDto, url : String): ServerResponse? {
+    private suspend fun harInnloggetBrukerTilgangTilOgOpprettesak(
+        norskIdentDto: NorskIdentDto,
+        url: String,
+    ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
