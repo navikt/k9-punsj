@@ -8,4 +8,8 @@ interface PdlService {
 
     suspend fun aktørIdFor(fnummer: String): String?
 
+    suspend fun hentBarn(identitetsnummer: String) : Set<String>
+
+    suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) : Set<Personopplysninger>
+
 }
