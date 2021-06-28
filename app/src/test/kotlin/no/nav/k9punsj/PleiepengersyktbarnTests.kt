@@ -248,14 +248,10 @@ class PleiepengersyktbarnTests {
         //ødelegger perioden
         soeknad.replace("soeknadsperiode", periode)
 
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
-
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
+            .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
         val response = res
@@ -418,13 +414,10 @@ class PleiepengersyktbarnTests {
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
-
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
+            .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
         assertEquals(HttpStatus.ACCEPTED, res.statusCode())
