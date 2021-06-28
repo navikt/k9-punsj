@@ -3,7 +3,6 @@ query($ident: ID!) {
         forelderBarnRelasjon {
             relatertPersonsIdent,
             relatertPersonsRolle
-        },
-        code
+        }
     }
 }
