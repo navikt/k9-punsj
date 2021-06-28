@@ -248,8 +248,6 @@ class PleiepengersyktbarnTests {
         //ødelegger perioden
         soeknad.replace("soeknadsperiode", periode)
 
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
