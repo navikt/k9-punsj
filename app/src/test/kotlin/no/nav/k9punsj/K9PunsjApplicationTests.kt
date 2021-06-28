@@ -103,7 +103,8 @@ class K9PunsjApplicationTests {
                 "venter" : null,
                 "punsjInnsendingType" : null,
                 "kanSendeInn" : true,
-                "erSaksbehandler" : true
+                "erSaksbehandler" : true,
+                "kanKopieres": true
 			}
 		""".trimIndent(), responseEntity, true)
     }

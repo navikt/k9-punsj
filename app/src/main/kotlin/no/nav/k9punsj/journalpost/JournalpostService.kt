@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -152,9 +153,12 @@ data class JournalpostInfoDto(
     val dokumenter: List<DokumentInfo>,
     val venter: VentDto?,
     val punsjInnsendingType: PunsjInnsendingType?,
+    @JsonIgnore
+    val erInngående: Boolean,
     val kanSendeInn: Boolean,
-    val erSaksbehandler: Boolean? = null
-)
+    val erSaksbehandler: Boolean? = null) {
+    val kanKopieres = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående
+}
 
 data class VentDto(
     val venteÅrsak: String,
