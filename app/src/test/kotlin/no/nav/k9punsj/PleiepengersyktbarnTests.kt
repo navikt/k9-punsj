@@ -236,33 +236,6 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Innsending av søknad med feil i perioden blir stoppet`() {
-        val norskIdent = "02022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val periode = soeknad["soeknadsperiode"] as MutableMap<String, Any>
-        periode.replace("fom", "2019-12-30")
-        periode.replace("tom", "2018-10-20")
-
-        //ødelegger perioden
-        soeknad.replace("soeknadsperiode", periode)
-
-        val res = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(soeknad))
-            .awaitExchangeBlocking()
-
-        val response = res
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
-            .block()
-        assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
-        //TODO fix når det er rettet i k9-format
-        assertEquals("IllegalArgumentException", response?.feil?.first()?.feilkode!!)
-    }
-
-    @Test
     fun `Skal kunne lagre ned minimal søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
@@ -413,6 +386,7 @@ class PleiepengersyktbarnTests {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }

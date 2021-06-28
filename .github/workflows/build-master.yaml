@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Bygge JAR
         run: |
-          mvn clean package -DskipTests
+          mvn clean package
           echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "IMAGE=${IMAGE}$IMAGE_BASE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Bygg & last opp Docker image
