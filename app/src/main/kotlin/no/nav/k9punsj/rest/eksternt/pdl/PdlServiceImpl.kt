@@ -141,16 +141,21 @@ class PdlServiceImpl(
             )
         )
 
-        return requestPdlJson(request).mapPersonopplysninger()
+        return requestPdlJson(
+            queryRequest = request,
+            getAuthorizationHeader = {systemAuthorizationHeader()}
+        ).mapPersonopplysninger()
     }
 
-    private suspend fun requestPdl(queryRequest: QueryRequest) : String {
+    private suspend fun requestPdl(
+        queryRequest: QueryRequest,
+        getAuthorizationHeader: suspend () -> String = {userAuthorizationHeader()}) : String {
         val response = client
             .post()
             .uri { it.build() }
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(TemaHeader, TemaHeaderValue)
-            .header(HttpHeaders.AUTHORIZATION, authorizationHeader())
+            .header(HttpHeaders.AUTHORIZATION, getAuthorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(queryRequest)
             .retrieve()
@@ -165,8 +170,10 @@ class PdlServiceImpl(
         }
     }
 
-    private suspend fun requestPdlJson(queryRequest: QueryRequest) : ObjectNode {
-        val response = objectMapper().readTree(requestPdl(queryRequest)) as ObjectNode
+    private suspend fun requestPdlJson(
+        queryRequest: QueryRequest,
+        getAuthorizationHeader: suspend () -> String = {userAuthorizationHeader()}) : ObjectNode {
+        val response = objectMapper().readTree(requestPdl(queryRequest, getAuthorizationHeader)) as ObjectNode
 
         val errors = when (response.hasNonNull("errors")) {
             true -> response.get("errors") as ArrayNode
@@ -186,9 +193,13 @@ class PdlServiceImpl(
         val operationName: String? = null
     )
 
-    private suspend fun authorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+    private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
         scopes = AzureScopes,
         onBehalfOf = coroutineContext.hentAuthentication().accessToken
+    ).asAuthoriationHeader()
+
+    private suspend fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+        scopes = AzureScopes
     ).asAuthoriationHeader()
 
     override fun health() = Mono.just(
