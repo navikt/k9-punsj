@@ -235,7 +235,6 @@ internal class PleiepengerSyktBarnRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-         //       val sendSøknad = request.sendSøknad()
                 val soknadTilValidering = request.pleiepengerSøknad()
                 soknadTilValidering.soekerId?.let {
                     harInnloggetBrukerTilgangTilOgSendeInn(
@@ -247,7 +246,6 @@ internal class PleiepengerSyktBarnRoutes(
                         .badRequest()
                         .buildAndAwait()
 
-           //     val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
                 val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(soknadTilValidering)
 
                 val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
