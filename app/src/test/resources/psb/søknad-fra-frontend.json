@@ -37,8 +37,8 @@
         "erNyoppstartet": false,
         "erVarigEndring": true,
         "endringInntekt": "1300000",
-        "endringDato" : "2018-12-30",
-        "endringBegrunnelse" : "Dota2 er best"
+        "endringDato": "2018-12-30",
+        "endringBegrunnelse": "Dota2 er best"
       }
     },
     "frilanser": {
@@ -153,6 +153,12 @@
   "lovbestemtFerie": [
     {
       "fom": "2018-12-30",
+      "tom": "2019-06-20"
+    }
+  ],
+  "lovbestemtFerieSomSkalSlettes": [
+    {
+      "fom": "2019-06-21",
       "tom": "2019-10-20"
     }
   ],

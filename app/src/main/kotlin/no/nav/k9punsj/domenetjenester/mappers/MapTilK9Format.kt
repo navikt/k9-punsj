@@ -79,8 +79,7 @@ internal class MapTilK9Format {
             val nattevåk: Nattevåk? = if (psb.nattevåk != null) objectMapper.convertValue(psb.nattevåk) else null
             val tilsynsordning: Tilsynsordning? =
                 if (psb.tilsynsordning != null) objectMapper.convertValue(psb.tilsynsordning) else null
-            val lovbestemtFerie: LovbestemtFerie? =
-                if (psb.lovbestemtFerie != null) objectMapper.convertValue(psb.lovbestemtFerie) else null
+            val lovbestemtFerie: LovbestemtFerie? = if (psb.lovbestemtFerie != null || psb.lovbestemtFerieSomSkalSlettes != null) mapLovbestemFerie(psb) else null
             val arbeidstid: Arbeidstid? =
                 if (psb.arbeidstid != null) objectMapper.convertValue(psb.arbeidstid) else null
             val uttak: Uttak? = if (psb.uttak != null) objectMapper.convertValue(psb.uttak) else null
@@ -115,6 +114,21 @@ internal class MapTilK9Format {
             omsorg?.let { pleiepengerSyktBarn.medOmsorg(it) }
 
             return pleiepengerSyktBarn
+        }
+
+        private fun mapLovbestemFerie(psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto): LovbestemtFerie? {
+            val lovbestemtFerie = LovbestemtFerie()
+            if (psb.lovbestemtFerie != null) {
+                psb.lovbestemtFerie.perioder?.forEach {
+                    lovbestemtFerie.leggeTilPeriode(Periode(it.key), LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true))
+                }
+            }
+            if (psb.lovbestemtFerieSomSkalSlettes != null) {
+                psb.lovbestemtFerieSomSkalSlettes.perioder?.forEach {
+                    lovbestemtFerie.leggeTilPeriode(Periode(it.key), LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(false))
+                }
+            }
+            return lovbestemtFerie
         }
 
         private fun opprettSøknad(

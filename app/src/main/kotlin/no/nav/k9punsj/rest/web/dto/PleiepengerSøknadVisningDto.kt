@@ -24,6 +24,7 @@ data class PleiepengerSøknadVisningDto(
     val omsorg: OmsorgDto? = null,
     val bosteder: List<BostederDto>? = null,
     val lovbestemtFerie: List<PeriodeDto>? = null,
+    val lovbestemtFerieSomSkalSlettes: List<PeriodeDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,

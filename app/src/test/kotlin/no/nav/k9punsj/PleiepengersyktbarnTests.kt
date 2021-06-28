@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -515,7 +516,8 @@ class PleiepengersyktbarnTests {
         assertThat(sendingsformat.ytelse?.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
         assertThat(sendingsformat.ytelse?.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
         assertThat(sendingsformat.ytelse?.bosteder?.perioder?.values?.first()?.land).isEqualTo("RU")
-        assertThat(sendingsformat.ytelse?.lovbestemtFerie?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(sendingsformat.ytelse?.lovbestemtFerie?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-06-20")
+        assertThat(sendingsformat.ytelse?.lovbestemtFerieSomSkalSlettes?.perioder?.keys?.first()).isEqualTo("2019-06-21/2019-10-20")
         assertThat(sendingsformat.ytelse?.utenlandsopphold?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
         assertThat(sendingsformat.ytelse?.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
         assertThat(sendingsformat.ytelse?.soknadsinfo!!.harMedsøker).isEqualTo(true)
@@ -555,7 +557,8 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
         assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
         assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
-        assertThat(ytelse.lovbestemtFerie!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(true)
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(false)
         assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.infoFraPunsj!!.get().inneholderMedisinskeOpplysninger).isEqualTo(false)
         assertThat(ytelse.infoFraPunsj!!.get().søknadenInneholderInfomasjonSomIkkeKanPunsjes).isEqualTo(true)

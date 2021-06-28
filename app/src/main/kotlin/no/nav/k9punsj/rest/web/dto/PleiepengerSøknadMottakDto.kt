@@ -29,6 +29,7 @@ data class PleiepengerSøknadMottakDto(
         val nattevåk: NattevåkDto?,
         val tilsynsordning: TilsynsordningDto?,
         val lovbestemtFerie: LovbestemtFerieDto?,
+        val lovbestemtFerieSomSkalSlettes: LovbestemtFerieDto?,
         val arbeidstid: ArbeidstidDto?,
         val uttak: UttakDto?,
         val omsorg: OmsorgDto?,
