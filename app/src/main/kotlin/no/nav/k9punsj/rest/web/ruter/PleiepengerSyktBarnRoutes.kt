@@ -235,16 +235,18 @@ internal class PleiepengerSyktBarnRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val sendSøknad = request.sendSøknad()
-                harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
-                    Urls.ValiderSøknad)?.let { return@RequestContext it }
-                val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+                val soknadTilValidering = request.pleiepengerSøknad()
+                soknadTilValidering.soekerId?.let {
+                    harInnloggetBrukerTilgangTilOgSendeInn(
+                        it,
+                        Urls.ValiderSøknad)?.let { return@RequestContext it }
+                }
+                val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
                         .buildAndAwait()
 
-                val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknad)
+                val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(soknadTilValidering)
 
                 val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
                 val journalPoster = søknadEntitet.journalposter!!
@@ -254,7 +256,7 @@ internal class PleiepengerSyktBarnRoutes(
 
                 try {
                     mapTilEksternFormat = MapTilK9Format.mapTilEksternFormat(format,
-                        søknad.soeknadId,
+                        soknadTilValidering.soeknadId,
                         hentPerioderSomFinnesIK9,
                         journalposterDto.journalposter)
                 } catch (e: Exception) {
@@ -279,9 +281,13 @@ internal class PleiepengerSyktBarnRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
+                        .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
                 }
-
+                val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+                mappeService.utfyllendeInnsending(
+                    søknad = soknadTilValidering,
+                    saksbehandler = saksbehandler
+                )
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .json()
