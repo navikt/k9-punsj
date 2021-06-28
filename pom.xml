@@ -27,7 +27,7 @@
         <dusseldorf-ktor.version>1.4.1.4754df6</dusseldorf-ktor.version>
         <k9-rapid.version>1.31aa518</k9-rapid.version>
 		<k9-sak.version>3.1.28</k9-sak.version>
-        <soknad-pleiepenger-barn.version>5.2.2</soknad-pleiepenger-barn.version>
+        <k9-format.version>5.2.2</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
         <mockk.version>1.11.0</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
@@ -111,7 +111,7 @@
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad</artifactId>
-                <version>${soknad-pleiepenger-barn.version}</version>
+                <version>${k9-format.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.rapid</groupId>
