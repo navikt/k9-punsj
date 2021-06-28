@@ -250,8 +250,6 @@ class PleiepengersyktbarnTests {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = oppdatertSoeknadDto.soeknadId)
-
         val res = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
