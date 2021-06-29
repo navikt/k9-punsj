@@ -134,6 +134,10 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>): Set<Personopplysninger> {
+        if (identitetsnummer.isEmpty()) {
+            return emptySet()
+        }
+
         val request = QueryRequest(
             query = HENT_PERSONOPPLYSNINGER,
             variables = mapOf(
