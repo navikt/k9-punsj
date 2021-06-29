@@ -1,4 +1,4 @@
-package no.nav.k9punsj.barn
+package no.nav.k9punsj.person
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
@@ -14,10 +14,9 @@ import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 
 @ExtendWith(SpringExtension::class)
-class BarnRoutesTest {
+class BarnApiTest {
 
     private val client = TestSetup.client
-    private val api = "api"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
@@ -60,7 +59,7 @@ class BarnRoutesTest {
 
     private fun hentBarnJson(identitetsnummer: String) = runBlocking {
         client.get()
-            .uri { it.pathSegment(api, "barn").build() }
+            .uri { it.pathSegment("api", "barn").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", identitetsnummer)
             .awaitExchange()

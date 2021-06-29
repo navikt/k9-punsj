@@ -1,10 +1,12 @@
-package no.nav.k9punsj.barn
+package no.nav.k9punsj.person
 
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
 import no.nav.k9punsj.abac.IPepClient
-import no.nav.k9punsj.barn.BarnRoutesConfiguration.Urls.HenteBarn
+import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HenteBarn
+import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HentePerson
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -15,20 +17,42 @@ import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-internal class BarnRoutesConfiguration(
+internal class PersonRoutesConfiguration(
     private val authenticationHandler: AuthenticationHandler,
     private val pepClient: IPepClient,
-    private val barnService: BarnService) {
+    private val barnService: BarnService,
+    private val pdlService: PdlService) {
 
     internal object Urls {
         internal const val HenteBarn = "/barn"
+        internal const val HentePerson = "/person"
     }
 
     @Bean
-    fun barnRoutes() = Routes(authenticationHandler) {
+    fun personRoutes() = Routes(authenticationHandler) {
+        GET("/api${HentePerson}") { request ->
+            RequestContext(coroutineContext, request) {
+                val identitetsnummer = request.identitetsnummer()
+
+                harInnloggetBrukerTilgangTil(identitetsnummer)?.let { return@RequestContext it }
+
+                val person = pdlService.hentPersonopplysninger(setOf(identitetsnummer)).first().let { Person(
+                    identitetsnummer = identitetsnummer,
+                    fødselsdato = it.fødselsdato,
+                    fornavn = it.fornavn,
+                    mellomnavn = it.mellomnavn,
+                    etternavn = it.etternavn
+                )}
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(person)
+            }
+        }
         GET("/api${HenteBarn}") { request ->
             RequestContext(coroutineContext, request) {
-                val identitetsnummer = request.norskeIdent()
+                val identitetsnummer = request.identitetsnummer()
 
                 harInnloggetBrukerTilgangTil(identitetsnummer)?.let { return@RequestContext it }
 
@@ -45,8 +69,12 @@ internal class BarnRoutesConfiguration(
         }
     }
 
-    private fun ServerRequest.norskeIdent(): String {
-        return headers().header("X-Nav-NorskIdent").first()!!
+    private fun ServerRequest.identitetsnummer(): String {
+        return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {
+            "Mangler identitetsnummer"
+        }.also { require(it.matches("\\d{11,20}".toRegex())) {
+            "Ugyldig identitetsnummer"
+        }}
     }
 
     private suspend fun harInnloggetBrukerTilgangTil(identitetsnummer: String): ServerResponse? {

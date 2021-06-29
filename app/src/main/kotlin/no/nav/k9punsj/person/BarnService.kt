@@ -1,4 +1,4 @@
-package no.nav.k9punsj.barn
+package no.nav.k9punsj.person
 
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import org.springframework.stereotype.Component
@@ -16,6 +16,7 @@ internal class BarnService(
             fornavn = it.fornavn,
             mellomnavn = it.mellomnavn,
             etternavn = it.etternavn
-        )}.toSet()
+        )
+        }.toSet()
     }
 }
