@@ -572,13 +572,17 @@ internal class JournalpostController {
                 description = "Når resett er gjennomført",
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Kan ikke endre på journalpost som har blitt sendt inn"
+            ),
+            ApiResponse(
                 responseCode = "404",
                 description = "Journalpost eksisterer ikke"
             )
         ]
     )
     @Operation(
-        summary = "Sjekker om jornalposten må behandles av infotrygd",
+        summary = "Resetter informasjon på journalposten angående om den skal til k9-sak eller infotrygd",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun ResettInfoOmJournalpost(

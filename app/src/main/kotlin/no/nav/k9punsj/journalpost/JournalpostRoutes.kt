@@ -272,13 +272,19 @@ internal class JournalpostRoutes(
                     ?: return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
+                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
 
-                val nyVerdi = journalpost.copy(skalTilK9 = null)
-                journalpostService.lagre(nyVerdi)
+                if (kanSendeInn) {
+                    val nyVerdi = journalpost.copy(skalTilK9 = null)
+                    journalpostService.lagre(nyVerdi)
 
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .buildAndAwait()
+                }
                 return@RequestContext ServerResponse
-                    .ok()
-                    .buildAndAwait()
+                    .badRequest()
+                    .bodyValueAndAwait("Kan ikke endre på en journalpost som har blitt sendt fra punsj")
             }
         }
 
