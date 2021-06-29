@@ -1,9 +1,9 @@
-package no.nav.k9punsj.barn
+package no.nav.k9punsj.person
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 
-data class Barn(
+data class Person(
     val identitetsnummer: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val fødselsdato: LocalDate,
@@ -15,7 +15,3 @@ data class Barn(
         else -> "$fornavn $mellomnavn $etternavn"
     }
 }
-
-data class BarnResponse(
-    val barn: Set<Barn>
-)

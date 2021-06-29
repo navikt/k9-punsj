@@ -195,8 +195,8 @@ class TestContext {
             false -> emptySet()
         }
 
-        override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = when (identitetsnummer == barn) {
-            true -> setOf(
+        override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = when {
+            identitetsnummer == barn -> setOf(
                 Personopplysninger(
                     identitetsnummer = "77777777777",
                     fødselsdato = LocalDate.parse("2005-12-12"),
@@ -222,7 +222,17 @@ class TestContext {
                     gradering = Personopplysninger.Gradering.UGRADERT
                 )
             )
-            false -> setOf()
+            identitetsnummer == setOf(harBarn) -> setOf(
+                Personopplysninger(
+                    identitetsnummer = harBarn,
+                    fødselsdato = LocalDate.parse("1980-05-06"),
+                    fornavn = "Søker",
+                    mellomnavn = null,
+                    etternavn = "Søkersen",
+                    gradering = Personopplysninger.Gradering.STRENGT_FORTROLIG_UTLAND
+                )
+            )
+            else -> setOf()
         }
     }
 
