@@ -70,7 +70,7 @@ internal class PersonRoutesConfiguration(
     }
 
     private fun ServerRequest.identitetsnummer(): String {
-        return requireNotNull(headers().header("X-Nav-NorskIdent").first()) {
+        return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {
             "Mangler identitetsnummer"
         }.also { require(it.matches("\\d{11,20}".toRegex())) {
             "Ugyldig identitetsnummer"
