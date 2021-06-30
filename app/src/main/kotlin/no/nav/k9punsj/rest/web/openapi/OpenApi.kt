@@ -589,6 +589,37 @@ internal class JournalpostController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
+
+    @GetMapping(JournalpostRoutes.Urls.HentHvaSomHarBlittSendtInn, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Gir hva som har blitt sendt inn for journalposten",
+                content = [Content(
+                    schema = Schema(
+                        implementation = no.nav.k9.søknad.Søknad::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Denne journalposten har ikke blitt sendt inn"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun HentHvaSomHarBlittSendtInn(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
 }
 
 data class OasDokumentInfo(
