@@ -300,6 +300,7 @@ internal class JournalpostRoutes(
 
                 if(journalpost.payload != null) {
                     val body: Søknad = objectMapper().convertValue(journalpost.payload)
+                    harBasisTilgang(body.søker.personIdent.verdi, Urls.HentHvaSomHarBlittSendtInn)?.let { return@RequestContext it }
                     return@RequestContext ServerResponse
                         .status(HttpStatus.ACCEPTED)
                         .json()
@@ -404,6 +405,21 @@ internal class JournalpostRoutes(
         }
         return null
     }
+
+    private suspend fun harBasisTilgang(
+        norskIdentDto: NorskIdentDto,
+        url: String,
+    ): ServerResponse? {
+        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
+        if (!saksbehandlerHarTilgang) {
+            return ServerResponse
+                .status(HttpStatus.FORBIDDEN)
+                .json()
+                .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
+        }
+        return null
+    }
+
 
     private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
     private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
