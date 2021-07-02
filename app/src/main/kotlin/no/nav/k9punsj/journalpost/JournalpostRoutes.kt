@@ -302,7 +302,7 @@ internal class JournalpostRoutes(
                     val body: Søknad = objectMapper().convertValue(journalpost.payload)
                     harBasisTilgang(body.søker.personIdent.verdi, Urls.HentHvaSomHarBlittSendtInn)?.let { return@RequestContext it }
                     return@RequestContext ServerResponse
-                        .status(HttpStatus.ACCEPTED)
+                        .status(HttpStatus.OK)
                         .json()
                         .bodyValueAndAwait(body)
                 }
