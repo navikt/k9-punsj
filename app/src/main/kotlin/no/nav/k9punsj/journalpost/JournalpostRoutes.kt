@@ -1,14 +1,15 @@
 package no.nav.k9punsj.journalpost
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.*
+import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.Routes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -299,8 +300,8 @@ internal class JournalpostRoutes(
                         .buildAndAwait()
 
                 if(journalpost.payload != null) {
-                    val body: Søknad = objectMapper().convertValue(journalpost.payload)
-                    harBasisTilgang(body.søker.personIdent.verdi, Urls.HentHvaSomHarBlittSendtInn)?.let { return@RequestContext it }
+//                    val body: Søknad = objectMapper().convertValue(journalpost.payload)
+//                    harBasisTilgang(body.søker.personIdent.verdi, Urls.HentHvaSomHarBlittSendtInn)?.let { return@RequestContext it }
                     return@RequestContext ServerResponse
                         .status(HttpStatus.OK)
                         .json()
