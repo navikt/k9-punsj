@@ -304,7 +304,7 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(body)
+                        .bodyValueAndAwait(journalpost.payload)
                 }
                 return@RequestContext ServerResponse
                     .badRequest()
