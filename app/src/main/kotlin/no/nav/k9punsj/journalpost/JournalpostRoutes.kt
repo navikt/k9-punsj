@@ -1,13 +1,15 @@
 package no.nav.k9punsj.journalpost
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.*
+import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.Routes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -297,14 +299,29 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                if(journalpost.payload != null) {
-                    val body: MutableMap<String, Any?> = objectMapper().convertValue(journalpost.payload)
-                    val ident: String = (body["søker"] as MutableMap<*, *>)["norskIdentitetsnummer"] as String
-                    harBasisTilgang(ident, Urls.HentHvaSomHarBlittSendtInn)?.let { return@RequestContext it }
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.OK)
-                        .json()
-                        .bodyValueAndAwait(journalpost.payload)
+                if (journalpost.payload != null) {
+                    try {
+                        val journalpostInfo = journalpostService.hentJournalpostInfo(
+                            journalpostId = request.journalpostId()
+                        )
+                        if (journalpostInfo == null) {
+                            return@RequestContext ServerResponse
+                                .notFound()
+                                .buildAndAwait()
+                        }
+                        return@RequestContext ServerResponse
+                            .status(HttpStatus.OK)
+                            .json()
+                            .bodyValueAndAwait(journalpost.payload)
+                    } catch (cause: IkkeStøttetJournalpost) {
+                        return@RequestContext ServerResponse
+                            .badRequest()
+                            .buildAndAwait()
+                    } catch (case: IkkeTilgang) {
+                        return@RequestContext ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .buildAndAwait()
+                    }
                 }
                 return@RequestContext ServerResponse
                     .badRequest()
