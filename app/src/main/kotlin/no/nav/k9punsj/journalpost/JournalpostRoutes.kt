@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.Routes
@@ -22,6 +23,8 @@ import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
 import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
 import no.nav.k9punsj.rest.web.openapi.OasSkalTilInfotrygdSvar
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -47,6 +50,8 @@ internal class JournalpostRoutes(
     private companion object {
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
+        private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
+
     }
 
     internal object Urls {
@@ -226,7 +231,8 @@ internal class JournalpostRoutes(
                         .buildAndAwait()
                 }
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
-                journalpostService.settTilFerdig(journalpostId)
+
+                logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
                 return@RequestContext ServerResponse
                     .ok()
