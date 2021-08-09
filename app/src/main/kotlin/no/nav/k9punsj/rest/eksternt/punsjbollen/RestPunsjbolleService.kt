@@ -24,7 +24,7 @@ import java.time.LocalDate
 
 @Configuration
 @Profile("!test & !local")
-class PunsjbolleServiceImpl(
+class RestPunsjbolleService(
     @Value("\${no.nav.k9punsjbolle.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9punsjbolle.scope}") private val scope: String,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
@@ -51,9 +51,55 @@ class PunsjbolleServiceImpl(
         periode: PeriodeDto?,
         correlationId: CorrelationId
     ) = ruting(
-        dto = punsjbolleDto(søker, barn, journalpostId, periode),
+        søker = søker,
+        barn = barn,
+        journalpostId = journalpostId,
+        periode = periode,
         correlationId = correlationId
-    ).destinasjon == "K9Sak"
+    ) == PunsjbolleRuting.K9SAK
+
+    override suspend fun ruting(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
+        correlationId: CorrelationId
+    ): PunsjbolleRuting {
+        val requestBody = objectMapper().writeValueAsString(punsjbolleDto(søker, barn, journalpostId, periode))
+
+        val (_, response, result) = "${baseUrl}/ruting"
+            .httpPost()
+            .body(requestBody)
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.XCorrelationId to correlationId
+            ).awaitStringResponseResult()
+
+        val responseBody = result.fold(
+            { success -> success },
+            { error -> when (error.response.body().isEmpty()) {
+                true -> "{}"
+                false -> String(error.response.body().toByteArray())
+            }}
+        )
+
+        val rutingResponse : RutingResponse = try {
+            objectMapper().readValue(responseBody)
+        } catch (e: Exception) {
+            throw IllegalStateException("Uventet response fra Punsjbollen ved ruting. PunsjbolleResponse=$responseBody", e)
+        }
+
+        return when {
+            response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9SAK
+            response.statusCode == 200 && rutingResponse.destinasjon == "Infotrygd" -> PunsjbolleRuting.INFOTRYGD
+            response.statusCode == 409 && rutingResponse.type == "punsjbolle://ikke-støttet-journalpost" -> PunsjbolleRuting.IKKE_STØTTET.also {
+                log.error("Ikke støttet journalpost. PunsjbolleResponse=$responseBody")
+            }
+            else -> throw IllegalStateException("Uventet response fra Punsjbollen ved ruting. PunsjbolleResponse=$responseBody")
+        }
+    }
 
     private suspend fun punsjbolleDto(
         søker: NorskIdentDto,
@@ -107,40 +153,6 @@ class PunsjbolleServiceImpl(
         }
     }
 
-    private suspend fun ruting(
-        dto: PunsjbollSaksnummerDto,
-        correlationId: CorrelationId
-    ): RutingResponse {
-        val body = objectMapper().writeValueAsString(dto)
-
-        val (request, _, result) = "${baseUrl}/ruting"
-            .httpPost()
-            .body(body)
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.XCorrelationId to correlationId
-            ).awaitStringResponseResult()
-
-
-        val json = result.fold(
-            { success -> success },
-            { error ->
-                log.error("Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}', $error")
-                throw IllegalStateException("Feil ved henting av ruting fra k9-punsjbolle")
-            }
-        )
-
-        try {
-            return objectMapper().readValue(json)
-        } catch (e: Exception) {
-            log.error("Feilet deserialisering $e")
-            throw IllegalStateException("Feilet deserialisering $e")
-        }
-    }
-
-
     data class PunsjbollSaksnummerDto(
         val søker: PunsjbollePersonDto,
         val pleietrengende: PunsjbollePersonDto,
@@ -157,15 +169,15 @@ class PunsjbolleServiceImpl(
     }
 
     data class RutingResponse(
-        val destinasjon: String
+        val destinasjon: String? = null,
+        val type: String? = null
     )
-
 
     private companion object {
         private fun LocalDate?.iso8601() = when (this) {
             null -> ".."
             else -> "$this"
         }
-        private val log = LoggerFactory.getLogger(PunsjbolleServiceImpl::class.java)
+        private val log = LoggerFactory.getLogger(RestPunsjbolleService::class.java)
     }
 }

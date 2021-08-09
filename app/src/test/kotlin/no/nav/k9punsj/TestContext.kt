@@ -15,6 +15,7 @@ import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.pdl.Personopplysninger
+import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
@@ -126,6 +127,14 @@ class TestContext {
             periode: PeriodeDto?,
             correlationId: CorrelationId
         ) = true
+
+        override suspend fun ruting(
+            søker: NorskIdentDto,
+            barn: NorskIdentDto,
+            journalpostId: JournalpostIdDto?,
+            periode: PeriodeDto?,
+            correlationId: CorrelationId
+        ) = PunsjbolleRuting.K9SAK
     }
 
     @Bean

@@ -29,4 +29,12 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
         periode: PeriodeDto?,
         correlationId: CorrelationId
     ) = true
+
+    override suspend fun ruting(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
+        correlationId: CorrelationId
+    ) = PunsjbolleRuting.K9SAK
 }

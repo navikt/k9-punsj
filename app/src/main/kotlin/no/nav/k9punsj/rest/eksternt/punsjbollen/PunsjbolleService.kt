@@ -20,4 +20,11 @@ interface PunsjbolleService {
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId): Boolean
+
+    suspend fun ruting(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        journalpostId: JournalpostIdDto?,
+        periode: PeriodeDto?,
+        correlationId: CorrelationId): PunsjbolleRuting
 }
