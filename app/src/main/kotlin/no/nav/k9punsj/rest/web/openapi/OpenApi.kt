@@ -656,8 +656,7 @@ data class OasPunsjBolleDto(
 )
 
 data class OasSkalTilInfotrygdSvar(
-    val k9sak: Boolean,
-    val ruting: String
+    val k9sak: Boolean
 )
 
 @RestController

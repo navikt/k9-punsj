@@ -34,6 +34,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.ServerResponse.status
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
@@ -199,13 +201,7 @@ internal class JournalpostRoutes(
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
 
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
-                    return@RequestContext ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(
-                            k9sak = hentHvisJournalpostMedId.skalTilK9,
-                            ruting = hentHvisJournalpostMedId.skalTilK9.somPunsjbolleRuting().name
-                        ))
+                    return@RequestContext hentHvisJournalpostMedId.skalTilK9.somPunsjbolleRuting().serverResponse()
                 }
 
                 val punsjbolleRuting = punsjbolleService.ruting(
@@ -216,21 +212,13 @@ internal class JournalpostRoutes(
                     correlationId = coroutineContext.hentCorrelationId()
                 )
 
-                val skalTilK9 = punsjbolleRuting == PunsjbolleRuting.K9Sak
-
                 if (punsjbolleRuting == PunsjbolleRuting.K9Sak || punsjbolleRuting == PunsjbolleRuting.Infotrygd) {
                     // Lagrer ikke om ruting == IkkeStøttet.
                     // Kan være at det f.eks. er tastet feil fnr på barn, da ønsker vi ikke å lagre at den ikke skal til K9
-                    lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
+                    lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, punsjbolleRuting == PunsjbolleRuting.K9Sak)
                 }
 
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(
-                        k9sak = skalTilK9,
-                        ruting = punsjbolleRuting.name
-                    ))
+                return@RequestContext punsjbolleRuting.serverResponse()
             }
         }
 
@@ -469,6 +457,11 @@ internal class JournalpostRoutes(
 
     private suspend fun ServerRequest.punsjbolleDto() =
         body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
+
+    private suspend fun PunsjbolleRuting.serverResponse() = when (this) {
+        PunsjbolleRuting.IkkeStøttet -> status(HttpStatus.CONFLICT)
+        else -> ok()
+    }.json().bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = this == PunsjbolleRuting.K9Sak))
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,
