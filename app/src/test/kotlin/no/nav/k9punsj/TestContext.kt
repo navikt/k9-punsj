@@ -120,21 +120,13 @@ class TestContext {
             "Må sette minst en av journalpostId og periode"
         }.let { SaksnummerDto(dummySaksnummer) }
 
-        override suspend fun kanRutesTilK9Sak(
-            søker: NorskIdentDto,
-            barn: NorskIdentDto,
-            journalpostId: JournalpostIdDto?,
-            periode: PeriodeDto?,
-            correlationId: CorrelationId
-        ) = true
-
         override suspend fun ruting(
             søker: NorskIdentDto,
             barn: NorskIdentDto,
             journalpostId: JournalpostIdDto?,
             periode: PeriodeDto?,
             correlationId: CorrelationId
-        ) = PunsjbolleRuting.K9SAK
+        ) = PunsjbolleRuting.K9Sak
     }
 
     @Bean

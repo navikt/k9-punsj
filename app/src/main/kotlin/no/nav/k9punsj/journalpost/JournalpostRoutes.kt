@@ -13,7 +13,9 @@ import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.rest.eksternt.punsjbollen.somPunsjbolleRuting
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
@@ -200,10 +202,13 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(hentHvisJournalpostMedId.skalTilK9))
+                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(
+                            k9sak = hentHvisJournalpostMedId.skalTilK9,
+                            ruting = hentHvisJournalpostMedId.skalTilK9.somPunsjbolleRuting().name
+                        ))
                 }
 
-                val skalTilK9 = punsjbolleService.kanRutesTilK9Sak(
+                val punsjbolleRuting = punsjbolleService.ruting(
                     søker = dto.brukerIdent,
                     barn = dto.barnIdent,
                     journalpostId = dto.journalpostId,
@@ -211,12 +216,21 @@ internal class JournalpostRoutes(
                     correlationId = coroutineContext.hentCorrelationId()
                 )
 
-                lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
+                val skalTilK9 = punsjbolleRuting == PunsjbolleRuting.K9Sak
+
+                if (punsjbolleRuting == PunsjbolleRuting.K9Sak || punsjbolleRuting == PunsjbolleRuting.Infotrygd) {
+                    // Lagrer ikke om ruting == IkkeStøttet.
+                    // Kan være at det f.eks. er tastet feil fnr på barn, da ønsker vi ikke å lagre at den ikke skal til K9
+                    lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, skalTilK9)
+                }
 
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(skalTilK9))
+                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(
+                        k9sak = skalTilK9,
+                        ruting = punsjbolleRuting.name
+                    ))
             }
         }
 

@@ -23,17 +23,17 @@ internal class RestPunsjbolleServiceTest {
 
     @Test
     fun `Journalpost som rutes til K9Sak`() {
-        assertEquals(ruting(TilK9Sak), PunsjbolleRuting.K9SAK)
+        assertEquals(ruting(TilK9Sak), PunsjbolleRuting.K9Sak)
     }
 
     @Test
     fun `Journalpost som rutes til Infotrygd`() {
-        assertEquals(ruting(TilInfotrygd), PunsjbolleRuting.INFOTRYGD)
+        assertEquals(ruting(TilInfotrygd), PunsjbolleRuting.Infotrygd)
     }
 
     @Test
     fun `Journalpost som ikke støttes`() {
-        assertEquals(ruting(IkkeStøttet), PunsjbolleRuting.IKKE_STØTTET)
+        assertEquals(ruting(IkkeStøttet), PunsjbolleRuting.IkkeStøttet)
     }
 
     @Test

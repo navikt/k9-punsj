@@ -44,20 +44,6 @@ class RestPunsjbolleService(
         correlationId = correlationId
     )
 
-    override suspend fun kanRutesTilK9Sak(
-        søker: NorskIdentDto,
-        barn: NorskIdentDto,
-        journalpostId: JournalpostIdDto?,
-        periode: PeriodeDto?,
-        correlationId: CorrelationId
-    ) = ruting(
-        søker = søker,
-        barn = barn,
-        journalpostId = journalpostId,
-        periode = periode,
-        correlationId = correlationId
-    ) == PunsjbolleRuting.K9SAK
-
     override suspend fun ruting(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
@@ -92,10 +78,10 @@ class RestPunsjbolleService(
         }
 
         return when {
-            response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9SAK
-            response.statusCode == 200 && rutingResponse.destinasjon == "Infotrygd" -> PunsjbolleRuting.INFOTRYGD
-            response.statusCode == 409 && rutingResponse.type == "punsjbolle://ikke-støttet-journalpost" -> PunsjbolleRuting.IKKE_STØTTET.also {
-                log.error("Ikke støttet journalpost. PunsjbolleResponse=$responseBody")
+            response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9Sak
+            response.statusCode == 200 && rutingResponse.destinasjon == "Infotrygd" -> PunsjbolleRuting.Infotrygd
+            response.statusCode == 409 && rutingResponse.type == "punsjbolle://ikke-støttet-journalpost" -> PunsjbolleRuting.IkkeStøttet.also {
+                log.error("Ikke støttet journalpost ved ruting. PunsjbolleResponse=$responseBody")
             }
             else -> throw IllegalStateException("Uventet response fra Punsjbollen ved ruting. PunsjbolleResponse=$responseBody")
         }
