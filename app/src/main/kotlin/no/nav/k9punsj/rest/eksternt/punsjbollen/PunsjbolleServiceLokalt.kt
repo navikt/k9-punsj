@@ -28,5 +28,9 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId
-    ) = PunsjbolleRuting.K9Sak
+    ) = when (journalpostId) {
+        "45537868838" -> PunsjbolleRuting.IkkeStøttet
+        "463687943" -> PunsjbolleRuting.Infotrygd
+        else -> PunsjbolleRuting.K9Sak
+    }
 }
