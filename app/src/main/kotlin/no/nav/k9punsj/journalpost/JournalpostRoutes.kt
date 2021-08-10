@@ -233,6 +233,7 @@ internal class JournalpostRoutes(
                         .buildAndAwait()
                 }
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                journalpostService.settTilFerdig(journalpostId)
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 

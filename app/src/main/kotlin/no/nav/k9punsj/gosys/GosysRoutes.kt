@@ -67,6 +67,7 @@ internal class GosysRoutes(
                                 .bodyValueAndAwait(OasFeil(response.second!!))
                         }
                         aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId, false)
+                        journalpostService.settTilFerdig(requestParameters.journalpostId)
 
                         logger.info("Journalpost sendes til Gosys", keyValue("journalpost_id", requestParameters.journalpostId))
 
