@@ -618,6 +618,23 @@ internal class JournalpostController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
+
+    @GetMapping(JournalpostRoutes.Urls.HentÅpneJournalposter, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Gir en liste med uferdig journalposter på aktørIden",
+            )
+        ]
+    )
+    @Operation(
+        summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
+    )
+    fun HentÅpneJournalposter(
+        @PathVariable("aktor_id") aktørId: String,
+    ) {
+    }
 }
 
 data class OasDokumentInfo(

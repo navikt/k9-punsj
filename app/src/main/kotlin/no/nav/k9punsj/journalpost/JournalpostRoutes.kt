@@ -53,9 +53,9 @@ internal class JournalpostRoutes(
 
     private companion object {
         private const val JournalpostIdKey = "journalpost_id"
+        private const val AktørIdKey = "aktor_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
-
     }
 
     internal object Urls {
@@ -67,6 +67,7 @@ internal class JournalpostRoutes(
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
+        internal const val HentÅpneJournalposter = "/journalpost/uferdig/{$AktørIdKey}"
 
         //for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -368,6 +369,18 @@ internal class JournalpostRoutes(
             }
         }
 
+        GET("/api${Urls.HentÅpneJournalposter}") { request ->
+            RequestContext(coroutineContext, request) {
+                    val aktørId = request.aktørId()
+                    val uferdigJournalposter = journalpostService.finnJournalposterPåPerson(aktørId).map { journalpost -> journalpost.journalpostId }
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(uferdigJournalposter)
+            }
+        }
+
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,
@@ -448,6 +461,7 @@ internal class JournalpostRoutes(
 
 
     private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
+    private suspend fun ServerRequest.aktørId(): AktørId = pathVariable(AktørIdKey)
     private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
     private suspend fun ServerRequest.omfordelingRequest() =
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
