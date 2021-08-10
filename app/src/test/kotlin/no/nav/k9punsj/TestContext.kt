@@ -15,6 +15,7 @@ import no.nav.k9punsj.rest.eksternt.pdl.IdentPdl
 import no.nav.k9punsj.rest.eksternt.pdl.PdlResponse
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.pdl.Personopplysninger
+import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.info.IIdToken
 import no.nav.k9punsj.rest.info.ITokenService
@@ -119,13 +120,13 @@ class TestContext {
             "Må sette minst en av journalpostId og periode"
         }.let { SaksnummerDto(dummySaksnummer) }
 
-        override suspend fun kanRutesTilK9Sak(
+        override suspend fun ruting(
             søker: NorskIdentDto,
             barn: NorskIdentDto,
             journalpostId: JournalpostIdDto?,
             periode: PeriodeDto?,
             correlationId: CorrelationId
-        ) = true
+        ) = PunsjbolleRuting.K9Sak
     }
 
     @Bean

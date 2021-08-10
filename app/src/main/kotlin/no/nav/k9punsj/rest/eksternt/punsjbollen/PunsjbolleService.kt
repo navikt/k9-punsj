@@ -14,10 +14,10 @@ interface PunsjbolleService {
         periode: PeriodeDto?,
         correlationId: CorrelationId): SaksnummerDto
 
-    suspend fun kanRutesTilK9Sak(
+    suspend fun ruting(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId): Boolean
+        correlationId: CorrelationId): PunsjbolleRuting
 }

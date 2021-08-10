@@ -22,11 +22,15 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
 
-    override suspend fun kanRutesTilK9Sak(
+    override suspend fun ruting(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId
-    ) = true
+    ) = when (journalpostId) {
+        "45537868838" -> PunsjbolleRuting.IkkeStøttet
+        "463687943" -> PunsjbolleRuting.Infotrygd
+        else -> PunsjbolleRuting.K9Sak
+    }
 }
