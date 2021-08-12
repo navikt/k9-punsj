@@ -45,7 +45,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn FROM soknad WHERE id_bunke = :id_bunke",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM soknad WHERE id_bunke = :id_bunke",
                         mapOf("id_bunke" to UUID.fromString(bunkerId))
                     )
                         .map { row ->
@@ -86,7 +86,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn FROM soknad WHERE soknad_id = :soknad_id",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM soknad WHERE soknad_id = :soknad_id",
                         mapOf("soknad_id" to UUID.fromString(søknadId))
                     )
                         .map { row ->
@@ -105,7 +105,8 @@ class SøknadRepository(private val dataSource: DataSource) {
         barnFødselsdato = row.localDateOrNull("barn_fodselsdato"),
         søknad = objectMapper().readValue(row.string("soknad")),
         journalposter = objectMapper().readValue(row.string("journalposter")),
-        sendtInn = row.boolean("sendt_inn")
+        sendtInn = row.boolean("sendt_inn"),
+        endret_av = row.stringOrNull("endret_av")
     )
 
     suspend fun markerSomSendtInn(søknadId: SøknadId) {
