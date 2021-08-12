@@ -35,7 +35,8 @@ class PleiepengerSyktBarnSoknadService(
                 innsendingClient.sendSøknad(
                     søknadId = søknad.søknadId.id,
                     søknad = søknad,
-                    correlationId = coroutineContext.hentCorrelationId()
+                    correlationId = coroutineContext.hentCorrelationId(),
+                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!)
                 )
             } catch (e: Exception) {
                 return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
@@ -75,5 +76,6 @@ class PleiepengerSyktBarnSoknadService(
 
     companion object {
         private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
+        private const val PunsjetAvSaksbehandler = "saksbehandler"
     }
 }
