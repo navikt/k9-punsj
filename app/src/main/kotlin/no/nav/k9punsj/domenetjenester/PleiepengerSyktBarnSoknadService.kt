@@ -36,7 +36,7 @@ class PleiepengerSyktBarnSoknadService(
                     søknadId = søknad.søknadId.id,
                     søknad = søknad,
                     correlationId = coroutineContext.hentCorrelationId(),
-                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!)
+                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"",""))
                 )
             } catch (e: Exception) {
                 return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
