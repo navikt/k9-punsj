@@ -26,7 +26,7 @@ internal class MapFraVisningTilEksternFormat {
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
                 mottattDato = if (søknad.mottattDato != null && søknad.klokkeslett != null) ZonedDateTime.of(søknad.mottattDato,
                     søknad.klokkeslett,
-                    ZoneId.of("UTC"))
+                    ZoneId.of("Europe/Oslo"))
                 else null,
                 ytelse = ytelseDto
             )
