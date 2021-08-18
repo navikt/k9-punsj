@@ -1,13 +1,14 @@
 package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
+@Profile("test") // Mangler håndtering av token på disse endepunktene
 class DelingAvOmsorgsdagerApi(
         private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService,
 ) {
@@ -24,7 +26,7 @@ class DelingAvOmsorgsdagerApi(
     }
 
     @Bean
-    fun delingDagerRoutes() = Routes {
+    fun delingDagerRoutes() = PublicRoutes {
 
         POST("/api/$type") { request ->
             RequestContext(coroutineContext, request) {

@@ -4,7 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
@@ -42,7 +42,7 @@ internal class GosysRoutes(
     }
 
     @Bean
-    fun GosysRoutes() = Routes(authenticationHandler) {
+    fun GosysRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.OpprettJournalføringsoppgave}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val requestParameters = request.request()

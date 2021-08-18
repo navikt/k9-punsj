@@ -6,6 +6,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
 import no.nav.k9punsj.exception.ExceptionResponse
+import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.codec.DecodingException
@@ -38,9 +39,24 @@ internal fun CoroutineContext.hentAuthentication() : Authentication = hentAttrib
 
 internal typealias CorrelationId = String
 
-internal fun Routes(
-    authenticationHandler: AuthenticationHandler? = null,
-    routes : CoRouterFunctionDsl.() -> Unit
+internal fun K9SakRoutes(
+    authenticationHandler: AuthenticationHandler,
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
+        jwtToken.containsClaim("sub", "srvk9sak")
+}
+
+internal fun SaksbehandlerRoutes(
+    authenticationHandler: AuthenticationHandler,
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(authenticationHandler, routes, setOf("azurev1", "azurev2")) { jwtToken -> true }
+
+internal fun PublicRoutes(
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(null, routes, null, null)
+
+private fun Routes2(
+    authenticationHandler: AuthenticationHandler?,
+    routes : CoRouterFunctionDsl.() -> Unit,
+    issuerNames: Set<String>?,
+    isAccepted: ((jwtToken: JwtToken) -> Boolean)?
 ) = coRouter {
     before { serverRequest ->
         val requestId = serverRequest
@@ -54,7 +70,12 @@ internal fun Routes(
         serverRequest
     }
     filter { serverRequest, requestedOperation ->
-        val serverResponse = authenticationHandler?.authenticatedRequest(serverRequest, requestedOperation) ?: requestedOperation(serverRequest)
+        val serverResponse = authenticationHandler?.authenticatedRequest(
+            serverRequest = serverRequest,
+            requestedOperation = requestedOperation,
+            issuerNames = issuerNames!!,
+            isAccepted = isAccepted!!
+        ) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
     }

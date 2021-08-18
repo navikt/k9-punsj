@@ -3,7 +3,7 @@ package no.nav.k9punsj.rest.eksternt.pdl
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.rest.web.dto.HentPerson
 import no.nav.k9punsj.rest.web.dto.PdlPersonDto
@@ -37,7 +37,7 @@ internal class PdlRoutes(
     }
 
     @Bean
-    fun PdlRoutes() = Routes(authenticationHandler) {
+    fun PdlRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.HentIdent}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentSøknad().norskIdent

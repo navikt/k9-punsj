@@ -4,7 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.datamodell.AktørId
@@ -75,7 +75,7 @@ internal class JournalpostRoutes(
     }
 
     @Bean
-    fun JournalpostRoutes() = Routes(authenticationHandler) {
+    fun JournalpostRoutes() = SaksbehandlerRoutes(authenticationHandler) {
 
         GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
