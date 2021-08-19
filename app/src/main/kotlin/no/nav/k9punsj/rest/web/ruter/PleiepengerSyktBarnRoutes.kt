@@ -7,7 +7,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
@@ -66,7 +66,7 @@ internal class PleiepengerSyktBarnRoutes(
     }
 
     @Bean
-    fun pleiepengerSyktBarnSøknadRoutes() = Routes(authenticationHandler) {
+    fun pleiepengerSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()

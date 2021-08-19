@@ -2,7 +2,7 @@ package no.nav.k9punsj.person
 
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HenteBarn
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HentePerson
@@ -29,7 +29,7 @@ internal class PersonRoutesConfiguration(
     }
 
     @Bean
-    fun personRoutes() = Routes(authenticationHandler) {
+    fun personRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${HentePerson}") { request ->
             RequestContext(coroutineContext, request) {
                 val identitetsnummer = request.identitetsnummer()

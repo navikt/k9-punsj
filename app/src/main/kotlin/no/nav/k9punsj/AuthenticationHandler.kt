@@ -4,6 +4,7 @@ import no.nav.security.token.support.core.configuration.IssuerProperties
 import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration
 import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.core.http.HttpRequest
+import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.core.validation.JwtTokenValidationHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,8 +23,8 @@ import javax.validation.Valid
 
 @Service
 internal class AuthenticationHandler(
-        multiIssuerProperties: MultiIssuerProperties
-) {
+        multiIssuerProperties: MultiIssuerProperties) {
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(AuthenticationHandler::class.java)
     }
@@ -46,17 +47,29 @@ internal class AuthenticationHandler(
 
     internal suspend fun authenticatedRequest(
             serverRequest: ServerRequest,
+            issuerNames: Set<String>,
+            isAccepted: (jwtToken: JwtToken) -> Boolean,
             requestedOperation: suspend (serverRequest: ServerRequest) -> ServerResponse
     ) : ServerResponse {
-        val isValidToken = try {
-            jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).hasValidToken()
+        val jwtToken = try {
+            jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).issuers.intersect(issuerNames).firstOrNull()?.let {
+                jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).getJwtToken(it)
+            }
         } catch (cause: Throwable) {
             logger.warn("Feil ved validering av token", cause)
-            false
+            null
         }
-        return if (isValidToken) {
-            requestedOperation(serverRequest)
-        } else ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
+        return when {
+            jwtToken == null -> {
+                ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
+            }
+            isAccepted(jwtToken) -> {
+                requestedOperation(serverRequest)
+            }
+            else -> {
+                ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
+            }
+        }
     }
 }
 

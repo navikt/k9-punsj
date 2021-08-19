@@ -2,7 +2,7 @@ package no.nav.k9punsj.fordel
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.PublicRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -31,7 +31,7 @@ internal class HendelseRoutes(
     }
 
     @Bean
-    fun HendelseRoutes() = Routes {
+    fun HendelseRoutes() = PublicRoutes {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val fordelPunsjEventDto = request.request()

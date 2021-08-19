@@ -4,7 +4,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.Routes
+import no.nav.k9punsj.SaksbehandlerRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -33,7 +33,7 @@ internal class OidcRoutes(
     }
 
     @Bean
-    fun OidcRoutes() = Routes(authenticationHandler) {
+    fun OidcRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentNavTokenHeader}") { request ->
             var navHeader = "Ikke funnet"
             try {

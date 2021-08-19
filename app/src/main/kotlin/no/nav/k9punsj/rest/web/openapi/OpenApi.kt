@@ -17,7 +17,6 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.fagsak.FagsakRoutes
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseRoutes
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -618,23 +617,6 @@ internal class JournalpostController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
-
-    @GetMapping(JournalpostRoutes.Urls.HentÅpneJournalposter, produces = ["application/json"])
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Gir en liste med uferdig journalposter på aktørIden",
-            )
-        ]
-    )
-    @Operation(
-        summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
-    )
-    fun HentÅpneJournalposter(
-        @PathVariable("aktor_id") aktørId: String,
-    ) {
-    }
 }
 
 data class OasDokumentInfo(
@@ -674,51 +656,6 @@ data class OasPunsjBolleDto(
 
 data class OasSkalTilInfotrygdSvar(
     val k9sak: Boolean
-)
-
-@RestController
-@Tag(name = "Fagsaker", description = "Liste fagsaker")
-internal class FagsakerController {
-    @GetMapping(FagsakRoutes.Urls.HenteFagsakinfo, produces = ["application/json"])
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Liste med fagsaker tilknyttet personen.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFagsakListe::class
-                    )
-                )]
-            )
-        ]
-    )
-    @Operation(
-        summary = "Hente liste med fagsaker tilknyttet personen.",
-        description = "ytelse må være 'pleiepenger-sykt-barn'"
-    )
-    fun HenteFagsaker(
-        @RequestParam("ytelse") ytelse: String,
-        @PathVariable("norsk_ident") norskIdent: String,
-    ) {
-    }
-}
-
-data class OasFagsakListe(
-    val fagsaker: Set<OasFagsak>,
-)
-
-data class OasFagsak(
-    val fagsak_id: String,
-    val url: String,
-    val fra_og_med: LocalDate,
-    val til_og_med: LocalDate?,
-    val barn: OasFagsakBarn,
-)
-
-data class OasFagsakBarn(
-    val fødselsdato: LocalDate,
-    val navn: String,
 )
 
 @RestController
