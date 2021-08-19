@@ -2,12 +2,12 @@ package no.nav.k9punsj
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
-import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV1WellKnownUrl
-import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
-import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
-import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.*
 import no.nav.k9punsj.util.DatabaseUtil
-import no.nav.k9punsj.wiremock.*
+import no.nav.k9punsj.wiremock.getK9PunsjbolleBaseUrl
+import no.nav.k9punsj.wiremock.getK9sakBaseUrl
+import no.nav.k9punsj.wiremock.getPdlBaseUrl
+import no.nav.k9punsj.wiremock.getSafBaseUrl
 
 internal object MockConfiguration {
     internal fun config(
@@ -44,6 +44,8 @@ internal object MockConfiguration {
         "AUDITLOGGER_VENDOR" to "",
         "AUDITLOGGER_PRODUCT" to "",
         "K9PUNSJBOLLE_BASE_URL" to wireMockServer.getK9PunsjbolleBaseUrl(),
-        "K9PUNSJBOLLE_SCOPE" to "k9-punsjbolle-id/.default"
+        "K9PUNSJBOLLE_SCOPE" to "k9-punsjbolle-id/.default",
+        "APP_NAISSTS_aud" to "srvk9sak",
+        "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl()
     )
 }

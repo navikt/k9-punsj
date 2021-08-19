@@ -96,3 +96,7 @@ spec:
       value: https://k9-punsjbolle.intern.nav.no/api
     - name: K9PUNSJBOLLE_SCOPE
       value: api://prod-gcp.omsorgspenger.k9-punsjbolle/.default
+    - name: APP_NAISSTS_aud
+      value: "srvk9sak"
+    - name: APP_NAISSTS_discovery_url
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
