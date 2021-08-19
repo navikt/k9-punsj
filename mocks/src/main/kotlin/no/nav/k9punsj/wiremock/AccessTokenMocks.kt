@@ -122,9 +122,9 @@ fun Azure.V2_0.navHeader() = generateJwt(
 
 fun NaisSts.k9SakToken() = generateJwt(
     application = "srvk9sak",
-    issuer = "naissts",
     overridingClaims = mapOf(
-        "sub" to "srvk9sak"
+        "sub" to "srvk9sak",
+        "aud" to "srvk9sak"
     )
 )
 
