@@ -3,6 +3,7 @@ package no.nav.k9punsj.wiremock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.helse.dusseldorf.testsupport.jws.NaisSts
 
 private const val path = "/access-token-mock"
 
@@ -118,3 +119,13 @@ fun Azure.V2_0.navHeader() = generateJwt(
         clientId = "nav",
         audience = "k9-punsj"
 )
+
+fun NaisSts.k9SakToken() = generateJwt(
+    application = "srvk9sak",
+    issuer = "naissts",
+    overridingClaims = mapOf(
+        "sub" to "srvk9sak"
+    )
+)
+
+

@@ -368,19 +368,6 @@ internal class JournalpostRoutes(
 
             }
         }
-
-        GET("/api${Urls.HentÅpneJournalposter}") { request ->
-            RequestContext(coroutineContext, request) {
-                    val aktørId = request.aktørId()
-                    val uferdigJournalposter = journalpostService.finnJournalposterPåPerson(aktørId).map { journalpost -> journalpost.journalpostId }
-
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(uferdigJournalposter)
-            }
-        }
-
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,
