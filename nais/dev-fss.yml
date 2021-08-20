@@ -99,5 +99,5 @@ spec:
     - name: APP_NAISSTS_aud
       value: "srvk9sak"
     - name: APP_NAISSTS_discovery_url
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
 
