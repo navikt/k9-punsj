@@ -32,13 +32,9 @@ internal class AuthenticationHandler(
     private val jwtTokenValidationHandler = JwtTokenValidationHandler(
             MultiIssuerConfiguration(
                     multiIssuerProperties.issuer,
-                    resourceReceiver()
             )
     )
 
-    private fun resourceReceiver() = System.getenv("HTTP_PROXY")?.let {
-        ProxyAwareResourceRetriever(URL(it))
-    }
 
     init {
         logger.info("Konfigurerte issuers = ${multiIssuerProperties.issuer}")
