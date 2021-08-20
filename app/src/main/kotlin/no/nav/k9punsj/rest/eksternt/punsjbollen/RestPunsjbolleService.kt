@@ -81,7 +81,7 @@ class RestPunsjbolleService(
             response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9Sak
             response.statusCode == 200 && rutingResponse.destinasjon == "Infotrygd" -> PunsjbolleRuting.Infotrygd
             response.statusCode == 409 && rutingResponse.type == "punsjbolle://ikke-støttet-journalpost" -> PunsjbolleRuting.IkkeStøttet.also {
-                log.error("Ikke støttet journalpost ved ruting. PunsjbolleResponse=$responseBody")
+                log.info("Ikke støttet journalpost ved ruting. PunsjbolleResponse=$responseBody")
             }
             else -> throw IllegalStateException("Uventet response fra Punsjbollen ved ruting. PunsjbolleResponse=$responseBody")
         }
