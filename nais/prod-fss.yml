@@ -46,7 +46,6 @@ spec:
         kvPath: /serviceuser/data/prod/srvk9punsj
       - mountPath: /var/run/secrets/nais.io/appdynamics
         kvPath: /apikey/appdynamics/prod
-  webproxy: true
   kafka:
     pool: nav-prod
   env:
@@ -100,3 +99,5 @@ spec:
       value: "srvk9sak"
     - name: APP_NAISSTS_discovery_url
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
+    - name: WEB_PROXY_URL
+      value: http://webproxy.nais:8088

@@ -74,12 +74,15 @@ no.nav:
         azurev1:
           discoveryurl: ${AZURE_V1_discovery_url}
           accepted_audience: ${AZURE_client_id}
+          proxyUrl: ${WEB_PROXY_URL:}
         azurev2:
           discoveryurl: ${AZURE_V2_discovery_url}
           accepted_audience: ${AZURE_client_id}
+          proxyUrl: ${WEB_PROXY_URL:}
         naissts:
           discoveryurl: ${APP_NAISSTS_discovery_url}
           accepted_audience: ${APP_NAISSTS_aud}
+          proxyUrl:
 
   db:
     url: ${DEFAULTDS_URL}
