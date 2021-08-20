@@ -66,9 +66,17 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             val journalpostId = request.journalpostId()
             val journalpost = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
+
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
-            if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
-            if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+
+            // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
+            if (dto.fra == dto.til) {
+                if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
+            } else {
+                if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
+                if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+            }
+
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 journalpostId = journalpostId,
                 fra = dto.fra,
