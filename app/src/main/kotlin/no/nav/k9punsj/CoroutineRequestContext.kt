@@ -41,18 +41,18 @@ internal typealias CorrelationId = String
 
 internal fun K9SakRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
         jwtToken.containsClaim("sub", "srvk9sak")
 }
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(authenticationHandler, routes, setOf("azurev1", "azurev2")) { jwtToken -> true }
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev1", "azurev2")) { jwtToken -> true }
 
 internal fun PublicRoutes(
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes2(null, routes, null, null)
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes(null, routes, null, null)
 
-private fun Routes2(
+private fun Routes(
     authenticationHandler: AuthenticationHandler?,
     routes : CoRouterFunctionDsl.() -> Unit,
     issuerNames: Set<String>?,

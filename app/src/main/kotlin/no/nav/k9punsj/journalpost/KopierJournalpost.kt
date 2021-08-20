@@ -65,7 +65,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         RequestContext(coroutineContext, request) {
             val journalpostId = request.journalpostId()
             val journalpost = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
-            if (!journalpost.erInngående) { return@RequestContext kanIkkeKopieres("Kan kun kopiere inngående journalposter.") }
             val dto = request.kopierJournalpostDto()
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
             if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
