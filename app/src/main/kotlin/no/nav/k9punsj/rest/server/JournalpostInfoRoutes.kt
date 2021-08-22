@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.server
 
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
@@ -16,7 +17,7 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 internal class JournalpostInfoRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    private val journalpostService: JournalpostService
+    private val journalpostService: JournalpostService,
 ) {
 
     private companion object {
@@ -33,14 +34,25 @@ internal class JournalpostInfoRoutes(
             RequestContext(coroutineContext, request) {
                 val aktørId = request.aktørId()
                 val journalpostIder = journalpostService.finnJournalposterPåPerson(aktørId)
-                    .map { journalpost -> journalpost.journalpostId }
+                    .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
+                if (journalpostIder.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(JournalpostIderDto(journalpostIder))
+                }
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(journalpostIder)
+                    .bodyValueAndAwait(JournalpostIderDto(emptyList()))
             }
         }
     }
+
     private fun ServerRequest.aktørId(): AktørIdDto = pathVariable(AktørIdKey)
+
+    data class JournalpostIderDto(
+        val journalpostIder: List<JournalpostIdDto>,
+    )
 }
