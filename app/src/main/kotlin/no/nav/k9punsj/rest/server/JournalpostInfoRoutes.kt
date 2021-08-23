@@ -6,6 +6,7 @@ import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -22,6 +23,7 @@ internal class JournalpostInfoRoutes(
 
     private companion object {
         private const val AktørIdKey = "aktor_id"
+        private val logger = LoggerFactory.getLogger(JournalpostInfoRoutes::class.java)
     }
 
     internal object Urls {
@@ -36,6 +38,7 @@ internal class JournalpostInfoRoutes(
                 val journalpostIder = journalpostService.finnJournalposterPåPerson(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
+                logger.info("Fått request fra k9-sak på aktør=$aktørId")
                 if (journalpostIder.isNotEmpty()) {
                     return@RequestContext ServerResponse
                         .ok()
