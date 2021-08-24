@@ -563,7 +563,7 @@ internal class JournalpostController {
     ) {
     }
 
-    @PostMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost, produces = ["application/json"])
+    @PostMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost)
     @ApiResponses(
         value = [
             ApiResponse(
@@ -580,9 +580,7 @@ internal class JournalpostController {
             )
         ]
     )
-    @Operation(
-        summary = "Resetter informasjon på journalposten angående om den skal til k9-sak eller infotrygd",
-    )
+
     fun ResettInfoOmJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
     ) {

@@ -1,17 +1,33 @@
 package no.nav.k9punsj.journalpost
 
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.reactive.function.client.ClientResponse
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.UUID
 
-@ExtendWith(SpringExtension::class)
+@ExtendWith(SpringExtension::class, MockKExtension::class)
+@TestPropertySource(locations = ["classpath:application.yml"])
 internal class JournalpostRepositoryTest {
+
+    val client = TestSetup.client
+    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
+
 
     @Test
     fun `Skal finne alle journalposter på personen`(): Unit = runBlocking {
@@ -72,6 +88,31 @@ internal class JournalpostRepositoryTest {
         val finnJournalposterPåPersonSkalGiTom = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPersonSkalGiTom).isEmpty()
     }
+
+    @Test
+    fun `Endepunkt brukt for isReady og isAlive fungerer`(): Unit = runBlocking {
+        val dummyAktørId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val journalpost1 =
+            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, skalTilK9 = false)
+        journalpostRepository.lagre(journalpost1) {
+            journalpost1
+        }
+
+        val res =
+            client.post().uri {
+                it.pathSegment("api", "journalpost", "resett", journalpost1.journalpostId).build()
+            }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+
+        Assertions.assertEquals(HttpStatus.OK, res.statusCode())
+
+        val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
+
+        Assertions.assertEquals(finnJournalposterPåPerson[0].skalTilK9, null)
+    }
+
+    private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
     @Test
     fun `Skal sjekke om punsj kan sende inn`(): Unit = runBlocking {
