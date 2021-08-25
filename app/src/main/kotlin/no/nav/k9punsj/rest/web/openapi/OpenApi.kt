@@ -563,7 +563,7 @@ internal class JournalpostController {
     ) {
     }
 
-    @GetMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost)
+    @GetMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
