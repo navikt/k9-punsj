@@ -90,7 +90,7 @@ internal class JournalpostRepositoryTest {
     }
 
     @Test
-    fun `Endepunkt brukt for isReady og isAlive fungerer`(): Unit = runBlocking {
+    fun `Endepunkt brukt for resett av journalpost fungerer`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
