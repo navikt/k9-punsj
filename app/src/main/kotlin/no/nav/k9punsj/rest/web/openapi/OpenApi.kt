@@ -580,7 +580,10 @@ internal class JournalpostController {
             )
         ]
     )
-
+    @Operation(
+        summary = "Resette journalpost",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
     fun ResettInfoOmJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
@@ -610,6 +613,7 @@ internal class JournalpostController {
     )
     @Operation(
         summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentHvaSomHarBlittSendtInn(
         @PathVariable("journalpost_id") journalpostId: String,
