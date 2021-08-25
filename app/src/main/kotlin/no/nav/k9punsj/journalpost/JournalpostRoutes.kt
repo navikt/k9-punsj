@@ -294,13 +294,14 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait("Journalpost med id $journalpostId har blitt resatt!")
+                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt resatt!"))
                 }
                 return@RequestContext ServerResponse
                     .badRequest()
                     .bodyValueAndAwait("Kan ikke endre på en journalpost som har blitt sendt fra punsj")
             }
         }
+
 
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
             RequestContext(coroutineContext, request) {
@@ -468,5 +469,8 @@ internal class JournalpostRoutes(
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,
+    )
+    data class ResultatDto(
+        val status: String
     )
 }
