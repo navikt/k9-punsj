@@ -47,7 +47,7 @@ internal fun K9SakRoutes(
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev1", "azurev2")) { jwtToken -> true }
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev2")) { jwtToken -> true }
 
 internal fun PublicRoutes(
     routes : CoRouterFunctionDsl.() -> Unit) = Routes(null, routes, null, null)

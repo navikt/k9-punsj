@@ -67,17 +67,13 @@ no.nav:
       expirythreshold: 1
       client:
         azure:
-          client_id: ${AZURE_client_id}
-          jwk: ${AZURE_jwk}
-          token_endpoint: ${AZURE_token_endpoint}
+          client_id: ${AZURE_APP_CLIENT_ID}
+          jwk: ${AZURE_APP_JWK}
+          token_endpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
       issuer:
-        azurev1:
-          discoveryurl: ${AZURE_V1_discovery_url}
-          accepted_audience: ${AZURE_client_id}
-          proxyUrl: ${HTTP_PROXY:}
         azurev2:
-          discoveryurl: ${AZURE_V2_discovery_url}
-          accepted_audience: ${AZURE_client_id}
+          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+          accepted_audience: ${AZURE_APP_CLIENT_ID}
           proxyUrl: ${HTTP_PROXY:}
         naissts:
           discoveryurl: ${APP_NAISSTS_discovery_url}
