@@ -293,7 +293,8 @@ internal class JournalpostRoutes(
 
                     return@RequestContext ServerResponse
                         .ok()
-                        .buildAndAwait()
+                        .json()
+                        .bodyValueAndAwait("Journalpost med id $journalpostId har blitt resatt!")
                 }
                 return@RequestContext ServerResponse
                     .badRequest()
