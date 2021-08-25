@@ -101,7 +101,7 @@ internal class JournalpostRepositoryTest {
         }
 
         val res =
-            client.post().uri {
+            client.get().uri {
                 it.pathSegment("api", "journalpost", "resett", journalpost1.journalpostId).build()
             }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
