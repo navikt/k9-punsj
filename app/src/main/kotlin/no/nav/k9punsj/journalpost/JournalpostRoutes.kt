@@ -277,7 +277,7 @@ internal class JournalpostRoutes(
             }
         }
 
-        POST("/api${Urls.ResettInfoOmJournalpost}") { request ->
+        GET("/api${Urls.ResettInfoOmJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
 
