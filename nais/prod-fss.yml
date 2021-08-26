@@ -83,7 +83,7 @@ spec:
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-punsj
     - name: ABAC_PDP_ENDPOINT_URL
-      value: https://abac-k9.nais.adeo.no/application/authorize
+      value: http://abac-k9.teamabac/application/authorize
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
