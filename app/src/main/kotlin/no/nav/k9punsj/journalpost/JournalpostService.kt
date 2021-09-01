@@ -63,14 +63,10 @@ class JournalpostService(
 
     private fun utledMottattDato(parsedJournalpost: ParsedJournalpost) : LocalDateTime {
         return if (parsedJournalpost.journalpostType == SafDtos.JournalpostType.I) {
-            hentRelevantDato(parsedJournalpost, SafDtos.Datotype.DATO_REGISTRERT)
+            parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
-            hentRelevantDato(parsedJournalpost, SafDtos.Datotype.DATO_JOURNALFOERT)
-        }
-    }
-
-    private fun hentRelevantDato(parsedJournalpost: ParsedJournalpost, datotype: SafDtos.Datotype): LocalDateTime {
-        return parsedJournalpost.relevanteDatoer.first { d -> d.datotype == datotype }.dato
+            parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
+        }?: parsedJournalpost.relevanteDatoer.first { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }.dato
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
