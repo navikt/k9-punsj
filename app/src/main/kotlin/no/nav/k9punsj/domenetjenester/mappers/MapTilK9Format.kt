@@ -54,7 +54,7 @@ internal class MapTilK9Format {
                 mottattDato = søknad.mottattDato,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
                 ytelse = pleiepengerSyktBarn
-            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it) })
+            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it).medInfomasjonSomIkkeKanPunsjes(ytelse.harInfoSomIkkeKanPunsjes).medInneholderMedisinskeOpplysninger(ytelse.harMedisinskeOpplysninger) })
             val feil = validator.valider(søknadK9Format)
 
             return Pair(søknadK9Format, feil)
