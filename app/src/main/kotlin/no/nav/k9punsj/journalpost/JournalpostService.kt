@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class JournalpostService(
@@ -66,7 +67,10 @@ class JournalpostService(
             parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
             parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
-        }?: parsedJournalpost.relevanteDatoer.first { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }.dato
+        }?: parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
+         ?: logger.warn(
+            "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedJournalpost.relevanteDatoer.map { it.datotype.name }}"
+        ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
