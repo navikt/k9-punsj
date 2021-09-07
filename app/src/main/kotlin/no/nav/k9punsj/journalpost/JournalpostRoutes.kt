@@ -136,9 +136,7 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
-                    return@RequestContext ServerResponse
-                        .badRequest()
-                        .buildAndAwait()
+                    return@RequestContext cause.serverResponse()
                 } catch (case: IkkeTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -266,9 +264,7 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
-                    ServerResponse
-                        .badRequest()
-                        .buildAndAwait()
+                    cause.serverResponse()
                 } catch (case: IkkeTilgang) {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -326,9 +322,7 @@ internal class JournalpostRoutes(
                             .json()
                             .bodyValueAndAwait(journalpost.payload)
                     } catch (cause: IkkeStøttetJournalpost) {
-                        return@RequestContext ServerResponse
-                            .badRequest()
-                            .buildAndAwait()
+                        return@RequestContext cause.serverResponse()
                     } catch (case: IkkeTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
@@ -466,6 +460,9 @@ internal class JournalpostRoutes(
         PunsjbolleRuting.IkkeStøttet -> status(HttpStatus.CONFLICT)
         else -> ok()
     }.json().bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = this == PunsjbolleRuting.K9Sak))
+
+    private suspend fun IkkeStøttetJournalpost.serverResponse() =
+        status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,
