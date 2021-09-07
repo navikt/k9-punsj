@@ -9,7 +9,6 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.journalpost.SafGateway
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,7 +37,7 @@ class PdlServiceImpl(
     private val AzureScopes = setOf(scope)
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(PdlServiceImpl::class.java)
         private const val TemaHeaderValue = "OMS"
         private const val TemaHeader = "Tema"
         private const val CorrelationIdHeader = "Nav-Callid"
@@ -202,7 +201,7 @@ class PdlServiceImpl(
         onBehalfOf = coroutineContext.hentAuthentication().accessToken
     ).asAuthoriationHeader()
 
-    private suspend fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+    private fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
         scopes = AzureScopes
     ).asAuthoriationHeader()
 

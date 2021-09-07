@@ -128,10 +128,10 @@ internal object SafDtos {
 
     data class JournalpostResponseWrapper(
         val data: JournalpostResponse?,
-        val errors: List<Any>?,
-    ) {
-        internal val journalpostFinnesIkke = errors?.toString()?.contains("ikke funnet") ?: false
-        internal val manglerTilgang = errors?.toString()?.contains("har ikke tilgang") ?: false
-        internal val abacException = errors?.toString()?.contains("AbacException") ?: false
+        val errors: List<Any>?) {
+        private fun inneholderError(error: String) = errors?.toString()?.contains(error) ?: false
+        internal val journalpostFinnesIkke = inneholderError("ikke funnet") || inneholderError("not_found")
+        internal val manglerTilgang = inneholderError("har ikke tilgang")
+        internal val abacException = inneholderError("AbacException")
     }
 }

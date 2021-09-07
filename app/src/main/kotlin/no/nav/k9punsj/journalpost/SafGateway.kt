@@ -86,10 +86,14 @@ class SafGateway(
 
         check(safResponse != null) {"Ingen response entity fra SAF"}
 
+        if (safResponse.errors != null) {
+            logger.warn("SafErrors=${safResponse.errors}")
+        }
+
         if (safResponse.journalpostFinnesIkke) return null
         if (safResponse.manglerTilgang) throw IkkeTilgang()
 
-        check(errors == null) {"Feil ved oppslag mot SAF graphql. Error = $errors"}
+        check(errors == null) {"Feil ved oppslag mot SAF graphql. SafErrors=$errors"}
 
         return journalpost
     }
