@@ -91,9 +91,16 @@ class SafGateway(
         }
 
         if (safResponse.journalpostFinnesIkke) return null
+        // For journalposter i status Utgår/Avbrutt. Krever spesialrettighet for å håndtere denne statusen i arkivet.
+        // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man har tilgang til disse statusene.
+        if (safResponse.manglerTilgangPåGrunnAvStatus) throw IkkeStøttetJournalpost()
         if (safResponse.manglerTilgang) throw IkkeTilgang()
 
         check(errors == null) {"Feil ved oppslag mot SAF graphql. SafErrors=$errors"}
+
+        // For saksbehandlere som har tilgang til å åpne journalposter i status Utgår/Avbrutt.
+        // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
+        if (journalpost?.journalstatus == "UTGAAR" || journalpost?.journalstatus == "AVBRUTT") throw IkkeStøttetJournalpost()
 
         return journalpost
     }

@@ -132,6 +132,6 @@ internal object SafDtos {
         private fun inneholderError(error: String) = errors?.toString()?.contains(error) ?: false
         internal val journalpostFinnesIkke = inneholderError("ikke funnet") || inneholderError("not_found")
         internal val manglerTilgang = inneholderError("har ikke tilgang")
-        internal val abacException = inneholderError("AbacException")
+        internal val manglerTilgangPåGrunnAvStatus = manglerTilgang && inneholderError("på grunn av journalposten sin status")
     }
 }
