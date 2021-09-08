@@ -39,6 +39,7 @@ class SafGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
         private const val MaxDokumentSize = 16 * 1024 * 1024
+        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT")
     }
 
     init {
@@ -91,16 +92,20 @@ class SafGateway(
         }
 
         if (safResponse.journalpostFinnesIkke) return null
-        // For journalposter i status Utgår/Avbrutt. Krever spesialrettighet for å håndtere denne statusen i arkivet.
+        // For journalposter i spesielle statuser. Krever spesialrettighet for å håndtere disse statusene i arkivet.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man har tilgang til disse statusene.
-        if (safResponse.manglerTilgangPåGrunnAvStatus) throw IkkeStøttetJournalpost()
+        if (safResponse.manglerTilgangPåGrunnAvStatus) throw IkkeStøttetJournalpost().also {
+            logger.warn("Saksbehandler mangler tilgang på grunn av journalstatus.")
+        }
         if (safResponse.manglerTilgang) throw IkkeTilgang()
 
         check(errors == null) {"Feil ved oppslag mot SAF graphql. SafErrors=$errors"}
 
-        // For saksbehandlere som har tilgang til å åpne journalposter i status Utgår/Avbrutt.
+        // For saksbehandlere som har tilgang til å åpne journalposter i spesielle statuser.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
-        if (journalpost?.journalstatus == "UTGAAR" || journalpost?.journalstatus == "AVBRUTT") throw IkkeStøttetJournalpost()
+        if (IkkeStøttedeStatuser.contains(journalpost?.journalstatus)) throw IkkeStøttetJournalpost().also {
+            logger.warn("Ikke støttet journalstatus ${journalpost?.journalstatus}.")
+        }
 
         return journalpost
     }
