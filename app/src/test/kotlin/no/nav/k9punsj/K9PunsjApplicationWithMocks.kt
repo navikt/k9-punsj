@@ -13,7 +13,7 @@ internal class K9PunsjApplicationWithMocks {
                 wireMockServer: WireMockServer,
                 port: Int,
                 args: Array<String> = arrayOf(),
-                azureV2DiscoveryUrl: String? = null,
+                azureV2Url: String? = null,
                 profiles: String? = null
         ): ConfigurableApplicationContext? {
             val builder = SpringApplicationBuilder(K9PunsjApplication::class.java)
@@ -22,7 +22,7 @@ internal class K9PunsjApplicationWithMocks {
                         MockConfiguration.config(
                             wireMockServer = wireMockServer,
                             port = port,
-                            azureV2DiscoveryUrl = azureV2DiscoveryUrl
+                            azureV2Url = azureV2Url
                         )
                     )
                     .main(K9PunsjApplication::class.java)
@@ -50,7 +50,7 @@ internal class K9PunsjApplicationWithMocks {
             startup(
                     wireMockServer = wireMockServer,
                     port = 8085,
-                    azureV2DiscoveryUrl = "http://azure-mock:8100/v2.0/.well-known/openid-configuration",
+                    azureV2Url = "http://localhost:8100/v2.0",
                     profiles = "local"
 
             )
