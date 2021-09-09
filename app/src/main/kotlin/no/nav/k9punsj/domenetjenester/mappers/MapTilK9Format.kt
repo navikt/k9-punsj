@@ -132,7 +132,7 @@ internal class MapTilK9Format {
             return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
         }
 
-        private fun List<PeriodeDto>.somK9Perioder() = map {
+        internal fun List<PeriodeDto>.somK9Perioder() = map {
             objectMapper.convertValue<Periode>(fromPeriodeDtoToString(it))
         }
 
