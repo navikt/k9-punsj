@@ -280,8 +280,7 @@ class PleiepengersyktbarnTests {
             .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
-        //9 feil
-        assertEquals(response?.feil?.size, 9)
+        assertEquals(response?.feil?.size, 12)
     }
 
     @Test
@@ -560,8 +559,6 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(true)
         assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(false)
         assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
-        assertThat(ytelse.infoFraPunsj!!.get().inneholderMedisinskeOpplysninger).isEqualTo(false)
-        assertThat(ytelse.infoFraPunsj!!.get().søknadenInneholderInfomasjonSomIkkeKanPunsjes).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
         assertThat(ytelse.opptjeningAktivitet.frilanser.jobberFortsattSomFrilans).isEqualTo(true)

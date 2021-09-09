@@ -2,7 +2,6 @@ package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
-import no.nav.k9.søknad.Validator
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.Versjon
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet
@@ -30,7 +29,7 @@ import java.util.UUID
 internal class MapTilK9Format {
 
     companion object {
-        private val validator = Validator()
+        private val validator = PleiepengerSyktBarnSøknadValidator()
         private const val SKILLE = "/"
         private const val ÅPEN = ".."
         private val objectMapper = no.nav.k9punsj.objectMapper()
@@ -38,15 +37,12 @@ internal class MapTilK9Format {
         internal fun mapTilEksternFormat(
             søknad: PleiepengerSøknadMottakDto,
             soeknadId: SøknadIdDto,
-            hentPerioderSomFinnesIK9: List<PeriodeDto>,
+            perioderSomFinnesIK9: List<PeriodeDto>,
             journalpostIder: Set<String>,
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
             val pleiepengerSyktBarn = map(
-                psb = ytelse!!,
-                endringsperioder = hentPerioderSomFinnesIK9.map {
-                    fromPeriodeDtoToString(it)
-                }
+                psb = ytelse!!
             )
 
             val søknadK9Format = opprettSøknad(
@@ -54,15 +50,19 @@ internal class MapTilK9Format {
                 mottattDato = søknad.mottattDato,
                 søker = Søker(NorskIdentitetsnummer.of(søknad.søker?.norskIdentitetsnummer)),
                 ytelse = pleiepengerSyktBarn
-            ).medJournalposter(journalpostIder.map { Journalpost().medJournalpostId(it).medInfomasjonSomIkkeKanPunsjes(ytelse.harInfoSomIkkeKanPunsjes).medInneholderMedisinskeOpplysninger(ytelse.harMedisinskeOpplysninger) })
-            val feil = validator.valider(søknadK9Format)
+            ).medJournalposter(journalpostIder.map { Journalpost()
+                .medJournalpostId(it)
+                .medInfomasjonSomIkkeKanPunsjes(ytelse.harInfoSomIkkeKanPunsjes)
+                .medInneholderMedisinskeOpplysninger(ytelse.harMedisinskeOpplysninger)
+            })
+
+            val feil = validator.valider(søknadK9Format, perioderSomFinnesIK9.somK9Perioder())
 
             return Pair(søknadK9Format, feil)
         }
 
         private fun map(
             psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto,
-            endringsperioder: List<String>,
         ): PleiepengerSyktBarn {
             val barn: Barn? = if (psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
                 psb.barn.fødselsdato) else null
@@ -86,19 +86,10 @@ internal class MapTilK9Format {
 
             val omsorg: Omsorg? = if (psb.omsorg != null) objectMapper.convertValue(psb.omsorg) else null
 
-            val infoFraPunsj = InfoFraPunsj()
-                .medSøknadenInneholderInfomasjonSomIkkeKanPunsjes(psb.harInfoSomIkkeKanPunsjes)
-                .medInneholderMedisinskeOpplysninger(psb.harMedisinskeOpplysninger)
-
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
-            pleiepengerSyktBarn.medInfoFraPunsj(infoFraPunsj)
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
             søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
 
-            if (endringsperioder.isNotEmpty()) {
-                val endrignsperioder: List<Periode> = endringsperioder.map { objectMapper.convertValue(it) }
-                pleiepengerSyktBarn.medEndringsperiode(endrignsperioder)
-            }
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
 
@@ -139,6 +130,10 @@ internal class MapTilK9Format {
             ytelse: no.nav.k9.søknad.ytelse.Ytelse,
         ): Søknad {
             return Søknad(SøknadId.of(søknadId.toString()), versjon, mottattDato, søker, ytelse)
+        }
+
+        private fun List<PeriodeDto>.somK9Perioder() = map {
+            objectMapper.convertValue<Periode>(fromPeriodeDtoToString(it))
         }
 
         private fun fromPeriodeDtoToString(dato: PeriodeDto): String {

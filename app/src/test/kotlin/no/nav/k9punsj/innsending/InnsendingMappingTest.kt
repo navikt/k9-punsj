@@ -27,7 +27,7 @@ internal class InnsendingMappingTest {
         val k9Format = MapTilK9Format.mapTilEksternFormat(
             søknad = MapFraVisningTilEksternFormat.mapTilSendingsformat(dto),
             soeknadId = "${UUID.randomUUID()}",
-            hentPerioderSomFinnesIK9 = emptyList(),
+            perioderSomFinnesIK9 = emptyList(),
             journalpostIder = setOf(IdGenerator.nesteId(), IdGenerator.nesteId())
         ).first
 
