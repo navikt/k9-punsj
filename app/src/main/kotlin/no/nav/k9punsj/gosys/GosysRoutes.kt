@@ -22,7 +22,6 @@ import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
 
-
 @Configuration
 internal class GosysRoutes(
     private val authenticationHandler: AuthenticationHandler,
@@ -55,6 +54,19 @@ internal class GosysRoutes(
                             .notFound()
                             .buildAndAwait()
                     } else {
+                        val journalpostInfo = journalpostService.hentJournalpostInfo(requestParameters.journalpostId)
+                        if (journalpostInfo == null) {
+                            logger.warn("Fant ikke journalpost.", keyValue("journalpost_id", requestParameters.journalpostId))
+                            return@RequestContext ServerResponse
+                                .status(HttpStatus.NOT_FOUND)
+                                .buildAndAwait()
+                        } else if (!journalpostInfo.erInngående){
+                            logger.warn("Kan kun opprette journalføringsoppgaver på inngående journalposter.", keyValue("journalpost_id", requestParameters.journalpostId))
+                            return@RequestContext ServerResponse
+                                .status(HttpStatus.CONFLICT)
+                                .buildAndAwait()
+                        }
+
                         val aktørid = hentIdenter.identer[0].ident
                         val response = gosysOppgaveService.opprettOppgave(
                             aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
