@@ -17,8 +17,7 @@ import java.time.ZoneId
 @Service
 class JournalpostService(
     private val safGateway: SafGateway,
-    private val journalpostRepository: JournalpostRepository,
-) {
+    private val journalpostRepository: JournalpostRepository) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostService::class.java)
@@ -56,7 +55,8 @@ class JournalpostService(
                     norskIdent = norskIdent,
                     aktørId = aktørId,
                     mottattDato = mottattDato,
-                    erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType
+                    erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
+                    kanOpprettesJournalføringsoppgave = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus
                 )
             }
         }
@@ -144,7 +144,8 @@ data class JournalpostInfo(
     val aktørId: AktørId?,
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
-    val erInngående: Boolean
+    val erInngående: Boolean,
+    val kanOpprettesJournalføringsoppgave: Boolean
 )
 
 data class JournalpostInfoDto(
@@ -156,7 +157,8 @@ data class JournalpostInfoDto(
     @JsonIgnore
     val erInngående: Boolean,
     val kanSendeInn: Boolean,
-    val erSaksbehandler: Boolean? = null) {
+    val erSaksbehandler: Boolean? = null,
+    val kanOpprettesJournalføringsoppgave: Boolean) {
     val kanKopieres = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående
 }
 

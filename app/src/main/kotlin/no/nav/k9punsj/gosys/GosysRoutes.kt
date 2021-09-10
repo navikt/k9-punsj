@@ -28,9 +28,7 @@ internal class GosysRoutes(
     private val gosysOppgaveService: GosysOppgaveService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
-    private val journalpostService: JournalpostService
-
-    ) {
+    private val journalpostService: JournalpostService) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(GosysRoutes::class.java)
@@ -60,8 +58,8 @@ internal class GosysRoutes(
                             return@RequestContext ServerResponse
                                 .status(HttpStatus.NOT_FOUND)
                                 .buildAndAwait()
-                        } else if (!journalpostInfo.erInngående){
-                            logger.warn("Kan kun opprette journalføringsoppgaver på inngående journalposter.", keyValue("journalpost_id", requestParameters.journalpostId))
+                        } else if (!journalpostInfo.kanOpprettesJournalføringsoppgave){
+                            logger.warn("Kan kun opprette journalføringsoppgaver på inngående journalposter i status mottatt.", keyValue("journalpost_id", requestParameters.journalpostId))
                             return@RequestContext ServerResponse
                                 .status(HttpStatus.CONFLICT)
                                 .buildAndAwait()

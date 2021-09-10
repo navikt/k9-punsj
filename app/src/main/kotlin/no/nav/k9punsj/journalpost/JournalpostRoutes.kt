@@ -102,7 +102,8 @@ internal class JournalpostRoutes(
                                 punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
                                     punsjInnsendingType) else null,
                                 erSaksbehandler = pepClient.erSaksbehandler(),
-                                erInngående = journalpostInfo.erInngående
+                                erInngående = journalpostInfo.erInngående,
+                                kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave
                             )
                             utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
@@ -130,7 +131,8 @@ internal class JournalpostRoutes(
                                         punsjInnsendingType) else null,
                                     kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                     erSaksbehandler = pepClient.erSaksbehandler(),
-                                    erInngående = journalpostInfo.erInngående
+                                    erInngående = journalpostInfo.erInngående,
+                                    kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave
                                 ))
                         }
                     }

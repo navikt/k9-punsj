@@ -104,7 +104,8 @@ class K9PunsjApplicationTests {
                 "punsjInnsendingType" : null,
                 "kanSendeInn" : true,
                 "erSaksbehandler" : true,
-                "kanKopieres": true
+                "kanKopieres": true,
+                "kanOpprettesJournalføringsoppgave": true
 			}
 		""".trimIndent(), responseEntity, true)
     }
