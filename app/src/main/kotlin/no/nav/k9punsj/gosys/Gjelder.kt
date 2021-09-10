@@ -26,7 +26,6 @@ enum class Behandlingstype(
 // https://github.com/navikt/oppgave/blob/master/src/main/resources/data/gjelder.json
 enum class Gjelder(
     internal val tekst: String,
-    internal val enabled: Boolean = true,
     internal val behandlingstema: Behandlingstema? = null,
     internal val behandlingstype: Behandlingstype? = null) {
     /** Pleiepenger sykt barn **/
@@ -90,7 +89,6 @@ enum class Gjelder(
 
     internal companion object {
         internal val JSON = values()
-            .filter { it.enabled }
             .associate { it.name to it.tekst }
             .let { objectMapper().writeValueAsString(it) }
     }
