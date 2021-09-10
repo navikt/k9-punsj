@@ -7,7 +7,7 @@ enum class Behandlingstema(
     internal val kodeverksverdi: String) {
     Omsorgspenger(kodeverksverdi = "ab0149"),
     PleiepengerSyktBarn(kodeverksverdi = "ab0320"),
-    PleiepengerVedInstitusjonsopphold(kodeverksverdi = "ab0153"),
+    PleiepengerVedInstitusjonsopphold(kodeverksverdi = "ab0137"),
     PleiepengerPårørende(kodeverksverdi = "ab0094"),
     Opplæringspenger(kodeverksverdi = "ab0141")
 }
