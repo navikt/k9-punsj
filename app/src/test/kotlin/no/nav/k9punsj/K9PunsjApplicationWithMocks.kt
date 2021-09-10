@@ -50,7 +50,7 @@ internal class K9PunsjApplicationWithMocks {
             startup(
                     wireMockServer = wireMockServer,
                     port = 8085,
-                    //azureV2Url = "http://localhost:8100/v2.0",
+                    azureV2Url = "http://localhost:8100/v2.0",
                     profiles = "local"
 
             )
