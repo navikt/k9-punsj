@@ -752,9 +752,22 @@ internal class GosysController {
         description = "",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
+    fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {}
 
-    }
+    @GetMapping(GosysRoutes.Urls.Gjelder, produces = ["application/json"])
+    @Operation(
+        summary = "Hente gyldige gjelder-verdier. (Public endpoint)",
+        description = "Nøkkel-verdien brukes som 'gjelder' ved opprettelse av journalføringsoppgave."
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Gyldige gjelder-verdier med tekst"
+            )
+        ]
+    )
+    fun HenteGjelder() {}
 }
 
 @RestController

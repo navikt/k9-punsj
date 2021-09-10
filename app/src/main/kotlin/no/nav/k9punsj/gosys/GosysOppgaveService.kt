@@ -19,17 +19,12 @@ import reactor.core.publisher.Mono
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URI
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Date
 import kotlin.coroutines.coroutineContext
 
-
 @Service
-class GosysOppgaveService(
+internal class GosysOppgaveService(
         @Value("\${no.nav.gosys.base_url}") safBaseUrl: URI,
-        @Qualifier("sts") private val accessTokenClient: AccessTokenClient
-) {
+        @Qualifier("sts") private val accessTokenClient: AccessTokenClient) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
@@ -46,18 +41,15 @@ class GosysOppgaveService(
             .baseUrl(safBaseUrl.toString())
             .build()
 
-    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String): Pair<HttpStatus, String?> {
-        val accessToken = cachedAccessTokenClient
-                .getAccessToken(
-                        scopes = scope
-                )
-        val df: DateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val opprettOppgaveRequest = OpprettOppgaveRequest(aktivDato = df.format(Date()),
-                aktoerId = aktørid,
-                journalpostId = joarnalpostId,
-                oppgavetype = "JFR",
-                prioritet = Prioritet.NORM,
-                tema = "OMS")
+    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
+        val accessToken = cachedAccessTokenClient.getAccessToken(
+            scopes = scope
+        )
+        val opprettOppgaveRequest = OpprettOppgaveRequest(
+            aktoerId = aktørid,
+            journalpostId = joarnalpostId,
+            gjelder = gjelder
+        )
         try {
             val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
             val response = client

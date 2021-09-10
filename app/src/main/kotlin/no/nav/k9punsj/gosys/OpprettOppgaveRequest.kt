@@ -1,13 +1,21 @@
 package no.nav.k9punsj.gosys
 
-data class OpprettOppgaveRequest(
-        val aktivDato: String,
-        val aktoerId: String,
-        val journalpostId: String,
-        val oppgavetype: String,
-        val prioritet: Prioritet,
-        val tema: String
-)
+import com.fasterxml.jackson.annotation.JsonIgnore
+import java.time.LocalDate
+import java.time.ZoneId
+
+internal data class OpprettOppgaveRequest(
+    val aktoerId: String,
+    val journalpostId: String,
+    @JsonIgnore
+    private val gjelder: Gjelder) {
+    val aktivDato = LocalDate.now(ZoneId.of("Europe/Oslo"))
+    val prioritet = Prioritet.NORM
+    val tema = "OMS"
+    val oppgavetype = "JFR"
+    val behandlingstema = gjelder.behandlingstema?.kodeverksverdi
+    val behandlingstype = gjelder.behandlingstype?.kodeverksverdi
+}
 
 enum class Prioritet {
     HOY, NORM, LAV
