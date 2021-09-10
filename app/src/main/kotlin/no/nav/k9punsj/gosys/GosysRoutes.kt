@@ -3,6 +3,7 @@ package no.nav.k9punsj.gosys
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -36,6 +37,17 @@ internal class GosysRoutes(
 
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
+        internal const val Gjelder = "/gosys/gjelder"
+    }
+
+    @Bean
+    fun PublicGosysRoutes() = PublicRoutes {
+        GET("/api${Urls.Gjelder}") {
+            return@GET ServerResponse
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValueAndAwait(Gjelder.JSON)
+        }
     }
 
     @Bean
@@ -67,7 +79,9 @@ internal class GosysRoutes(
 
                         val aktørid = hentIdenter.identer[0].ident
                         val response = gosysOppgaveService.opprettOppgave(
-                            aktørid = aktørid, joarnalpostId = requestParameters.journalpostId
+                            aktørid = aktørid,
+                            joarnalpostId = requestParameters.journalpostId,
+                            gjelder = requestParameters.gjelder
                         )
 
                         if (response.second != null) {
@@ -94,7 +108,6 @@ internal class GosysRoutes(
                 }
             }
         }
-
     }
 
     private suspend fun ServerRequest.request() =
@@ -103,5 +116,6 @@ internal class GosysRoutes(
     data class GosysOpprettJournalføringsOppgaveRequest(
         val norskIdent: NorskIdent,
         val journalpostId: JournalpostId,
+        val gjelder: Gjelder = Gjelder.Annet
     )
 }
