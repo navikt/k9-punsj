@@ -30,6 +30,10 @@ internal object SafDtos {
                   id
                   type
                 }
+                tilleggsopplysninger {
+                  nokkel
+                  verdi
+                }
               }
             }
             """.trimIndent(),
@@ -105,6 +109,20 @@ internal object SafDtos {
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,
         val relevanteDatoer: List<RelevantDato>,
+        private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()) {
+        val k9Kilde = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.kilde" }?.verdi
+        val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
+        private val erDigital = "DIGITAL" == k9Kilde
+        private val erEttersendelse = "ETTERSENDELSE" == k9Type
+        val erIkkeStøttetDigitalJournalpost = when (erDigital) {
+            true -> !erEttersendelse
+            false -> false
+        }
+    }
+
+    internal data class Tilleggsopplysning(
+        val nokkel: String,
+        val verdi: String
     )
 
     internal data class RelevantDato(

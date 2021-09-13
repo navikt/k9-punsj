@@ -2,6 +2,7 @@ package no.nav.k9punsj.gosys
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+
 internal class FinnRelevanteGjelder {
 
     @Test
