@@ -42,7 +42,8 @@ internal class MapTilK9Format {
         ): Pair<Søknad, List<Feil>> {
             val ytelse = søknad.ytelse
             val pleiepengerSyktBarn = map(
-                psb = ytelse!!
+                psb = ytelse!!,
+                endringsperioder = perioderSomFinnesIK9.somK9Perioder()
             )
 
             val søknadK9Format = opprettSøknad(
@@ -56,13 +57,16 @@ internal class MapTilK9Format {
                 .medInneholderMedisinskeOpplysninger(ytelse.harMedisinskeOpplysninger)
             })
 
-            val feil = validator.valider(søknadK9Format, perioderSomFinnesIK9.somK9Perioder())
+            val feil = validator.valider(søknadK9Format)
+            // TODO: Dette er riktig når vi endrer til k9-format >= 5.4.17
+            //val feil = validator.valider(søknadK9Format, perioderSomFinnesIK9.somK9Perioder())
 
             return Pair(søknadK9Format, feil)
         }
 
         private fun map(
             psb: PleiepengerSøknadMottakDto.PleiepengerYtelseDto,
+            endringsperioder: List<Periode>
         ): PleiepengerSyktBarn {
             val barn: Barn? = if (psb.barn != null) Barn(NorskIdentitetsnummer.of(psb.barn.norskIdentitetsnummer),
                 psb.barn.fødselsdato) else null
@@ -89,6 +93,9 @@ internal class MapTilK9Format {
             val pleiepengerSyktBarn = PleiepengerSyktBarn()
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
             søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
+
+            // TODO: Fjernes når vi endrer til k9-format >= 5.4.17
+            pleiepengerSyktBarn.medEndringsperiode(endringsperioder)
 
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }

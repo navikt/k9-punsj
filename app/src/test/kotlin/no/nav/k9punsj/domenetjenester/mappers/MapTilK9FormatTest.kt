@@ -22,8 +22,11 @@ internal class MapTilK9FormatTest {
         val søknad = pleiepengerSyktBarnSøknad()
         val (ytelse, feil) = søknad.mapTilK9Format(lengrePeriodeIK9)
         assertThat(feil).isEmpty()
-        assertThat(endringsperioder).hasSameElementsAs(ytelse.endringsperiode)
-        assertThat(endringsperioder).hasSameElementsAs(ytelse.endringsperioderFraJson())
+        assertThat(lengrePeriodeIK9.somK9Perioder()).hasSameElementsAs(ytelse.endringsperiode)
+        assertThat(lengrePeriodeIK9.somK9Perioder()).hasSameElementsAs(ytelse.endringsperioderFraJson())
+        // TODO: Dette er riktig når vi endrer til k9-format >= 5.4.17
+        //assertThat(endringsperioder).hasSameElementsAs(ytelse.endringsperiode)
+        //assertThat(endringsperioder).hasSameElementsAs(ytelse.endringsperioderFraJson())
     }
 
     @Test
