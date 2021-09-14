@@ -31,7 +31,7 @@ internal class FinnRelevanteGjelder {
         val manglerIPunsj = alle.minus(finnesIPunsj)
         println("Mangler i Punsj: ${manglerIPunsj.size}")
         manglerIPunsj.forEach { println(" - $it (${it.behandlingstema.behandlingstemaOrNull()}/${it.behandlingstype.behandlingstypeOrNull()})") }
-        assertThat(manglerIPunsj).allMatch { it.underkategori in underkategorierSomIkkeTilbysIPunsj }
+        assertThat(manglerIPunsj.map { it.underkategori }).hasSameElementsAs(underkategorierSomIkkeTilbysIPunsj)
     }
 
     private companion object {
@@ -49,9 +49,9 @@ internal class FinnRelevanteGjelder {
             KodeverkEntry(underkategori = "PLEIEPENGERSY_OMS", behandlingstema = "ab0069", behandlingstype = null, tema = "OMS") // Pleiepenger sykt barn gammel ordning
         )
         private val underkategorierSomIkkeTilbysIPunsj = listOf(
-            "VEDTAK_OMS", "UTBETALING_OMS", "ANKE_OMS", "KLAGE_OMS", "UTLAND_OMS", "TIDLIG_HJEMSENDT_OMS",
-            "HJEMSENDT_NY_OMS", "SAM_BS_OMS", "FEILUTB_UTL_OMS", "FEILUTB_OMS", "KLAGE_ANKE_OMS", "PART_OMS",
-            "EU_EOS_NY_BEH_OMS", "MEDLEM_OMS"
+            "VEDTAK_OMS", "UTBETALING_OMS", "UTLAND_OMS", "TIDLIG_HJEMSENDT_OMS",
+            "HJEMSENDT_NY_OMS", "SAM_BS_OMS", "FEILUTB_UTL_OMS", "FEILUTB_OMS",
+            "EU_EOS_NY_BEH_OMS", "MEDLEM_OMS", "KLAGE_ANKE_OMS", "PART_OMS"
         )
 
         data class KodeverkEntry(
@@ -74,7 +74,7 @@ internal class FinnRelevanteGjelder {
         VEDTAK_OMS;;ae0004;OMS
         UTBETALING_OMS;;ae0007;OMS
         ANKE_OMS;;ae0046;OMS
-        KLAGE_OMS;;ae0058;OMS
+        KLAGE_OMS;;ae0058;OMS       
         UTLAND_OMS;;ae0106;OMS
         TIDLIG_HJEMSENDT_OMS;;ae0114;OMS
         HJEMSENDT_NY_OMS;;ae0115;OMS

@@ -19,7 +19,9 @@ enum class Behandlingstype(
     Utbetaling(kodeverksverdi = "ae0007"),
     DigitalEttersendelse(kodeverksverdi = "ae0246"),
     Ansatte(kodeverksverdi = "ae0249"),
-    SelvstendigNæringsdrivende(kodeverksverdi = "ae0221")
+    SelvstendigNæringsdrivende(kodeverksverdi = "ae0221"),
+    Klage(kodeverksverdi = "ae0058"),
+    Anke(kodeverksverdi = "ae0046")
 }
 
 // https://github.com/navikt/kodeverksmapper/blob/master/web/src/main/resources/underkategori.csv
@@ -81,6 +83,15 @@ enum class Gjelder(
     PleiepengerPårørende(
         tekst = "Pleiepenger pårørende",
         behandlingstema = Behandlingstema.PleiepengerPårørende
+    ),
+    /** Felles **/
+    Klage(
+        tekst = "Klage",
+        behandlingstype = Behandlingstype.Klage
+    ),
+    Anke(
+        tekst = "Anke",
+        behandlingstype = Behandlingstype.Anke
     ),
     /** Annet **/
     Annet(
