@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -26,6 +27,7 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -34,6 +36,7 @@ import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -48,8 +51,8 @@ internal class PleiepengerSyktBarnRoutes(
     private val k9SakService: K9SakService,
     private val journalpostRepository: JournalpostRepository,
     private val punsjbolleService: PunsjbolleService,
+    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI) {
 
-    ) {
     private companion object {
         private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
         private const val SøknadIdKey = "soeknad_id"
@@ -189,8 +192,10 @@ internal class PleiepengerSyktBarnRoutes(
                                 .json()
                                 .bodyValueAndAwait(OasFeil(feil.second))
                         }
+
                         return@RequestContext ServerResponse
                             .accepted()
+                            .location(k9SakFrontendUrl(søknadK9Format.first))
                             .json()
                             .bodyValueAndAwait(søknadK9Format.first)
 
@@ -322,6 +327,13 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
     }
+
+    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
+        søker = søknad.søker.personIdent.verdi,
+        barn = søknad.getYtelse<PleiepengerSyktBarn>().barn.personIdent.verdi,
+        søknad = søknad,
+        correlationId = coroutineContext.hentCorrelationId()
+    ).let { URI("$k9SakFrontend/fagsak/$it") }
 
     private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): Pair<List<PeriodeDto>?, String?>? {
         if (format.søker?.norskIdentitetsnummer == null || format.ytelse?.barn?.norskIdentitetsnummer == null) {

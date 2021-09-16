@@ -100,3 +100,5 @@ spec:
       value: "srvk9sak"
     - name: APP_NAISSTS_discovery_url
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
+    - name: K9SAK_FRONTEND
+      value: https://app.adeo.no/k9/web
