@@ -1,5 +1,6 @@
 package no.nav.k9punsj
 
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -119,6 +120,13 @@ class TestContext {
         ) = require(journalpostId != null || periode != null) {
             "Må sette minst en av journalpostId og periode"
         }.let { SaksnummerDto(dummySaksnummer) }
+
+        override suspend fun opprettEllerHentFagsaksnummer(
+            søker: NorskIdentDto,
+            barn: NorskIdentDto,
+            søknad: Søknad,
+            correlationId: CorrelationId
+        ) = SaksnummerDto(dummySaksnummer)
 
         override suspend fun ruting(
             søker: NorskIdentDto,

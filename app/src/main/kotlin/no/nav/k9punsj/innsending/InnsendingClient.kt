@@ -6,13 +6,14 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
 interface InnsendingClient {
-    fun mapSøknad(søknadId: String, søknad: Any, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
-        val søknad: Map<String, *> = objectMapper.convertValue(søknad)
+    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
+        val søknadMap = søknad.somMap()
         val behovssekvensId = ulid.nextULID()
 
         logger.info("Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",
@@ -26,13 +27,13 @@ interface InnsendingClient {
             behov = arrayOf(Behov(
                 navn = PunsjetSøknadBehovNavn,
                 input = tilleggsOpplysninger
-                    .plus(PunsjetSøknadSøknadKey to søknad)
+                    .plus(PunsjetSøknadSøknadKey to søknadMap)
                     .plus(VersjonKey to PunsjetSøknadVersjon)
             ))
         ).keyValue
     }
 
-    fun sendSøknad(søknadId: String, søknad: Any, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
+    fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
         send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 
@@ -82,5 +83,7 @@ interface InnsendingClient {
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> "PleiepengerSyktBarn"
             else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
         }
+
+        internal fun Søknad.somMap() : Map<String, *> = objectMapper.convertValue(this)
     }
 }
