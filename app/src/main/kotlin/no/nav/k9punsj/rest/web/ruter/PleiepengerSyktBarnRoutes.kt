@@ -333,7 +333,7 @@ internal class PleiepengerSyktBarnRoutes(
         barn = søknad.getYtelse<PleiepengerSyktBarn>().barn.personIdent.verdi,
         søknad = søknad,
         correlationId = coroutineContext.hentCorrelationId()
-    ).let { URI("$k9SakFrontend/fagsak/$it") }
+    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
     private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): Pair<List<PeriodeDto>?, String?>? {
         if (format.søker?.norskIdentitetsnummer == null || format.ytelse?.barn?.norskIdentitetsnummer == null) {
