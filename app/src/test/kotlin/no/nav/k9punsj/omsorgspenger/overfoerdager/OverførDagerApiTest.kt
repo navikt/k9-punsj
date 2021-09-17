@@ -82,34 +82,6 @@ internal class OverførDagerApiTest {
     }
 
     @Test
-    fun `Ugyldig skjema om overføring gir 400`() {
-        @Language("json")
-        val req =
-                """
-            {
-              "journalpostIder": [
-                "466988237"
-              ],
-              "søknad": {},
-              "dedupKey": "01EJTT64E3PG3DX4HKA5Z7JR75"
-            }
-            """.trimIndent()
-
-        val response = client.post()
-                .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
-                .body(BodyInserters.fromValue(req))
-                .header("content-type", "application/json")
-                .awaitExchangeBlocking()
-
-        val responseBody = response.body(BodyExtractors.toMono(ExceptionResponse::class.java)).block()
-
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(responseBody?.exceptionId).isNotBlank()
-        assertThat(responseBody?.message).isNotBlank()
-        assertThat(responseBody?.uri.toString()).isNotBlank()
-    }
-
-    @Test
     fun `Uhåndtert exception gir 500 response`() {
         val fellesIdNummer = "23098025855"
 

@@ -3,10 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <flyway-core.version>7.9.1</flyway-core.version>
-        <vault-jdbc.version>1.3.7</vault-jdbc.version>
-        <HikariCP.version>4.0.3</HikariCP.version>
+        <flyway-core.version>7.15.0</flyway-core.version>
+        <vault-jdbc.version>1.3.9</vault-jdbc.version>
+        <HikariCP.version>5.0.0</HikariCP.version>
         <kotliquery.version>1.3.1</kotliquery.version>
+        <embedded-postgres-version>1.3.0</embedded-postgres-version>
+        <gson.version>2.8.8</gson.version>
+        <fuel.version>2.3.1</fuel.version>
     </properties>
     <parent>
         <groupId>no.nav.k9</groupId>
@@ -162,23 +165,23 @@
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-postgres</artifactId>
-            <version>1.2.10</version>
+            <version>${embedded-postgres-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.7</version>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.kittinunf.fuel</groupId>
             <artifactId>fuel</artifactId>
-            <version>2.3.1</version>
+            <version>${fuel.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.kittinunf.fuel</groupId>
             <artifactId>fuel-coroutines</artifactId>
-            <version>2.3.1</version>
+            <version>${fuel.version}</version>
         </dependency>
     </dependencies>
 

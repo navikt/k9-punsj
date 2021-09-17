@@ -43,8 +43,8 @@ internal class OverførDagerConverterTest {
         val mappet = OverførDagerConverter.map(overførDagerDTO)
 
         assertThat(mappet.fra.identitetsnummer).isEqualTo(søknad.norskIdent)
-        assertThat(mappet.fra.jobberINorge).isTrue()
-        assertThat(mappet.til.harBoddSammenMinstEttÅr).isTrue()
+        assertThat(mappet.fra.jobberINorge).isTrue
+        assertThat(mappet.til.harBoddSammenMinstEttÅr).isTrue
         assertThat(mappet.til.identitetsnummer).isEqualTo(søknad.omsorgenDelesMed.norskIdent)
         assertThat(mappet.til.relasjon).isEqualTo(OverføreOmsorgsdagerBehov.Relasjon.NåværendeSamboer)
         assertThat(mappet.omsorgsdagerÅOverføre).isEqualTo(søknad.omsorgenDelesMed.antallOverførteDager)
@@ -58,6 +58,6 @@ internal class OverførDagerConverterTest {
         }
         assertThat(mappet.journalpostIder).hasSize(1)
         assertThat(mappet.journalpostIder[0]).isEqualTo(journalpostId)
-        assertThat(mappet.mottaksdato).isEqualTo(mottaksdato)
+        assertThat(mappet.mottatt.toLocalDate()).isEqualTo(mottaksdato)
     }
 }
