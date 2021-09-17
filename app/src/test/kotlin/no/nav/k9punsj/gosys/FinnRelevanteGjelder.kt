@@ -22,10 +22,10 @@ internal class FinnRelevanteGjelder {
             .filterNot { it in kodeverkEntriesSomIkkeSkalBrukes }
 
         println("Antall: ${alle.size}")
-        val finnesIPunsj = alle.filter { it.somGjelderOrNull() != null }
+        val finnesIPunsj = alle.filter { it.somAktivGjelderOrNull() != null }
         println("Finnes i Punsj: ${finnesIPunsj.size}")
-        finnesIPunsj.forEach { println(" - $it (${it.somGjelderOrNull()})") }
-        val ugyldigeGjelderIPunsj = Gjelder.values().toList().minus(Gjelder.Annet).minus(alle.mapNotNull { it.somGjelderOrNull() })
+        finnesIPunsj.forEach { println(" - $it (${it.somAktivGjelderOrNull()})") }
+        val ugyldigeGjelderIPunsj = Gjelder.aktive().minus(Gjelder.Annet).minus(alle.mapNotNull { it.somAktivGjelderOrNull() })
         println("Ugyldige verdier i Punsj: ${ugyldigeGjelderIPunsj.size}")
         ugyldigeGjelderIPunsj.forEach { println(" - $it") }
         val manglerIPunsj = alle.minus(finnesIPunsj)
@@ -51,7 +51,10 @@ internal class FinnRelevanteGjelder {
         private val underkategorierSomIkkeTilbysIPunsj = listOf(
             "VEDTAK_OMS", "UTBETALING_OMS", "UTLAND_OMS", "TIDLIG_HJEMSENDT_OMS",
             "HJEMSENDT_NY_OMS", "SAM_BS_OMS", "FEILUTB_UTL_OMS", "FEILUTB_OMS",
-            "EU_EOS_NY_BEH_OMS", "MEDLEM_OMS", "KLAGE_ANKE_OMS", "PART_OMS"
+            "EU_EOS_NY_BEH_OMS", "MEDLEM_OMS", "KLAGE_ANKE_OMS", "PART_OMS",
+            "PLEIEPENGERIN_OMS", "OMSPNG_UTBET_OMS", "OMSPNG_OVERFOR_OMS",
+            "PLPNG_NY_DIG_ETT_OMS", "OMSPNG_SELVS_OMS", "OMSPNG_ANSATTE_OMS",
+            "OMSPNG_DIG_ETT_OMS"
         )
 
         data class KodeverkEntry(
@@ -59,7 +62,7 @@ internal class FinnRelevanteGjelder {
             val behandlingstema: String?,
             val behandlingstype: String?,
             val tema: String) {
-            fun somGjelderOrNull() = Gjelder.values()
+            fun somAktivGjelderOrNull() = Gjelder.aktive()
                 .firstOrNull { behandlingstema == it.behandlingstema?.kodeverksverdi && behandlingstype == it.behandlingstype?.kodeverksverdi}
         }
 

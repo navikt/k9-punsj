@@ -29,7 +29,8 @@ enum class Behandlingstype(
 enum class Gjelder(
     internal val tekst: String,
     internal val behandlingstema: Behandlingstema? = null,
-    internal val behandlingstype: Behandlingstype? = null) {
+    internal val behandlingstype: Behandlingstype? = null,
+    internal val aktiv: Boolean = true) {
     /** Pleiepenger sykt barn **/
     PleiepengerSyktBarn(
         tekst = "Pleiepenger ny ordning",
@@ -37,12 +38,14 @@ enum class Gjelder(
     ),
     PleiepengerVedInstitusjonsopphold(
         tekst = "Pleiepenger institusjon",
-        behandlingstema = Behandlingstema.PleiepengerVedInstitusjonsopphold
+        behandlingstema = Behandlingstema.PleiepengerVedInstitusjonsopphold,
+        aktiv = false
     ),
     DigitalEttersendelsePleiepengerSyktBarn(
         tekst = "Pleiepenger ny ordning - digital ettersendelse",
         behandlingstema = Behandlingstema.PleiepengerSyktBarn,
-        behandlingstype = Behandlingstype.DigitalEttersendelse
+        behandlingstype = Behandlingstype.DigitalEttersendelse,
+        aktiv = false
     ),
     /** Omsorgspenger **/
     Omsorgspenger(
@@ -52,27 +55,32 @@ enum class Gjelder(
     DigitalEttersendelseOmsorgspenger(
         tekst = "Omsorgspenger - digital ettersendelse",
         behandlingstema = Behandlingstema.Omsorgspenger,
-        behandlingstype = Behandlingstype.DigitalEttersendelse
+        behandlingstype = Behandlingstype.DigitalEttersendelse,
+        aktiv = false
     ),
     OverføreOmsorgsdager(
         tekst = "Omsorgspenger - overføring",
         behandlingstema = Behandlingstema.Omsorgspenger,
-        behandlingstype = Behandlingstype.Overføring
+        behandlingstype = Behandlingstype.Overføring,
+        aktiv = false
     ),
     UtbetaleOmsorgspenger(
         tekst = "Omsorgspenger - utbetaling",
         behandlingstema = Behandlingstema.Omsorgspenger,
-        behandlingstype = Behandlingstype.Utbetaling
+        behandlingstype = Behandlingstype.Utbetaling,
+        aktiv = false
     ),
     OmsorgspengerForAnsatte(
         tekst = "Omsorgspenger — Ansatte",
         behandlingstema = Behandlingstema.Omsorgspenger,
-        behandlingstype = Behandlingstype.Ansatte
+        behandlingstype = Behandlingstype.Ansatte,
+        aktiv = false
     ),
     OmsorgspengerSelvstendigNæringsdrivende(
         tekst = "Omsorgspenger — Selvst næringsdrivende",
         behandlingstema = Behandlingstema.Omsorgspenger,
-        behandlingstype = Behandlingstype.SelvstendigNæringsdrivende
+        behandlingstype = Behandlingstype.SelvstendigNæringsdrivende,
+        aktiv = false
     ),
     /** Opplæringspenger **/
     Opplæringspenger(
@@ -99,7 +107,8 @@ enum class Gjelder(
     );
 
     internal companion object {
-        internal val JSON = values()
+        internal fun aktive() = values().filter { it.aktiv }
+        internal val JSON = aktive()
             .associate { it.name to it.tekst }
             .let { objectMapper().writeValueAsString(it) }
     }
