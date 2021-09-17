@@ -155,12 +155,11 @@ class RestPunsjbolleService(
     private suspend fun String.post(
         requestBody: Any,
         correlationId: CorrelationId) : Triple<URI, Response, String> {
-        val requestBody = objectMapper().serialiser(requestBody)
         val url = URI("${baseUrl}/$this")
 
         val (_, response, result) = "$url"
             .httpPost()
-            .body(requestBody)
+            .body(objectMapper().serialiser(requestBody))
             .header(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
