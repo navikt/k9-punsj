@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.eksternt.punsjbollen
 
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
@@ -21,6 +22,13 @@ class PunsjbolleServiceLokalt : PunsjbolleService {
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
+
+    override suspend fun opprettEllerHentFagsaksnummer(
+        søker: NorskIdentDto,
+        barn: NorskIdentDto,
+        søknad: Søknad,
+        correlationId: CorrelationId
+    ) = SaksnummerDto("SAK1")
 
     override suspend fun ruting(
         søker: NorskIdentDto,
