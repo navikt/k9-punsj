@@ -4,7 +4,7 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.wiremock.k9SakToken
-import org.junit.Assert
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
@@ -27,6 +27,6 @@ class JournalpostInfoRoutesTest{
         }.header(HttpHeaders.AUTHORIZATION, k9sakToken)
 
         val runBlocking = runBlocking { res.awaitExchange() }
-        Assert.assertEquals(HttpStatus.OK, runBlocking.statusCode())
+        assertEquals(HttpStatus.OK, runBlocking.statusCode())
     }
 }
