@@ -1,6 +1,7 @@
 package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
+import no.nav.k9punsj.omsorgspenger.delingavomsorgsdager.DelingAvOmsorgsdagerConverter.Companion.osloNå
 
 internal class OverførDagerConverter {
 
@@ -39,7 +40,7 @@ internal class OverførDagerConverter {
                     },
                     kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
                     journalpostIder = journalpostIder,
-                    mottaksdato = mottaksdato
+                    mottatt = mottaksdato.osloNå()
             )
         }
     }

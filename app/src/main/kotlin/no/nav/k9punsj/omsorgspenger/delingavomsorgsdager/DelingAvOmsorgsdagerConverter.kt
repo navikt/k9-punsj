@@ -1,10 +1,14 @@
 package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 
 import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
+import java.time.*
 
 internal class DelingAvOmsorgsdagerConverter {
 
     companion object {
+        private val Oslo = ZoneId.of("Europe/Oslo")
+        internal fun LocalDate.osloNå() = ZonedDateTime.of(LocalDateTime.of(this, LocalTime.now(Oslo)), Oslo)
+
         fun map(dto: DelingAvOmsorgsdagerDTO): OverføreOmsorgsdagerBehov {
             val (journalpostIder, søknad) = dto
             val (mottaksdato, identitetsnummer, arbeidssituasjon, _, aleneOmOmsorgen, barn, omsorgenDelesMed) = søknad
@@ -39,7 +43,7 @@ internal class DelingAvOmsorgsdagerConverter {
                     },
                     kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
                     journalpostIder = journalpostIder,
-                    mottaksdato = mottaksdato
+                    mottatt = mottaksdato.osloNå()
             )
         }
     }
