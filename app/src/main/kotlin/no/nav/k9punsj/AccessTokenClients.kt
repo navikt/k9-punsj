@@ -42,7 +42,8 @@ internal class AccessTokenClients(
     private val naisStsClient = ClientSecretAccessTokenClient(
         clientId = clientId,
         clientSecret = clientSecret,
-        tokenEndpoint = stsTokenEndpoint
+        tokenEndpoint = stsTokenEndpoint,
+        authenticationMode = ClientSecretAccessTokenClient.AuthenticationMode.BASIC
     )
 
     private val signedJwtAzureAccessTokenClient = SignedJwtAccessTokenClient(
