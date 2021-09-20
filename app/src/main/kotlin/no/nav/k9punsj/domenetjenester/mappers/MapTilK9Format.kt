@@ -58,7 +58,7 @@ internal class MapTilK9Format {
             })
 
             val feil = validator.valider(søknadK9Format)
-            // TODO: Dette er riktig når vi endrer til k9-format >= 5.4.17
+            // TODO: Dette er riktig når vi endrer til k9-format som utleder endringsperioder
             //val feil = validator.valider(søknadK9Format, perioderSomFinnesIK9.somK9Perioder())
 
             return Pair(søknadK9Format, feil)
@@ -94,7 +94,7 @@ internal class MapTilK9Format {
             barn?.let { pleiepengerSyktBarn.medBarn(it) }
             søknadsperiode?.let { pleiepengerSyktBarn.medSøknadsperiode(it) }
 
-            // TODO: Fjernes når vi endrer til k9-format >= 5.4.17
+            // TODO: Fjernes når vi endrer til k9-format som utleder endringsperioder
             pleiepengerSyktBarn.medEndringsperiode(endringsperioder)
 
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
