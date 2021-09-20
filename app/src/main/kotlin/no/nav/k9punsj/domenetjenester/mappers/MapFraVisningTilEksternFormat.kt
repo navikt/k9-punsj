@@ -88,6 +88,7 @@ internal class MapFraVisningTilEksternFormat {
                 omsorg = if (søknad.omsorg?.relasjonTilBarnet.isNullOrEmpty()) null else mapOmsorg(søknad.omsorg!!),
                 harInfoSomIkkeKanPunsjes = søknad.harInfoSomIkkeKanPunsjes,
                 harMedisinskeOpplysninger = søknad.harMedisinskeOpplysninger,
+                trekkKravPerioder = søknad.trekkKravPerioder.map { fromPeriodeDtoToString(it) }.toSet()
             )
         }
 

@@ -28,9 +28,8 @@ data class PleiepengerSøknadVisningDto(
     val soknadsinfo: DataBruktTilUtledningDto? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
-    val harMedisinskeOpplysninger : Boolean
-
-) {
+    val harMedisinskeOpplysninger : Boolean,
+    val trekkKravPerioder: Set<PeriodeDto> = emptySet()) {
     data class BarnDto(
         val norskIdent: NorskIdentDto?,
         @JsonFormat(pattern = "yyyy-MM-dd")
