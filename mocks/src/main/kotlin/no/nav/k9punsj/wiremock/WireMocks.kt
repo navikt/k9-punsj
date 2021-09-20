@@ -36,5 +36,6 @@ fun initWireMock(
         .stubNaisStsTokenResponsePost()
         .stubNaisStsTokenResponsePut()
         .stubPdlHenteAktøridOkPost()
+        .stubGosys()
 
 
