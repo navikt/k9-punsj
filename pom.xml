@@ -27,7 +27,7 @@
         <dusseldorf-ktor.version>2.1.6.3-bbb6831</dusseldorf-ktor.version>
         <k9-rapid.version>1.20210916120916-75a25d9</k9-rapid.version>
         <k9-sak.version>3.2.20</k9-sak.version>
-        <k9-format.version>5.4.20</k9-format.version>
+        <k9-format.version>5.4.21</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
         <mockk.version>1.12.0</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
