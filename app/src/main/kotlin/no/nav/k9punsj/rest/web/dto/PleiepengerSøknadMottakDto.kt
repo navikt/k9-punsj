@@ -34,8 +34,8 @@ data class PleiepengerSøknadMottakDto(
         val uttak: UttakDto?,
         val omsorg: OmsorgDto?,
         val harInfoSomIkkeKanPunsjes : Boolean,
-        val harMedisinskeOpplysninger : Boolean
-    ) {
+        val harMedisinskeOpplysninger : Boolean,
+        val trekkKravPerioder: Set<String> = emptySet()) {
 
         data class BarnDto(
             val norskIdentitetsnummer: NorskIdentDto?,

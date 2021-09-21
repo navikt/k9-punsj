@@ -97,6 +97,8 @@ internal class MapTilK9Format {
             // TODO: Fjernes når vi endrer til k9-format som utleder endringsperioder
             pleiepengerSyktBarn.medEndringsperiode(endringsperioder)
 
+            pleiepengerSyktBarn.addAllTrekkKravPerioder(psb.trekkKravPerioder.map { Periode(it) })
+
             opptjeningAktivitet?.let { pleiepengerSyktBarn.medOpptjeningAktivitet(it) }
             databruktTilUtledning?.let { pleiepengerSyktBarn.medSøknadInfo(it) }
 
