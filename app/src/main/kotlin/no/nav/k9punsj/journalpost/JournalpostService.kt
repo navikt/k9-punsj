@@ -2,6 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -56,7 +57,9 @@ class JournalpostService(
                     aktørId = aktørId,
                     mottattDato = mottattDato,
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
-                    kanOpprettesJournalføringsoppgave = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus
+                    kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also { if (!it) {
+                        logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}", keyValue("journalpost_id", journalpostId))
+                    }}
                 )
             }
         }
