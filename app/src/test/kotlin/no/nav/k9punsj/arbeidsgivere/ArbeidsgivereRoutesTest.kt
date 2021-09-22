@@ -24,7 +24,7 @@ internal class ArbeidsgivereRoutesTest {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
-    fun `hente arbeidsgivere`() {
+    fun `hente arbeidsgivere for person som har arbeidsgivere`() {
         @Language("JSON")
         val forventetResponse = """
             {
@@ -34,17 +34,32 @@ internal class ArbeidsgivereRoutesTest {
               }]
             }
         """.trimIndent()
-        val (httpStatus, response) = "/api/arbeidsgivere".get()
+        val (httpStatus, response) = "/api/arbeidsgivere".get("11111111111")
         assertEquals(HttpStatus.OK, httpStatus)
         JSONAssert.assertEquals(forventetResponse, response, true)
     }
 
-    private fun String.get(): Pair<HttpStatus, String?> = this.let { path -> runBlocking {
+    @Test
+    fun `hente arbeidsgivere for person som ikke har arbeidsgivere`() {
+        @Language("JSON")
+        val forventetResponse = """
+            {
+              "arbeidsgivere": []
+            }
+        """.trimIndent()
+        val (httpStatus, response) = "/api/arbeidsgivere".get("22222222222")
+        assertEquals(HttpStatus.OK, httpStatus)
+        JSONAssert.assertEquals(forventetResponse, response, true)
+    }
+
+    private fun String.get(
+        identitetsnummer: String
+    ): Pair<HttpStatus, String?> = this.let { path -> runBlocking {
         client.get()
             .uri { it.path(path).build() }
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", "11111111111")
+            .header("X-Nav-NorskIdent", identitetsnummer)
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
     }}
 }
