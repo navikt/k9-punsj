@@ -18,7 +18,7 @@ internal class ArbeidsgiverRoutes(
 
     @Bean
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
-        GET("/arbeidgivere") { request ->
+        GET("/api/arbeidsgivere") { request ->
             RequestContext(coroutineContext, request) {
                 ServerResponse
                     .status(HttpStatus.OK)

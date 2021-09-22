@@ -12,8 +12,8 @@ internal class ArbeidsgiverService() {
         tom: LocalDate = LocalDate.now(Oslo).plusMonths(6)) : Set<Arbeidsgiver> {
         return setOf(
             Arbeidsgiver(
-                organisasjonsnummer = "987676789",
-                navn = "Kiwi AS"
+                organisasjonsnummer = "979312059",
+                navn = "NAV AS"
         ))
     }
 
