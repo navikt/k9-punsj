@@ -9,10 +9,7 @@ import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
-import no.nav.k9.søknad.felles.type.Journalpost
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
-import no.nav.k9.søknad.felles.type.Periode
-import no.nav.k9.søknad.felles.type.SøknadId
+import no.nav.k9.søknad.felles.type.*
 import no.nav.k9.søknad.ytelse.psb.v1.*
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
@@ -77,8 +74,17 @@ internal class MapTilK9Format {
             val databruktTilUtledning: DataBruktTilUtledning? =
                 if (psb.soknadsinfo != null) objectMapper.convertValue(psb.soknadsinfo) else null
             val bosteder: Bosteder? = if (psb.bosteder != null) objectMapper.convertValue(psb.bosteder) else null
-            val utenlandsopphold: Utenlandsopphold? =
-                if (psb.utenlandsopphold != null) objectMapper.convertValue(psb.utenlandsopphold) else null
+
+            val utenlandsopphold = psb.utenlandsopphold?.let { punsjUtelandsopphold ->
+                val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
+                punsjUtelandsopphold.perioder?.forEach { (punsjPeriode, punsjInfo) ->
+                    k9Utenlandsopphold[Periode(punsjPeriode)] = Utenlandsopphold.UtenlandsoppholdPeriodeInfo()
+                        .let { if (punsjInfo.land == null) it else it.medLand(Landkode.of(punsjInfo.land)) }
+                        .let { if (punsjInfo.årsak == null) it else it.medÅrsak(Utenlandsopphold.UtenlandsoppholdÅrsak.valueOf(punsjInfo.årsak)) }
+                }
+                Utenlandsopphold().medPerioder(k9Utenlandsopphold)
+            }
+
             val beredskap: Beredskap? = if (psb.beredskap != null) objectMapper.convertValue(psb.beredskap) else null
             val nattevåk: Nattevåk? = if (psb.nattevåk != null) objectMapper.convertValue(psb.nattevåk) else null
             val tilsynsordning: Tilsynsordning? =
