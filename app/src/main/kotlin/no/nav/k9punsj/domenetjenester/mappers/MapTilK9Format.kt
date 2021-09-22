@@ -73,14 +73,24 @@ internal class MapTilK9Format {
                 if (psb.opptjeningAktivitet != null) objectMapper.convertValue(psb.opptjeningAktivitet) else null
             val databruktTilUtledning: DataBruktTilUtledning? =
                 if (psb.soknadsinfo != null) objectMapper.convertValue(psb.soknadsinfo) else null
-            val bosteder: Bosteder? = if (psb.bosteder != null) objectMapper.convertValue(psb.bosteder) else null
 
+            /** Bosteder **/
+            val bosteder = psb.bosteder?.let { punsjBosteder ->
+                val k9Bosteder = mutableMapOf<Periode, Bosteder.BostedPeriodeInfo>()
+                punsjBosteder.perioder?.filterKeys { it.isNotBlank() }?.forEach { (punsjPeriode, punsjInfo) ->
+                    k9Bosteder[Periode(punsjPeriode)] = Bosteder.BostedPeriodeInfo()
+                        .let { if (punsjInfo.land.isNullOrBlank()) it else it.medLand(Landkode.of(punsjInfo.land))}
+                }
+                Bosteder().medPerioder(k9Bosteder)
+            }
+
+            /** Utenlandsopphold **/
             val utenlandsopphold = psb.utenlandsopphold?.let { punsjUtelandsopphold ->
                 val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
-                punsjUtelandsopphold.perioder?.forEach { (punsjPeriode, punsjInfo) ->
+                punsjUtelandsopphold.perioder?.filterKeys { it.isNotBlank() }?.forEach { (punsjPeriode, punsjInfo) ->
                     k9Utenlandsopphold[Periode(punsjPeriode)] = Utenlandsopphold.UtenlandsoppholdPeriodeInfo()
-                        .let { if (punsjInfo.land == null) it else it.medLand(Landkode.of(punsjInfo.land)) }
-                        .let { if (punsjInfo.årsak == null) it else it.medÅrsak(Utenlandsopphold.UtenlandsoppholdÅrsak.valueOf(punsjInfo.årsak)) }
+                        .let { if (punsjInfo.land.isNullOrBlank()) it else it.medLand(Landkode.of(punsjInfo.land)) }
+                        .let { if (punsjInfo.årsak.isNullOrBlank()) it else it.medÅrsak(Utenlandsopphold.UtenlandsoppholdÅrsak.valueOf(punsjInfo.årsak)) }
                 }
                 Utenlandsopphold().medPerioder(k9Utenlandsopphold)
             }
