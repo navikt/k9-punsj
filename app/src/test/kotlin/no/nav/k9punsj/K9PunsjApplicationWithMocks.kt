@@ -1,11 +1,16 @@
 package no.nav.k9punsj
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
+import java.util.*
 
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
@@ -47,13 +52,23 @@ internal class K9PunsjApplicationWithMocks {
                 wireMockServer.stop()
             })
 
-            startup(
+            val applicationContext = startup(
                     wireMockServer = wireMockServer,
                     port = 8085,
                     azureV2Url = "http://localhost:8100/v2.0",
                     profiles = "local"
 
             )
+            runBlocking {
+                applicationContext?.getBean(JournalpostService::class.java)?.lagre(
+                    journalpost = Journalpost(
+                        uuid = UUID.randomUUID(),
+                        journalpostId = "56745674",
+                        aktørId = "56745674",
+                        type = "KOPI"
+                    )
+                )
+            }
         }
     }
 }
