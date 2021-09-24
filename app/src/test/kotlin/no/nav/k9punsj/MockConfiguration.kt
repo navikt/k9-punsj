@@ -51,7 +51,8 @@ internal object MockConfiguration {
             "APP_NAISSTS_aud" to "srvk9sak",
             "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl(),
             "ENABLE_ARBEIDSGIVER_APIS" to "true",
-            "AAREG_BASE_URL" to wireMockServer.getAaregBaseUrl()
+            "AAREG_BASE_URL" to wireMockServer.getAaregBaseUrl(),
+            "EREG_BASE_URL" to wireMockServer.getEregBaseUrl()
         )
     }
 }

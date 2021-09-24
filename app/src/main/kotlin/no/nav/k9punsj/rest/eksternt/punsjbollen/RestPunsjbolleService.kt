@@ -192,7 +192,7 @@ class RestPunsjbolleService(
         }.fold(
             onSuccess = { it },
             onFailure = {
-                throw IllegalStateException("Feil ved deserialisering av Response=$this")
+                throw IllegalStateException("Feil ved deserialisering av Response=$this", it)
             }
         )
 

@@ -38,5 +38,6 @@ fun initWireMock(
         .stubPdlHenteAktøridOkPost()
         .stubGosys()
         .stubAareg()
+        .stubEreg()
 
 

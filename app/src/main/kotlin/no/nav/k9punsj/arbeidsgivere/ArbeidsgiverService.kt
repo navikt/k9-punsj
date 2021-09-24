@@ -8,7 +8,8 @@ import java.time.LocalDate
 
 @Service
 internal class ArbeidsgiverService(
-    private val aaregClient: AaregClient) {
+    private val aaregClient: AaregClient,
+    private val eregClient: EregClient) {
 
     private val cache: Cache<Triple<String, LocalDate, LocalDate>, Arbeidsgivere> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
@@ -44,7 +45,7 @@ internal class ArbeidsgiverService(
         return Arbeidsgivere(
             organisasjoner = arbeidsforhold.organisasjoner.distinctBy { it.organisasjonsnummer }.map { OrganisasjonArbeidsgiver(
                 organisasjonsnummer = it.organisasjonsnummer,
-                navn = "NAV AS" // TODO
+                navn = eregClient.hentOrganisasjonnavn(it.organisasjonsnummer)
             )}.toSet()
         )
     }

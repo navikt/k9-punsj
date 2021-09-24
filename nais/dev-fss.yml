@@ -106,3 +106,5 @@ spec:
       value: "false"
     - name: AAREG_BASE_URL
       value: https://modapp-q1.adeo.no/aareg-services/api/v1
+    - name: EREG_BASE_URL
+      value: https://modapp-q1.adeo.no/ereg/api/v1
