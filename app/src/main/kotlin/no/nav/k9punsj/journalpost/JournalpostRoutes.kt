@@ -377,10 +377,9 @@ internal class JournalpostRoutes(
     private suspend fun utvidJournalpostMedMottattDato(
         jornalpostId: JournalpostId,
         mottattDato: LocalDateTime,
-        aktørId: AktørId?,
-    ) {
+        aktørId: AktørId?) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(jornalpostId)
-        if (journalpostFraBasen?.mottattDato != null) {
+        if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {
             return
         }
         if (journalpostFraBasen != null) {
