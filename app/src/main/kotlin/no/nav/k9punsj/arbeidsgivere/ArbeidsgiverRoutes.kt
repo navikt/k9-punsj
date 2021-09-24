@@ -3,6 +3,7 @@ package no.nav.k9punsj.arbeidsgivere
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.abac.IPepClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,23 +17,33 @@ import kotlin.coroutines.coroutineContext
 internal class ArbeidsgiverRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val arbeidsgiverService: ArbeidsgiverService,
+    private val pepClient: IPepClient,
     @Value("\${ENABLE_ARBEIDSGIVER_APIS}") private val enabled: Boolean) {
+
+    suspend fun String.harTilgang() =
+        pepClient.harBasisTilgang(this, ArbeidsgiverePath)
 
     @Bean
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
-        GET("/api/arbeidsgivere") { request ->
+        GET(ArbeidsgiverePath) { request ->
             RequestContext(coroutineContext, request) {
                 when (enabled) {
                     true -> {
-                        // TODO: Legge til abac-sjekk
-                        ServerResponse
-                            .status(HttpStatus.OK)
-                            .json()
-                            .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivere(
-                                identitetsnummer = request.identitetsnummer(),
-                                fom = request.fom(),
-                                tom = request.tom()
-                            ))
+                        if (request.identitetsnummer().harTilgang()) {
+                            ServerResponse
+                                .status(HttpStatus.OK)
+                                .json()
+                                .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivere(
+                                    identitetsnummer = request.identitetsnummer(),
+                                    fom = request.fom(),
+                                    tom = request.tom()
+                                ))
+                        } else {
+                            ServerResponse
+                                .status(HttpStatus.FORBIDDEN)
+                                .buildAndAwait()
+                        }
+
                     }
                     false -> ServerResponse
                         .status(HttpStatus.NOT_IMPLEMENTED)
@@ -43,6 +54,7 @@ internal class ArbeidsgiverRoutes(
     }
 
     private companion object {
+        private const val ArbeidsgiverePath = "/api/arbeidsgivere"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
             ?.let { LocalDate.parse(it) }
