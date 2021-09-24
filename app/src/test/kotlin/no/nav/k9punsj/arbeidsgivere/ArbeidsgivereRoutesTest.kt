@@ -28,7 +28,7 @@ internal class ArbeidsgivereRoutesTest {
         @Language("JSON")
         val forventetResponse = """
             {
-              "arbeidsgivere": [{
+              "organisasjoner": [{
                 "organisasjonsnummer": "979312059",
                 "navn": "NAV AS"
               }]
@@ -44,7 +44,7 @@ internal class ArbeidsgivereRoutesTest {
         @Language("JSON")
         val forventetResponse = """
             {
-              "arbeidsgivere": []
+              "organisasjoner": []
             }
         """.trimIndent()
         val (httpStatus, response) = "/api/arbeidsgivere".get("22222222222")

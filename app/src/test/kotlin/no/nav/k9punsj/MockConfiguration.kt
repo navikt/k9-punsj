@@ -49,7 +49,9 @@ internal object MockConfiguration {
             "K9PUNSJBOLLE_BASE_URL" to wireMockServer.getK9PunsjbolleBaseUrl(),
             "K9PUNSJBOLLE_SCOPE" to "k9-punsjbolle-id/.default",
             "APP_NAISSTS_aud" to "srvk9sak",
-            "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl()
+            "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl(),
+            "ENABLE_ARBEIDSGIVER_APIS" to "true",
+            "AAREG_BASE_URL" to wireMockServer.getNaisStsWellKnownUrl() // TODO
         )
     }
 }
