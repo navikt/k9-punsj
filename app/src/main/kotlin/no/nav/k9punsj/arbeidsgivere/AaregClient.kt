@@ -1,7 +1,7 @@
 package no.nav.k9punsj.arbeidsgivere
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.kittinunf.fuel.coroutines.awaitStringResponse
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -34,13 +34,15 @@ internal class AaregClient(
             "sporingsinformasjon=false&" +
             "historikk=false"
 
-        val (_, response, responseBody) = url.httpGet()
+        val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
             .header("Nav-Consumer-Token", authorizationHeader)
             .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
             .header("Nav-Personident", identitetsnummer)
             .header("Accept", "application/json")
-            .awaitStringResponse()
+            .awaitStringResponseResult()
+
+        val responseBody = result.fold(success = { it }, failure = { String(it.response.body().toByteArray()) })
 
         check(response.statusCode == 200) {
             "Uventet response fra Aareg. HttpStatus=${response.statusCode}, Response=$responseBody fra Url=$url"

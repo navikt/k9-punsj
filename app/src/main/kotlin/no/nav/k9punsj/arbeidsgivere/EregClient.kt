@@ -23,7 +23,7 @@ internal class EregClient(
             .header("Accept", "application/json")
             .awaitStringResponseResult()
 
-        val responseBody = result.fold(success = { it }, failure = { "$it" })
+        val responseBody = result.fold(success = { it }, failure = { String(it.response.body().toByteArray()) })
 
         check(response.statusCode == 200 || response.statusCode == 404) {
             "Uventet response fra Ereg. HttpStatus=${response.statusCode}, Response=$responseBody fra Url=$url"

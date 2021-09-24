@@ -70,7 +70,7 @@ internal class ArbeidsgiverRoutes(
         private fun ServerRequest.identitetsnummer(): String {
             return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {
                 "Mangler identitetsnummer"
-            }.also { require(it.matches("\\d{11,20}".toRegex())) {
+            }.also { require(it.matches("\\d{11}".toRegex())) {
                 "Ugyldig identitetsnummer"
             }}
         }
@@ -78,6 +78,8 @@ internal class ArbeidsgiverRoutes(
         private fun ServerRequest.organisasjonsnummer() =
             requireNotNull(queryParamOrNull("organisasjonsnummer")) {
                 "Mangler organisasjonsnummer"
-            }
+            }.also { require(it.matches("\\d{9}".toRegex())) {
+                "Ugyldig organisasjonsnummer"
+            }}
     }
 }
