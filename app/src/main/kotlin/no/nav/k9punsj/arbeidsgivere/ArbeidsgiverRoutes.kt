@@ -5,7 +5,6 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -18,8 +17,7 @@ import kotlin.coroutines.coroutineContext
 internal class ArbeidsgiverRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val arbeidsgiverService: ArbeidsgiverService,
-    private val pepClient: IPepClient,
-    @Value("\${ENABLE_ARBEIDSGIVER_APIS}") private val enabled: Boolean) {
+    private val pepClient: IPepClient) {
 
     suspend fun String.harTilgang() =
         pepClient.harBasisTilgang(this, ArbeidsgiverePath)
@@ -28,26 +26,18 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgiverePath) { request ->
             RequestContext(coroutineContext, request) {
-                when (enabled) {
-                    true -> {
-                        if (request.identitetsnummer().harTilgang()) {
-                            ServerResponse
-                                .status(HttpStatus.OK)
-                                .json()
-                                .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivere(
-                                    identitetsnummer = request.identitetsnummer(),
-                                    fom = request.fom(),
-                                    tom = request.tom()
-                                ))
-                        } else {
-                            ServerResponse
-                                .status(HttpStatus.FORBIDDEN)
-                                .buildAndAwait()
-                        }
-
-                    }
-                    false -> ServerResponse
-                        .status(HttpStatus.NOT_IMPLEMENTED)
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivere(
+                            identitetsnummer = request.identitetsnummer(),
+                            fom = request.fom(),
+                            tom = request.tom()
+                        ))
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
             }
