@@ -11,7 +11,12 @@ internal class ArbeidsgiverService(
     private val aaregClient: AaregClient,
     private val eregClient: EregClient) {
 
-    private val cache: Cache<Triple<String, LocalDate, LocalDate>, Arbeidsgivere> = Caffeine.newBuilder()
+    private val arbeidsgivereCache: Cache<Triple<String, LocalDate, LocalDate>, Arbeidsgivere> = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(10))
+        .maximumSize(100)
+        .build()
+
+    private val organisasjonsnavnCache: Cache<String, String> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
         .maximumSize(100)
         .build()
@@ -22,14 +27,19 @@ internal class ArbeidsgiverService(
         tom: LocalDate) : Arbeidsgivere {
         val cacheKey = Triple(identitetsnummer,fom,tom)
 
-        return when (val cacheValue = cache.getIfPresent(cacheKey)) {
+        return when (val cacheValue = arbeidsgivereCache.getIfPresent(cacheKey)) {
             null -> slåOppArbeidsgivere(
                 identitetsnummer = identitetsnummer,
                 fom = fom,
                 tom = tom
-            ).also { cache.put(cacheKey, it) }
+            ).also { arbeidsgivereCache.put(cacheKey, it) }
             else -> cacheValue
         }
+    }
+
+    internal suspend fun hentOrganisasjonsnavn(organisasjonsnummer: String) = when (val cacheValue = organisasjonsnavnCache.getIfPresent(organisasjonsnummer)) {
+        null -> slåOppOrganisasjonsnavn(organisasjonsnummer)?.also { organisasjonsnavnCache.put(organisasjonsnummer, it) }
+        else -> cacheValue
     }
 
     private suspend fun slåOppArbeidsgivere(
@@ -45,8 +55,13 @@ internal class ArbeidsgiverService(
         return Arbeidsgivere(
             organisasjoner = arbeidsforhold.organisasjoner.distinctBy { it.organisasjonsnummer }.map { OrganisasjonArbeidsgiver(
                 organisasjonsnummer = it.organisasjonsnummer,
-                navn = eregClient.hentOrganisasjonnavn(it.organisasjonsnummer)
+                navn = hentOrganisasjonsnavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig"
             )}.toSet()
         )
     }
+
+
+    private suspend fun slåOppOrganisasjonsnavn(
+        organisasjonsnummer: String
+    ) = eregClient.hentOrganisasjonsnavn(organisasjonsnummer)
 }

@@ -34,7 +34,7 @@ internal class ArbeidsgivereRoutesTest {
               }]
             }
         """.trimIndent()
-        val (httpStatus, response) = "/api/arbeidsgivere".get("11111111111")
+        val (httpStatus, response) = getArbeidsgivere("11111111111")
         assertEquals(HttpStatus.OK, httpStatus)
         JSONAssert.assertEquals(forventetResponse, response, true)
     }
@@ -47,19 +47,38 @@ internal class ArbeidsgivereRoutesTest {
               "organisasjoner": []
             }
         """.trimIndent()
-        val (httpStatus, response) = "/api/arbeidsgivere".get("22222222222")
+        val (httpStatus, response) = getArbeidsgivere("22222222222")
         assertEquals(HttpStatus.OK, httpStatus)
         JSONAssert.assertEquals(forventetResponse, response, true)
     }
 
-    private fun String.get(
+    @Test
+    fun `hente navn på arbeidsgiver som finnes`() {
+        val (httpStatus, response) = getArbeidsgiverNavn("979312059")
+        assertEquals(HttpStatus.OK, httpStatus)
+        JSONAssert.assertEquals("""{"navn":"NAV AS"}""", response, true)
+    }
+
+    @Test
+    fun `hente navn på arbeidsgiver som ikke finnes`() {
+        val (httpStatus, _) = getArbeidsgiverNavn("993110469")
+        assertEquals(HttpStatus.NOT_FOUND, httpStatus)
+    }
+
+    private fun getArbeidsgivere(
         identitetsnummer: String
-    ): Pair<HttpStatus, String?> = this.let { path -> runBlocking {
+    ): Pair<HttpStatus, String?> = runBlocking {
         client.get()
-            .uri { it.path(path).build() }
+            .uri { it.path("/api/arbeidsgivere").build() }
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", identitetsnummer)
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
-    }}
+    }
+
+    private fun getArbeidsgiverNavn(organisasjonsnummer: String): Pair<HttpStatus, String?> = runBlocking {
+        client.get()
+            .uri { it.path("/api/arbeidsgiver").queryParam("organisasjonsnummer", organisasjonsnummer).build() }
+            .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+    }
 }

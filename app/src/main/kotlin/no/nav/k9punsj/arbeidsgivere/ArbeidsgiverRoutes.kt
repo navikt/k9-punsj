@@ -1,6 +1,7 @@
 package no.nav.k9punsj.arbeidsgivere
 
 import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
@@ -53,6 +54,18 @@ internal class ArbeidsgiverRoutes(
         }
     }
 
+    @Bean
+    fun hentArbeidsgiverInfoRoute() = PublicRoutes {
+        GET("/api/arbeidsgiver") { request ->
+            RequestContext(coroutineContext, request) {
+                when (val navn = arbeidsgiverService.hentOrganisasjonsnavn(request.organisasjonsnummer())) {
+                    null -> ServerResponse.status(HttpStatus.NOT_FOUND).buildAndAwait()
+                    else -> ServerResponse.status(HttpStatus.OK).json().bodyValueAndAwait("""{"navn":"$navn"}""")
+                }
+            }
+        }
+    }
+
     private companion object {
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
         private val Oslo = ZoneId.of("Europe/Oslo")
@@ -71,5 +84,10 @@ internal class ArbeidsgiverRoutes(
                 "Ugyldig identitetsnummer"
             }}
         }
+
+        private fun ServerRequest.organisasjonsnummer() =
+            requireNotNull(queryParamOrNull("organisasjonsnummer")) {
+                "Mangler organisasjonsnummer"
+            }
     }
 }

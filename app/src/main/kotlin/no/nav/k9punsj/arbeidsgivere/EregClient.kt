@@ -1,7 +1,7 @@
 package no.nav.k9punsj.arbeidsgivere
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.kittinunf.fuel.coroutines.awaitStringResponse
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
@@ -14,14 +14,24 @@ import kotlin.coroutines.coroutineContext
 internal class EregClient(
     @Value("\${EREG_BASE_URL}") private val baseUrl: URI) {
 
-    internal suspend fun hentOrganisasjonnavn(organisasjonsummer: String) : String {
+    internal suspend fun hentOrganisasjonsnavn(organisasjonsummer: String) : String? {
         val url = "$baseUrl/organisasjon/$organisasjonsummer/noekkelinfo"
 
-        val (_, response, responseBody) = url.httpGet()
+        val (_, response, result) = url.httpGet()
             .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
             .header("Nav-Consumer-Id", "k9-punsj")
             .header("Accept", "application/json")
-            .awaitStringResponse()
+            .awaitStringResponseResult()
+
+        val responseBody = result.fold(success = { it }, failure = { "$it" })
+
+        check(response.statusCode == 200 || response.statusCode == 404) {
+            "Uventet response fra Ereg. HttpStatus=${response.statusCode}, Response=$responseBody fra Url=$url"
+        }
+
+        if (response.statusCode == 404) {
+            return null
+        }
 
         val eregNavn = responseBody.deserialiser<EregNøkkelinfo>().navn
         return listOf(

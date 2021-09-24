@@ -22,9 +22,25 @@ private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjon(): WireMockSer
     )
     return this
 }
+private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjonIkkeFunnet(
+    organisasjonsnummer: String
+): WireMockServer {
+    WireMock.stubFor(
+        WireMock.get(WireMock.urlPathMatching(".*$path/organisasjon/$organisasjonsnummer/noekkelinfo"))
+            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
+            .withHeader("Nav-Call-Id", AnythingPattern())
+            .withHeader("Accept", WireMock.equalTo("application/json"))
+            .willReturn(
+                WireMock.aResponse()
+                    .withStatus(404)
+            )
+    )
+    return this
+}
 
 fun WireMockServer.stubEreg() : WireMockServer =
     stubHentOrganisasjonNøkkelinformasjon()
+    .stubHentOrganisasjonNøkkelinformasjonIkkeFunnet("993110469")
 
 fun WireMockServer.getEregBaseUrl() = baseUrl() + path
 
