@@ -346,12 +346,12 @@ internal class MapTilK9FormatV2(
         private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
         private fun String?.erSatt() = !isNullOrBlank()
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
-        private val EtMinuttIMillis = Duration.ofMinutes(1).toMillis()
+        private val EnTimeInMillis = Duration.ofHours(1).toMillis()
         private fun String.somDuration() : Duration {
             kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
             if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
             if (somDesimalOrNull() != null) {
-                val millis = (somDesimalOrNull()!! * EtMinuttIMillis).roundToLong()
+                val millis = (somDesimalOrNull()!! * EnTimeInMillis).roundToLong()
                 return Duration.ofMillis(millis)
             }
             throw IllegalArgumentException("Ugyldig duration $this")

@@ -16,7 +16,7 @@ internal object PleiepengerSyktBarnMapper {
         perioderSomFinnesIK9: List<PeriodeDto>,
         journalpostIder: Set<String>,
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
-            if (!it.erLike) logger.warn("Søknader ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
+            if (!it.erLike) logger.warn("Mapping ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
         }): Pair<Søknad, List<Feil>> {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
             gammel = MapTilK9Format.mapTilEksternFormat(
