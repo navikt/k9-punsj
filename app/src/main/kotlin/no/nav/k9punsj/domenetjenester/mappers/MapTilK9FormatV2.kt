@@ -35,12 +35,6 @@ internal class MapTilK9FormatV2(
     private val søknad = Søknad()
     private val pleiepengerSyktBarn = PleiepengerSyktBarn()
     private val feil = mutableListOf<Feil>()
-    private val gammelMapping = MapTilK9Format.mapTilEksternFormat(
-        søknad = MapFraVisningTilEksternFormat.mapTilSendingsformat(dto),
-        soeknadId = søknadId,
-        journalpostIder = journalpostIder,
-        perioderSomFinnesIK9 = perioderSomFinnesIK9
-    )
 
     init { kotlin.runCatching {
         søknadId.leggTilSøknadId()
@@ -72,8 +66,8 @@ internal class MapTilK9FormatV2(
         feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
     }}
 
-    internal fun søknad() = gammelMapping.first //søknad
-    internal fun feil() = gammelMapping.second //feil.toList()
+    internal fun søknad() = søknad
+    internal fun feil() = feil.toList()
     internal fun søknadOgFeil() = søknad() to feil()
 
     private fun String.leggTilSøknadId() { if (erSatt()) {
