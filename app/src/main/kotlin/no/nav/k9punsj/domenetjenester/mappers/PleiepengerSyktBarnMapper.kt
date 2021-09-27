@@ -16,9 +16,13 @@ internal object PleiepengerSyktBarnMapper {
         perioderSomFinnesIK9: List<PeriodeDto>,
         journalpostIder: Set<String>,
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
-            if (!it.erLike) {
-                logger.warn("Mapping ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
-                logger.warn(it.søknaderSammenlignet.message)
+            if (it.forskjelligeSøknader && it.forskjelligeFeil) {
+                logger.warn("Søknad & feil ikke like. Søknadsforskjeller=[${it.søknaderSammenlignet.message}], Feilforskjeller=[${it.feilSammenlignet.message}]")
+            } else if (it.forskjelligeFeil) {
+                logger.warn("Feil ikke like. Feilforskjeller=[${it.feilSammenlignet.message}]")
+            } else if (it.forskjelligeSøknader) {
+                // TODO:Ikke logg i prod
+                logger.warn("Søknad ikke like. Søknadsforskjeller=[${it.søknaderSammenlignet.message}]")
             }
         }): Pair<Søknad, List<Feil>> {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -46,13 +50,12 @@ internal object PleiepengerSyktBarnMapper {
         internal val gamleFeilJson = JsonUtils.toString(gammel.second.map { it.toMap() })
         internal val nySøknadJson = JsonUtils.toString(ny.first)
         internal val nyeFeilJson = JsonUtils.toString(ny.second.filterNot {
-            it.felt.endsWith("PerDag") // TODO
+            it.felt.endsWith("PerDag") // Gamle mapping mapper null || blank = PT0S, blir null med ny mapping
         }.map { it.toMap() })
         internal val søknaderSammenlignet = JSONCompare.compareJSON(gammelSøknadJson, nySøknadJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
-        internal val søknaderErLike = søknaderSammenlignet.passed()
-        internal val feilErLike = feilSammenlignet.passed()
-        internal val erLike = søknaderErLike && feilErLike
+        internal val forskjelligeSøknader = søknaderSammenlignet.failed()
+        internal val forskjelligeFeil = feilSammenlignet.failed()
         private fun Feil.toMap() = mapOf(
             "felt" to felt,
             "feilkode" to feilkode,
