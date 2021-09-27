@@ -16,13 +16,13 @@ internal object PleiepengerSyktBarnMapper {
         perioderSomFinnesIK9: List<PeriodeDto>,
         journalpostIder: Set<String>,
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
-            if (it.forskjelligeSøknader && it.forskjelligeFeil) {
-                logger.warn("Søknad & feil ikke like. Søknadsforskjeller=[${it.søknaderSammenlignet.message}], Feilforskjeller=[${it.feilSammenlignet.message}]")
-            } else if (it.forskjelligeFeil) {
-                logger.warn("Feil ikke like. Feilforskjeller=[${it.feilSammenlignet.message}]")
+            if (it.forskjelligeFeil) {
+                logger.warn("Mapping ga forskjellige feil. GamleFeil=${it.gamleFeilJson}, NyeFeil=${it.nyeFeilJson}]")
             } else if (it.forskjelligeSøknader) {
-                // TODO:Ikke logg i prod
-                logger.warn("Søknad ikke like. Søknadsforskjeller=[${it.søknaderSammenlignet.message}]")
+                logger.warn("Mapping ga forskjellige søknader. Felt=${it.søknaderSammenlignet.fieldFailures.map { failure -> failure.field }}")
+                if (!isProd) {
+                    logger.warn("Søknadsforskjeller=[${it.søknaderSammenlignet.message}]")
+                }
             }
         }): Pair<Søknad, List<Feil>> {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -46,14 +46,15 @@ internal object PleiepengerSyktBarnMapper {
     internal data class Sammenligningsgrunnlag(
         internal val gammel: Pair<Søknad, List<Feil>>,
         internal val ny: Pair<Søknad, List<Feil>>) {
-        internal val gammelSøknadJson = JsonUtils.toString(gammel.first)
-        internal val gamleFeilJson = JsonUtils.toString(gammel.second.map { it.toMap() })
-        internal val nySøknadJson = JsonUtils.toString(ny.first)
-        internal val nyeFeilJson = JsonUtils.toString(ny.second.map { it.toMap() })
+        private val gammelSøknadJson = gammel.first.toJson()
+        internal val gamleFeilJson = gammel.second.map { it.toMap() }.toJson()
+        private val nySøknadJson = ny.first.toJson()
+        internal val nyeFeilJson = ny.second.map { it.toMap() }.toJson()
         internal val søknaderSammenlignet = JSONCompare.compareJSON(gammelSøknadJson, nySøknadJson, JSONCompareMode.NON_EXTENSIBLE)
-        internal val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
+        private val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val forskjelligeSøknader = søknaderSammenlignet.failed()
         internal val forskjelligeFeil = feilSammenlignet.failed()
+        private fun Any.toJson() = JsonUtils.getObjectMapper().writeValueAsString(this)
         private fun Feil.toMap() = mapOf(
             "felt" to felt,
             "feilkode" to feilkode,
@@ -62,4 +63,5 @@ internal object PleiepengerSyktBarnMapper {
     }
 
     private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnMapper::class.java)
+    private val isProd = System.getenv("NAIS_CLUSTER_NAME").let { it != null && it.lowercase().startsWith("prod") }
 }
