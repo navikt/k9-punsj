@@ -405,7 +405,7 @@ internal class MapTilK9FormatV2(
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
         private val EnTimeInMillis = Duration.ofHours(1).toMillis()
         private fun String?.somDuration() : Duration {
-            if (isNullOrBlank()) return Duration.ofSeconds(0) // TODO: Bør fjernes
+            if (isNullOrBlank()) return Duration.ofSeconds(0) // TODO: Bør fjernes, dette bør bli null (som om ikke satt)
             kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
             if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
             if (somDesimalOrNull() != null) {
