@@ -18,8 +18,7 @@ internal object PleiepengerSyktBarnMapper {
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
             if (!it.erLike) {
                 logger.warn("Mapping ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
-                logger.warn("NyeFeil=${it.nyeFeilJson}")
-                logger.warn("GamleFeil=${it.gamleFeilJson}")
+                logger.warn(it.søknaderSammenlignet.message)
             }
         }): Pair<Søknad, List<Feil>> {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -46,7 +45,9 @@ internal object PleiepengerSyktBarnMapper {
         internal val gammelSøknadJson = JsonUtils.toString(gammel.first)
         internal val gamleFeilJson = JsonUtils.toString(gammel.second.map { it.toMap() })
         internal val nySøknadJson = JsonUtils.toString(ny.first)
-        internal val nyeFeilJson = JsonUtils.toString(ny.second.map { it.toMap() })
+        internal val nyeFeilJson = JsonUtils.toString(ny.second.filterNot {
+            it.felt.endsWith("PerDag") // TODO
+        }.map { it.toMap() })
         internal val søknaderSammenlignet = JSONCompare.compareJSON(gammelSøknadJson, nySøknadJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val søknaderErLike = søknaderSammenlignet.passed()

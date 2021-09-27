@@ -123,8 +123,8 @@ internal class MapTilK9FormatV2(
                 k9Info.medLand(Landkode.of(utenlandsopphold.land))
             }
             if (utenlandsopphold.årsak.erSatt()) {
-                mapEllerLeggTilFeil("ytelse.utenlandsopphold.$k9Periode.årsak") {
-                    Utenlandsopphold.UtenlandsoppholdÅrsak.valueOf(utenlandsopphold.årsak!!)
+                mapEllerLeggTilFeil("ytelse.utenlandsopphold.[$k9Periode].årsak") {
+                    Utenlandsopphold.UtenlandsoppholdÅrsak.of(utenlandsopphold.årsak!!)
                 }?.also { k9Info.medÅrsak(it) }
             }
 
@@ -153,10 +153,16 @@ internal class MapTilK9FormatV2(
     private fun List<PleiepengerSøknadVisningDto.BeredskapDto>.leggTilBeredskap() {
         val k9Beredskap = mutableMapOf<Periode, Beredskap.BeredskapPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { beredskap ->
-            k9Beredskap[beredskap.periode!!.somK9Periode()!!] = Beredskap.BeredskapPeriodeInfo()
-                .let { if (beredskap.tilleggsinformasjon.erSatt()) it.medTilleggsinformasjon(beredskap.tilleggsinformasjon) else it }
+            val k9Periode = beredskap.periode!!.somK9Periode()!!
+            val k9Info = Beredskap.BeredskapPeriodeInfo()
+            if (beredskap.tilleggsinformasjon.erSatt()) {
+                k9Info.medTilleggsinformasjon(beredskap.tilleggsinformasjon)
+            }
+            k9Beredskap[k9Periode] = k9Info
         }
-        pleiepengerSyktBarn.medBeredskap(Beredskap().medPerioder(k9Beredskap))
+        if (k9Beredskap.isNotEmpty()) {
+            pleiepengerSyktBarn.medBeredskap(Beredskap().medPerioder(k9Beredskap))
+        }
     }
 
     private fun List<PleiepengerSøknadVisningDto.UttakDto>?.leggTilUttak(søknadsperiode: PeriodeDto?) {
@@ -174,7 +180,9 @@ internal class MapTilK9FormatV2(
             k9Uttak[søknadsperiode!!.somK9Periode()!!] = DefaultUttak
         }
 
-        pleiepengerSyktBarn.medUttak(Uttak().medPerioder(k9Uttak))
+        if (k9Uttak.isNotEmpty()) {
+            pleiepengerSyktBarn.medUttak(Uttak().medPerioder(k9Uttak))
+        }
     }
 
     private fun PleiepengerSøknadVisningDto.leggTilLovestemtFerie() {
@@ -211,63 +219,75 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.OmsorgDto.leggTilOmsorg() {
         val k9Omsorg = Omsorg()
-        mapEllerLeggTilFeil("omsorg.relasjonTilBarnet") {
-            relasjonTilBarnet?.let { Omsorg.BarnRelasjon.valueOf(it.uppercase()) }
+        mapEllerLeggTilFeil("ytelse.omsorg.relasjonTilBarnet") {
+            relasjonTilBarnet?.blankAsNull()?.let { Omsorg.BarnRelasjon.valueOf(it.uppercase()) }
         }?.also { k9Omsorg.medRelasjonTilBarnet(it) }
 
         if (beskrivelseAvOmsorgsrollen.erSatt()) {
             k9Omsorg.medBeskrivelseAvOmsorgsrollen(beskrivelseAvOmsorgsrollen!!)
         }
-
         pleiepengerSyktBarn.medOmsorg(k9Omsorg)
     }
 
     private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.leggTilOpptjeningAktivitet() {
         val k9OpptjeningAktivitet = OpptjeningAktivitet()
-        selvstendigNaeringsdrivende?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it.mapOpptjeningAktivitetSelvstendigNæringsdrivende()) }
+        selvstendigNaeringsdrivende?.mapOpptjeningAktivitetSelvstendigNæringsdrivende()?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it) }
         frilanser?.also { k9OpptjeningAktivitet.medFrilanser(it.mapOpptjeningAktivitetFrilanser()) }
         arbeidstaker?.also { k9OpptjeningAktivitet.medArbeidstaker(it.mapOpptjeningAktivitetArbeidstaker())}
         pleiepengerSyktBarn.medOpptjeningAktivitet(k9OpptjeningAktivitet)
     }
 
     private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende() : SelvstendigNæringsdrivende? {
+        val noeSatt = organisasjonsnummer.erSatt() || virksomhetNavn.erSatt() || info?.periode.erSatt()
+        if (!noeSatt) return null
+
         val k9SelvstendigNæringsdrivende = SelvstendigNæringsdrivende.builder()
         if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.organisasjonsnummer(Organisasjonsnummer.of(organisasjonsnummer))
         if (virksomhetNavn.erSatt()) k9SelvstendigNæringsdrivende.virksomhetNavn(virksomhetNavn)
+
         if (info?.periode.erSatt()) {
-            val k9Periode = info!!.periode!!.somK9Periode()
+            val k9Periode = info!!.periode!!.somK9Periode()!!
             val k9Info = SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo.builder()
-            if (info.erNyoppstartet != null) k9Info.erNyoppstartet(info.erNyoppstartet)
-            if (info.erVarigEndring != null) k9Info.erVarigEndring(info.erVarigEndring)
-            if (info.registrertIUtlandet != null) k9Info.registrertIUtlandet(info.registrertIUtlandet)
-            if (info.regnskapsførerNavn.erSatt()) k9Info.regnskapsførerNavn(info.regnskapsførerNavn)
-            if (info.regnskapsførerTlf.erSatt()) k9Info.regnskapsførerTelefon(info.regnskapsførerTlf)
-            // TODO: Mangler felter
+            info.registrertIUtlandet?.also { k9Info.registrertIUtlandet(it) }
+            info.regnskapsførerNavn?.also { k9Info.regnskapsførerNavn(it) }
+            info.regnskapsførerTlf?.also { k9Info.regnskapsførerTelefon(it) }
+            info.landkode?.blankAsNull()?.also { k9Info.landkode(Landkode.of(it)) }
+            info.bruttoInntekt?.also { k9Info.bruttoInntekt(it) }
+            info.erVarigEndring?.also { k9Info.erVarigEndring(it) }
+            info.endringDato?.also { k9Info.endringDato(it) }
+            info.endringBegrunnelse?.blankAsNull()?.also { k9Info.endringBegrunnelse(it) }
+            when (info.erNyoppstartet) {
+                null -> k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4))
+                else -> info.erNyoppstartet
+            }.also { k9Info.erNyoppstartet(it) }
+            when (info.erVarigEndring) {
+                true -> info.endringInntekt
+                else -> info.bruttoInntekt
+            }?.also { k9Info.bruttoInntekt(it) }
+
             if (!info.virksomhetstyper.isNullOrEmpty()) {
                 val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
                     virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA
                     virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
                     virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
                     virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
-                    else -> mapEllerLeggTilFeil("opptjening.selvstendigNæringsdrivende.$k9Periode.virksomhetstyper[$index]") {
+                    else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.[$k9Periode].virksomhetstyper[$index]") {
                         VirksomhetType.valueOf(virksomhetstype)
                     }
                 }}
                 k9Info.virksomhetstyper(k9Virksomhetstyper)
             }
+            k9SelvstendigNæringsdrivende.periode(k9Periode, k9Info.build())
         }
         return k9SelvstendigNæringsdrivende.build()
     }
 
     private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser() : Frilanser {
         val k9Frilanser = Frilanser()
-        if (jobberFortsattSomFrilans != null) {
-            k9Frilanser.medJobberFortsattSomFrilans(jobberFortsattSomFrilans)
-        }
-        if (startdato.erSatt()) mapEllerLeggTilFeil("opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
+        if (startdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
             k9Frilanser.medStartDato(it)
         }
-        if (startdato.erSatt()) mapEllerLeggTilFeil("opptjening.frilanser.sluttDato") { LocalDate.parse(sluttdato) }?.also {
+        if (startdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.sluttDato") { LocalDate.parse(sluttdato) }?.also {
             k9Frilanser.medSluttDato(it)
         }
         return k9Frilanser
@@ -303,7 +323,7 @@ internal class MapTilK9FormatV2(
         arbeidstaker.arbeidstidInfo?.perioder?.filter { it.periode.erSatt() }?.forEachIndexed{ index, periode ->
             val k9Periode = periode.periode!!.somK9Periode()!!
             val k9Info = ArbeidstidPeriodeInfo()
-            val felt = "arbeisdtid.arbeidstakerList[$index].arbeidstidInfo.perioder.$k9Periode"
+            val felt = "ytelse.arbeisdtid.arbeidstakerList[$index].arbeidstidInfo.perioder[$k9Periode]"
             if (periode.faktiskArbeidTimerPerDag.erSatt()) mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
                 periode.faktiskArbeidTimerPerDag!!.somDuration()
             }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
@@ -331,10 +351,11 @@ internal class MapTilK9FormatV2(
                 .medEtablertTilsynTimerPerDag(Duration
                     .ofHours(tilsynsordning.timer.toLong())
                     .plusMinutes(tilsynsordning.minutter.toLong()
-                    )
-                )
+                ))
         }
-        pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))
+        if (k9Tilsynsordning.isNotEmpty()) {
+            pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))
+        }
     }
 
     private fun <Til>mapEllerLeggTilFeil(felt: String, map: () -> Til?) = kotlin.runCatching {
@@ -357,6 +378,10 @@ internal class MapTilK9FormatV2(
         }
         private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
         private fun String?.erSatt() = !isNullOrBlank()
+        private fun String.blankAsNull() = when (isBlank()) {
+            true -> null
+            false -> this
+        }
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
         private val EnTimeInMillis = Duration.ofHours(1).toMillis()
         private fun String.somDuration() : Duration {
@@ -364,7 +389,11 @@ internal class MapTilK9FormatV2(
             if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
             if (somDesimalOrNull() != null) {
                 val millis = (somDesimalOrNull()!! * EnTimeInMillis).roundToLong()
-                return Duration.ofMillis(millis)
+                val nøyaktig = Duration.ofMillis(millis)
+                return nøyaktig
+                    .minusSeconds(nøyaktig.toSecondsPart().toLong())
+                    .minusMillis(nøyaktig.toMillisPart().toLong())
+                    .minusNanos(nøyaktig.toNanosPart().toLong())
             }
             throw IllegalArgumentException("Ugyldig duration $this")
         }
