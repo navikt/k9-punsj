@@ -49,9 +49,7 @@ internal object PleiepengerSyktBarnMapper {
         internal val gammelSøknadJson = JsonUtils.toString(gammel.first)
         internal val gamleFeilJson = JsonUtils.toString(gammel.second.map { it.toMap() })
         internal val nySøknadJson = JsonUtils.toString(ny.first)
-        internal val nyeFeilJson = JsonUtils.toString(ny.second.filterNot {
-            it.felt.endsWith("PerDag") // Gamle mapping mapper null || blank = PT0S, blir null med ny mapping
-        }.map { it.toMap() })
+        internal val nyeFeilJson = JsonUtils.toString(ny.second.map { it.toMap() })
         internal val søknaderSammenlignet = JSONCompare.compareJSON(gammelSøknadJson, nySøknadJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val forskjelligeSøknader = søknaderSammenlignet.failed()

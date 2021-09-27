@@ -88,7 +88,8 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() {
         val barn = when {
-            norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
+            // TODO: Skal kun sette identitetsnummer, men setter begge ettersom gammel mapping gjorde det
+            norskIdent.erSatt() -> Barn(NorskIdentitetsnummer.of(norskIdent), foedselsdato)
             foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
             else -> Barn.builder().build()
         }
@@ -170,7 +171,7 @@ internal class MapTilK9FormatV2(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val periode = uttak.periode!!.somK9Periode()!!
             val periodeInfo = UttakPeriodeInfo()
-            mapEllerLeggTilFeil("uttak.$periode.timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil("uttak.$periode.timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
                 periodeInfo.timerPleieAvBarnetPerDag = it
             }
             k9Uttak[periode] = periodeInfo
@@ -256,10 +257,8 @@ internal class MapTilK9FormatV2(
             info.erVarigEndring?.also { k9Info.erVarigEndring(it) }
             info.endringDato?.also { k9Info.endringDato(it) }
             info.endringBegrunnelse?.blankAsNull()?.also { k9Info.endringBegrunnelse(it) }
-            when (info.erNyoppstartet) {
-                null -> k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4))
-                else -> info.erNyoppstartet
-            }.also { k9Info.erNyoppstartet(it) }
+            // TODO: Hvorfor brukes ikke info.erNyoppstartet? Gjenbrukt fra gammel mapping
+            k9Info.erNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
             when (info.erVarigEndring) {
                 true -> info.endringInntekt
                 else -> info.bruttoInntekt
@@ -306,12 +305,20 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.ArbeidstidDto.leggTilArbeidstid() {
         val k9Arbeidstid = Arbeidstid()
-        arbeidstakerList?.also { k9Arbeidstid.medArbeidstaker(it.mapArbeidstidArbeidstaker()) }
-        // TODO: Frilanser og selvstendig
+        arbeidstakerList?.also {
+            k9Arbeidstid.medArbeidstaker(it.mapArbeidstidArbeidstaker())
+        }
+        selvstendigNæringsdrivendeArbeidstidInfo?.mapArbeidstid("selvstendigNæringsdrivendeArbeidstidInfo")?.also {
+            k9Arbeidstid.medSelvstendigNæringsdrivendeArbeidstidInfo(it)
+        }
+        frilanserArbeidstidInfo?.mapArbeidstid("frilanserArbeidstidInfo")?.also {
+            k9Arbeidstid.medFrilanserArbeidstid(it)
+        }
         pleiepengerSyktBarn.medArbeidstid(k9Arbeidstid)
     }
 
-    private fun List<PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = map { arbeidstaker ->
+    private fun List<PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = mapIndexed { index, arbeidstaker ->
+        // TODO: Ikke sette når tom?
         val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
         if (arbeidstaker.norskIdent.erSatt()) {
             k9Arbeidstaker.norskIdentitetsnummer = NorskIdentitetsnummer.of(arbeidstaker.norskIdent)
@@ -319,21 +326,29 @@ internal class MapTilK9FormatV2(
         if (arbeidstaker.organisasjonsnummer.erSatt()) {
             k9Arbeidstaker.organisasjonsnummer = Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer)
         }
+        k9Arbeidstaker.arbeidstidInfo = arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")
+        k9Arbeidstaker
+    }
+
+    private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(type: String) : ArbeidstidInfo? {
         val k9ArbeidstidPeriodeInfo = mutableMapOf<Periode, ArbeidstidPeriodeInfo>()
-        arbeidstaker.arbeidstidInfo?.perioder?.filter { it.periode.erSatt() }?.forEachIndexed{ index, periode ->
+        this.perioder?.filter { it.periode.erSatt() }?.forEachIndexed{ index, periode ->
             val k9Periode = periode.periode!!.somK9Periode()!!
             val k9Info = ArbeidstidPeriodeInfo()
-            val felt = "ytelse.arbeisdtid.arbeidstakerList[$index].arbeidstidInfo.perioder[$k9Periode]"
-            if (periode.faktiskArbeidTimerPerDag.erSatt()) mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
-                periode.faktiskArbeidTimerPerDag!!.somDuration()
+            val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder[$k9Periode]"
+            mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
+                periode.faktiskArbeidTimerPerDag.somDuration()
             }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
-            if (periode.jobberNormaltTimerPerDag.erSatt()) mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag!!.somDuration()
+            mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
+                periode.jobberNormaltTimerPerDag.somDuration()
             }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
             k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
         }
-        k9Arbeidstaker.arbeidstidInfo = ArbeidstidInfo().medPerioder(k9ArbeidstidPeriodeInfo)
-        k9Arbeidstaker
+        return if (k9ArbeidstidPeriodeInfo.isNotEmpty()) {
+            ArbeidstidInfo().medPerioder(k9ArbeidstidPeriodeInfo)
+        } else {
+            null
+        }
     }
 
     private fun PleiepengerSøknadVisningDto.DataBruktTilUtledningDto.leggTilDataBruktTilUtledning() {
@@ -384,7 +399,8 @@ internal class MapTilK9FormatV2(
         }
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
         private val EnTimeInMillis = Duration.ofHours(1).toMillis()
-        private fun String.somDuration() : Duration {
+        private fun String?.somDuration() : Duration {
+            if (isNullOrBlank()) return Duration.ofSeconds(0) // TODO: Bør fjernes
             kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
             if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
             if (somDesimalOrNull() != null) {
