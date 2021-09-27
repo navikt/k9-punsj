@@ -169,12 +169,12 @@ internal class MapTilK9FormatV2(
     private fun List<PleiepengerSøknadVisningDto.UttakDto>?.leggTilUttak(søknadsperiode: PeriodeDto?) {
         val k9Uttak = mutableMapOf<Periode, UttakPeriodeInfo>()
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
-            val periode = uttak.periode!!.somK9Periode()!!
-            val periodeInfo = UttakPeriodeInfo()
-            mapEllerLeggTilFeil("uttak.$periode.timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
-                periodeInfo.timerPleieAvBarnetPerDag = it
+            val k9Periode = uttak.periode!!.somK9Periode()!!
+            val k9Info = UttakPeriodeInfo()
+            mapEllerLeggTilFeil("ytelse.uttak.perioder[$k9Periode].timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
+                k9Info.timerPleieAvBarnetPerDag = it
             }
-            k9Uttak[periode] = periodeInfo
+            k9Uttak[k9Periode] = k9Info
         }
 
         if (k9Uttak.isEmpty() && søknadsperiode.erSatt()) {
@@ -317,8 +317,7 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medArbeidstid(k9Arbeidstid)
     }
 
-    private fun List<PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = mapIndexed { index, arbeidstaker ->
-        // TODO: Ikke sette når tom?
+    private fun List<PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = mapIndexedNotNull {  index, arbeidstaker ->
         val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
         if (arbeidstaker.norskIdent.erSatt()) {
             k9Arbeidstaker.norskIdentitetsnummer = NorskIdentitetsnummer.of(arbeidstaker.norskIdent)
@@ -327,12 +326,18 @@ internal class MapTilK9FormatV2(
             k9Arbeidstaker.organisasjonsnummer = Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer)
         }
         k9Arbeidstaker.arbeidstidInfo = arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")
-        k9Arbeidstaker
+
+        val noeSatt = arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
+        if (noeSatt) {
+            k9Arbeidstaker
+        } else {
+            null
+        }
     }
 
     private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(type: String) : ArbeidstidInfo? {
         val k9ArbeidstidPeriodeInfo = mutableMapOf<Periode, ArbeidstidPeriodeInfo>()
-        this.perioder?.filter { it.periode.erSatt() }?.forEachIndexed{ index, periode ->
+        this.perioder?.filter { it.periode.erSatt() }?.forEach{ periode ->
             val k9Periode = periode.periode!!.somK9Periode()!!
             val k9Info = ArbeidstidPeriodeInfo()
             val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder[$k9Periode]"
