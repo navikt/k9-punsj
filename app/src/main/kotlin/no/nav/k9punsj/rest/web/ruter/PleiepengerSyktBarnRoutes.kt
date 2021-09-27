@@ -18,6 +18,7 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.PleiepengerSyktBarnMapper
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
@@ -157,10 +158,12 @@ internal class PleiepengerSyktBarnRoutes(
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
-                        val søknadK9Format = MapTilK9Format.mapTilEksternFormat(format,
-                            søknad.soeknadId,
-                            hentPerioderSomFinnesIK9,
-                            journalposterDto.journalposter)
+                        val søknadK9Format = PleiepengerSyktBarnMapper.mapTilK9Format(
+                            søknad = søknad,
+                            soeknadId = søknad.soeknadId,
+                            perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
+                            journalpostIder = journalposterDto.journalposter
+                        )
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
@@ -260,10 +263,12 @@ internal class PleiepengerSyktBarnRoutes(
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = MapTilK9Format.mapTilEksternFormat(format,
-                        soknadTilValidering.soeknadId,
-                        hentPerioderSomFinnesIK9,
-                        journalposterDto.journalposter)
+                    mapTilEksternFormat = PleiepengerSyktBarnMapper.mapTilK9Format(
+                        søknad = soknadTilValidering,
+                        soeknadId = soknadTilValidering.soeknadId,
+                        perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
+                        journalpostIder = journalposterDto.journalposter
+                    )
                 } catch (e: Exception) {
                     val sw = StringWriter()
                     e.printStackTrace(PrintWriter(sw))
