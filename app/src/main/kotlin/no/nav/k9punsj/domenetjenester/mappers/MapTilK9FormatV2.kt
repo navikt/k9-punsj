@@ -86,11 +86,14 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medSøknadsperiode(somK9Periode()!!)
     }}
 
-    private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() { when {
-        norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
-        foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
-        else -> null
-    }?.also { pleiepengerSyktBarn.medBarn(it) }}
+    private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() {
+        val barn = when {
+            norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
+            foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
+            else -> Barn.builder().build()
+        }
+        pleiepengerSyktBarn.medBarn(barn)
+    }
 
     private fun String.leggTilSøker() { if (erSatt()) {
         søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
@@ -99,10 +102,16 @@ internal class MapTilK9FormatV2(
     private fun List<PleiepengerSøknadVisningDto.BostederDto>.leggTilBosteder() {
         val k9Bosteder = mutableMapOf<Periode, Bosteder.BostedPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { bosted ->
-            k9Bosteder[bosted.periode!!.somK9Periode()!!] = Bosteder.BostedPeriodeInfo()
-                .let { if (bosted.land.erSatt()) it.medLand(Landkode.of(bosted.land)) else it }
+            val k9Periode = bosted.periode!!.somK9Periode()!!
+            val k9Info = Bosteder.BostedPeriodeInfo()
+            if (bosted.land.erSatt()) {
+                k9Info.medLand(Landkode.of(bosted.land))
+            }
+            k9Bosteder[k9Periode] = k9Info
         }
-        pleiepengerSyktBarn.medBosteder(Bosteder().medPerioder(k9Bosteder))
+        if (k9Bosteder.isNotEmpty()) {
+            pleiepengerSyktBarn.medBosteder(Bosteder().medPerioder(k9Bosteder))
+        }
     }
 
     private fun List<PleiepengerSøknadVisningDto.UtenlandsoppholdDto>.leggTilUtenlandsopphold() {
@@ -114,23 +123,31 @@ internal class MapTilK9FormatV2(
                 k9Info.medLand(Landkode.of(utenlandsopphold.land))
             }
             if (utenlandsopphold.årsak.erSatt()) {
-                mapEllerLeggTilFeil("utenlandsopphold.$k9Periode.årsak") {
+                mapEllerLeggTilFeil("ytelse.utenlandsopphold.$k9Periode.årsak") {
                     Utenlandsopphold.UtenlandsoppholdÅrsak.valueOf(utenlandsopphold.årsak!!)
                 }?.also { k9Info.medÅrsak(it) }
             }
 
             k9Utenlandsopphold[k9Periode] = k9Info
         }
-        pleiepengerSyktBarn.medUtenlandsopphold(Utenlandsopphold().medPerioder(k9Utenlandsopphold))
+        if (k9Utenlandsopphold.isNotEmpty()) {
+            pleiepengerSyktBarn.medUtenlandsopphold(Utenlandsopphold().medPerioder(k9Utenlandsopphold))
+        }
     }
 
     private fun List<PleiepengerSøknadVisningDto.NattevåkDto>.leggTilNattevåk() {
         val k9Nattevåk = mutableMapOf<Periode, Nattevåk.NattevåkPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { nattevåk ->
-            k9Nattevåk[nattevåk.periode!!.somK9Periode()!!] = Nattevåk.NattevåkPeriodeInfo()
-                .let { if (nattevåk.tilleggsinformasjon.erSatt()) it.medTilleggsinformasjon(nattevåk.tilleggsinformasjon) else it }
+            val k9Periode = nattevåk.periode!!.somK9Periode()!!
+            val k9Info = Nattevåk.NattevåkPeriodeInfo()
+            if (nattevåk.tilleggsinformasjon.erSatt()) {
+                k9Info.medTilleggsinformasjon(nattevåk.tilleggsinformasjon)
+            }
+            k9Nattevåk[k9Periode] = k9Info
         }
-        pleiepengerSyktBarn.medNattevåk(Nattevåk().medPerioder(k9Nattevåk))
+        if (k9Nattevåk.isNotEmpty()) {
+            pleiepengerSyktBarn.medNattevåk(Nattevåk().medPerioder(k9Nattevåk))
+        }
     }
 
     private fun List<PleiepengerSøknadVisningDto.BeredskapDto>.leggTilBeredskap() {
@@ -213,7 +230,7 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medOpptjeningAktivitet(k9OpptjeningAktivitet)
     }
 
-    private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende() : SelvstendigNæringsdrivende {
+    private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende() : SelvstendigNæringsdrivende? {
         val k9SelvstendigNæringsdrivende = SelvstendigNæringsdrivende.builder()
         if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.organisasjonsnummer(Organisasjonsnummer.of(organisasjonsnummer))
         if (virksomhetNavn.erSatt()) k9SelvstendigNæringsdrivende.virksomhetNavn(virksomhetNavn)
@@ -225,6 +242,7 @@ internal class MapTilK9FormatV2(
             if (info.registrertIUtlandet != null) k9Info.registrertIUtlandet(info.registrertIUtlandet)
             if (info.regnskapsførerNavn.erSatt()) k9Info.regnskapsførerNavn(info.regnskapsførerNavn)
             if (info.regnskapsførerTlf.erSatt()) k9Info.regnskapsførerTelefon(info.regnskapsførerTlf)
+            // TODO: Mangler felter
             if (!info.virksomhetstyper.isNullOrEmpty()) {
                 val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
                     virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA

@@ -16,7 +16,11 @@ internal object PleiepengerSyktBarnMapper {
         perioderSomFinnesIK9: List<PeriodeDto>,
         journalpostIder: Set<String>,
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
-            if (!it.erLike) logger.warn("Mapping ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
+            if (!it.erLike) {
+                logger.warn("Mapping ikke like. SøknaderErLike=[${it.søknaderErLike}], FeilErLike=[${it.feilErLike}]")
+                logger.warn("NyeFeil=${it.nyeFeilJson}")
+                logger.warn("GamleFeil=${it.gamleFeilJson}")
+            }
         }): Pair<Søknad, List<Feil>> {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
             gammel = MapTilK9Format.mapTilEksternFormat(
@@ -40,14 +44,19 @@ internal object PleiepengerSyktBarnMapper {
         internal val gammel: Pair<Søknad, List<Feil>>,
         internal val ny: Pair<Søknad, List<Feil>>) {
         internal val gammelSøknadJson = JsonUtils.toString(gammel.first)
-        internal val gamleFeilJson = JsonUtils.toString(gammel.second)
+        internal val gamleFeilJson = JsonUtils.toString(gammel.second.map { it.toMap() })
         internal val nySøknadJson = JsonUtils.toString(ny.first)
-        internal val nyeFeilJson = JsonUtils.toString(ny.second)
+        internal val nyeFeilJson = JsonUtils.toString(ny.second.map { it.toMap() })
         internal val søknaderSammenlignet = JSONCompare.compareJSON(gammelSøknadJson, nySøknadJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val feilSammenlignet = JSONCompare.compareJSON(gamleFeilJson, nyeFeilJson, JSONCompareMode.NON_EXTENSIBLE)
         internal val søknaderErLike = søknaderSammenlignet.passed()
         internal val feilErLike = feilSammenlignet.passed()
         internal val erLike = søknaderErLike && feilErLike
+        private fun Feil.toMap() = mapOf(
+            "felt" to felt,
+            "feilkode" to feilkode,
+            "feilmelding" to feilmelding
+        )
     }
 
     private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnMapper::class.java)
