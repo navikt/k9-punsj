@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AppConfiguration
+import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.audit.*
 import no.nav.k9punsj.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
@@ -13,7 +14,6 @@ import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication
@@ -29,7 +29,7 @@ private const val XACML_CONTENT_TYPE = "application/xacml+json"
 private const val DOMENE = "k9"
 
 @Configuration
-@Profile("!test & !local")
+@StandardProfil
 class PepClient(
     private val config: AppConfiguration,
     private val azureGraphService: AzureGraphService,

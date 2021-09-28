@@ -5,12 +5,13 @@ import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
 import no.nav.helse.dusseldorf.testsupport.wiremock.*
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.*
+import java.net.URI
 
 internal object MockConfiguration {
     internal fun config(
         wireMockServer: WireMockServer,
         port: Int,
-        azureV2Url: String?,
+        azureV2Url: URI?,
     ): Map<String, String> {
         val (wellKnownUrl, tokenUrl) = when (azureV2Url) {
             null -> wireMockServer.getAzureV2WellKnownUrl() to wireMockServer.getAzureV2TokenUrl()

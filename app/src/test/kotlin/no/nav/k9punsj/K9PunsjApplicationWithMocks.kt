@@ -1,15 +1,17 @@
 package no.nav.k9punsj
 
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.Journalpost
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
+import java.net.URI
 import java.util.*
 
 internal class K9PunsjApplicationWithMocks {
@@ -18,7 +20,7 @@ internal class K9PunsjApplicationWithMocks {
                 wireMockServer: WireMockServer,
                 port: Int,
                 args: Array<String> = arrayOf(),
-                azureV2Url: String? = null,
+                azureV2Url: URI? = null,
                 profiles: String? = null
         ): ConfigurableApplicationContext? {
             val builder = SpringApplicationBuilder(K9PunsjApplication::class.java)
@@ -40,6 +42,20 @@ internal class K9PunsjApplicationWithMocks {
                     .run(*args)
         }
 
+        private fun lokaltKjørendeAzureV2OrNull(): URI? {
+            val potensiellUrl = URI("http://localhost:8100/v2.0")
+            val kjørerLokalt = runBlocking { "$potensiellUrl/.well-known/openid-configuration"
+                .httpGet()
+                .timeout(200)
+                .timeout(200)
+                .awaitStringResponseResult().second.statusCode == 200
+            }
+            return when (kjørerLokalt) {
+                true -> potensiellUrl
+                false -> null
+            }
+        }
+
         @JvmStatic
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
@@ -55,7 +71,7 @@ internal class K9PunsjApplicationWithMocks {
             val applicationContext = startup(
                     wireMockServer = wireMockServer,
                     port = 8085,
-                    azureV2Url = "http://localhost:8100/v2.0",
+                    azureV2Url = lokaltKjørendeAzureV2OrNull(),
                     profiles = "local"
 
             )

@@ -1,5 +1,7 @@
 package no.nav.k9punsj.kafka
 
+import no.nav.k9punsj.IkkeLokalProfil
+import no.nav.k9punsj.IkkeTestProfil
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
@@ -24,8 +25,8 @@ import org.springframework.kafka.listener.ContainerStoppingErrorHandler
 import java.net.InetAddress
 import java.time.Duration
 
-@Profile("!test")
 @Configuration
+@IkkeTestProfil
 class KafkaConfig(
     @Value("\${kafka.bootstrap.server}") private val bootstrapServers: String,
     @Value("\${kafka.clientId}") private val clientId: String,
@@ -52,7 +53,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
-    @Profile("!local")
+    @IkkeLokalProfil
     fun aivenKafkaBaseProperties() : Map<String, Any> {
         val env = System.getenv()
 
@@ -94,7 +95,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
-    @Profile("!local")
+    @IkkeLokalProfil
     fun aivenKafkaConsumerFactory(
         @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ) = kafkaConsumerFactory(baseProperties)
@@ -108,7 +109,7 @@ class KafkaConfig(
 
     @Bean(AIVEN_CONTAINER_FACTORY)
     @Qualifier(AIVEN)
-    @Profile("!local")
+    @IkkeLokalProfil
     fun aivenKafkaListenerContainerFactory(
         @Qualifier(AIVEN) consumerFactory: ConsumerFactory<String, String>
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
@@ -122,7 +123,7 @@ class KafkaConfig(
 
     @Bean
     @Qualifier(AIVEN)
-    @Profile("!local")
+    @IkkeLokalProfil
     fun aivenKafkaTemplate(
         @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)

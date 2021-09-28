@@ -7,6 +7,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.typer.Periode
+import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
@@ -17,14 +18,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.util.UUID
 
 @Configuration
-@Profile("!test & !local")
+@StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.*
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -26,7 +26,7 @@ import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-@Profile("!test")
+@IkkeTestProfil
 class PdlServiceImpl(
     @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
     @Value("\${no.nav.pdl.scope}") scope: String,

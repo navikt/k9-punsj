@@ -1,11 +1,11 @@
 package no.nav.k9punsj.person
 
+import no.nav.k9punsj.IkkeLokalProfil
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("!local")
+@IkkeLokalProfil
 internal class PdlBarnService(
     private val pdlService: PdlService) : BarnService {
 

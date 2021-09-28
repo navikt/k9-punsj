@@ -17,7 +17,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.PleiepengerSyktBarnMapper
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
