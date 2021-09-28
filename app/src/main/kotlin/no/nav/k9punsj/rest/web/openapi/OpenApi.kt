@@ -18,7 +18,6 @@ import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
-import no.nav.k9punsj.fordel.HendelseRoutes
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
@@ -774,7 +773,7 @@ internal class GosysController {
 @Tag(name = "HendelseMottaker", description = "Prosesserer")
 internal class HendelseController {
     @PostMapping(
-        HendelseRoutes.Urls.ProsesserHendelse,
+        "/prosesserHendelse/",
         consumes = ["application/json"],
         produces = ["application/json"]
     )
