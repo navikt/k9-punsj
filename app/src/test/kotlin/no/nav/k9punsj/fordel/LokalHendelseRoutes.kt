@@ -18,7 +18,7 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 @LokalProfil
-internal class LokalHendelseRoutes(
+class LokalHendelseRoutes(
     private val hendelseMottaker: HendelseMottaker) {
 
     private companion object {
@@ -30,7 +30,7 @@ internal class LokalHendelseRoutes(
     }
 
     @Bean
-    fun lokalHendelseRoutes() = PublicRoutes {
+    fun prosesserHendelseRoute() = PublicRoutes {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val fordelPunsjEventDto = request.request()
