@@ -7,6 +7,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
+@Deprecated(message = "Bruk MapTilK9FormatV2 som mapper direkte fra visning til K9Format")
 data class PleiepengerSøknadMottakDto(
 
     val søker: SøkerDto?,

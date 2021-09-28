@@ -11,16 +11,17 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import kotlin.math.pow
 
-
-/** Mapper fra visning format (GUI format) til backend format slik at dette letter kan gjøres om til k9-format senere
- *
+/**
+ * Mapper fra visning format (GUI format) til backend format slik at dette letter kan gjøres om til k9-format senere
  */
+@Deprecated(message = "Bruk MapTilK9FormatV2 som mapper direkte fra visning til K9Format")
 internal class MapFraVisningTilEksternFormat {
     companion object {
         private const val SKILLE = "/"
         private const val ÅPEN = ".."
 
-        fun mapTilSendingsformat(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto {
+        @Deprecated(message = "Bruk MapTilK9FormatV2 som mapper direkte fra visning til K9Format")
+        internal fun mapTilSendingsformat(søknad: PleiepengerSøknadVisningDto): PleiepengerSøknadMottakDto {
             val ytelseDto = mapYtelse(søknad)
             return PleiepengerSøknadMottakDto(
                 søker = PleiepengerSøknadMottakDto.SøkerDto(søknad.soekerId),
