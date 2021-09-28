@@ -16,7 +16,6 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
-import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.domenetjenester.mappers.PleiepengerSyktBarnMapper
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -150,9 +149,7 @@ internal class PleiepengerSyktBarnRoutes(
                 } else {
                     try {
                         val søknad: PleiepengerSøknadVisningDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknad)
-
-                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
+                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknad)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -253,9 +250,7 @@ internal class PleiepengerSyktBarnRoutes(
                         .badRequest()
                         .buildAndAwait()
 
-                val format = MapFraVisningTilEksternFormat.mapTilSendingsformat(soknadTilValidering)
-
-                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(format)?.first ?: emptyList()
+                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(soknadTilValidering)?.first ?: emptyList()
                 val journalPoster = søknadEntitet.journalposter!!
                 val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
@@ -339,13 +334,15 @@ internal class PleiepengerSyktBarnRoutes(
         correlationId = coroutineContext.hentCorrelationId()
     ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(format: PleiepengerSøknadMottakDto): Pair<List<PeriodeDto>?, String?>? {
-        if (format.søker?.norskIdentitetsnummer == null || format.ytelse?.barn?.norskIdentitetsnummer == null) {
+    private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerSøknadVisningDto): Pair<List<PeriodeDto>?, String?>? {
+        if (dto.soekerId.isNullOrBlank() || dto.barn == null || dto.barn.norskIdent.isNullOrBlank()) {
             return null
         }
-        return k9SakService.hentPerioderSomFinnesIK9(format.søker.norskIdentitetsnummer,
-            format.ytelse.barn.norskIdentitetsnummer,
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+        return k9SakService.hentPerioderSomFinnesIK9(
+            søker = dto.soekerId,
+            barn = dto.barn.norskIdent,
+            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        )
     }
 
     private suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>, url: String): ServerResponse? {

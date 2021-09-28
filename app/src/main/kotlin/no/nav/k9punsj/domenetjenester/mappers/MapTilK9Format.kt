@@ -19,10 +19,10 @@ import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import java.time.ZonedDateTime
 import java.util.UUID
 
-
 /**  Mapper til k9-format
  *   og bruker deres validering
  */
+@Deprecated(message = "Bruk MapTilK9FormatV2 som mapper direkte fra visning til K9Format")
 internal class MapTilK9Format {
 
     companion object {
@@ -31,6 +31,7 @@ internal class MapTilK9Format {
         private const val ÅPEN = ".."
         private val objectMapper = no.nav.k9punsj.objectMapper()
 
+        @Deprecated(message = "Bruk MapTilK9FormatV2 som mapper direkte fra visning til K9Format")
         internal fun mapTilEksternFormat(
             søknad: PleiepengerSøknadMottakDto,
             soeknadId: SøknadIdDto,

@@ -10,6 +10,13 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 import org.slf4j.LoggerFactory
 
 internal object PleiepengerSyktBarnMapper {
+    private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnMapper::class.java)
+    private val isProd = System.getenv("NAIS_CLUSTER_NAME").let { it != null && it.lowercase().startsWith("prod") }
+    init {
+        if (isProd) { logger.info("Benytter gammel mapping av søknader (MapTilK9Format)") }
+        else { logger.info("Benytter ny mapping av søknader (MapTilK9FormatV2)") }
+    }
+
     internal fun mapTilK9Format(
         søknad: PleiepengerSøknadVisningDto,
         soeknadId: String,
@@ -18,7 +25,8 @@ internal object PleiepengerSyktBarnMapper {
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
             if (it.forskjelligeFeil) {
                 logger.warn("Mapping ga forskjellige feil. GamleFeil=${it.gamleFeilJson}, NyeFeil=${it.nyeFeilJson}]")
-            } else if (it.forskjelligeSøknader) {
+            }
+            if (it.forskjelligeSøknader) {
                 logger.warn("Mapping ga forskjellige søknader. Felt=${it.søknaderSammenlignet.fieldFailures.map { failure -> failure.field }}")
                 if (!isProd) {
                     logger.warn("Søknadsforskjeller=[${it.søknaderSammenlignet.message}]")
@@ -40,7 +48,10 @@ internal object PleiepengerSyktBarnMapper {
             ).søknadOgFeil()
         )
         håndterSammenligning(sammenligningsgrunnlag)
-        return sammenligningsgrunnlag.gammel
+        return when (isProd) {
+            true -> sammenligningsgrunnlag.gammel
+            false -> sammenligningsgrunnlag.ny
+        }
     }
 
     internal data class Sammenligningsgrunnlag(
@@ -61,7 +72,4 @@ internal object PleiepengerSyktBarnMapper {
             "feilmelding" to feilmelding
         )
     }
-
-    private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnMapper::class.java)
-    private val isProd = System.getenv("NAIS_CLUSTER_NAME").let { it != null && it.lowercase().startsWith("prod") }
 }
