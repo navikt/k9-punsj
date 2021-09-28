@@ -25,12 +25,11 @@ import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.util.DatabaseUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestConfiguration
-@Profile("test")
+@TestProfil
 class TestContext {
 
     val dummyFnr = "11111111111"

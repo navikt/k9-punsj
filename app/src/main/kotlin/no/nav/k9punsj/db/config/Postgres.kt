@@ -3,11 +3,9 @@ package no.nav.k9punsj.db.config
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
-import org.flywaydb.core.api.FlywayException
 import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.core.env.Environment
 import javax.sql.DataSource
 
 enum class Role {
@@ -40,29 +38,6 @@ fun migrate(configuration: DbConfiguration) =
     } else {
         runMigration(HikariDataSource(configuration.hikariConfig()))
     }
-
-fun runMigrationLocal(configuration: DbConfiguration, environment: Environment): MigrateResult? {
-    val kanKjøreCleanEtterMigrate = environment.activeProfiles.size == 1 && environment.activeProfiles.contains("local")
-    if(kanKjøreCleanEtterMigrate) {
-        val hikariDataSource = HikariDataSource(configuration.hikariConfig())
-        val load = Flyway.configure()
-            .locations("migreringer/")
-            .dataSource(hikariDataSource)
-            .load()
-        return try {
-            load.migrate()
-        } catch (fwe: FlywayException) {
-            //prøver igjen siden kjører lokalt
-            load.clean()
-            try {
-                load.migrate()
-            } catch (fwe: FlywayException) {
-                throw IllegalStateException("Migrering feiler", fwe)
-            }
-        }
-    }
-    throw IllegalStateException("HEI!!!! Du prøver å kjøre flyway(migrate->clean->migrate) som sletter innholdet i databasen hvis migrering feiler! Må bare kjøres lokalt")
-}
 
 fun loadFlyway(dataSource: DataSource, initSql: String? = null) =
     Flyway.configure()

@@ -3,7 +3,6 @@ package no.nav.k9punsj
 import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.Journalpost
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
