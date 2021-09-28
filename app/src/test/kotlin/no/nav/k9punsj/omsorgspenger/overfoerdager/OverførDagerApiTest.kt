@@ -2,7 +2,6 @@ package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.TestContext
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.exception.ExceptionResponse
 import no.nav.k9punsj.journalpost.Journalpost
@@ -26,7 +25,6 @@ import java.util.UUID
 @ActiveProfiles("test")
 @ContextConfiguration(classes = [
     JournalpostRepository::class,
-    TestContext::class,
     TestBeans::class
 ])
 internal class OverførDagerApiTest {

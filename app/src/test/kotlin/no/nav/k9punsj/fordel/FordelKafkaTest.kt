@@ -3,7 +3,6 @@ package no.nav.k9punsj.fordel
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.TestContext
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
@@ -32,7 +31,6 @@ import java.util.UUID
     TestBeans::class,
     HendelseMottaker::class,
     AksjonspunktServiceImpl::class,
-    TestContext::class,
     JournalpostRepository::class,
     AksjonspunktRepository::class,
     SøknadRepository::class

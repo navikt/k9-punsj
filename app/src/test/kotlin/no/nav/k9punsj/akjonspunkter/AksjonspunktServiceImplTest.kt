@@ -3,7 +3,6 @@ package no.nav.k9punsj.akjonspunkter
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.TestContext
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
@@ -27,7 +26,6 @@ import java.util.UUID
 @ActiveProfiles("test")
 @ContextConfiguration(classes = [
     AksjonspunktServiceImpl::class,
-    TestContext::class,
     JournalpostRepository::class,
     AksjonspunktRepository::class,
     SøknadRepository::class,
