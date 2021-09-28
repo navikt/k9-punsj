@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-@Profile("local")
+@Profile("local") // TODO Flytt til test scope
 internal class HendelseRoutes(
     private val hendelseMottaker: HendelseMottaker,
 ) {

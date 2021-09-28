@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-@Profile("test") // Mangler håndtering av token på disse endepunktene
+@Profile("test") // Mangler håndtering av token på disse endepunktene // TODO Flytt til test scope
 class DelingAvOmsorgsdagerApi(
         private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService,
 ) {

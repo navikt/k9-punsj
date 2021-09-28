@@ -1,8 +1,6 @@
 package no.nav.k9punsj
 
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.k9punsj.abac.IPepClient
-import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.config.DbConfiguration
 import no.nav.k9punsj.db.config.getDataSource
 import org.flywaydb.core.Flyway
@@ -18,27 +16,11 @@ annotation class LokalProfil
 
 @TestConfiguration
 @LokalProfil
-class LokalConfiguraton {
+class LokalBeans {
     @Bean
     fun lokalDataSource(dbConfiguration: DbConfiguration): DataSource {
         return hikariConfigLocal(dbConfiguration)
     }
-
-    @Bean
-    fun lokalPepClient() = object : IPepClient {
-        override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String) = true
-        override suspend fun harBasisTilgang(fnr: String, urlKallet: String) = true
-        override suspend fun sendeInnTilgang(fnr: String, urlKallet: String) = true
-        override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String) = true
-        override suspend fun erSaksbehandler() = true
-    }
-
-    @Bean
-    fun lokalAzureGraphService() = object : IAzureGraphService {
-        override suspend fun hentIdentTilInnloggetBruker() = "saksbehandler@nav.no"
-        override suspend fun hentEnhetForInnloggetBruker() = "Hjemmekontor"
-    }
-
 
     private fun hikariConfigLocal(hikariConfig: DbConfiguration): HikariDataSource {
         runMigrationLocal(hikariConfig)

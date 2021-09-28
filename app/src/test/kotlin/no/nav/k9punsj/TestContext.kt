@@ -1,11 +1,9 @@
 package no.nav.k9punsj
 
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.Journalpost
@@ -96,18 +94,6 @@ class TestContext {
     }
 
     @Bean
-    fun azureGraphServiceBean() = azureGraphService
-    val azureGraphService: IAzureGraphService = object : IAzureGraphService {
-        override suspend fun hentIdentTilInnloggetBruker(): String {
-            return "saksbehandler"
-        }
-
-        override suspend fun hentEnhetForInnloggetBruker(): String {
-            return "Hjemmekontor"
-        }
-    }
-
-    @Bean
     fun punsjBolleServiceBean() = punsjbolleService
     val punsjbolleService : PunsjbolleService = object : PunsjbolleService {
         override suspend fun opprettEllerHentFagsaksnummer(
@@ -134,45 +120,6 @@ class TestContext {
             periode: PeriodeDto?,
             correlationId: CorrelationId
         ) = PunsjbolleRuting.K9Sak
-    }
-
-    @Bean
-    fun pepClientBean() = pepClient
-    val pepClient: IPepClient = object : IPepClient {
-        override suspend fun harBasisTilgang(fnr: String, urlKallet : String): Boolean {
-            return true
-        }
-
-        override suspend fun harBasisTilgang(fnr: List<String>, urlKallet : String): Boolean {
-            return true
-        }
-
-        override suspend fun sendeInnTilgang(fnr: String, urlKallet : String): Boolean {
-            return true
-        }
-
-        override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
-            return true
-        }
-
-        override suspend fun erSaksbehandler(): Boolean {
-            return true
-        }
-    }
-
-    @Bean
-    fun k9ServiceBean() = k9ServiceMock
-    val k9ServiceMock: K9SakService = object : K9SakService {
-
-
-
-        override suspend fun hentPerioderSomFinnesIK9(
-            søker: NorskIdent,
-            barn: NorskIdent,
-            fagsakYtelseType: FagsakYtelseType,
-        ): Pair<List<PeriodeDto>?, String?> {
-            return Pair(emptyList(), null)
-        }
     }
 
     @Bean
@@ -242,10 +189,5 @@ class TestContext {
             )
             else -> setOf()
         }
-    }
-
-    @Bean
-    fun databaseInitializer(): DataSource {
-        return DatabaseUtil.dataSource
     }
 }
