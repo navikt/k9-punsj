@@ -1,6 +1,7 @@
 package no.nav.k9punsj.omsorgspenger.delingavomsorgsdager
 
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9punsj.IkkeKlarForProduksjon
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -16,10 +17,9 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-@Profile("test") // Mangler håndtering av token på disse endepunktene // TODO Flytt til test scope
+@IkkeKlarForProduksjon(begrunnelse = "Mangler håndtering av token på disse endepunktene")
 class DelingAvOmsorgsdagerApi(
-        private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService,
-) {
+        private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService) {
     companion object {
         private const val type = FagsakYtelseTypeUri.OMSORGSPENGER_DELING
         private val logger: Logger = LoggerFactory.getLogger(DelingAvOmsorgsdagerApi::class.java)
