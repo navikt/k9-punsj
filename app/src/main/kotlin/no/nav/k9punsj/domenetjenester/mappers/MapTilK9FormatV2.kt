@@ -88,8 +88,7 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() {
         val barn = when {
-            // TODO: Skal kun sette identitetsnummer, men setter begge ettersom gammel mapping gjorde det
-            norskIdent.erSatt() -> Barn(NorskIdentitetsnummer.of(norskIdent), foedselsdato)
+            norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
             foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
             else -> Barn.builder().build()
         }
