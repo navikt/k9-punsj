@@ -124,7 +124,7 @@ internal class MapTilK9FormatV2(
                 k9Info.medLand(Landkode.of(utenlandsopphold.land))
             }
             if (utenlandsopphold.årsak.erSatt()) {
-                mapEllerLeggTilFeil("ytelse.utenlandsopphold.[$k9Periode].årsak") {
+                mapEllerLeggTilFeil("ytelse.utenlandsopphold.${k9Periode.jsonPath()}.årsak") {
                     Utenlandsopphold.UtenlandsoppholdÅrsak.of(utenlandsopphold.årsak!!)
                 }?.also { k9Info.medÅrsak(it) }
             }
@@ -171,7 +171,7 @@ internal class MapTilK9FormatV2(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = UttakPeriodeInfo()
-            mapEllerLeggTilFeil("ytelse.uttak.perioder[$k9Periode].timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
+            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
                 k9Info.timerPleieAvBarnetPerDag = it
             }
             k9Uttak[k9Periode] = k9Info
@@ -270,7 +270,7 @@ internal class MapTilK9FormatV2(
                     virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
                     virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
                     virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
-                    else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.[$k9Periode].virksomhetstyper[$index]") {
+                    else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.${k9Periode.jsonPath()}.virksomhetstyper[$index]") {
                         VirksomhetType.valueOf(virksomhetstype)
                     }
                 }}
@@ -286,7 +286,7 @@ internal class MapTilK9FormatV2(
         if (startdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
             k9Frilanser.medStartDato(it)
         }
-        if (startdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.sluttDato") { LocalDate.parse(sluttdato) }?.also {
+        if (sluttdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.sluttDato") { LocalDate.parse(sluttdato) }?.also {
             k9Frilanser.medSluttDato(it)
         }
         return k9Frilanser
@@ -340,7 +340,7 @@ internal class MapTilK9FormatV2(
         this.perioder?.filter { it.periode.erSatt() }?.forEach{ periode ->
             val k9Periode = periode.periode!!.somK9Periode()!!
             val k9Info = ArbeidstidPeriodeInfo()
-            val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder[$k9Periode]"
+            val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
             mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
                 periode.faktiskArbeidTimerPerDag.somDuration()
             }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
@@ -418,5 +418,6 @@ internal class MapTilK9FormatV2(
             }
             throw IllegalArgumentException("Ugyldig duration $this")
         }
+        private fun Periode.jsonPath() = "[${this.iso8601}]"
     }
 }
