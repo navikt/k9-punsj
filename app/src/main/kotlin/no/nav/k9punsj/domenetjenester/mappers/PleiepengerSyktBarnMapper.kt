@@ -18,7 +18,8 @@ internal object PleiepengerSyktBarnMapper {
         håndterSammenligning: (sammenligningsgrunnlag: Sammenligningsgrunnlag) -> Unit = {
             if (it.forskjelligeFeil) {
                 logger.warn("Mapping ga forskjellige feil. GamleFeil=${it.gamleFeilJson}, NyeFeil=${it.nyeFeilJson}]")
-            } else if (it.forskjelligeSøknader) {
+            }
+            if (it.forskjelligeSøknader) {
                 logger.warn("Mapping ga forskjellige søknader. Felt=${it.søknaderSammenlignet.fieldFailures.map { failure -> failure.field }}")
                 if (!isProd) {
                     logger.warn("Søknadsforskjeller=[${it.søknaderSammenlignet.message}]")
