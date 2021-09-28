@@ -403,20 +403,40 @@ internal class MapTilK9FormatV2(
             false -> this
         }
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
+        private fun String.somTimerOgMinutterOrNull() : Pair<Long, Long>? {
+            if (split(":").size != 2) return null
+            val timer = split(":")[0].toLongOrNull()?:return null
+            val minutter = split(":")[1].toLongOrNull()?:return null
+            if (timer < 0 || minutter < 0 || minutter > 60) return null
+            return timer to minutter
+        }
         private val EnTimeInMillis = Duration.ofHours(1).toMillis()
-        private fun String?.somDuration() : Duration {
-            if (isNullOrBlank()) return Duration.ofSeconds(0) // TODO: Bør fjernes, dette bør bli null (som om ikke satt)
+        internal fun String?.somDuration() : Duration? {
+            if (isNullOrBlank()) return null
+            // Om man oppgir gyldig ISO-standard
             kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
-            if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
-            if (somDesimalOrNull() != null) {
-                val millis = (somDesimalOrNull()!! * EnTimeInMillis).roundToLong()
+            // Om man oppgir et heltal antall timer
+            val heltall = toLongOrNull()
+            if (heltall != null) { return Duration.ofHours(heltall)}
+            // Om man oppgir et desimaltall med enten '.' eller ','  5.5 == 5 timer og 30 minutter
+            val desimal = somDesimalOrNull()
+            if (desimal != null) {
+                val millis = (desimal * EnTimeInMillis).roundToLong()
                 val nøyaktig = Duration.ofMillis(millis)
+                val sekunder = nøyaktig.toSecondsPart().toLong()
                 return nøyaktig
-                    .minusSeconds(nøyaktig.toSecondsPart().toLong())
+                    .minusSeconds(sekunder)
                     .minusMillis(nøyaktig.toMillisPart().toLong())
                     .minusNanos(nøyaktig.toNanosPart().toLong())
+                    .let { if (sekunder >= 30) it.plusMinutes(1) else it }
             }
-            throw IllegalArgumentException("Ugyldig duration $this")
+            // Om man oppgir <timer>:<minutter> 5:30 == 5 timer og 30 minutter
+            val timerOgMinutter = somTimerOgMinutterOrNull()
+            if (timerOgMinutter != null) {
+                return Duration.ofHours(timerOgMinutter.first).plusMinutes(timerOgMinutter.second)
+            }
+            // Ikke en støttet måte å oppgi tid på
+            throw IllegalArgumentException("Ugyldig tid $this")
         }
         private fun Periode.jsonPath() = "[${this.iso8601}]"
     }

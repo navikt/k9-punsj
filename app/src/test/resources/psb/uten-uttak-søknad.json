@@ -25,14 +25,14 @@
     "arbeidstakerList": [
       {
         "arbeidstidInfo": {
-          "jobberNormaltTimerPerDag": "45",
           "perioder": [
             {
               "periode": {
                 "fom": "2021-05-10",
                 "tom": "2021-05-30"
               },
-              "faktiskArbeidTimerPerDag": ""
+              "jobberNormaltTimerPerDag": "8",
+              "faktiskArbeidTimerPerDag": "4.5"
             }
           ]
         },
