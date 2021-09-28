@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.info.ITokenService
@@ -13,13 +14,12 @@ import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import java.time.LocalDateTime
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-@Profile("!test & !local")
+@StandardProfil
 class AzureGraphService(
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
     private val tokenService: ITokenService,

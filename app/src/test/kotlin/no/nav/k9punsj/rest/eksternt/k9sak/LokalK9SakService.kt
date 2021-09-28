@@ -1,16 +1,16 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
+import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Month
 
 @Component
-@Profile("local")
+@LokalProfil
 class LokalK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: NorskIdent,

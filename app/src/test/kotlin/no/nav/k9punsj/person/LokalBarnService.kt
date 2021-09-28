@@ -1,13 +1,13 @@
 package no.nav.k9punsj.person
 
+import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.util.MockUtil.erFødtI
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Month
 
 @Component
-@Profile("local")
+@LokalProfil
 internal class LokalBarnService : BarnService {
     override suspend fun hentBarn(identitetsnummer: String): Set<Barn> = when {
         identitetsnummer.erFødtI(Month.MAY) -> setOf(
