@@ -88,8 +88,7 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() {
         val barn = when {
-            // TODO: Skal kun sette identitetsnummer, men setter begge ettersom gammel mapping gjorde det
-            norskIdent.erSatt() -> Barn(NorskIdentitetsnummer.of(norskIdent), foedselsdato)
+            norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
             foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
             else -> Barn.builder().build()
         }
@@ -250,14 +249,14 @@ internal class MapTilK9FormatV2(
             val k9Periode = info!!.periode!!.somK9Periode()!!
             val k9Info = SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo.builder()
             info.registrertIUtlandet?.also { k9Info.registrertIUtlandet(it) }
-            info.regnskapsførerNavn?.also { k9Info.regnskapsførerNavn(it) }
-            info.regnskapsførerTlf?.also { k9Info.regnskapsførerTelefon(it) }
+            info.regnskapsførerNavn?.blankAsNull()?.also { k9Info.regnskapsførerNavn(it) }
+            info.regnskapsførerTlf?.blankAsNull()?.also { k9Info.regnskapsførerTelefon(it) }
             info.landkode?.blankAsNull()?.also { k9Info.landkode(Landkode.of(it)) }
             info.bruttoInntekt?.also { k9Info.bruttoInntekt(it) }
             info.erVarigEndring?.also { k9Info.erVarigEndring(it) }
             info.endringDato?.also { k9Info.endringDato(it) }
             info.endringBegrunnelse?.blankAsNull()?.also { k9Info.endringBegrunnelse(it) }
-            // TODO: Hvorfor brukes ikke info.erNyoppstartet? Gjenbrukt fra gammel mapping
+            // TODO: Denne utledningen virker rar, men flagget skal forhåpentligvis fjernes fra K9-Format.
             k9Info.erNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
             when (info.erVarigEndring) {
                 true -> info.endringInntekt
@@ -266,12 +265,13 @@ internal class MapTilK9FormatV2(
 
             if (!info.virksomhetstyper.isNullOrEmpty()) {
                 val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
+                    virksomhetstype.isBlank() -> null
                     virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA
                     virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
                     virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
                     virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
                     else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.${k9Periode.jsonPath()}.virksomhetstyper[$index]") {
-                        VirksomhetType.valueOf(virksomhetstype)
+                        VirksomhetType.valueOf(virksomhetstype.uppercase())
                     }
                 }}
                 k9Info.virksomhetstyper(k9Virksomhetstyper)
@@ -403,20 +403,40 @@ internal class MapTilK9FormatV2(
             false -> this
         }
         private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
+        private fun String.somTimerOgMinutterOrNull() : Pair<Long, Long>? {
+            if (split(":").size != 2) return null
+            val timer = split(":")[0].toLongOrNull()?:return null
+            val minutter = split(":")[1].toLongOrNull()?:return null
+            if (timer < 0 || minutter < 0 || minutter > 60) return null
+            return timer to minutter
+        }
         private val EnTimeInMillis = Duration.ofHours(1).toMillis()
-        private fun String?.somDuration() : Duration {
-            if (isNullOrBlank()) return Duration.ofSeconds(0) // TODO: Bør fjernes, dette bør bli null (som om ikke satt)
+        internal fun String?.somDuration() : Duration? {
+            if (isNullOrBlank()) return null
+            // Om man oppgir gyldig ISO-standard
             kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
-            if (toLongOrNull() != null) { return Duration.ofHours(toLong())}
-            if (somDesimalOrNull() != null) {
-                val millis = (somDesimalOrNull()!! * EnTimeInMillis).roundToLong()
+            // Om man oppgir et heltal antall timer
+            val heltall = toLongOrNull()
+            if (heltall != null) { return Duration.ofHours(heltall)}
+            // Om man oppgir et desimaltall med enten '.' eller ','  5.5 == 5 timer og 30 minutter
+            val desimal = somDesimalOrNull()
+            if (desimal != null) {
+                val millis = (desimal * EnTimeInMillis).roundToLong()
                 val nøyaktig = Duration.ofMillis(millis)
+                val sekunder = nøyaktig.toSecondsPart().toLong()
                 return nøyaktig
-                    .minusSeconds(nøyaktig.toSecondsPart().toLong())
+                    .minusSeconds(sekunder)
                     .minusMillis(nøyaktig.toMillisPart().toLong())
                     .minusNanos(nøyaktig.toNanosPart().toLong())
+                    .let { if (sekunder >= 30) it.plusMinutes(1) else it }
             }
-            throw IllegalArgumentException("Ugyldig duration $this")
+            // Om man oppgir <timer>:<minutter> 5:30 == 5 timer og 30 minutter
+            val timerOgMinutter = somTimerOgMinutterOrNull()
+            if (timerOgMinutter != null) {
+                return Duration.ofHours(timerOgMinutter.first).plusMinutes(timerOgMinutter.second)
+            }
+            // Ikke en støttet måte å oppgi tid på
+            throw IllegalArgumentException("Ugyldig tid $this")
         }
         private fun Periode.jsonPath() = "[${this.iso8601}]"
     }
