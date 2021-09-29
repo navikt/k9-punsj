@@ -10,7 +10,7 @@ import java.time.Duration
 internal class MapTilK9FormatV2Test {
 
     @Test
-    fun `test mapping av tid`() {
+    fun `mapping av tid`() {
         assertThat(setOf(null.somDuration(), "".somDuration(), " ".somDuration())).hasSameElementsAs(setOf(null))
         assertThat(setOf("4".somDuration(),"4.0".somDuration(),"4,0".somDuration(), "4:00".somDuration(), "PT4H".somDuration())).hasSameElementsAs(setOf(Duration.ofHours(4)))
         assertThat(setOf("5.75".somDuration(), "5,75".somDuration(), "5:45".somDuration(), "PT5H45M".somDuration())).hasSameElementsAs(setOf(Duration.ofHours(5).plusMinutes(45)))

@@ -249,14 +249,14 @@ internal class MapTilK9FormatV2(
             val k9Periode = info!!.periode!!.somK9Periode()!!
             val k9Info = SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo.builder()
             info.registrertIUtlandet?.also { k9Info.registrertIUtlandet(it) }
-            info.regnskapsførerNavn?.also { k9Info.regnskapsførerNavn(it) }
-            info.regnskapsførerTlf?.also { k9Info.regnskapsførerTelefon(it) }
+            info.regnskapsførerNavn?.blankAsNull()?.also { k9Info.regnskapsførerNavn(it) }
+            info.regnskapsførerTlf?.blankAsNull()?.also { k9Info.regnskapsførerTelefon(it) }
             info.landkode?.blankAsNull()?.also { k9Info.landkode(Landkode.of(it)) }
             info.bruttoInntekt?.also { k9Info.bruttoInntekt(it) }
             info.erVarigEndring?.also { k9Info.erVarigEndring(it) }
             info.endringDato?.also { k9Info.endringDato(it) }
             info.endringBegrunnelse?.blankAsNull()?.also { k9Info.endringBegrunnelse(it) }
-            // TODO: Hvorfor brukes ikke info.erNyoppstartet? Gjenbrukt fra gammel mapping
+            // TODO: Denne utledningen virker rar, men flagget skal forhåpentligvis fjernes fra K9-Format.
             k9Info.erNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
             when (info.erVarigEndring) {
                 true -> info.endringInntekt
@@ -270,7 +270,7 @@ internal class MapTilK9FormatV2(
                     virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
                     virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
                     else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.${k9Periode.jsonPath()}.virksomhetstyper[$index]") {
-                        VirksomhetType.valueOf(virksomhetstype)
+                        VirksomhetType.valueOf(virksomhetstype.uppercase())
                     }
                 }}
                 k9Info.virksomhetstyper(k9Virksomhetstyper)
