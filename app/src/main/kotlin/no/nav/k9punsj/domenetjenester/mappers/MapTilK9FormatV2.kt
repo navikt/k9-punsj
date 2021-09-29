@@ -56,7 +56,7 @@ internal class MapTilK9FormatV2(
         dto.opptjeningAktivitet?.leggTilOpptjeningAktivitet()
         dto.arbeidstid?.leggTilArbeidstid()
         dto.soknadsinfo?.leggTilDataBruktTilUtledning()
-        dto.tilsynsordning?.perioder?.leggTilTilsynsordning()
+        dto.tilsynsordning?.leggTilTilsynsordning()
 
         // Fullfører søknad & validerer
         søknad.medYtelse(pleiepengerSyktBarn)
@@ -337,18 +337,36 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(type: String) : ArbeidstidInfo? {
         val k9ArbeidstidPeriodeInfo = mutableMapOf<Periode, ArbeidstidPeriodeInfo>()
-        this.perioder?.filter { it.periode.erSatt() }?.forEach{ periode ->
-            val k9Periode = periode.periode!!.somK9Periode()!!
-            val k9Info = ArbeidstidPeriodeInfo()
-            val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
-            mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
-                periode.faktiskArbeidTimerPerDag.somDuration()
-            }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
-            mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag.somDuration()
-            }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
-            k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
+
+        if (aktiv.leggTilPerioder()) {
+            this.perioder?.filter { it.periode.erSatt() }?.forEach{ periodeInfo ->
+                val k9Periode = periodeInfo.periode!!.somK9Periode()!!
+                val k9Info = ArbeidstidPeriodeInfo()
+                val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
+                mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
+                    periodeInfo.faktiskArbeidTimerPerDag.somDuration()
+                }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
+                mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
+                    periodeInfo.jobberNormaltTimerPerDag.somDuration()
+                }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
+                k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
+            }
         }
+        if (aktiv.leggTilDager()) {
+            this.dager.filter { it.dag != null }.forEach { dagInfo ->
+                val k9Periode = Periode(dagInfo.dag, dagInfo.dag)
+                val k9Info = ArbeidstidPeriodeInfo()
+                val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
+                mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
+                    dagInfo.faktiskArbeidTimerPerDag.somDuration()
+                }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
+                mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
+                    dagInfo.jobberNormaltTimerPerDag.somDuration()
+                }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
+                k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
+            }
+        }
+
         return if (k9ArbeidstidPeriodeInfo.isNotEmpty()) {
             ArbeidstidInfo().medPerioder(k9ArbeidstidPeriodeInfo)
         } else {
@@ -363,16 +381,23 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medSøknadInfo(k9DataBruktTilUtledning)
     }
 
-    private fun List<PleiepengerSøknadVisningDto.TilsynsordningDto.TilsynsordningPeriodeInfoDto>.leggTilTilsynsordning() {
+    private fun PleiepengerSøknadVisningDto.TilsynsordningDto.leggTilTilsynsordning() {
         val k9Tilsynsordning = mutableMapOf<Periode, TilsynPeriodeInfo>()
-        filter { it.periode.erSatt() }.forEach { tilsynsordning ->
-            val k9Periode = tilsynsordning.periode!!.somK9Periode()!!
-            k9Tilsynsordning[k9Periode] = TilsynPeriodeInfo()
-                .medEtablertTilsynTimerPerDag(Duration
-                    .ofHours(tilsynsordning.timer.toLong())
-                    .plusMinutes(tilsynsordning.minutter.toLong()
-                ))
+        if (aktiv.leggTilPerioder()) {
+            perioder?.filter { it.periode.erSatt() }?.forEach { tilsynsordning ->
+                val k9Periode = tilsynsordning.periode!!.somK9Periode()!!
+                k9Tilsynsordning[k9Periode] = TilsynPeriodeInfo()
+                    .medEtablertTilsynTimerPerDag(Duration.ofHours(tilsynsordning.timer.toLong()).plusMinutes(tilsynsordning.minutter.toLong()))
+            }
         }
+        if (aktiv.leggTilDager()) {
+            dager.filter { it.dag != null }.forEach { tilsynsordning ->
+                val k9Periode = Periode(tilsynsordning.dag, tilsynsordning.dag)
+                k9Tilsynsordning[k9Periode] = TilsynPeriodeInfo()
+                    .medEtablertTilsynTimerPerDag(Duration.ofHours(tilsynsordning.timer.toLong()).plusMinutes(tilsynsordning.minutter.toLong()))
+            }
+        }
+
         if (k9Tilsynsordning.isNotEmpty()) {
             pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))
         }
@@ -439,5 +464,7 @@ internal class MapTilK9FormatV2(
             throw IllegalArgumentException("Ugyldig tid $this")
         }
         private fun Periode.jsonPath() = "[${this.iso8601}]"
+        private fun PleiepengerSøknadVisningDto.AktivtInterval.leggTilDager() = this == PleiepengerSøknadVisningDto.AktivtInterval.dager || this == PleiepengerSøknadVisningDto.AktivtInterval.begge
+        private fun PleiepengerSøknadVisningDto.AktivtInterval.leggTilPerioder() = this == PleiepengerSøknadVisningDto.AktivtInterval.perioder || this == PleiepengerSøknadVisningDto.AktivtInterval.begge
     }
 }
