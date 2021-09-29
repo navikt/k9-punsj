@@ -12,10 +12,6 @@ import org.slf4j.LoggerFactory
 internal object PleiepengerSyktBarnMapper {
     private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnMapper::class.java)
     private val isProd = System.getenv("NAIS_CLUSTER_NAME").let { it != null && it.lowercase().startsWith("prod") }
-    init {
-        if (isProd) { logger.info("Benytter gammel mapping av søknader (MapTilK9Format)") }
-        else { logger.info("Benytter ny mapping av søknader (MapTilK9FormatV2)") }
-    }
 
     internal fun mapTilK9Format(
         søknad: PleiepengerSøknadVisningDto,
@@ -48,10 +44,7 @@ internal object PleiepengerSyktBarnMapper {
             ).søknadOgFeil()
         )
         håndterSammenligning(sammenligningsgrunnlag)
-        return when (isProd) {
-            true -> sammenligningsgrunnlag.gammel
-            false -> sammenligningsgrunnlag.ny
-        }
+        return sammenligningsgrunnlag.ny
     }
 
     internal data class Sammenligningsgrunnlag(
