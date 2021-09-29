@@ -144,7 +144,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         ),
         tilsynsordning = PleiepengerSøknadVisningDto.TilsynsordningDto(
             perioder = listOf(
-                PleiepengerSøknadVisningDto.TilsynsordningInfoDto(
+                PleiepengerSøknadVisningDto.TilsynsordningDto.TilsynsordningPeriodeInfoDto(
                     periode = optionalPeriode,
                     timer = 0,
                     minutter = 0

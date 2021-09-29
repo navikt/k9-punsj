@@ -39,13 +39,11 @@ data class PleiepengerSøknadVisningDto(
     data class ArbeidAktivitetDto(
         val selvstendigNaeringsdrivende: SelvstendigNæringsdrivendeDto?,
         val frilanser: FrilanserDto?,
-        val arbeidstaker: List<ArbeidstakerDto>?,
-    ) {
+        val arbeidstaker: List<ArbeidstakerDto>?) {
         data class SelvstendigNæringsdrivendeDto(
             val organisasjonsnummer: String?,
             val virksomhetNavn: String?,
-            val info: SelvstendigNæringsdrivendePeriodeInfoDto?,
-        ) {
+            val info: SelvstendigNæringsdrivendePeriodeInfoDto?) {
             data class SelvstendigNæringsdrivendePeriodeInfoDto(
                 val periode: PeriodeDto?,
                 val virksomhetstyper: List<String>?,
@@ -74,13 +72,19 @@ data class PleiepengerSøknadVisningDto(
         data class ArbeidstakerDto(
             val norskIdent: NorskIdentDto?,
             val organisasjonsnummer: String?,
-            val arbeidstidInfo: ArbeidstidInfoDto?,
-        ) {
+            val arbeidstidInfo: ArbeidstidInfoDto?) {
             data class ArbeidstidInfoDto(
                 val perioder: List<ArbeidstidPeriodeInfoDto>?,
-            ) {
+                val dager: List<ArbeidstidDagInfoDto> = emptyList(),
+                val aktiv: AktivtInterval = AktivtInterval.perioder) {
                 data class ArbeidstidPeriodeInfoDto(
                     val periode: PeriodeDto?,
+                    val faktiskArbeidTimerPerDag: String?,
+                    val jobberNormaltTimerPerDag: String?,
+                )
+                data class ArbeidstidDagInfoDto(
+                    @JsonFormat(pattern = "yyyy-MM-dd")
+                    val dag: LocalDate?,
                     val faktiskArbeidTimerPerDag: String?,
                     val jobberNormaltTimerPerDag: String?,
                 )
@@ -91,45 +95,51 @@ data class PleiepengerSøknadVisningDto(
     data class ArbeidstidDto(
         val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,
         val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
-        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
+        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?
     )
 
     data class DataBruktTilUtledningDto(
         val samtidigHjemme: Boolean? = null,
-        val harMedsoeker: Boolean? = null,
+        val harMedsoeker: Boolean? = null
     )
 
     data class BostederDto(
         val periode: PeriodeDto?,
-        val land: String?,
+        val land: String?
     )
 
     data class UtenlandsoppholdDto(
         val periode: PeriodeDto?,
         val land: String?,
-        val årsak: String?,
+        val årsak: String?
     )
 
     data class BeredskapDto(
         val periode: PeriodeDto?,
-        val tilleggsinformasjon: String?,
-
-        )
+        val tilleggsinformasjon: String?
+    )
 
     data class NattevåkDto(
         val periode: PeriodeDto?,
-        val tilleggsinformasjon: String?,
+        val tilleggsinformasjon: String?
     )
 
     data class TilsynsordningDto(
-        val perioder: List<TilsynsordningInfoDto>?,
-    )
-
-    data class TilsynsordningInfoDto(
-        val periode: PeriodeDto?,
-        val timer: Int,
-        val minutter: Int
-    )
+        val perioder: List<TilsynsordningPeriodeInfoDto>?,
+        val dager: List<TilsynsordningDagInfoDto> = emptyList(),
+        val aktiv: AktivtInterval = AktivtInterval.perioder) {
+        data class TilsynsordningPeriodeInfoDto(
+            val periode: PeriodeDto?,
+            val timer: Int,
+            val minutter: Int
+        )
+        data class TilsynsordningDagInfoDto(
+            @JsonFormat(pattern = "yyyy-MM-dd")
+            val dag: LocalDate?,
+            val timer: Int,
+            val minutter: Int
+        )
+    }
 
     data class UttakDto(
         val periode: PeriodeDto?,
@@ -141,4 +151,10 @@ data class PleiepengerSøknadVisningDto(
         val samtykketOmsorgForBarnet: Boolean?,
         val beskrivelseAvOmsorgsrollen: String?,
     )
+
+    enum class AktivtInterval {
+        perioder,
+        dager,
+        begge
+    }
 }

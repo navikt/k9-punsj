@@ -363,7 +363,7 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medSøknadInfo(k9DataBruktTilUtledning)
     }
 
-    private fun List<PleiepengerSøknadVisningDto.TilsynsordningInfoDto>.leggTilTilsynsordning() {
+    private fun List<PleiepengerSøknadVisningDto.TilsynsordningDto.TilsynsordningPeriodeInfoDto>.leggTilTilsynsordning() {
         val k9Tilsynsordning = mutableMapOf<Periode, TilsynPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { tilsynsordning ->
             val k9Periode = tilsynsordning.periode!!.somK9Periode()!!
