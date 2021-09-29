@@ -265,6 +265,7 @@ internal class MapTilK9FormatV2(
 
             if (!info.virksomhetstyper.isNullOrEmpty()) {
                 val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
+                    virksomhetstype.isBlank() -> null
                     virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA
                     virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
                     virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
