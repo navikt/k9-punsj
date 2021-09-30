@@ -22,8 +22,9 @@ internal object PleiepengerSøknadVisningDtoUtils {
     internal fun minimalSøknadSomValiderer(
         søker: String = "11111111111",
         barn: String = "22222222222",
-        søknadsperiode: Pair<LocalDate, LocalDate>? = null,
-        manipuler: (MutableMap<String, Any?>) -> Unit = {}
+        søknadsperiode: PeriodeDto? = null,
+        appendJson: Map<String, String> = emptyMap(),
+        manipuler: (MutableMap<String, Any?>) -> Unit = {},
     ) : PleiepengerSøknadVisningDto {
         @Language("JSON")
         val json = """
@@ -42,9 +43,13 @@ internal object PleiepengerSøknadVisningDtoUtils {
             """
         val søknad: MutableMap<String, Any?> = objectMapper().readValue(json)
         søknadsperiode?.also {
-            søknad["soeknadsperiode"] = mapOf("fom" to "${it.first}", "tom" to "${it.second}")
+            søknad["soeknadsperiode"] = mapOf("fom" to "${it.fom}", "tom" to "${it.tom}")
         }
         manipuler(søknad)
+        appendJson.forEach { (key, json) ->
+            val map : Map<String, Any?> = objectMapper().readValue(json)
+            søknad[key] = map
+        }
         return objectMapper().convertValue(søknad)
     }
 
@@ -184,7 +189,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
 
     init {
         val k9Feil = minimalSøknadSomValiderer(
-            søknadsperiode = LocalDate.now() to LocalDate.now().plusWeeks(1)
+            søknadsperiode = PeriodeDto(LocalDate.now(), LocalDate.now().plusWeeks(1))
         ).mapTilK9Format(emptyList()).second
         check(k9Feil.isEmpty()) {
             "Minimal søknad mangler felter. Feil=$k9Feil"

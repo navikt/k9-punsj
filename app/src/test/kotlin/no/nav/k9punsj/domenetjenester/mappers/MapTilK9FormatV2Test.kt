@@ -42,15 +42,17 @@ internal class MapTilK9FormatV2Test {
         ).søknadOgFeil().second.assertInneholderFeil()
     }
 
-    private fun PleiepengerSøknadVisningDto.søknadOgFeil() = MapTilK9FormatV2(
-        dto = this,
-        perioderSomFinnesIK9 = emptyList(),
-        journalpostIder = setOf("123456789"),
-        søknadId = "${UUID.randomUUID()}"
-    ).søknadOgFeil()
+    internal companion object {
+        internal fun PleiepengerSøknadVisningDto.søknadOgFeil() = MapTilK9FormatV2(
+            dto = this,
+            perioderSomFinnesIK9 = emptyList(),
+            journalpostIder = setOf("123456789"),
+            søknadId = "${UUID.randomUUID()}"
+        ).søknadOgFeil()
 
-    private fun List<Feil>.assertInneholderFeil() {
-        assertThat(this).isNotEmpty
-        assertThat(this.filter { it.feilkode == "uventetMappingfeil" }).isEmpty()
+        private fun List<Feil>.assertInneholderFeil() {
+            assertThat(this).isNotEmpty
+            assertThat(this.filter { it.feilkode == "uventetMappingfeil" }).isEmpty()
+        }
     }
 }

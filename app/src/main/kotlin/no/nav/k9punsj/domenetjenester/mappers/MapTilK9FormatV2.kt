@@ -417,7 +417,7 @@ internal class MapTilK9FormatV2(
         private const val Versjon = "1.0.0"
         private val DefaultUttak = UttakPeriodeInfo().setTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
-        private fun PeriodeDto.somK9Periode() = when (erSatt()) {
+        internal fun PeriodeDto.somK9Periode() = when (erSatt()) {
             true -> Periode(fom, tom)
             else -> null
         }
