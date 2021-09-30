@@ -206,7 +206,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før`() {
+    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`() {
         val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         val journalpostId = "34234234"
@@ -233,7 +233,7 @@ class PleiepengersyktbarnTests {
         val response2 = res2
             .bodyToMono(OasFeil::class.java)
             .block()
-        assertThat(response2!!.feil).isEqualTo("En eller alle journalpostene[34234234] har blitt sendt inn fra før")
+        assertThat(response2!!.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
     }
 
     @Test

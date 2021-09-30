@@ -26,6 +26,7 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -53,6 +54,7 @@ internal class PleiepengerSyktBarnRoutes(
     @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI) {
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
         private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
         private const val SøknadIdKey = "soeknad_id"
     }
@@ -153,12 +155,24 @@ internal class PleiepengerSyktBarnRoutes(
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+                        val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
+                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn -> if (!kanSendesInn) {
+                                logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
+                            }}
+                        }.toMutableSet()
+
+                        if (journalpostIder.isEmpty()) {
+                            logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+                            return@RequestContext ServerResponse
+                                .status(HttpStatus.CONFLICT)
+                                .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
+                        }
 
                         val søknadK9Format = PleiepengerSyktBarnMapper.mapTilK9Format(
                             søknad = søknad,
                             soeknadId = søknad.soeknadId,
                             perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
-                            journalpostIder = journalposterDto.journalposter
+                            journalpostIder = journalpostIder
                         )
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
@@ -175,14 +189,9 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        if (!søknadK9Format.first.journalposter.map { j -> j.journalpostId }
-                                .containsAll(journalposterDto.journalposter)) {
-                            throw IllegalStateException("missmatch mellom journalposter -> Dette skal ikke skje")
-                        }
-
                         val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
                             søknadK9Format.first,
-                            journalposterDto.journalposter
+                            journalpostIder
                         )
 
                         if (feil != null) {
