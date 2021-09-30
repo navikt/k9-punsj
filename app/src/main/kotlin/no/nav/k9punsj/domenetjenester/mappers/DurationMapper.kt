@@ -31,7 +31,6 @@ internal object DurationMapper {
         val sekunder = nøyaktig.toSecondsPart().toLong()
         return nøyaktig
             .minusSeconds(sekunder)
-            .minusMillis(nøyaktig.toMillisPart().toLong())
             .minusNanos(nøyaktig.toNanosPart().toLong())
             .let { if (sekunder >= 30) it.plusMinutes(1) else it }
     }
