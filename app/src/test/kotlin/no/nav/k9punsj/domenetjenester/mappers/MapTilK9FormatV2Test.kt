@@ -50,6 +50,8 @@ internal class MapTilK9FormatV2Test {
             søknadId = "${UUID.randomUUID()}"
         ).søknadOgFeil()
 
+        internal fun LocalDate.somEnkeltdagPeriode() = PeriodeDto(fom = this, tom = this)
+
         private fun List<Feil>.assertInneholderFeil() {
             assertThat(this).isNotEmpty
             assertThat(this.filter { it.feilkode == "uventetMappingfeil" }).isEmpty()

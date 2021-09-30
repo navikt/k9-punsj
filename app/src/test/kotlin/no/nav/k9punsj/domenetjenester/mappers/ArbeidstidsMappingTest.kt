@@ -4,11 +4,12 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2.Companion.somK9Periode
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2Test.Companion.somEnkeltdagPeriode
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2Test.Companion.søknadOgFeil
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
 import no.nav.k9punsj.util.PleiepengerSøknadVisningDtoUtils
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -19,10 +20,6 @@ internal class ArbeidstidsMappingTest {
 
     @Test
     fun `oppgi perioder og dager for arbeidstid`() {
-        val søknadsperiode = PeriodeDto(LocalDate.now(), LocalDate.now().plusMonths(1))
-        val arbeidstidperiode = søknadsperiode.copy(tom = søknadsperiode.tom!!.minusDays(1))
-        val arbeidstiddag = søknadsperiode.tom!!
-
         arbeidstidPerioderOgDager(
             aktiv = PleiepengerSøknadVisningDto.AktivtInterval.perioder
         ).assertArbeidstidPeriodeInfo(forventet = mapOf(
@@ -32,14 +29,14 @@ internal class ArbeidstidsMappingTest {
         arbeidstidPerioderOgDager(
             aktiv = PleiepengerSøknadVisningDto.AktivtInterval.dager
         ).assertArbeidstidPeriodeInfo(forventet = mapOf(
-            PeriodeDto(arbeidstiddag, arbeidstiddag) to (Duration.ofHours(8) to Duration.ofHours(5).plusMinutes(30))
+            arbeidstiddag.somEnkeltdagPeriode() to (Duration.ofHours(8) to Duration.ofHours(5).plusMinutes(30))
         ))
 
         arbeidstidPerioderOgDager(
             aktiv = PleiepengerSøknadVisningDto.AktivtInterval.begge
         ).assertArbeidstidPeriodeInfo(forventet = mapOf(
             arbeidstidperiode to (Duration.ofHours(7).plusMinutes(30) to Duration.ofHours(5)),
-            PeriodeDto(arbeidstiddag, arbeidstiddag) to (Duration.ofHours(8) to Duration.ofHours(5).plusMinutes(30))
+            arbeidstiddag.somEnkeltdagPeriode() to (Duration.ofHours(8) to Duration.ofHours(5).plusMinutes(30))
         ))
     }
 
@@ -70,9 +67,7 @@ internal class ArbeidstidsMappingTest {
                             "faktiskArbeidTimerPerDag": "5,5"
                         }],
                         "aktiv": "$aktiv"
-                    },
-                    "organisasjonsnummer": null,
-                    "norskIdent": "15026819005"
+                    }
                 }]
             }
             """.trimIndent()
@@ -85,7 +80,7 @@ internal class ArbeidstidsMappingTest {
 
         private fun Map<Periode, ArbeidstidPeriodeInfo>.assertArbeidstidPeriodeInfo(
             forventet: Map<PeriodeDto, Pair<Duration, Duration>>) {
-            Assertions.assertThat(this.keys).hasSameElementsAs(forventet.keys.map { it.somK9Periode() })
+            assertThat(this.keys).hasSameElementsAs(forventet.keys.map { it.somK9Periode() })
             forventet.forEach { periode, (normalt, faktisk) ->
                 val periodeInfo = get(periode.somK9Periode())!!
                 assertEquals(normalt, periodeInfo.jobberNormaltTimerPerDag)
