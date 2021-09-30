@@ -25,7 +25,6 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import kotlin.math.roundToLong
 
 internal class MapTilK9FormatV2(
     søknadId: String,
@@ -170,7 +169,7 @@ internal class MapTilK9FormatV2(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = UttakPeriodeInfo()
-            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.timerPleieAvBarnetPerDag.somDuration() }?.also {
+            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
                 k9Info.timerPleieAvBarnetPerDag = it
             }
             k9Uttak[k9Periode] = k9Info
@@ -342,10 +341,10 @@ internal class MapTilK9FormatV2(
             val k9Info = ArbeidstidPeriodeInfo()
             val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
             mapEllerLeggTilFeil("$felt.faktiskArbeidTimerPerDag") {
-                periode.faktiskArbeidTimerPerDag.somDuration()
+                periode.faktiskArbeidPerDag?.somDuration()
             }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
             mapEllerLeggTilFeil("$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag.somDuration()
+                periode.jobberNormaltPerDag?.somDuration()
             }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
             k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
         }
@@ -402,42 +401,8 @@ internal class MapTilK9FormatV2(
             true -> null
             false -> this
         }
-        private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()
-        private fun String.somTimerOgMinutterOrNull() : Pair<Long, Long>? {
-            if (split(":").size != 2) return null
-            val timer = split(":")[0].toLongOrNull()?:return null
-            val minutter = split(":")[1].toLongOrNull()?:return null
-            if (timer < 0 || minutter < 0 || minutter > 60) return null
-            return timer to minutter
-        }
-        private val EnTimeInMillis = Duration.ofHours(1).toMillis()
-        internal fun String?.somDuration() : Duration? {
-            if (isNullOrBlank()) return null
-            // Om man oppgir gyldig ISO-standard
-            kotlin.runCatching { Duration.parse(this) }.onSuccess { return it }
-            // Om man oppgir et heltal antall timer
-            val heltall = toLongOrNull()
-            if (heltall != null) { return Duration.ofHours(heltall)}
-            // Om man oppgir et desimaltall med enten '.' eller ','  5.5 == 5 timer og 30 minutter
-            val desimal = somDesimalOrNull()
-            if (desimal != null) {
-                val millis = (desimal * EnTimeInMillis).roundToLong()
-                val nøyaktig = Duration.ofMillis(millis)
-                val sekunder = nøyaktig.toSecondsPart().toLong()
-                return nøyaktig
-                    .minusSeconds(sekunder)
-                    .minusMillis(nøyaktig.toMillisPart().toLong())
-                    .minusNanos(nøyaktig.toNanosPart().toLong())
-                    .let { if (sekunder >= 30) it.plusMinutes(1) else it }
-            }
-            // Om man oppgir <timer>:<minutter> 5:30 == 5 timer og 30 minutter
-            val timerOgMinutter = somTimerOgMinutterOrNull()
-            if (timerOgMinutter != null) {
-                return Duration.ofHours(timerOgMinutter.first).plusMinutes(timerOgMinutter.second)
-            }
-            // Ikke en støttet måte å oppgi tid på
-            throw IllegalArgumentException("Ugyldig tid $this")
-        }
+
         private fun Periode.jsonPath() = "[${this.iso8601}]"
+        private fun PleiepengerSøknadVisningDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer.toLong()).plusMinutes(minutter.toLong())
     }
 }
