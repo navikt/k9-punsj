@@ -2,7 +2,6 @@ package no.nav.k9punsj.domenetjenester.mappers
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9.søknad.felles.opptjening.Arbeidstaker
 import no.nav.k9.søknad.felles.opptjening.Frilanser
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende
@@ -232,7 +231,6 @@ internal class MapTilK9FormatV2(
         val k9OpptjeningAktivitet = OpptjeningAktivitet()
         selvstendigNaeringsdrivende?.mapOpptjeningAktivitetSelvstendigNæringsdrivende()?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it) }
         frilanser?.also { k9OpptjeningAktivitet.medFrilanser(it.mapOpptjeningAktivitetFrilanser()) }
-        arbeidstaker?.also { k9OpptjeningAktivitet.medArbeidstaker(it.mapOpptjeningAktivitetArbeidstaker())}
         pleiepengerSyktBarn.medOpptjeningAktivitet(k9OpptjeningAktivitet)
     }
 
@@ -289,17 +287,6 @@ internal class MapTilK9FormatV2(
             k9Frilanser.medSluttDato(it)
         }
         return k9Frilanser
-    }
-
-    private fun List<PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapOpptjeningAktivitetArbeidstaker() = map { arbeidstaker ->
-        val k9Arbeidstaker = Arbeidstaker()
-        if (arbeidstaker.norskIdent.erSatt()) {
-            k9Arbeidstaker.norskIdentitetsnummer = NorskIdentitetsnummer.of(arbeidstaker.norskIdent)
-        }
-        if (arbeidstaker.organisasjonsnummer.erSatt()) {
-            k9Arbeidstaker.organisasjonsnummer = Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer)
-        }
-        k9Arbeidstaker
     }
 
     private fun PleiepengerSøknadVisningDto.ArbeidstidDto.leggTilArbeidstid() {

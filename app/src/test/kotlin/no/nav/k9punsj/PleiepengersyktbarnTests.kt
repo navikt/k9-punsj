@@ -9,7 +9,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -462,8 +462,8 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).hasSize(4)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
         assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
-        assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
-        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
+        assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("910909088")
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("910909088")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.tom).isEqualTo(
@@ -480,7 +480,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
-        assertThat(søknadViaGet.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("37,5")
+        assertThat(søknadViaGet.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("7,5")
         assertThat(søknadViaGet.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
         assertThat(søknadViaGet.bosteder!![0].land).isEqualTo("RU")
         assertThat(søknadViaGet.lovbestemtFerie!![0].fom).isEqualTo(LocalDate.of(2018, 12, 30))
@@ -488,47 +488,16 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.soknadsinfo!!.harMedsoeker).isEqualTo(true)
         assertThat(søknadViaGet.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
 
-
-        // punsj backend format
-        val sendingsformat = MapFraVisningTilEksternFormat.mapTilSendingsformat(søknadViaGet)
-        assertThat(sendingsformat.søker?.norskIdentitetsnummer).isEqualTo(norskIdent)
-        assertThat(sendingsformat.ytelse?.barn?.norskIdentitetsnummer).isEqualTo("22222222222")
-        assertThat(sendingsformat.ytelse?.søknadsperiode).isEqualTo("2018-12-30/2019-10-20")
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()).isEqualTo(
-            "2018-12-30/..")
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("999999999")
-        assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("999999999")
-        assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.keys?.first()).isEqualTo(
-            "2018-12-30/2019-10-20")
-        assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.faktiskArbeidTimerPerDag?.toString()).isEqualTo(
-            "PT37H30M")
-        assertThat(sendingsformat.ytelse?.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
-            "PT7H28M")
-        assertThat(sendingsformat.ytelse?.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(4))
-        assertThat(sendingsformat.ytelse?.arbeidstid?.frilanserArbeidstidInfo?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
-        assertThat(sendingsformat.ytelse?.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-        assertThat(sendingsformat.ytelse?.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-        assertThat(sendingsformat.ytelse?.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
-        assertThat(sendingsformat.ytelse?.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
-        assertThat(sendingsformat.ytelse?.bosteder?.perioder?.values?.first()?.land).isEqualTo("RU")
-        assertThat(sendingsformat.ytelse?.lovbestemtFerie?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-06-20")
-        assertThat(sendingsformat.ytelse?.lovbestemtFerieSomSkalSlettes?.perioder?.keys?.first()).isEqualTo("2019-06-21/2019-10-20")
-        assertThat(sendingsformat.ytelse?.utenlandsopphold?.perioder?.keys?.first()).isEqualTo("2018-12-30/2019-10-20")
-        assertThat(sendingsformat.ytelse?.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
-        assertThat(sendingsformat.ytelse?.soknadsinfo!!.harMedsøker).isEqualTo(true)
-
-
         // k9-format, faktisk søknad format
-        val mapTilEksternFormat = MapTilK9Format.mapTilEksternFormat(sendingsformat,
+        val mapTilEksternFormat = MapTilK9FormatV2(
             søknadViaGet.soeknadId,
+            søknadViaGet.journalposter!!.toSet(),
             emptyList(),
-            søknadViaGet.journalposter!!.toSet())
+            søknadViaGet
+        )
 
-        assertThat(mapTilEksternFormat.second).isEmpty()
-        val søknad = mapTilEksternFormat.first
+        assertThat(mapTilEksternFormat.feil()).isEmpty()
+        val søknad = mapTilEksternFormat.søknad()
 
         assertThat(søknad.søker.personIdent.verdi).isEqualTo(norskIdent)
         val ytelse = søknad.getYtelse<PleiepengerSyktBarn>()
@@ -537,22 +506,21 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
             "2018-12-30/..")
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
-        assertThat(sendingsformat.ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
+        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
+        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
         assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
-        assertThat(ytelse.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer.verdi).isEqualTo("999999999")
-        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("999999999")
+        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("910909088")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.faktiskArbeidTimerPerDag?.toString()).isEqualTo(
             "PT37H30M")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
-            "PT7H28M")
+            "PT7H29M")
         assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(4))
         assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(ytelse.tilsynsordning?.perioder?.values?.first()?.etablertTilsynTimerPerDag.toString()).isEqualTo("PT7H30M")
-        assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT37H30M")
+        assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT7H30M")
         assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
         assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
         assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(true)

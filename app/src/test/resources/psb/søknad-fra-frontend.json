@@ -17,7 +17,7 @@
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
       "virksomhetNavn": "FiskerAS",
-      "organisasjonsnummer": "890508087",
+      "organisasjonsnummer": "910909088",
       "info": {
         "periode": {
           "fom": "2018-12-30",
@@ -49,7 +49,7 @@
     "arbeidstaker": [
       {
         "norskIdent": null,
-        "organisasjonsnummer": "999999999"
+        "organisasjonsnummer": "910909088"
       }
     ]
   },
@@ -57,7 +57,7 @@
     "arbeidstakerList": [
       {
         "norskIdent": null,
-        "organisasjonsnummer": "999999999",
+        "organisasjonsnummer": "910909088",
         "arbeidstidInfo": {
           "perioder": [
             {
@@ -133,7 +133,7 @@
         "fom": "2018-12-30",
         "tom": "2019-10-20"
       },
-      "timerPleieAvBarnetPerDag": "37,5"
+      "timerPleieAvBarnetPerDag": "7,5"
     }
   ],
   "omsorg": {
