@@ -42,7 +42,6 @@ internal class MapTilK9FormatV2(
         dto.leggTilJournalposter(journalpostIder = journalpostIder)
         dto.barn?.leggTilBarn()
         dto.soeknadsperiode?.leggTilSøknadsperiode()
-        perioderSomFinnesIK9.leggTilEndringsperioder() // TODO: Fjernes når vi endrer til k9-format som utleder endringsperioder.
         dto.trekkKravPerioder.leggTilTrekkKravPerioder()
         dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
         dto.leggTilLovestemtFerie()
@@ -58,7 +57,8 @@ internal class MapTilK9FormatV2(
 
         // Fullfører søknad & validerer
         søknad.medYtelse(pleiepengerSyktBarn)
-        feil.addAll(Validator.valider(søknad)) //TODO: Send med perioderSomFinnesIK9 når vi endrer til k9-format som utleder endringsperioder.
+        Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder())
+        feil.addAll(Validator.valider(søknad))
     }.onFailure { throwable ->
         logger.error("Uventet mappingfeil", throwable)
         feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
