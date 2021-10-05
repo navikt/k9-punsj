@@ -57,8 +57,7 @@ internal class MapTilK9FormatV2(
 
         // Fullfører søknad & validerer
         søknad.medYtelse(pleiepengerSyktBarn)
-        Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder())
-        feil.addAll(Validator.valider(søknad))
+        feil.addAll(Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder()))
     }.onFailure { throwable ->
         logger.error("Uventet mappingfeil", throwable)
         feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
