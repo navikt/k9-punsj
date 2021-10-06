@@ -17,7 +17,7 @@ data class PleiepengerSøknadVisningDto(
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
-    val soeknadsperiode: PeriodeDto? = null,
+    val soeknadsperiode: List<PeriodeDto>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
     val beredskap: List<BeredskapDto>? = null,

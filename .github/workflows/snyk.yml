@@ -16,4 +16,4 @@ jobs:
           GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           command: monitor
-          args: --org=omsorgspenger --configuration-attributes=usage:java-runtime --project-name=${{ github.repository }} --remote-repo-url=https://github.com/${{ github.repository }}.git
+          args: --org=k9saksbehandling --configuration-attributes=usage:java-runtime --project-name=${{ github.repository }} --remote-repo-url=https://github.com/${{ github.repository }}.git
