@@ -3,8 +3,7 @@ package no.nav.k9punsj.util
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
-import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
@@ -15,9 +14,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal object PleiepengerSøknadVisningDtoUtils {
-
-    internal fun MutableMap<String, Any?>.somPleiepengerSøknadVisningDto(manipuler: (MutableMap<String, Any?>) -> Unit)
-        = manipuler(this).let { objectMapper().convertValue<PleiepengerSøknadVisningDto>(this) }
 
     internal fun minimalSøknadSomValiderer(
         søker: String = "11111111111",
@@ -48,17 +44,16 @@ internal object PleiepengerSøknadVisningDtoUtils {
         return objectMapper().convertValue(søknad)
     }
 
-    internal fun PleiepengerSøknadVisningDto.mapTilSendingsFormat() =
-        MapFraVisningTilEksternFormat.mapTilSendingsformat(this)
+    internal fun PleiepengerSøknadVisningDto.mapTilSendingsFormat() = mapTilK9Format()
 
     internal fun PleiepengerSøknadVisningDto.mapTilK9Format(
         perioderSomFinnesIK9: List<PeriodeDto> = emptyList()) =
-        MapTilK9Format.mapTilEksternFormat(
-            søknad = mapTilSendingsFormat(),
-            soeknadId = soeknadId,
+        MapTilK9FormatV2(
+            søknadId = soeknadId,
             perioderSomFinnesIK9 = perioderSomFinnesIK9,
-            journalpostIder = journalposter?.toSet() ?: emptySet()
-        ).let { it.first.getYtelse<PleiepengerSyktBarn>() to it.second }
+            journalpostIder = journalposter?.toSet() ?: emptySet(),
+            dto = this
+        )
 
 
     private fun arbeidstidInfoKomplettStruktur(
@@ -77,7 +72,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         requiredTekst: String = "",
         optionalTekst: String? = "",
         requiredPeriode: PeriodeDto,
-        optionalPeriode: PeriodeDto?
+        optionalPeriode: List<PeriodeDto>?
     ) = PleiepengerSøknadVisningDto(
         soeknadId = "${UUID.randomUUID()}",
         soekerId = "11111111111",
@@ -94,7 +89,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 organisasjonsnummer = optionalTekst,
                 virksomhetNavn = optionalTekst,
                 info = PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.SelvstendigNæringsdrivendePeriodeInfoDto(
-                    periode = optionalPeriode,
+                    periode = optionalPeriode?.firstOrNull(),
                     virksomhetstyper = listOf(requiredTekst),
                     registrertIUtlandet = null,
                     landkode = optionalTekst,
@@ -110,7 +105,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
             ),
             arbeidstaker = listOf(
                 PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto(
-                    arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode),
+                    arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode?.firstOrNull()),
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst
                 )),
@@ -125,34 +120,34 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 PleiepengerSøknadVisningDto.ArbeidAktivitetDto.ArbeidstakerDto(
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst,
-                    arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
+                    arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode?.firstOrNull())
                 )),
-            frilanserArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode),
-            selvstendigNæringsdrivendeArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
+            frilanserArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode?.firstOrNull()),
+            selvstendigNæringsdrivendeArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode?.firstOrNull())
         ),
         beredskap = listOf(
             PleiepengerSøknadVisningDto.BeredskapDto(
-                periode = optionalPeriode,
+                periode = optionalPeriode?.firstOrNull(),
                 tilleggsinformasjon = optionalTekst
             )
         ),
         nattevaak = listOf(
             PleiepengerSøknadVisningDto.NattevåkDto(
-                periode = optionalPeriode,
+                periode = optionalPeriode?.firstOrNull(),
                 tilleggsinformasjon =  optionalTekst
             )
         ),
         tilsynsordning = PleiepengerSøknadVisningDto.TilsynsordningDto(
             perioder = listOf(
                 PleiepengerSøknadVisningDto.TilsynsordningInfoDto(
-                    periode = optionalPeriode,
+                    periode = optionalPeriode?.firstOrNull(),
                     timer = 0,
                     minutter = 0
                 )
             )
         ),
         uttak = listOf(PleiepengerSøknadVisningDto.UttakDto(
-            periode = optionalPeriode,
+            periode = optionalPeriode?.firstOrNull(),
             timerPleieAvBarnetPerDag = optionalTekst
         )),
         omsorg = PleiepengerSøknadVisningDto.OmsorgDto(
@@ -161,7 +156,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
             beskrivelseAvOmsorgsrollen = optionalTekst
         ),
         bosteder = listOf(PleiepengerSøknadVisningDto.BostederDto(
-            periode = optionalPeriode,
+            periode = optionalPeriode?.firstOrNull(),
             land = optionalTekst
         )),
         lovbestemtFerie = listOf(requiredPeriode),
@@ -172,7 +167,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         ),
         utenlandsopphold = listOf(
             PleiepengerSøknadVisningDto.UtenlandsoppholdDto(
-                periode = optionalPeriode,
+                periode = optionalPeriode?.firstOrNull(),
                 land = optionalTekst,
                 årsak = optionalTekst
             )
@@ -185,8 +180,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
     init {
         val k9Feil = minimalSøknadSomValiderer(
             søknadsperiode = LocalDate.now() to LocalDate.now().plusWeeks(1)
-        ).mapTilK9Format(emptyList()).second
-        check(k9Feil.isEmpty()) {
+        ).mapTilK9Format(emptyList())
+        check(k9Feil.feil().isEmpty()) {
             "Minimal søknad mangler felter. Feil=$k9Feil"
         }
     }

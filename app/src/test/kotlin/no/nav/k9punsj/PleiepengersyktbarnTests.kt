@@ -8,7 +8,6 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -182,7 +181,7 @@ class PleiepengersyktbarnTests {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
         val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
-        val mapTilSendingsformat = MapFraVisningTilEksternFormat.mapTilSendingsformat(visningDto)
+        val mapTilSendingsformat = MapTilK9FormatV2(søknadId = "", journalpostIder = setOf(), perioderSomFinnesIK9 = listOf(), dto = visningDto)
         assertNotNull(mapTilSendingsformat)
 
         val tilbake = objectMapper().convertValue<SøknadJson>(visningDto)
@@ -454,8 +453,8 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
         assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
         assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
-        assertThat(søknadViaGet.soeknadsperiode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
-        assertThat(søknadViaGet.soeknadsperiode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.soeknadsperiode!!.first().fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soeknadsperiode!!.first().tom).isEqualTo(LocalDate.of(2019, 10, 20))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
