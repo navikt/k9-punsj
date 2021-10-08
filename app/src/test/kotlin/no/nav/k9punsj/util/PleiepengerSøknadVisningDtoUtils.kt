@@ -38,7 +38,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
             """
         val søknad: MutableMap<String, Any?> = objectMapper().readValue(json)
         søknadsperiode?.also {
-            søknad["soeknadsperiode"] = mapOf("fom" to "${it.first}", "tom" to "${it.second}")
+            søknad["soeknadsperiode"] = listOf(mapOf("fom" to "${it.first}", "tom" to "${it.second}"))
         }
         manipuler(søknad)
         return objectMapper().convertValue(søknad)

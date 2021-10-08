@@ -10,10 +10,10 @@
     "norskIdent": "22222222222",
     "foedselsdato": "2018-10-30"
   },
-  "soeknadsperiode": {
+  "soeknadsperiode": [{
     "fom": "2018-12-30",
     "tom": "2019-10-20"
-  },
+  }],
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
       "virksomhetNavn": "FiskerAS",
