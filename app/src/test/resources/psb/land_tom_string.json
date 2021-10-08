@@ -34,7 +34,7 @@
                 "tom": "2021-05-31"
               },
               "faktiskArbeidTimerPerDag": "10",
-              "jobberNormaltTimerPerDag": "40"
+              "jobberNormaltTimerPerDag": "20"
             }
           ]
         }
