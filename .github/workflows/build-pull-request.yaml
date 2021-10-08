@@ -1,10 +1,6 @@
 name: Build Pull Request
 
-on: [pull_request_target]
-
-env:
-  GITHUB_USERNAME: x-access-token
-  GITHUB_TOKEN: ${{ secrets.PUNSJ_TOKEN }}
+on: pull_request
 
 jobs:
   Build:
@@ -17,6 +13,7 @@ jobs:
         with:
           java-version: 16
           distribution: 'adopt'
+          cache: maven
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
@@ -28,5 +25,5 @@ jobs:
         run: |
           mvn clean verify -e --batch-mode -DtrimStackTrace=false
         env:
+          GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-
