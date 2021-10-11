@@ -16,7 +16,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
-import no.nav.k9punsj.domenetjenester.mappers.PleiepengerSyktBarnMapper
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
@@ -168,12 +168,13 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val søknadK9Format = PleiepengerSyktBarnMapper.mapTilK9Format(
-                            søknad = søknad,
-                            soeknadId = søknad.soeknadId,
+                        val søknadK9Format = MapTilK9FormatV2(
+                            søknadId = søknad.soeknadId,
+                            journalpostIder = journalpostIder,
                             perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
-                            journalpostIder = journalpostIder
-                        )
+                            dto = søknad
+                        ).søknadOgFeil()
+
                         if (søknadK9Format.second.isNotEmpty()) {
                             val feil = søknadK9Format.second.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
@@ -266,12 +267,12 @@ internal class PleiepengerSyktBarnRoutes(
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = PleiepengerSyktBarnMapper.mapTilK9Format(
-                        søknad = soknadTilValidering,
-                        soeknadId = soknadTilValidering.soeknadId,
+                    mapTilEksternFormat = MapTilK9FormatV2(
+                        søknadId = soknadTilValidering.soeknadId,
+                        journalpostIder = journalposterDto.journalposter,
                         perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
-                        journalpostIder = journalposterDto.journalposter
-                    )
+                        dto = soknadTilValidering
+                    ).søknadOgFeil()
                 } catch (e: Exception) {
                     val sw = StringWriter()
                     e.printStackTrace(PrintWriter(sw))

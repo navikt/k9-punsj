@@ -24,15 +24,15 @@ internal class InnsendingMappingTest {
         val dto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
 
         val k9Format = MapTilK9FormatV2(
-            søknadId = "${UUID.randomUUID()}",
+            søknadId = dto.soeknadId,
+            journalpostIder = dto.journalposter?.toSet()?: emptySet(),
             perioderSomFinnesIK9 = emptyList(),
-            journalpostIder = setOf(IdGenerator.nesteId(), IdGenerator.nesteId()),
             dto = dto
-        )
+        ).søknadOgFeil().first
 
         val (_, value) = innsendingClient.mapSøknad(
-            søknadId = k9Format.søknad().søknadId.id,
-            søknad = k9Format.søknad(),
+            søknadId = k9Format.søknadId.id,
+            søknad = k9Format,
             tilleggsOpplysninger = mapOf(
                 "foo" to "bar",
                 "bar" to 2

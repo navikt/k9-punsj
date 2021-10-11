@@ -181,7 +181,12 @@ class PleiepengersyktbarnTests {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
         val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
-        val mapTilSendingsformat = MapTilK9FormatV2(søknadId = "", journalpostIder = setOf(), perioderSomFinnesIK9 = listOf(), dto = visningDto)
+        val mapTilSendingsformat = MapTilK9FormatV2(
+            søknadId = visningDto.soeknadId,
+            journalpostIder = visningDto.journalposter?.toSet()?: emptySet(),
+            perioderSomFinnesIK9 = emptyList(),
+            dto = visningDto
+        ).søknadOgFeil()
         assertNotNull(mapTilSendingsformat)
 
         val tilbake = objectMapper().convertValue<SøknadJson>(visningDto)
@@ -453,8 +458,8 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
         assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
         assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
-        assertThat(søknadViaGet.soeknadsperiode!!.first().fom).isEqualTo(LocalDate.of(2018, 12, 30))
-        assertThat(søknadViaGet.soeknadsperiode!!.first().tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.soeknadsperiode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soeknadsperiode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
@@ -468,13 +473,13 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.tom).isEqualTo(
             LocalDate.of(2019, 10, 20))
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].faktiskArbeidTimerPerDag).isEqualTo(
-            "37,5")
+            "7,48")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].jobberNormaltTimerPerDag).isEqualTo(
             "7,48")
         assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(LocalDate.of(2018,
             12,
             30))
-        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo("4")
+        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo("7")
         assertThat(søknadViaGet.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
@@ -511,10 +516,10 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("910909088")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.faktiskArbeidTimerPerDag?.toString()).isEqualTo(
-            "PT37H30M")
+            "PT7H29M")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
             "PT7H29M")
-        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(4))
+        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(7))
         assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
@@ -671,4 +676,3 @@ private fun hentSøknadId(location: URI?): String? {
     val søknadId = path?.substring(path.lastIndexOf('/'))
     return søknadId?.trim('/')
 }
-
