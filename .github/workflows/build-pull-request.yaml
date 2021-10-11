@@ -1,6 +1,13 @@
 name: Build Pull Request
 
-on: pull_request
+on: 
+  pull_request_target:
+    paths-ignore:
+      - '**.md'
+      - '**.MD'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'CODEOWNERS'
 
 jobs:
   Build:
@@ -12,8 +19,8 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           java-version: 16
-          distribution: 'adopt'
-          cache: maven
+          distribution: adopt
+          cache: maven 
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
@@ -23,7 +30,7 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn clean verify -e --batch-mode -DtrimStackTrace=false
+          mvn clean verify -e --batch-mode --settings ./.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
           GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GITHUB_PASSWORD: ${{ secrets.READ_PACKAGES_PAT }}
