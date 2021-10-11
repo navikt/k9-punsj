@@ -3,8 +3,7 @@ package no.nav.k9punsj.util
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
-import no.nav.k9punsj.domenetjenester.mappers.MapFraVisningTilEksternFormat
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
@@ -49,16 +48,19 @@ internal object PleiepengerSøknadVisningDtoUtils {
     }
 
     internal fun PleiepengerSøknadVisningDto.mapTilSendingsFormat() =
-        MapFraVisningTilEksternFormat.mapTilSendingsformat(this)
+        MapTilK9FormatV2(søknadId = this.soeknadId,
+        journalpostIder = this.journalposter?.toSet()?: emptySet(),
+        perioderSomFinnesIK9 = emptyList(),
+        dto = this)
 
     internal fun PleiepengerSøknadVisningDto.mapTilK9Format(
         perioderSomFinnesIK9: List<PeriodeDto> = emptyList()) =
-        MapTilK9Format.mapTilEksternFormat(
-            søknad = mapTilSendingsFormat(),
-            soeknadId = soeknadId,
+        MapTilK9FormatV2(
+            søknadId = soeknadId,
             perioderSomFinnesIK9 = perioderSomFinnesIK9,
-            journalpostIder = journalposter?.toSet() ?: emptySet()
-        ).let { it.first.getYtelse<PleiepengerSyktBarn>() to it.second }
+            journalpostIder = journalposter?.toSet() ?: emptySet(),
+            dto = this
+        ).søknadOgFeil()
 
 
     private fun arbeidstidInfoKomplettStruktur(

@@ -65,7 +65,7 @@
                 "fom": "2018-12-30",
                 "tom": "2019-10-20"
               },
-              "faktiskArbeidTimerPerDag": "37,5",
+              "faktiskArbeidTimerPerDag": "7,48",
               "jobberNormaltTimerPerDag": "7,48"
             }
           ]
@@ -79,8 +79,8 @@
             "fom": "2018-12-30",
             "tom": "2019-10-20"
           },
-          "faktiskArbeidTimerPerDag": "6",
-          "jobberNormaltTimerPerDag": "5"
+          "faktiskArbeidTimerPerDag": "5",
+          "jobberNormaltTimerPerDag": "6"
         }
       ]
     },
@@ -91,8 +91,8 @@
             "fom": "2018-12-30",
             "tom": "2019-10-20"
           },
-          "faktiskArbeidTimerPerDag": "7",
-          "jobberNormaltTimerPerDag": "4"
+          "faktiskArbeidTimerPerDag": "4",
+          "jobberNormaltTimerPerDag": "7"
         }
       ]
     }
