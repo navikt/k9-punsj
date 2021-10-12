@@ -20,7 +20,7 @@ internal class MapTilK9FormatV2Test {
         ).søknadOgFeil().second.assertInneholderFeil()
         PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(
             requiredPeriode = periode,
-            optionalPeriode = listOf(periode)
+            optionalPeriode = periode
         ).søknadOgFeil().second.assertInneholderFeil()
     }
 

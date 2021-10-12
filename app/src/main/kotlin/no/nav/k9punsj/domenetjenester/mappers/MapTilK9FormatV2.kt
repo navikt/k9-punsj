@@ -176,7 +176,7 @@ internal class MapTilK9FormatV2(
             k9Uttak[k9Periode] = k9Info
         }
 
-        if (k9Uttak.isEmpty()) {
+        if (k9Uttak.isEmpty() && søknadsperiode != null) {
             k9Uttak[søknadsperiode!!.first().somK9Periode()!!] = DefaultUttak
         }
 
