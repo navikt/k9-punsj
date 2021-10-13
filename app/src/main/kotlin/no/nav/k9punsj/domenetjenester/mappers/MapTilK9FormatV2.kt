@@ -177,7 +177,9 @@ internal class MapTilK9FormatV2(
         }
 
         if (k9Uttak.isEmpty() && søknadsperiode != null) {
-            k9Uttak[søknadsperiode!!.first().somK9Periode()!!] = DefaultUttak
+            søknadsperiode.forEach {
+                k9Uttak[it.somK9Periode()!!] = DefaultUttak
+            }
         }
 
         if (k9Uttak.isNotEmpty()) {
