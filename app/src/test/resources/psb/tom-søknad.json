@@ -8,7 +8,7 @@
   "barn": {},
   "sendtInn": false,
   "erFraK9": false,
-  "soeknadsperiode": {},
+  "soeknadsperiode": [{}],
   "opptjeningAktivitet": {
     "arbeidstaker": [],
     "selvstendigNaeringsdrivende": {},

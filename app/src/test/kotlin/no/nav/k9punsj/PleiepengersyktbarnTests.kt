@@ -152,9 +152,9 @@ class PleiepengersyktbarnTests {
 
         assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
-        assertEquals(PeriodeDto(
+        assertEquals(listOf(PeriodeDto(
             LocalDate.of(2018, 12, 30),
-            LocalDate.of(2019, 10, 20)),
+            LocalDate.of(2019, 10, 20))),
             oppdatertSoeknadDto.soeknadsperiode)
         assertEquals(HttpStatus.OK, res.statusCode())
     }
@@ -458,8 +458,8 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
         assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
         assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
-        assertThat(søknadViaGet.soeknadsperiode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
-        assertThat(søknadViaGet.soeknadsperiode?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.soeknadsperiode?.first()?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soeknadsperiode?.first()?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
             LocalDate.of(2018, 12, 30))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()

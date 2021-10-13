@@ -30,6 +30,7 @@ internal class MapTilK9FormatV2(
     journalpostIder: Set<String>,
     perioderSomFinnesIK9: List<PeriodeDto>,
     dto: PleiepengerSøknadVisningDto) {
+
     private val søknad = Søknad()
     private val pleiepengerSyktBarn = PleiepengerSyktBarn()
     private val feil = mutableListOf<Feil>()
@@ -79,8 +80,8 @@ internal class MapTilK9FormatV2(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }}
 
-    private fun PeriodeDto.leggTilSøknadsperiode() { if (erSatt()) {
-        pleiepengerSyktBarn.medSøknadsperiode(somK9Periode()!!)
+    private fun List<PeriodeDto>.leggTilSøknadsperiode() { if (!this.isNullOrEmpty()) {
+        pleiepengerSyktBarn.medSøknadsperiode(this.somK9Perioder())
     }}
 
     private fun PleiepengerSøknadVisningDto.BarnDto.leggTilBarn() {
@@ -162,19 +163,23 @@ internal class MapTilK9FormatV2(
         }
     }
 
-    private fun List<PleiepengerSøknadVisningDto.UttakDto>?.leggTilUttak(søknadsperiode: PeriodeDto?) {
+    private fun List<PleiepengerSøknadVisningDto.UttakDto>?.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
         val k9Uttak = mutableMapOf<Periode, UttakPeriodeInfo>()
+
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = UttakPeriodeInfo()
-            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
+            { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
                 k9Info.timerPleieAvBarnetPerDag = it
             }
             k9Uttak[k9Periode] = k9Info
         }
 
-        if (k9Uttak.isEmpty() && søknadsperiode.erSatt()) {
-            k9Uttak[søknadsperiode!!.somK9Periode()!!] = DefaultUttak
+        if (k9Uttak.isEmpty() && søknadsperiode != null) {
+            søknadsperiode.forEach {
+                k9Uttak[it.somK9Periode()!!] = DefaultUttak
+            }
         }
 
         if (k9Uttak.isNotEmpty()) {

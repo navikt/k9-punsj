@@ -2,7 +2,6 @@ package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
@@ -41,7 +40,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
             """
         val søknad: MutableMap<String, Any?> = objectMapper().readValue(json)
         søknadsperiode?.also {
-            søknad["soeknadsperiode"] = mapOf("fom" to "${it.first}", "tom" to "${it.second}")
+            søknad["soeknadsperiode"] = listOf(mapOf("fom" to "${it.first}", "tom" to "${it.second}"))
         }
         manipuler(søknad)
         return objectMapper().convertValue(søknad)
@@ -90,7 +89,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
             norskIdent = optionalTekst,
             foedselsdato = null
         ),
-        soeknadsperiode = optionalPeriode,
+        soeknadsperiode = optionalTilPeriode(optionalPeriode),
         opptjeningAktivitet = PleiepengerSøknadVisningDto.ArbeidAktivitetDto(
             selvstendigNaeringsdrivende = PleiepengerSøknadVisningDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(
                 organisasjonsnummer = optionalTekst,
@@ -191,5 +190,12 @@ internal object PleiepengerSøknadVisningDtoUtils {
         check(k9Feil.isEmpty()) {
             "Minimal søknad mangler felter. Feil=$k9Feil"
         }
+    }
+
+    fun optionalTilPeriode(periodeDto: PeriodeDto?):  List<PeriodeDto>? {
+        if(periodeDto != null) {
+            return listOf(periodeDto)
+        }
+        return null
     }
 }
