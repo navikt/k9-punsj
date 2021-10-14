@@ -39,7 +39,7 @@ class SafGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
         private const val MaxDokumentSize = 16 * 1024 * 1024
-        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT")
+        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT", "UNDER_REDIGERING")
     }
 
     init {
