@@ -12,10 +12,10 @@
   },
   "sendtInn": false,
   "erFraK9": false,
-  "soeknadsperiode": [{
+  "soeknadsperiode": {
     "fom": "",
     "tom": ""
-  }],
+  },
   "opptjeningAktivitet": {
     "arbeidstaker": [],
     "selvstendigNaeringsdrivende": null,

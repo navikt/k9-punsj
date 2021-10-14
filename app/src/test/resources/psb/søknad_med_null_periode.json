@@ -9,10 +9,10 @@
   "barn": {},
   "sendtInn": false,
   "erFraK9": false,
-  "soeknadsperiode": [{
+  "soeknadsperiode": {
     "fom": null,
     "tom": null
-  }],
+  },
   "opptjeningAktivitet": {
     "arbeidstaker": [],
     "selvstendigNaeringsdrivende": {},

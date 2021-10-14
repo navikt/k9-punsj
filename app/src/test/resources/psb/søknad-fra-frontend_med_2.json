@@ -11,10 +11,10 @@
     "norskIdent": "22222222222",
     "foedselsdato": null
   },
-  "soeknadsperiode": [{
+  "soeknadsperiode": {
     "fom": "2018-12-30",
     "tom": "2019-10-20"
-  }],
+  },
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
       "virksomhetNavn": "ASASAS",
