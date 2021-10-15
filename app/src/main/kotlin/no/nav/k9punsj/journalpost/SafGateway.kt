@@ -115,7 +115,7 @@ class SafGateway(
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
         if(journalpost?.journalposttype == "N" &&
             journalpost?.journalstatus?.equals("UNDER_ARBEID") == true) throw IkkeStøttetJournalpost().also {
-            logger.warn("Ikke støttet journalpost: NOTAT med status UNDER_REDIGERING")
+            logger.warn("Ikke støttet journalpost: Type NOTAT med status UNDER_ARBEID")
         }
 
         return journalpost
