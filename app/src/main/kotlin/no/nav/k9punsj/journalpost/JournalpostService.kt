@@ -49,7 +49,8 @@ class JournalpostService(
                 }
 
                 val mottattDato = utledMottattDato(parsedJournalpost)
-                val punsjInnsendingType = PunsjInnsendingType.fraKode(journalpostRepository.hent(journalpostId).type?:"Ukjent")
+                val punsjInnsendingType = PunsjInnsendingType.fraKode(
+                    hentHvisJournalpostMedId(journalpostId)?.type ?: PunsjInnsendingType.UKJENT.kode)
 
                 JournalpostInfo(
                     journalpostId = journalpostId,
