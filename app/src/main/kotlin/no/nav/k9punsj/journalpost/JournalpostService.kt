@@ -49,6 +49,7 @@ class JournalpostService(
                 }
 
                 val mottattDato = utledMottattDato(parsedJournalpost)
+                val punsjInnsendingType = PunsjInnsendingType.fraKode(journalpostRepository.hent(journalpostId).type?:"Ukjent")
 
                 JournalpostInfo(
                     journalpostId = journalpostId,
@@ -59,7 +60,8 @@ class JournalpostService(
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
                     kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also { if (!it) {
                         logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}", keyValue("journalpost_id", journalpostId))
-                    }}
+                    }},
+                    punsjInnsendingType = punsjInnsendingType
                 )
             }
         }
@@ -148,7 +150,8 @@ data class JournalpostInfo(
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
-    val kanOpprettesJournalføringsoppgave: Boolean
+    val kanOpprettesJournalføringsoppgave: Boolean,
+    val punsjInnsendingType: PunsjInnsendingType = PunsjInnsendingType.UKJENT
 )
 
 data class JournalpostInfoDto(
