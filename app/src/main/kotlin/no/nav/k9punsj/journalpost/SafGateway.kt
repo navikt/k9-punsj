@@ -39,7 +39,7 @@ class SafGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
         private const val MaxDokumentSize = 16 * 1024 * 1024
-        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT", "UNDER_REDIGERING")
+        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT")
     }
 
     init {
@@ -108,9 +108,14 @@ class SafGateway(
 
         // For saksbehandlere som har tilgang til å åpne journalposter i spesielle statuser.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
-        // Inkludert status som gør att journalpost ikke kan oppdateres eller ferdigstilles.
         if (IkkeStøttedeStatuser.contains(journalpost?.journalstatus)) throw IkkeStøttetJournalpost().also {
             logger.warn("Ikke støttet journalstatus ${journalpost?.journalstatus}.")
+        }
+
+        // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
+        if(journalpost?.journalposttype == "N" &&
+            journalpost?.journalstatus?.equals("UNDER_REDIGERING") == true) throw IkkeStøttetJournalpost().also {
+            logger.warn("Ikke støttet journalpost: NOTAT med status UNDER_REDIGERING")
         }
 
         return journalpost
