@@ -2,6 +2,7 @@ package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
@@ -181,7 +182,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         harInfoSomIkkeKanPunsjes = true,
         harMedisinskeOpplysninger = true,
         trekkKravPerioder = setOf(requiredPeriode),
-        begrunnelseForInnsending = "fordi dette er ett test"
+        begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test")
     )
 
     init {

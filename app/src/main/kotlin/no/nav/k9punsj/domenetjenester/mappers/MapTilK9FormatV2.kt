@@ -208,7 +208,7 @@ internal class MapTilK9FormatV2(
 
     private fun PleiepengerSøknadVisningDto.leggTilBegrunnelseForInnsending() {
         if(begrunnelseForInnsending != null) {
-            søknad.medBegrunnelseForInnsending(BegrunnelseForInnsending().medBegrunnelseForInnsending(this.begrunnelseForInnsending))
+            søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
         }
     }
 

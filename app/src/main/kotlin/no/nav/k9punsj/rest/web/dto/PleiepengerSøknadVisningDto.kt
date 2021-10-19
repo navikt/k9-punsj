@@ -34,7 +34,7 @@ data class PleiepengerSøknadVisningDto(
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
-    val begrunnelseForInnsending: String? = null) {
+    val begrunnelseForInnsending: BegrunnelseForInnsending? = null) {
 
     data class BarnDto(
         val norskIdent: NorskIdentDto?,
