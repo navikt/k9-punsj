@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -32,7 +33,9 @@ data class PleiepengerSøknadVisningDto(
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean,
-    val trekkKravPerioder: Set<PeriodeDto> = emptySet()) {
+    val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
+    val begrunnelseForInnsending: String? = null) {
+
     data class BarnDto(
         val norskIdent: NorskIdentDto?,
         @JsonFormat(pattern = "yyyy-MM-dd")
