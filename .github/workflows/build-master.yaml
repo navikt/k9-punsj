@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Bygge JAR
         run: |
-          mvn clean package
+          mvn clean package --settings ./.m2/settings.xml
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
@@ -42,6 +42,7 @@ jobs:
         run: |
           echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "IMAGE=${IMAGE}$IMAGE_BASE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Bygg & last opp Docker image
         run: |
           docker build --pull --tag ${IMAGE} --tag ${IMAGE_BASE}:latest ./app/.
