@@ -55,6 +55,7 @@ internal class MapTilK9FormatV2(
         dto.arbeidstid?.leggTilArbeidstid()
         dto.soknadsinfo?.leggTilDataBruktTilUtledning()
         dto.tilsynsordning?.perioder?.leggTilTilsynsordning()
+        dto.leggTilBegrunnelseForInnsending()
 
         // Fullfører søknad & validerer
         søknad.medYtelse(pleiepengerSyktBarn)
@@ -201,12 +202,14 @@ internal class MapTilK9FormatV2(
         pleiepengerSyktBarn.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
 
-    private fun List<PeriodeDto>.leggTilEndringsperioder() {
-        pleiepengerSyktBarn.medEndringsperiode(this.somK9Perioder())
-    }
-
     private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
         pleiepengerSyktBarn.addAllTrekkKravPerioder(this.somK9Perioder())
+    }
+
+    private fun PleiepengerSøknadVisningDto.leggTilBegrunnelseForInnsending() {
+        if(begrunnelseForInnsending != null) {
+            søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
+        }
     }
 
     private fun PleiepengerSøknadVisningDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
