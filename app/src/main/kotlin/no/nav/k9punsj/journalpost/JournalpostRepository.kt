@@ -116,6 +116,21 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<Journalpost> {
+        return using(sessionOf(dataSource)) {
+            val statement = queryOf(
+                "SELECT DATA FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
+            )
+            val resultat = it.run(
+                statement
+                    .map { row ->
+                        row.string("data")
+                    }.asList
+            )
+            resultat.map { res ->  objectMapper.readValue(res, Journalpost::class.java) }
+        }
+    }
+
     suspend fun fantIkke(journalpostId: String): Boolean {
         return using(sessionOf(dataSource)) {
             val run = it.run(

@@ -35,7 +35,7 @@ internal class JournalpostInfoRoutes(
         GET("/api${Urls.HentÅpneJournalposter}") { request ->
             RequestContext(coroutineContext, request) {
                 val aktørId = request.aktørId()
-                val journalpostIder = journalpostService.finnJournalposterPåPerson(aktørId)
+                val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
                 logger.info("Fått request fra k9-sak på aktør=$aktørId")
