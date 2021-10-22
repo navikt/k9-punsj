@@ -103,7 +103,8 @@ internal class JournalpostRoutes(
                                     punsjInnsendingType) else null,
                                 erSaksbehandler = pepClient.erSaksbehandler(),
                                 erInngående = journalpostInfo.erInngående,
-                                kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave
+                                kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
+                                journalpostStatus = journalpostInfo.journalpostStatus
                             )
                             utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
@@ -132,7 +133,8 @@ internal class JournalpostRoutes(
                                     kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                     erSaksbehandler = pepClient.erSaksbehandler(),
                                     erInngående = journalpostInfo.erInngående,
-                                    kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave
+                                    kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
+                                    journalpostStatus = journalpostInfo.journalpostStatus
                                 ))
                         }
                     }
@@ -233,6 +235,14 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
                 }
+
+                val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId())
+                if (journalpostInfo?.journalpostStatus != "JOURNALFOERT") {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.CONFLICT)
+                        .buildAndAwait()
+                }
+
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
                 journalpostService.settTilFerdig(journalpostId)
 

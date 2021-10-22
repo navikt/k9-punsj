@@ -59,7 +59,8 @@ class JournalpostService(
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
                     kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also { if (!it) {
                         logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}", keyValue("journalpost_id", journalpostId))
-                    }}
+                    }},
+                    journalpostStatus = safJournalpost.journalstatus!!
                 )
             }
         }
@@ -148,7 +149,8 @@ data class JournalpostInfo(
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
-    val kanOpprettesJournalføringsoppgave: Boolean
+    val kanOpprettesJournalføringsoppgave: Boolean,
+    val journalpostStatus : String
 )
 
 data class JournalpostInfoDto(
@@ -161,6 +163,7 @@ data class JournalpostInfoDto(
     val erInngående: Boolean,
     val kanSendeInn: Boolean,
     val erSaksbehandler: Boolean? = null,
+    val journalpostStatus : String,
     val kanOpprettesJournalføringsoppgave: Boolean) {
     val kanKopieres = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående
 }

@@ -91,23 +91,25 @@ class K9PunsjApplicationTests {
             it.pathSegment("api", "journalpost", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
         val responseEntity = runBlocking { res.awaitBody<String>() }
-        JSONAssert.assertEquals("""
-			{
-				"journalpostId": "1",
-				"norskIdent": "29099000129",
-				"dokumenter": [{
-					"dokumentId": "470164680"
-				},{
-					"dokumentId": "470164681"
-				}],
-                "venter" : null,
-                "punsjInnsendingType" : null,
-                "kanSendeInn" : true,
-                "erSaksbehandler" : true,
-                "kanKopieres": true,
-                "kanOpprettesJournalføringsoppgave": true
-			}
-		""".trimIndent(), responseEntity, true)
+        JSONAssert.assertEquals("""{
+	"journalpostId": "1",
+	"norskIdent": "29099000129",
+	"dokumenter": [
+		{
+			"dokumentId": "470164680"
+		},
+		{
+			"dokumentId": "470164681"
+		}
+	],
+	"venter": null,
+	"punsjInnsendingType": null,
+	"kanSendeInn": true,
+	"erSaksbehandler": true,
+	"journalpostStatus": "MOTTATT",
+	"kanOpprettesJournalføringsoppgave": true,
+	"kanKopieres": true
+}""".trimIndent(), responseEntity, true)
     }
 
     @Test
