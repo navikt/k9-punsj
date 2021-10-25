@@ -1,10 +1,18 @@
 version: 2
+registries:
+  k9-punsj:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-punsj
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
 updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+    registries:
+      - k9-punsj
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
