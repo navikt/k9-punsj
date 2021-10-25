@@ -81,6 +81,10 @@ class JournalpostService(
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
+    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<Journalpost> {
+        return journalpostRepository.finnJournalposterPåPersonBareFordel(aktørId)
+    }
+
     internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): Journalpost? {
         return journalpostRepository.hentHvis(journalpostId)
     }
