@@ -236,13 +236,6 @@ internal class JournalpostRoutes(
                         .buildAndAwait()
                 }
 
-                val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId())
-                if (journalpostInfo?.journalpostStatus != "JOURNALFOERT") {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.CONFLICT)
-                        .buildAndAwait()
-                }
-
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
                 journalpostService.settTilFerdig(journalpostId)
 
