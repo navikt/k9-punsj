@@ -2,14 +2,14 @@ package no.nav.k9punsj.domenetjenester.mappers
 
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.util.PleiepengerSøknadVisningDtoUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class MapTilK9FormatV2Test {
+internal class MapPsbTilK9FormatTest {
 
     @Test
     fun `tom søknad med komplett struktur skal gi feil fra k9-format`() {
@@ -24,7 +24,7 @@ internal class MapTilK9FormatV2Test {
         ).søknadOgFeil().second.assertInneholderFeil()
     }
 
-    private fun PleiepengerSøknadVisningDto.søknadOgFeil() = MapTilK9FormatV2(
+    private fun PleiepengerSøknadDto.søknadOgFeil() = MapPsbTilK9Format(
         dto = this,
         perioderSomFinnesIK9 = emptyList(),
         journalpostIder = setOf("123456789"),

@@ -1,0 +1,26 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "fravaersperioder": [
+    {
+      "periode": {
+        "fom": "2018-12-26",
+        "tom": "2018-12-31"
+      },
+      "faktiskTidPrDag": null,
+      "aarsak": "STENGT_SKOLE_ELLER_BARNEHAGE",
+      "soeknadAarsak": "ARBEIDSGIVER_KONKURS",
+      "organisasjonsnummer": "910909088",
+      "arbeidsforholdId": "1337",
+      "aktivitetFravaer": [
+        "SELVSTENDIG_VIRKSOMHET"
+      ]
+    }
+  ]
+}
+
+
+
