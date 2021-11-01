@@ -170,6 +170,22 @@ class OmsorgspengerRoutesTest{
     }
 
     @Test
+    fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`() {
+        val norskIdent = "02020050123"
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekk()
+        val journalpostid = UUID.randomUUID().toString()
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val response = res.second
+            .bodyToMono(OasSoknadsfeil::class.java)
+            .block()
+        assertThat(response?.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
+    }
+
+    @Test
     fun `Skal verifisere at søknad er ok`() {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
