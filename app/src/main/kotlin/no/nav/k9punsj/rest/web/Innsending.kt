@@ -1,14 +1,11 @@
 package no.nav.k9punsj.rest.web
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
-
-internal val objectMapper = jacksonObjectMapper()
 
 typealias JournalpostId = String
 

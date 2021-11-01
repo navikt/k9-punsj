@@ -9,6 +9,7 @@ import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
@@ -26,6 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 class OmsorgspengerRoutesTest{
@@ -53,7 +55,7 @@ class OmsorgspengerRoutesTest{
     @Test
     fun `Opprette ny mappe på person`() {
         val norskIdent = "01010050053"
-        val opprettNySøknad = opprettSøknad(norskIdent, "999")
+        val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
         val res = client.post()
             // post omsorgspenger-soknad/mappe
             .uri { it.pathSegment(api, søknadTypeUri).build() }
@@ -66,7 +68,8 @@ class OmsorgspengerRoutesTest{
     @Test
     fun `Hente eksisterende mappe på person`() {
         val norskIdent = "02020050163"
-        val opprettNySøknad = opprettSøknad(norskIdent, "9999")
+        val journalpostId = UUID.randomUUID().toString()
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
 
         val resPost = client.post()
             .uri { it.pathSegment(api, søknadTypeUri).build() }
@@ -84,14 +87,14 @@ class OmsorgspengerRoutesTest{
 
         val mappeSvar = runBlocking { res.awaitBody<SvarOmsDto>() }
         val journalposterDto = mappeSvar.søknader?.first()?.journalposter
-        Assertions.assertEquals("9999", journalposterDto?.first())
+        Assertions.assertEquals(journalpostId, journalposterDto?.first())
     }
 
     @Test
     fun `Hent en søknad`() {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
-        val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
+        val journalpostid = UUID.randomUUID().toString()
         tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
@@ -120,7 +123,7 @@ class OmsorgspengerRoutesTest{
     fun `Oppdaterer en søknad`() {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOms()
         val norskIdent = "02030050163"
-        val journalpostid = "9999"
+        val journalpostid = UUID.randomUUID().toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
@@ -150,21 +153,38 @@ class OmsorgspengerRoutesTest{
         Assertions.assertEquals(HttpStatus.OK, res.statusCode())
     }
 
-//    @Test
-//    fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
-//        val norskIdent = "02020050121"
-//        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
-//        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
-//
-//        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = "9999")
-//        val response = res.second
-//            .bodyToMono(OasSoknadsfeil::class.java)
-//            .block()
-//        assertThat(response?.feil).isNull()
-//        Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
-//        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
-//    }
+    @Test
+    fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
+        val norskIdent = "02020050123"
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
+        val journalpostid = UUID.randomUUID().toString()
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val response = res.second
+            .bodyToMono(OasSoknadsfeil::class.java)
+            .block()
+        assertThat(response?.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
+    }
+
+    @Test
+    fun `Skal verifisere at søknad er ok`() {
+        val norskIdent = "02022352122"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
+        val journalpostid = UUID.randomUUID().toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
+
+        val res = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknad))
+            .awaitExchangeBlocking()
+
+        Assertions.assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+    }
 
     private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
@@ -248,5 +268,38 @@ class OmsorgspengerRoutesTest{
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
             .awaitExchangeBlocking())
+    }
+
+    private fun opprettOgLagreSoeknad(
+        soeknadJson: SøknadJson,
+        ident: String,
+        journalpostid: String = IdGenerator.nesteId(),
+    ): PleiepengerSøknadDto {
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+
+        // oppretter en søknad
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        Assertions.assertNotNull(location)
+
+        leggerPåNySøknadId(soeknadJson, location)
+
+        // fyller ut en søknad
+        val resPut = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknadJson))
+            .awaitExchangeBlocking()
+
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
+        Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
+
+        return søknadDtoFyltUt
     }
 }

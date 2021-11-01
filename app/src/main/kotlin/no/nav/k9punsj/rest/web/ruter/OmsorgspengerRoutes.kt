@@ -1,8 +1,9 @@
 package no.nav.k9punsj.rest.web.ruter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
+import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -33,6 +34,7 @@ import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OmsorgspengerRoutes(
+    private val objectMapper: ObjectMapper,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
     private val mappeService: MappeService,
@@ -221,7 +223,6 @@ internal class OmsorgspengerRoutes(
 
                         return@RequestContext ServerResponse
                             .accepted()
-                            .location(k9SakFrontendUrl(søknadK9Format.first))
                             .json()
                             .bodyValueAndAwait(søknadK9Format.first)
 
@@ -237,16 +238,72 @@ internal class OmsorgspengerRoutes(
                 }
             }
         }
+
+        POST("/api${Urls.ValiderSøknad}") { request ->
+            RequestContext(coroutineContext, request) {
+                val soknadTilValidering = request.omsorgspengerSøknad()
+                soknadTilValidering.soekerId?.let { norskIdent ->
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent,
+                        PleiepengerSyktBarnRoutes.Urls.ValiderSøknad)?.let { return@RequestContext it }
+                }
+                val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
+                    ?: return@RequestContext ServerResponse
+                        .badRequest()
+                        .buildAndAwait()
+
+                val journalPoster = søknadEntitet.journalposter!!
+                val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+
+                val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
+
+                try {
+                    mapTilEksternFormat = MapOmsTilK9Format(
+                        søknadId = soknadTilValidering.soeknadId,
+                        journalpostIder = journalposterDto.journalposter,
+                        dto = soknadTilValidering
+                    ).søknadOgFeil()
+                } catch (e: Exception) {
+                    val sw = StringWriter()
+                    e.printStackTrace(PrintWriter(sw))
+                    val exceptionAsString = sw.toString()
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(exceptionAsString))
+                }
+
+                if (mapTilEksternFormat.second.isNotEmpty()) {
+                    val feil = mapTilEksternFormat.second.map { feil ->
+                        SøknadFeil.SøknadFeilDto(
+                            feil.felt,
+                            feil.feilkode,
+                            feil.feilmelding
+                        )
+                    }.toList()
+
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
+                }
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.ACCEPTED)
+                    .json()
+                    .bodyValueAndAwait(mapTilEksternFormat.first)
+            }
+        }
     }
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 
-    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
-        søker = søknad.søker.personIdent.verdi,
-        barn = søknad.getYtelse<PleiepengerSyktBarn>().barn.personIdent.verdi,
-        søknad = søknad,
-        correlationId = coroutineContext.hentCorrelationId()
-    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
+    //TODO(OJR) har ikke tilgang på barnet?
+//    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
+//        søker = søknad.søker.personIdent.verdi,
+//        barn = søknad.getYtelse<OmsorgspengerUtbetaling>().barn.personIdent.verdi,
+//        søknad = søknad,
+//        correlationId = coroutineContext.hentCorrelationId()
+//    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
 }
 

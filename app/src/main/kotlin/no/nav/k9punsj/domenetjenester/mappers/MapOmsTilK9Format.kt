@@ -4,8 +4,6 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
-import no.nav.k9.søknad.felles.fravær.FraværÅrsak
-import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
@@ -38,7 +36,7 @@ internal class MapOmsTilK9Format(
         dto.soekerId?.leggTilSøker()
         dto.leggTilJournalposter(journalpostIder = journalpostIder)
 
-        dto.fravaersperioder?.leggTilFraværsperioderKorrigeringIm()
+        dto.fravaersperioder?.leggTilFraværsperioderKorrigeringIm(dto)
 
         // Fullfører søknad & validerer
         søknad.medYtelse(omsorgspengerUtbetaling)
@@ -64,16 +62,16 @@ internal class MapOmsTilK9Format(
         søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
     }}
 
-    private fun List<OmsorgspengerSøknadDto.FraværPeriode>.leggTilFraværsperioderKorrigeringIm() {
+    private fun List<OmsorgspengerSøknadDto.FraværPeriode>.leggTilFraværsperioderKorrigeringIm(dto: OmsorgspengerSøknadDto) {
         omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(filter { it.periode.erSatt() }.map {
             FraværPeriode(
-                it.periode.somK9Periode(),
+                it.periode?.somK9Periode(),
                 it.tidPrDag?.somDuration(),
-                FraværÅrsak.of(it.aarsak),
-                SøknadÅrsak.of(it.soeknadAarsak),
-                it.aktivitetFravaer.map { af -> AktivitetFravær.of(af) },
-                Organisasjonsnummer.of(it.organisasjonsnummer),
-                it.arbeidsforholdId
+                null,
+                null,
+                listOf(AktivitetFravær.ARBEIDSTAKER),
+                Organisasjonsnummer.of(dto.organisasjonsnummer),
+                dto.arbeidsforholdId
             )
         }.toList())
     }
