@@ -8,13 +8,13 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
+import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
-import no.nav.k9punsj.rest.web.openapi.OasPleiepengerSyktBarnFeil
+import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
@@ -52,7 +52,7 @@ class PleiepengersyktbarnTests {
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
-        val svar = runBlocking { res.awaitBody<SvarDto>() }
+        val svar = runBlocking { res.awaitBody<SvarPsbDto>() }
         assertTrue(svar.søknader!!.isEmpty())
     }
 
@@ -87,7 +87,7 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
 
-        val mappeSvar = runBlocking { res.awaitBody<SvarDto>() }
+        val mappeSvar = runBlocking { res.awaitBody<SvarPsbDto>() }
         val journalposterDto = mappeSvar.søknader?.first()?.journalposter
         assertEquals("9999", journalposterDto?.first())
     }
@@ -116,7 +116,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
         assertNotNull(søknadViaGet)
         assertEquals(journalpostid, søknadViaGet.journalposter?.first())
     }
@@ -148,7 +148,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(søknadFraFrontend))
             .awaitExchangeBlocking()
 
-        val oppdatertSoeknadDto = runBlocking { res.awaitBody<PleiepengerSøknadVisningDto>() }
+        val oppdatertSoeknadDto = runBlocking { res.awaitBody<PleiepengerSøknadDto>() }
 
         assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
@@ -180,8 +180,8 @@ class PleiepengersyktbarnTests {
     fun `sjekker at mapping fungre hele veien`() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
-        val visningDto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(gyldigSoeknad)
-        val mapTilSendingsformat = MapTilK9FormatV2(
+        val visningDto = objectMapper().convertValue<PleiepengerSøknadDto>(gyldigSoeknad)
+        val mapTilSendingsformat = MapPsbTilK9Format(
             søknadId = visningDto.soeknadId,
             journalpostIder = visningDto.journalposter?.toSet()?: emptySet(),
             perioderSomFinnesIK9 = emptyList(),
@@ -201,7 +201,7 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = "9999")
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
@@ -217,7 +217,7 @@ class PleiepengersyktbarnTests {
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
 
@@ -250,7 +250,7 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
 
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
         assertThat(response!!.feil).isNotEmpty
@@ -265,7 +265,7 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
@@ -280,7 +280,7 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
         assertThat(response!!.feil).isNotEmpty
@@ -295,7 +295,7 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res
-            .second.bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .second.bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
@@ -311,7 +311,7 @@ class PleiepengersyktbarnTests {
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
         val response = res.second
-            .bodyToMono(OasPleiepengerSyktBarnFeil::class.java)
+            .bodyToMono(OasSoknadsfeil::class.java)
             .block()
         assertThat(response?.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
@@ -330,7 +330,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
 
         assertNotNull(søknadViaGet)
         assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
@@ -349,7 +349,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
@@ -377,7 +377,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
@@ -432,7 +432,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
 
         assertThat(søknadViaGet.journalposter).hasSize(2)
         assertThat(søknadViaGet.journalposter).isEqualTo(listOf("9999", "10000"))
@@ -452,7 +452,7 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         // GUI format
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.soekerId).isEqualTo(norskIdent)
         assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
@@ -493,7 +493,7 @@ class PleiepengersyktbarnTests {
         assertThat(søknadViaGet.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
 
         // k9-format, faktisk søknad format
-        val mapTilEksternFormat = MapTilK9FormatV2(
+        val mapTilEksternFormat = MapPsbTilK9Format(
             søknadViaGet.soeknadId,
             søknadViaGet.journalposter!!.toSet(),
             emptyList(),
@@ -563,7 +563,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
         assertNotNull(søknadDtoFyltUt.soekerId)
 
         val søknadId = søknadDtoFyltUt.soeknadId
@@ -586,7 +586,7 @@ class PleiepengersyktbarnTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): PleiepengerSøknadVisningDto {
+    ): PleiepengerSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -609,7 +609,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadVisningDto>() }
+        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
         assertNotNull(søknadDtoFyltUt.soekerId)
 
         return søknadDtoFyltUt

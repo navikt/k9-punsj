@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -14,10 +13,9 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
-import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.dto.*
@@ -35,48 +33,51 @@ import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-internal class PleiepengerSyktBarnRoutes(
+internal class OmsorgspengerRoutes(
     private val objectMapper: ObjectMapper,
-    private val mappeService: MappeService,
-    private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
-    private val personService: PersonService,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
-    private val azureGraphService: IAzureGraphService,
-    private val k9SakService: K9SakService,
-    private val journalpostRepository: JournalpostRepository,
+    private val mappeService: MappeService,
+    private val personService: PersonService,
     private val punsjbolleService: PunsjbolleService,
-    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI) {
+    private val azureGraphService: IAzureGraphService,
+    private val journalpostRepository: JournalpostRepository,
+    private val pleiepengerSyktBarnSoknadService : PleiepengerSyktBarnSoknadService,
+    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI
+) {
+
 
     private companion object {
-        private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnRoutes::class.java)
-        private const val søknadType = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
+        private val logger = LoggerFactory.getLogger(OmsorgspengerRoutes::class.java)
+        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER
         private const val SøknadIdKey = "soeknad_id"
+
     }
 
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
         internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/$søknadType" //post
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
+        internal const val NySøknad = "/${søknadType}" //post
+        internal const val OppdaterEksisterendeSøknad = "/${søknadType}/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/$søknadType/valider" //post
-        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
+        internal const val ValiderSøknad = "/${søknadType}/valider" //post
     }
 
+
     @Bean
-    fun pleiepengerSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun omsorgspengerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskeIdent()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
+                    Urls.HenteMappe)?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
                         person = person,
-                        søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                    ).tilPsbVisning(norskIdent)
+                        søknadType = FagsakYtelseType.OMSORGSPENGER
+                    ).tilOmsVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
@@ -98,7 +99,7 @@ internal class PleiepengerSyktBarnRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(søknad.tilPsbvisning())
+                        .bodyValueAndAwait(søknad.tilOmsvisning())
                 }
                 return@RequestContext ServerResponse
                     .notFound()
@@ -106,12 +107,37 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
+        POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
+            RequestContext(coroutineContext, request) {
+                val opprettNySøknad = request.opprettNy()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
+                    Urls.NySøknad)?.let { return@RequestContext it }
+
+                //oppretter sak i k9-sak hvis det ikke finnes fra før
+                if (opprettNySøknad.barnIdent != null) {
+                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
+                        opprettNySøknad.barnIdent,
+                        opprettNySøknad.journalpostId,
+                        null,
+                        coroutineContext.hentCorrelationId())
+                }
+
+                val søknadEntitet = mappeService.førsteInnsendingOms(
+                    nySøknad = opprettNySøknad!!
+                )
+                return@RequestContext ServerResponse
+                    .created(request.søknadLocation(søknadEntitet.søknadId))
+                    .json()
+                    .bodyValueAndAwait(søknadEntitet.tilOmsvisning())
+            }
+        }
+
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.pleiepengerSøknad()
+                val søknad = request.omsorgspengerSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-                val søknadEntitet = mappeService.utfyllendeInnsendingPsb(
+                val søknadEntitet = mappeService.utfyllendeInnsendingOms(
                     søknad = søknad,
                     saksbehandler = saksbehandler
                 )
@@ -145,8 +171,7 @@ internal class PleiepengerSyktBarnRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: PleiepengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknad)?.first ?: emptyList()
+                        val søknad: OmsorgspengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -163,10 +188,9 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val søknadK9Format = MapPsbTilK9Format(
+                        val søknadK9Format = MapOmsTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
-                            perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
                             dto = søknad
                         ).søknadOgFeil()
 
@@ -199,7 +223,6 @@ internal class PleiepengerSyktBarnRoutes(
 
                         return@RequestContext ServerResponse
                             .accepted()
-                            .location(k9SakFrontendUrl(søknadK9Format.first))
                             .json()
                             .bodyValueAndAwait(søknadK9Format.first)
 
@@ -216,55 +239,28 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
-                val opprettNySøknad = request.opprettNy()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
-                    Urls.NySøknad)?.let { return@RequestContext it }
-
-                //oppretter sak i k9-sak hvis det ikke finnes fra før
-                if (opprettNySøknad.barnIdent != null) {
-                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.barnIdent,
-                        opprettNySøknad.journalpostId,
-                        null,
-                        coroutineContext.hentCorrelationId())
-                }
-
-                val søknadEntitet = mappeService.førsteInnsendingPsb(
-                    nySøknad = opprettNySøknad!!
-                )
-                return@RequestContext ServerResponse
-                    .created(request.søknadLocation(søknadEntitet.søknadId))
-                    .json()
-                    .bodyValueAndAwait(søknadEntitet.tilPsbvisning())
-            }
-        }
-
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val soknadTilValidering = request.pleiepengerSøknad()
+                val soknadTilValidering = request.omsorgspengerSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
-                        Urls.ValiderSøknad)?.let { return@RequestContext it }
+                        PleiepengerSyktBarnRoutes.Urls.ValiderSøknad)?.let { return@RequestContext it }
                 }
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
                         .buildAndAwait()
 
-                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(soknadTilValidering)?.first ?: emptyList()
                 val journalPoster = søknadEntitet.journalposter!!
                 val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = MapPsbTilK9Format(
+                    mapTilEksternFormat = MapOmsTilK9Format(
                         søknadId = soknadTilValidering.soeknadId,
                         journalpostIder = journalposterDto.journalposter,
-                        perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
                         dto = soknadTilValidering
                     ).søknadOgFeil()
                 } catch (e: Exception) {
@@ -291,64 +287,27 @@ internal class PleiepengerSyktBarnRoutes(
                         .json()
                         .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
                 }
-                val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-                mappeService.utfyllendeInnsendingPsb(
-                    søknad = soknadTilValidering,
-                    saksbehandler = saksbehandler
-                )
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .json()
                     .bodyValueAndAwait(mapTilEksternFormat.first)
             }
         }
-
-        POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
-                val matchfagsak = request.matchFagsak()
-                innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
-                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak)?.let { return@RequestContext it }
-
-                val hentPerioderSomFinnesIK9 = k9SakService.hentPerioderSomFinnesIK9(
-                    matchfagsak.brukerIdent,
-                    matchfagsak.barnIdent,
-                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-
-                return@RequestContext if (hentPerioderSomFinnesIK9.first != null) {
-                    val body = hentPerioderSomFinnesIK9.first!!
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(body)
-
-                } else {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(listOf<PeriodeDto>())
-                }
-            }
-        }
     }
-
-    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
-        søker = søknad.søker.personIdent.verdi,
-        barn = søknad.getYtelse<PleiepengerSyktBarn>().barn.personIdent.verdi,
-        søknad = søknad,
-        correlationId = coroutineContext.hentCorrelationId()
-    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
-
-    private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerSøknadDto): Pair<List<PeriodeDto>?, String?>? {
-        if (dto.soekerId.isNullOrBlank() || dto.barn == null || dto.barn.norskIdent.isNullOrBlank()) {
-            return null
-        }
-        return k9SakService.hentPerioderSomFinnesIK9(
-            søker = dto.soekerId,
-            barn = dto.barn.norskIdent,
-            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        )
-    }
-
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+
+    //TODO(OJR) har ikke tilgang på barnet?
+//    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
+//        søker = søknad.søker.personIdent.verdi,
+//        barn = søknad.getYtelse<OmsorgspengerUtbetaling>().barn.personIdent.verdi,
+//        søknad = søknad,
+//        correlationId = coroutineContext.hentCorrelationId()
+//    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
+
 }
+
+
+
+
+

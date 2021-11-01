@@ -16,12 +16,24 @@ class LesFraFilUtil {
             }
         }
 
+        private fun lesFraOmsMappeFil(filnavn: String): String{
+            try {
+                return Files.readString(Path.of("src/test/resources/oms/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
         fun genererSøknadMedFeil() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
         }
 
         fun søknadFraFrontend() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
+        }
+
+        fun søknadFraFrontendOms() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend.json"))
         }
 
         fun søknadFraFrontendMed2() : MutableMap<String, Any?> {

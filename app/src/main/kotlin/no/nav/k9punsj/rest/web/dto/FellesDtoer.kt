@@ -27,10 +27,16 @@ data class BunkeDto<T>(
     val søknader: List<SøknadDto<T>>?,
 )
 
-data class SvarDto(
+data class SvarPsbDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<PleiepengerSøknadVisningDto>?,
+    val søknader: List<PleiepengerSøknadDto>?,
+)
+
+data class SvarOmsDto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<OmsorgspengerSøknadDto>?,
 )
 
 data class PerioderDto(
@@ -56,10 +62,10 @@ data class IdentDto(
     val norskIdent: NorskIdentDto
 )
 
-internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
+internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarPsbDto {
     val bunke = this.bunke.firstOrNull { b -> b.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN }
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
+        return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -67,10 +73,27 @@ internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarDto {
         if (s.søknad != null) {
             objectMapper().convertValue(s.søknad)
         } else {
-            PleiepengerSøknadVisningDto(soeknadId = s.søknadId, soekerId = norskIdent, journalposter = hentUtJournalposter(s), harMedisinskeOpplysninger = false, harInfoSomIkkeKanPunsjes = false)
+            PleiepengerSøknadDto(soeknadId = s.søknadId, soekerId = norskIdent, journalposter = hentUtJournalposter(s), harMedisinskeOpplysninger = false, harInfoSomIkkeKanPunsjes = false)
         }
     }
-    return SvarDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
+    return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
+}
+
+internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
+    val bunke = this.bunke.firstOrNull { b -> b.fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER }
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                OmsorgspengerSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            }
+        }
+    return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
 }
 
 internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
@@ -78,9 +101,16 @@ internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != nul
     journalposter.journalposter.toList()
 } else null
 
-internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadVisningDto {
+internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSøknadDto {
     if (søknad == null) {
-        return PleiepengerSøknadVisningDto(soeknadId = this.søknadId, journalposter = hentUtJournalposter(this), harInfoSomIkkeKanPunsjes = false, harMedisinskeOpplysninger = false)
+        return PleiepengerSøknadDto(soeknadId = this.søknadId, journalposter = hentUtJournalposter(this), harInfoSomIkkeKanPunsjes = false, harMedisinskeOpplysninger = false)
+    }
+    return objectMapper().convertValue(søknad)
+}
+
+internal fun SøknadEntitet.tilOmsvisning(): OmsorgspengerSøknadDto {
+    if (søknad == null) {
+        return OmsorgspengerSøknadDto(soeknadId = this.søknadId)
     }
     return objectMapper().convertValue(søknad)
 }

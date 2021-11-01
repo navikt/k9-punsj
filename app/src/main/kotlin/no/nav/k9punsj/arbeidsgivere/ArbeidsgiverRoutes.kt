@@ -45,6 +45,28 @@ internal class ArbeidsgiverRoutes(
     }
 
     @Bean
+    fun hentArbeidsgivereMedIdRoute() = SaksbehandlerRoutes(authenticationHandler) {
+        GET(ArbeidsgivereMedIdPath) { request ->
+            RequestContext(coroutineContext, request) {
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivereMedId(
+                            identitetsnummer = request.identitetsnummer(),
+                            fom = request.fom(),
+                            tom = request.tom()
+                        ))
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
+            }
+        }
+    }
+
+    @Bean
     fun hentArbeidsgiverInfoRoute() = PublicRoutes {
         GET("/api/arbeidsgiver") { request ->
             RequestContext(coroutineContext, request) {
@@ -58,6 +80,7 @@ internal class ArbeidsgiverRoutes(
 
     private companion object {
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
+        private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
             ?.let { LocalDate.parse(it) }

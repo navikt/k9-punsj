@@ -2,10 +2,9 @@ package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.domenetjenester.mappers.MapTilK9FormatV2
+import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
-import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
@@ -21,9 +20,9 @@ internal class InnsendingMappingTest {
     @Test
     fun `mappe pleiepenger sykt barn søknad`() {
         val søknad = LesFraFilUtil.søknadFraFrontend()
-        val dto = objectMapper().convertValue<PleiepengerSøknadVisningDto>(søknad)
+        val dto = objectMapper().convertValue<PleiepengerSøknadDto>(søknad)
 
-        val k9Format = MapTilK9FormatV2(
+        val k9Format = MapPsbTilK9Format(
             søknadId = dto.soeknadId,
             journalpostIder = dto.journalposter?.toSet()?: emptySet(),
             perioderSomFinnesIK9 = emptyList(),

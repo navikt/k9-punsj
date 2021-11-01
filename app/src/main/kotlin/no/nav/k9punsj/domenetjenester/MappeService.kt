@@ -9,7 +9,8 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadVisningDto
+import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -39,13 +40,13 @@ class MappeService(
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
     }
 
-    suspend fun førsteInnsending(søknadType: FagsakYtelseType, nySøknad: OpprettNySøknad): SøknadEntitet {
+    suspend fun førsteInnsendingPsb(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
         val barnIdent = nySøknad.barnIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, søknadType)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         val søknadId = UUID.randomUUID()
 
         val journalposter = mutableMapOf<String, Any?>()
@@ -53,11 +54,11 @@ class MappeService(
 
         val mottattDato = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
         val klokkeslett = if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour, mottattDato.toLocalTime().minute) else null
-        val pleiepengerSøknadVisningDto =
-            PleiepengerSøknadVisningDto(
+        val pleiepengerSøknadDto =
+            PleiepengerSøknadDto(
                 soeknadId = søknadId.toString(),
                 soekerId = norskIdent,
-                barn = PleiepengerSøknadVisningDto.BarnDto(barnIdent, null),
+                barn = PleiepengerSøknadDto.BarnDto(barnIdent, null),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = mottattDato?.toLocalDate(),
                 klokkeslett = klokkeslett,
@@ -65,13 +66,45 @@ class MappeService(
                 harMedisinskeOpplysninger = false
             )
 
-        //TODO(OJR) skal jeg legge på informasjon om hvilken saksbehandler som punsjet denne?
+        return opprettSøknadEntitet(søknadId, bunkeId, søker, journalposter, pleiepengerSøknadDto)
+    }
+
+    suspend fun førsteInnsendingOms(nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
+        val barnIdent = nySøknad.barnIdent
+        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
+        val søknadId = UUID.randomUUID()
+
+        val journalposter = mutableMapOf<String, Any?>()
+        journalposter["journalposter"] = listOf(nySøknad.journalpostId)
+
+        val mottattDato = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
+        val klokkeslett = if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour, mottattDato.toLocalTime().minute) else null
+        val dto =
+            OmsorgspengerSøknadDto(
+                soeknadId = søknadId.toString(),
+                journalposter = listOf(nySøknad.journalpostId),
+            )
+
+        return opprettSøknadEntitet(søknadId, bunkeId, søker, journalposter, dto)
+    }
+
+    private suspend fun opprettSøknadEntitet(
+        søknadId: UUID,
+        bunkeId: BunkeId,
+        søker: Person,
+        journalposter: MutableMap<String, Any?>,
+        dto: Any,
+    ): SøknadEntitet {
         val søknadEntitet = SøknadEntitet(
             søknadId = søknadId.toString(),
             bunkeId = bunkeId,
             søkerId = søker.personId,
             journalposter = journalposter,
-            søknad = objectMapper().convertValue<JsonB>(pleiepengerSøknadVisningDto)
+            søknad = objectMapper().convertValue<JsonB>(dto)
         )
         return søknadRepository.opprettSøknad(søknadEntitet)
     }
@@ -80,10 +113,28 @@ class MappeService(
         return journalpostRepository.hentHvis(journalpostIdDto)?.mottattDato
     }
 
-    suspend fun utfyllendeInnsending(
-        søknad: PleiepengerSøknadVisningDto,
+    suspend fun utfyllendeInnsendingPsb(
+        søknad: PleiepengerSøknadDto,
         saksbehandler: String,
-    ): Pair<SøknadEntitet, PleiepengerSøknadVisningDto>? {
+    ): Pair<SøknadEntitet, PleiepengerSøknadDto>? {
+        val hentSøknad = søknadRepository.hentSøknad(søknad.soeknadId)!!
+        return if (hentSøknad.sendtInn.not()) {
+            val journalposter = leggTilJournalpost(søknad.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(søknad)
+            val oppdatertSøknad =
+                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            val nySøknad = søknad.copy(journalposter = journalposter.values.toList() as List<JournalpostIdDto>)
+            Pair(oppdatertSøknad, nySøknad)
+        } else {
+            null
+        }
+    }
+
+    suspend fun utfyllendeInnsendingOms(
+        søknad: OmsorgspengerSøknadDto,
+        saksbehandler: String,
+    ): Pair<SøknadEntitet, OmsorgspengerSøknadDto>? {
         val hentSøknad = søknadRepository.hentSøknad(søknad.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(søknad.journalposter, hentSøknad.journalposter)
