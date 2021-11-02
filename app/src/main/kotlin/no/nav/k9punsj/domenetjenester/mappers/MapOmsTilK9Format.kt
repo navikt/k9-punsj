@@ -18,6 +18,7 @@ import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId
+import java.time.ZonedDateTime
 
 internal class MapOmsTilK9Format(
     søknadId: String,
@@ -33,7 +34,7 @@ internal class MapOmsTilK9Format(
         kotlin.runCatching {
             søknadId.leggTilSøknadId()
             Versjon.leggTilVersjon()
-
+            dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
 
@@ -61,6 +62,10 @@ internal class MapOmsTilK9Format(
     private fun String.leggTilVersjon() {
         søknad.medVersjon(this)
     }
+
+    private fun OmsorgspengerSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
+    }}
 
     private fun String.leggTilSøker() {
         if (erSatt()) {
