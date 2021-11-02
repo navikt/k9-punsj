@@ -1,0 +1,32 @@
+{
+  "soeknadId": "ac55de59-56c3-483d-9f65-f2a683cb6426",
+  "soekerId": "29099000129",
+  "journalposter": [
+    "200"
+  ],
+  "organisasjonsnummer": "979312059",
+  "arbeidsforholdId": "",
+  "fravaersperioder": [
+    {
+      "periode": {
+        "fom": "2021-11-08",
+        "tom": "2021-11-13"
+      },
+      "faktiskTidPrDag": "0"
+    },
+    {
+      "periode": {
+        "fom": "2021-11-14",
+        "tom": "2021-11-14"
+      },
+      "faktiskTidPrDag": "0"
+    },
+    {
+      "periode": {
+        "fom": "2021-11-16",
+        "tom": "2021-11-17"
+      },
+      "faktiskTidPrDag": "0"
+    }
+  ]
+}

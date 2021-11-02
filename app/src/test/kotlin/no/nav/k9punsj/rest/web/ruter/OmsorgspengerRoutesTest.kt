@@ -202,6 +202,22 @@ class OmsorgspengerRoutesTest{
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
+    @Test
+    fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`() {
+        val norskIdent = "02020050123"
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekkKompleks()
+        val journalpostid = UUID.randomUUID().toString()
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
+
+        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val response = res.second
+            .bodyToMono(OasSoknadsfeil::class.java)
+            .block()
+        assertThat(response?.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
+    }
+
     private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
     private fun opprettSøknad(
