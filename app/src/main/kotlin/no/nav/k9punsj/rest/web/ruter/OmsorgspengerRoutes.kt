@@ -16,6 +16,7 @@ import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.dto.*
@@ -42,6 +43,7 @@ internal class OmsorgspengerRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
+    private val k9SakService: K9SakService,
     private val pleiepengerSyktBarnSoknadService : PleiepengerSyktBarnSoknadService,
     @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI
 ) {
@@ -61,6 +63,7 @@ internal class OmsorgspengerRoutes(
         internal const val OppdaterEksisterendeSøknad = "/${søknadType}/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
         internal const val ValiderSøknad = "/${søknadType}/valider" //post
+        internal const val HentArbeidsforholdIderFraK9sak = "/${søknadType}/k9sak/arbeidsforholdIder" //post
     }
 
 
@@ -291,6 +294,33 @@ internal class OmsorgspengerRoutes(
                     .status(HttpStatus.ACCEPTED)
                     .json()
                     .bodyValueAndAwait(mapTilEksternFormat.first)
+            }
+        }
+
+        POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val matchfagsakMedPeriode = request.matchFagsakMedPerioder()
+                innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsakMedPeriode.brukerIdent), Urls.HentArbeidsforholdIderFraK9sak)?.let { return@RequestContext it }
+
+                val hentPerioderSomFinnesIK9 = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
+                    matchfagsakMedPeriode.brukerIdent,
+                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                    matchfagsakMedPeriode.periodeDto
+                )
+
+                return@RequestContext if (hentPerioderSomFinnesIK9.first != null) {
+                    val body = hentPerioderSomFinnesIK9.first!!
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(body)
+
+                } else {
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
+                }
             }
         }
     }

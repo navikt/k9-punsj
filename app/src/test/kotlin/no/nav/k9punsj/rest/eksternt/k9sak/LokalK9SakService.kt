@@ -3,6 +3,7 @@ package no.nav.k9punsj.rest.eksternt.k9sak
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.rest.web.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
@@ -23,4 +24,10 @@ class LokalK9SakService : K9SakService {
         ), null)
         false -> Pair(emptyList(), null)
     }
+
+    override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
+        søker: NorskIdent,
+        fagsakYtelseType: FagsakYtelseType,
+        periodeDto: PeriodeDto,
+    ) : Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> = Pair(emptyList(), null)
 }

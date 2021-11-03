@@ -6,11 +6,15 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakServiceImpl.Urls.hentPerioder
+import no.nav.k9punsj.rest.web.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -33,6 +37,11 @@ class K9SakServiceImpl(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     val log = LoggerFactory.getLogger("K9SakService")
 
+    internal object Urls {
+        internal const val hentPerioder = "/behandling/soknad/perioder"
+        internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
+    }
+
     override fun health(): Mono<Health> {
         TODO("Not yet implemented")
     }
@@ -47,31 +56,10 @@ class K9SakServiceImpl(
             søker,
             barn)
 
-        val body = objectMapper().writeValueAsString(matchDto)
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
+            ?: return Pair(null, "Feilet serialisering")
 
-        val (request, _, result) = "${baseUrl}/behandling/soknad/perioder"
-            .httpPost()
-            .body(
-                body
-            )
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to UUID.randomUUID().toString()
-            ).awaitStringResponseResult()
-
-        val json = result.fold(
-            { success ->
-                Pair(success, null) },
-            { error ->
-                log.error(
-                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
-                )
-                log.error(error.toString())
-                Pair(null, "Feil ved henting av peridoer fra k9-sak")
-            }
-        )
+        val json = httpPost(body, hentPerioder)
         return try {
             if (json.first == null) {
                 return Pair(null, json.second!!)
@@ -85,9 +73,72 @@ class K9SakServiceImpl(
         }
     }
 
+    override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
+        søker: NorskIdent,
+        fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
+        periodeDto: PeriodeDto,
+    ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
+        val matchDto = MatchMedPeriodeDto(FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            søker,
+            periodeDto)
+
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
+            ?: return Pair(null, "Feilet serialisering")
+
+        val json = httpPost(body, hentIntektsmelidnger)
+
+        return try {
+            if (json.first == null) {
+                return Pair(null, json.second!!)
+            }
+            val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json.first!!)
+            val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
+                ArbeidsgiverMedArbeidsforholdId(entry.key.identifikator,
+                    entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId })
+            }
+            Pair(map, null)
+        } catch (e: Exception) {
+            Pair(null, "Feilet deserialisering $e")
+        }
+    }
+
+    private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
+        val (request, _, result) = "$baseUrl$url}"
+            .httpPost()
+            .body(
+                body
+            )
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.CallId to UUID.randomUUID().toString()
+            ).awaitStringResponseResult()
+
+        val json = result.fold(
+            { success ->
+                Pair(success, null)
+            },
+            { error ->
+                log.error(
+                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                )
+                log.error(error.toString())
+                Pair(null, "Feil ved henting av peridoer fra k9-sak")
+            }
+        )
+        return json
+    }
+
     data class MatchDto(
         val ytelseType: FagsakYtelseType,
         val bruker: String,
         val pleietrengende: String,
+    )
+
+    data class MatchMedPeriodeDto(
+        val ytelseType: FagsakYtelseType,
+        val bruker: String,
+        val periode: PeriodeDto
     )
 }

@@ -130,3 +130,8 @@ data class PeriodeDto(
     val tom: LocalDate?,
 )
 
+data class ArbeidsgiverMedArbeidsforholdId(
+    val orgNummerEllerAktørID : String,
+    val arbeidsforholdId : List<String>
+)
+

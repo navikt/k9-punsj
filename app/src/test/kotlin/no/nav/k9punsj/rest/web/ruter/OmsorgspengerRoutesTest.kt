@@ -9,6 +9,7 @@ import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
@@ -27,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
+import java.time.LocalDate
 import java.util.UUID
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
@@ -216,6 +218,23 @@ class OmsorgspengerRoutesTest{
         assertThat(response?.feil).isNull()
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
+    }
+
+    @Test
+    fun `Skal hente arbeidsforholdIder fra k9-sak`() {
+        val norskIdent = "02020050123"
+        val dtoSpørring =
+            OasMatchfagsakMedPeriode(norskIdent, PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
+
+        val res = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "k9sak", "arbeidsforholdIder").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(dtoSpørring))
+            .awaitExchangeBlocking()
+
+        val oppdatertSoeknadDto = runBlocking { res.awaitBody<List<ArbeidsgiverMedArbeidsforholdId>>() }
+
+        Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
     }
 
     private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }

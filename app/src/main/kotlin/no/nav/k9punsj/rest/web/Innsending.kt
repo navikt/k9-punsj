@@ -31,6 +31,11 @@ data class Matchfagsak(
     val barnIdent: NorskIdentDto,
 )
 
+data class MatchFagsakMedPeriode(
+    val brukerIdent: NorskIdentDto,
+    val periodeDto: PeriodeDto
+)
+
 data class PunsjBolleDto(
     val brukerIdent: NorskIdentDto,
     val barnIdent: NorskIdentDto,
@@ -65,6 +70,8 @@ internal suspend fun ServerRequest.opprettNy() =
 
 internal suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 internal suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
+internal suspend fun ServerRequest.matchFagsakMedPerioder() = body(BodyExtractors.toMono(MatchFagsakMedPeriode::class.java)).awaitFirst()
+
 
 internal fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) =
     uriBuilder().pathSegment("mappe", søknadId).build()
