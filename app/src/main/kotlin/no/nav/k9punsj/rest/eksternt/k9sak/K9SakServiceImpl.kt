@@ -86,12 +86,15 @@ class K9SakServiceImpl(
             ?: return Pair(null, "Feilet serialisering")
 
         val json = httpPost(body, hentIntektsmelidnger)
+        log.info(json.first ?: "Sucsess er null")
+        log.info(json.second ?: "Failure er null")
 
         return try {
             if (json.first == null) {
                 return Pair(null, json.second!!)
             }
             val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json.first!!)
+            log.info("Datasett er "+ dataSett)
             val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
                 ArbeidsgiverMedArbeidsforholdId(entry.key.identifikator,
                     entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId })
