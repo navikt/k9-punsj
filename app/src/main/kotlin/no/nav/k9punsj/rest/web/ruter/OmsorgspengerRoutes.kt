@@ -315,6 +315,11 @@ internal class OmsorgspengerRoutes(
                         .json()
                         .bodyValueAndAwait(body)
 
+                } else if (hentPerioderSomFinnesIK9.second != null) {
+                    ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(hentPerioderSomFinnesIK9.second!!)
                 } else {
                     ServerResponse
                         .ok()

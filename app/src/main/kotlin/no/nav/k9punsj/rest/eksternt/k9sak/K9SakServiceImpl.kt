@@ -106,7 +106,7 @@ class K9SakServiceImpl(
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
-        val (request, _, result) = "$baseUrl$url}"
+        val (request, _, result) = "$baseUrl$url"
             .httpPost()
             .body(
                 body
