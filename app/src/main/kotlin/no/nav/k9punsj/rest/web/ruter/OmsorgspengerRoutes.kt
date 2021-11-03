@@ -304,7 +304,7 @@ internal class OmsorgspengerRoutes(
 
                 val hentPerioderSomFinnesIK9 = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
                     matchfagsakMedPeriode.brukerIdent,
-                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                    FagsakYtelseType.OMSORGSPENGER,
                     matchfagsakMedPeriode.periodeDto
                 )
 
