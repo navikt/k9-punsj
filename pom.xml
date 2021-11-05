@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.5</version>
+        <version>2.5.6</version>
         <relativePath/>
     </parent>
     <groupId>no.nav.k9</groupId>
@@ -20,11 +20,11 @@
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
         <kotlin.version>1.5.31</kotlin.version>
-        <springdoc.version>1.5.10</springdoc.version>
+        <springdoc.version>1.5.12</springdoc.version>
         <kotlinx-coroutines.version>1.5.2</kotlinx-coroutines.version>
         <logback.logstash.version>6.6</logback.logstash.version>
-        <token-support.version>1.3.8</token-support.version>
-        <dusseldorf-ktor.version>3.1.6.3-bf04e18</dusseldorf-ktor.version>
+        <token-support.version>1.3.9</token-support.version>
+        <dusseldorf-ktor.version>3.1.6.4-e07c5ec</dusseldorf-ktor.version>
         <k9-rapid.version>1.20210920084849-2ac86f1</k9-rapid.version>
         <k9-sak.version>3.2.24</k9-sak.version>
         <k9-format.version>5.5.9</k9-format.version>
@@ -32,6 +32,7 @@
         <mockk.version>1.12.0</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
+        <zonky-postgresql.version>13.2.0</zonky-postgresql.version>
     </properties>
 
     <modules>
@@ -47,19 +48,16 @@
                 <artifactId>punsj-mocks</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>${k9-sak.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-coroutines-core</artifactId>
@@ -70,6 +68,7 @@
                 <artifactId>kotlinx-coroutines-reactor</artifactId>
                 <version>${kotlinx-coroutines.version}</version>
             </dependency>
+
             <!-- Authentication -->
             <dependency>
                 <groupId>no.nav.security</groupId>
@@ -86,6 +85,7 @@
                 <artifactId>dusseldorf-test-support</artifactId>
                 <version>${dusseldorf-ktor.version}</version>
             </dependency>
+
             <!-- Monitorering -->
             <dependency>
                 <groupId>net.logstash.logback</groupId>
@@ -97,12 +97,22 @@
                 <artifactId>kotlinx-coroutines-slf4j</artifactId>
                 <version>${kotlinx-coroutines.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.papertrailapp</groupId>
                 <artifactId>logback-syslog4j</artifactId>
                 <version>${logback-syslog4j.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
+
             <!-- Meldingsformater -->
             <dependency>
                 <groupId>org.skyscreamer</groupId>
@@ -124,6 +134,7 @@
                 <artifactId>behov</artifactId>
                 <version>${k9-rapid.version}</version>
             </dependency>
+
             <!-- Testing -->
             <dependency>
                 <groupId>io.mockk</groupId>
@@ -133,8 +144,16 @@
             <dependency>
                 <groupId>org.glassfish</groupId>
                 <artifactId>jakarta.el</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
             </dependency>
+            <dependency>
+                <groupId>io.zonky.test.postgres</groupId>
+                <artifactId>embedded-postgres-binaries-bom</artifactId>
+                <version>${zonky-postgresql.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- Annet -->
             <dependency>
                 <groupId>de.huxhorn.sulky</groupId>
