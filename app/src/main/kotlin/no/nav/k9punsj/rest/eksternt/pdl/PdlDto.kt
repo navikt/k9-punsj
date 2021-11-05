@@ -46,32 +46,6 @@ data class PdlResponse(
         val identPdl: IdentPdl?
 )
 
-data class PersonPdlResponse(
-        val ikkeTilgang: Boolean,
-        val person: PersonPdl?
-)
-
-data class Error(
-        val errors: List<Error>
-) {
-    data class Error(
-            val extensions: Extensions,
-            val locations: List<Location>,
-            val message: String,
-            val path: List<String>
-    ) {
-        data class Extensions(
-                val classification: String,
-                val code: String
-        )
-
-        data class Location(
-                val column: Int,
-                val line: Int
-        )
-    }
-}
-
 
 data class PersonPdl(
         val `data`: Data
@@ -110,5 +84,6 @@ data class PersonPdl(
 }
 
 internal fun PersonPdl.navn(): String{
-    return data.hentPerson.navn[0].forkortetNavn?:data.hentPerson.navn[0].fornavn + " " +data.hentPerson.navn[0].etternavn
+    return data.hentPerson.navn[0].forkortetNavn
+        ?: (data.hentPerson.navn[0].fornavn + " " + data.hentPerson.navn[0].etternavn)
 }

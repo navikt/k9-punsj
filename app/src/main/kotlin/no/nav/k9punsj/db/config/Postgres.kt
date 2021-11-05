@@ -4,17 +4,15 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import java.util.Locale
 import javax.sql.DataSource
 
 enum class Role {
-    Admin, User, ReadOnly;
+    Admin;
 
-    override fun toString() = name.toLowerCase()
+    override fun toString() = name.lowercase(Locale.getDefault())
 }
 
-private val logger: Logger = LoggerFactory.getLogger(DbConfiguration::class.java)
 fun getDataSource(configuration: DbConfiguration): HikariDataSource =
     if (configuration.isVaultEnabled()) {
         dataSourceFromVault(configuration, Role.Admin)
@@ -44,7 +42,7 @@ fun loadFlyway(dataSource: DataSource, initSql: String? = null) =
         .locations("migreringer/")
         .dataSource(dataSource)
         .initSql(initSql)
-        .load()
+        .load()!!
 
 fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
     return loadFlyway(dataSource, initSql).migrate()

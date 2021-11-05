@@ -91,7 +91,7 @@ class AksjonspunktServiceImpl(
         val aksjonspunkterSomSkalLukkes = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId)
             .filter { it.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET }
 
-        if (!aksjonspunkterSomSkalLukkes.isNullOrEmpty()) {
+        if (aksjonspunkterSomSkalLukkes.isNotEmpty()) {
             val mutableMap = mutableMapOf<String, String>()
             aksjonspunkterSomSkalLukkes.forEach {
                 mutableMap.plus(Pair(it.aksjonspunktKode.kode, AksjonspunktStatus.UTFØRT))

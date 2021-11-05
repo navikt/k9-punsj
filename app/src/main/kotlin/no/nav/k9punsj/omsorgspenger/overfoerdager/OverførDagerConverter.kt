@@ -14,7 +14,7 @@ internal class OverførDagerConverter {
 
             return OverføreOmsorgsdagerBehov(
                     fra = OverføreOmsorgsdagerBehov.OverførerFra(
-                            identitetsnummer = identitetsnummer.toString(),
+                            identitetsnummer = identitetsnummer,
                             jobberINorge = jobberINorge
                     ),
                     til = OverføreOmsorgsdagerBehov.OverførerTil(

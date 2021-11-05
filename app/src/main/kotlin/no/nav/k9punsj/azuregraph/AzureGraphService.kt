@@ -26,8 +26,7 @@ class AzureGraphService(
 ) : IAzureGraphService {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val cache = Cache<String>()
-    val log = LoggerFactory.getLogger("AzureGraphService")
-
+    val log = LoggerFactory.getLogger("AzureGraphService")!!
 
     override suspend fun hentIdentTilInnloggetBruker(): String {
         val accessToken = coroutineContext.hentAuthentication().accessToken

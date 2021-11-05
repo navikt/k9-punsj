@@ -21,7 +21,6 @@ import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
-import no.nav.k9punsj.rest.eksternt.k9sak.K9SakRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
@@ -811,46 +810,6 @@ internal class HendelseController {
 
     @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
     fun ProsesserHendelse(@RequestBody body: FordelPunsjEventDto) {
-    }
-}
-
-@RestController
-@Tag(name = "K9Sak", description = "Håndtering kall mot k9Sak")
-internal class K9SakController {
-    @PostMapping(
-        K9SakRoutes.Urls.HentSisteVersjonAvPleiepengerSøknad,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Prosessert",
-                content = [Content(
-                    schema = Schema(
-                        implementation = K9SakRoutes.K9SakSøknadDto::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Ikke innlogget"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "Ikke tilgang til å opprette journalføringsoppgave"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Eksisterer ikke"
-            )
-        ]
-    )
-
-    @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
-    fun ProsesserHendelse(@RequestBody body: FordelPunsjEventDto) {
-
     }
 }
 

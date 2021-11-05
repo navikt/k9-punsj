@@ -81,15 +81,15 @@ internal class MapPsbTilK9Format(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }}
 
-    private fun List<PeriodeDto>.leggTilSøknadsperiode() { if (!this.isNullOrEmpty()) {
+    private fun List<PeriodeDto>.leggTilSøknadsperiode() { if (this.isNotEmpty()) {
         pleiepengerSyktBarn.medSøknadsperiode(this.somK9Perioder())
     }}
 
     private fun PleiepengerSøknadDto.BarnDto.leggTilBarn() {
-        val barn = when {
-            norskIdent.erSatt() -> Barn.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent)).build()
-            foedselsdato != null -> Barn.builder().fødselsdato(foedselsdato).build()
-            else -> Barn.builder().build()
+        val barn = Barn()
+        when {
+            norskIdent.erSatt() -> barn.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent))
+            foedselsdato != null -> barn.medFødselsdato(foedselsdato)
         }
         pleiepengerSyktBarn.medBarn(barn)
     }
@@ -245,27 +245,27 @@ internal class MapPsbTilK9Format(
         val noeSatt = organisasjonsnummer.erSatt() || virksomhetNavn.erSatt() || info?.periode.erSatt()
         if (!noeSatt) return null
 
-        val k9SelvstendigNæringsdrivende = SelvstendigNæringsdrivende.builder()
-        if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.organisasjonsnummer(Organisasjonsnummer.of(organisasjonsnummer))
-        if (virksomhetNavn.erSatt()) k9SelvstendigNæringsdrivende.virksomhetNavn(virksomhetNavn)
+        val k9SelvstendigNæringsdrivende = SelvstendigNæringsdrivende()
+        if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.medOrganisasjonsnummer(Organisasjonsnummer.of(organisasjonsnummer))
+        if (virksomhetNavn.erSatt()) k9SelvstendigNæringsdrivende.medVirksomhetNavn(virksomhetNavn)
 
         if (info?.periode.erSatt()) {
             val k9Periode = info!!.periode!!.somK9Periode()!!
-            val k9Info = SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo.builder()
-            info.registrertIUtlandet?.also { k9Info.registrertIUtlandet(it) }
-            info.regnskapsførerNavn?.blankAsNull()?.also { k9Info.regnskapsførerNavn(it) }
-            info.regnskapsførerTlf?.blankAsNull()?.also { k9Info.regnskapsførerTelefon(it) }
-            info.landkode?.blankAsNull()?.also { k9Info.landkode(Landkode.of(it)) }
-            info.bruttoInntekt?.also { k9Info.bruttoInntekt(it) }
-            info.erVarigEndring?.also { k9Info.erVarigEndring(it) }
-            info.endringDato?.also { k9Info.endringDato(it) }
-            info.endringBegrunnelse?.blankAsNull()?.also { k9Info.endringBegrunnelse(it) }
+            val k9Info = SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo()
+            info.registrertIUtlandet?.also { k9Info.medRegistrertIUtlandet(it) }
+            info.regnskapsførerNavn?.blankAsNull()?.also { k9Info.medRegnskapsførerNavn(it) }
+            info.regnskapsførerTlf?.blankAsNull()?.also { k9Info.medRegnskapsførerTlf(it) }
+            info.landkode?.blankAsNull()?.also { k9Info.medLandkode(Landkode.of(it)) }
+            info.bruttoInntekt?.also { k9Info.medBruttoInntekt(it) }
+            info.erVarigEndring?.also { k9Info.medErVarigEndring(it) }
+            info.endringDato?.also { k9Info.medEndringDato(it) }
+            info.endringBegrunnelse?.blankAsNull()?.also { k9Info.medEndringBegrunnelse(it) }
             // TODO: Denne utledningen virker rar, men flagget skal forhåpentligvis fjernes fra K9-Format.
-            k9Info.erNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
+            k9Info.medErNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
             when (info.erVarigEndring) {
                 true -> info.endringInntekt
                 else -> info.bruttoInntekt
-            }?.also { k9Info.bruttoInntekt(it) }
+            }?.also { k9Info.medBruttoInntekt(it) }
 
             if (!info.virksomhetstyper.isNullOrEmpty()) {
                 val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
@@ -278,11 +278,11 @@ internal class MapPsbTilK9Format(
                         VirksomhetType.valueOf(virksomhetstype.uppercase())
                     }
                 }}
-                k9Info.virksomhetstyper(k9Virksomhetstyper)
+                k9Info.medVirksomhetstyper(k9Virksomhetstyper)
             }
-            k9SelvstendigNæringsdrivende.periode(k9Periode, k9Info.build())
+            k9SelvstendigNæringsdrivende.medPerioder(mutableMapOf(k9Periode to k9Info))
         }
-        return k9SelvstendigNæringsdrivende.build()
+        return k9SelvstendigNæringsdrivende
     }
 
     private fun PleiepengerSøknadDto.ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser() : Frilanser {
@@ -397,6 +397,6 @@ internal class MapPsbTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer.toLong()).plusMinutes(minutter.toLong())
+        private fun PleiepengerSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

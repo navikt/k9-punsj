@@ -25,7 +25,6 @@ internal class MapOmsTilK9Format(
     journalpostIder: Set<String>,
     dto: OmsorgspengerSøknadDto,
 ) {
-
     private val søknad = Søknad()
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
     private val feil = mutableListOf<Feil>()
@@ -36,8 +35,7 @@ internal class MapOmsTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
-            dto.leggTilJournalposter(journalpostIder = journalpostIder)
-
+            leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioderKorrigeringIm(dto)
 
             // Fullfører søknad & validerer
@@ -127,7 +125,7 @@ internal class MapOmsTilK9Format(
         omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(fraværsperioder)
     }
 
-    private fun OmsorgspengerSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)
@@ -155,8 +153,7 @@ internal class MapOmsTilK9Format(
         }
 
         private fun String?.erSatt() = !isNullOrBlank()
-        private fun Periode.jsonPath() = "[${this.iso8601}]"
         private fun PleiepengerSøknadDto.TimerOgMinutter.somDuration() =
-            Duration.ofHours(timer.toLong()).plusMinutes(minutter.toLong())
+            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

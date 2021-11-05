@@ -1,7 +1,5 @@
 package no.nav.k9punsj.db.config
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,10 +11,6 @@ class DbConfiguration(
         @Value("\${no.nav.db.password}") private val password: String?,
         @Value("\${no.nav.db.vault_mountpath}") private val vaultMountpath: String
 ) {
-
-    private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(DbConfiguration::class.java)
-    }
 
     @Bean
     fun hikariConfig() = createHikariConfig(url, username, password)

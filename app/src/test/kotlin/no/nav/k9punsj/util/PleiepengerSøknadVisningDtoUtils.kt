@@ -15,10 +15,7 @@ import java.util.*
 
 internal object PleiepengerSøknadVisningDtoUtils {
 
-    internal fun MutableMap<String, Any?>.somPleiepengerSøknadVisningDto(manipuler: (MutableMap<String, Any?>) -> Unit)
-        = manipuler(this).let { objectMapper().convertValue<PleiepengerSøknadDto>(this) }
-
-    internal fun minimalSøknadSomValiderer(
+    private fun minimalSøknadSomValiderer(
         søker: String = "11111111111",
         barn: String = "22222222222",
         søknadsperiode: Pair<LocalDate, LocalDate>? = null,

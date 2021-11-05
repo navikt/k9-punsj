@@ -23,7 +23,6 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
         const val rapidTopic = "k9-rapid-v2"
     }
 
-    //TODO(OJR) lagre i databasen? + oppdatering av journalpost? + abac
     internal suspend fun send(melding: OverføreOmsorgsdagerBehov, dedupKey: String) {
         val (id, overføring) = Behovssekvens(
             id = dedupKey,
@@ -35,17 +34,24 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
 
         for (jornalpostId in melding.journalpostIder) {
             val jpost = journalpostRepository.hent(jornalpostId)
-            hendelseProducer.send(
-                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS, data = objectMapper().writeValueAsString(
-                    PunsjEventDto(
-                        jpost.uuid.toString(),
-                        jornalpostId,
-                        jpost.aktørId,
-                        LocalDateTime.now(),
-                        aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
-                    )
-                ), key = id
-            )
+
+            kotlin.runCatching { objectMapper().writeValueAsString(
+                PunsjEventDto(
+                    jpost.uuid.toString(),
+                    jornalpostId,
+                    jpost.aktørId,
+                    LocalDateTime.now(),
+                    aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                )
+            ) }.onSuccess {
+                hendelseProducer.send(
+                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                data = it,
+                key = id
+                )
+            }.onFailure {
+                throw IllegalArgumentException("Uventet mappingfeil", it)
+            }
         }
     }
 }

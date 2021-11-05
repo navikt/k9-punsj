@@ -114,7 +114,7 @@ class SafGateway(
 
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
         if(journalpost?.journalposttype == "N" &&
-            journalpost?.journalstatus?.equals("UNDER_ARBEID") == true) throw IkkeStøttetJournalpost().also {
+            journalpost.journalstatus?.equals("UNDER_ARBEID") == true) throw IkkeStøttetJournalpost().also {
             logger.warn("Ikke støttet journalpost: Type NOTAT med status UNDER_ARBEID")
         }
 
@@ -135,7 +135,6 @@ class SafGateway(
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                 .awaitExchange()
-
 
         return when (clientResponse.rawStatusCode()) {
             200 -> {

@@ -8,8 +8,6 @@ import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.rest.web.dto.HentPerson
 import no.nav.k9punsj.rest.web.dto.PdlPersonDto
 import no.nav.k9punsj.rest.web.dto.PdlResponseDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -27,10 +25,6 @@ internal class PdlRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val pdlService: PdlService
 ) {
-
-    private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(PdlRoutes::class.java)
-    }
 
     internal object Urls {
         internal const val HentIdent = "/pdl/hentident/"

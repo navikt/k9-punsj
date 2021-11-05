@@ -1,6 +1,5 @@
 package no.nav.k9punsj.omsorgspenger.overfoerdager
 
-import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.exception.ExceptionResponse
@@ -16,8 +15,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.UUID
 
@@ -34,10 +31,10 @@ internal class OverførDagerApiTest {
     private val client = TestSetup.client
 
     @Test
-    fun `Gyldig skjema om overføring gir 202`() {
+    suspend fun `Gyldig skjema om overføring gir 202`() {
         @Language("json")
         val req =
-                """
+            """
             {
               "journalpostIder": [
                 "466988237"
@@ -69,28 +66,28 @@ internal class OverførDagerApiTest {
               "dedupKey": "01EJTT64E3PG3DX4HKA5Z7JR75"
             }
             """.trimIndent()
-        runBlocking {
-            val journalpost = Journalpost(UUID.randomUUID(), "466988237", aktørId = null)
-            journalpostRepository.lagre(journalpost) {
-                journalpost
-            }
-        }
-        val response = client.post()
-                .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
-                .body(BodyInserters.fromValue(req))
-                .header("content-type", "application/json")
-                .awaitExchangeBlocking()
 
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.ACCEPTED)
+        val journalpost = Journalpost(UUID.randomUUID(), "466988237", aktørId = null)
+        journalpostRepository.lagre(journalpost) {
+            journalpost
+        }
+
+        client.post()
+            .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
+            .body(BodyInserters.fromValue(req))
+            .header("content-type", "application/json")
+            .awaitExchange { clientResponse ->
+                assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.ACCEPTED)
+            }
     }
 
     @Test
-    fun `Uhåndtert exception gir 500 response`() {
+    suspend fun `Uhåndtert exception gir 500 response`() {
         val fellesIdNummer = "23098025855"
 
         @Language("json")
         val req =
-                """
+            """
             {
               "journalpostIder": [
                 "466988237"
@@ -123,19 +120,18 @@ internal class OverførDagerApiTest {
             }
             """.trimIndent()
 
-        val response = client.post()
-                .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
-                .body(BodyInserters.fromValue(req))
-                .header("content-type", "application/json")
-                .awaitExchangeBlocking()
-
-        val responseBody = response.body(BodyExtractors.toMono(ExceptionResponse::class.java)).block()
-
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(responseBody?.exceptionId).isNotBlank()
-        assertThat(responseBody?.message).isNotBlank()
-        assertThat(responseBody?.uri.toString()).isNotBlank()
+        client.post()
+            .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
+            .body(BodyInserters.fromValue(req))
+            .header("content-type", "application/json").awaitExchange { response ->
+                kotlin.runCatching {
+                    response.body(BodyExtractors.toMono(ExceptionResponse::class.java)).block()
+                }.onSuccess {
+                    assertThat(response.statusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                    assertThat(it?.exceptionId).isNotBlank
+                    assertThat(it?.message).isNotBlank
+                    assertThat(it?.uri.toString()).isNotBlank
+                }.onFailure { throw IllegalStateException("", it) }
+            }
     }
-
-    private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 }

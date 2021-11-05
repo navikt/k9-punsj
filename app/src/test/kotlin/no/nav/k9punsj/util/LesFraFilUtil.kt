@@ -24,10 +24,6 @@ class LesFraFilUtil {
             }
         }
 
-        fun genererSøknadMedFeil() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraFil("søknad-med-feil.json"))
-        }
-
         fun søknadFraFrontend() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
         }
@@ -80,8 +76,5 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
         }
 
-        fun zero() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraFil("søknad_med_null_periode.json"))
-        }
     }
 }

@@ -14,7 +14,6 @@ private const val path = "/pdl-mock"
 typealias AktørId = String
 
 fun WireMockServer.getPdlBaseUrl() = baseUrl() + path
-fun WireMockServer.getPdlScope() = "scope"
 
 object AktørIds {
     const val Ok : AktørId = "200"

@@ -21,7 +21,6 @@ class Auditlogger constructor(
     }
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(Auditlogger::class.java)
         private val auditLogger: Logger = LoggerFactory.getLogger("auditLogger")
     }
 }

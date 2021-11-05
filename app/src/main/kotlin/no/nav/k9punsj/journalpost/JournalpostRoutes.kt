@@ -140,7 +140,7 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
-                    return@RequestContext cause.serverResponse()
+                    return@RequestContext serverResponseConflict()
                 } catch (case: IkkeTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -269,7 +269,7 @@ internal class JournalpostRoutes(
                     }
 
                 } catch (cause: IkkeStøttetJournalpost) {
-                    cause.serverResponse()
+                    serverResponseConflict()
                 } catch (case: IkkeTilgang) {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -327,7 +327,7 @@ internal class JournalpostRoutes(
                             .json()
                             .bodyValueAndAwait(journalpost.payload)
                     } catch (cause: IkkeStøttetJournalpost) {
-                        return@RequestContext cause.serverResponse()
+                        return@RequestContext serverResponseConflict()
                     } catch (case: IkkeTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
@@ -424,32 +424,15 @@ internal class JournalpostRoutes(
     ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
-            return ServerResponse
-                .status(HttpStatus.FORBIDDEN)
+            return status(HttpStatus.FORBIDDEN)
                 .json()
                 .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
         }
         return null
     }
 
-    private suspend fun harBasisTilgang(
-        norskIdentDto: NorskIdentDto,
-        url: String,
-    ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harBasisTilgang(norskIdentDto, url)
-        if (!saksbehandlerHarTilgang) {
-            return ServerResponse
-                .status(HttpStatus.FORBIDDEN)
-                .json()
-                .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
-        }
-        return null
-    }
-
-
-    private suspend fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
-    private suspend fun ServerRequest.aktørId(): AktørId = pathVariable(AktørIdKey)
-    private suspend fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
+    private fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
+    private fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
     private suspend fun ServerRequest.omfordelingRequest() =
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
@@ -465,7 +448,7 @@ internal class JournalpostRoutes(
         else -> ok()
     }.json().bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = this == PunsjbolleRuting.K9Sak))
 
-    private suspend fun IkkeStøttetJournalpost.serverResponse() =
+    private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
     data class OmfordelingRequest(

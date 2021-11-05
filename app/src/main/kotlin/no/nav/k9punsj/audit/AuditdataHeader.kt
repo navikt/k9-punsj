@@ -8,10 +8,6 @@ class AuditdataHeader (
     private val severity: String
 ) {
 
-    fun getEventClassId(): EventClassId {
-        return eventClassId
-    }
-
     /**
      * Loggheader i "Commen Event Format (CEF)".
      */

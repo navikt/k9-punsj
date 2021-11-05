@@ -4,7 +4,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.db.datamodell.AktørId
-import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
@@ -18,7 +17,7 @@ import javax.sql.DataSource
 class JournalpostRepository(private val dataSource: DataSource) {
 
 
-    private val objectMapper = objectMapper();
+    private val objectMapper = objectMapper()
 
     suspend fun lagre(
         journalpostId: Journalpost,
@@ -197,9 +196,4 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
         return !using.contains(true)
     }
-
-    data class JournalIdMedDato(
-        val journalpostId: JournalpostId,
-        val dato: LocalDate,
-    )
 }

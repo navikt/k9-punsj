@@ -1,5 +1,4 @@
-package no.nav.k9.integrasjon.azuregraph
-
+package no.nav.k9punsj.azuregraph
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

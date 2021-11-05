@@ -2,7 +2,6 @@ package no.nav.k9punsj
 
 import no.nav.security.token.support.core.configuration.IssuerProperties
 import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration
-import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever
 import no.nav.security.token.support.core.http.HttpRequest
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.core.validation.JwtTokenValidationHandler
@@ -17,8 +16,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
-import java.net.URL
-import java.util.HashMap
 import javax.validation.Valid
 
 @Service
@@ -67,11 +64,6 @@ internal class AuthenticationHandler(
             }
         }
     }
-}
-
-private data class NameValueCookie(private val name: String, private val value: String) : HttpRequest.NameValue {
-    override fun getName() = name
-    override fun getValue() = value
 }
 
 private class ServerHttpRequest(private val serverRequest: ServerRequest) : HttpRequest {

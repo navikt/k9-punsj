@@ -24,14 +24,13 @@ private const val CorrelationIdKey = "correlation_id"
 private const val AuthenticationKey = "authentication"
 
 
-private class CoroutineRequestContext() : AbstractCoroutineContextElement(Key) {
-    internal companion object Key : CoroutineContext.Key<CoroutineRequestContext>
-    internal val attributter: MutableMap<String, Any> = mutableMapOf()
+private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
+    companion object Key : CoroutineContext.Key<CoroutineRequestContext>
+    val attributter: MutableMap<String, Any> = mutableMapOf()
 }
 
 private fun CoroutineContext.requestContext() = get(CoroutineRequestContext.Key) ?: throw IllegalStateException("Request Context ikke satt.")
 internal fun CoroutineContext.hentAttributt(key: String) : Any? = requestContext().attributter.getOrDefault(key, null)
-internal fun CoroutineContext.settAttributt(key: String, value: String) = requestContext().attributter.put(key, value)
 private fun CoroutineContext.settCorrelationId(correlationId: String) = requestContext().attributter.put(CorrelationIdKey, correlationId)
 internal fun CoroutineContext.hentCorrelationId() : CorrelationId = hentAttributt(CorrelationIdKey) as? CorrelationId ?: throw IllegalStateException("$CorrelationIdKey ikke satt")
 private fun CoroutineContext.settAuthentication(authorizationHeader: String) = requestContext().attributter.put(AuthenticationKey, Authentication(authorizationHeader))

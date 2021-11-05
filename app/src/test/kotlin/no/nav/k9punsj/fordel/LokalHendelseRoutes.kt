@@ -4,8 +4,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -20,10 +18,6 @@ import kotlin.coroutines.coroutineContext
 @LokalProfil
 class LokalHendelseRoutes(
     private val hendelseMottaker: HendelseMottaker) {
-
-    private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(LokalHendelseRoutes::class.java)
-    }
 
     internal object Urls {
         internal const val ProsesserHendelse = "/prosesserHendelse/"

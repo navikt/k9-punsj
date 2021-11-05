@@ -41,8 +41,7 @@ internal class VirkedagerUtilTest {
         val papirsøknad = PunsjInnsendingType.DIGITAL_ETTERSENDELSE
 
         val søndag = LocalDateTime.of(2021, 6, 6, 10, 22)
-        val søndagForventetTidspunkt = søndag
 
-        Assertions.assertThat(søndagForventetTidspunkt).isEqualTo(VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(papirsøknad.kode, søndag))
+        Assertions.assertThat(søndag).isEqualTo(VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(papirsøknad.kode, søndag))
     }
 }

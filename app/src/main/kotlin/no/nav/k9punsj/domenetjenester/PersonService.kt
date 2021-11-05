@@ -1,6 +1,5 @@
 package no.nav.k9punsj.domenetjenester
 
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.db.datamodell.PersonId
@@ -28,19 +27,6 @@ class PersonService(
         return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
     }
 
-    suspend fun finnEllerOpprettPersonVedAktørId(aktørId: AktørId): Person {
-        val person = personRepository.hentPersonVedAktørId(aktørId)
-
-        if (person != null) {
-            return person
-        }
-        val pdlResponse = pdlService.identifikatorMedAktørId(aktørId)
-        val personIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
-            ?: throw IllegalStateException("Fant ikke personIdent i PDL")
-
-        return personRepository.lagre(personIdent, aktørId)
-    }
-
     suspend fun finnPerson(personId: PersonId): Person {
         return personRepository.hentPersonVedPersonId(personId)!!
     }
@@ -49,13 +35,4 @@ class PersonService(
         return personRepository.hentPersonVedPersonIdent(norskIdent)
     }
 
-    suspend fun finnPersoner(norskeIdenter: Set<NorskIdent>): List<Person> {
-        return norskeIdenter
-            .map { norskeIdent -> finnEllerOpprettPersonVedNorskIdent(norskeIdent) }
-    }
-
-    suspend fun finnPersonerVedPersonId(personIder: Set<PersonId>): List<Person> {
-        return personIder
-            .map { personId -> finnPerson(personId) }
-    }
 }

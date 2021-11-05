@@ -15,10 +15,6 @@ class CefField {
         this.value = java.lang.Long.toString(value)
     }
 
-    fun getKey(): CefFieldName {
-        return key
-    }
-
     /**
      * Nøkkel og verdi i "Commen Event Format (CEF)".
      */

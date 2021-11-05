@@ -35,7 +35,7 @@ class K9SakServiceImpl(
 ) : ReactiveHealthIndicator, K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    val log = LoggerFactory.getLogger("K9SakService")
+    val log = LoggerFactory.getLogger("K9SakService")!!
 
     internal object Urls {
         internal const val hentPerioder = "/behandling/soknad/perioder"
