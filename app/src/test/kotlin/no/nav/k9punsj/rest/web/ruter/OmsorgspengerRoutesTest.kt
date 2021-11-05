@@ -30,6 +30,8 @@ import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.abs
+import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 class OmsorgspengerRoutesTest{
@@ -96,7 +98,7 @@ class OmsorgspengerRoutesTest{
     fun `Hent en søknad`() {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(2224).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
@@ -125,7 +127,7 @@ class OmsorgspengerRoutesTest{
     fun `Oppdaterer en søknad`() {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOms()
         val norskIdent = "02030050163"
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
@@ -159,7 +161,7 @@ class OmsorgspengerRoutesTest{
     fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -175,7 +177,7 @@ class OmsorgspengerRoutesTest{
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekk()
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -191,7 +193,7 @@ class OmsorgspengerRoutesTest{
     fun `Skal verifisere at søknad er ok`() {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
@@ -201,14 +203,41 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
+        val response = res
+            .bodyToMono(OasSoknadsfeil::class.java)
+            .block()
+        assertThat(response?.feil).isNull()
+
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.statusCode())
+    }
+
+    @Test
+    fun `skal få feil hvis mottattDato ikke er fylt ut`() {
+        val norskIdent = "02022352122"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsFeil()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
+
+        val res = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknad))
+            .awaitExchangeBlocking()
+
+        val response = res
+            .bodyToMono(OasSoknadsfeil::class.java)
+            .block()
+
+        assertThat(response?.feil?.get(0)?.felt).isEqualTo("mottattDato")
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
     }
 
     @Test
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekkKompleks()
-        val journalpostid = UUID.randomUUID().toString()
+        val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)

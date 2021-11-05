@@ -10,7 +10,7 @@ import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
-import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingValidator
+import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
@@ -42,7 +42,7 @@ internal class MapOmsTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerUtbetaling)
-            feil.addAll(Validator.valider(søknad.getYtelse()))
+            feil.addAll(Validator.valider(søknad))
         }.onFailure { throwable ->
             logger.error("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
@@ -138,7 +138,7 @@ internal class MapOmsTilK9Format(
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsTilK9Format::class.java)
         private val Oslo = ZoneId.of("Europe/Oslo")
-        private val Validator = OmsorgspengerUtbetalingValidator()
+        private val Validator = OmsorgspengerUtbetalingSøknadValidator()
         private const val Versjon = "1.0.0"
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
         private fun PeriodeDto.somK9Periode() = when (erSatt()) {

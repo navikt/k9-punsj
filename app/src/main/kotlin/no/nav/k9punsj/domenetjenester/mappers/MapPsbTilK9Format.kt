@@ -165,14 +165,14 @@ internal class MapPsbTilK9Format(
     }
 
     private fun List<PleiepengerSøknadDto.UttakDto>?.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
-        val k9Uttak = mutableMapOf<Periode, UttakPeriodeInfo>()
+        val k9Uttak = mutableMapOf<Periode, Uttak.UttakPeriodeInfo>()
 
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
-            val k9Info = UttakPeriodeInfo()
+            val k9Info = Uttak.UttakPeriodeInfo()
             mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
             { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
-                k9Info.timerPleieAvBarnetPerDag = it
+                k9Info.medTimerPleieAvBarnetPerDag(it)
             }
             k9Uttak[k9Periode] = k9Info
         }
@@ -216,7 +216,7 @@ internal class MapPsbTilK9Format(
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)
-                .medInfomasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
+                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
                 .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
@@ -313,12 +313,12 @@ internal class MapPsbTilK9Format(
     private fun List<PleiepengerSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = mapIndexedNotNull { index, arbeidstaker ->
         val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
         if (arbeidstaker.norskIdent.erSatt()) {
-            k9Arbeidstaker.norskIdentitetsnummer = NorskIdentitetsnummer.of(arbeidstaker.norskIdent)
+            k9Arbeidstaker.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(arbeidstaker.norskIdent))
         }
         if (arbeidstaker.organisasjonsnummer.erSatt()) {
-            k9Arbeidstaker.organisasjonsnummer = Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer)
+            k9Arbeidstaker.medOrganisasjonsnummer(Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer))
         }
-        k9Arbeidstaker.arbeidstidInfo = arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")
+        arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")?.let { k9Arbeidstaker.medArbeidstidInfo(it) }
 
         val noeSatt = arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
         if (noeSatt) {
@@ -383,7 +383,7 @@ internal class MapPsbTilK9Format(
         private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = PleiepengerSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
-        private val DefaultUttak = UttakPeriodeInfo().setTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
+        private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
         private fun PeriodeDto.somK9Periode() = when (erSatt()) {
             true -> Periode(fom, tom)
