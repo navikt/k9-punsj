@@ -112,7 +112,7 @@ internal class PleiepengerSyktBarnRoutes(
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsendingPsb(
-                    søknad = søknad,
+                    pleiepengerSøknadDto = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -293,7 +293,7 @@ internal class PleiepengerSyktBarnRoutes(
                 }
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 mappeService.utfyllendeInnsendingPsb(
-                    søknad = soknadTilValidering,
+                    pleiepengerSøknadDto = soknadTilValidering,
                     saksbehandler = saksbehandler
                 )
                 return@RequestContext ServerResponse

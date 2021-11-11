@@ -141,7 +141,7 @@ internal class OmsorgspengerRoutes(
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsendingOms(
-                    søknad = søknad,
+                    omsorgspengerSøknadDto = søknad,
                     saksbehandler = saksbehandler
                 )
 

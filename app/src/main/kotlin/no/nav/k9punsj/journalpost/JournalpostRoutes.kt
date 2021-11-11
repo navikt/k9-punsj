@@ -228,13 +228,11 @@ internal class JournalpostRoutes(
         POST("/api${Urls.LukkJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
-                val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(journalpostId)
 
-                if (hentHvisJournalpostMedId == null) {
-                    return@RequestContext ServerResponse
+                journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
-                }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
                 journalpostService.settTilFerdig(journalpostId)
@@ -314,14 +312,11 @@ internal class JournalpostRoutes(
 
                 if (journalpost.payload != null) {
                     try {
-                        val journalpostInfo = journalpostService.hentJournalpostInfo(
-                            journalpostId = request.journalpostId()
-                        )
-                        if (journalpostInfo == null) {
-                            return@RequestContext ServerResponse
+                        journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId()) ?:
+                        return@RequestContext ServerResponse
                                 .notFound()
                                 .buildAndAwait()
-                        }
+
                         return@RequestContext ServerResponse
                             .status(HttpStatus.OK)
                             .json()
