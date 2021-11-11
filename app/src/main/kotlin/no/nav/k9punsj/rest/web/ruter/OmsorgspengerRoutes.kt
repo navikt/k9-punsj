@@ -53,7 +53,6 @@ internal class OmsorgspengerRoutes(
         private val logger = LoggerFactory.getLogger(OmsorgspengerRoutes::class.java)
         private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER
         private const val SøknadIdKey = "soeknad_id"
-
     }
 
     internal object Urls {
@@ -78,8 +77,7 @@ internal class OmsorgspengerRoutes(
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
-                        person = person,
-                        søknadType = FagsakYtelseType.OMSORGSPENGER
+                        person = person
                     ).tilOmsVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()

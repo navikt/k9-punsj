@@ -74,8 +74,7 @@ internal class PleiepengerSyktBarnRoutes(
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
-                        person = person,
-                        søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                        person = person
                     ).tilPsbVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()

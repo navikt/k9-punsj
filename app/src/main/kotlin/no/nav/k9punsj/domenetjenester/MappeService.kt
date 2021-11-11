@@ -36,7 +36,7 @@ class MappeService(
         return null
     }
 
-    suspend fun hentMappe(person: Person, søknadType: FagsakYtelseType): Mappe {
+    suspend fun hentMappe(person: Person): Mappe {
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
     }
 
