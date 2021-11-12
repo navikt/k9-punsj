@@ -59,9 +59,9 @@ internal class HendelseMottakerTest {
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`() : Unit = runBlocking {
         val journalpostRepository = hendelseMottaker.journalpostRepository
-        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB", FordelStatusType.OPPRETTET.kode)
+        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
-        val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode, fordelStatusType = FordelStatusType.OPPRETTET.kode)
+        val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
         journalpostRepository.lagre(journalpostTilDb){
             journalpostTilDb
         }
@@ -70,21 +70,5 @@ internal class HendelseMottakerTest {
 
         val journalpost = journalpostRepository.hent("666")
         Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
-    }
-
-    @Test
-    fun `skal lagre ned informasjon om journalpost når journalposten har ankommet fra før med ny status`() : Unit = runBlocking {
-        val journalpostRepository = hendelseMottaker.journalpostRepository
-        val meldingSomSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB", fordelStatus = FordelStatusType.LUKKET_FRA_FORDEL.kode)
-
-        val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomSkalBrukes.journalpostId, aktørId = meldingSomSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode, fordelStatusType = FordelStatusType.OPPRETTET.kode)
-        journalpostRepository.lagre(journalpostTilDb){
-            journalpostTilDb
-        }
-
-        hendelseMottaker.prosesser(meldingSomSkalBrukes)
-
-        val journalpost = journalpostRepository.hent("666")
-        Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PAPIRSØKNAD.kode)
     }
 }

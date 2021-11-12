@@ -14,7 +14,6 @@ data class FordelPunsjEventDto(
     val journalpostId: JournalpostIdDto,
     val type: String? = null,
     val ytelse: String? = null,
-    val fordelStatus: String? = null,
     val opprinneligJournalpost: OpprinneligJournalpost? = null) {
 
     data class OpprinneligJournalpost(
