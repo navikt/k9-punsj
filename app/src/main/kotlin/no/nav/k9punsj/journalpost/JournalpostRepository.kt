@@ -8,7 +8,6 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 

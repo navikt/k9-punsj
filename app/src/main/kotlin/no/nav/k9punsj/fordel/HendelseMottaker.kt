@@ -20,27 +20,34 @@ class HendelseMottaker @Autowired constructor(
         private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
     }
 
-    suspend fun prosesser(fordelPunsjEventDto: FordelPunsjEventDto) {
+    suspend fun prosesser(fordelPunsjEventDto: FordelPunsjEventDto){
         val journalpostId = fordelPunsjEventDto.journalpostId
         val aktørId = fordelPunsjEventDto.aktørId
-        val fantIkke = journalpostRepository.fantIkke(journalpostId)
 
-        if (fantIkke) {
+        val journalpostFraDb = journalpostRepository.hentHvis(journalpostId)
+
+        if (journalpostFraDb == null || fordelPunsjEventDto.fordelStatus != null && (journalpostFraDb.fordelStatusType != FordelStatusType.LUKKET_FRA_FORDEL.kode && journalpostFraDb.fordelStatusType != fordelPunsjEventDto.fordelStatus)) {
             val uuid = UUID.randomUUID()
             val journalpost = Journalpost(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
+                fordelStatusType = fordelPunsjEventDto.fordelStatus ?: FordelStatusType.OPPRETTET.kode,
                 type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
                 opprinneligJournalpost = if(fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
                     fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
             )
             journalpostRepository.opprettJournalpost(journalpost)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
-                journalpost = journalpost,
-                aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-                type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
-                ytelse = fordelPunsjEventDto.ytelse)
+
+            if (fordelPunsjEventDto.fordelStatus == FordelStatusType.LUKKET_FRA_FORDEL.kode) {
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+            } else {
+                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                    journalpost = journalpost,
+                    aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                    type = if(fordelPunsjEventDto.type!=null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
+                    ytelse = fordelPunsjEventDto.ytelse)
+            }
         } else {
             log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
         }

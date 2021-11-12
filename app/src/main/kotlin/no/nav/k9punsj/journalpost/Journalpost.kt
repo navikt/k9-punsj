@@ -13,6 +13,7 @@ data class Journalpost(
     val mottattDato: LocalDateTime? = null,
     val type: String? = null,
     val payload: String? = null,
+    val fordelStatusType: String? = null,
     val opprinneligJournalpost: OpprinneligJournalpost? = null,
 ) {
     data class OpprinneligJournalpost(

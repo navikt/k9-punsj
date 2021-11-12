@@ -13,6 +13,7 @@ enum class PunsjInnsendingType(val kode: String, val navn: String, val erScannin
     SKRIV_TIL_OSS_SPØRMSÅL("SKRIV_TIL_OSS_SPØRMSÅL", "Skriv til oss spørmsål",false),
     SKRIV_TIL_OSS_SVAR("SKRIV_TIL_OSS_SVAR", "Skriv til oss svar",false),
     SAMTALEREFERAT("SAMTALEREFERAT", "Samtalereferat",false),
+    INNTEKSTMELDING_UTGÅTT("INNTEKSTMELDING_UTGÅTT", "Inntekstmelding utgått", false),
     KOPI("KOPI", "Kopi",true),
     UKJENT("UKJENT", "Ukjent",true);
 

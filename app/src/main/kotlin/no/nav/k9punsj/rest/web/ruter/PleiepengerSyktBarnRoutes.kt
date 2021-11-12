@@ -74,8 +74,7 @@ internal class PleiepengerSyktBarnRoutes(
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
-                        person = person,
-                        søknadType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                        person = person
                     ).tilPsbVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()
@@ -112,7 +111,7 @@ internal class PleiepengerSyktBarnRoutes(
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsendingPsb(
-                    søknad = søknad,
+                    pleiepengerSøknadDto = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -293,7 +292,7 @@ internal class PleiepengerSyktBarnRoutes(
                 }
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 mappeService.utfyllendeInnsendingPsb(
-                    søknad = soknadTilValidering,
+                    pleiepengerSøknadDto = soknadTilValidering,
                     saksbehandler = saksbehandler
                 )
                 return@RequestContext ServerResponse
