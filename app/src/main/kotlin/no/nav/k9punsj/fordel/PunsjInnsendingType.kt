@@ -13,14 +13,14 @@ enum class PunsjInnsendingType(val kode: String, val navn: String, val erScannin
     SKRIV_TIL_OSS_SPØRMSÅL("SKRIV_TIL_OSS_SPØRMSÅL", "Skriv til oss spørmsål",false),
     SKRIV_TIL_OSS_SVAR("SKRIV_TIL_OSS_SVAR", "Skriv til oss svar",false),
     SAMTALEREFERAT("SAMTALEREFERAT", "Samtalereferat",false),
-    INNTEKSTMELDING_UTGÅTT("INNTEKSTMELDING_UTGÅTT", "Inntekstmelding utgått", false),
+    INNTEKTSMELDING_UTGÅTT("INNTEKTSMELDING_UTGÅTT", "inntektsmelding utgått", false),
     KOPI("KOPI", "Kopi",true),
     UKJENT("UKJENT", "Ukjent",true);
 
     companion object {
         @JsonCreator
         @JvmStatic
-        fun fraKode(kode: String): PunsjInnsendingType = values().find { it.kode == kode } ?: throw IllegalStateException("Finner ikke$kode")
+        fun fraKode(kode: String): PunsjInnsendingType = values().find { it.kode == kode } ?: throw IllegalStateException("Finner ikke $kode")
 
         fun sjekkOmDetErScanning(kode: String): Boolean {
             return valueOf(kode).erScanning
