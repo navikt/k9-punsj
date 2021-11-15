@@ -13,12 +13,12 @@ internal class FordelPunsjEventDtoTest {
         val dto = """{
             "aktørId": "21707997229",
             "journalpostId": "23452352",
-            "type": "INNTEKSTMELDING_UTGÅTT",
+            "type": "INNTEKTSMELDING_UTGÅTT",
             "ytelse": "OMP"
             }""".trimIndent()
 
         val fordelPunsjEventDto = dto.somFordelPunsjEventDto(topic)
 
-        Assertions.assertThat(fordelPunsjEventDto.type).isEqualTo(PunsjInnsendingType.INNTEKSTMELDING_UTGÅTT.kode)
+        Assertions.assertThat(fordelPunsjEventDto.type).isEqualTo(PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode)
     }
 }
