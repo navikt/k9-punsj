@@ -183,6 +183,7 @@ data class DokumentInfo(
 )
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
+internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
 internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
