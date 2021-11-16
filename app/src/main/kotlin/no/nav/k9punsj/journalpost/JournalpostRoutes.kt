@@ -72,6 +72,7 @@ internal class JournalpostRoutes(
         //for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
+        internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -301,6 +302,34 @@ internal class JournalpostRoutes(
             }
         }
 
+        GET("/api${Urls.LukkJournalpostDebugg}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+
+                journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+
+                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
+                if (kanSendeInn) {
+                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                    journalpostService.settTilFerdig(journalpostId)
+                    logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
+
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt lukket i punsj og i los"))
+                } else {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt lukket fra før! (Ingen endring)"))
+                }
+            }
+        }
+
 
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
             RequestContext(coroutineContext, request) {
@@ -312,8 +341,8 @@ internal class JournalpostRoutes(
 
                 if (journalpost.payload != null) {
                     try {
-                        journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId()) ?:
-                        return@RequestContext ServerResponse
+                        journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId())
+                            ?: return@RequestContext ServerResponse
                                 .notFound()
                                 .buildAndAwait()
 
@@ -375,7 +404,8 @@ internal class JournalpostRoutes(
     private suspend fun utvidJournalpostMedMottattDato(
         jornalpostId: JournalpostId,
         mottattDato: LocalDateTime,
-        aktørId: AktørId?) {
+        aktørId: AktørId?,
+    ) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(jornalpostId)
         if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {
             return
@@ -449,7 +479,8 @@ internal class JournalpostRoutes(
     data class OmfordelingRequest(
         val fagsakYtelseTypeKode: String,
     )
+
     data class ResultatDto(
-        val status: String
+        val status: String,
     )
 }

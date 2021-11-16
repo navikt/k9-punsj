@@ -623,6 +623,32 @@ internal class JournalpostController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
+
+    @GetMapping(JournalpostRoutes.Urls.LukkJournalpostDebugg, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis journalposten har blitt lukket",
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Denne journalposten har allerede blitt lukket"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke i punsj"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Lukker en journalpost i k9-punsj og k9-los",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun LukkJournalpostDebugg(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
 }
 
 data class OasDokumentInfo(
