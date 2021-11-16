@@ -44,13 +44,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         return objectMapper().convertValue(søknad)
     }
 
-    internal fun PleiepengerSøknadDto.mapTilSendingsFormat() =
-        MapPsbTilK9Format(søknadId = this.soeknadId,
-        journalpostIder = this.journalposter?.toSet()?: emptySet(),
-        perioderSomFinnesIK9 = emptyList(),
-        dto = this)
-
-    internal fun PleiepengerSøknadDto.mapTilK9Format(
+    private fun PleiepengerSøknadDto.mapTilK9Format(
         perioderSomFinnesIK9: List<PeriodeDto> = emptyList()) =
         MapPsbTilK9Format(
             søknadId = soeknadId,
@@ -191,7 +185,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         }
     }
 
-    fun optionalTilPeriode(periodeDto: PeriodeDto?):  List<PeriodeDto>? {
+    private fun optionalTilPeriode(periodeDto: PeriodeDto?):  List<PeriodeDto>? {
         if(periodeDto != null) {
             return listOf(periodeDto)
         }

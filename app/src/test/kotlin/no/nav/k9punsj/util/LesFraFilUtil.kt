@@ -24,24 +24,12 @@ class LesFraFilUtil {
             }
         }
 
+        /**
+         *  Pleiepenger
+         */
+
         fun søknadFraFrontend() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
-        }
-
-        fun søknadFraFrontendOms() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend.json"))
-        }
-
-        fun søknadFraFrontendOmsFeil() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-feil.json"))
-        }
-
-        fun søknadFraFrontendOmsTrekk() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk.json"))
-        }
-
-        fun søknadFraFrontendOmsTrekkKompleks() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
         }
 
         fun søknadFraFrontendMed2() : MutableMap<String, Any?> {
@@ -74,6 +62,26 @@ class LesFraFilUtil {
 
         fun tomtLand() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
+        }
+
+        /**
+         *  Omsorgspenger
+         */
+
+        fun søknadFraFrontendOms() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend.json"))
+        }
+
+        fun søknadFraFrontendOmsFeil() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-feil.json"))
+        }
+
+        fun søknadFraFrontendOmsTrekk() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk.json"))
+        }
+
+        fun søknadFraFrontendOmsTrekkKompleks() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
         }
 
     }

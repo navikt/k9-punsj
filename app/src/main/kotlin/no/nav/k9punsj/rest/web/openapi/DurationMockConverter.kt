@@ -23,7 +23,7 @@ class DurationMockConverter : ModelConverter {
         if (type.isSchemaProperty) {
             val _type = Json.mapper().constructType(type.type)
             if (_type != null) {
-                val cls = _type.getRawClass()
+                val cls = _type.rawClass
                 if (Duration::class.java.isAssignableFrom(cls)) {
                     return ObjectSchema().example("PT7H25M")
                 }

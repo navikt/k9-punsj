@@ -21,8 +21,8 @@ internal class SøknadRepositoryTest {
     private val barnIdent = "01122334412"
     private val barnAktørID = "1000000000001"
 
-    val journalpostid1 = "2948688b-3ee6-4c05-b179-31830dde5069"
-    val journalpostid2 = "2948688b-3ee6-4c05-b179-32830dde5069"
+    private val journalpostid1 = "29486889"
+    private val journalpostid2 = "29486887"
 
 
     @Test

@@ -10,7 +10,7 @@ internal data class OpprettOppgaveRequest(
     val journalpostId: String,
     @JsonIgnore
     private val gjelder: Gjelder) {
-    val aktivDato: LocalDate = LocalDate.now(ZoneId.of("Europe/Oslo"))
+    private val aktivDato: LocalDate = LocalDate.now(ZoneId.of("Europe/Oslo"))
     val fristFerdigstillelse: LocalDate = aktivDato.treVirkerdagerFrem()
     val prioritet = "NORM"
     val tema = "OMS"

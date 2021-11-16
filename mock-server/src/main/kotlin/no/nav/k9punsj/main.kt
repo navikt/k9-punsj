@@ -2,7 +2,7 @@ package no.nav.k9punsj
 
 import no.nav.k9punsj.wiremock.initWireMock
 
-fun main(args: Array<String>) {
+fun main() {
     val port = 8084
 
     val rootDirectory = System.getenv("K9_MOCKS_ROOT_DIR") ?: "mock-server/src/main/resources"

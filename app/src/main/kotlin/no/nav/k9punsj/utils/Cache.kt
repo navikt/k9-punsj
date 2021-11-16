@@ -15,7 +15,7 @@ class Cache <T>(val cacheSize : Int = 1000){
         map[key] = value
     }
 
-    fun remove(key: String) = map.remove(key)
+    private fun remove(key: String) = map.remove(key)
 
     fun get(key: String): CacheObject<T>? {
         val cacheObject = map[key] ?: return null

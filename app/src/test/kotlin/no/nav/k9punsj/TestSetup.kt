@@ -4,7 +4,7 @@ import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.web.reactive.function.client.WebClient
 
 object TestSetup {
-    val wireMockServer = initWireMock(
+    private val wireMockServer = initWireMock(
             port = 9192
     )
 

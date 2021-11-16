@@ -190,7 +190,7 @@ class PleiepengersyktbarnTests {
         assertNotNull(mapTilSendingsformat)
 
         val tilbake = objectMapper().convertValue<SøknadJson>(visningDto)
-//        assertEquals(gyldigSoeknad, tilbake)
+        assertEquals(visningDto.soekerId, tilbake["soekerId"].toString())
     }
 
     @Test
@@ -406,7 +406,7 @@ class PleiepengersyktbarnTests {
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        val søknadId = opprettSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val søknadId = opprettSoeknad(ident = norskIdent)
         leggerPåNySøknadId(soeknad, søknadId)
 
         client.put()
@@ -616,7 +616,6 @@ class PleiepengersyktbarnTests {
     }
 
     private fun opprettSoeknad(
-        soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
     ): URI? {

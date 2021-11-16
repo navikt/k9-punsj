@@ -8,7 +8,10 @@
   "barn": {},
   "sendtInn": false,
   "erFraK9": false,
-  "soeknadsperiode": [{}],
+  "soeknadsperiode": [{
+    "fom": "2018-12-30",
+    "tom": "2019-10-20"
+  }],
   "opptjeningAktivitet": {
     "arbeidstaker": [],
     "selvstendigNaeringsdrivende": {},

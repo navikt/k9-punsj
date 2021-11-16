@@ -46,7 +46,7 @@ internal fun K9SakRoutes(
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev2")) { jwtToken -> true }
+    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev2")) { true }
 
 internal fun PublicRoutes(
     routes : CoRouterFunctionDsl.() -> Unit) = Routes(null, routes, null, null)
@@ -132,7 +132,7 @@ private fun ServerRequest.contextMap() = pathVariables().toMutableMap().apply {
 data class Authentication(
         internal val authorizationHeader : String
 ) {
-    internal val tokenType : String
+    private val tokenType : String
     internal val accessToken: String
 
     init {

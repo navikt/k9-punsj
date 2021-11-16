@@ -10,8 +10,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 internal class MappeRepositoryTest {
 
-    val dummyFnr = "11111111111"
-    val dummyAktørId = "1000000000000"
+    private val dummyFnr = "11111111111"
+    private val dummyAktørId = "1000000000000"
 
     @Test
     internal fun HentAlleMapperSomInneholderEnNorskIdent(): Unit = runBlocking {

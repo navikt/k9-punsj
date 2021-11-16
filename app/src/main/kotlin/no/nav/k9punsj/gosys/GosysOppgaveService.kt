@@ -63,8 +63,8 @@ internal class GosysOppgaveService(
                     .bodyValue(body)
 
                     .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError) {
-                        it.bodyToFlux<String>().flatMap {
+                    .onStatus(HttpStatus::is4xxClientError) { clientResponse ->
+                        clientResponse.bodyToFlux<String>().flatMap { it ->
                             logger.info(it)
                             Mono.just(it)
                         }

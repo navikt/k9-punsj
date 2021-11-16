@@ -34,8 +34,8 @@ internal class TestPdlService : PdlService {
         false -> emptySet()
     }
 
-    override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = when {
-        identitetsnummer == barn -> setOf(
+    override suspend fun hentPersonopplysninger(identitetsnummer: Set<String>) = when (identitetsnummer) {
+        barn -> setOf(
             Personopplysninger(
                 identitetsnummer = "77777777777",
                 fødselsdato = LocalDate.parse("2005-12-12"),
@@ -61,7 +61,7 @@ internal class TestPdlService : PdlService {
                 gradering = Personopplysninger.Gradering.UGRADERT
             )
         )
-        identitetsnummer == setOf(harBarn) -> setOf(
+        setOf(harBarn) -> setOf(
             Personopplysninger(
                 identitetsnummer = harBarn,
                 fødselsdato = LocalDate.parse("1980-05-06"),
