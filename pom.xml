@@ -29,7 +29,7 @@
         <k9-sak.version>3.2.35</k9-sak.version>
         <k9-format.version>5.5.9</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.2.0</de.huxhorn.sulky.ulid.version>
-        <mockk.version>1.12.0</mockk.version>
+        <mockk.version>1.12.1</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
