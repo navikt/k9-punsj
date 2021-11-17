@@ -4,6 +4,7 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitExchangeBlocking
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
@@ -16,9 +17,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.UUID
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
@@ -139,8 +137,6 @@ internal class JournalpostRepositoryTest {
 
         Assertions.assertEquals(finnJournalposterPåPerson[0].skalTilK9, null)
     }
-
-    private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
     @Test
     fun `Skal sjekke om punsj kan sende inn`(): Unit = runBlocking {

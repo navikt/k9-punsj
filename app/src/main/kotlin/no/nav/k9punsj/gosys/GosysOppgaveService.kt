@@ -51,7 +51,8 @@ internal class GosysOppgaveService(
             gjelder = gjelder
         )
         try {
-            val body = objectMapper().writeValueAsString(opprettOppgaveRequest)
+            val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest)}.getOrElse { throw it }
+
             val response = client
                     .post()
                     .uri { it.pathSegment("api", "v1", "oppgaver").build() }
@@ -64,7 +65,7 @@ internal class GosysOppgaveService(
 
                     .retrieve()
                     .onStatus(HttpStatus::is4xxClientError) { clientResponse ->
-                        clientResponse.bodyToFlux<String>().flatMap { it ->
+                        clientResponse.bodyToFlux<String>().flatMap {
                             logger.info(it)
                             Mono.just(it)
                         }

@@ -1,6 +1,6 @@
 package no.nav.k9punsj
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import de.huxhorn.sulky.ulid.ULID
@@ -26,7 +26,7 @@ class K9PunsjApplication {
 	@Bean
 	fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
 		return Jackson2ObjectMapperBuilder()
-				.propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+				.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
 				.modulesToInstall(JavaTimeModule())
 				.featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
 				.deserializerByType(ULID.Value::class.java, UlidDeserializer())

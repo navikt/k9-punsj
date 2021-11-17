@@ -2,7 +2,6 @@ package no.nav.k9punsj
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
@@ -28,9 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
@@ -44,7 +41,7 @@ class PleiepengersyktbarnTests {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
-    fun `Får tom liste når personen ikke har en eksisterende mappe`() {
+    suspend fun `Får tom liste når personen ikke har en eksisterende mappe`() {
         val norskIdent = "01110050053"
         val res = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
@@ -52,12 +49,12 @@ class PleiepengersyktbarnTests {
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
-        val svar = runBlocking { res.awaitBody<SvarPsbDto>() }
+        val svar = res.awaitBody<SvarPsbDto>()
         assertTrue(svar.søknader!!.isEmpty())
     }
 
     @Test
-    fun `Opprette ny mappe på person`() {
+    suspend fun `Opprette ny mappe på person`() {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, "999")
         val res = client.post()
@@ -69,7 +66,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Hente eksisterende mappe på person`() {
+    suspend fun `Hente eksisterende mappe på person`() {
         val norskIdent = "02020050163"
         val opprettNySøknad = opprettSøknad(norskIdent, "9999")
 
@@ -87,13 +84,13 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
         assertEquals(HttpStatus.OK, res.statusCode())
 
-        val mappeSvar = runBlocking { res.awaitBody<SvarPsbDto>() }
+        val mappeSvar = res.awaitBody<SvarPsbDto>()
         val journalposterDto = mappeSvar.søknader?.first()?.journalposter
         assertEquals("9999", journalposterDto?.first())
     }
 
     @Test
-    fun `Hent en søknad`() {
+    suspend fun `Hent en søknad`() {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
@@ -116,13 +113,13 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
         assertNotNull(søknadViaGet)
         assertEquals(journalpostid, søknadViaGet.journalposter?.first())
     }
 
     @Test
-    fun `Oppdaterer en søknad`() {
+    suspend fun `Oppdaterer en søknad`() {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
         val journalpostid = "9999"
@@ -148,7 +145,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(søknadFraFrontend))
             .awaitExchangeBlocking()
 
-        val oppdatertSoeknadDto = runBlocking { res.awaitBody<PleiepengerSøknadDto>() }
+        val oppdatertSoeknadDto = res.awaitBody<PleiepengerSøknadDto>()
 
         assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
@@ -161,7 +158,7 @@ class PleiepengersyktbarnTests {
 
 
     @Test
-    fun `Innsending av søknad returnerer 404 når mappe ikke finnes`() {
+    suspend fun `Innsending av søknad returnerer 404 når mappe ikke finnes`() {
         val norskIdent = "12030050163"
         val søknadId = "d8e2c5a8-b993-4d2d-9cb5-fdb22a653a0c"
 
@@ -183,7 +180,7 @@ class PleiepengersyktbarnTests {
         val visningDto = objectMapper().convertValue<PleiepengerSøknadDto>(gyldigSoeknad)
         val mapTilSendingsformat = MapPsbTilK9Format(
             søknadId = visningDto.soeknadId,
-            journalpostIder = visningDto.journalposter?.toSet()?: emptySet(),
+            journalpostIder = visningDto.journalposter?.toSet() ?: emptySet(),
             perioderSomFinnesIK9 = emptyList(),
             dto = visningDto
         ).søknadOgFeil()
@@ -194,32 +191,29 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
+    suspend fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = "9999")
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+        assertThat(response.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
 
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
     }
 
     @Test
-    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`() {
+    suspend fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`() {
         val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         val journalpostId = "34234234"
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
-        val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val res =
+            opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+        assertThat(response.feil).isNull()
 
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
 
@@ -234,14 +228,13 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         assertEquals(HttpStatus.CONFLICT, res2.statusCode())
-        val response2 = res2
-            .bodyToMono(OasFeil::class.java)
-            .block()
-        assertThat(response2!!.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+
+        val response2 = res2.awaitBody<OasFeil>()
+        assertThat(response2.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
     }
 
     @Test
-    fun `Skal kunne lagre ned minimal søknad`() {
+    suspend fun `Skal kunne lagre ned minimal søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
         val journalpostId = IdGenerator.nesteId()
@@ -249,76 +242,68 @@ class PleiepengersyktbarnTests {
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
 
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
         assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
-        assertThat(response!!.feil).isNotEmpty
+        assertThat(response.feil).isNotEmpty
     }
 
     @Test
-    fun `Skal kunne lagre ned tomt land søknad`() {
+    suspend fun `Skal kunne lagre ned tomt land søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val response = res.second.awaitBody<OasSoknadsfeil>()
 
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        assertThat(response.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
     @Test
-    fun `Skal kunne lagre med tid søknad`() {
+    suspend fun `Skal kunne lagre med tid søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val response = res.second.awaitBody<OasSoknadsfeil>()
 
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
         assertEquals(HttpStatus.BAD_REQUEST, res.second.statusCode())
-        assertThat(response!!.feil).isNotEmpty
+        assertThat(response.feil).isNotEmpty
     }
 
     @Test
-    fun `Skal kunne lagre og sette uttak`() {
+    suspend fun `Skal kunne lagre og sette uttak`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res
-            .second.bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+
+        assertThat(response.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
 
     @Test
-    fun `Skal kunne lagre med ferie null`() {
+    suspend fun `Skal kunne lagre med ferie null`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+
+        assertThat(response.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
     }
 
     @Test
-    fun `Skal kunne lagre ned ferie fra søknad`() {
+    suspend fun `Skal kunne lagre ned ferie fra søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.ferieSøknad()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -330,14 +315,14 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
     }
 
     @Test
-    fun `Skal kunne lagre ned sn fra søknad`() {
+    suspend fun `Skal kunne lagre ned sn fra søknad`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.sn()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -349,23 +334,26 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.organisasjonsnummer).isEqualTo("890508087")
-        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(LocalDate.of(2021, 5, 10))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
+            LocalDate.of(2021, 5, 10))
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.landkode).isEqualTo("")
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerNavn).isEqualTo("Regskapsfører")
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerTlf).isEqualTo("88888889")
-        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(false)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(
+            false)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(false)
-        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet"))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(
+            listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet"))
     }
 
     @Test
-    fun `Skal kunne lagre flagg om medisinske og punsjet`() {
+    suspend fun `Skal kunne lagre flagg om medisinske og punsjet`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -377,7 +365,7 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
@@ -385,7 +373,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Skal verifisere at søknad er ok`() {
+    suspend fun `Skal verifisere at søknad er ok`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -401,7 +389,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `Skal verifisere at vi utvider men flere journalposter`() {
+    suspend fun `Skal verifisere at vi utvider men flere journalposter`() {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -432,14 +420,14 @@ class PleiepengersyktbarnTests {
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
 
         assertThat(søknadViaGet.journalposter).hasSize(2)
         assertThat(søknadViaGet.journalposter).isEqualTo(listOf("9999", "10000"))
     }
 
     @Test
-    fun `Skal verifisere at alle felter blir lagret`() {
+    suspend fun `Skal verifisere at alle felter blir lagret`() {
         val norskIdent = "12022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -452,7 +440,7 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking()
 
         // GUI format
-        val søknadViaGet = runBlocking { resHent.awaitBody<PleiepengerSøknadDto>() }
+        val søknadViaGet = resHent.awaitBody<PleiepengerSøknadDto>()
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.soekerId).isEqualTo(norskIdent)
         assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
@@ -476,10 +464,12 @@ class PleiepengersyktbarnTests {
             "7,48")
         assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].jobberNormaltTimerPerDag).isEqualTo(
             "7,48")
-        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(LocalDate.of(2018,
-            12,
-            30))
-        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo("7")
+        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(
+            LocalDate.of(2018,
+                12,
+                30))
+        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo(
+            "7")
         assertThat(søknadViaGet.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
@@ -510,7 +500,8 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
             "2018-12-30/..")
-        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(4)
+        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(
+            4)
         assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
         assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("910909088")
@@ -519,7 +510,8 @@ class PleiepengersyktbarnTests {
             "PT7H29M")
         assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
             "PT7H29M")
-        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(Duration.ofHours(7))
+        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(
+            Duration.ofHours(7))
         assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
         assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
@@ -527,8 +519,10 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT7H30M")
         assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
         assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
-        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(true)
-        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(false)
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(
+            true)
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(
+            false)
         assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
         assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
         assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
@@ -536,7 +530,7 @@ class PleiepengersyktbarnTests {
         assertThat(ytelse.opptjeningAktivitet.frilanser.sluttdato).isEqualTo(LocalDate.of(2019, 11, 10))
     }
 
-    private fun opprettOgSendInnSoeknad(
+    private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
@@ -563,7 +557,7 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
+        val søknadDtoFyltUt = resPut.awaitBody<PleiepengerSøknadDto>()
         assertNotNull(søknadDtoFyltUt.soekerId)
 
         val søknadId = søknadDtoFyltUt.soeknadId
@@ -582,7 +576,7 @@ class PleiepengersyktbarnTests {
             .awaitExchangeBlocking())
     }
 
-    private fun opprettOgLagreSoeknad(
+    private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
@@ -609,13 +603,13 @@ class PleiepengersyktbarnTests {
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
+        val søknadDtoFyltUt = resPut.awaitBody<PleiepengerSøknadDto>()
         assertNotNull(søknadDtoFyltUt.soekerId)
 
         return søknadDtoFyltUt
     }
 
-    private fun opprettSoeknad(
+    private suspend fun opprettSoeknad(
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
     ): URI? {
@@ -635,9 +629,6 @@ class PleiepengersyktbarnTests {
         return location
     }
 }
-
-
-private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
 
 private fun opprettSøknad(

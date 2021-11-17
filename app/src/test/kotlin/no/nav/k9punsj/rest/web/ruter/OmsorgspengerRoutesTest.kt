@@ -1,9 +1,9 @@
 package no.nav.k9punsj.rest.web.ruter
 
 import io.mockk.junit5.MockKExtension
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitExchangeBlocking
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -24,9 +24,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
@@ -43,7 +41,7 @@ class OmsorgspengerRoutesTest{
 
 
     @Test
-    fun `Får tom liste når personen ikke har en eksisterende mappe`() {
+    suspend fun `Får tom liste når personen ikke har en eksisterende mappe`() {
         val norskIdent = "01110050053"
         val res = client.get()
             // get omsorgspenger-soknad/mappe
@@ -52,12 +50,12 @@ class OmsorgspengerRoutesTest{
             .header("X-Nav-NorskIdent", norskIdent)
             .awaitExchangeBlocking()
         Assertions.assertEquals(HttpStatus.OK, res.statusCode())
-        val svar = runBlocking { res.awaitBody<SvarPsbDto>() }
+        val svar = res.awaitBody<SvarPsbDto>()
         Assertions.assertTrue(svar.søknader!!.isEmpty())
     }
 
     @Test
-    fun `Opprette ny mappe på person`() {
+    suspend fun `Opprette ny mappe på person`() {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
         val res = client.post()
@@ -70,7 +68,7 @@ class OmsorgspengerRoutesTest{
     }
 
     @Test
-    fun `Hente eksisterende mappe på person`() {
+    suspend fun `Hente eksisterende mappe på person`() {
         val norskIdent = "02020050163"
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
@@ -89,13 +87,13 @@ class OmsorgspengerRoutesTest{
             .awaitExchangeBlocking()
         Assertions.assertEquals(HttpStatus.OK, res.statusCode())
 
-        val mappeSvar = runBlocking { res.awaitBody<SvarOmsDto>() }
+        val mappeSvar = res.awaitBody<SvarOmsDto>()
         val journalposterDto = mappeSvar.søknader?.first()?.journalposter
         Assertions.assertEquals(journalpostId, journalposterDto?.first())
     }
 
     @Test
-    fun `Hent en søknad`() {
+    suspend fun `Hent en søknad`() {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
         val journalpostid = abs(Random(2224).nextInt()).toString()
@@ -113,18 +111,18 @@ class OmsorgspengerRoutesTest{
         Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
         Assertions.assertNotNull(location)
 
-        val resHent = client.get()
+        val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .awaitExchangeBlocking()
+            .awaitBody<OmsorgspengerSøknadDto>()
 
-        val søknadViaGet = runBlocking { resHent.awaitBody<OmsorgspengerSøknadDto>() }
         Assertions.assertNotNull(søknadViaGet)
         Assertions.assertEquals(journalpostid, søknadViaGet.journalposter?.first())
     }
 
     @Test
-    fun `Oppdaterer en søknad`() {
+    suspend fun `Oppdaterer en søknad`() {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOms()
         val norskIdent = "02030050163"
         val journalpostid = abs(Random(1234).nextInt()).toString()
@@ -150,7 +148,7 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(søknadFraFrontend))
             .awaitExchangeBlocking()
 
-        val oppdatertSoeknadDto = runBlocking { res.awaitBody<OmsorgspengerSøknadDto>() }
+        val oppdatertSoeknadDto = res.awaitBody<OmsorgspengerSøknadDto>()
 
         Assertions.assertNotNull(oppdatertSoeknadDto)
         Assertions.assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
@@ -158,39 +156,37 @@ class OmsorgspengerRoutesTest{
     }
 
     @Test
-    fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
+    suspend fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+
+        assertThat(response.feil).isNull()
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
     @Test
-    fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`() {
+    suspend fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekk()
         val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+
+        assertThat(response.feil).isNull()
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
     @Test
-    fun `Skal verifisere at søknad er ok`() {
+    suspend fun `Skal verifisere at søknad er ok`() {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
         val journalpostid = abs(Random(234234).nextInt()).toString()
@@ -203,16 +199,14 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
-        val response = res
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.awaitBody<OasSoknadsfeil>()
+        assertThat(response.feil).isNull()
 
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.statusCode())
     }
 
     @Test
-    fun `skal få feil hvis mottattDato ikke er fylt ut`() {
+    suspend fun `skal få feil hvis mottattDato ikke er fylt ut`() {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsFeil()
         val journalpostid = abs(Random(234234).nextInt()).toString()
@@ -225,32 +219,29 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(soeknad))
             .awaitExchangeBlocking()
 
-        val response = res
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
+        val response = res.awaitBody<OasSoknadsfeil>()
 
-        assertThat(response?.feil?.get(0)?.felt).isEqualTo("mottattDato")
+        assertThat(response.feil?.get(0)?.felt).isEqualTo("mottattDato")
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, res.statusCode())
     }
 
     @Test
-    fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`() {
+    suspend fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`() {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekkKompleks()
         val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val res = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        val response = res.second
-            .bodyToMono(OasSoknadsfeil::class.java)
-            .block()
-        assertThat(response?.feil).isNull()
+        val response = res.second.awaitBody<OasSoknadsfeil>()
+
+        assertThat(response.feil).isNull()
         Assertions.assertEquals(HttpStatus.ACCEPTED, res.second.statusCode())
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
     @Test
-    fun `Skal hente arbeidsforholdIder fra k9-sak`() {
+    suspend fun `Skal hente arbeidsforholdIder fra k9-sak`() {
         val norskIdent = "02020050123"
         val dtoSpørring =
             OasMatchfagsakMedPeriode(norskIdent, PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
@@ -261,12 +252,10 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(dtoSpørring))
             .awaitExchangeBlocking()
 
-        val oppdatertSoeknadDto = runBlocking { res.awaitBody<List<ArbeidsgiverMedArbeidsforholdId>>() }
+        val oppdatertSoeknadDto = res.awaitBody<List<ArbeidsgiverMedArbeidsforholdId>>()
 
         Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
     }
-
-    private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
 
     private fun opprettSøknad(
         personnummer: NorskIdentDto,
@@ -304,7 +293,7 @@ class OmsorgspengerRoutesTest{
         return SendSøknad(norskIdent, søknadId)
     }
 
-    private fun opprettOgSendInnSoeknad(
+    private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
@@ -331,7 +320,7 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<OmsorgspengerSøknadDto>() }
+        val søknadDtoFyltUt = resPut.awaitBody<OmsorgspengerSøknadDto>()
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
 
         val søknadId = søknadDtoFyltUt.soeknadId
@@ -350,7 +339,7 @@ class OmsorgspengerRoutesTest{
             .awaitExchangeBlocking())
     }
 
-    private fun opprettOgLagreSoeknad(
+    private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
@@ -377,7 +366,7 @@ class OmsorgspengerRoutesTest{
             .body(BodyInserters.fromValue(soeknadJson))
             .awaitExchangeBlocking()
 
-        val søknadDtoFyltUt = runBlocking { resPut.awaitBody<PleiepengerSøknadDto>() }
+        val søknadDtoFyltUt = resPut.awaitBody<PleiepengerSøknadDto>()
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
 
         return søknadDtoFyltUt

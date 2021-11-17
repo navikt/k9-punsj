@@ -126,7 +126,9 @@ class MappeService(
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = pleiepengerSøknadDto.copy(journalposter = journalposter.values.toList() as List<JournalpostIdDto>)
+
+            val nySøknad = pleiepengerSøknadDto.copy(journalposter = journalposter.values.toList()
+                .filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null
@@ -144,7 +146,7 @@ class MappeService(
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = omsorgspengerSøknadDto.copy(journalposter = journalposter.values.toList() as List<JournalpostIdDto>)
+            val nySøknad = omsorgspengerSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null

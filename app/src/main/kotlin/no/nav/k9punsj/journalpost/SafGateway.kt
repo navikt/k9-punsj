@@ -134,7 +134,7 @@ class SafGateway(
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .awaitExchange()
+                .awaitExchange { it }
 
         return when (clientResponse.rawStatusCode()) {
             200 -> {

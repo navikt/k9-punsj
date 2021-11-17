@@ -1,6 +1,5 @@
 package no.nav.k9punsj
 
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.wiremock.JournalpostIds
@@ -38,7 +37,7 @@ class K9PunsjApplicationTests {
     val client = TestSetup.client
 
     @Test
-    fun `Endepunkt brukt for isReady og isAlive fungerer`() {
+    suspend fun `Endepunkt brukt for isReady og isAlive fungerer`() {
         val res =
             client.get().uri {
                 it.pathSegment("internal", "actuator", "info").build()
@@ -48,7 +47,7 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente et dokument fra Journalpost uten credentials feiler`() {
+    suspend fun `Hente et dokument fra Journalpost uten credentials feiler`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
         }.awaitExchangeBlocking()
@@ -57,18 +56,18 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente et dokument fra Journalpost fungerer`() {
+    suspend fun `Hente et dokument fra Journalpost fungerer`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
 
         assertEquals(HttpStatus.OK, res.statusCode())
-        val responsePdf = runBlocking { res.awaitBody<ByteArray>() }
+        val responsePdf = res.awaitBody<ByteArray>()
         assertArrayEquals(responsePdf, dummyPdf)
     }
 
     @Test
-    fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() {
+    suspend fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
@@ -77,7 +76,7 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente et dokument fra Journalpost uten tilgang håndteres`() {
+    suspend fun `Hente et dokument fra Journalpost uten tilgang håndteres`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
@@ -86,11 +85,11 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente journalpostinfo fungerer`() {
+    suspend fun `Hente journalpostinfo fungerer`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
-        val responseEntity = runBlocking { res.awaitBody<String>() }
+        val responseEntity =  res.awaitBody<String>()
         JSONAssert.assertEquals("""{
 	"journalpostId": "1",
 	"norskIdent": "29099000129",
@@ -113,7 +112,7 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente journalpostinfo for ikke eksisterende journalpost håndteres`() {
+    suspend fun `Hente journalpostinfo for ikke eksisterende journalpost håndteres`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke).build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
@@ -122,7 +121,7 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente journalpostinfo på journalpost uten tilgang på journalpostnivå håndteres`() {
+    suspend fun `Hente journalpostinfo på journalpost uten tilgang på journalpostnivå håndteres`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.AbacError).build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
@@ -131,7 +130,7 @@ class K9PunsjApplicationTests {
     }
 
     @Test
-    fun `Hente journalpostinfo på journalpost uten tilgang på alle dokumenter håndteres`() {
+    suspend fun `Hente journalpostinfo på journalpost uten tilgang på alle dokumenter håndteres`() {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.IkkeKomplettTilgang).build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
@@ -141,5 +140,6 @@ class K9PunsjApplicationTests {
 
 }
 
-
-private fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse = runBlocking { awaitExchange() }
+suspend fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse {
+    return awaitExchange { it }
+}
