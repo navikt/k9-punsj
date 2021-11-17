@@ -1,8 +1,8 @@
 # k9-punsj
 
-Håndterer manuell `punching` av papirsøknader som kommer inn for ytelser i Kapittel 9.
+Håndterer manuell `punching` av søknader, tilleggsinformasjon og avklaringer som kommer inn for ytelser i Kapittel 9 og som ikke kan avklares av k9-fordel.
 
-[![](https://github.com/navikt/k9-punsj/workflows/Build%20and%20deploy/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+and+deploy%22)
+[![](https://github.com/navikt/k9-punsj/workflows/Build%20master%20/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+master%22)
 
 ## Bygge lokalt
 ```
@@ -42,14 +42,9 @@ Husk å være logget inn på [dev](https://k9-punsj.dev.adeo.no/) først, så g�
 for å hente token som kan brukes i swagger.
 
 ## Åpne
-Link til ulike skjemaer:
+Link til k9-punsj skjemaer:
 [http://localhost:8080](http://localhost:8080)
 
-[Melding om deling av omsorgsdager (Overføring og fordeling av omsorgsdager)](http://localhost:8080/202#/)
-
-[Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn](http://localhost:8080/203#/)
-
-[Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler](http://localhost:8080/204#/)
 
 ## Henvendelser
  Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
