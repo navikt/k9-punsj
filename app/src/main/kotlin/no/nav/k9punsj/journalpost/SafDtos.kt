@@ -46,33 +46,33 @@ internal object SafDtos {
         https://saf-q1.nais.preprod.local/graphiql
      */
 
-    internal enum class VariantFormat {
-        ARKIV
+    internal enum class VariantFormat(beskrivelse: String) {
+        ARKIV("Mennesklig leselig variant av dokumentet")
     }
 
-    internal enum class Tema {
-        OMS
+    internal enum class Tema(beskrivelse: String) {
+        OMS("Journalposter tilknyttet Kapittel 9 ytelsene (OMS)")
     }
 
-    enum class JournalpostType {
-        I
+    enum class JournalpostType(beskrivelse: String) {
+        I("Inngående")
     }
 
-    internal enum class AvsenderType {
-        FNR
+    internal enum class AvsenderType(beskrivelse: String) {
+        FNR("Fødselsnummer")
     }
 
-    internal enum class BrukerType {
-        FNR,
-        AKTOERID
+    internal enum class BrukerType(beskrivelse: String) {
+        FNR("Fødselsnummer"),
+        AKTOERID("AKTOERID")
     }
 
-    internal enum class AvsenderMottakertype {
-        FNR
+    internal enum class AvsenderMottakertype(beskrivelse: String) {
+        FNR("Fødselsnummer")
     }
 
-    internal enum class Journalstatus {
-        MOTTATT
+    internal enum class Journalstatus(beskrivelse: String) {
+        MOTTATT("Mottatt journalpost")
     }
 
     internal data class Bruker(
@@ -130,14 +130,14 @@ internal object SafDtos {
         val datotype: Datotype,
     )
 
-    internal enum class Datotype {
-        DATO_OPPRETTET,
-        DATO_SENDT_PRINT,
-        DATO_EKSPEDERT,
-        DATO_JOURNALFOERT,
-        DATO_REGISTRERT,
-        DATO_AVS_RETUR,
-        DATO_DOKUMENT;
+    internal enum class Datotype(beskrivelse: String) {
+        DATO_OPPRETTET("DATO_OPPRETTET"),
+        DATO_SENDT_PRINT("DATO_SENDT_PRINT"),
+        DATO_EKSPEDERT("DATO_EKSPEDERT"),
+        DATO_JOURNALFOERT("DATO_JOURNALFOERT"),
+        DATO_REGISTRERT("DATO_REGISTRERT"),
+        DATO_AVS_RETUR("DATO_AVS_RETUR"),
+        DATO_DOKUMENT("DATO_DOKUMENT");
     }
 
     internal data class JournalpostResponse(
