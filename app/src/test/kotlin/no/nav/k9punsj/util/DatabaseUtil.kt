@@ -2,6 +2,7 @@ package no.nav.k9punsj.util
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.brev.BrevRepository
 import no.nav.k9punsj.db.config.loadFlyway
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
@@ -25,6 +26,10 @@ class DatabaseUtil {
 
         fun getSøknadRepo(): SøknadRepository {
             return SøknadRepository(dataSource)
+        }
+
+        fun getBrevRepo(): BrevRepository {
+            return BrevRepository(dataSource)
         }
 
         fun getPersonRepo(): PersonRepository {
