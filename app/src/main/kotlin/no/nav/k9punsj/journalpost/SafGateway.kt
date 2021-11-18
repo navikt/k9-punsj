@@ -146,7 +146,7 @@ class SafGateway(
             404 -> null
             403 -> throw IkkeTilgang()
             else -> {
-                throw IllegalStateException("Feil ved henting av dokument fra SAF. ${statusCode}")
+                throw IllegalStateException("Feil ved henting av dokument fra SAF. $statusCode")
             }
         }
     }
