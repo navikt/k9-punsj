@@ -128,17 +128,16 @@ class SafGateway(
                         onBehalfOf = coroutineContext.hentAuthentication().accessToken
                 )
 
-        val clientResponse = client
+        val (statusCode, entity) = client
                 .get()
                 .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .awaitExchange()
+                .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
 
-        return when (clientResponse.rawStatusCode()) {
+        return when (statusCode) {
             200 -> {
-                val entity = clientResponse.awaitEntity<DataBuffer>()
                 Dokument(
                         contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
                         dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
@@ -147,7 +146,7 @@ class SafGateway(
             404 -> null
             403 -> throw IkkeTilgang()
             else -> {
-                throw IllegalStateException("Feil ved henting av dokument fra SAF. ${clientResponse.statusCode()}")
+                throw IllegalStateException("Feil ved henting av dokument fra SAF. ${statusCode}")
             }
         }
     }
