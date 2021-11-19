@@ -7,6 +7,8 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,6 +16,10 @@ class BrevServiceImpl(
     val brevRepository: BrevRepository,
     val hendelseProducer: HendelseProducer,
 ) : BrevService {
+
+    private companion object {
+        private val log: Logger = LoggerFactory.getLogger(BrevServiceImpl::class.java)
+    }
 
 
     override suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet) {
@@ -28,7 +34,7 @@ class BrevServiceImpl(
         val nyId = BrevId().nyId()
 
         val data = "json"
-        hendelseProducer.send(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING, data,  nyId)
+        hendelseProducer.sendMedOnSuccess(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING, data,  nyId) {}
     }
 
 
