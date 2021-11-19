@@ -1,8 +1,8 @@
 package no.nav.k9punsj.brev
 
+import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
-import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
-import no.nav.k9punsj.db.datamodell.AktørId
+import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
@@ -21,34 +21,32 @@ class BrevServiceImpl(
         private val log: Logger = LoggerFactory.getLogger(BrevServiceImpl::class.java)
     }
 
-
-    override suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet) {
-        brevRepository.opprettBrev(brevEntitet)
-    }
-
     override suspend fun hentBrevSendtUtPåJournalpost(journalpostId: JournalpostId): List<BrevEntitet> {
         return brevRepository.hentAlleBrevPåJournalpost(journalpostId)
     }
 
-    override suspend fun bestillBrev() {
-        val nyId = BrevId().nyId()
+    override suspend fun bestillBrev(brevEntitet: BrevEntitet) {
+        val brevId = brevEntitet.brevId
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.forJournalpostId, brevEntitet.brevData).bestillingOgFeil()
 
-        val data = "json"
-        hendelseProducer.sendMedOnSuccess(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING, data,  nyId) {}
+        if (feil.isEmpty()) {
+            hendelseProducer.sendMedOnSuccess(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
+                bestilling.toJson(),
+                brevId) {
+                runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet) }
+            }
+        } else {
+            throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
+        }
     }
 
+    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet) {
+        val brev = brevRepository.opprettBrev(brevEntitet)
+        log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId})""")
 
-    fun lagDokumentbestillingPåJournalpost(journalpostId: JournalpostId, saksnummer: String?, aktørId: AktørId): String {
-        val dokumentbestilling = Dokumentbestilling()
-        dokumentbestilling.eksternReferanse = journalpostId
-        dokumentbestilling.saksnummer = saksnummer ?: "GSAK"
-        dokumentbestilling.aktørId = aktørId
-
-        // utled?
-        dokumentbestilling.dokumentMal = DokumentMalType.INNTEKTSMELDING_FOR_TIDLIG_DOK.kode
-
-
-        return kotlin.runCatching { objectMapper().writeValueAsString(dokumentbestilling) }.getOrElse { throw it }
     }
 
+    private fun Dokumentbestilling.toJson(): String {
+        return kotlin.runCatching { objectMapper().writeValueAsString(this) }.getOrElse { throw it }
+    }
 }

@@ -1,6 +1,8 @@
 package no.nav.k9punsj.brev
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
+import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.util.DatabaseUtil
@@ -27,13 +29,14 @@ internal class BrevRepositoryTest {
 
         val repo = DatabaseUtil.getBrevRepo()
         val forJournalpostId = journalpost1.journalpostId
-        val brev = BrevEntitet(BrevId().nyId(), forJournalpostId, BrevData("Statnett"), BrevType.FRITEKSTBREV)
+        val brevData = DokumentbestillingDto("1", "2", "123", "1234", DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"), FagsakYtelseType.OMSORGSPENGER, "2", "2")
+        val brev = BrevEntitet(BrevId().nyId(), forJournalpostId, brevData, BrevType.FRITEKSTBREV)
 
         repo.opprettBrev(brev = brev)
         val alleBrev : List<BrevEntitet> = repo.hentAlleBrevPåJournalpost(forJournalpostId)
 
         assertThat(alleBrev).hasSize(1)
-        assertThat(alleBrev[0].brevData.mottaker).isEqualTo("Statnett")
+        assertThat(alleBrev[0].brevData.mottaker.id).isEqualTo("Statnett")
     }
 }
 
