@@ -1,6 +1,5 @@
 package no.nav.k9punsj.brev
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf

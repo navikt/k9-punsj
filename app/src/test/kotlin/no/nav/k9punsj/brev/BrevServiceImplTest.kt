@@ -6,27 +6,27 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
 
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
+@SpringBootTest
+@TestPropertySource(properties = ["spring.config.location = classpath:application.yml"])
 @ContextConfiguration(classes = [
     JournalpostRepository::class,
     BrevRepository::class,
@@ -52,22 +52,18 @@ internal class BrevServiceImplTest {
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
 
         val forJournalpostId = "1234"
-        val aktørId = "AktørId"
         val saksnummer = "123"
-        val dokumentbestilling = lagDokumentbestillingPåJournalpost(forJournalpostId, saksnummer, aktørId)
-
-        val brevEntitet =
-            BrevEntitet(UUID.randomUUID().toString(), forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV)
+        val dokumentbestilling = lagDokumentbestillingPåJournalpost()
 
         // act
-        brev.bestillBrev(brevEntitet)
+        brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV)
 
         // assert
-        Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING)
+        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9-dokumenthendelse")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<Dokumentbestilling>(value)
 
-        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo(aktørId)
+        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo("1234")
         Assertions.assertThat(verdiFraKafka.saksnummer).isEqualTo(saksnummer)
     }
 
@@ -81,12 +77,15 @@ internal class BrevServiceImplTest {
         return {}
     }
 
-    private fun lagDokumentbestillingPåJournalpost(
-        journalpostId: JournalpostId,
-        saksnummer: String?,
-        aktørId: AktørId,
-    ): DokumentbestillingDto {
-        val brevData = DokumentbestillingDto("1", "2", "123", "1234", DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"), FagsakYtelseType.OMSORGSPENGER, "2", "2")
-        return brevData
+    private fun lagDokumentbestillingPåJournalpost(): DokumentbestillingDto {
+        return DokumentbestillingDto(
+            "1",
+            "2",
+            "123",
+            "1234",
+            DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"),
+            FagsakYtelseType.OMSORGSPENGER,
+            "INNTID"
+        )
     }
 }

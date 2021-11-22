@@ -16,7 +16,6 @@ data class DokumentbestillingDto(
     val mottaker: Mottaker,
     val fagsakYtelseType: FagsakYtelseType,
     val dokumentMal: String,
-    val avsenderApplikasjon: String,
     val dokumentdata: JsonB? = null
 
 ) {

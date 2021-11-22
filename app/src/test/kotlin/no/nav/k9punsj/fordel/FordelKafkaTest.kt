@@ -11,7 +11,6 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -66,7 +65,7 @@ internal class FordelKafkaTest {
                 melding.type,
                 melding.ytelse)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
+        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo(melding.aktørId)
@@ -94,7 +93,7 @@ internal class FordelKafkaTest {
                 melding.type,
                 melding.ytelse)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo(Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS)
+        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isNull()

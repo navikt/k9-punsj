@@ -2,7 +2,7 @@ package no.nav.k9punsj.kafka
 
 class Topics {
 
-    //TODO (legg alle topics her og beskriv hva som er p: (producer) og c: (consumer)
+    //TODO legg dette i dev-fss.yml og prod-fss.yml
     internal companion object {
 
         // topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los

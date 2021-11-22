@@ -106,3 +106,11 @@ spec:
       value: https://modapp-q1.adeo.no/aareg-services/api/v1
     - name: EREG_BASE_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1
+
+      # Integrasjoner (Kafka)
+      # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los
+    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
+      value: "privat-k9-dokumenthendelse"
+      # topic (p:k9-punsj -> c:k9-formidling) for å opprette en dokumentbestilling
+    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
+      value: "privat-k9punsj-aksjonspunkthendelse-v1"

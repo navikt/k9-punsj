@@ -24,7 +24,7 @@ class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,
-    val søknadRepository: SøknadRepository
+    val søknadRepository: SøknadRepository,
 ) : AksjonspunktService {
 
     private companion object {

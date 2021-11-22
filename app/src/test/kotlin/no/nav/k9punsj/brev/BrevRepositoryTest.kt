@@ -29,7 +29,7 @@ internal class BrevRepositoryTest {
 
         val repo = DatabaseUtil.getBrevRepo()
         val forJournalpostId = journalpost1.journalpostId
-        val brevData = DokumentbestillingDto("1", "2", "123", "1234", DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"), FagsakYtelseType.OMSORGSPENGER, "2", "2")
+        val brevData = DokumentbestillingDto("1", "2", "123", "1234", DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"), FagsakYtelseType.OMSORGSPENGER, "2")
         val brev = BrevEntitet(BrevId().nyId(), forJournalpostId, brevData, BrevType.FRITEKSTBREV)
 
         repo.opprettBrev(brev = brev)

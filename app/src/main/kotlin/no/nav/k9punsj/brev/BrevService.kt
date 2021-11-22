@@ -6,5 +6,5 @@ interface BrevService {
 
     suspend fun hentBrevSendtUtPåJournalpost(journalpostId: JournalpostId) : List<BrevEntitet>
 
-    suspend fun bestillBrev(brevEntitet: BrevEntitet)
+    suspend fun bestillBrev(forJournalpostId: JournalpostId, brevData: DokumentbestillingDto, brevType: BrevType)
 }

@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
+import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
@@ -25,12 +25,18 @@ class BrevServiceImpl(
         return brevRepository.hentAlleBrevPåJournalpost(journalpostId)
     }
 
-    override suspend fun bestillBrev(brevEntitet: BrevEntitet) {
-        val brevId = brevEntitet.brevId
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.forJournalpostId, brevEntitet.brevData).bestillingOgFeil()
+    override suspend fun bestillBrev(forJournalpostId: JournalpostId, brevData: DokumentbestillingDto, brevType: BrevType) {
+        val brevId = BrevId().nyId()
+        val brevEntitet = BrevEntitet(
+            brevId = brevId,
+            forJournalpostId = forJournalpostId,
+            brevType = brevType,
+            brevData = brevData
+        )
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevData).bestillingOgFeil()
 
         if (feil.isEmpty()) {
-            hendelseProducer.sendMedOnSuccess(Topics.SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
+            hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                 bestilling.toJson(),
                 brevId) {
                 runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet) }
