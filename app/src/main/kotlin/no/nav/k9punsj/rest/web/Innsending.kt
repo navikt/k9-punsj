@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.web
 
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.*
 import org.springframework.http.HttpStatus
@@ -64,6 +65,9 @@ internal suspend fun ServerRequest.pleiepengerSøknad() =
 
 internal suspend fun ServerRequest.omsorgspengerSøknad() =
     body(BodyExtractors.toMono(OmsorgspengerSøknadDto::class.java)).awaitFirst()
+
+internal suspend fun ServerRequest.brevBestilling() =
+    body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.opprettNy() =
     body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()

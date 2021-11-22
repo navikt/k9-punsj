@@ -2,6 +2,7 @@ package no.nav.k9punsj
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
@@ -41,7 +42,7 @@ class PleiepengersyktbarnTests {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
-    suspend fun `Får tom liste når personen ikke har en eksisterende mappe`() {
+    fun `Får tom liste når personen ikke har en eksisterende mappe`() : Unit = runBlocking {
         val norskIdent = "01110050053"
         val res = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
@@ -54,7 +55,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Opprette ny mappe på person`() {
+    fun `Opprette ny mappe på person`() : Unit = runBlocking {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, "999")
         val res = client.post()
@@ -66,7 +67,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Hente eksisterende mappe på person`() {
+    fun `Hente eksisterende mappe på person`() : Unit = runBlocking {
         val norskIdent = "02020050163"
         val opprettNySøknad = opprettSøknad(norskIdent, "9999")
 
@@ -90,7 +91,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Hent en søknad`() {
+    fun `Hent en søknad`() : Unit = runBlocking {
         val søknad = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
@@ -119,7 +120,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Oppdaterer en søknad`() {
+    fun `Oppdaterer en søknad`() : Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontend()
         val norskIdent = "02030050163"
         val journalpostid = "9999"
@@ -158,7 +159,7 @@ class PleiepengersyktbarnTests {
 
 
     @Test
-    suspend fun `Innsending av søknad returnerer 404 når mappe ikke finnes`() {
+    fun `Innsending av søknad returnerer 404 når mappe ikke finnes`() : Unit = runBlocking {
         val norskIdent = "12030050163"
         val søknadId = "d8e2c5a8-b993-4d2d-9cb5-fdb22a653a0c"
 
@@ -174,7 +175,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    fun `sjekker at mapping fungre hele veien`() {
+    fun `sjekker at mapping fungre hele veien`() : Unit = runBlocking {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
         val visningDto = objectMapper().convertValue<PleiepengerSøknadDto>(gyldigSoeknad)
@@ -191,7 +192,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Prøver å sende søknaden til Kafka når den er gyldig`() {
+    fun `Prøver å sende søknaden til Kafka når den er gyldig`() : Unit = runBlocking {
         val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
@@ -205,7 +206,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`() {
+    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`() : Unit = runBlocking {
         val norskIdent = "02020050121"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         val journalpostId = "34234234"
@@ -234,7 +235,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre ned minimal søknad`() {
+    fun `Skal kunne lagre ned minimal søknad`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
         val journalpostId = IdGenerator.nesteId()
@@ -248,7 +249,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre ned tomt land søknad`() {
+    fun `Skal kunne lagre ned tomt land søknad`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -261,7 +262,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre med tid søknad`() {
+    fun `Skal kunne lagre med tid søknad`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -274,7 +275,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre og sette uttak`() {
+    fun `Skal kunne lagre og sette uttak`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -289,7 +290,7 @@ class PleiepengersyktbarnTests {
 
 
     @Test
-    suspend fun `Skal kunne lagre med ferie null`() {
+    fun `Skal kunne lagre med ferie null`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -303,7 +304,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre ned ferie fra søknad`() {
+    fun `Skal kunne lagre ned ferie fra søknad`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.ferieSøknad()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -322,7 +323,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre ned sn fra søknad`() {
+    fun `Skal kunne lagre ned sn fra søknad`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.sn()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -353,7 +354,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal kunne lagre flagg om medisinske og punsjet`() {
+    fun `Skal kunne lagre flagg om medisinske og punsjet`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -373,7 +374,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal verifisere at søknad er ok`() {
+    fun `Skal verifisere at søknad er ok`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -389,7 +390,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal verifisere at vi utvider men flere journalposter`() {
+    fun `Skal verifisere at vi utvider men flere journalposter`() : Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
@@ -427,7 +428,7 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
-    suspend fun `Skal verifisere at alle felter blir lagret`() {
+    fun `Skal verifisere at alle felter blir lagret`() : Unit = runBlocking {
         val norskIdent = "12022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)

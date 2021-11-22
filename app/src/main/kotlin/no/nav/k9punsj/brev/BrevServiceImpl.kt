@@ -25,7 +25,7 @@ class BrevServiceImpl(
         return brevRepository.hentAlleBrevPåJournalpost(journalpostId)
     }
 
-    override suspend fun bestillBrev(forJournalpostId: JournalpostId, brevData: DokumentbestillingDto, brevType: BrevType) {
+    override suspend fun bestillBrev(forJournalpostId: JournalpostId, brevData: DokumentbestillingDto, brevType: BrevType) : BrevEntitet {
         val brevId = BrevId().nyId()
         val brevEntitet = BrevEntitet(
             brevId = brevId,
@@ -44,6 +44,7 @@ class BrevServiceImpl(
         } else {
             throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
         }
+        return brevEntitet
     }
 
     private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet) {

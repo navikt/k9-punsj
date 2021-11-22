@@ -1,5 +1,6 @@
 package no.nav.k9punsj
 
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.Periode
 import no.nav.k9punsj.wiremock.JournalpostIds
@@ -37,59 +38,57 @@ class K9PunsjApplicationTests {
     val client = TestSetup.client
 
     @Test
-    suspend fun `Endepunkt brukt for isReady og isAlive fungerer`() {
-        val res =
+    fun `Endepunkt brukt for isReady og isAlive fungerer`() : Unit = runBlocking {
+        val httpStatus =
             client.get().uri {
                 it.pathSegment("internal", "actuator", "info").build()
-            }.awaitExchangeBlocking()
+            }.awaitStatuscode()
 
-        assertEquals(HttpStatus.OK, res.statusCode())
+        assertEquals(HttpStatus.OK, httpStatus)
     }
 
     @Test
-    suspend fun `Hente et dokument fra Journalpost uten credentials feiler`() {
+    fun `Hente et dokument fra Journalpost uten credentials feiler`() : Unit = runBlocking {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
-        }.awaitExchangeBlocking()
+        }.awaitStatuscode()
 
-        assertEquals(HttpStatus.UNAUTHORIZED, res.statusCode())
+        assertEquals(HttpStatus.UNAUTHORIZED, res)
     }
 
     @Test
-    suspend fun `Hente et dokument fra Journalpost fungerer`() {
-        val res = client.get().uri {
+    fun `Hente et dokument fra Journalpost fungerer`() : Unit = runBlocking {
+        val res : Pair<HttpStatus, ByteArray> = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatusWithBody()
 
-        assertEquals(HttpStatus.OK, res.statusCode())
-        val responsePdf = res.awaitBody<ByteArray>()
-        assertArrayEquals(responsePdf, dummyPdf)
+        assertEquals(HttpStatus.OK, res.first)
+        assertArrayEquals(res.second, dummyPdf)
     }
 
     @Test
-    suspend fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() {
+    fun `Hente et dokument fra Journalpost som ikke finnes håndteres`() : Unit = runBlocking {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
+        assertEquals(HttpStatus.NOT_FOUND, res)
     }
 
     @Test
-    suspend fun `Hente et dokument fra Journalpost uten tilgang håndteres`() {
+    fun `Hente et dokument fra Journalpost uten tilgang håndteres`() : Unit = runBlocking {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
+        assertEquals(HttpStatus.FORBIDDEN, res)
     }
 
     @Test
-    suspend fun `Hente journalpostinfo fungerer`() {
-        val res = client.get().uri {
+    fun `Hente journalpostinfo fungerer`() : Unit = runBlocking {
+        val body = client.get().uri {
             it.pathSegment("api", "journalpost", "1").build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
-        val responseEntity =  res.awaitBody<String>()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitBodyString()
         JSONAssert.assertEquals("""{
 	"journalpostId": "1",
 	"norskIdent": "29099000129",
@@ -108,38 +107,51 @@ class K9PunsjApplicationTests {
 	"journalpostStatus": "MOTTATT",
 	"kanOpprettesJournalføringsoppgave": true,
 	"kanKopieres": true
-}""".trimIndent(), responseEntity, true)
+}""".trimIndent(), body, true)
     }
 
     @Test
-    suspend fun `Hente journalpostinfo for ikke eksisterende journalpost håndteres`() {
-        val res = client.get().uri {
+    fun `Hente journalpostinfo for ikke eksisterende journalpost håndteres`() : Unit = runBlocking {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke).build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.NOT_FOUND, res.statusCode())
+        assertEquals(HttpStatus.NOT_FOUND, httpStatus)
     }
 
     @Test
-    suspend fun `Hente journalpostinfo på journalpost uten tilgang på journalpostnivå håndteres`() {
-        val res = client.get().uri {
+    fun `Hente journalpostinfo på journalpost uten tilgang på journalpostnivå håndteres`() : Unit = runBlocking {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.AbacError).build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
+        assertEquals(HttpStatus.FORBIDDEN, httpStatus)
     }
 
     @Test
-    suspend fun `Hente journalpostinfo på journalpost uten tilgang på alle dokumenter håndteres`() {
-        val res = client.get().uri {
+    fun `Hente journalpostinfo på journalpost uten tilgang på alle dokumenter håndteres`() : Unit = runBlocking {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.IkkeKomplettTilgang).build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.FORBIDDEN, res.statusCode())
+        assertEquals(HttpStatus.FORBIDDEN, httpStatus)
     }
 
 }
 
+
 suspend fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse {
     return awaitExchange { it }
+}
+
+suspend inline fun <reified T> WebClient.RequestHeadersSpec<*>.awaitStatusWithBody(): Pair<HttpStatus, T> {
+    return awaitExchange { Pair(it.statusCode(), it.awaitBody()) }
+}
+
+suspend fun WebClient.RequestHeadersSpec<*>.awaitBodyString(): String {
+    return awaitExchange { it.awaitBody() }
+}
+
+suspend fun WebClient.RequestHeadersSpec<*>.awaitStatuscode(): HttpStatus {
+    return awaitExchange { it.statusCode() }
 }

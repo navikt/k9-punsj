@@ -18,10 +18,10 @@ internal class MapDokumentTilK9Formidling(
 
     init {
         kotlin.runCatching {
-            dto.eksternReferanse.leggTilEksternRefernase()
-            dto.dokumentbestillingId.leggTilDokumentbestillingId()
+            dto.journalpostId.leggTilEksternRefernase()
+            dto.brevId?.leggTilDokumentbestillingId()
             dto.saksnummer.leggTilSaksnummer()
-            dto.aktørId.leggTilAktørId()
+            dto.soekerId.leggTilAktørId()
             dto.mottaker.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
