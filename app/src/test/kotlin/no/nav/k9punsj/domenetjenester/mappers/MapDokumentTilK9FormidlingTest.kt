@@ -12,8 +12,9 @@ internal class MapDokumentTilK9FormidlingTest {
     fun `skal mappe bestilling uten feil`() {
        // arrange
         val saksnummer = "GSF-123"
+        val brevId = "dok123"
         val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            "dok123",
+            brevId,
             saksnummer,
             "123",
             DokumentbestillingDto.Mottaker("ORGNR", "1231245"),
@@ -23,7 +24,7 @@ internal class MapDokumentTilK9FormidlingTest {
 
 
         // act
-        val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto).bestillingOgFeil()
 
         // assert
         assertThat(feil).isEmpty()
@@ -34,8 +35,9 @@ internal class MapDokumentTilK9FormidlingTest {
     fun `skal fange opp feil i bestillingen`() {
         // arrange
         val saksnummer = "GSF-123"
+        val brevId = "dok123"
         val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            "dok123",
+            brevId,
             saksnummer,
             "123",
             DokumentbestillingDto.Mottaker("ORG2NR", "1231245"),
@@ -45,7 +47,7 @@ internal class MapDokumentTilK9FormidlingTest {
 
 
         // act
-        val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto).bestillingOgFeil()
+        val (_, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto).bestillingOgFeil()
 
         // assert
         assertThat(feil).isNotEmpty

@@ -1,15 +1,17 @@
 package no.nav.k9punsj.rest.web.ruter
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitExchangeBlocking
+import no.nav.k9punsj.awaitStatuscode
 import no.nav.k9punsj.brev.DokumentbestillingDto
+import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
@@ -33,18 +35,17 @@ internal class BrevRoutesTest {
 
         val body = lagBestilling(norskIdent, journalpostId)
 
-        val res = client.post()
-            .uri { it.pathSegment(api, "brev", "bestill", journalpostId).build() }
+        val httpStatus = client.post()
+            .uri { it.pathSegment(api, "brev", "bestill").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(body))
-            .awaitExchangeBlocking()
+            .awaitStatuscode()
 
-        Assertions.assertEquals(HttpStatus.OK, res.statusCode())
+        assertThat(HttpStatus.OK).isEqualTo(httpStatus)
     }
 
-
-    private fun lagBestilling(søker: String, journalpostId: String): String {
-        return objectMapper().writeValueAsString(
+    private fun lagBestilling(søker: String, journalpostId: String): JsonB {
+        return objectMapper().convertValue(
             DokumentbestillingDto(
                 journalpostId = journalpostId,
                 soekerId = søker,

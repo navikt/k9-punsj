@@ -6,6 +6,7 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.brev.BrevServiceImpl
 import no.nav.k9punsj.brev.BrevType
 import no.nav.k9punsj.rest.web.brevBestilling
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -27,12 +28,10 @@ internal class BrevRoutes(
         private val logger: Logger = LoggerFactory.getLogger(BrevRoutes::class.java)
     }
 
-
     internal object Urls {
-        internal const val BestillBrev = "/brev/bestill/{$JournalpostIdKey}" //post
+        internal const val BestillBrev = "/brev/bestill" //post
         internal const val HentAlleBrev = "/brev/hentAlle/{$JournalpostIdKey}" //get
     }
-
 
     @Bean
     fun BrevRoutes() = SaksbehandlerRoutes(authenticationHandler) {
@@ -49,21 +48,26 @@ internal class BrevRoutes(
             RequestContext(coroutineContext, request) {
                 val bestilling = kotlin.runCatching { request.brevBestilling() }
                     .getOrElse {
-                        return@RequestContext ServerResponse.badRequest().json()
-                            .bodyValueAndAwait("Feiler med" + it.message)
+                        return@RequestContext ServerResponse
+                            .badRequest()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(it.message!!))
                     }
-
                 val brevEntitet = kotlin.runCatching {
-                    brevService.bestillBrev(bestilling.journalpostId,
+                    brevService.bestillBrev(
+                        bestilling.journalpostId,
                         bestilling,
                         BrevType.FRITEKSTBREV)
                 }
                     .getOrElse {
-                        return@RequestContext ServerResponse.badRequest().json()
-                            .bodyValueAndAwait("Feiler med" + it.message)
+                        return@RequestContext ServerResponse
+                            .badRequest()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(it.message!!))
                     }
-
-                return@RequestContext ServerResponse.ok().json()
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
                     .bodyValueAndAwait(brevEntitet)
             }
         }

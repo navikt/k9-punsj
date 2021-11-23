@@ -33,7 +33,7 @@ class BrevServiceImpl(
             brevType = brevType,
             brevData = brevData
         )
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevData).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, brevEntitet.brevData).bestillingOgFeil()
 
         if (feil.isEmpty()) {
             hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,

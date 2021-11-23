@@ -3,6 +3,7 @@ package no.nav.k9punsj.domenetjenester.mappers
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9punsj.brev.BrevId
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
@@ -10,6 +11,7 @@ import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
+    brevId: BrevId,
     dto: DokumentbestillingDto,
 ) {
 
@@ -19,7 +21,7 @@ internal class MapDokumentTilK9Formidling(
     init {
         kotlin.runCatching {
             dto.journalpostId.leggTilEksternRefernase()
-            dto.brevId?.leggTilDokumentbestillingId()
+            brevId.leggTilDokumentbestillingId()
             dto.saksnummer.leggTilSaksnummer()
             dto.soekerId.leggTilAktørId()
             dto.mottaker.leggTilMottaker()
