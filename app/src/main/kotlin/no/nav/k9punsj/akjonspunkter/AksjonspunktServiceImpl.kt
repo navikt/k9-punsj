@@ -37,19 +37,20 @@ class AksjonspunktServiceImpl(
         type: String?,
         ytelse: String?,
     ) {
+        val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val eksternId = journalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),
-            aksjonspunktKode = aksjonspunkt.first,
+            aksjonspunktKode = aksjonspunktKode,
             journalpostId = journalpost.journalpostId,
-            aksjonspunktStatus = aksjonspunkt.second)
+            aksjonspunktStatus = aksjonspunktStatus)
 
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             lagPunsjDto(eksternId,
                 journalpostId = journalpost.journalpostId,
                 aktørId = journalpost.aktørId,
-                aksjonspunkter = mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode),
+                aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
                 ytelse = ytelse,
                 type = type
             ),
@@ -68,14 +69,15 @@ class AksjonspunktServiceImpl(
     ) {
         val journalpost = journalpostRepository.hent(journalpostId)
         val eksternId = journalpost.uuid
-        val aksjonspunktEntitet = aksjonspunktRepository.hentAksjonspunkt(journalpostId, aksjonspunkt.first.kode)!!
+        val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
+        val aksjonspunktEntitet = aksjonspunktRepository.hentAksjonspunkt(journalpostId, aksjonspunktKode.kode)!!
 
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             lagPunsjDto(eksternId,
                 journalpostId,
                 journalpost.aktørId,
-                mutableMapOf(aksjonspunkt.first.kode to aksjonspunkt.second.kode),
+                mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
 
             ),
             eksternId.toString()) {

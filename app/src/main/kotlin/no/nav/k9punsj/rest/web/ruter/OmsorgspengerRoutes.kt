@@ -148,8 +148,9 @@ internal class OmsorgspengerRoutes(
                         .badRequest()
                         .buildAndAwait()
                 } else {
-                    val søker = personService.finnPerson(søknadEntitet.first.søkerId)
-                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(søknadEntitet.first),
+                    val (entitet, _) = søknadEntitet
+                    val søker = personService.finnPerson(entitet.søkerId)
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(entitet),
                         søker.aktørId)
                     ServerResponse
                         .ok()
@@ -189,14 +190,14 @@ internal class OmsorgspengerRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val søknadK9Format = MapOmsTilK9Format(
+                        val (søknadK9Format, feilListe) = MapOmsTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
                             dto = søknad
                         ).søknadOgFeil()
 
-                        if (søknadK9Format.second.isNotEmpty()) {
-                            val feil = søknadK9Format.second.map { feil ->
+                        if (feilListe.isNotEmpty()) {
+                            val feil = feilListe.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
                                     feil.felt,
                                     feil.feilkode,
@@ -211,21 +212,22 @@ internal class OmsorgspengerRoutes(
                         }
 
                         val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
-                            søknadK9Format.first,
+                            søknadK9Format,
                             journalpostIder
                         )
 
                         if (feil != null) {
+                            val (httpStatus, feilen) = feil
                             return@RequestContext ServerResponse
-                                .status(feil.first)
+                                .status(httpStatus)
                                 .json()
-                                .bodyValueAndAwait(OasFeil(feil.second))
+                                .bodyValueAndAwait(OasFeil(feilen))
                         }
 
                         return@RequestContext ServerResponse
                             .accepted()
                             .json()
-                            .bodyValueAndAwait(søknadK9Format.first)
+                            .bodyValueAndAwait(søknadK9Format)
 
                     } catch (e: Exception) {
                         val sw = StringWriter()
@@ -273,9 +275,9 @@ internal class OmsorgspengerRoutes(
                         .json()
                         .bodyValueAndAwait(OasFeil(exceptionAsString))
                 }
-
-                if (mapTilEksternFormat.second.isNotEmpty()) {
-                    val feil = mapTilEksternFormat.second.map { feil ->
+                val (søknad, feilListe) = mapTilEksternFormat
+                if (feilListe.isNotEmpty()) {
+                    val feil = feilListe.map { feil ->
                         SøknadFeil.SøknadFeilDto(
                             feil.felt,
                             feil.feilkode,
@@ -291,7 +293,7 @@ internal class OmsorgspengerRoutes(
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .json()
-                    .bodyValueAndAwait(mapTilEksternFormat.first)
+                    .bodyValueAndAwait(søknad)
             }
         }
 
@@ -300,24 +302,23 @@ internal class OmsorgspengerRoutes(
                 val matchfagsakMedPeriode = request.matchFagsakMedPerioder()
                 innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsakMedPeriode.brukerIdent), Urls.HentArbeidsforholdIderFraK9sak)?.let { return@RequestContext it }
 
-                val hentPerioderSomFinnesIK9 = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
+                val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
                     matchfagsakMedPeriode.brukerIdent,
                     FagsakYtelseType.OMSORGSPENGER,
                     matchfagsakMedPeriode.periodeDto
                 )
 
-                return@RequestContext if (hentPerioderSomFinnesIK9.first != null) {
-                    val body = hentPerioderSomFinnesIK9.first!!
+                return@RequestContext if (arbeidsgiverMedArbeidsforholdId != null) {
                     ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(body)
+                        .bodyValueAndAwait(arbeidsgiverMedArbeidsforholdId)
 
-                } else if (hentPerioderSomFinnesIK9.second != null) {
+                } else if (feil != null) {
                     ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
-                        .bodyValueAndAwait(hentPerioderSomFinnesIK9.second!!)
+                        .bodyValueAndAwait(feil)
                 } else {
                     ServerResponse
                         .ok()

@@ -38,7 +38,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
             """
         val søknad: MutableMap<String, Any?> = objectMapper().readValue(json)
         søknadsperiode?.also {
-            søknad["soeknadsperiode"] = listOf(mapOf("fom" to "${it.first}", "tom" to "${it.second}"))
+            val (fom, tom) = it
+            søknad["soeknadsperiode"] = listOf(mapOf("fom" to "$fom", "tom" to "$tom"))
         }
         manipuler(søknad)
         return objectMapper().convertValue(søknad)
@@ -177,11 +178,12 @@ internal object PleiepengerSøknadVisningDtoUtils {
     )
 
     init {
-        val k9Feil = minimalSøknadSomValiderer(
+        val (_, feil) = minimalSøknadSomValiderer(
             søknadsperiode = LocalDate.now() to LocalDate.now().plusWeeks(1)
-        ).mapTilK9Format(emptyList()).second
-        check(k9Feil.isEmpty()) {
-            "Minimal søknad mangler felter. Feil=$k9Feil"
+        ).mapTilK9Format(emptyList())
+
+        check(feil.isEmpty()) {
+            "Minimal søknad mangler felter. Feil=$feil"
         }
     }
 

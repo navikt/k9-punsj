@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 @Component
 class LoggingInnsendingClient : InnsendingClient {
     override fun send(pair: Pair<String, String>) {
-        logger.info("Innsending. Key=[${pair.first}], Value=[${pair.second}]")
+        val (key, value) = pair
+        logger.info("Innsending. Key=[${key}], Value=[${value}]")
     }
 
     private companion object {

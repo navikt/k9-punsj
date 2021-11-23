@@ -78,17 +78,17 @@ internal class GosysRoutes(
                         }
 
                         val aktørid = hentIdenter.identer[0].ident
-                        val response = gosysOppgaveService.opprettOppgave(
+                        val (httpStatus, feil) = gosysOppgaveService.opprettOppgave(
                             aktørid = aktørid,
                             joarnalpostId = requestParameters.journalpostId,
                             gjelder = requestParameters.gjelder
                         )
 
-                        if (response.second != null) {
+                        if (feil != null) {
                             return@RequestContext ServerResponse
-                                .status(response.first)
+                                .status(httpStatus)
                                 .json()
-                                .bodyValueAndAwait(OasFeil(response.second!!))
+                                .bodyValueAndAwait(OasFeil(feil))
                         }
                         aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId, false)
                         journalpostService.settTilFerdig(requestParameters.journalpostId)

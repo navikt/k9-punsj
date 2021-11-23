@@ -20,7 +20,8 @@ internal object DurationMapper {
         // Om man oppgir <timer>:<minutter> 5:30 == 5 timer og 30 minutter
         val timerOgMinutter = somTimerOgMinutterOrNull()
         if (timerOgMinutter != null) {
-            return Duration.ofHours(timerOgMinutter.first).plusMinutes(timerOgMinutter.second)
+            val (timer, minutter) = timerOgMinutter
+            return Duration.ofHours(timer).plusMinutes(minutter)
         }
         // Ikke en støttet måte å oppgi tid på
         throw IllegalArgumentException("Ugyldig tid $this")

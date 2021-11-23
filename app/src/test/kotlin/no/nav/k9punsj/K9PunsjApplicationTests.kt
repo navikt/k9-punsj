@@ -49,39 +49,39 @@ class K9PunsjApplicationTests {
 
     @Test
     fun `Hente et dokument fra Journalpost uten credentials feiler`(): Unit = runBlocking {
-        val res = client.get().uri {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", "1", "dokument", "1").build()
         }.awaitStatuscode()
 
-        assertEquals(HttpStatus.UNAUTHORIZED, res)
+        assertEquals(HttpStatus.UNAUTHORIZED, httpStatus)
     }
 
     @Test
     fun `Hente et dokument fra Journalpost fungerer`(): Unit = runBlocking {
-        val res: Pair<HttpStatus, ByteArray> = client.get().uri {
+        val (httpStatus, body) = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.Ok, "dokument", "1").build()
-        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatusWithBody()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatusWithBody<ByteArray>()
 
-        assertEquals(HttpStatus.OK, res.first)
-        assertArrayEquals(res.second, dummyPdf)
+        assertEquals(HttpStatus.OK, httpStatus)
+        assertArrayEquals(body, dummyPdf)
     }
 
     @Test
     fun `Hente et dokument fra Journalpost som ikke finnes håndteres`(): Unit = runBlocking {
-        val res = client.get().uri {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.FinnesIkke, "dokument", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.NOT_FOUND, res)
+        assertEquals(HttpStatus.NOT_FOUND, httpStatus)
     }
 
     @Test
     fun `Hente et dokument fra Journalpost uten tilgang håndteres`(): Unit = runBlocking {
-        val res = client.get().uri {
+        val httpStatus = client.get().uri {
             it.pathSegment("api", "journalpost", JournalpostIds.AbacError, "dokument", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
-        assertEquals(HttpStatus.FORBIDDEN, res)
+        assertEquals(HttpStatus.FORBIDDEN, httpStatus)
     }
 
     @Test

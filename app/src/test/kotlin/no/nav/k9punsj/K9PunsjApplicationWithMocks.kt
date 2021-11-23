@@ -12,7 +12,7 @@ import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
 import java.net.URI
-import java.util.*
+import java.util.UUID
 
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
@@ -44,11 +44,13 @@ internal class K9PunsjApplicationWithMocks {
 
         private fun lokaltKjørendeAzureV2OrNull(): URI? {
             val potensiellUrl = URI("http://localhost:8100/v2.0")
-            val kjørerLokalt = runBlocking { "$potensiellUrl/.well-known/openid-configuration"
-                .httpGet()
-                .timeout(200)
-                .timeout(200)
-                .awaitStringResponseResult().second.statusCode == 200
+            val kjørerLokalt = runBlocking {
+                val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
+                    .httpGet()
+                    .timeout(200)
+                    .timeout(200)
+                    .awaitStringResponseResult()
+                response.statusCode == 200
             }
             return when (kjørerLokalt) {
                 true -> potensiellUrl

@@ -155,9 +155,9 @@ class OmsorgspengerRoutesTest{
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val (_, statusMedBody) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        assertThat(statusMedBody.second.feil).isNull()
-        Assertions.assertEquals(HttpStatus.ACCEPTED, statusMedBody.first)
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, status)
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -168,9 +168,9 @@ class OmsorgspengerRoutesTest{
         val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val (_, statusMedBody) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        assertThat(statusMedBody.second.feil).isNull()
-        Assertions.assertEquals(HttpStatus.ACCEPTED, statusMedBody.first)
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, status)
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -218,9 +218,9 @@ class OmsorgspengerRoutesTest{
         val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val (_, statusMedBody) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
-        assertThat(statusMedBody.second.feil).isNull()
-        Assertions.assertEquals(HttpStatus.ACCEPTED, statusMedBody.first)
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
+        Assertions.assertEquals(HttpStatus.ACCEPTED, status)
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -279,7 +279,7 @@ class OmsorgspengerRoutesTest{
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): Pair<SøknadIdDto, Pair<HttpStatus, OasSoknadsfeil>> {
+    ): Triple<SøknadIdDto, HttpStatus, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -313,12 +313,13 @@ class OmsorgspengerRoutesTest{
         assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        val awaitStatusWithBody: Pair<HttpStatus, OasSoknadsfeil> = client.post()
+        val (httpStatus, oasSoknadsfeil) = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(sendSøknad))
-            .awaitStatusWithBody()
-        return Pair(søknadId, awaitStatusWithBody)
+            .awaitStatusWithBody<OasSoknadsfeil>()
+
+        return Triple(søknadId, httpStatus, oasSoknadsfeil)
     }
 
     private suspend fun opprettOgLagreSoeknad(

@@ -120,8 +120,9 @@ internal class PleiepengerSyktBarnRoutes(
                         .badRequest()
                         .buildAndAwait()
                 } else {
-                    val søker = personService.finnPerson(søknadEntitet.first.søkerId)
-                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(søknadEntitet.first),
+                    val (entitet, _) = søknadEntitet
+                    val søker = personService.finnPerson(entitet.søkerId)
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(entitet),
                         søker.aktørId)
                     ServerResponse
                         .ok()
@@ -162,15 +163,15 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val søknadK9Format = MapPsbTilK9Format(
+                        val (søknadK9Format, feilISøknaden) = MapPsbTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
                             perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
                             dto = søknad
                         ).søknadOgFeil()
 
-                        if (søknadK9Format.second.isNotEmpty()) {
-                            val feil = søknadK9Format.second.map { feil ->
+                        if (feilISøknaden.isNotEmpty()) {
+                            val feil = feilISøknaden.map { feil ->
                                 SøknadFeil.SøknadFeilDto(
                                     feil.felt,
                                     feil.feilkode,
@@ -185,22 +186,23 @@ internal class PleiepengerSyktBarnRoutes(
                         }
 
                         val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
-                            søknadK9Format.first,
+                            søknadK9Format,
                             journalpostIder
                         )
-
                         if (feil != null) {
+                            val (httpStatus, feilen) = feil
+
                             return@RequestContext ServerResponse
-                                .status(feil.first)
+                                .status(httpStatus)
                                 .json()
-                                .bodyValueAndAwait(OasFeil(feil.second))
+                                .bodyValueAndAwait(OasFeil(feilen))
                         }
 
                         return@RequestContext ServerResponse
                             .accepted()
-                            .location(k9SakFrontendUrl(søknadK9Format.first))
+                            .location(k9SakFrontendUrl(søknadK9Format))
                             .json()
-                            .bodyValueAndAwait(søknadK9Format.first)
+                            .bodyValueAndAwait(søknadK9Format)
 
                     } catch (e: Exception) {
                         val sw = StringWriter()
@@ -276,8 +278,9 @@ internal class PleiepengerSyktBarnRoutes(
                         .bodyValueAndAwait(OasFeil(exceptionAsString))
                 }
 
-                if (mapTilEksternFormat.second.isNotEmpty()) {
-                    val feil = mapTilEksternFormat.second.map { feil ->
+                val (søknad, feilListe) = mapTilEksternFormat
+                if (feilListe.isNotEmpty()) {
+                    val feil = feilListe.map { feil ->
                         SøknadFeil.SøknadFeilDto(
                             feil.felt,
                             feil.feilkode,
@@ -298,7 +301,7 @@ internal class PleiepengerSyktBarnRoutes(
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .json()
-                    .bodyValueAndAwait(mapTilEksternFormat.first)
+                    .bodyValueAndAwait(søknad)
             }
         }
 
@@ -308,17 +311,16 @@ internal class PleiepengerSyktBarnRoutes(
                 innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
                     matchfagsak.barnIdent), Urls.HentInfoFraK9sak)?.let { return@RequestContext it }
 
-                val hentPerioderSomFinnesIK9 = k9SakService.hentPerioderSomFinnesIK9(
+                val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
                     matchfagsak.brukerIdent,
                     matchfagsak.barnIdent,
                     FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 
-                return@RequestContext if (hentPerioderSomFinnesIK9.first != null) {
-                    val body = hentPerioderSomFinnesIK9.first!!
+                return@RequestContext if (perioder != null) {
                     ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(body)
+                        .bodyValueAndAwait(perioder)
 
                 } else {
                     ServerResponse

@@ -59,12 +59,12 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val json = httpPost(body, hentPerioder)
+        val (json, feil) = httpPost(body, hentPerioder)
         return try {
-            if (json.first == null) {
-                return Pair(null, json.second!!)
+            if (json == null) {
+                return Pair(null, feil!!)
             }
-            val resultat = objectMapper().readValue<List<Periode>>(json.first!!)
+            val resultat = objectMapper().readValue<List<Periode>>(json)
             val liste = resultat
                 .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
             Pair(liste, null)
@@ -85,13 +85,13 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val json = httpPost(body, hentIntektsmelidnger)
+        val (json, feil) = httpPost(body, hentIntektsmelidnger)
 
         return try {
-            if (json.first == null) {
-                return Pair(null, json.second!!)
+            if (json == null) {
+                return Pair(null, feil)
             }
-            val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json.first!!)
+            val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json)
             val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
                 ArbeidsgiverMedArbeidsforholdId(entry.key.identifikator,
                     entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId })
@@ -115,7 +115,7 @@ class K9SakServiceImpl(
                 NavHeaders.CallId to UUID.randomUUID().toString()
             ).awaitStringResponseResult()
 
-        val json = result.fold(
+        return result.fold(
             { success ->
                 Pair(success, null)
             },
@@ -127,7 +127,6 @@ class K9SakServiceImpl(
                 Pair(null, "Feil ved henting av peridoer fra k9-sak")
             }
         )
-        return json
     }
 
     data class MatchDto(
