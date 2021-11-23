@@ -1,5 +1,6 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
+import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
@@ -8,11 +9,13 @@ import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
     brevId: BrevId,
     dto: DokumentbestillingDto,
+    val pdlService: PdlService
 ) {
 
     private val bestilling = Dokumentbestilling()
@@ -23,7 +26,7 @@ internal class MapDokumentTilK9Formidling(
             dto.journalpostId.leggTilEksternRefernase()
             brevId.leggTilDokumentbestillingId()
             dto.saksnummer.leggTilSaksnummer()
-            dto.soekerId.leggTilAktørId()
+            dto.soekerId.transformTilAktørId()
             dto.mottaker.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
@@ -53,8 +56,17 @@ internal class MapDokumentTilK9Formidling(
         bestilling.saksnummer = this ?: "GSAK"
     }
 
-    private fun AktørId.leggTilAktørId() {
-        bestilling.aktørId = this
+    private fun AktørId.transformTilAktørId() {
+        val søkerId = this
+        runBlocking {
+            val identifikator = pdlService.identifikator(søkerId)
+            val hentIdenter = identifikator?.identPdl?.data?.hentIdenter
+            if (hentIdenter != null) {
+                bestilling.aktørId = hentIdenter.identer[0].ident
+            } else {
+                feil.add(Feil("AktørId", "AktørId", "Kunne ikke finne person i pdl"))
+            }
+        }
     }
 
     private fun DokumentbestillingDto.Mottaker.leggTilMottaker() {

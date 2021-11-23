@@ -6,6 +6,7 @@ import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
 class BrevServiceImpl(
     val brevRepository: BrevRepository,
     val hendelseProducer: HendelseProducer,
+    val pdlService: PdlService
 ) : BrevService {
 
     private companion object {
@@ -33,7 +35,7 @@ class BrevServiceImpl(
             brevType = brevType,
             brevData = brevData
         )
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, brevEntitet.brevData).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, brevEntitet.brevData, pdlService).bestillingOgFeil()
 
         if (feil.isEmpty()) {
             hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,

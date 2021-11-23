@@ -9,6 +9,7 @@ import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,6 +32,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     JournalpostRepository::class,
     BrevRepository::class,
     BrevServiceImpl::class,
+    TestPdlService::class,
     TestBeans::class
 ])
 internal class BrevServiceImplTest {
@@ -63,7 +65,7 @@ internal class BrevServiceImplTest {
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<Dokumentbestilling>(value)
 
-        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo("1234")
+        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo("1000000000000")
         Assertions.assertThat(verdiFraKafka.saksnummer).isEqualTo(saksnummer)
     }
 
