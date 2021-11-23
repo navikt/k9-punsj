@@ -94,5 +94,11 @@ no.nav:
     enabled: ${AUDITLOGGER_ENABLED}
     vendor: ${AUDITLOGGER_VENDOR}
     product: ${AUDITLOGGER_PRODUCT}
+  kafka:
+    k9_formidling:
+      topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
+    k9_los:
+      topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+
 server:
   port: ${PORT:8080}

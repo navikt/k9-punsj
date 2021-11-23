@@ -18,8 +18,8 @@ import java.util.UUID
 
 @Service
 class OverførDagerSøknadService @Autowired constructor(
-        val hendelseProducer: HendelseProducer,
-        val journalpostRepository: JournalpostRepository,
+    val hendelseProducer: HendelseProducer,
+    val journalpostRepository: JournalpostRepository,
 ){
     private companion object {
         const val rapidTopic = "k9-rapid-v2"

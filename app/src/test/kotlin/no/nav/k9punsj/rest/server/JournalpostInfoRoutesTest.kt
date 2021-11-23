@@ -1,8 +1,9 @@
 package no.nav.k9punsj.rest.server
 
 import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitExchangeBlocking
+import no.nav.k9punsj.awaitStatuscode
 import no.nav.k9punsj.wiremock.k9SakToken
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -20,12 +21,12 @@ class JournalpostInfoRoutesTest{
 
 
     @Test
-    suspend fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj`() {
+    fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj`(): Unit = runBlocking {
         val res = client.get().uri {
             it.pathSegment("api", "journalpost", "uferdig", "1000000000000").build()
         }.header(HttpHeaders.AUTHORIZATION, k9sakToken)
 
-        val clientResponse = res.awaitExchangeBlocking()
-        assertEquals(HttpStatus.OK, clientResponse.statusCode())
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.OK, status)
     }
 }

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
+import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -23,6 +24,7 @@ import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
 import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.rest.web.ruter.BrevRoutes
 import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
 import org.springframework.beans.factory.annotation.Value
@@ -687,7 +689,7 @@ data class OasPunsjBolleDto(
 )
 
 data class OasSkalTilInfotrygdSvar(
-    val k9sak: Boolean
+    val k9sak: Boolean,
 )
 
 @RestController
@@ -782,7 +784,8 @@ internal class GosysController {
         description = "",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {}
+    fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
+    }
 
     @GetMapping(GosysRoutes.Urls.Gjelder, produces = ["application/json"])
     @Operation(
@@ -797,7 +800,8 @@ internal class GosysController {
             )
         ]
     )
-    fun HenteGjelder() {}
+    fun HenteGjelder() {
+    }
 }
 
 @RestController
@@ -1070,5 +1074,70 @@ internal class OmsorgspengerSoknadController {
         ]
     )
     fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsakMedPeriode) {
+    }
+}
+
+@RestController
+@Tag(name = "Brev-bestilling", description = "Håndtering av brevbestillinger fra punsj til k9formidling via kafka")
+internal class BrevController {
+    @PostMapping(
+        BrevRoutes.Urls.BestillBrev,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Sender en brevbestilling med gitt mal og innhold",
+        description = "Sender en brevbestilling med gitt mal og innhold",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Bestiller brev",
+                content = [Content(
+                    schema = Schema(
+                        implementation = DokumentbestillingDto::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Innsending feilet grunnet mangler i bestillingen.",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OasFeil::class
+                    )
+                )]
+            ),
+        ]
+    )
+    fun BestillBrev(
+        @RequestBody bestilling: DokumentbestillingDto,
+    ) {
+    }
+
+    @GetMapping(BrevRoutes.Urls.HentAlleBrev, produces = ["application/json"])
+    @Operation(
+        summary = "Sender en brevbestilling med gitt mal og innhold",
+        description = "Sender en brevbestilling med gitt mal og innhold",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Bestiller brev",
+                content = [Content(
+                    schema = Schema(
+                        implementation = DokumentbestillingDto::class
+                    )
+                )]
+            )
+        ]
+    )
+    fun HentAlleBrev(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
     }
 }

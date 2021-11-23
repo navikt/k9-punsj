@@ -329,15 +329,6 @@ internal class OmsorgspengerRoutes(
     }
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
-
-    //TODO(OJR) har ikke tilgang på barnet?
-//    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
-//        søker = søknad.søker.personIdent.verdi,
-//        barn = søknad.getYtelse<OmsorgspengerUtbetaling>().barn.personIdent.verdi,
-//        søknad = søknad,
-//        correlationId = coroutineContext.hentCorrelationId()
-//    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
-
 }
 
 

@@ -1,7 +1,10 @@
 package no.nav.k9punsj.omsorgspenger.overfoerdager
 
+import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitStatusWithBody
+import no.nav.k9punsj.awaitStatuscode
 import no.nav.k9punsj.exception.ExceptionResponse
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -13,9 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.UUID
 
 @SpringBootTest
@@ -31,7 +32,7 @@ internal class OverførDagerApiTest {
     private val client = TestSetup.client
 
     @Test
-    suspend fun `Gyldig skjema om overføring gir 202`() {
+    fun `Gyldig skjema om overføring gir 202`() : Unit = runBlocking {
         @Language("json")
         val req =
             """
@@ -72,17 +73,17 @@ internal class OverførDagerApiTest {
             journalpost
         }
 
-        client.post()
+        val httpStatus = client.post()
             .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
             .body(BodyInserters.fromValue(req))
             .header("content-type", "application/json")
-            .awaitExchange { clientResponse ->
-                assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.ACCEPTED)
-            }
+            .awaitStatuscode()
+
+        assertThat(httpStatus).isEqualTo(HttpStatus.ACCEPTED)
     }
 
     @Test
-    suspend fun `Uhåndtert exception gir 500 response`() {
+    fun `Uhåndtert exception gir 500 response`() : Unit = runBlocking {
         val fellesIdNummer = "23098025855"
 
         @Language("json")
@@ -120,18 +121,14 @@ internal class OverførDagerApiTest {
             }
             """.trimIndent()
 
-        client.post()
+        val (httpStatus, exceptionResponse) = client.post()
             .uri { it.pathSegment("api", OverførDagerApi.søknadTypeUri).build() }
             .body(BodyInserters.fromValue(req))
-            .header("content-type", "application/json").awaitExchange { response ->
-                kotlin.runCatching {
-                    response.body(BodyExtractors.toMono(ExceptionResponse::class.java)).block()
-                }.onSuccess {
-                    assertThat(response.statusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-                    assertThat(it?.exceptionId).isNotBlank
-                    assertThat(it?.message).isNotBlank
-                    assertThat(it?.uri.toString()).isNotBlank
-                }.onFailure { throw IllegalStateException("", it) }
-            }
+            .header("content-type", "application/json").awaitStatusWithBody<ExceptionResponse>()
+
+        assertThat(httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(exceptionResponse.exceptionId).isNotBlank
+        assertThat(exceptionResponse.message).isNotBlank
+        assertThat(exceptionResponse.uri.toString()).isNotBlank
     }
 }

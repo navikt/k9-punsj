@@ -2,7 +2,10 @@ package no.nav.k9punsj
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.helse.dusseldorf.testsupport.jws.ClientCredentials
-import no.nav.helse.dusseldorf.testsupport.wiremock.*
+import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
+import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.*
 import java.net.URI
@@ -52,7 +55,9 @@ internal object MockConfiguration {
             "APP_NAISSTS_aud" to "srvk9sak",
             "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl(),
             "AAREG_BASE_URL" to wireMockServer.getAaregBaseUrl(),
-            "EREG_BASE_URL" to wireMockServer.getEregBaseUrl()
+            "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
+            "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
+            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1"
         )
     }
 }

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 typealias SøknadId = String
-typealias JsonB = MutableMap<String, Any?>
 
 data class SøknadEntitet(
     val søknadId: SøknadId,

@@ -6,7 +6,6 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.LoggerFactory
@@ -19,7 +18,6 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class PleiepengerSyktBarnSoknadService(
-    val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val søknadRepository: SøknadRepository,
     val innsendingClient: InnsendingClient,

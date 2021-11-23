@@ -34,6 +34,11 @@
             <artifactId>kontrakt</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.formidling</groupId>
+            <artifactId>eksterne-kontrakter</artifactId>
+        </dependency>
+
         <!-- spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
