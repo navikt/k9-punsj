@@ -31,9 +31,7 @@ internal class MapDokumentTilK9Formidling(
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()
-
-            //TODO fix når k9punsj er lag til
-            bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9SAK
+            bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9PUNSJ
 
             feil.addAll(validator.validate(bestilling).map { Feil(it.propertyPath.toString(), "kode", it.message) })
         }
