@@ -6,10 +6,15 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitBodyWithType
 import no.nav.k9punsj.awaitStatuscode
+import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,6 +23,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
+import java.util.UUID
 
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
@@ -30,8 +36,8 @@ internal class BrevRoutesTest {
 
     @Test
     fun `Bestill brev og send til k9-formidling på kafka`() : Unit = runBlocking {
+        val journalpostId = lagJournalpost()
         val norskIdent = "01110050053"
-        val journalpostId = "1252334"
 
         val body = lagBestilling(norskIdent, journalpostId)
 
@@ -42,6 +48,47 @@ internal class BrevRoutesTest {
             .awaitStatuscode()
 
         assertThat(HttpStatus.OK).isEqualTo(httpStatus)
+    }
+
+    @Test
+    fun `Hent opp brevbestillinger`() : Unit = runBlocking {
+        val journalpostId = lagJournalpost()
+        val norskIdent = "01110050053"
+
+        val body = lagBestilling(norskIdent, journalpostId)
+
+        val httpStatus = client.post()
+            .uri { it.pathSegment(api, "brev", "bestill").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(body))
+            .awaitStatuscode()
+
+        assertThat(HttpStatus.OK).isEqualTo(httpStatus)
+
+        val dtoByGet = client.get()
+            .uri { it.pathSegment(api, "brev", "hentAlle", journalpostId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<List<BrevVisningDto>>()
+
+        val brevVisningDto = dtoByGet[0]
+
+        assertThat(brevVisningDto.journalpostId).isEqualTo(journalpostId)
+        assertThat(brevVisningDto.sendtInnAv).isEqualTo("saksbehandler@nav.no")
+    }
+
+    private suspend fun lagJournalpost(): String {
+        val journalpostId = "1252334"
+        val aktørId = "100000000"
+
+        val jp =
+            Journalpost(uuid = UUID.randomUUID(),
+                journalpostId = journalpostId,
+                aktørId = aktørId,
+                type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode)
+        DatabaseUtil.getJournalpostRepo().lagre(jp) {
+            jp
+        }
+        return journalpostId
     }
 
     private fun lagBestilling(søker: String, journalpostId: String): JsonB {

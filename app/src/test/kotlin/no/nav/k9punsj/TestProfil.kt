@@ -18,7 +18,11 @@ class TestBeans {
 
     @Bean
     fun testHendelseProducer() = object : HendelseProducer {
-        override fun send(topicName: String, data: String, key: String) {}
-        override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {}
+        override fun send(topicName: String, data: String, key: String) {
+
+        }
+        override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {
+            onSuccess.invoke()
+        }
     }
 }

@@ -58,7 +58,7 @@ internal class BrevServiceImplTest {
         val dokumentbestilling = lagDokumentbestillingPåJournalpost()
 
         // act
-        brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV)
+        brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV, "saksbehandler")
 
         // assert
         Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9-dokumenthendelse")

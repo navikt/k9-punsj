@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
+import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
@@ -1130,9 +1131,13 @@ internal class BrevController {
                 description = "Bestiller brev",
                 content = [Content(
                     schema = Schema(
-                        implementation = DokumentbestillingDto::class
+                        implementation = BrevVisningDto::class
                     )
                 )]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Fant ingen brev",
             )
         ]
     )

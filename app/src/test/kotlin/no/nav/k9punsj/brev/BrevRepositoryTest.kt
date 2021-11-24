@@ -22,21 +22,38 @@ internal class BrevRepositoryTest {
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val journalpost1 =
-            Journalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
+            Journalpost(uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.PAPIRSØKNAD.kode)
         journalpostRepository.lagre(journalpost1) {
             journalpost1
         }
 
         val repo = DatabaseUtil.getBrevRepo()
         val forJournalpostId = journalpost1.journalpostId
-        val brevData = DokumentbestillingDto("1", "2", "123", "1234", DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"), FagsakYtelseType.OMSORGSPENGER, "2")
-        val brev = BrevEntitet(BrevId().nyId(), forJournalpostId, brevData, BrevType.FRITEKSTBREV)
+        val brevData = DokumentbestillingDto("1",
+            "2",
+            "123",
+            "1234",
+            DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"),
+            FagsakYtelseType.OMSORGSPENGER,
+            "2")
+        val brev = BrevEntitet(
+            forJournalpostId = forJournalpostId,
+            brevData = brevData,
+            brevType = BrevType.FRITEKSTBREV
+        )
 
-        repo.opprettBrev(brev = brev)
-        val alleBrev : List<BrevEntitet> = repo.hentAlleBrevPåJournalpost(forJournalpostId)
+        val saksbehandler = "saksbehandler"
+        repo.opprettBrev(brev = brev, saksbehandler = saksbehandler)
+        val alleBrev: List<BrevEntitet> = repo.hentAlleBrevPåJournalpost(forJournalpostId)
 
         assertThat(alleBrev).hasSize(1)
-        assertThat(alleBrev[0].brevData.mottaker.id).isEqualTo("Statnett")
+        val brevEntitet = alleBrev[0]
+        assertThat(brevEntitet.brevData.mottaker.id).isEqualTo("Statnett")
+        assertThat(brevEntitet.opprettet_av).isEqualTo(saksbehandler)
+        assertThat(brevEntitet.opprettet_tid).isNotNull()
     }
 }
 

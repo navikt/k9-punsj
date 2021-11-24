@@ -27,21 +27,24 @@ class BrevServiceImpl(
         return brevRepository.hentAlleBrevPåJournalpost(journalpostId)
     }
 
-    override suspend fun bestillBrev(forJournalpostId: JournalpostId, brevData: DokumentbestillingDto, brevType: BrevType) : BrevEntitet {
-        val brevId = BrevId().nyId()
+    override suspend fun bestillBrev(
+        forJournalpostId: JournalpostId,
+        brevData: DokumentbestillingDto,
+        brevType: BrevType,
+        saksbehandler: String
+    ) : BrevEntitet {
         val brevEntitet = BrevEntitet(
-            brevId = brevId,
             forJournalpostId = forJournalpostId,
             brevType = brevType,
             brevData = brevData
         )
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, brevEntitet.brevData, pdlService).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevId, brevEntitet.brevData, pdlService).bestillingOgFeil()
 
         if (feil.isEmpty()) {
             hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                 bestilling.toJson(),
-                brevId) {
-                runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet) }
+                brevEntitet.brevId) {
+                runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet, saksbehandler) }
             }
         } else {
             throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
@@ -49,8 +52,8 @@ class BrevServiceImpl(
         return brevEntitet
     }
 
-    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet) {
-        val brev = brevRepository.opprettBrev(brevEntitet)
+    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String) {
+        val brev = brevRepository.opprettBrev(brevEntitet, saksbehandler)
         log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId})""")
 
     }
