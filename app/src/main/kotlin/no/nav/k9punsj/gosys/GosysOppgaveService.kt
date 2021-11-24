@@ -1,8 +1,13 @@
 package no.nav.k9punsj.gosys
 
-import kotlinx.coroutines.reactive.awaitFirst
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.isSuccessful
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.abac.NavHeaders
+import no.nav.k9punsj.gosys.GosysOppgaveService.Urls.opprettOppgaveUrl
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
@@ -11,20 +16,16 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
-import reactor.core.publisher.Mono
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.net.URI
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
 internal class GosysOppgaveService(
-        @Value("\${no.nav.gosys.base_url}") safBaseUrl: URI,
-        @Qualifier("sts") private val accessTokenClient: AccessTokenClient) {
+    @Value("\${no.nav.gosys.base_url}") private val safBaseUrl: URI,
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
@@ -36,50 +37,55 @@ internal class GosysOppgaveService(
         private val scope: Set<String> = setOf("openid")
     }
 
-    private val client = WebClient
-            .builder()
-            .baseUrl(safBaseUrl.toString())
-            .build()
+    internal object Urls {
+        internal const val opprettOppgaveUrl = "/api/v1/oppgaver"
+    }
 
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
-        val accessToken = cachedAccessTokenClient.getAccessToken(
-            scopes = scope
-        )
         val opprettOppgaveRequest = OpprettOppgaveRequest(
             aktoerId = aktørid,
             journalpostId = joarnalpostId,
             gjelder = gjelder
         )
-        try {
-            val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest)}.getOrElse { throw it }
 
-            val response = client
-                    .post()
-                    .uri { it.pathSegment("api", "v1", "oppgaver").build() }
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                    .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-                    .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                    .bodyValue(body)
-
-                    .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError) { clientResponse ->
-                        clientResponse.bodyToFlux<String>().flatMap {
-                            logger.info(it)
-                            Mono.just(it)
-                        }
-                        return@onStatus Mono.error(IllegalStateException())
-                    }
-                    .toEntity(String::class.java)
-                    .awaitFirst()
-            return Pair<HttpStatus, String?>(response.statusCode, null)
-
-        } catch (e: Exception) {
-            val sw = StringWriter()
-            e.printStackTrace(PrintWriter(sw))
-            val exceptionAsString = sw.toString()
-            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, exceptionAsString)
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest) }.getOrElse {
+            logger.error(it.message)
+            throw it
         }
+
+        val (url, response, responseBody) = httpPost(body, opprettOppgaveUrl)
+
+        val harFeil = !response.isSuccessful
+        if (harFeil) {
+            logger.error("Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody")
+        }
+        return HttpStatus.valueOf(response.statusCode) to if (harFeil) "Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody" else null
+    }
+
+    private suspend fun httpPost(body: String, url: String): Triple<String, Response, String> {
+        val (_, response, result) = "$safBaseUrl$url"
+            .httpPost()
+            .body(
+                body
+            )
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.CallId to UUID.randomUUID().toString(),
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue
+            ).awaitStringResponseResult()
+
+        val responseBody = result.fold(
+            { success -> success },
+            { error ->
+                when (error.response.body().isEmpty()) {
+                    true -> "{}"
+                    false -> String(error.response.body().toByteArray())
+                }
+            }
+        )
+        return Triple(url, response, responseBody)
     }
 }
