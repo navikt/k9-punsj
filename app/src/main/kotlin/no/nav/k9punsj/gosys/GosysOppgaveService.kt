@@ -45,7 +45,7 @@ internal class GosysOppgaveService(
         val opprettOppgaveRequest = OpprettOppgaveRequest(
             aktoerId = aktørid,
             journalpostId = joarnalpostId,
-            gjelder = gjelder
+            gjelder = gjelder,
         )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest) }.getOrElse {

@@ -9,10 +9,12 @@ internal data class OpprettOppgaveRequest(
     val aktoerId: String,
     val journalpostId: String,
     @JsonIgnore
-    private val gjelder: Gjelder) {
-    private val aktivDato: LocalDate = LocalDate.now(ZoneId.of("Europe/Oslo"))
-    val fristFerdigstillelse: LocalDate = aktivDato.treVirkerdagerFrem()
+    private val gjelder: Gjelder,
+) {
+
     val prioritet = "NORM"
+    val aktivDato: LocalDate = LocalDate.now(ZoneId.of("Europe/Oslo"))
+    val fristFerdigstillelse: LocalDate = aktivDato.treVirkerdagerFrem()
     val tema = "OMS"
     val oppgavetype = "JFR"
     val behandlingstema = gjelder.behandlingstema?.kodeverksverdi
