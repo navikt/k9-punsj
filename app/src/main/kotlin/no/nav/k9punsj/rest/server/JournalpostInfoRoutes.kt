@@ -38,7 +38,6 @@ internal class JournalpostInfoRoutes(
                 val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
-                logger.info("Fått request fra k9-sak på aktør=$aktørId")
                 if (journalpostIder.isNotEmpty()) {
                     return@RequestContext ServerResponse
                         .ok()
