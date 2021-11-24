@@ -5,15 +5,13 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitBodyWithType
-import no.nav.k9punsj.awaitStatuscode
+import no.nav.k9punsj.*
 import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.Journalpost
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
@@ -74,6 +72,25 @@ internal class BrevRoutesTest {
 
         assertThat(brevVisningDto.journalpostId).isEqualTo(journalpostId)
         assertThat(brevVisningDto.sendtInnAv).isEqualTo("saksbehandler@nav.no")
+    }
+
+
+    @Test
+    fun `Skal feile hvis man prøver å sende brev på en ferdig behandlet journalpost`() : Unit = runBlocking {
+        val journalpostId = lagJournalpost()
+        val norskIdent = "01110050053"
+        DatabaseUtil.getJournalpostRepo().ferdig(journalpostId)
+
+        val body = lagBestilling(norskIdent, journalpostId)
+
+        val (httpStatus, oasFeil) = client.post()
+            .uri { it.pathSegment(api, "brev", "bestill").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(body))
+            .awaitStatusWithBody<OasFeil>()
+
+        assertThat(HttpStatus.BAD_REQUEST).isEqualTo(httpStatus)
+        assertThat(oasFeil.feil).isEqualTo("Kan ikke bestille brev på en journalpost som er ferdig behandlet av punsj")
     }
 
     private suspend fun lagJournalpost(): String {
