@@ -53,6 +53,8 @@ internal class GosysOppgaveService(
             throw it
         }
 
+        logger.info("Dette er boddyen $body")
+
         val (url, response, responseBody) = httpPost(body, opprettOppgaveUrl)
 
         val harFeil = !response.isSuccessful
