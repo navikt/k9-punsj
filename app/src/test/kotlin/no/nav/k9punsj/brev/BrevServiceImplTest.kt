@@ -7,9 +7,11 @@ import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
+import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -40,6 +42,9 @@ internal class BrevServiceImplTest {
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
 
+    @MockBean
+    private lateinit var journalpostService: JournalpostService
+
     @Autowired
     private lateinit var brev: BrevServiceImpl
 
@@ -52,10 +57,11 @@ internal class BrevServiceImplTest {
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
+        Mockito.doAnswer { true }.`when`(journalpostService).kanSendeInn(Mockito.anyString())
 
-        val forJournalpostId = "1234"
+        val forJournalpostId = IdGenerator.nesteId()
         val saksnummer = "123"
-        val dokumentbestilling = lagDokumentbestillingPåJournalpost()
+        val dokumentbestilling = lagDokumentbestillingPåJournalpost(forJournalpostId)
 
         // act
         brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV, "saksbehandler")
@@ -79,9 +85,9 @@ internal class BrevServiceImplTest {
         return {}
     }
 
-    private fun lagDokumentbestillingPåJournalpost(): DokumentbestillingDto {
+    private fun lagDokumentbestillingPåJournalpost(forJournalpostId: String): DokumentbestillingDto {
         return DokumentbestillingDto(
-            "1",
+            forJournalpostId,
             "2",
             "123",
             "1234",

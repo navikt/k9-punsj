@@ -18,7 +18,8 @@ import java.time.ZoneId
 @Service
 class JournalpostService(
     private val safGateway: SafGateway,
-    private val journalpostRepository: JournalpostRepository) {
+    private val journalpostRepository: JournalpostRepository,
+) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(JournalpostService::class.java)
@@ -57,22 +58,25 @@ class JournalpostService(
                     aktørId = aktørId,
                     mottattDato = mottattDato,
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
-                    kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also { if (!it) {
-                        logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}", keyValue("journalpost_id", journalpostId))
-                    }},
+                    kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also {
+                        if (!it) {
+                            logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
+                                keyValue("journalpost_id", journalpostId))
+                        }
+                    },
                     journalpostStatus = safJournalpost.journalstatus!!
                 )
             }
         }
     }
 
-    private fun utledMottattDato(parsedJournalpost: ParsedJournalpost) : LocalDateTime {
+    private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {
         return if (parsedJournalpost.journalpostType == SafDtos.JournalpostType.I) {
             parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
             parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
-        }?: parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
-         ?: logger.warn(
+        } ?: parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
+        ?: logger.warn(
             "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedJournalpost.relevanteDatoer.map { it.datotype.name }}"
         ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
@@ -154,7 +158,7 @@ data class JournalpostInfo(
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
     val kanOpprettesJournalføringsoppgave: Boolean,
-    val journalpostStatus : String
+    val journalpostStatus: String,
 )
 
 data class JournalpostInfoDto(
@@ -167,8 +171,9 @@ data class JournalpostInfoDto(
     val erInngående: Boolean,
     val kanSendeInn: Boolean,
     val erSaksbehandler: Boolean? = null,
-    val journalpostStatus : String,
-    val kanOpprettesJournalføringsoppgave: Boolean) {
+    val journalpostStatus: String,
+    val kanOpprettesJournalføringsoppgave: Boolean,
+) {
     val kanKopieres = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående
 }
 

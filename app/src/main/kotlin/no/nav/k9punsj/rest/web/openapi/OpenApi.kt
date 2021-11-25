@@ -324,7 +324,7 @@ data class OasIdentDto(
 )
 
 data class OasFeil(
-    val feil: String,
+    val feil: String?,
 )
 
 data class OasSøknadId(

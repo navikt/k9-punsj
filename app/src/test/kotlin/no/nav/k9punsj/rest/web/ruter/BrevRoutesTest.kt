@@ -5,14 +5,18 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.*
+import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitBodyWithType
+import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -39,13 +43,14 @@ internal class BrevRoutesTest {
 
         val body = lagBestilling(norskIdent, journalpostId)
 
-        val httpStatus = client.post()
+        val (httpStatus, oasFeil) = client.post()
             .uri { it.pathSegment(api, "brev", "bestill").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(body))
-            .awaitStatuscode()
+            .awaitStatusWithBody<OasFeil>()
 
-        assertThat(HttpStatus.OK).isEqualTo(httpStatus)
+        assertThat(oasFeil.feil).isNull()
+        assertThat(httpStatus).isEqualTo(HttpStatus.OK)
     }
 
     @Test
@@ -55,13 +60,14 @@ internal class BrevRoutesTest {
 
         val body = lagBestilling(norskIdent, journalpostId)
 
-        val httpStatus = client.post()
+        val (httpStatus, oasFeil) = client.post()
             .uri { it.pathSegment(api, "brev", "bestill").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(body))
-            .awaitStatuscode()
+            .awaitStatusWithBody<OasFeil>()
 
-        assertThat(HttpStatus.OK).isEqualTo(httpStatus)
+        assertThat(oasFeil.feil).isNull()
+        assertThat(httpStatus).isEqualTo(HttpStatus.OK)
 
         val dtoByGet = client.get()
             .uri { it.pathSegment(api, "brev", "hentAlle", journalpostId).build() }
@@ -73,7 +79,6 @@ internal class BrevRoutesTest {
         assertThat(brevVisningDto.journalpostId).isEqualTo(journalpostId)
         assertThat(brevVisningDto.sendtInnAv).isEqualTo("saksbehandler@nav.no")
     }
-
 
     @Test
     fun `Skal feile hvis man prøver å sende brev på en ferdig behandlet journalpost`() : Unit = runBlocking {
@@ -89,12 +94,12 @@ internal class BrevRoutesTest {
             .body(BodyInserters.fromValue(body))
             .awaitStatusWithBody<OasFeil>()
 
-        assertThat(HttpStatus.BAD_REQUEST).isEqualTo(httpStatus)
         assertThat(oasFeil.feil).isEqualTo("Kan ikke bestille brev på en journalpost som er ferdig behandlet av punsj")
+        assertThat(httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     private suspend fun lagJournalpost(): String {
-        val journalpostId = "1252334"
+        val journalpostId = IdGenerator.nesteId()
         val aktørId = "100000000"
 
         val jp =
