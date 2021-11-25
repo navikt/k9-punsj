@@ -66,8 +66,6 @@ class BrevServiceImpl(
     private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String, data: String) {
         val brev = brevRepository.opprettBrev(brevEntitet, saksbehandler)
         log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId}) --> body er $data""")
-
-
     }
 
     private fun Dokumentbestilling.toJson(): String {
