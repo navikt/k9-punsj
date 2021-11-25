@@ -45,6 +45,13 @@ class BrevServiceImpl(
 
         val kanSendeInn = journalpostService.kanSendeInn(brevEntitet.forJournalpostId)
         if (kanSendeInn) {
+            log.info("journalpostId == " + brevData.journalpostId)
+            log.info("soekerId == " + brevData.soekerId)
+            log.info("saksnummer == " + brevData.saksnummer)
+            log.info("fagsakYtelseType == " + brevData.fagsakYtelseType)
+            log.info("mottaker == " + brevData.mottaker)
+            log.info("dokumentMal == " + brevData.dokumentMal)
+
             val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevId,
                 brevEntitet.brevData,
                 pdlService).bestillingOgFeil()

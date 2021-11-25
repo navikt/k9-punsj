@@ -32,8 +32,10 @@ internal class MapDokumentTilK9Formidling(
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()
             bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9PUNSJ
-
             feil.addAll(validator.validate(bestilling).map { Feil(it.propertyPath.toString(), "kode", it.message) })
+        }.onFailure { throwable ->
+            logger.error("Uventet mappingfeil", throwable)
+            feil.add(Feil("dokumentbestilling", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }
 
