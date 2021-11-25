@@ -8,14 +8,14 @@ import no.nav.k9punsj.brev.BrevId
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
     brevId: BrevId,
     dto: DokumentbestillingDto,
-    val pdlService: PdlService
+    val personService: PersonService,
 ) {
 
     private val bestilling = Dokumentbestilling()
@@ -46,8 +46,8 @@ internal class MapDokumentTilK9Formidling(
 
     private fun String.leggTilEksternRefernase() {
         bestilling.eksternReferanse = this
-
     }
+
     private fun String.leggTilDokumentbestillingId() {
         bestilling.dokumentbestillingId = this
     }
@@ -59,18 +59,14 @@ internal class MapDokumentTilK9Formidling(
     private fun AktørId.transformTilAktørId() {
         val søkerId = this
         runBlocking {
-            val identifikator = pdlService.identifikator(søkerId)
-            val hentIdenter = identifikator?.identPdl?.data?.hentIdenter
-            if (hentIdenter != null) {
-                bestilling.aktørId = hentIdenter.identer[0].ident
-            } else {
-                feil.add(Feil("AktørId", "AktørId", "Kunne ikke finne person i pdl"))
-            }
+            kotlin.runCatching { personService.finnEllerOpprettPersonVedNorskIdent(søkerId) }
+                .onSuccess { bestilling.aktørId = it.aktørId }
+                .onFailure { feil.add(Feil("AktørId", "AktørId", "Kunne ikke finne person i pdl")) }
         }
     }
 
     private fun DokumentbestillingDto.Mottaker.leggTilMottaker() {
-        kotlin.runCatching { Mottaker(this.id, IdType.valueOf(this.type))}
+        kotlin.runCatching { Mottaker(this.id, IdType.valueOf(this.type)) }
             .onSuccess { bestilling.overstyrtMottaker = it }
             .onFailure { feil.add(Feil("Mottaker", "Mottaker", it.message)) }
     }

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 class BrevServiceImpl(
     val brevRepository: BrevRepository,
     val hendelseProducer: HendelseProducer,
-    val pdlService: PdlService,
+    val personService: PersonService,
     val journalpostService: JournalpostService
 ) : BrevService {
 
@@ -45,33 +45,17 @@ class BrevServiceImpl(
 
         val kanSendeInn = journalpostService.kanSendeInn(brevEntitet.forJournalpostId)
         if (kanSendeInn) {
-            log.info("journalpostId == " + brevData.journalpostId)
-            log.info("soekerId == " + brevData.soekerId)
-            log.info("saksnummer == " + brevData.saksnummer)
-            log.info("fagsakYtelseType == " + brevData.fagsakYtelseType)
-            log.info("mottaker == " + brevData.mottaker)
-            log.info("dokumentMal == " + brevData.dokumentMal)
-
             val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevId,
                 brevEntitet.brevData,
-                pdlService).bestillingOgFeil()
+                personService).bestillingOgFeil()
 
             if (feil.isEmpty()) {
-                log.info("AktørId == " + bestilling.aktørId)
-                log.info("eksternReferanse == " + bestilling.eksternReferanse)
-                log.info("dokumentbestillingId == " + bestilling.dokumentbestillingId)
-                log.info("saksnummer == " + bestilling.saksnummer)
-                log.info("overstyrtMottaker == " + bestilling.overstyrtMottaker)
-                log.info("ytelseType == " + bestilling.ytelseType)
-                log.info("avsenderApplikasjon == " + bestilling.avsenderApplikasjon)
-
                 val data = kotlin.runCatching { bestilling.toJsonB() }.getOrElse { throw it }
-                log.info("DATA ER$data")
 
                 hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                     data,
                     brevEntitet.brevId) {
-                    runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet, saksbehandler, data) }
+                    runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet, saksbehandler) }
                 }
             } else {
                 throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
@@ -82,9 +66,9 @@ class BrevServiceImpl(
         }
     }
 
-    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String, data: String) {
+    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String) {
         val brev = brevRepository.opprettBrev(brevEntitet, saksbehandler)
-        log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId}) --> body er $data""")
+        log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId})""")
     }
 
     private fun Dokumentbestilling.toJsonB() : String {

@@ -6,11 +6,12 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
+import no.nav.k9punsj.db.datamodell.Person
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -34,7 +35,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     JournalpostRepository::class,
     BrevRepository::class,
     BrevServiceImpl::class,
-    TestPdlService::class,
     TestBeans::class
 ])
 internal class BrevServiceImplTest {
@@ -44,6 +44,10 @@ internal class BrevServiceImplTest {
 
     @MockBean
     private lateinit var journalpostService: JournalpostService
+
+    @MockBean
+    private lateinit var personService: PersonService
+
 
     @Autowired
     private lateinit var brev: BrevServiceImpl
@@ -58,6 +62,7 @@ internal class BrevServiceImplTest {
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         Mockito.doAnswer { true }.`when`(journalpostService).kanSendeInn(Mockito.anyString())
+        Mockito.doAnswer { Person("123", "1234", "1000000000000") }.`when`(personService).finnEllerOpprettPersonVedNorskIdent("1234")
 
         val forJournalpostId = IdGenerator.nesteId()
         val saksnummer = "123"
