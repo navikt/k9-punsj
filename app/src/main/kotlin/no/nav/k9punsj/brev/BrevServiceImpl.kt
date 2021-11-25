@@ -50,7 +50,7 @@ class BrevServiceImpl(
                 pdlService).bestillingOgFeil()
 
             if (feil.isEmpty()) {
-                val data = bestilling.toJsonB()
+                val data = kotlin.runCatching { bestilling.toJsonB() }.getOrElse { throw it }
                 hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                     data,
                     brevEntitet.brevId) {
