@@ -50,7 +50,17 @@ class BrevServiceImpl(
                 pdlService).bestillingOgFeil()
 
             if (feil.isEmpty()) {
+                log.info("AktørId == " + bestilling.aktørId)
+                log.info("eksternReferanse == " + bestilling.eksternReferanse)
+                log.info("dokumentbestillingId == " + bestilling.dokumentbestillingId)
+                log.info("saksnummer == " + bestilling.saksnummer)
+                log.info("overstyrtMottaker == " + bestilling.overstyrtMottaker)
+                log.info("ytelseType == " + bestilling.ytelseType)
+                log.info("avsenderApplikasjon == " + bestilling.avsenderApplikasjon)
+
                 val data = kotlin.runCatching { bestilling.toJsonB() }.getOrElse { throw it }
+                log.info("DATA ER$data")
+
                 hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                     data,
                     brevEntitet.brevId) {
