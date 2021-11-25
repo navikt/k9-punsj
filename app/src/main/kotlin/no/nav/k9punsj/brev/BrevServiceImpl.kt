@@ -48,10 +48,11 @@ class BrevServiceImpl(
                 pdlService).bestillingOgFeil()
 
             if (feil.isEmpty()) {
+                val data = bestilling.toJson()
                 hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
-                    bestilling.toJson(),
+                    data,
                     brevEntitet.brevId) {
-                    runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet, saksbehandler) }
+                    runBlocking { lagreUnnaBrevSomErUtsendt(brevEntitet, saksbehandler, data) }
                 }
             } else {
                 throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
@@ -62,9 +63,10 @@ class BrevServiceImpl(
         }
     }
 
-    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String) {
+    private suspend fun lagreUnnaBrevSomErUtsendt(brevEntitet: BrevEntitet, saksbehandler: String, data: String) {
         val brev = brevRepository.opprettBrev(brevEntitet, saksbehandler)
-        log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId})""")
+        log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId}) --> body er $data""")
+
 
     }
 
