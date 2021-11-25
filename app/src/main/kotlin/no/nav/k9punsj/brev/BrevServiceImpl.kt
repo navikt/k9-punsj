@@ -1,7 +1,9 @@
 package no.nav.k9punsj.brev
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
+import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -48,7 +50,7 @@ class BrevServiceImpl(
                 pdlService).bestillingOgFeil()
 
             if (feil.isEmpty()) {
-                val data = bestilling.toJson()
+                val data = bestilling.toJsonB()
                 hendelseProducer.sendMedOnSuccess(SEND_BREVBESTILLING_TIL_K9_FORMIDLING,
                     data,
                     brevEntitet.brevId) {
@@ -68,7 +70,8 @@ class BrevServiceImpl(
         log.info("""Punsj har sendt brevbestilling for journalpostId(${brev.forJournalpostId}) --> body er $data""")
     }
 
-    private fun Dokumentbestilling.toJson(): String {
-        return kotlin.runCatching { objectMapper().writeValueAsString(this) }.getOrElse { throw it }
+    private fun Dokumentbestilling.toJsonB() : String {
+        val jsonB = kotlin.runCatching { objectMapper().convertValue<JsonB>(this) }.getOrElse { throw it }
+        return kotlin.runCatching { objectMapper().writeValueAsString(jsonB) }.getOrElse { throw it }
     }
 }
