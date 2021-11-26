@@ -449,9 +449,12 @@ internal class JournalpostRoutes(
         )
     }
 
-    private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus) = status(httpStatus)
-        .json()
-        .bodyValueAndAwait(OasFeil(this.message))
+    private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus): ServerResponse {
+        logger.error("" +httpStatus.value() + this.message)
+        return status(httpStatus)
+            .json()
+            .bodyValueAndAwait(OasFeil(this.message))
+    }
 
     private suspend fun utvidJournalpostMedMottattDato(
         jornalpostId: JournalpostId,

@@ -173,6 +173,8 @@ class SafGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .awaitExchange { Pair(it.rawStatusCode(), it.awaitBody<String>()) }
 
+        logger.info(""+httpStatus + svar)
+
         return when (httpStatus) {
             200 -> {
                 svar
