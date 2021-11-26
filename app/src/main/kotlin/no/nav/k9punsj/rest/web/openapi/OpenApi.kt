@@ -688,7 +688,7 @@ internal class JournalpostController {
         ]
     )
     @Operation(
-        summary = "Lukker en journalpost i k9-punsj og k9-los",
+        summary = "Setter journalposten til UTGÅTT i arkivet",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun MarkerJournalpostSomUtgått(
