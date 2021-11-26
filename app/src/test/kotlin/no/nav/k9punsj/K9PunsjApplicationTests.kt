@@ -136,7 +136,6 @@ class K9PunsjApplicationTests {
 
         assertEquals(HttpStatus.FORBIDDEN, httpStatus)
     }
-
 }
 
 

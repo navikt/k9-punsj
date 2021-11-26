@@ -652,6 +652,49 @@ internal class JournalpostController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
+
+    @PatchMapping(JournalpostRoutes.Urls.MarkerJournalpostSomUtgått, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis journalposten har blitt lukket",
+                content = [Content(
+                    schema = Schema(
+                        implementation = String::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Feil i aksjonslogg"
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Ugyldig OIDC token. Denne feilen gis dersom tokenet ikke har riktig format eller er utgått"
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "Ikke tilgang"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalpost eksisterer ikke i arkivet"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Internal server error eller Doarkiv har fått Internal server error"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Lukker en journalpost i k9-punsj og k9-los",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun MarkerJournalpostSomUtgått(
+        @PathVariable("journalpost_id") journalpostId: String,
+    ) {
+    }
 }
 
 data class OasDokumentInfo(

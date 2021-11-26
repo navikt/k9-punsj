@@ -158,6 +158,7 @@ object JournalpostIds {
     const val AbacError: JournalpostId = "500"
     const val IkkeKomplettTilgang: JournalpostId = "403"
     const val FinnesIkke: JournalpostId = "404"
+    const val Utgått: JournalpostId = "1337"
 
 }
 

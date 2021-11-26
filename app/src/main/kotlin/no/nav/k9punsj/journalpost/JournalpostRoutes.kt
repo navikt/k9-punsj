@@ -21,10 +21,7 @@ import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.openapi.OasDokumentInfo
-import no.nav.k9punsj.rest.web.openapi.OasJournalpostDto
-import no.nav.k9punsj.rest.web.openapi.OasJournalpostIder
-import no.nav.k9punsj.rest.web.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.rest.web.openapi.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -67,7 +64,7 @@ internal class JournalpostRoutes(
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
-        internal const val HentÅpneJournalposter = "/journalpost/uferdig/{$AktørIdKey}"
+        internal const val MarkerJournalpostSomUtgått = "/journalpost/utgått/{$JournalpostIdKey}"
 
         //for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -373,11 +370,11 @@ internal class JournalpostRoutes(
                     )
 
                     if (dokument == null) {
-                        ServerResponse
+                        return@RequestContext ServerResponse
                             .notFound()
                             .buildAndAwait()
                     } else {
-                        ServerResponse
+                        return@RequestContext ServerResponse
                             .ok()
                             .contentType(dokument.contentType)
                             .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -386,13 +383,64 @@ internal class JournalpostRoutes(
                             .bodyValueAndAwait(dokument.dataBuffer)
                     }
                 } catch (cause: IkkeTilgang) {
-                    ServerResponse
+                    return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
 
             }
         }
+
+        PATCH("/api${Urls.MarkerJournalpostSomUtgått}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+
+                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
+
+                if (kanSendeInn) {
+                    return@RequestContext kotlin.runCatching {
+                        journalpostService.markerJournalpostSomUtgått(journalpostId)
+                    }
+                        .fold(
+                            onSuccess = {
+                                journalpostService.settTilFerdig(journalpostId)
+                                ServerResponse
+                                    .ok()
+                                    .json()
+                                    .bodyValueAndAwait(it!!)
+                            },
+                            onFailure = {
+                                when (it) {
+                                    FeilIAksjonslogg() -> {
+                                        it.serverResponseMedStatus(HttpStatus.BAD_REQUEST)
+                                    }
+                                    UgyldigToken() -> {
+                                        it.serverResponseMedStatus(HttpStatus.UNAUTHORIZED)
+                                    }
+                                    IkkeTilgang() -> {
+                                        it.serverResponseMedStatus(HttpStatus.FORBIDDEN)
+                                    }
+                                    IkkeFunnet() -> {
+                                        it.serverResponseMedStatus(HttpStatus.NOT_FOUND)
+                                    }
+                                    InternalServerErrorDoarkiv() -> {
+                                        it.serverResponseMedStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    }
+                                    else -> {
+                                        it.serverResponseMedStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    }
+                                }
+                            }
+                        )
+                } else {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.CONFLICT)
+                        .json()
+                        .bodyValueAndAwait(OasFeil("Kan ikke endre en journalpost som er ferdig behandling i punsj"))
+                }
+            }
+        }
+
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,
@@ -400,6 +448,10 @@ internal class JournalpostRoutes(
             innsendingClient = innsendingClient
         )
     }
+
+    private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus) = status(httpStatus)
+        .json()
+        .bodyValueAndAwait(OasFeil(this.message))
 
     private suspend fun utvidJournalpostMedMottattDato(
         jornalpostId: JournalpostId,

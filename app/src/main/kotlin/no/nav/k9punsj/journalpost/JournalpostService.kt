@@ -70,6 +70,10 @@ class JournalpostService(
         }
     }
 
+    internal suspend fun markerJournalpostSomUtgått(journalpostId: JournalpostId): String? {
+        return safGateway.markerJournalpostSomUtgått(journalpostId)
+    }
+
     private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {
         return if (parsedJournalpost.journalpostType == SafDtos.JournalpostType.I) {
             parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
@@ -190,6 +194,10 @@ data class DokumentInfo(
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
 internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
 internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")
+internal class FeilIAksjonslogg : Throwable("Feil i aksjonslogg")
+internal class UgyldigToken : Throwable("Ugyldig OIDC token. Denne feilen gis dersom tokenet ikke har riktig format eller er utgått")
+internal class IkkeFunnet : Throwable("Journalpost ikke funnet")
+internal class InternalServerErrorDoarkiv : Throwable("Doarkiv har fått Internal server error")
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
     enumValues<T>().find { it.name.equals(name, ignoreCase = true) }

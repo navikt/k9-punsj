@@ -6,7 +6,6 @@ import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.brev.BrevId
 import no.nav.k9punsj.brev.DokumentbestillingDto
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.objectMapper
@@ -43,7 +42,6 @@ internal class MapDokumentTilK9Formidling(
     internal fun feil() = feil.toList()
     internal fun bestillingOgFeil() = bestilling() to feil()
 
-
     private fun String.leggTilEksternRefernase() {
         bestilling.eksternReferanse = this
     }
@@ -56,7 +54,7 @@ internal class MapDokumentTilK9Formidling(
         bestilling.saksnummer = this ?: "GSAK"
     }
 
-    private fun AktørId.transformTilAktørId() {
+    private fun String.transformTilAktørId() {
         val søkerId = this
         runBlocking {
             kotlin.runCatching { personService.finnEllerOpprettPersonVedNorskIdent(søkerId) }

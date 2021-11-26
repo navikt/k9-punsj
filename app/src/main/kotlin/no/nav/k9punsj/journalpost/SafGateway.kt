@@ -16,20 +16,17 @@ import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.ExchangeStrategies
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitEntity
-import org.springframework.web.reactive.function.client.awaitExchange
+import org.springframework.web.reactive.function.client.*
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Service
 class SafGateway(
-        @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
-        @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
-        @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
-        @Qualifier("azure")private val accessTokenClient: AccessTokenClient
+    @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
+    @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
+    @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
 ) : ReactiveHealthIndicator {
 
     private companion object {
@@ -39,7 +36,7 @@ class SafGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
         private const val MaxDokumentSize = 16 * 1024 * 1024
-        private val IkkeStøttedeStatuser = setOf("UTGAAR","AVBRUTT","FEILREGISTRERT")
+        private val IkkeStøttedeStatuser = setOf("UTGAAR", "AVBRUTT", "FEILREGISTRERT")
     }
 
     init {
@@ -49,43 +46,43 @@ class SafGateway(
     }
 
     private val client = WebClient
-            .builder()
-            .baseUrl(safBaseUrl.toString())
-            .exchangeStrategies(
-                    ExchangeStrategies.builder()
-                            .codecs { configurer ->
-                                configurer
-                                        .defaultCodecs()
-                                        .maxInMemorySize(MaxDokumentSize)
-                            }.build()
-            )
-            .build()
+        .builder()
+        .baseUrl(safBaseUrl.toString())
+        .exchangeStrategies(
+            ExchangeStrategies.builder()
+                .codecs { configurer ->
+                    configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(MaxDokumentSize)
+                }.build()
+        )
+        .build()
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
         val accessToken = cachedAccessTokenClient
-                .getAccessToken(
-                        scopes = henteJournalpostScopes,
-                        onBehalfOf = coroutineContext.hentAuthentication().accessToken
-                )
+            .getAccessToken(
+                scopes = henteJournalpostScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
         val response = client
-                .post()
-                .uri { it.pathSegment("graphql").build() }
-                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(SafDtos.JournalpostQuery(journalpostId))
-                .retrieve()
-                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
-                .awaitFirst()
+            .post()
+            .uri { it.pathSegment("graphql").build() }
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+            .retrieve()
+            .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+            .awaitFirst()
 
         val safResponse = response.body
         val errors = safResponse?.errors
         val journalpost = response.body?.data?.journalpost
 
-        check(safResponse != null) {"Ingen response entity fra SAF"}
+        check(safResponse != null) { "Ingen response entity fra SAF" }
 
         if (safResponse.errors != null) {
             logger.warn("SafErrors=${safResponse.errors}")
@@ -104,7 +101,7 @@ class SafGateway(
         }
         if (safResponse.manglerTilgang) throw IkkeTilgang()
 
-        check(errors == null) {"Feil ved oppslag mot SAF graphql. SafErrors=$errors"}
+        check(errors == null) { "Feil ved oppslag mot SAF graphql. SafErrors=$errors" }
 
         // For saksbehandlere som har tilgang til å åpne journalposter i spesielle statuser.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
@@ -113,8 +110,9 @@ class SafGateway(
         }
 
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
-        if(journalpost?.journalposttype == "N" &&
-            journalpost.journalstatus?.equals("UNDER_ARBEID") == true) throw NotatUnderArbeidFeil().also {
+        if (journalpost?.journalposttype == "N" &&
+            journalpost.journalstatus?.equals("UNDER_ARBEID") == true
+        ) throw NotatUnderArbeidFeil().also {
             logger.warn("Ikke støttet journalpost: Type NOTAT med status UNDER_ARBEID")
         }
 
@@ -123,24 +121,24 @@ class SafGateway(
 
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
         val accessToken = cachedAccessTokenClient
-                .getAccessToken(
-                        scopes = henteDokumentScopes,
-                        onBehalfOf = coroutineContext.hentAuthentication().accessToken
-                )
+            .getAccessToken(
+                scopes = henteDokumentScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
 
         val (statusCode, entity) = client
-                .get()
-                .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
-                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-                .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
+            .get()
+            .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
 
         return when (statusCode) {
             200 -> {
                 Dokument(
-                        contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
-                        dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
+                    contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
+                    dataBuffer = entity.body ?: throw IllegalStateException("Body ikke satt")
                 )
             }
             404 -> null
@@ -151,15 +149,54 @@ class SafGateway(
         }
     }
 
-    override fun health() = Mono.just(
-            accessTokenClient.helsesjekk(
-                    operasjon = "hente-journalpost",
-                    scopes = henteJournalpostScopes,
-                    initialHealth = accessTokenClient.helsesjekk(
-                            operasjon = "hente-dokument",
-                            scopes = henteDokumentScopes
-                    )
+    //https://github.com/navikt/dokarkiv/blob/master/journalpost/src/main/java/no/nav/do[…]post/v1/controllers/FeilregistrerJournalpostRestController.java
+    //rest/journalpostapi/v1/journalpost/{journalpostId}/feilregistrer/settStatusUtgår
+    internal suspend fun markerJournalpostSomUtgått(journalpostId: String): String? {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = henteDokumentScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
+        val (httpStatus, svar) = client
+            .patch()
+            .uri {
+                it.pathSegment("rest",
+                    "journalpostapi",
+                    "v1",
+                    "journalpost",
+                    journalpostId,
+                    "feilregistrer",
+                    "settStatusUtgår").build()
+            }
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .awaitExchange { Pair(it.rawStatusCode(), it.awaitBody<String>()) }
+
+        return when (httpStatus) {
+            200 -> {
+                svar
+            }
+            400 -> throw FeilIAksjonslogg()
+            401 -> throw UgyldigToken()
+            403 -> throw IkkeTilgang()
+            404 -> throw IkkeFunnet()
+            500 -> throw InternalServerErrorDoarkiv()
+            else -> {
+                throw IllegalStateException("$httpStatus -> Feil ved henting av dokument fra SAF")
+            }
+        }
+    }
+
+    override fun health() = Mono.just(
+        accessTokenClient.helsesjekk(
+            operasjon = "hente-journalpost",
+            scopes = henteJournalpostScopes,
+            initialHealth = accessTokenClient.helsesjekk(
+                operasjon = "hente-dokument",
+                scopes = henteDokumentScopes
+            )
+        )
     )
 }
 
@@ -167,6 +204,6 @@ class SafGateway(
 typealias DokumentId = String
 
 data class Dokument(
-        val contentType: MediaType,
-        val dataBuffer: DataBuffer
+    val contentType: MediaType,
+    val dataBuffer: DataBuffer,
 )
