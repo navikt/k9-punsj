@@ -1,5 +1,7 @@
 package no.nav.k9punsj.journalpost
 
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpPatch
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -16,14 +18,17 @@ import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.*
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitEntity
+import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Service
 class SafGateway(
-    @Value("\${no.nav.saf.base_url}") safBaseUrl: URI,
+    @Value("\${no.nav.saf.base_url}") val safBaseUrl: URI,
     @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
     @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
@@ -158,38 +163,35 @@ class SafGateway(
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
-        val (httpStatus, svar) = client
-            .patch()
-            .uri {
-                it.pathSegment("rest",
-                    "journalpostapi",
-                    "v1",
-                    "journalpost",
-                    journalpostId,
-                    "feilregistrer",
-                    String("settStatusUtgår".toByteArray(), charset("UTF-8")))
-                    .build()
-            }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .awaitExchange { Pair(it.rawStatusCode(), it.awaitBody<String>()) }
+        val (request, response, result) = """$safBaseUrl/rest/journalpostapi/v1/journalpost/$journalpostId/feilregistrer/settStatusUtgår"""
+            .httpPatch()
+            .header(
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
+            ).awaitStringResponseResult()
 
-        logger.info(""+httpStatus + svar)
-
-        return when (httpStatus) {
-            200 -> {
-                svar
+        return result.fold(
+            success = {
+                it
+            },
+            failure = {
+                logger.error(
+                    "Error response = '${it.response.body().asString("text/plain")}' fra '${request.url}'"
+                )
+                logger.error(it.toString())
+                when (response.statusCode) {
+                    400 -> throw FeilIAksjonslogg()
+                    401 -> throw UgyldigToken()
+                    403 -> throw IkkeTilgang()
+                    404 -> throw IkkeFunnet()
+                    500 -> throw InternalServerErrorDoarkiv()
+                    else -> {
+                        throw IllegalStateException("${response.statusCode} -> Feil ved henting av dokument fra SAF")
+                    }
+                }
             }
-            400 -> throw FeilIAksjonslogg()
-            401 -> throw UgyldigToken()
-            403 -> throw IkkeTilgang()
-            404 -> throw IkkeFunnet()
-            500 -> throw InternalServerErrorDoarkiv()
-            else -> {
-                throw IllegalStateException("$httpStatus -> Feil ved henting av dokument fra SAF")
-            }
-        }
+        )
     }
 
     override fun health() = Mono.just(
