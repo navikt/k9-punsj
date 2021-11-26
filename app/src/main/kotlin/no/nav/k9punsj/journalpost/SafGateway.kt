@@ -6,6 +6,8 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.journalpost.SafGateway.Urls.JournalpostApi
+import no.nav.k9punsj.journalpost.SafGateway.Urls.Utgår
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,6 +45,11 @@ class SafGateway(
         logger.info("SafBaseUr=$safBaseUrl")
         logger.info("HenteJournalpostScopes=${henteJournalpostScopes.joinToString()}")
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
+    }
+
+    internal object Urls {
+        internal const val JournalpostApi = "rest/journalpostapi/v1/journalpost/"
+        internal const val Utgår = "/feilregistrer/settStatusUtgår"
     }
 
     private val client = WebClient
@@ -157,17 +164,11 @@ class SafGateway(
                 scopes = henteDokumentScopes,
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
+
+        val url = URI(JournalpostApi+journalpostId+ String(Utgår.toByteArray(), charset("UTF-8")))
         val (httpStatus, svar) = client
             .patch()
-            .uri {
-                it.pathSegment("rest",
-                    "journalpostapi",
-                    "v1",
-                    "journalpost",
-                    journalpostId,
-                    "feilregistrer",
-                    "settStatusUtgår").build()
-            }
+            .uri(url)
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
