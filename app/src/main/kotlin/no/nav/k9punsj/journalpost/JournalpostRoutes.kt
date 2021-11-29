@@ -411,19 +411,19 @@ internal class JournalpostRoutes(
                             },
                             onFailure = {
                                 when (it) {
-                                    FeilIAksjonslogg() -> {
+                                    FeilIAksjonslogg(it.response.body().asString("text/plain")) -> {
                                         it.serverResponseMedStatus(HttpStatus.BAD_REQUEST)
                                     }
-                                    UgyldigToken() -> {
+                                    UgyldigToken(it.response.body().asString("text/plain")) -> {
                                         it.serverResponseMedStatus(HttpStatus.UNAUTHORIZED)
                                     }
-                                    IkkeTilgang() -> {
+                                    IkkeTilgang(it.response.body().asString("text/plain")) -> {
                                         it.serverResponseMedStatus(HttpStatus.FORBIDDEN)
                                     }
-                                    IkkeFunnet() -> {
+                                    IkkeFunnet(it.message) -> {
                                         it.serverResponseMedStatus(HttpStatus.NOT_FOUND)
                                     }
-                                    InternalServerErrorDoarkiv() -> {
+                                    InternalServerErrorDoarkiv(it.response.body().asString("text/plain")) -> {
                                         it.serverResponseMedStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                                     }
                                     else -> {

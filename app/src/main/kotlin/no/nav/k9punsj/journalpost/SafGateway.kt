@@ -104,7 +104,7 @@ class SafGateway(
         if (safResponse.manglerTilgangPåGrunnAvStatus) throw IkkeStøttetJournalpost().also {
             logger.warn("Saksbehandler mangler tilgang på grunn av journalstatus.")
         }
-        if (safResponse.manglerTilgang) throw IkkeTilgang()
+        if (safResponse.manglerTilgang) throw IkkeTilgang("Saksbehandler har ikke tilgang.")
 
         check(errors == null) { "Feil ved oppslag mot SAF graphql. SafErrors=$errors" }
 
@@ -147,7 +147,7 @@ class SafGateway(
                 )
             }
             404 -> null
-            403 -> throw IkkeTilgang()
+            403 -> throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             else -> {
                 throw IllegalStateException("Feil ved henting av dokument fra SAF. $statusCode")
             }
@@ -176,16 +176,17 @@ class SafGateway(
                 it
             },
             failure = {
+                val feil = it.response.body().asString("text/plain")
                 logger.error(
-                    "Error response = '${it.response.body().asString("text/plain")}' fra '${request.url}'"
+                    "Error response = '$feil' fra '${request.url}'"
                 )
                 logger.error(it.toString())
                 when (response.statusCode) {
-                    400 -> throw FeilIAksjonslogg()
-                    401 -> throw UgyldigToken()
-                    403 -> throw IkkeTilgang()
-                    404 -> throw IkkeFunnet()
-                    500 -> throw InternalServerErrorDoarkiv()
+                    400 -> throw FeilIAksjonslogg(feil)
+                    401 -> throw UgyldigToken(feil)
+                    403 -> throw IkkeTilgang(feil)
+                    404 -> throw IkkeFunnet(feil)
+                    500 -> throw InternalServerErrorDoarkiv(feil)
                     else -> {
                         throw IllegalStateException("${response.statusCode} -> Feil ved henting av dokument fra SAF")
                     }

@@ -40,7 +40,7 @@ class JournalpostService(
                     safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
                         bruker = SafDtos.Bruker(null, null))
                 }")
-                throw IkkeTilgang()
+                throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             } else {
                 val (norskIdent, aktørId) = when {
                     SafDtos.BrukerType.FNR == parsedJournalpost.brukerType -> safJournalpost.bruker?.id to null
@@ -193,11 +193,11 @@ data class DokumentInfo(
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
 internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
-internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang på alle dokumeter i journalposten.")
-internal class FeilIAksjonslogg : Throwable("Feil i aksjonslogg")
-internal class UgyldigToken : Throwable("Ugyldig OIDC token. Denne feilen gis dersom tokenet ikke har riktig format eller er utgått")
-internal class IkkeFunnet : Throwable("Journalpost ikke funnet")
-internal class InternalServerErrorDoarkiv : Throwable("Doarkiv har fått Internal server error")
+internal class IkkeTilgang(feil: String) : Throwable(feil)
+internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
+internal class UgyldigToken(feil: String) : Throwable(feil)
+internal class IkkeFunnet(message: String) : Throwable(message)
+internal class InternalServerErrorDoarkiv(feil: String) : Throwable(feil)
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
     enumValues<T>().find { it.name.equals(name, ignoreCase = true) }
