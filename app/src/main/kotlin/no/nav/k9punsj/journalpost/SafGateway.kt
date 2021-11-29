@@ -28,7 +28,7 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class SafGateway(
-    @Value("\${no.nav.saf.base_url}") val safBaseUrl: URI,
+    @Value("\${no.nav.saf.base_url}") private val safBaseUrl: URI,
     @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
     @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
@@ -159,11 +159,11 @@ class SafGateway(
     internal suspend fun markerJournalpostSomUtgått(journalpostId: String): String? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
-                scopes = henteDokumentScopes,
+                scopes = henteJournalpostScopes,
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
-        val (request, response, result) = """$safBaseUrl/rest/journalpostapi/v1/journalpost/$journalpostId/feilregistrer/settStatusUtgår"""
+        val (request, response, result) = journalpostId.settStautsTilUtgåttUrl()
             .httpPatch()
             .header(
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue,
@@ -193,6 +193,8 @@ class SafGateway(
             }
         )
     }
+
+    private fun JournalpostId.settStautsTilUtgåttUrl() = "$safBaseUrl/rest/journalpostapi/v1/journalpost/${this}/feilregistrer/settStatusUtgår"
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
