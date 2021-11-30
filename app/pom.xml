@@ -35,6 +35,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>no.nav.k9.formidling</groupId>
             <artifactId>eksterne-kontrakter</artifactId>
         </dependency>

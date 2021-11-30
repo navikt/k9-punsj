@@ -1,6 +1,8 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
@@ -80,7 +82,7 @@ internal class MapDokumentTilK9Formidling(
     }
 
     private fun JsonB?.leggTilDokumentData() {
-        kotlin.runCatching { objectMapper().writeValueAsString(this) }
+        kotlin.runCatching { objectMapper().readValue<DokumentdataParametreK9>(objectMapper().writeValueAsString(this)) }
             .onSuccess { bestilling.dokumentdata = it }
             .onFailure { feil.add(Feil("DokumentData", "DokumentData", it.message)) }
     }

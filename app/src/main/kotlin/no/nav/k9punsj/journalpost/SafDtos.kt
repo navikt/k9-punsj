@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 internal object SafDtos {
     internal open class GraphqlQuery(val query: String, val variables: Any? = null)
+
     internal data class JournalpostQuery(val journalpostId: String) : GraphqlQuery(
         query = """ 
             query {
@@ -33,6 +34,25 @@ internal object SafDtos {
                 tilleggsopplysninger {
                   nokkel
                   verdi
+                }
+              }
+            }
+            """.trimIndent(),
+        variables = null
+    )
+
+    internal data class FerdigstillJournalpostQuery(val journalpostId: String) : GraphqlQuery(
+        query = """ 
+            query {
+              journalpost(journalpostId: "$journalpostId") {
+                journalposttype
+                journalstatus
+                dokumenter {
+                  dokumentInfoId
+                  tittel
+                }
+                avsenderMottaker {
+                  navn
                 }
               }
             }

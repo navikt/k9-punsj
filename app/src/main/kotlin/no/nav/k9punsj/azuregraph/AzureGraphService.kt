@@ -75,7 +75,49 @@ class AzureGraphService(
     }
 
     override suspend fun hentEnhetForInnloggetBruker(): String {
-        TODO("Not yet implemented")
+        val accessToken = coroutineContext.hentAuthentication().accessToken
+        val iIdToken = tokenService.decodeToken(accessToken)
+        val username = iIdToken.getUsername() + "_office_location"
+        val cachedObject = cache.get(username)
+
+        if (cachedObject == null) {
+            val enhetAccessToken =
+                cachedAccessTokenClient.getAccessToken(
+                    scopes = setOf("https://graph.microsoft.com/user.read"),
+                    onBehalfOf = accessToken
+                )
+
+            val (request, _, result) = "https://graph.microsoft.com/v1.0/me?\$select=officeLocation"
+                .httpGet()
+                .header(
+                    HttpHeaders.ACCEPT to "application/json",
+                    HttpHeaders.AUTHORIZATION to "Bearer ${enhetAccessToken.token}"
+                ).awaitStringResponseResult()
+
+            val json = result.fold(
+                { success -> success },
+                { error ->
+                    log.error(
+                        "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                    )
+                    log.error(error.toString())
+                    throw IllegalStateException("Feil ved henting av saksbehandlers enhet")
+                }
+            )
+
+            return try {
+                val officeLocation = objectMapper().readValue<OfficeLocation>(json).officeLocation
+                cache.set(username, CacheObject(officeLocation, LocalDateTime.now().plusDays(180)))
+                return officeLocation
+            } catch (e: Exception) {
+                log.error(
+                    "Feilet deserialisering", e
+                )
+                ""
+            }
+        } else {
+            return cachedObject.value
+        }
     }
 }
 

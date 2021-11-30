@@ -1,15 +1,25 @@
 package no.nav.k9punsj.journalpost
 
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPatch
+import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.httpPut
+import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
+import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJournalpostType
+import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -50,6 +60,8 @@ class SafGateway(
         logger.info("HenteJournalpostScopes=${henteJournalpostScopes.joinToString()}")
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
+
+    private val GraphQlUrl : String = "$baseUrl/graphql"
 
     private val client = WebClient
         .builder()
@@ -125,6 +137,33 @@ class SafGateway(
         return journalpost
     }
 
+    private suspend fun String.hentDataFraSaf() : JSONObject? {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = henteJournalpostScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val (request, response, result) = GraphQlUrl
+            .httpPost()
+            .body(this)
+            .header(
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
+            ).awaitStringResponseResult()
+
+        return result.fold(
+            success = {
+                it.safData()
+            },
+            failure = {
+                håndterFeil(it, request, response)
+                null
+            }
+        )
+    }
+
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -177,43 +216,105 @@ class SafGateway(
                 it
             },
             failure = {
-                val feil = it.response.body().asString("text/plain")
-                logger.error(
-                    "Error response = '$feil' fra '${request.url}'"
-                )
-                logger.error(it.toString())
-                when (response.statusCode) {
-                    400 -> throw FeilIAksjonslogg(feil)
-                    401 -> throw UgyldigToken(feil)
-                    403 -> throw IkkeTilgang(feil)
-                    404 -> throw IkkeFunnet(feil)
-                    500 -> throw InternalServerErrorDoarkiv(feil)
-                    else -> {
-                        throw IllegalStateException("${response.statusCode} -> Feil ved henting av dokument fra SAF")
-                    }
-                }
+                håndterFeil(it, request, response)
+                null
             }
         )
     }
 
-    internal suspend fun oppdaterJournalpostData(journalpostId: JournalpostId) {
+    internal suspend fun oppdaterJournalpostData(
+        journalpostId: JournalpostId,
+        identitetsnummer: Identitetsnummer,
+        enhetKode: String
+    ) {
+        val ferdigstillJournalpost = SafDtos.FerdigstillJournalpostQuery(journalpostId)
+            .query
+            .hentDataFraSaf()
+            ?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
+
+
+        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadGenerellSak()
+
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
-        journalpostId.oppdaterJournalpostUrl()
+        val (request, response, result) = journalpostId.oppdaterJournalpostUrl()
             .httpPut()
+            .jsonBody(JSONObject(oppdatertPayload).toString())
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
+            ).awaitStringResponseResult()
+
+        result.onError {
+            håndterFeil(it, request, response)
+        }
+
+        ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
 
     }
+
+    private fun håndterFeil(
+        it: FuelError,
+        request: Request,
+        response: Response,
+    ) {
+        val feil = it.response.body().asString("text/plain")
+        logger.error(
+            "Error response = '$feil' fra '${request.url}'"
+        )
+        logger.error(it.toString())
+        when (response.statusCode) {
+            400 -> throw FeilIAksjonslogg(feil)
+            401 -> throw UgyldigToken(feil)
+            403 -> throw IkkeTilgang(feil)
+            404 -> throw IkkeFunnet(feil)
+            500 -> throw InternalServerErrorDoarkiv(feil)
+            else -> {
+                throw IllegalStateException("${response.statusCode} -> Feil ved henting av dokument fra SAF")
+            }
+        }
+    }
+
+    internal fun JSONObject.mapFerdigstillJournalpost(
+        journalpostId: no.nav.k9punsj.journalpost.JournalpostId,
+        identitetsnummer: Identitetsnummer
+    ) =
+        getJSONObject("journalpost")
+            .let { journalpost -> FerdigstillJournalpost(
+                journalpostId = journalpostId,
+                avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
+                status = journalpost.getString("journalstatus").somJournalpostStatus(),
+                type = journalpost.getString("journalposttype").somJournalpostType(),
+                tittel = journalpost.stringOrNull("tittel"),
+                dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
+                    FerdigstillJournalpost.Dokument(
+                        dokumentId = it.getString("dokumentInfoId"),
+                        tittel = it.stringOrNull("tittel")
+                    )
+                }.toSet(),
+                bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+            )}
+
+    internal fun String.safData() = JSONObject(this).getJSONObject("data")
+
+    private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
+        true -> getString(key)
+        false -> null
+    }
+    private fun JSONObject.notNullNotBlankString(key: String)
+            = has(key) && get(key) is String && getString(key).isNotBlank()
 
     //TODO(OJR) skal nok fjernes
     private fun JournalpostId.settStautsTilUtgåttUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/feilregistrer/settStatusUtgår"
 
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
     private fun JournalpostId.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
-
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
