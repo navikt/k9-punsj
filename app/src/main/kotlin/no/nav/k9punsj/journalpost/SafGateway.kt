@@ -2,6 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPatch
+import com.github.kittinunf.fuel.httpPut
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -28,7 +29,7 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class SafGateway(
-    @Value("\${no.nav.saf.base_url}") private val safBaseUrl: URI,
+    @Value("\${no.nav.saf.base_url}") private val baseUrl: URI,
     @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
     @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
@@ -45,14 +46,14 @@ class SafGateway(
     }
 
     init {
-        logger.info("SafBaseUr=$safBaseUrl")
+        logger.info("SafBaseUr=$baseUrl")
         logger.info("HenteJournalpostScopes=${henteJournalpostScopes.joinToString()}")
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
 
     private val client = WebClient
         .builder()
-        .baseUrl(safBaseUrl.toString())
+        .baseUrl(baseUrl.toString())
         .exchangeStrategies(
             ExchangeStrategies.builder()
                 .codecs { configurer ->
@@ -195,7 +196,24 @@ class SafGateway(
         )
     }
 
-    private fun JournalpostId.settStautsTilUtgåttUrl() = "$safBaseUrl/rest/journalpostapi/v1/journalpost/${this}/feilregistrer/settStatusUtgår"
+    internal suspend fun oppdaterJournalpostData(journalpostId: JournalpostId) {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = henteJournalpostScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        journalpostId.oppdaterJournalpostUrl()
+            .httpPut()
+
+    }
+
+    //TODO(OJR) skal nok fjernes
+    private fun JournalpostId.settStautsTilUtgåttUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/feilregistrer/settStatusUtgår"
+
+    private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
+    private fun JournalpostId.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
+
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
