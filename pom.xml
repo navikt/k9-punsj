@@ -33,7 +33,7 @@
         <mockk.version>1.12.1</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
+        <zonky-postgresql.version>14.1.0</zonky-postgresql.version>
     </properties>
 
     <modules>
