@@ -7,11 +7,13 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.journalpost.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -21,6 +23,7 @@ import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.rest.web.identOgJournalpost
 import no.nav.k9punsj.rest.web.openapi.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,6 +49,7 @@ internal class JournalpostRoutes(
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
+    private val azureGraphService: IAzureGraphService,
 ) {
 
     private companion object {
@@ -64,7 +68,8 @@ internal class JournalpostRoutes(
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
-        internal const val MarkerJournalpostSomUtgått = "/journalpost/utgått/{$JournalpostIdKey}"
+        internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
+
 
         //for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -391,56 +396,29 @@ internal class JournalpostRoutes(
             }
         }
 
-        PATCH("/api${Urls.MarkerJournalpostSomUtgått}") { request ->
+        POST("/api${Urls.JournalførPåGenerellSak}") { request ->
             RequestContext(coroutineContext, request) {
-                return@RequestContext ServerResponse.status(HttpStatus.NOT_IMPLEMENTED).buildAndAwait()
+                val identOgJournalpost = request.identOgJournalpost()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+
+                return@RequestContext kotlin.runCatching {
+                    journalpostService.journalførMotGenerellSak(
+                        identOgJournalpost.journalpostId,
+                        identOgJournalpost.norskIdent.somIdentitetsnummer(),
+                        enhet
+                    )
+                }.fold(
+                    onSuccess = {
+                        ServerResponse.status(it).buildAndAwait()
+                    },
+                    onFailure = {
+                        ServerResponse
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .json()
+                            .bodyValueAndAwait(OasFeil(it.message))
+                    }
+                )
             }
-//                val journalpostId = request.journalpostId()
-//
-//                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
-//
-//                if (kanSendeInn) {
-//                    return@RequestContext kotlin.runCatching {
-//                        journalpostService.markerJournalpostSomUtgått(journalpostId)
-//                    }
-//                        .fold(
-//                            onSuccess = {
-//                                journalpostService.settTilFerdig(journalpostId)
-//                                ServerResponse
-//                                    .ok()
-//                                    .json()
-//                                    .bodyValueAndAwait(it!!)
-//                            },
-//                            onFailure = {
-//                                when (it) {
-//                                    FeilIAksjonslogg(it.message!!) -> {
-//                                        it.serverResponseMedStatus(HttpStatus.BAD_REQUEST)
-//                                    }
-//                                    UgyldigToken(it.message!!) -> {
-//                                        it.serverResponseMedStatus(HttpStatus.UNAUTHORIZED)
-//                                    }
-//                                    IkkeTilgang(it.message!!) -> {
-//                                        it.serverResponseMedStatus(HttpStatus.FORBIDDEN)
-//                                    }
-//                                    IkkeFunnet(it.message!!) -> {
-//                                        it.serverResponseMedStatus(HttpStatus.NOT_FOUND)
-//                                    }
-//                                    InternalServerErrorDoarkiv(it.message!!) -> {
-//                                        it.serverResponseMedStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//                                    }
-//                                    else -> {
-//                                        it.serverResponseMedStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//                                    }
-//                                }
-//                            }
-//                        )
-//                } else {
-//                    return@RequestContext ServerResponse
-//                        .status(HttpStatus.CONFLICT)
-//                        .json()
-//                        .bodyValueAndAwait(OasFeil("Kan ikke endre en journalpost som er ferdig behandling i punsj"))
-//                }
-//            }
         }
 
         kopierJournalpostRoute(
@@ -452,7 +430,7 @@ internal class JournalpostRoutes(
     }
 
     private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus): ServerResponse {
-        logger.error("" +httpStatus.value() + this.message)
+        logger.error("" + httpStatus.value() + this.message)
         return status(httpStatus)
             .json()
             .bodyValueAndAwait(OasFeil(this.message))

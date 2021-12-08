@@ -106,6 +106,10 @@ spec:
       value: https://modapp-q1.adeo.no/aareg-services/api/v1
     - name: EREG_BASE_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.dev-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: 972814f3-8bdf-44f8-a191-c2ed00020b54/.default
 
       # Integrasjoner (Kafka)
       # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los

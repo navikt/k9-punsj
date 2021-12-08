@@ -16,7 +16,6 @@ internal data class FerdigstillJournalpost(
     private val dokumenter: Set<Dokument> = emptySet(),
     private val bruker: Bruker? = null) {
 
-
     private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
     private val kanFerdigstilles = !erFerdigstilt
 

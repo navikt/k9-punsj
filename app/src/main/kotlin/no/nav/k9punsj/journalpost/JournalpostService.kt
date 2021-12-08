@@ -19,6 +19,7 @@ import java.time.ZoneId
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
+    private val dokarkivGateway: DokarkivGateway
 ) {
 
     private companion object {
@@ -70,8 +71,12 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun markerJournalpostSomUtgått(journalpostId: JournalpostId): String? {
-        return safGateway.markerJournalpostSomUtgått(journalpostId)
+    internal suspend fun journalførMotGenerellSak(
+        journalpostId: JournalpostId, identitetsnummer: Identitetsnummer,
+        enhetKode: String,
+    ): Int {
+        val hentDataFraSaf = safGateway.hentDataFraSaf(SafDtos.FerdigstillJournalpostQuery(journalpostId).query)
+        return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
     }
 
     private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {

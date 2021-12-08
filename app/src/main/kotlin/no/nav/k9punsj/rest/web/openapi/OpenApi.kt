@@ -24,6 +24,7 @@ import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.gosys.GosysRoutes
 import no.nav.k9punsj.journalpost.JournalpostRoutes
 import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
+import no.nav.k9punsj.rest.web.IdentOgJournalpost
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.ruter.BrevRoutes
 import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
@@ -653,33 +654,12 @@ internal class JournalpostController {
     ) {
     }
 
-    @PatchMapping(JournalpostRoutes.Urls.MarkerJournalpostSomUtgått, produces = ["application/json"])
+    @PostMapping(JournalpostRoutes.Urls.JournalførPåGenerellSak, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Hvis journalposten har blitt lukket",
-                content = [Content(
-                    schema = Schema(
-                        implementation = String::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "400",
-                description = "Feil i aksjonslogg"
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Ugyldig OIDC token. Denne feilen gis dersom tokenet ikke har riktig format eller er utgått"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "Ikke tilgang"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Journalpost eksisterer ikke i arkivet"
+                description = "Hvis journalposten har blitt ferdigstilt på generell sak",
             ),
             ApiResponse(
                 responseCode = "500",
@@ -688,11 +668,11 @@ internal class JournalpostController {
         ]
     )
     @Operation(
-        summary = "Setter journalposten til UTGÅTT i arkivet",
+        summary = "Journalfører journalposten mot generell sak og ferdigstiller",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun MarkerJournalpostSomUtgått(
-        @PathVariable("journalpost_id") journalpostId: String,
+    fun JournalførPåGenerellSak(
+        @RequestBody body: IdentOgJournalpost,
     ) {
     }
 }

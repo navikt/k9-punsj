@@ -3,21 +3,14 @@ package no.nav.k9punsj.journalpost
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
-import com.github.kittinunf.fuel.httpPatch
 import com.github.kittinunf.fuel.httpPost
-import com.github.kittinunf.fuel.httpPut
-import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
-import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJournalpostType
-import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -137,7 +130,7 @@ class SafGateway(
         return journalpost
     }
 
-    private suspend fun String.hentDataFraSaf() : JSONObject? {
+    internal suspend fun hentDataFraSaf(body: String) : JSONObject? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -146,7 +139,7 @@ class SafGateway(
 
         val (request, response, result) = GraphQlUrl
             .httpPost()
-            .body(this)
+            .body(body)
             .header(
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue,
                 CorrelationIdHeader to coroutineContext.hentCorrelationId(),
@@ -194,72 +187,7 @@ class SafGateway(
         }
     }
 
-    //https://github.com/navikt/dokarkiv/blob/master/journalpost/src/main/java/no/nav/do[…]post/v1/controllers/FeilregistrerJournalpostRestController.java
-    //rest/journalpostapi/v1/journalpost/{journalpostId}/feilregistrer/settStatusUtgår
-    internal suspend fun markerJournalpostSomUtgått(journalpostId: String): String? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val (request, response, result) = journalpostId.settStautsTilUtgåttUrl()
-            .httpPatch()
-            .header(
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
-            ).awaitStringResponseResult()
-
-        return result.fold(
-            success = {
-                it
-            },
-            failure = {
-                håndterFeil(it, request, response)
-                null
-            }
-        )
-    }
-
-    internal suspend fun oppdaterJournalpostData(
-        journalpostId: JournalpostId,
-        identitetsnummer: Identitetsnummer,
-        enhetKode: String
-    ) {
-        val ferdigstillJournalpost = SafDtos.FerdigstillJournalpostQuery(journalpostId)
-            .query
-            .hentDataFraSaf()
-            ?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
-
-
-        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadGenerellSak()
-
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val (request, response, result) = journalpostId.oppdaterJournalpostUrl()
-            .httpPut()
-            .jsonBody(JSONObject(oppdatertPayload).toString())
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
-            ).awaitStringResponseResult()
-
-        result.onError {
-            håndterFeil(it, request, response)
-        }
-
-        ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
-
-    }
-
-    private fun håndterFeil(
+    internal fun håndterFeil(
         it: FuelError,
         request: Request,
         response: Response,
@@ -281,40 +209,7 @@ class SafGateway(
         }
     }
 
-    internal fun JSONObject.mapFerdigstillJournalpost(
-        journalpostId: no.nav.k9punsj.journalpost.JournalpostId,
-        identitetsnummer: Identitetsnummer
-    ) =
-        getJSONObject("journalpost")
-            .let { journalpost -> FerdigstillJournalpost(
-                journalpostId = journalpostId,
-                avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
-                status = journalpost.getString("journalstatus").somJournalpostStatus(),
-                type = journalpost.getString("journalposttype").somJournalpostType(),
-                tittel = journalpost.stringOrNull("tittel"),
-                dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
-                    FerdigstillJournalpost.Dokument(
-                        dokumentId = it.getString("dokumentInfoId"),
-                        tittel = it.stringOrNull("tittel")
-                    )
-                }.toSet(),
-                bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
-            )}
-
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
-
-    private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
-        true -> getString(key)
-        false -> null
-    }
-    private fun JSONObject.notNullNotBlankString(key: String)
-            = has(key) && get(key) is String && getString(key).isNotBlank()
-
-    //TODO(OJR) skal nok fjernes
-    private fun JournalpostId.settStautsTilUtgåttUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/feilregistrer/settStatusUtgår"
-
-    private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
-    private fun JournalpostId.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
@@ -327,7 +222,6 @@ class SafGateway(
         )
     )
 }
-
 
 typealias DokumentId = String
 

@@ -22,6 +22,11 @@ data class HentSøknad(
     val norskIdent: NorskIdent,
 )
 
+data class IdentOgJournalpost(
+    val norskIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
+)
+
 data class SendSøknad(
     val norskIdent: NorskIdentDto,
     val soeknadId: SøknadIdDto,
@@ -71,6 +76,9 @@ internal suspend fun ServerRequest.brevBestilling() =
 
 internal suspend fun ServerRequest.opprettNy() =
     body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
+
+internal suspend fun ServerRequest.identOgJournalpost() =
+    body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 internal suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()

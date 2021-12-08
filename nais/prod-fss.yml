@@ -116,6 +116,10 @@ spec:
       value: https://oppgave.nais.adeo.no
     - name: SAF_BASE_URL
       value: https://saf.intern.nav.no
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: 162b3255-2f72-4399-8f7a-244add9ffaac/.default
 
       # Integrasjoner (Kafka)
       # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los
