@@ -61,7 +61,7 @@ data class OpprettNyOmsSøknad(
 internal fun Boolean.httpStatus() = if (this) HttpStatus.OK else HttpStatus.BAD_REQUEST
 
 
-internal fun ServerRequest.norskeIdent(): String {
+internal fun ServerRequest.norskIdent(): String {
     return headers().header("X-Nav-NorskIdent").first()!!
 }
 

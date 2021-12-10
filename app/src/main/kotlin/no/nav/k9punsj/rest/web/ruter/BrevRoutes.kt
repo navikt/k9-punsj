@@ -7,8 +7,11 @@ import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.brev.BrevServiceImpl
 import no.nav.k9punsj.brev.BrevType
 import no.nav.k9punsj.brev.BrevVisningDto
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
+import no.nav.k9punsj.rest.web.InnloggetUtils
 import no.nav.k9punsj.rest.web.brevBestilling
+import no.nav.k9punsj.rest.web.norskIdent
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,9 +27,10 @@ import kotlin.coroutines.coroutineContext
 internal class BrevRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val brevService: BrevServiceImpl,
-    private val azureGraphService: IAzureGraphService
+    private val azureGraphService: IAzureGraphService,
+    private val innlogget: InnloggetUtils,
+    private val personService: PersonService
 ) {
-
 
     private companion object {
         private const val JournalpostIdKey = "journalpost_id"
@@ -36,6 +40,7 @@ internal class BrevRoutes(
     internal object Urls {
         internal const val BestillBrev = "/brev/bestill" //post
         internal const val HentAlleBrev = "/brev/hentAlle/{$JournalpostIdKey}" //get
+        internal const val HentAktørId = "/brev/aktorId" //get
     }
 
     @Bean
@@ -51,7 +56,7 @@ internal class BrevRoutes(
                         .buildAndAwait()
                 }
 
-                val res = brev.map { BrevVisningDto.lagBrevVisningDto(it.brevData, it)}
+                val res = brev.map { BrevVisningDto.lagBrevVisningDto(it.brevData, it) }
 
                 return@RequestContext ServerResponse
                     .ok()
@@ -87,6 +92,26 @@ internal class BrevRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(brevEntitet)
+            }
+        }
+
+        GET("/app${Urls.HentAktørId}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.norskIdent()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
+                    Urls.HentAktørId)?.let { return@RequestContext it }
+
+                val person = kotlin.runCatching { personService.finnPersonVedNorskIdentFørstDbSåPdl(norskIdent) }
+                    .getOrElse {
+                        return@RequestContext ServerResponse
+                            .badRequest()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(it.message!!))
+                    }
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(person.aktørId)
             }
         }
     }

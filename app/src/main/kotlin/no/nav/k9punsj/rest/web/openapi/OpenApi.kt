@@ -1168,4 +1168,32 @@ internal class BrevController {
         @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
+
+    @GetMapping(BrevRoutes.Urls.HentAktørId, produces = ["application/json"])
+    @Operation(
+        summary = "Sender en brevbestilling med gitt mal og innhold",
+        description = "Sender en brevbestilling med gitt mal og innhold",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Gir aktørId",
+                content = [Content(
+                    schema = Schema(
+                        implementation = AktørIdDto::class
+                    )
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Klarte ikke hent aktør for gitt fnr",
+            )
+        ]
+    )
+    fun HentAktørId(
+        @RequestHeader("X-Nav-NorskIdent") norskIdent: String
+    ) {
+    }
 }

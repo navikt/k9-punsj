@@ -68,7 +68,7 @@ internal class PleiepengerSyktBarnRoutes(
     fun pleiepengerSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.norskeIdent()
+                val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)

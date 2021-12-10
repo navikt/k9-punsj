@@ -35,4 +35,19 @@ class PersonService(
         return personRepository.hentPersonVedPersonIdent(norskIdent)
     }
 
+    suspend fun finnPersonVedNorskIdentFørstDbSåPdl(norskIdent: NorskIdent): Person {
+        val aktørId = finnAktørId(norskIdent)
+        return Person("", norskIdent, aktørId)
+    }
+
+    suspend fun finnAktørId(norskIdent: NorskIdent): String {
+        val person = personRepository.hentPersonVedPersonIdent(norskIdent)
+        if (person != null) {
+            return person.aktørId
+        }
+        val pdlResponse = pdlService.identifikator(norskIdent)
+        return pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+            ?: throw IllegalStateException("Fant ikke aktørId i PDL")
+    }
+
 }
