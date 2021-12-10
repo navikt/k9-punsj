@@ -95,7 +95,7 @@ internal class BrevRoutes(
             }
         }
 
-        GET("/app${Urls.HentAktørId}") { request ->
+        GET("/api${Urls.HentAktørId}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
