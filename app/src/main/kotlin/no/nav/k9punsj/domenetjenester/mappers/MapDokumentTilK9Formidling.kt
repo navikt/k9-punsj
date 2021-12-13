@@ -53,7 +53,7 @@ internal class MapDokumentTilK9Formidling(
     }
 
     private fun String?.leggTilSaksnummer() {
-        bestilling.saksnummer = this ?: "GENERELL_SAK"
+        bestilling.saksnummer = this ?: DokumentbestillingDto.GENERELL_SAK
     }
 
     private fun String.transformTilAktørId() {

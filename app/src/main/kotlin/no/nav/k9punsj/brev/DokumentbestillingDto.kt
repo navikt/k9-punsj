@@ -5,8 +5,6 @@ import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 
-const val GENERELL_SAK = "GENERELL_SAK"
-
 data class DokumentbestillingDto(
     val journalpostId: JournalpostIdDto,
     val brevId: BrevId? = null,
@@ -15,11 +13,15 @@ data class DokumentbestillingDto(
     val mottaker: Mottaker,
     val fagsakYtelseType: FagsakYtelseType,
     val dokumentMal: String,
-    val dokumentdata: JsonB? = null
+    val dokumentdata: JsonB? = null,
 
-) {
+    ) {
     data class Mottaker(
-        val type : String,
-        val id : String
+        val type: String,
+        val id: String,
     )
+
+    companion object {
+        const val GENERELL_SAK = "GENERELL_SAK"
+    }
 }
