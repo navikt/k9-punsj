@@ -6,6 +6,7 @@ import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import no.nav.k9punsj.rest.web.søkUferdigJournalposter
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -28,6 +29,7 @@ internal class JournalpostInfoRoutes(
 
     internal object Urls {
         internal const val HentÅpneJournalposter = "/journalpost/uferdig/{${AktørIdKey}}"
+        internal const val HentÅpneJournalposterPost = "/journalpost/uferdig"
     }
 
     @Bean
@@ -38,16 +40,28 @@ internal class JournalpostInfoRoutes(
                 val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
-                if (journalpostIder.isNotEmpty()) {
-                    return@RequestContext ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(JournalpostIderDto(journalpostIder))
-                }
+             return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(JournalpostIderDto(journalpostIder))
+            }
+        }
+
+        POST("/api${Urls.HentÅpneJournalposterPost}") { request ->
+            RequestContext(coroutineContext, request) {
+                val dto = request.søkUferdigJournalposter()
+                val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(dto.aktorIdentDto)
+                    .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
+
+                val journalpostPåBarnet = dto.aktorIdentBarnDto?.let {
+                    journalpostService.finnJournalposterPåPersonBareFraFordel(it)
+                        .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
+                }.orEmpty()
+
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(JournalpostIderDto(emptyList()))
+                    .bodyValueAndAwait(JournalpostIderDto(journalpostIder, journalpostPåBarnet))
             }
         }
     }
@@ -56,5 +70,6 @@ internal class JournalpostInfoRoutes(
 
     data class JournalpostIderDto(
         val journalpostIder: List<JournalpostIdDto>,
+        val journalpostIderBarn: List<JournalpostIdDto> = emptyList()
     )
 }

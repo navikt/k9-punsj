@@ -42,6 +42,11 @@ data class MatchFagsakMedPeriode(
     val periodeDto: PeriodeDto
 )
 
+data class SøkUferdigJournalposter(
+    val aktorIdentDto: AktørIdDto,
+    val aktorIdentBarnDto: AktørIdDto?
+)
+
 data class PunsjBolleDto(
     val brukerIdent: NorskIdentDto,
     val barnIdent: NorskIdentDto,
@@ -79,6 +84,9 @@ internal suspend fun ServerRequest.opprettNy() =
 
 internal suspend fun ServerRequest.identOgJournalpost() =
     body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
+
+internal suspend fun ServerRequest.søkUferdigJournalposter() =
+    body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 internal suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
