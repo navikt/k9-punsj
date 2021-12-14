@@ -65,10 +65,6 @@ internal fun ServerRequest.norskIdent(): String {
     return headers().header("X-Nav-NorskIdent").first()!!
 }
 
-internal fun ServerRequest.barnIdent(): String? {
-    return headers().header("X-Nav-AktorId-barn").firstOrNull()
-}
-
 internal suspend fun ServerRequest.pleiepengerSøknad() =
     body(BodyExtractors.toMono(PleiepengerSøknadDto::class.java)).awaitFirst()
 

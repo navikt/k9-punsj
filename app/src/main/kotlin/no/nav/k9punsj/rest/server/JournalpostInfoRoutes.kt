@@ -5,7 +5,6 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.rest.web.barnIdent
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -39,15 +38,16 @@ internal class JournalpostInfoRoutes(
                 val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
-                val journalpostPåBarnet = request.barnIdent()?.let {
-                    journalpostService.finnJournalposterPåPersonBareFraFordel(it)
-                        .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
-                }.orEmpty()
-
+                if (journalpostIder.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(JournalpostIderDto(journalpostIder))
+                }
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(JournalpostIderDto(journalpostIder, journalpostPåBarnet))
+                    .bodyValueAndAwait(JournalpostIderDto(emptyList()))
             }
         }
     }
@@ -56,6 +56,5 @@ internal class JournalpostInfoRoutes(
 
     data class JournalpostIderDto(
         val journalpostIder: List<JournalpostIdDto>,
-        val journalpostIderBarn: List<JournalpostIdDto> = emptyList(),
     )
 }
