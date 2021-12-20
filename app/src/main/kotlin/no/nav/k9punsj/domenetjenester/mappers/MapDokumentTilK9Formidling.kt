@@ -1,22 +1,21 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.brev.BrevId
 import no.nav.k9punsj.brev.DokumentbestillingDto
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
-import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
     brevId: BrevId,
     dto: DokumentbestillingDto,
-    val personService: PersonService,
+    aktørId: AktørId,
 ) {
 
     private val bestilling = Dokumentbestilling()
@@ -27,7 +26,7 @@ internal class MapDokumentTilK9Formidling(
             dto.journalpostId.leggTilEksternRefernase()
             brevId.leggTilDokumentbestillingId()
             dto.saksnummer.leggTilSaksnummer()
-            dto.soekerId.transformTilAktørId()
+            aktørId.sett()
             dto.mottaker.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
@@ -56,13 +55,8 @@ internal class MapDokumentTilK9Formidling(
         bestilling.saksnummer = this ?: DokumentbestillingDto.GENERELL_SAK
     }
 
-    private fun String.transformTilAktørId() {
-        val søkerId = this
-        runBlocking {
-            kotlin.runCatching { personService.finnEllerOpprettPersonVedNorskIdent(søkerId) }
-                .onSuccess { bestilling.aktørId = it.aktørId }
-                .onFailure { feil.add(Feil("AktørId", "AktørId", "Kunne ikke finne person i pdl")) }
-        }
+    private fun String.sett() {
+        bestilling.aktørId = this
     }
 
     private fun DokumentbestillingDto.Mottaker.leggTilMottaker() {

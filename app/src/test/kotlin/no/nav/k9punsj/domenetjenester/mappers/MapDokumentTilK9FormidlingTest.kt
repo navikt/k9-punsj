@@ -3,13 +3,9 @@ package no.nav.k9punsj.domenetjenester.mappers
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.brev.DokumentbestillingDto
-import no.nav.k9punsj.db.datamodell.Person
-import no.nav.k9punsj.domenetjenester.PersonService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
@@ -17,13 +13,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("test")
 internal class MapDokumentTilK9FormidlingTest {
 
-    @MockBean
-    private lateinit var personService: PersonService
-
     @Test
     fun `skal mappe bestilling uten feil`(): Unit = runBlocking {
-        mockSvarFraPersonService()
-
         // arrange
         val saksnummer = "GSF-123"
         val brevId = "dok123"
@@ -37,7 +28,7 @@ internal class MapDokumentTilK9FormidlingTest {
             null)
 
         // act
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, personService).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isEmpty()
@@ -48,7 +39,6 @@ internal class MapDokumentTilK9FormidlingTest {
     @Test
     fun `skal fange opp feil i bestillingen`(): Unit = runBlocking {
         // arrange
-        mockSvarFraPersonService()
         val saksnummer = "GSF-123"
         val brevId = "dok123"
         val dokumentbestillingDto = DokumentbestillingDto("ref123",
@@ -62,16 +52,12 @@ internal class MapDokumentTilK9FormidlingTest {
 
 
         // act
-        val (_, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, personService).bestillingOgFeil()
+        val (_, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isNotEmpty
         val feilKode = feil.map { it.feilkode }
         assertThat(feilKode).contains("DokumentMalType")
         assertThat(feilKode).contains("Mottaker")
-    }
-
-    private suspend fun mockSvarFraPersonService() {
-        Mockito.doAnswer { Person("f231231234", "123", "321") }.`when`(personService).finnEllerOpprettPersonVedNorskIdent(Mockito.anyString())
     }
 }

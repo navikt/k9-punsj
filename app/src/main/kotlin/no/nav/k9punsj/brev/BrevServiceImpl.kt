@@ -45,9 +45,10 @@ class BrevServiceImpl(
 
         val kanSendeInn = journalpostService.kanSendeInn(brevEntitet.forJournalpostId)
         if (kanSendeInn) {
+            val aktørId = personService.finnPersonVedNorskIdentFørstDbSåPdl(brevData.soekerId).aktørId
             val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevId,
                 brevEntitet.brevData,
-                personService).bestillingOgFeil()
+                aktørId).bestillingOgFeil()
 
             if (feil.isEmpty()) {
                 val data = kotlin.runCatching { bestilling.toJsonB() }.getOrElse { throw it }
