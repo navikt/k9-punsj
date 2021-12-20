@@ -188,8 +188,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SettPåVent}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpost = request.journalpostId()
-                val dto = request.søknadId()
-
+                val dto = kotlin.runCatching { request.søknadId() }.getOrDefault(SettPåVentDto(null))
                 aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
 
                 ServerResponse
