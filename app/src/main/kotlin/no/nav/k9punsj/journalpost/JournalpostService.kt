@@ -75,7 +75,7 @@ class JournalpostService(
         journalpostId: JournalpostId, identitetsnummer: Identitetsnummer,
         enhetKode: String,
     ): Int {
-        val hentDataFraSaf = safGateway.hentDataFraSaf(SafDtos.FerdigstillJournalpostQuery(journalpostId).query)
+        val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
     }
 
