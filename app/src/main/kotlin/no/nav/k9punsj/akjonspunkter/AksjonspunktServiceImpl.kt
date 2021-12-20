@@ -141,9 +141,9 @@ class AksjonspunktServiceImpl(
         return null
     }
 
-    override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto) {
+    override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto?) {
         val journalpost = journalpostRepository.hent(journalpostId)
-        val søknad = søknadRepository.hentSøknad(søknadId = søknadId)?.søknad
+        val søknad = if (søknadId != null) søknadRepository.hentSøknad(søknadId = søknadId)?.søknad else null
         val barnIdent  = if (søknad != null) {
             val vising: PleiepengerSøknadDto = objectMapper().convertValue(søknad)
             val norskIdent = vising.barn?.norskIdent

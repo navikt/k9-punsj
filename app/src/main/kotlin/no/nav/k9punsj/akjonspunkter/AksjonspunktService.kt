@@ -19,7 +19,7 @@ interface AksjonspunktService {
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>
     )
 
-    suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto)
+    suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto?)
 
     suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
         journalpostId: List<String>,

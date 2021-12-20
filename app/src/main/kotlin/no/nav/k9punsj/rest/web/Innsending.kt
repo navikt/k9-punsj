@@ -54,7 +54,7 @@ data class PunsjBolleDto(
 )
 
 data class SettPåVentDto(
-    val soeknadId: SøknadIdDto
+    val soeknadId: SøknadIdDto?
 )
 
 
