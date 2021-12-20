@@ -207,7 +207,7 @@ class SafGateway(
             404 -> throw IkkeFunnet(feil)
             500 -> throw InternalServerErrorDoarkiv(feil)
             else -> {
-                throw IllegalStateException("${response.statusCode} -> Feil ved henting av dokument fra SAF")
+                throw IllegalStateException("${response.statusCode} -> "+ feil)
             }
         }
     }
