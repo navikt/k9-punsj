@@ -144,6 +144,7 @@ class SafGateway(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.CONTENT_TYPE to "application/json",
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue,
                 CorrelationIdHeader to coroutineContext.hentCorrelationId(),
                 HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
