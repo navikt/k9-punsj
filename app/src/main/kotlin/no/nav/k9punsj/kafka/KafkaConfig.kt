@@ -76,9 +76,7 @@ class KafkaConfig(
 
     private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.containerProperties.apply {
-            authorizationExceptionRetryInterval = Duration.ofMillis(RETRY_INTERVAL)
-        }
+        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofMillis(RETRY_INTERVAL))
         factory.setErrorHandler(ContainerStoppingErrorHandler())
         factory.consumerFactory = consumerFactory
         return factory
