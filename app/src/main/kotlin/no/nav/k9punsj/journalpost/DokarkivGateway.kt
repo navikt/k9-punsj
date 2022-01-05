@@ -1,11 +1,11 @@
 package no.nav.k9punsj.journalpost
 
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
-import com.github.kittinunf.fuel.httpPatch
 import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.onError
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
@@ -62,10 +62,11 @@ class DokarkivGateway(
             håndterFeil(it, request, response)
         }
 
+        val fuelManager = FuelManager.instance
+        fuelManager.forceMethods = true
         val ferdigstillPayload = ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
-
-        val (ferdigstillReqest, ferdigstillResponse, ferdigstillResult) = journalpostId.ferdigstillJournalpostUrl()
-            .httpPatch()
+        val (ferdigstillReqest, ferdigstillResponse, ferdigstillResult) =
+            fuelManager.patch(journalpostId.ferdigstillJournalpostUrl())
             .jsonBody(JSONObject(ferdigstillPayload).toString())
             .header(
                 HttpHeaders.ACCEPT to "application/json",
