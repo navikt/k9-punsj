@@ -1,7 +1,6 @@
 package no.nav.k9punsj.journalpost
 
 import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.extensions.jsonBody
@@ -22,7 +21,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
@@ -38,8 +41,9 @@ class DokarkivGateway(
         journalpostId: JournalpostId,
         identitetsnummer: Identitetsnummer,
         enhetKode: String
-    ) : Int {
-        val ferdigstillJournalpost = dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
+    ): Int {
+        val ferdigstillJournalpost =
+            dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
         val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadGenerellSak()
 
         val accessToken = cachedAccessTokenClient
@@ -62,28 +66,17 @@ class DokarkivGateway(
             håndterFeil(it, request, response)
         }
 
-        val fuelManager = FuelManager.instance
-        fuelManager.forceMethods = true
         val ferdigstillPayload = ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
-        val (ferdigstillReqest, ferdigstillResponse, ferdigstillResult) =
-            fuelManager.patch(journalpostId.ferdigstillJournalpostUrl())
-            .jsonBody(JSONObject(ferdigstillPayload).toString())
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
-            ).awaitStringResponseResult()
 
-        return ferdigstillResult.fold(
-            success = {
-                ferdigstillResponse.statusCode
-            },
-            failure = {
-                håndterFeil(it, ferdigstillReqest, ferdigstillResponse)
-                ferdigstillResponse.statusCode
-            }
-        )
+        return client
+            .patch()
+            .uri { it.pathSegment(journalpostId.ferdigstillJournalpostUrl()).build() }
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(ferdigstillPayload)
+            .awaitExchange { it.rawStatusCode() }
     }
 
     private companion object {
@@ -91,7 +84,21 @@ class DokarkivGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
+        private const val MaxDokumentSize = 16 * 1024 * 1024
     }
+
+    private val client = WebClient
+        .builder()
+        .baseUrl(baseUrl.toString())
+        .exchangeStrategies(
+            ExchangeStrategies.builder()
+                .codecs { configurer ->
+                    configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(MaxDokumentSize)
+                }.build()
+        )
+        .build()
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
