@@ -63,9 +63,8 @@ internal data class FerdigstillJournalpost(
         }}
     }
 
-    internal fun ferdigstillPayload(enhetKode : String) : JournalførendeEnhet {
+    internal fun kanFerdigstilles() {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
-        return JournalførendeEnhet(enhetKode)
     }
 
     internal data class JournalførendeEnhet(
