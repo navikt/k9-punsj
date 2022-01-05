@@ -53,11 +53,20 @@ internal class JournalpostRoutes(
     private val azureGraphService: IAzureGraphService,
 ) {
 
-    private companion object {
+    internal companion object {
         private const val JournalpostIdKey = "journalpost_id"
         private const val AktørIdKey = "aktor_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
+
+        internal fun String.hentBareKodeverdien(): String {
+            val koden = this.trimIndent().substring(0, 4)
+            val bareTall = Pattern.matches("^[0-9]*$", koden)
+            if (bareTall) {
+                return koden
+            }
+            throw IllegalStateException("Klarte ikke hente riktig enhetkode")
+        }
     }
 
     internal object Urls {
@@ -430,14 +439,6 @@ internal class JournalpostRoutes(
         )
     }
 
-    private fun String.hentBareKodeverdien() : String {
-        val koden = this.substring(0, 3)
-        val bareTall = Pattern.matches("^[0-9]*$", koden)
-        if (bareTall) {
-            return koden
-        }
-        throw IllegalStateException("Klarte ikke hente riktig enhetkoden")
-    }
 
     private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus): ServerResponse {
         logger.error("" + httpStatus.value() + this.message)
