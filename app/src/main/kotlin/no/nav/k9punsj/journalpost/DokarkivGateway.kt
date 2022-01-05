@@ -15,6 +15,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -67,10 +68,9 @@ class DokarkivGateway(
         }
 
         val ferdigstillPayload = ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
+        val body = objectMapper().writeValueAsString(ferdigstillPayload)
 
-        val bodyen = JSONObject(ferdigstillPayload).toString()
-        logger.error("body = $bodyen")
-
+        logger.error("body = $body")
         val awaitFirst = client
             .patch()
             .uri { it.pathSegment("rest", "journalpostapi", "v1", "journalpost", journalpostId, "ferdigstill").build() }
@@ -79,7 +79,7 @@ class DokarkivGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(bodyen)
+            .bodyValue(body)
             .retrieve()
             .toEntity(String::class.java)
             .awaitFirst()
