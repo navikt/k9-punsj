@@ -40,7 +40,7 @@ class DokarkivGateway(
         dataFraSaf: JSONObject?,
         journalpostId: JournalpostId,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String
+        enhetKode: String,
     ): Int {
         val ferdigstillJournalpost =
             dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
@@ -75,12 +75,14 @@ class DokarkivGateway(
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(ferdigstillPayload)
+            .bodyValue(JSONObject(ferdigstillPayload).toString())
             .retrieve()
             .toEntity(String::class.java)
             .awaitFirst()
 
-        logger.error("HVA SKJER" + awaitFirst.body)
+        if (awaitFirst.statusCode.value() != 200) {
+            logger.error("Feiler med" + awaitFirst.body)
+        }
 
         return awaitFirst.statusCode.value()
     }
@@ -108,13 +110,14 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
-    private fun JournalpostId.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
+    private fun JournalpostId.ferdigstillJournalpostUrl() = "/rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
         true -> getString(key)
         false -> null
     }
-    private fun JSONObject.notNullNotBlankString(key: String)
-            = has(key) && get(key) is String && getString(key).isNotBlank()
+
+    private fun JSONObject.notNullNotBlankString(key: String) =
+        has(key) && get(key) is String && getString(key).isNotBlank()
 
     private fun håndterFeil(
         it: FuelError,
@@ -133,29 +136,31 @@ class DokarkivGateway(
             404 -> throw IkkeFunnet(feil)
             500 -> throw InternalServerErrorDoarkiv(feil)
             else -> {
-                throw IllegalStateException("${response.statusCode} -> "+ feil)
+                throw IllegalStateException("${response.statusCode} -> " + feil)
             }
         }
     }
 
-   private fun JSONObject.mapFerdigstillJournalpost(
+    private fun JSONObject.mapFerdigstillJournalpost(
         journalpostId: no.nav.k9punsj.journalpost.JournalpostId,
-        identitetsnummer: Identitetsnummer
+        identitetsnummer: Identitetsnummer,
     ) =
         getJSONObject("journalpost")
-            .let { journalpost -> FerdigstillJournalpost(
-                journalpostId = journalpostId,
-                avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
-                status = journalpost.getString("journalstatus").somJournalpostStatus(),
-                type = journalpost.getString("journalposttype").somJournalpostType(),
-                tittel = journalpost.stringOrNull("tittel"),
-                dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
-                    FerdigstillJournalpost.Dokument(
-                        dokumentId = it.getString("dokumentInfoId"),
-                        tittel = it.stringOrNull("tittel")
-                    )
-                }.toSet(),
-                bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
-            )}
+            .let { journalpost ->
+                FerdigstillJournalpost(
+                    journalpostId = journalpostId,
+                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
+                    status = journalpost.getString("journalstatus").somJournalpostStatus(),
+                    type = journalpost.getString("journalposttype").somJournalpostType(),
+                    tittel = journalpost.stringOrNull("tittel"),
+                    dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
+                        FerdigstillJournalpost.Dokument(
+                            dokumentId = it.getString("dokumentInfoId"),
+                            tittel = it.stringOrNull("tittel")
+                        )
+                    }.toSet(),
+                    bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+                )
+            }
 
 }
