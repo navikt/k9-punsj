@@ -68,6 +68,9 @@ class DokarkivGateway(
 
         val ferdigstillPayload = ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
 
+        val bodyen = JSONObject(ferdigstillPayload).toString()
+        logger.error("body = $bodyen")
+
         val awaitFirst = client
             .patch()
             .uri { it.pathSegment("rest", "journalpostapi", "v1", "journalpost", journalpostId, "ferdigstill").build() }
@@ -75,7 +78,8 @@ class DokarkivGateway(
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(JSONObject(ferdigstillPayload).toString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(bodyen)
             .retrieve()
             .toEntity(String::class.java)
             .awaitFirst()
@@ -110,7 +114,8 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
-//    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
+
+    //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
         true -> getString(key)
         false -> null
