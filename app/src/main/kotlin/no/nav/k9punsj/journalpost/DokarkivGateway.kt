@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.onError
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.hentAuthentication
@@ -25,7 +26,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
@@ -68,7 +68,7 @@ class DokarkivGateway(
 
         val ferdigstillPayload = ferdigstillJournalpost.ferdigstillPayload(enhetKode = enhetKode)
 
-        return client
+        val awaitFirst = client
             .patch()
             .uri { it.pathSegment(journalpostId.ferdigstillJournalpostUrl()).build() }
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -76,7 +76,13 @@ class DokarkivGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(ferdigstillPayload)
-            .awaitExchange { it.rawStatusCode() }
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        logger.error("HVA SKJER" + awaitFirst.body)
+
+        return awaitFirst.statusCode.value()
     }
 
     private companion object {
