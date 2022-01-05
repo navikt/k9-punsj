@@ -71,6 +71,9 @@ class DokarkivGateway(
         val pair = "journalfoerendeEnhet" to enhetKode
         val body = emptyMap<String, String>().plus(pair)
 
+        val fromValue = BodyInserters.fromValue(body)
+
+        logger.info("Boddy$fromValue")
         val awaitFirst = client
             .patch()
             .uri { it.pathSegment("rest", "journalpostapi", "v1", "journalpost", journalpostId, "ferdigstill").build() }
@@ -79,7 +82,7 @@ class DokarkivGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
+            .body(fromValue)
             .retrieve()
             .toEntity(String::class.java)
             .awaitFirst()
