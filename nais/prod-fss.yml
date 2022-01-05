@@ -117,7 +117,7 @@ spec:
     - name: SAF_BASE_URL
       value: https://saf.intern.nav.no
     - name: DOKARKIV_BASE_URL
-      value: https://dokarkiv.prod-fss-pub.nais.io
+      value: https://dokarkiv.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: 162b3255-2f72-4399-8f7a-244add9ffaac/.default
 
