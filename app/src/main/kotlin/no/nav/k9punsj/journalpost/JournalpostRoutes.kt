@@ -38,6 +38,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.ServerResponse.status
 import java.time.LocalDateTime
 import java.util.UUID
+import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -400,11 +401,12 @@ internal class JournalpostRoutes(
                 val identOgJournalpost = request.identOgJournalpost()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker()
 
+
                 return@RequestContext kotlin.runCatching {
                     journalpostService.journalførMotGenerellSak(
                         identOgJournalpost.journalpostId,
                         identOgJournalpost.norskIdent.somIdentitetsnummer(),
-                        enhet
+                        enhet.hentBareKodeverdien()
                     )
                 }.fold(
                     onSuccess = {
@@ -426,6 +428,15 @@ internal class JournalpostRoutes(
             journalpostService = journalpostService,
             innsendingClient = innsendingClient
         )
+    }
+
+    private fun String.hentBareKodeverdien() : String {
+        val koden = this.substring(0, 3)
+        val bareTall = Pattern.matches("^[0-9]*$", koden)
+        if (bareTall) {
+            return koden
+        }
+        throw IllegalStateException("Klarte ikke hente riktig enhetkoden")
     }
 
     private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus): ServerResponse {
