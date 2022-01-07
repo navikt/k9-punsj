@@ -78,9 +78,9 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             //TODO(UKJENT) håndter hvis FagsakYtelseType er UKJENT
-            val type = journalpostService.hentHvisJournalpostMedId(journalpostId)?.type?.let {
-                FagsakYtelseType.fraKode(it)
-            } ?: return@RequestContext kanIkkeKopieres("Fant ikke ytelsestype")
+//            val type = journalpostService.hentHvisJournalpostMedId(journalpostId)?.type?.let {
+//                FagsakYtelseType.fraKode(it)
+//            } ?: return@RequestContext kanIkkeKopieres("Fant ikke ytelsestype")
 
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 journalpostId = journalpostId,
@@ -88,7 +88,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 til = dto.til,
                 pleietrengende = dto.barn,
                 correlationId = coroutineContext.hentCorrelationId(),
-                ytelse = type
+                ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
             ))
             return@RequestContext sendtTilKopiering()
         }
