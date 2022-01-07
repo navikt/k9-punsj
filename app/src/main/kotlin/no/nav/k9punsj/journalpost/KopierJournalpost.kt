@@ -77,13 +77,18 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             }
 
+            //TODO(UKJENT) håndter hvis FagsakYtelseType er UKJENT
+            val type = journalpostService.hentHvisJournalpostMedId(journalpostId)?.type?.let {
+                FagsakYtelseType.fraKode(it)
+            } ?: return@RequestContext kanIkkeKopieres("Fant ikke ytelsestype")
+
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 journalpostId = journalpostId,
                 fra = dto.fra,
                 til = dto.til,
                 pleietrengende = dto.barn,
                 correlationId = coroutineContext.hentCorrelationId(),
-                ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                ytelse = type
             ))
             return@RequestContext sendtTilKopiering()
         }

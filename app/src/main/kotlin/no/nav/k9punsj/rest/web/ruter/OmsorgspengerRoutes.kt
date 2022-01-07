@@ -87,7 +87,7 @@ internal class OmsorgspengerRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
+                    .bodyValueAndAwait(SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
             }
         }
 
