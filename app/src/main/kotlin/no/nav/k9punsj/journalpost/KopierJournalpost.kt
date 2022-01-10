@@ -5,6 +5,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.innsending.KopierJournalpostInfo
@@ -64,23 +65,21 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
             val journalpostId = request.journalpostId()
-            val journalpost = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+            val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
 
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
 
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
-                if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
+                if (!tilKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
             } else {
-                if (!fraKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
-                if (!tilKanRutesTilK9(dto, journalpost, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+                if (!fraKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
+                if (!tilKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             }
 
-            //TODO(UKJENT) håndter hvis FagsakYtelseType er UKJENT
-//            val type = journalpostService.hentHvisJournalpostMedId(journalpostId)?.type?.let {
-//                FagsakYtelseType.fraKode(it)
-//            } ?: return@RequestContext kanIkkeKopieres("Fant ikke ytelsestype")
+            val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
+            val ytelseType = utledeFagsakYtelseType(journalpost)
 
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 journalpostId = journalpostId,
@@ -88,11 +87,26 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 til = dto.til,
                 pleietrengende = dto.barn,
                 correlationId = coroutineContext.hentCorrelationId(),
-                ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                ytelse = ytelseType
             ))
             return@RequestContext sendtTilKopiering()
         }
     }
+}
+
+private fun utledeFagsakYtelseType(journalpost: Journalpost?): FagsakYtelseType {
+    val ytelse = if (journalpost == null) {
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+    } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse) {
+        FagsakYtelseType.OMSORGSPENGER
+    } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+    } else if (journalpost.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
+        FagsakYtelseType.OMSORGSPENGER
+    } else {
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+    }
+    return ytelse
 }
 
 internal object KopierJournalpost {

@@ -232,6 +232,9 @@ internal class PleiepengerSyktBarnRoutes(
                         coroutineContext.hentCorrelationId())
                 }
 
+                //setter riktig type der man jobber på en ukjent i utgangspunktet
+                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, opprettNySøknad.journalpostId)
+
                 val søknadEntitet = mappeService.førsteInnsendingPsb(
                     nySøknad = opprettNySøknad!!
                 )

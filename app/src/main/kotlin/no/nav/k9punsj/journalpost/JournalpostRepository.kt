@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.db.datamodell.AktørId
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
@@ -178,6 +179,16 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 lagre(journalpost, KildeType.SAKSBEHANDLER) {
                     journalpost
                 }
+            }
+        }
+    }
+
+    suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
+        val journalpost = hentHvis(journalpostId)
+        if (journalpost != null) {
+            val medType = journalpost.copy(ytelse = ytelseType.kode)
+            lagre(medType){
+                medType
             }
         }
     }

@@ -3,6 +3,7 @@ package no.nav.k9punsj.fordel
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import org.slf4j.Logger
@@ -32,6 +33,7 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
+                ytelse = if(fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null,
                 type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
                 opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
                     fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null

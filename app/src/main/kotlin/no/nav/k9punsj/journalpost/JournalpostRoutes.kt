@@ -409,11 +409,19 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val identOgJournalpost = request.identOgJournalpost()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+                val journalpostId = identOgJournalpost.journalpostId
 
+                journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                journalpostService.settTilFerdig(journalpostId)
 
                 return@RequestContext kotlin.runCatching {
                     journalpostService.journalførMotGenerellSak(
-                        identOgJournalpost.journalpostId,
+                        journalpostId,
                         identOgJournalpost.norskIdent.somIdentitetsnummer(),
                         enhet.hentBareKodeverdien()
                     )

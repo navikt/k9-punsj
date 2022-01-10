@@ -123,6 +123,9 @@ internal class OmsorgspengerRoutes(
                         coroutineContext.hentCorrelationId())
                 }
 
+                //setter riktig type der man jobber på en ukjent i utgangspunktet
+                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+
                 val søknadEntitet = mappeService.førsteInnsendingOms(
                     nySøknad = opprettNySøknad!!
                 )
