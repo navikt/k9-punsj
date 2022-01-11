@@ -79,7 +79,14 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
+            if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
+                return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
+            }
             val ytelseType = utledeFagsakYtelseType(journalpost)
+
+            if (ytelseType != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+                return@RequestContext kanIkkeKopieres("Støtter bare kopier av pleiepenger sykt barn relaterte journalposter")
+            }
 
             innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
                 journalpostId = journalpostId,
@@ -101,8 +108,6 @@ private fun utledeFagsakYtelseType(journalpost: Journalpost?): FagsakYtelseType 
         FagsakYtelseType.OMSORGSPENGER
     } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-    } else if (journalpost.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
-        FagsakYtelseType.OMSORGSPENGER
     } else {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
     }
