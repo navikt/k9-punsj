@@ -13,6 +13,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -22,7 +23,6 @@ import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -30,11 +30,10 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.*
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-internal class OmsorgspengerRoutes(
+internal class OmsorgspengerKroniskSyktBarnRoutes(
     private val objectMapper: ObjectMapper,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
@@ -44,14 +43,12 @@ internal class OmsorgspengerRoutes(
     private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
     private val k9SakService: K9SakService,
-    private val soknadService : SoknadService,
-    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI
+    private val soknadService : SoknadService
 ) {
 
-
     private companion object {
-        private val logger = LoggerFactory.getLogger(OmsorgspengerRoutes::class.java)
-        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER
+        private val logger = LoggerFactory.getLogger(OmsorgspengerKroniskSyktBarnRoutes::class.java)
+        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER_KRONISK_SYKT_BARN
         private const val SøknadIdKey = "soeknad_id"
     }
 
@@ -67,7 +64,7 @@ internal class OmsorgspengerRoutes(
 
 
     @Bean
-    fun omsorgspengerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun omsorgspengerEkstraOmsorgsdagerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
@@ -78,7 +75,7 @@ internal class OmsorgspengerRoutes(
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
                         person = person
-                    ).tilOmsVisning(norskIdent)
+                    ).tilOmsKSBVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
@@ -87,7 +84,7 @@ internal class OmsorgspengerRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
+                    .bodyValueAndAwait(SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf()))
             }
         }
 
@@ -100,7 +97,7 @@ internal class OmsorgspengerRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(søknad.tilOmsvisning())
+                        .bodyValueAndAwait(søknad.tilOmsKSBvisning())
                 }
                 return@RequestContext ServerResponse
                     .notFound()
@@ -124,25 +121,25 @@ internal class OmsorgspengerRoutes(
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
-                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, opprettNySøknad.journalpostId)
 
-                val søknadEntitet = mappeService.førsteInnsendingOms(
+                val søknadEntitet = mappeService.førsteInnsendingOmsKSB(
                     nySøknad = opprettNySøknad!!
                 )
                 return@RequestContext ServerResponse
                     .created(request.søknadLocation(søknadEntitet.søknadId))
                     .json()
-                    .bodyValueAndAwait(søknadEntitet.tilOmsvisning())
+                    .bodyValueAndAwait(søknadEntitet.tilOmsKSBvisning())
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.omsorgspengerSøknad()
+                val søknad = request.omsorgspengerKroniskSyktBarnSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-                val søknadEntitet = mappeService.utfyllendeInnsendingOms(
-                    omsorgspengerSøknadDto = søknad,
+                val søknadEntitet = mappeService.utfyllendeInnsendingOmsKSB(
+                    omsorgspengerKroniskSyktBarnSøknadDto = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -176,7 +173,7 @@ internal class OmsorgspengerRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: OmsorgspengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: OmsorgspengerKroniskSyktBarnSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -193,7 +190,7 @@ internal class OmsorgspengerRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val (søknadK9Format, feilListe) = MapOmsTilK9Format(
+                        val (søknadK9Format, feilListe) = MapOmsKSBTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
                             dto = søknad
@@ -247,11 +244,11 @@ internal class OmsorgspengerRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val soknadTilValidering = request.omsorgspengerSøknad()
+                val soknadTilValidering = request.omsorgspengerKroniskSyktBarnSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
-                        PleiepengerSyktBarnRoutes.Urls.ValiderSøknad)?.let { return@RequestContext it }
+                        Urls.ValiderSøknad)?.let { return@RequestContext it }
                 }
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
@@ -264,7 +261,7 @@ internal class OmsorgspengerRoutes(
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = MapOmsTilK9Format(
+                    mapTilEksternFormat = MapOmsKSBTilK9Format(
                         søknadId = soknadTilValidering.soeknadId,
                         journalpostIder = journalposterDto.journalposter,
                         dto = soknadTilValidering
@@ -307,7 +304,7 @@ internal class OmsorgspengerRoutes(
 
                 val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
                     matchfagsakMedPeriode.brukerIdent,
-                    FagsakYtelseType.OMSORGSPENGER,
+                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
                     matchfagsakMedPeriode.periodeDto
                 )
 

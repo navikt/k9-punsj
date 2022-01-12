@@ -17,7 +17,7 @@ import kotlin.coroutines.coroutineContext
 
 
 @Service
-class PleiepengerSyktBarnSoknadService(
+class SoknadService(
     val journalpostRepository: JournalpostRepository,
     val søknadRepository: SøknadRepository,
     val innsendingClient: InnsendingClient,
@@ -73,7 +73,7 @@ class PleiepengerSyktBarnSoknadService(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(PleiepengerSyktBarnSoknadService::class.java)
+        private val logger = LoggerFactory.getLogger(SoknadService::class.java)
         private const val PunsjetAvSaksbehandler = "saksbehandler"
     }
 }
