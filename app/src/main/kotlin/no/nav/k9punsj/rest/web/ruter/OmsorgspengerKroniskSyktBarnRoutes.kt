@@ -14,7 +14,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
-import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService

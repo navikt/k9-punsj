@@ -1,9 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 import java.time.LocalTime
 
