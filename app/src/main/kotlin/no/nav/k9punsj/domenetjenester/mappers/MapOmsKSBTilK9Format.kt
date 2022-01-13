@@ -2,6 +2,7 @@ package no.nav.k9punsj.domenetjenester.mappers
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
@@ -27,6 +28,8 @@ internal class MapOmsKSBTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
+            dto.barn?.leggTilBarn()
+            dto.kroniskEllerFunksjonshemming?.let { dto.leggTilKroniskEllerFunksjonshemming() }
             leggTilJournalposter(journalpostIder = journalpostIder)
 
             // Fullfører søknad & validerer
@@ -52,9 +55,27 @@ internal class MapOmsKSBTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
-        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilMottattDato() {
+        if (mottattDato != null && klokkeslett != null) {
+            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
+        }
+    }
+
+    private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilKroniskEllerFunksjonshemming() {
+        omsorgspengerKroniskSyktBarn.medKroniskEllerFunksjonshemming(kroniskEllerFunksjonshemming)
+    }
+
+    private fun OmsorgspengerKroniskSyktBarnSøknadDto.BarnDto.leggTilBarn() = when {
+        norskIdent != null -> omsorgspengerKroniskSyktBarn.medBarn(
+            Barn().medNorskIdentitetsnummer(
+                NorskIdentitetsnummer.of(
+                    norskIdent
+                )
+            )
+        )
+        foedselsdato != null -> omsorgspengerKroniskSyktBarn.medBarn(Barn().medFødselsdato(foedselsdato))
+        else -> omsorgspengerKroniskSyktBarn.medBarn(Barn())
+    }
 
     private fun String.leggTilSøker() {
         if (erSatt()) {
@@ -64,8 +85,9 @@ internal class MapOmsKSBTilK9Format(
 
     private fun leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
-            søknad.medJournalpost(Journalpost()
-                .medJournalpostId(journalpostId)
+            søknad.medJournalpost(
+                Journalpost()
+                    .medJournalpostId(journalpostId)
             )
         }
     }
