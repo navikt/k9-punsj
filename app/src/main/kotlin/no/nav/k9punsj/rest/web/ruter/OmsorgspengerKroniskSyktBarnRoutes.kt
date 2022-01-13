@@ -63,7 +63,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
 
 
     @Bean
-    fun omsorgspengerEkstraOmsorgsdagerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun omsorgspengerKroniskSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
