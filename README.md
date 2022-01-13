@@ -29,7 +29,7 @@ Bruk header fra Nav token header i authorize
 
 ## Accesstoken lokalt
 Husk å være logget inn på [localhost](https://localhost:8080) først, så gå til 
-[Nav token header](https://localhost:8082/api/k9-punsj/oidc/hentNavTokenHeader)
+[Nav token header](https://localhost:8085/api/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ## Swagger i dev
