@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.eksternt.punsjbollen
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
@@ -13,13 +14,15 @@ interface PunsjbolleService {
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId): SaksnummerDto
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType,
+    ): SaksnummerDto
 
     suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         søknad: Søknad,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
     ): SaksnummerDto
 
     suspend fun ruting(
@@ -27,5 +30,7 @@ interface PunsjbolleService {
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId): PunsjbolleRuting
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType,
+    ): PunsjbolleRuting
 }

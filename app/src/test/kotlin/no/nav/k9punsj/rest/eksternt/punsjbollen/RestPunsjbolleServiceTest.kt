@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenResponse
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -47,7 +48,8 @@ internal class RestPunsjbolleServiceTest {
             barn = "456",
             journalpostId = "789",
             null,
-            correlationId
+            correlationId,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
     }
 

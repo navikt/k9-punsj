@@ -46,20 +46,22 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
-    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.ruting(
+    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo,fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.fra,
         barn = dto.barn,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId
+        correlationId = correlationId,
+        fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
-    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, correlationId: CorrelationId) = punsjbolleService.ruting(
+    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.til,
         barn = dto.barn,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId
+        correlationId = correlationId,
+        fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
@@ -67,22 +69,22 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             val journalpostId = request.journalpostId()
             val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
+            val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
 
             if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
-
+            val ytelseType = utledeFagsakYtelseType(journalpost)
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
-                if (!tilKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
             } else {
-                if (!fraKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
-                if (!tilKanRutesTilK9(dto, journalpostInfo, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
             }
 
-            val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
             if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
                 return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
             }
-            val ytelseType = utledeFagsakYtelseType(journalpost)
+
 
             if (ytelseType != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                 return@RequestContext kanIkkeKopieres("Støtter bare kopier av pleiepenger sykt barn relaterte journalposter")
