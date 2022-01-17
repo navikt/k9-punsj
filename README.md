@@ -25,11 +25,11 @@ vault read postgresql/preprod-fss/creds/k9-punsj-user
 
 ## Swagger lokalt
 Bruk header fra Nav token header i authorize
-[Swagger](https://localhost:8085/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
+[Swagger](http://localhost:8085/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
 
 ## Accesstoken lokalt
-Husk å være logget inn på [localhost](https://localhost:8080) først, så gå til 
-[Nav token header](https://localhost:8085/api/oidc/hentNavTokenHeader)
+Husk å være logget inn på [localhost](http://localhost:8085) først, så gå til 
+[Nav token header](http://localhost:8085/api/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ## Swagger i dev
@@ -38,12 +38,12 @@ Bruk header fra Nav token header i authorize.
 
 ## Accesstoken i dev
 Husk å være logget inn på [dev](https://k9-punsj.dev.adeo.no/) først, så gå til 
-[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/k9-punsj/oidc/hentNavTokenHeader)
+[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ## Åpne
 Link til k9-punsj skjemaer:
-[http://localhost:8080](http://localhost:8080)
+[http://localhost:8085](http://localhost:8085)
 
 ## Systemarkitektur
 Det brukes mermaid for å generere diagrammer. For å komme i gang, installer [mermaid-cli](https://github.com/mermaid-js/mermaid-cli#install-globally).
