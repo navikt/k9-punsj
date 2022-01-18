@@ -28,9 +28,10 @@ Bruk header fra Nav token header i authorize
 [Swagger](http://localhost:8085/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
 
 ## Accesstoken lokalt
-Husk å være logget inn på [localhost](http://localhost:8085) først, så gå til 
-[Nav token header](http://localhost:8085/api/oidc/hentNavTokenHeader)
-for å hente token som kan brukes i swagger.
+Husk å være logget inn på [localhost (frontend)](http://localhost:8080) først.
+Tokenet kan du finne i loggen til azure-mock kjørende i docker-compose.
+Søk etter ", assertion=" i loggen og kopier innholdet mellom firkantparantesen. Altså, den siste assertion som ble logget.
+Eksempel: `, assertion=[eyJr...]`
 
 ## Swagger i dev
 Bruk header fra Nav token header i authorize.
