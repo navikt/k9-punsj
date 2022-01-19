@@ -106,7 +106,8 @@ internal class ArbeidsgiverService(
             .map { entry ->
                 OrganisasjonArbeidsgiverMedId(entry.key,
                     hentOrganisasjonsnavn(entry.key) ?: "Ikke tilgjengelig",
-                    entry.value.map { it.arbeidsforholdId })
+                    entry.value.filter { it.arbeidsforholdId != null }
+                        .map { it.arbeidsforholdId!! })
             }.toSet())
     }
 
