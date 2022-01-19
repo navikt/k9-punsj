@@ -4,9 +4,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -70,5 +72,26 @@ internal class HendelseMottakerTest {
 
         val journalpost = journalpostRepository.hent("666")
         Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
+    }
+
+    @Test
+    fun `skal fjerne oppgave når det kommer info fra fordel`(): Unit = runBlocking {
+        val journalpostRepository = hendelseMottaker.journalpostRepository
+        val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
+
+        hendelseMottaker.prosesser(førsteMelding)
+
+        val meldingSomSkalLukkeOppgave = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode, ytelse = "PSB")
+
+        hendelseMottaker.prosesser(meldingSomSkalLukkeOppgave)
+
+        val journalpost = journalpostRepository.hent(meldingSomSkalLukkeOppgave.journalpostId)
+        Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
+
+        val alleAksjonspunkter =
+            DatabaseUtil.getAksjonspunktRepo().hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
+
+        Assertions.assertThat(alleAksjonspunkter).hasSize(1)
+        Assertions.assertThat(alleAksjonspunkter[0].aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)
     }
 }

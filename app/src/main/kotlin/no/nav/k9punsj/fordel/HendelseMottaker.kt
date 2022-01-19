@@ -15,7 +15,7 @@ import java.util.UUID
 @Service
 class HendelseMottaker @Autowired constructor(
     val journalpostRepository: JournalpostRepository,
-    val aksjonspunktService: AksjonspunktService
+    val aksjonspunktService: AksjonspunktService,
 ) {
     private companion object {
         private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
@@ -33,7 +33,7 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
-                ytelse = if(fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null,
+                ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null,
                 type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
                 opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
                     fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
@@ -45,7 +45,18 @@ class HendelseMottaker @Autowired constructor(
                 type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
                 ytelse = fordelPunsjEventDto.ytelse)
         } else {
-            log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
+            if (fordelPunsjEventDto.type != null && PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+                val journalpostFraDb = journalpostRepository.hent(journalpostId)
+                if (journalpostFraDb.type != null && PunsjInnsendingType.fraKode(journalpostFraDb.type) != PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+                    journalpostRepository.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
+                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                } else {
+                    log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
+                }
+            } else {
+                log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
+            }
+
         }
     }
 }
