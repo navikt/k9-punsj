@@ -9,6 +9,7 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -35,17 +36,20 @@ internal class HendelseMottakerTest {
 
     @Test
     fun `skal lagre ned informasjon om journalpost`() : Unit = runBlocking {
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "1", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val journalpostId = IdGenerator.nesteId()
+
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
         hendelseMottaker.prosesser(melding)
 
-        val journalpost = hendelseMottaker.journalpostRepository.hent("1")
+        val journalpost = hendelseMottaker.journalpostRepository.hent(journalpostId)
         Assertions.assertThat(journalpost).isNotNull
     }
 
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når det kommer samme uten status`() : Unit = runBlocking {
+        val journalpostId = IdGenerator.nesteId()
         val journalpostRepository = hendelseMottaker.journalpostRepository
-        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "2", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
         journalpostRepository.lagre(journalpostTilDb){
@@ -54,14 +58,15 @@ internal class HendelseMottakerTest {
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
-        val journalpost = journalpostRepository.hent("2")
+        val journalpost = journalpostRepository.hent(journalpostId)
         Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`() : Unit = runBlocking {
+        val journalpostId = IdGenerator.nesteId()
         val journalpostRepository = hendelseMottaker.journalpostRepository
-        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "3", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
         journalpostRepository.lagre(journalpostTilDb){
@@ -70,18 +75,19 @@ internal class HendelseMottakerTest {
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
-        val journalpost = journalpostRepository.hent("3")
+        val journalpost = journalpostRepository.hent(journalpostId)
         Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal fjerne oppgave når det kommer info fra fordel`(): Unit = runBlocking {
+        val journalpostId = IdGenerator.nesteId()
         val journalpostRepository = hendelseMottaker.journalpostRepository
-        val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "4", type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
+        val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
 
         hendelseMottaker.prosesser(førsteMelding)
 
-        val meldingSomSkalLukkeOppgave = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "4", type = PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode, ytelse = "PSB")
+        val meldingSomSkalLukkeOppgave = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode, ytelse = "PSB")
 
         hendelseMottaker.prosesser(meldingSomSkalLukkeOppgave)
 
