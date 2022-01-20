@@ -44,7 +44,7 @@ for å hente token som kan brukes i swagger.
 
 ## Åpne
 Link til k9-punsj skjemaer:
-[http://localhost:8085](http://localhost:8085)
+[http://localhost:8080](http://localhost:8080)
 
 ## Systemarkitektur
 Det brukes mermaid for å generere diagrammer. For å komme i gang, installer [mermaid-cli](https://github.com/mermaid-js/mermaid-cli#install-globally).
