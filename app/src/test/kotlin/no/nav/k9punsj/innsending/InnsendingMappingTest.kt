@@ -55,9 +55,8 @@ internal class InnsendingMappingTest {
 
     private inline fun <reified T> mapTilK9FormatOgAssert(søknad: MutableMap<String, Any?>, ytelse: Ytelse.Type) {
         val dto: T = objectMapper().convertValue(søknad)
-
-        val k9Format = when {
-            dto is OmsorgspengerKroniskSyktBarnSøknadDto -> {
+        val k9Format = when(dto) {
+            is OmsorgspengerKroniskSyktBarnSøknadDto -> {
                 MapOmsKSBTilK9Format(
                     søknadId = dto.soeknadId,
                     journalpostIder = dto.journalposter?.toSet() ?: emptySet(),
@@ -65,7 +64,7 @@ internal class InnsendingMappingTest {
                 ).søknadOgFeil().first
             }
 
-            dto is PleiepengerSøknadDto -> {
+            is PleiepengerSøknadDto -> {
                 MapPsbTilK9Format(
                     søknadId = dto.soeknadId,
                     journalpostIder = dto.journalposter?.toSet() ?: emptySet(),

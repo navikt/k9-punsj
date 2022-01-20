@@ -3,7 +3,8 @@ package no.nav.k9punsj.rest.web.ruter
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.*
+import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -11,9 +12,7 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.DatabaseUtil
-import no.nav.k9punsj.util.IdGenerator
-import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.util.*
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -47,28 +46,26 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
-        val norskIdent = "01110050053"
-        val (status, body) = client.get()
-            // get omsorgspenger-kronisk-sykt-barn-soknad/mappe
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", norskIdent)
-            .awaitStatusWithBody<SvarOmsKSBDto>()
-        Assertions.assertEquals(HttpStatus.OK, status)
-        Assertions.assertTrue(body.søknader!!.isEmpty())
+        val responsebody = client.getAndAssert<SvarOmsKSBDto>(
+            norskIdent = "01110050053",
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe"
+        )
+        Assertions.assertTrue(responsebody.søknader!!.isEmpty())
     }
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
-        val httpStatus = client.post()
-            // post omsorgspenger-kronisk-sykt-barn-soknad/mappe
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .awaitStatuscode()
-        Assertions.assertEquals(HttpStatus.CREATED, httpStatus)
+
+        client.postAndAssert<OpprettNySøknad>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api, søknadTypeUri
+        )
     }
 
     @Test
@@ -77,21 +74,21 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
 
-        val httpStatus = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .awaitStatuscode()
-        Assertions.assertEquals(HttpStatus.CREATED, httpStatus)
+        client.postAndAssert<OpprettNySøknad>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api, søknadTypeUri
+        )
 
-        val (status, body) = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", norskIdent)
-            .awaitStatusWithBody<SvarOmsKSBDto>()
-        Assertions.assertEquals(HttpStatus.OK, status)
+        val responsebody = client.getAndAssert<SvarOmsKSBDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe"
+        )
 
-        val journalposterDto = body.søknader?.first()?.journalposter
+        val journalposterDto = responsebody.søknader?.first()?.journalposter
         Assertions.assertEquals(journalpostId, journalposterDto?.first())
     }
 
@@ -104,23 +101,25 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .awaitExchangeBlocking()
+        val resPost = client.postAndAssert<OpprettNySøknad>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api, søknadTypeUri
+        )
 
         val location = resPost.headers().asHttpHeaders().location
-        Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
         Assertions.assertNotNull(location)
 
-        val søknadViaGet = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<OmsorgspengerKroniskSyktBarnSøknadDto>()
+        val res = client.getAndAssert<OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = "",
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", hentSøknadId(location)!!
+        )
 
-        Assertions.assertNotNull(søknadViaGet)
-        Assertions.assertEquals(journalpostid, søknadViaGet.journalposter?.first())
+        Assertions.assertNotNull(res)
+        Assertions.assertEquals(journalpostid, res.journalposter?.first())
     }
 
     @Test
@@ -132,27 +131,28 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .awaitExchangeBlocking()
+        val nySøknadRespons = client.postAndAssert<OpprettNySøknad>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api, søknadTypeUri
+        )
 
-        val location = resPost.headers().asHttpHeaders().location
-        Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        val location = nySøknadRespons.headers().asHttpHeaders().location
         Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        val (status, body) = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(søknadFraFrontend))
-            .awaitStatusWithBody<OmsorgspengerKroniskSyktBarnSøknadDto>()
+        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(søknadFraFrontend),
+            api, søknadTypeUri, "oppdater"
+        )
 
         Assertions.assertNotNull(body)
         Assertions.assertEquals(norskIdent, body.soekerId)
-        Assertions.assertEquals(HttpStatus.OK, status)
     }
 
     @Test
@@ -162,9 +162,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
         assertThat(body.feil).isNull()
-        Assertions.assertEquals(HttpStatus.ACCEPTED, status)
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -196,14 +195,14 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        val (status, body) = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(soeknad))
-            .awaitStatusWithBody<OasSoknadsfeil>()
+        val body= client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.BAD_REQUEST,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api, søknadTypeUri,"valider"
+        )
 
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, status)
     }
 
     @Test
@@ -212,11 +211,12 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         val dtoSpørring =
             OasMatchfagsakMedPeriode(norskIdent, PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
 
-        val oppdatertSoeknadDto = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "k9sak", "arbeidsforholdIder").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(dtoSpørring))
-            .awaitBodyWithType<List<ArbeidsgiverMedArbeidsforholdId>>()
+        val oppdatertSoeknadDto = client.postAndAssertAwaitWithStatusAndBody<OasMatchfagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(dtoSpørring),
+            api, søknadTypeUri, "k9sak", "arbeidsforholdIder"
+        )
 
         Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
     }
@@ -260,28 +260,31 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): Triple<SøknadIdDto, HttpStatus, OasSoknadsfeil> {
+    ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
-            .awaitExchangeBlocking()
+        val response = client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
+            api, søknadTypeUri
+        )
 
-        val location = resPost.headers().asHttpHeaders().location
-        Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        val location = response.headers().asHttpHeaders().location
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode())
         Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: OmsorgspengerKroniskSyktBarnSøknadDto = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(soeknadJson))
-            .awaitBodyWithType()
+        val søknadDtoFyltUt: OmsorgspengerKroniskSyktBarnSøknadDto = client.putAndAssert(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknadJson),
+            api, søknadTypeUri, "oppdater"
+        )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
 
@@ -294,13 +297,14 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        val (httpStatus, oasSoknadsfeil) = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(sendSøknad))
-            .awaitStatusWithBody<OasSoknadsfeil>()
+        val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(sendSøknad),
+            api, søknadTypeUri, "send"
+        )
 
-        return Triple(søknadId, httpStatus, oasSoknadsfeil)
+        return body
     }
 
     private suspend fun opprettOgLagreSoeknad(
@@ -311,24 +315,26 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val resPost = client.post()
-            .uri { it.pathSegment(api, søknadTypeUri).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
-            .awaitExchangeBlocking()
+        val resPost = client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
+            api, søknadTypeUri
+        )
 
         val location = resPost.headers().asHttpHeaders().location
-        Assertions.assertEquals(HttpStatus.CREATED, resPost.statusCode())
         Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.put()
-            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .body(BodyInserters.fromValue(soeknadJson))
-            .awaitBodyWithType<OmsorgspengerKroniskSyktBarnSøknadDto>()
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknadJson),
+            api, søknadTypeUri, "oppdater"
+        )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
         return søknadDtoFyltUt
