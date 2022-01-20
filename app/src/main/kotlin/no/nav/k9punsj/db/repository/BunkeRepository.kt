@@ -13,12 +13,16 @@ import javax.sql.DataSource
 @Repository
 class BunkeRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val BUNKE_TABLE = "bunke"
+    }
+
     suspend fun opprettEllerHentBunkeForFagsakType(mappeId: String, type: FagsakYtelseType): BunkeId {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val resultat = tx.run(
                     queryOf(
-                        "select bunke_id from bunke where id_mappe = :id_mappe and ytelse_type = :ytelse_type",
+                        "select bunke_id from $BUNKE_TABLE where id_mappe = :id_mappe and ytelse_type = :ytelse_type",
                         mapOf("id_mappe" to UUID.fromString(mappeId),
                             "ytelse_type" to type.kode
                         )
@@ -35,7 +39,7 @@ class BunkeRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into bunke as k (bunke_id, id_mappe, ytelse_type)
+                    insert into $BUNKE_TABLE as k (bunke_id, id_mappe, ytelse_type)
                     values (:bunke_id, :id_mappe, :ytelse_type)
                  """, mapOf("bunke_id" to bunkeId,
                             "id_mappe" to UUID.fromString(mappeId),
@@ -53,7 +57,7 @@ class BunkeRepository(private val dataSource: DataSource) {
                 return@transaction tx.run(
                     queryOf(
                         """
-                                select bunke_id, id_mappe, ytelse_type from bunke where id_mappe = :mappeId
+                                select bunke_id, id_mappe, ytelse_type from $BUNKE_TABLE where id_mappe = :mappeId
                              """, mapOf("mappeId" to UUID.fromString(mappeId)
                         )).map { row ->
                         BunkeEntitet(row.string("bunke_id"), FagsakYtelseType.fromKode(row.string("ytelse_type")))

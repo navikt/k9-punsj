@@ -12,12 +12,16 @@ import javax.sql.DataSource
 @Repository
 class AksjonspunktRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val AKSJONSPUNKT_TABLE = "aksjonspunkt"
+    }
+
     suspend fun opprettAksjonspunkt(aksjonspunktEntitet: AksjonspunktEntitet): AksjonspunktEntitet {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val aksjonspunktId = tx.run(
                     queryOf(
-                        """select aksjonspunkt_id from aksjonspunkt where id_journalpost = ? and aksjonspunkt_status = ? and aksjonspunkt_kode = ?""",
+                        """select aksjonspunkt_id from $AKSJONSPUNKT_TABLE where id_journalpost = ? and aksjonspunkt_status = ? and aksjonspunkt_kode = ?""",
                         aksjonspunktEntitet.journalpostId,
                         aksjonspunktEntitet.aksjonspunktStatus.kode,
                         aksjonspunktEntitet.aksjonspunktKode.kode
@@ -30,7 +34,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
                     tx.run(
                         queryOf(
                             """
-                    insert into aksjonspunkt as a (aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak)
+                    insert into $AKSJONSPUNKT_TABLE as a (aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak)
                     values (:aksjonspunkt_id, :aksjonspunkt_kode, :id_journalpost, :aksjonspunkt_status, :frist_tid, :vent_aarsak)
                     """, mapOf(
                                 "aksjonspunkt_id" to UUID.fromString(aksjonspunktEntitet.aksjonspunktId),
@@ -42,7 +46,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
                         ).asUpdate
                     )
                 } else {
-                    tx.run(queryOf("UPDATE AKSJONSPUNKT SET FRIST_TID = ? WHERE AKSJONSPUNKT_ID = ?",
+                    tx.run(queryOf("UPDATE $AKSJONSPUNKT_TABLE SET FRIST_TID = ? WHERE AKSJONSPUNKT_ID = ?",
                         aksjonspunktEntitet.frist_tid,
                         UUID.fromString(aksjonspunktId)).asUpdate)
                 }
@@ -53,7 +57,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
 
     suspend fun settStatus(aksjonspunktId: AksjonspunktId, aksjonspunktStatus: AksjonspunktStatus) {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("UPDATE AKSJONSPUNKT SET AKSJONSPUNKT_STATUS = ? WHERE AKSJONSPUNKT_ID = ?",
+            it.run(queryOf("UPDATE $AKSJONSPUNKT_TABLE SET AKSJONSPUNKT_STATUS = ? WHERE AKSJONSPUNKT_ID = ?",
                 aksjonspunktStatus.kode,
                 UUID.fromString(aksjonspunktId)).asUpdate)
         }
@@ -64,7 +68,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
             it.run(
                 queryOf("""
                         select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
-                        from aksjonspunkt
+                        from $AKSJONSPUNKT_TABLE
                         where frist_tid IS NOT NULL and frist_tid < now() and aksjonspunkt_status = 'OPPR'
                     """)
                     .map { row ->
@@ -79,7 +83,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
             it.run(
                 queryOf("""
                         select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
-                        from aksjonspunkt
+                        from $AKSJONSPUNKT_TABLE
                         where id_journalpost = :journalpostId
                     """, mapOf("journalpostId" to journalpostId))
                     .map { row ->
@@ -93,7 +97,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             it.run(
                 queryOf("""select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
-                        from aksjonspunkt
+                        from $AKSJONSPUNKT_TABLE
                         where id_journalpost = ? and aksjonspunkt_kode = ?""", journalpostId, kode
                 )
                     .map { row ->

@@ -15,8 +15,12 @@ import javax.sql.DataSource
 @Repository
 class PersonRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val PERSON_TABLE = "person"
+    }
+
     suspend fun hentPersonVedPersonIdent(norskIdent: NorskIdent): Person? {
-        val nameQuery = "select person_id, aktoer_ident, norsk_ident from person where norsk_ident = ?"
+        val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where norsk_ident = ?"
 
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
@@ -29,7 +33,7 @@ class PersonRepository(private val dataSource: DataSource) {
     }
 
     suspend fun hentPersonVedPersonId(personId: PersonId): Person? {
-        val nameQuery = "select person_id, aktoer_ident, norsk_ident from person where person_id = ?"
+        val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where person_id = ?"
 
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
@@ -42,7 +46,7 @@ class PersonRepository(private val dataSource: DataSource) {
     }
 
     suspend fun hentPersonVedAktørId(aktørId: AktørId): Person? {
-        val nameQuery = "select person_id, aktoer_ident, norsk_ident from person where aktoer_ident = ?"
+        val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where aktoer_ident = ?"
 
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
@@ -57,7 +61,7 @@ class PersonRepository(private val dataSource: DataSource) {
     suspend fun lagre(norskIdent: String, aktørId: String): Person {
         val uuid = UUID.randomUUID()
 
-        val insert = "insert into person (person_id,  aktoer_ident, norsk_ident) values (?, ?, ?)"
+        val insert = "insert into $PERSON_TABLE (person_id,  aktoer_ident, norsk_ident) values (?, ?, ?)"
 
         using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
