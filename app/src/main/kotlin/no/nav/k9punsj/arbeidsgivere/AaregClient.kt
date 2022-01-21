@@ -17,22 +17,23 @@ import kotlin.coroutines.coroutineContext
 @Component
 internal class AaregClient(
     @Value("\${AAREG_BASE_URL}") private val baseUrl: URI,
-    @Qualifier("sts") accessTokenClient: AccessTokenClient) {
+    @Qualifier("sts") accessTokenClient: AccessTokenClient,
+) {
     private val scopes: Set<String> = setOf("openid")
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentArbeidsforhold(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
-    ) : Arbeidsforhold {
+        tom: LocalDate,
+    ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(scopes).asAuthoriationHeader()
         val url = "$baseUrl/arbeidstaker/arbeidsforhold?" +
-            "ansettelsesperiodeFom=$fom&" +
-            "ansettelsesperiodeTom=$tom&" +
-            "regelverk=A_ORDNINGEN&" +
-            "sporingsinformasjon=false&" +
-            "historikk=false"
+                "ansettelsesperiodeFom=$fom&" +
+                "ansettelsesperiodeTom=$tom&" +
+                "regelverk=A_ORDNINGEN&" +
+                "sporingsinformasjon=false&" +
+                "historikk=false"
 
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
@@ -51,23 +52,27 @@ internal class AaregClient(
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
                 .filterNot { it.arbeidsgiver.organisasjonsnummer.isNullOrBlank() }
-                .map { OrganisasjonArbeidsforhold(
-                    organisasjonsnummer = it.arbeidsgiver.organisasjonsnummer!!,
-                    arbeidsforholdId = it.arbeidsforholdId
-                )}
+                .map {
+                    OrganisasjonArbeidsforhold(
+                        organisasjonsnummer = it.arbeidsgiver.organisasjonsnummer!!,
+                        arbeidsforholdId = it.arbeidsforholdId
+                    )
+                }
                 .toSet()
         )
     }
 
-    private companion object {
-        private data class AaregArbeidgiver(
+    companion object {
+        data class AaregArbeidgiver(
             val organisasjonsnummer: String?,
         )
-        private data class AaregArbeidsforhold(
-            val arbeidsforholdId: String,
-            val arbeidsgiver: AaregArbeidgiver
+
+        data class AaregArbeidsforhold(
+            val arbeidsforholdId: String?,
+            val arbeidsgiver: AaregArbeidgiver,
         )
-        private inline fun <reified T>String.deserialiser() = kotlin.runCatching {
+
+        inline fun <reified T> String.deserialiser() = kotlin.runCatching {
             objectMapper().readValue<T>(this)
         }.fold(
             onSuccess = { it },

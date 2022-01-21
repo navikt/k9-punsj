@@ -229,7 +229,8 @@ internal class PleiepengerSyktBarnRoutes(
                         opprettNySøknad.barnIdent,
                         opprettNySøknad.journalpostId,
                         null,
-                        coroutineContext.hentCorrelationId())
+                        coroutineContext.hentCorrelationId(),
+                    fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet

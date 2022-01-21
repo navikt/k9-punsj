@@ -116,7 +116,9 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
                         opprettNySøknad.barnIdent,
                         opprettNySøknad.journalpostId,
                         null,
-                        coroutineContext.hentCorrelationId())
+                        coroutineContext.hentCorrelationId(),
+                        no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
+                    )
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet

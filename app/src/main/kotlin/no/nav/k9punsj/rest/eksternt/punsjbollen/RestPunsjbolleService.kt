@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
@@ -43,13 +44,15 @@ class RestPunsjbolleService(
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
             barn = barn,
             journalpostId = journalpostId,
-            periode = periode
+            periode = periode,
+            fagsakYtelseType = fagsakYtelseType
         )
 
         val (url, response, responseBody) = "saksnummer".post(
@@ -68,7 +71,7 @@ class RestPunsjbolleService(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         søknad: Søknad,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerFraSøknadDto(
             søker = søker,
@@ -93,13 +96,15 @@ class RestPunsjbolleService(
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType
     ): PunsjbolleRuting {
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
             barn = barn,
             journalpostId = journalpostId,
-            periode = periode
+            periode = periode,
+            fagsakYtelseType = fagsakYtelseType
         )
 
         val (url, response, responseBody) = "ruting".post(
@@ -107,7 +112,7 @@ class RestPunsjbolleService(
             correlationId = correlationId
         )
 
-        val rutingResponse : RutingResponse = responseBody.deserialiser()
+        val rutingResponse: RutingResponse = responseBody.deserialiser()
 
         return when {
             response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9Sak
@@ -119,21 +124,30 @@ class RestPunsjbolleService(
         }
     }
 
+    private fun FagsakYtelseType.somSøknadstype() = when (this) {
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> "PleiepengerSyktBarn"
+        FagsakYtelseType.OMSORGSPENGER -> "Omsorgspenger"
+        else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
+    }
+
+
     private suspend fun punsjbolleSaksnummerDto(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
-        periode: PeriodeDto?) : PunsjbolleSaksnummerDto {
+        periode: PeriodeDto?,
+        fagsakYtelseType: FagsakYtelseType,
+    ): PunsjbolleSaksnummerDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
         return PunsjbolleSaksnummerDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = PunsjbollePersonDto(barnPerson.norskIdent, barnPerson.aktørId),
             periode = periode?.let {
-               require(it.fom != null || it.tom != null) { "Må sette enten fom eller tom" }
+                require(it.fom != null || it.tom != null) { "Må sette enten fom eller tom" }
                 "${it.fom.iso8601()}/${it.tom.iso8601()}"
             },
-            søknadstype = "PleiepengerSyktBarn",
+            søknadstype = fagsakYtelseType.somSøknadstype(),
             journalpostId = journalpostId
         )
     }
@@ -141,8 +155,8 @@ class RestPunsjbolleService(
     private suspend fun punsjbolleSaksnummerFraSøknadDto(
         søker: NorskIdentDto,
         barn: NorskIdentDto,
-        søknad: Søknad
-    ) : PunsjbolleSaksnummerFraSøknadDto {
+        søknad: Søknad,
+    ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val barnPerson = personService.finnEllerOpprettPersonVedNorskIdent(barn)
         return PunsjbolleSaksnummerFraSøknadDto(
@@ -154,7 +168,8 @@ class RestPunsjbolleService(
 
     private suspend fun String.post(
         requestBody: Any,
-        correlationId: CorrelationId) : Triple<URI, Response, String> {
+        correlationId: CorrelationId,
+    ): Triple<URI, Response, String> {
         val url = URI("${baseUrl}/$this")
 
         val (_, response, result) = "$url"
@@ -162,17 +177,20 @@ class RestPunsjbolleService(
             .body(objectMapper().serialiser(requestBody))
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(setOf(scope))
+                    .asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.XCorrelationId to correlationId
             ).awaitStringResponseResult()
 
         val responseBody = result.fold(
             { success -> success },
-            { error -> when (error.response.body().isEmpty()) {
-                true -> "{}"
-                false -> String(error.response.body().toByteArray())
-            }}
+            { error ->
+                when (error.response.body().isEmpty()) {
+                    true -> "{}"
+                    false -> String(error.response.body().toByteArray())
+                }
+            }
         )
 
         return Triple(url, response, responseBody)
@@ -187,7 +205,7 @@ class RestPunsjbolleService(
 
         inline fun <reified T> ObjectMapper.serialiser(value: T): String = writeValueAsString(value)
 
-        private inline fun <reified T>String.deserialiser() = kotlin.runCatching {
+        private inline fun <reified T> String.deserialiser() = kotlin.runCatching {
             objectMapper().readValue<T>(this)
         }.fold(
             onSuccess = { it },
@@ -206,21 +224,24 @@ class RestPunsjbolleService(
             val pleietrengende: PunsjbollePersonDto,
             val søknadstype: String,
             val journalpostId: String? = null,
-            val periode: String? = null) {
-            init { require(journalpostId != null || periode != null) {
-                "Må sette minst en av journalpostId og periode"
-            }}
+            val periode: String? = null,
+        ) {
+            init {
+                require(journalpostId != null || periode != null) {
+                    "Må sette minst en av journalpostId og periode"
+                }
+            }
         }
 
         private data class PunsjbolleSaksnummerFraSøknadDto(
             val søker: PunsjbollePersonDto,
             val pleietrengende: PunsjbollePersonDto,
-            val søknad: Map<String, *>
+            val søknad: Map<String, *>,
         )
 
         private data class RutingResponse(
             val destinasjon: String? = null,
-            val type: String? = null
+            val type: String? = null,
         )
 
         private val log = LoggerFactory.getLogger(RestPunsjbolleService::class.java)

@@ -120,11 +120,13 @@ internal class OmsorgspengerRoutes(
                         opprettNySøknad.barnIdent,
                         opprettNySøknad.journalpostId,
                         null,
-                        coroutineContext.hentCorrelationId())
+                        coroutineContext.hentCorrelationId(),
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER)
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
-                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER,
+                    opprettNySøknad.journalpostId)
 
                 val søknadEntitet = mappeService.førsteInnsendingOms(
                     nySøknad = opprettNySøknad!!
@@ -181,9 +183,11 @@ internal class OmsorgspengerRoutes(
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
                         val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn -> if (!kanSendesInn) {
-                                logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
-                            }}
+                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                                if (!kanSendesInn) {
+                                    logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
+                                }
+                            }
                         }.toMutableSet()
 
                         if (journalpostIder.isEmpty()) {
@@ -303,7 +307,8 @@ internal class OmsorgspengerRoutes(
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsakMedPeriode = request.matchFagsakMedPerioder()
-                innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsakMedPeriode.brukerIdent), Urls.HentArbeidsforholdIderFraK9sak)?.let { return@RequestContext it }
+                innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsakMedPeriode.brukerIdent),
+                    Urls.HentArbeidsforholdIderFraK9sak)?.let { return@RequestContext it }
 
                 val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
                     matchfagsakMedPeriode.brukerIdent,

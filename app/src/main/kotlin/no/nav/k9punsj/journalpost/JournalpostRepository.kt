@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
@@ -190,6 +191,16 @@ class JournalpostRepository(private val dataSource: DataSource) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(ytelse = ytelseType.kode)
+            lagre(medType){
+                medType
+            }
+        }
+    }
+
+    suspend fun settInnsendingstype(type: PunsjInnsendingType, journalpostId: String) {
+        val journalpost = hentHvis(journalpostId)
+        if (journalpost != null) {
+            val medType = journalpost.copy(type = type.kode)
             lagre(medType){
                 medType
             }

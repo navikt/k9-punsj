@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.eksternt.punsjbollen
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.LokalProfil
@@ -17,7 +18,8 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType,
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
@@ -34,7 +36,8 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         barn: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId
+        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType,
     ) = when (journalpostId) {
         "45537868838" -> PunsjbolleRuting.IkkeStøttet
         "463687943" -> PunsjbolleRuting.Infotrygd

@@ -224,7 +224,8 @@ internal class JournalpostRoutes(
                     barn = dto.barnIdent,
                     journalpostId = dto.journalpostId,
                     periode = null, // Utledes fra journalposten i Punsjbollen
-                    correlationId = coroutineContext.hentCorrelationId()
+                    correlationId = coroutineContext.hentCorrelationId(),
+                    fagsakYtelseType = utledeFagsakYtelseType(hentHvisJournalpostMedId)
                 )
 
                 if (punsjbolleRuting == PunsjbolleRuting.K9Sak || punsjbolleRuting == PunsjbolleRuting.Infotrygd) {
@@ -453,6 +454,19 @@ internal class JournalpostRoutes(
         return status(httpStatus)
             .json()
             .bodyValueAndAwait(OasFeil(this.message))
+    }
+
+    private fun utledeFagsakYtelseType(journalpost: Journalpost?): no.nav.k9.kodeverk.behandling.FagsakYtelseType {
+        val ytelse = if (journalpost == null) {
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse) {
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
+        } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        } else {
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        }
+        return ytelse
     }
 
     private suspend fun utvidJournalpostMedMottattDato(
