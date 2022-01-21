@@ -41,7 +41,6 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
-    private val k9SakService: K9SakService,
     private val soknadService : SoknadService
 ) {
 
@@ -58,9 +57,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
         internal const val OppdaterEksisterendeSøknad = "/${søknadType}/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
         internal const val ValiderSøknad = "/${søknadType}/valider" //post
-        internal const val HentArbeidsforholdIderFraK9sak = "/${søknadType}/k9sak/arbeidsforholdIder" //post
     }
-
 
     @Bean
     fun omsorgspengerKroniskSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
@@ -295,37 +292,6 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
                     .status(HttpStatus.ACCEPTED)
                     .json()
                     .bodyValueAndAwait(søknad)
-            }
-        }
-
-        POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
-                val matchfagsakMedPeriode = request.matchFagsakMedPerioder()
-                innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsakMedPeriode.brukerIdent), Urls.HentArbeidsforholdIderFraK9sak)?.let { return@RequestContext it }
-
-                val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
-                    matchfagsakMedPeriode.brukerIdent,
-                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
-                    matchfagsakMedPeriode.periodeDto
-                )
-
-                return@RequestContext if (arbeidsgiverMedArbeidsforholdId != null) {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(arbeidsgiverMedArbeidsforholdId)
-
-                } else if (feil != null) {
-                    ServerResponse
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .json()
-                        .bodyValueAndAwait(feil)
-                } else {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
-                }
             }
         }
     }

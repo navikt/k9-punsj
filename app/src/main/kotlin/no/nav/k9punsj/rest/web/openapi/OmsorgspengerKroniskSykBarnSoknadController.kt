@@ -213,34 +213,4 @@ internal class OmsorgspengerKroniskSykBarnSoknadController {
         @RequestBody søknad: OasSendSøknad,
     ) {
     }
-
-    @PostMapping(
-        OmsorgspengerKroniskSyktBarnRoutes.Urls.HentArbeidsforholdIderFraK9sak,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @Operation(
-        summary = "Henter arbeidsforholdIder som ligger i k9-sak",
-        description = "Henter arbeidsforholdIder som ligger i k9-sak",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Henter arbeidsforholdIder som ligger i k9-sak",
-                content = [Content(
-                    schema = Schema(
-                        implementation = ArbeidsgiverMedArbeidsforholdId::class
-                    )
-                )]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Ingen treff"
-            )
-        ]
-    )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsakMedPeriode) {
-    }
 }

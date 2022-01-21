@@ -205,22 +205,6 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
     }
 
-    @Test
-    fun `Skal hente arbeidsforholdIder fra k9-sak`(): Unit = runBlocking {
-        val norskIdent = "02020050123"
-        val dtoSpørring =
-            OasMatchfagsakMedPeriode(norskIdent, PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
-
-        val oppdatertSoeknadDto = client.postAndAssertAwaitWithStatusAndBody<OasMatchfagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(dtoSpørring),
-            api, søknadTypeUri, "k9sak", "arbeidsforholdIder"
-        )
-
-        Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
-    }
-
     private fun opprettSøknad(personnummer: NorskIdentDto, journalpostId: String) = OpprettNySøknad(
         norskIdent = personnummer,
         journalpostId = journalpostId,
