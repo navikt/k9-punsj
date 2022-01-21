@@ -39,7 +39,7 @@ Bruk header fra Nav token header i authorize.
 
 ## Accesstoken i dev
 Husk å være logget inn på [dev](https://k9-punsj.dev.adeo.no/) først, så gå til 
-[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/oidc/hentNavTokenHeader)
+[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.intern.nav.no/api/k9-punsj/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ## Åpne
