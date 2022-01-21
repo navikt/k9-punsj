@@ -13,7 +13,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.domenetjenester.PleiepengerSyktBarnSoknadService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -38,7 +38,7 @@ import kotlin.coroutines.coroutineContext
 internal class PleiepengerSyktBarnRoutes(
     private val objectMapper: ObjectMapper,
     private val mappeService: MappeService,
-    private val pleiepengerSyktBarnSoknadService: PleiepengerSyktBarnSoknadService,
+    private val soknadService: SoknadService,
     private val personService: PersonService,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
@@ -185,7 +185,7 @@ internal class PleiepengerSyktBarnRoutes(
                                 .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
                         }
 
-                        val feil = pleiepengerSyktBarnSoknadService.sendSøknad(
+                        val feil = soknadService.sendSøknad(
                             søknadK9Format,
                             journalpostIder
                         )

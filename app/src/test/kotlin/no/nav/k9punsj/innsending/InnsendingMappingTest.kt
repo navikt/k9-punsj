@@ -2,8 +2,11 @@ package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.web.dto.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
+import java.lang.IllegalArgumentException
 import java.util.UUID
 
 internal class InnsendingMappingTest {
@@ -19,15 +23,58 @@ internal class InnsendingMappingTest {
 
     @Test
     fun `mappe pleiepenger sykt barn søknad`() {
-        val søknad = LesFraFilUtil.søknadFraFrontend()
-        val dto = objectMapper().convertValue<PleiepengerSøknadDto>(søknad)
+        mapTilK9FormatOgAssert<PleiepengerSøknadDto>(
+            søknad = LesFraFilUtil.søknadFraFrontend(),
+            ytelse = Ytelse.Type.PLEIEPENGER_SYKT_BARN
+        )
+    }
 
-        val k9Format = MapPsbTilK9Format(
-            søknadId = dto.soeknadId,
-            journalpostIder = dto.journalposter?.toSet()?: emptySet(),
-            perioderSomFinnesIK9 = emptyList(),
-            dto = dto
-        ).søknadOgFeil().first
+    @Test
+    fun `mappe kopiering av journalpost for pleiepenger syk barn`() {
+        mapKopierJournalpostOgAssert(
+            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            søknadstype = "PleiepengerSyktBarn"
+        )
+    }
+
+    @Test
+    fun `mappe omsorgspenger kronisk sykt barn søknad`() {
+        mapTilK9FormatOgAssert<OmsorgspengerKroniskSyktBarnSøknadDto>(
+            søknad = LesFraFilUtil.søknadFraFrontendOmsKSB(),
+            ytelse = Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN
+        )
+    }
+
+    @Test
+    fun `mappe kopiering av journalpost for omsorgspengr kronisk sykt barn`() {
+        mapKopierJournalpostOgAssert(
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER_KS,
+            søknadstype = "OmsorgspengerKroniskSyktBarn"
+        )
+    }
+
+    private inline fun <reified T> mapTilK9FormatOgAssert(søknad: MutableMap<String, Any?>, ytelse: Ytelse.Type) {
+        val dto: T = objectMapper().convertValue(søknad)
+        val k9Format = when(dto) {
+            is OmsorgspengerKroniskSyktBarnSøknadDto -> {
+                MapOmsKSBTilK9Format(
+                    søknadId = dto.soeknadId,
+                    journalpostIder = dto.journalposter?.toSet() ?: emptySet(),
+                    dto = dto
+                ).søknadOgFeil().first
+            }
+
+            is PleiepengerSøknadDto -> {
+                MapPsbTilK9Format(
+                    søknadId = dto.soeknadId,
+                    journalpostIder = dto.journalposter?.toSet() ?: emptySet(),
+                    perioderSomFinnesIK9 = emptyList(),
+                    dto = dto
+                ).søknadOgFeil().first
+            }
+
+            else -> throw IllegalArgumentException("Ikke støttet type.")
+        }
 
         val (_, value) = innsendingClient.mapSøknad(
             søknadId = k9Format.søknadId.id,
@@ -41,21 +88,24 @@ internal class InnsendingMappingTest {
 
         val behov = JSONObject(value).getJSONObject("@behov").getJSONObject("PunsjetSøknad")
         assertTrue(behov.has("søknad") && behov.get("søknad") is JSONObject)
-        assertEquals( "bar", behov.getString("foo"))
-        assertEquals( 2, behov.getInt("bar"))
+        assertEquals("bar", behov.getString("foo"))
+        assertEquals(2, behov.getInt("bar"))
         assertEquals("1.0.0", behov.getString("versjon"))
+        val k9FormatSøknad = behov.getJSONObject("søknad")
+        assertEquals(ytelse.kode(), k9FormatSøknad.getJSONObject("ytelse").getString("type"))
     }
 
-    @Test
-    fun `mappe kopiering av journalpost for pleiepenger syk barn`() {
-        val (_, value) = innsendingClient.mapKopierJournalpost(KopierJournalpostInfo(
-            correlationId = "5bc73106-a0b1-46a4-a297-54541265934e",
-            journalpostId = "11111111111",
-            fra = "22222222222",
-            til = "33333333333",
-            pleietrengende = "44444444444",
-            ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        ))
+    private fun mapKopierJournalpostOgAssert(fagsakYtelseType: FagsakYtelseType, søknadstype: String) {
+        val (_, value) = innsendingClient.mapKopierJournalpost(
+            KopierJournalpostInfo(
+                correlationId = "5bc73106-a0b1-46a4-a297-54541265934e",
+                journalpostId = "11111111111",
+                fra = "22222222222",
+                til = "33333333333",
+                pleietrengende = "44444444444",
+                ytelse = fagsakYtelseType
+            )
+        )
 
         val behov = JSONObject(value).getJSONObject("@behov").getJSONObject("KopierPunsjbarJournalpost").toString()
 
@@ -68,7 +118,7 @@ internal class InnsendingMappingTest {
               "til": "33333333333",
               "pleietrengende": "44444444444",
               "annenPart": null,
-              "søknadstype": "PleiepengerSyktBarn"
+              "søknadstype": "$søknadstype"
             }
         """.trimIndent()
 

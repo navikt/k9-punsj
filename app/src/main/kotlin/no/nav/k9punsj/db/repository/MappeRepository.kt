@@ -14,6 +14,9 @@ import javax.sql.DataSource
 
 @Repository
 class MappeRepository(private val dataSource: DataSource) {
+   companion object {
+       const val MAPPE_TABLE = "mappe"
+   }
 
     suspend fun hent(personIder: Set<PersonId>): List<Mappe> {
         return using(sessionOf(dataSource)) {
@@ -21,7 +24,7 @@ class MappeRepository(private val dataSource: DataSource) {
                 //language=PostgreSQL
                 tx.run(
                     queryOf(
-                        "select data from mappe where (data -> 'personInfo') ??| array['${personIder.joinToString("','")}']",
+                        "select data from $MAPPE_TABLE where (data -> 'personInfo') ??| array['${personIder.joinToString("','")}']",
                     )
                         .map { row ->
                             objectMapper().readValue<Mappe>(row.string("data"))
@@ -36,7 +39,7 @@ class MappeRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 val json = tx.run(
                     queryOf(
-                        "select data from mappe where id = :id for update",
+                        "select data from $MAPPE_TABLE where id = :id for update",
                         mapOf("id" to UUID.fromString(mappeId))
                     )
                         .map { row ->
@@ -53,7 +56,7 @@ class MappeRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into mappe as k (id, endret_tid, data)
+                    insert into $MAPPE_TABLE as k (id, endret_tid, data)
                     values (:id, now(), :data :: jsonb)
                     on conflict (id) do update
                     set data = :data :: jsonb,
@@ -71,7 +74,7 @@ class MappeRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 return@transaction tx.run(
                     queryOf(
-                        "select id_person from mappe where id = :mappeId",
+                        "select id_person from $MAPPE_TABLE where id = :mappeId",
                         mapOf("mappeId" to UUID.fromString(mappeId))
                     )
                         .map { row ->
@@ -88,7 +91,7 @@ class MappeRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 val resultat = tx.run(
                     queryOf(
-                        "select id from mappe where id_person = :id_person",
+                        "select id from $MAPPE_TABLE where id_person = :id_person",
                         mapOf("id_person" to UUID.fromString(personId))
                     )
                         .map { row ->
@@ -103,7 +106,7 @@ class MappeRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into mappe as k (id, id_person)
+                    insert into $MAPPE_TABLE as k (id, id_person)
                     values (:id, :id_person)
                     
                  """, mapOf("id" to mappeId, "id_person" to UUID.fromString(personId))

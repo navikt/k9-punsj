@@ -17,6 +17,9 @@ import javax.sql.DataSource
 @Repository
 class JournalpostRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val JOURNALPOST_TABLE = "journalpost"
+    }
 
     private val objectMapper = objectMapper()
 
@@ -29,7 +32,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 val json = tx.run(
                     queryOf(
-                        "select data from journalpost where JOURNALPOST_ID = :id for update",
+                        "select data from $JOURNALPOST_TABLE where JOURNALPOST_ID = :id for update",
                         mapOf("id" to journalpostId.journalpostId)
                     )
                         .map { row ->
@@ -46,7 +49,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into journalpost as k (journalpost_id, data, kilde)
+                    insert into $JOURNALPOST_TABLE as k (journalpost_id, data, kilde)
                     values (:id, :data :: jsonb, :kilde)
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
@@ -67,7 +70,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 //language=PostgreSQL
                 val json = tx.run(
                     queryOf(
-                        "select data from journalpost where journalpost_id = :journalpostId",
+                        "select data from $JOURNALPOST_TABLE where journalpost_id = :journalpostId",
                         mapOf("journalpostId" to journalpostId)
                     )
                         .map { row ->
@@ -85,7 +88,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 //language=PostgreSQL
                 val json = tx.run(
                     queryOf(
-                        "select data from journalpost where journalpost_id = :journalpostId",
+                        "select data from $JOURNALPOST_TABLE where journalpost_id = :journalpostId",
                         mapOf("journalpostId" to journalpostId)
                     )
                         .map { row ->
@@ -104,7 +107,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
             )
             val resultat = it.run(
                 statement
@@ -119,7 +122,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<Journalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM JOURNALPOST WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
             )
             val resultat = it.run(
                 statement
@@ -135,7 +138,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             val run = it.run(
                 queryOf(
-                    "select journalpost_id from journalpost where journalpost_id = :journalpostId",
+                    "select journalpost_id from $JOURNALPOST_TABLE where journalpost_id = :journalpostId",
                     mapOf("journalpostId" to journalpostId)
                 ).map { row -> row.string("journalpost_Id") }.asSingle
             )
@@ -151,7 +154,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun ferdig(journalpostId: String) {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID = ?",
+            it.run(queryOf("UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID = ?",
                 journalpostId).asUpdate)
         }
     }
@@ -160,7 +163,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 val antallUpdates = using(sessionOf(dataSource)) {
-                    tx.run(queryOf("UPDATE JOURNALPOST SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID in (${
+                    tx.run(queryOf("UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID in (${
                         IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
                     })",
                         IntRange(0,
@@ -206,7 +209,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     fun kanSendeInn(journalpostIder: List<JournalpostId>): Boolean {
         val using = using(sessionOf(dataSource)) {
-            it.run(queryOf("select ferdig_behandlet from journalpost where journalpost_id in (${
+            it.run(queryOf("select ferdig_behandlet from $JOURNALPOST_TABLE where journalpost_id in (${
                 IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
             })",
                 IntRange(0,

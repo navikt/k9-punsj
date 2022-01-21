@@ -76,6 +76,9 @@ internal suspend fun ServerRequest.pleiepengerSøknad() =
 internal suspend fun ServerRequest.omsorgspengerSøknad() =
     body(BodyExtractors.toMono(OmsorgspengerSøknadDto::class.java)).awaitFirst()
 
+internal suspend fun ServerRequest.omsorgspengerKroniskSyktBarnSøknad() =
+    body(BodyExtractors.toMono(OmsorgspengerKroniskSyktBarnSøknadDto::class.java)).awaitFirst()
+
 internal suspend fun ServerRequest.brevBestilling() =
     body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
 

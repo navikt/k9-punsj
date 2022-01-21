@@ -1,6 +1,9 @@
 package no.nav.k9punsj.util
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.brev.BrevRepository
 import no.nav.k9punsj.db.config.loadFlyway
@@ -20,32 +23,42 @@ class DatabaseUtil {
             flyway.migrate()
         }
 
-        fun getMappeRepo(): MappeRepository {
-            return MappeRepository(dataSource)
+        fun getMappeRepo(): MappeRepository = MappeRepository(dataSource)
+        fun cleanMappeRepo() = cleanTable(MappeRepository.MAPPE_TABLE)
+
+        fun getSøknadRepo(): SøknadRepository = SøknadRepository(dataSource)
+        fun cleanSøknadRepo() = cleanTable(SøknadRepository.SØKNAD_TABLE)
+
+        fun getBrevRepo(): BrevRepository = BrevRepository(dataSource)
+        fun cleanBrevRepo() = cleanTable(BrevRepository.BREV_TABLE)
+
+        fun getPersonRepo(): PersonRepository = PersonRepository(dataSource)
+        fun cleanPersonRepo() = cleanTable(PersonRepository.PERSON_TABLE)
+
+        fun getBunkeRepo(): BunkeRepository = BunkeRepository(dataSource)
+        fun cleanBunkeRepo() = cleanTable(BunkeRepository.BUNKE_TABLE)
+
+        fun getJournalpostRepo(): JournalpostRepository = JournalpostRepository(dataSource)
+        fun cleanJournalpostRepo() = cleanTable(JournalpostRepository.JOURNALPOST_TABLE)
+
+        fun getAksjonspunktRepo(): AksjonspunktRepository = AksjonspunktRepository(dataSource)
+        fun cleanAksjonspunktRepo() = cleanTable(AksjonspunktRepository.AKSJONSPUNKT_TABLE)
+
+        fun cleanDB() {
+            cleanSøknadRepo()
+            cleanBunkeRepo()
+            cleanMappeRepo()
+            cleanPersonRepo()
+            cleanAksjonspunktRepo()
+            cleanBrevRepo()
+            cleanJournalpostRepo()
         }
 
-        fun getSøknadRepo(): SøknadRepository {
-            return SøknadRepository(dataSource)
-        }
-
-        fun getBrevRepo(): BrevRepository {
-            return BrevRepository(dataSource)
-        }
-
-        fun getPersonRepo(): PersonRepository {
-            return PersonRepository(dataSource)
-        }
-
-        fun getBunkeRepo(): BunkeRepository {
-            return BunkeRepository(dataSource)
-        }
-
-        fun getJournalpostRepo() :JournalpostRepository {
-            return JournalpostRepository(dataSource)
-        }
-
-        fun getAksjonspunktRepo() : AksjonspunktRepository {
-            return AksjonspunktRepository(dataSource)
+        private fun cleanTable(tableName: String) {
+            using(sessionOf(dataSource)) {
+                //language=PostgreSQL
+                it.transaction { tx -> tx.run(queryOf("DELETE FROM $tableName;").asExecute) }
+            }
         }
     }
 }

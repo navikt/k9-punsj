@@ -6,11 +6,12 @@ import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(SpringExtension::class)
 internal class SøknadRepositoryTest {
@@ -24,13 +25,30 @@ internal class SøknadRepositoryTest {
     private val journalpostid1 = "29486889"
     private val journalpostid2 = "29486887"
 
+    val søknadRepository = DatabaseUtil.getSøknadRepo()
+    val personRepository = DatabaseUtil.getPersonRepo()
+    val bunkeRepository = DatabaseUtil.getBunkeRepo()
+    val mappeRepo = DatabaseUtil.getMappeRepo()
+
+    @AfterEach
+    internal fun tearDown() {
+        DatabaseUtil.cleanSøknadRepo()
+        DatabaseUtil.cleanBunkeRepo()
+        DatabaseUtil.cleanMappeRepo()
+        DatabaseUtil.cleanPersonRepo()
+    }
 
     @Test
-    fun `Skal lagre søknad`(): Unit = runBlocking {
-        val søknadRepository = DatabaseUtil.getSøknadRepo()
-        val personRepository = DatabaseUtil.getPersonRepo()
-        val bunkeRepository = DatabaseUtil.getBunkeRepo()
-        val mappeRepo = DatabaseUtil.getMappeRepo()
+    fun `Skal lagre pleiepenger sykt barn søknad`(): Unit = runBlocking {
+        opprettOgAssertSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, LesFraFilUtil.søknadFraFrontend())
+    }
+
+    @Test
+    fun `Skal lagre omsorgspenger kronisk sykt barn søknad`(): Unit = runBlocking {
+        opprettOgAssertSøknad(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB())
+    }
+
+    private suspend fun opprettOgAssertSøknad(fagsakYtelseType: FagsakYtelseType, søknad: MutableMap<String, Any?>) {
         val barnFødselsdato = LocalDate.now()
 
         //oppretter en person
@@ -43,9 +61,7 @@ internal class SøknadRepositoryTest {
         val mappeId = mappeRepo.opprettEllerHentMappeForPerson(person.personId)
 
         //oppretter en bunke i mappen for pleiepenger
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-
-        val genererKomplettSøknad = LesFraFilUtil.søknadFraFrontend()
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, fagsakYtelseType)
 
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(journalpostid1, journalpostid2)
@@ -57,14 +73,12 @@ internal class SøknadRepositoryTest {
             søkerId = person.personId,
             barnId = barn.personId,
             barnFødselsdato = barnFødselsdato,
-            søknad = genererKomplettSøknad,
+            søknad = søknad,
             journalposter = journalposter,
             sendtInn = false
         )
 
         val søknad = søknadRepository.opprettSøknad(søknadEntitet)
-
-
         assertThat(søknad.søknad).isNotNull
     }
 }

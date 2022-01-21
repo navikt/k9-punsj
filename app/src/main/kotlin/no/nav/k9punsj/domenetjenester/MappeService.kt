@@ -8,10 +8,7 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
-import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import no.nav.k9punsj.rest.web.dto.*
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -94,6 +91,23 @@ class MappeService(
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }
 
+    suspend fun førsteInnsendingOmsKSB(nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
+        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
+
+        val søknadfelles = felles(nySøknad)
+        val dto = OmsorgspengerKroniskSyktBarnSøknadDto(
+                soeknadId = søknadfelles.søknadsId.toString(),
+                journalposter = listOf(nySøknad.journalpostId),
+                mottattDato = søknadfelles.mottattDato?.toLocalDate(),
+                klokkeslett = søknadfelles.klokkeslett,
+                soekerId = norskIdent
+            )
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+    }
+
     private suspend fun opprettSøknadEntitet(
         søknadId: UUID,
         bunkeId: BunkeId,
@@ -147,6 +161,24 @@ class MappeService(
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = omsorgspengerSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
+            Pair(oppdatertSøknad, nySøknad)
+        } else {
+            null
+        }
+    }
+
+    suspend fun utfyllendeInnsendingOmsKSB(
+        omsorgspengerKroniskSyktBarnSøknadDto: OmsorgspengerKroniskSyktBarnSøknadDto,
+        saksbehandler: String,
+    ): Pair<SøknadEntitet, OmsorgspengerKroniskSyktBarnSøknadDto>? {
+        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerKroniskSyktBarnSøknadDto.soeknadId)!!
+        return if (hentSøknad.sendtInn.not()) {
+            val journalposter = leggTilJournalpost(omsorgspengerKroniskSyktBarnSøknadDto.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerKroniskSyktBarnSøknadDto)
+            val oppdatertSøknad =
+                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            val nySøknad = omsorgspengerKroniskSyktBarnSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null

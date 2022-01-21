@@ -25,12 +25,13 @@ vault read postgresql/preprod-fss/creds/k9-punsj-user
 
 ## Swagger lokalt
 Bruk header fra Nav token header i authorize
-[Swagger](https://localhost:8085/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
+[Swagger](http://localhost:8085/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
 
 ## Accesstoken lokalt
-Husk å være logget inn på [localhost](https://localhost:8080) først, så gå til 
-[Nav token header](https://localhost:8082/api/k9-punsj/oidc/hentNavTokenHeader)
-for å hente token som kan brukes i swagger.
+Husk å være logget inn på [localhost (frontend)](http://localhost:8080) først.
+Tokenet kan du finne i loggen til azure-mock kjørende i docker-compose.
+Søk etter ", assertion=" i loggen og kopier innholdet mellom firkantparantesen. Altså, den siste assertion som ble logget.
+Eksempel: `, assertion=[eyJr...]`
 
 ## Swagger i dev
 Bruk header fra Nav token header i authorize.
@@ -38,7 +39,7 @@ Bruk header fra Nav token header i authorize.
 
 ## Accesstoken i dev
 Husk å være logget inn på [dev](https://k9-punsj.dev.adeo.no/) først, så gå til 
-[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/k9-punsj/oidc/hentNavTokenHeader)
+[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.adeo.no/api/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ## Åpne

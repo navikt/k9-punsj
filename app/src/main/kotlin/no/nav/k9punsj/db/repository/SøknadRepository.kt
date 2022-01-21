@@ -16,6 +16,10 @@ import javax.sql.DataSource
 @Repository
 class SøknadRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val SØKNAD_TABLE = "soknad"
+    }
+
     suspend fun opprettSøknad(søknad: SøknadEntitet): SøknadEntitet {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
@@ -23,7 +27,7 @@ class SøknadRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    insert into soknad as k (soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter)
+                    insert into $SØKNAD_TABLE as k (soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter)
                     values (:soknad_id, :id_bunke, :id_person, :id_person_barn, :barn_fodselsdato, :soknad :: jsonb, :journalposter :: jsonb)
                     """, mapOf(
                             "soknad_id" to UUID.fromString(søknad.søknadId),
@@ -45,7 +49,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM soknad WHERE id_bunke = :id_bunke",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM $SØKNAD_TABLE WHERE id_bunke = :id_bunke",
                         mapOf("id_bunke" to UUID.fromString(bunkerId))
                     )
                         .map { row ->
@@ -62,7 +66,7 @@ class SøknadRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    update soknad
+                    update $SØKNAD_TABLE
                     set soknad = :soknad :: jsonb,
                     journalposter = :journalposter :: jsonb,
                     endret_tid = now(),
@@ -86,7 +90,7 @@ class SøknadRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM soknad WHERE soknad_id = :soknad_id",
+                        "SELECT soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter, sendt_inn, endret_av FROM $SØKNAD_TABLE WHERE soknad_id = :soknad_id",
                         mapOf("soknad_id" to UUID.fromString(søknadId))
                     )
                         .map { row ->
@@ -115,7 +119,7 @@ class SøknadRepository(private val dataSource: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                    update soknad
+                    update $SØKNAD_TABLE
                     set SENDT_INN = true,
                     SENDT_INN_TIDSPUNKT = now()
                     where soknad_id = :soknad_id

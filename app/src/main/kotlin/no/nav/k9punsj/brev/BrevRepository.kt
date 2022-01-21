@@ -14,13 +14,17 @@ import javax.sql.DataSource
 @Repository
 class BrevRepository(private val dataSource: DataSource) {
 
+    companion object {
+        const val BREV_TABLE = "brev"
+    }
+
    suspend fun opprettBrev(brev: BrevEntitet, saksbehandler: String): BrevEntitet {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 //language=PostgreSQL
                 tx.run(
                     queryOf(
-                        """insert into brev as k (brev_id, id_journalpost, brev_type, data, opprettet_av)
+                        """insert into $BREV_TABLE as k (brev_id, id_journalpost, brev_type, data, opprettet_av)
                     values (:brev_id, :id_journalpost, :brev_type, :data :: jsonb, :opprettet_av)""", mapOf(
                             "brev_id" to UUID.fromString(brev.brevId),
                             "id_journalpost" to brev.forJournalpostId,
@@ -39,7 +43,7 @@ class BrevRepository(private val dataSource: DataSource) {
             it.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "SELECT brev_id, id_journalpost, brev_type, data, opprettet_av, opprettet_tid FROM brev WHERE id_journalpost = :id_journalpost",
+                        "SELECT brev_id, id_journalpost, brev_type, data, opprettet_av, opprettet_tid FROM $BREV_TABLE WHERE id_journalpost = :id_journalpost",
                         mapOf("id_journalpost" to forJournalpostId)
                     )
                         .map { row ->
