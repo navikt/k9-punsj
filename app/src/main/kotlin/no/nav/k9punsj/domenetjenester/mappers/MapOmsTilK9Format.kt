@@ -14,7 +14,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadV
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId
@@ -153,7 +153,7 @@ internal class MapOmsTilK9Format(
         }
 
         private fun String?.erSatt() = !isNullOrBlank()
-        private fun PleiepengerSøknadDto.TimerOgMinutter.somDuration() =
+        private fun PleiepengerSyktBarnSøknadDto.TimerOgMinutter.somDuration() =
             Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

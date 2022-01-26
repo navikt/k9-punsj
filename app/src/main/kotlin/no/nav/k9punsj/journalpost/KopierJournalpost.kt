@@ -48,7 +48,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
     suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo,fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.fra,
-        barn = dto.barn,
+        pleietrengende = dto.barn,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId,
@@ -57,7 +57,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
     suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.til,
-        barn = dto.barn,
+        pleietrengende = dto.barn,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId,

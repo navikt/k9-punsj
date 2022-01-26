@@ -7,7 +7,7 @@ import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
@@ -23,7 +23,7 @@ internal class InnsendingMappingTest {
 
     @Test
     fun `mappe pleiepenger sykt barn søknad`() {
-        mapTilK9FormatOgAssert<PleiepengerSøknadDto>(
+        mapTilK9FormatOgAssert<PleiepengerSyktBarnSøknadDto>(
             søknad = LesFraFilUtil.søknadFraFrontend(),
             ytelse = Ytelse.Type.PLEIEPENGER_SYKT_BARN
         )
@@ -64,7 +64,7 @@ internal class InnsendingMappingTest {
                 ).søknadOgFeil().first
             }
 
-            is PleiepengerSøknadDto -> {
+            is PleiepengerSyktBarnSøknadDto -> {
                 MapPsbTilK9Format(
                     søknadId = dto.soeknadId,
                     journalpostIder = dto.journalposter?.toSet() ?: emptySet(),

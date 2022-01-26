@@ -46,10 +46,10 @@ class MappeService(
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         val søknadfelles = felles(nySøknad)
         val pleiepengerSøknadDto =
-            PleiepengerSøknadDto(
+            PleiepengerSyktBarnSøknadDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 soekerId = norskIdent,
-                barn = PleiepengerSøknadDto.BarnDto(barnIdent, null),
+                barn = PleiepengerSyktBarnSøknadDto.BarnDto(barnIdent, null),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
                 klokkeslett = søknadfelles.klokkeslett,
@@ -130,9 +130,9 @@ class MappeService(
     }
 
     suspend fun utfyllendeInnsendingPsb(
-        pleiepengerSøknadDto: PleiepengerSøknadDto,
+        pleiepengerSøknadDto: PleiepengerSyktBarnSøknadDto,
         saksbehandler: String,
-    ): Pair<SøknadEntitet, PleiepengerSøknadDto>? {
+    ): Pair<SøknadEntitet, PleiepengerSyktBarnSøknadDto>? {
         val hentSøknad = søknadRepository.hentSøknad(pleiepengerSøknadDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(pleiepengerSøknadDto.journalposter, hentSøknad.journalposter)
@@ -142,6 +142,26 @@ class MappeService(
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
 
             val nySøknad = pleiepengerSøknadDto.copy(journalposter = journalposter.values.toList()
+                .filterIsInstance<JournalpostIdDto>())
+            Pair(oppdatertSøknad, nySøknad)
+        } else {
+            null
+        }
+    }
+
+    suspend fun utfyllendeInnsendingPls(
+        dto: PleiepengerLivetsSluttfaseSøknadDto,
+        saksbehandler: String,
+    ): Pair<SøknadEntitet, PleiepengerLivetsSluttfaseSøknadDto>? {
+        val hentSøknad = søknadRepository.hentSøknad(dto.soeknadId)!!
+        return if (hentSøknad.sendtInn.not()) {
+            val journalposter = leggTilJournalpost(dto.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(dto)
+            val oppdatertSøknad =
+                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+
+            val nySøknad = dto.copy(journalposter = journalposter.values.toList()
                 .filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {

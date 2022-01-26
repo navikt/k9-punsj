@@ -71,7 +71,10 @@ internal fun ServerRequest.norskIdent(): String {
 }
 
 internal suspend fun ServerRequest.pleiepengerSøknad() =
-    body(BodyExtractors.toMono(PleiepengerSøknadDto::class.java)).awaitFirst()
+    body(BodyExtractors.toMono(PleiepengerSyktBarnSøknadDto::class.java)).awaitFirst()
+
+internal suspend fun ServerRequest.pleiepengerPlsSøknad() =
+    body(BodyExtractors.toMono(PleiepengerLivetsSluttfaseSøknadDto::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.omsorgspengerSøknad() =
     body(BodyExtractors.toMono(OmsorgspengerSøknadDto::class.java)).awaitFirst()

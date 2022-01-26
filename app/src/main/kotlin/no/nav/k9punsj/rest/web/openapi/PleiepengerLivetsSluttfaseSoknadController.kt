@@ -8,16 +8,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.rest.web.dto.PerioderDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.rest.web.dto.SvarPsbDto
 import no.nav.k9punsj.rest.web.dto.SøknadFeil
-import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
+import no.nav.k9punsj.rest.web.ruter.PleiepengerLivetsSluttfaseRoutes
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Pleiepenger sykt barn søknad", description = "Håndtering av papirsøknader")
-internal class PleiepengerSyktBarnSoknadController {
-    @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteMappe, produces = ["application/json"])
+internal class PleiepengerLivetsSluttfaseSoknadController {
+    @GetMapping(PleiepengerLivetsSluttfaseRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter mappen til en person som inneholder søknader.",
         description = "Sendes NorskIdente til person som headere.",
@@ -30,7 +30,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Henter mappen til en person som inneholder alle søknader",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerSyktBarnSøknadDto::class
+                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
                     )
                 )]
             )
@@ -39,7 +39,7 @@ internal class PleiepengerSyktBarnSoknadController {
     fun HenteMappe(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
     }
 
-    @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteSøknad, produces = ["application/json"])
+    @GetMapping(PleiepengerLivetsSluttfaseRoutes.Urls.HenteSøknad, produces = ["application/json"])
     @Operation(
         summary = "Hente eksisterende mappe"
     )
@@ -66,7 +66,7 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PutMapping(
-        PleiepengerSyktBarnRoutes.Urls.OppdaterEksisterendeSøknad,
+        PleiepengerLivetsSluttfaseRoutes.Urls.OppdaterEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -81,20 +81,20 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerSyktBarnSøknadDto::class
+                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
                     )
                 )]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: PleiepengerSyktBarnSøknadDto,
+        @RequestBody søknad: PleiepengerLivetsSluttfaseSøknadDto,
     ) {
     }
 
 
     @PostMapping(
-        PleiepengerSyktBarnRoutes.Urls.SendEksisterendeSøknad,
+        PleiepengerLivetsSluttfaseRoutes.Urls.SendEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -147,7 +147,7 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
-        PleiepengerSyktBarnRoutes.Urls.ValiderSøknad,
+        PleiepengerLivetsSluttfaseRoutes.Urls.ValiderSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -192,7 +192,7 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
-        PleiepengerSyktBarnRoutes.Urls.NySøknad,
+        PleiepengerLivetsSluttfaseRoutes.Urls.NySøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -207,7 +207,7 @@ internal class PleiepengerSyktBarnSoknadController {
                 description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerSyktBarnSøknadDto::class
+                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
                     )
                 )]
             )
@@ -219,7 +219,7 @@ internal class PleiepengerSyktBarnSoknadController {
     }
 
     @PostMapping(
-        PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak,
+        PleiepengerLivetsSluttfaseRoutes.Urls.HentInfoFraK9sak,
         consumes = ["application/json"],
         produces = ["application/json"]
     )

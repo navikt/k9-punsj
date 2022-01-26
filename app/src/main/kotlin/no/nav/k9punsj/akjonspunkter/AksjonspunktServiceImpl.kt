@@ -11,7 +11,7 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -145,7 +145,7 @@ class AksjonspunktServiceImpl(
         val journalpost = journalpostRepository.hent(journalpostId)
         val søknad = if (søknadId != null) søknadRepository.hentSøknad(søknadId = søknadId)?.søknad else null
         val barnIdent  = if (søknad != null) {
-            val vising: PleiepengerSøknadDto = objectMapper().convertValue(søknad)
+            val vising: PleiepengerSyktBarnSøknadDto = objectMapper().convertValue(søknad)
             val norskIdent = vising.barn?.norskIdent
             norskIdent
         } else null

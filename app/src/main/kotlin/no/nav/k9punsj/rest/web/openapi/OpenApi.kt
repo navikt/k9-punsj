@@ -95,7 +95,7 @@ data class OasPleiepengerSyktBarSoknadMappeSvar(
     data class OasBunkeDto(
         val bunkeId: BunkeIdDto,
         val fagsakKode: String,
-        val søknader: List<SøknadDto<PleiepengerSøknadDto>>?,
+        val søknader: List<SøknadDto<PleiepengerSyktBarnSøknadDto>>?,
     )
 }
 
