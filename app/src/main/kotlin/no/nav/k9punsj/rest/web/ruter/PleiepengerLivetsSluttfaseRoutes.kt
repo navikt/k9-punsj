@@ -14,7 +14,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.mappers.MapPilsfTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapPlsfTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
@@ -164,7 +164,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val (søknadK9Format, feilISøknaden) = MapPilsfTilK9Format(
+                        val (søknadK9Format, feilISøknaden) = MapPlsfTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
                             dto = søknad
@@ -267,7 +267,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = MapPilsfTilK9Format(
+                    mapTilEksternFormat = MapPlsfTilK9Format(
                         søknadId = soknadTilValidering.soeknadId,
                         journalpostIder = journalposterDto.journalposter,
                         dto = soknadTilValidering

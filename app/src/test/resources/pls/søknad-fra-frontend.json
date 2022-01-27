@@ -42,7 +42,7 @@
     },
     "frilanser": {
       "startdato": "2019-10-10",
-      "sluttdato": "2019-11-10",
+      "sluttdato": null,
       "jobberFortsattSomFrilans": true
     },
     "arbeidstaker": [

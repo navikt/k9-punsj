@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.rest.web.dto.PerioderDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarPsbDto
+import no.nav.k9punsj.rest.web.dto.SvarPlsDto
 import no.nav.k9punsj.rest.web.dto.SøknadFeil
 import no.nav.k9punsj.rest.web.ruter.PleiepengerLivetsSluttfaseRoutes
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@Tag(name = "Pleiepenger sykt barn søknad", description = "Håndtering av papirsøknader")
+@Tag(name = "Pleiepenger livets sluttfase søknad", description = "Håndtering av papirsøknader")
 internal class PleiepengerLivetsSluttfaseSoknadController {
     @GetMapping(PleiepengerLivetsSluttfaseRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
@@ -50,7 +50,7 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
                 description = "Søknaden",
                 content = [Content(
                     schema = Schema(
-                        implementation = SvarPsbDto::class
+                        implementation = SvarPlsDto::class
                     )
                 )]
             ),

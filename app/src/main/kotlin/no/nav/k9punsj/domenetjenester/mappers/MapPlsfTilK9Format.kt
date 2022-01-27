@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-internal class MapPilsfTilK9Format(
+internal class MapPlsfTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
     dto: PleiepengerLivetsSluttfaseSøknadDto
@@ -257,7 +257,7 @@ internal class MapPilsfTilK9Format(
     })
 
     internal companion object {
-        private val logger = LoggerFactory.getLogger(MapPilsfTilK9Format::class.java)
+        private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)
         private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = PleiepengerLivetsSluttfaseSøknadValidator()
         private const val Versjon = "1.0.0"
