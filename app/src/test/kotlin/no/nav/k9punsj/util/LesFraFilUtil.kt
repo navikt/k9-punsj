@@ -16,6 +16,14 @@ class LesFraFilUtil {
             }
         }
 
+        private fun lesFraFilPls(filnavn: String): String{
+            try {
+                return Files.readString(Path.of("src/test/resources/pls/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
         private fun lesFraOmsMappeFil(filnavn: String): String{
             try {
                 return Files.readString(Path.of("src/test/resources/oms/$filnavn"))
@@ -70,6 +78,13 @@ class LesFraFilUtil {
 
         fun tomtLand() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
+        }
+
+        /**
+         *  Pleiepenger livets sluttfase
+         */
+        fun søknadFraFrontendPls() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFilPls("søknad-fra-frontend.json"))
         }
 
         /**

@@ -45,7 +45,7 @@ internal class RestPunsjbolleServiceTest {
     private fun ruting(correlationId: CorrelationId) = runBlocking {
         punsjbolleService.ruting(
             søker = "123",
-            barn = "456",
+            pleietrengende = "456",
             journalpostId = "789",
             null,
             correlationId,

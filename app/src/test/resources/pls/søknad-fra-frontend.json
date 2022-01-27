@@ -1,0 +1,123 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "mottattDato": "2020-10-12",
+  "klokkeslett": "12:53",
+  "pleietrengende": {
+    "norskIdent": "22222222222"
+  },
+  "soeknadsperiode": [{
+    "fom": "2018-12-30",
+    "tom": "2019-10-20"
+  }],
+  "opptjeningAktivitet": {
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "FiskerAS",
+      "organisasjonsnummer": "910909088",
+      "info": {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": null
+        },
+        "virksomhetstyper": [
+          "Fiske",
+          "Jordbruk",
+          "Dagmamma i eget hjem/familiebarnehage",
+          "Annen næringsvirksomhet"
+        ],
+        "landkode": "",
+        "regnskapsførerNavn": "Regskapsfører",
+        "regnskapsførerTlf": "88888889",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "1200000",
+        "erNyoppstartet": false,
+        "erVarigEndring": true,
+        "endringInntekt": "1300000",
+        "endringDato": "2018-12-30",
+        "endringBegrunnelse": "Dota2 er best"
+      }
+    },
+    "frilanser": {
+      "startdato": "2019-10-10",
+      "sluttdato": null,
+      "jobberFortsattSomFrilans": true
+    },
+    "arbeidstaker": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "910909088"
+      }
+    ]
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "910909088",
+        "arbeidstidInfo": {
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2018-12-30",
+                "tom": "2019-10-20"
+              },
+              "faktiskArbeidTimerPerDag": "7,48",
+              "jobberNormaltTimerPerDag": "7,48"
+            }
+          ]
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": {
+      "perioder": [
+        {
+          "periode": {
+            "fom": "2018-12-30",
+            "tom": "2019-10-20"
+          },
+          "faktiskArbeidTimerPerDag": "5",
+          "jobberNormaltTimerPerDag": "6"
+        }
+      ]
+    },
+    "selvstendigNæringsdrivendeArbeidstidInfo": {
+      "perioder": [
+        {
+          "periode": {
+            "fom": "2018-12-30",
+            "tom": "2019-10-20"
+          },
+          "faktiskArbeidTimerPerDag": "4",
+          "jobberNormaltTimerPerDag": "7"
+        }
+      ]
+    }
+  },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "utenlandsopphold": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "soknadsinfo": {
+    "samtidigHjemme": true,
+    "harMedsoeker": true
+  },
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
+}

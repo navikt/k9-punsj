@@ -3,7 +3,7 @@ package no.nav.k9punsj.rest.web.ruter
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.*
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
@@ -12,20 +12,18 @@ import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
-import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -336,7 +334,7 @@ class OmsorgspengerRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): PleiepengerSøknadDto {
+    ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -353,7 +351,7 @@ class OmsorgspengerRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, PleiepengerSøknadDto>(
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, PleiepengerSyktBarnSøknadDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,

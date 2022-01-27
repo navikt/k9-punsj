@@ -3,7 +3,7 @@ package no.nav.k9punsj.rest.web.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -23,6 +23,6 @@ data class OmsorgspengerSøknadDto(
     data class FraværPeriode(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
-        val tidPrDag: PleiepengerSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+        val tidPrDag: PleiepengerSyktBarnSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
     )
 }

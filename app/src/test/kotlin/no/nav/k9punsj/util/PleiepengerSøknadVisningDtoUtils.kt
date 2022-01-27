@@ -6,7 +6,7 @@ import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSøknadDto
+import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalTime
@@ -20,7 +20,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         barn: String = "22222222222",
         søknadsperiode: Pair<LocalDate, LocalDate>? = null,
         manipuler: (MutableMap<String, Any?>) -> Unit = {}
-    ) : PleiepengerSøknadDto {
+    ) : PleiepengerSyktBarnSøknadDto {
         @Language("JSON")
         val json = """
             {
@@ -45,7 +45,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         return objectMapper().convertValue(søknad)
     }
 
-    private fun PleiepengerSøknadDto.mapTilK9Format(
+    private fun PleiepengerSyktBarnSøknadDto.mapTilK9Format(
         perioderSomFinnesIK9: List<PeriodeDto> = emptyList()) =
         MapPsbTilK9Format(
             søknadId = soeknadId,
@@ -58,9 +58,9 @@ internal object PleiepengerSøknadVisningDtoUtils {
     private fun arbeidstidInfoKomplettStruktur(
         optionalTekst: String?,
         periode: PeriodeDto?
-    ) = PleiepengerSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
+    ) = PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
         perioder = listOf(
-            PleiepengerSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
+            PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                 periode = periode,
                 faktiskArbeidTimerPerDag = optionalTekst,
                 jobberNormaltTimerPerDag = optionalTekst
@@ -72,22 +72,22 @@ internal object PleiepengerSøknadVisningDtoUtils {
         optionalTekst: String? = "",
         requiredPeriode: PeriodeDto,
         optionalPeriode: PeriodeDto?
-    ) = PleiepengerSøknadDto(
+    ) = PleiepengerSyktBarnSøknadDto(
         soeknadId = "${UUID.randomUUID()}",
         soekerId = "11111111111",
         journalposter = listOf(requiredTekst),
         mottattDato = null,
         klokkeslett = null,
-        barn = PleiepengerSøknadDto.BarnDto(
+        barn = PleiepengerSyktBarnSøknadDto.BarnDto(
             norskIdent = optionalTekst,
             foedselsdato = null
         ),
         soeknadsperiode = optionalTilPeriode(optionalPeriode),
-        opptjeningAktivitet = PleiepengerSøknadDto.ArbeidAktivitetDto(
-            selvstendigNaeringsdrivende = PleiepengerSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(
+        opptjeningAktivitet = PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto(
+            selvstendigNaeringsdrivende = PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto(
                 organisasjonsnummer = optionalTekst,
                 virksomhetNavn = optionalTekst,
-                info = PleiepengerSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.SelvstendigNæringsdrivendePeriodeInfoDto(
+                info = PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.SelvstendigNæringsdrivendePeriodeInfoDto(
                     periode = optionalPeriode,
                     virksomhetstyper = listOf(requiredTekst),
                     registrertIUtlandet = null,
@@ -103,20 +103,20 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 )
             ),
             arbeidstaker = listOf(
-                PleiepengerSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto(
+                PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto(
                     arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode),
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst
                 )),
-            frilanser = PleiepengerSøknadDto.ArbeidAktivitetDto.FrilanserDto(
+            frilanser = PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.FrilanserDto(
                 startdato = optionalTekst,
                 sluttdato = optionalTekst,
                 jobberFortsattSomFrilans = null
             )
         ),
-        arbeidstid = PleiepengerSøknadDto.ArbeidstidDto(
+        arbeidstid = PleiepengerSyktBarnSøknadDto.ArbeidstidDto(
             arbeidstakerList = listOf(
-                PleiepengerSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto(
+                PleiepengerSyktBarnSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto(
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst,
                     arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
@@ -125,47 +125,47 @@ internal object PleiepengerSøknadVisningDtoUtils {
             selvstendigNæringsdrivendeArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
         ),
         beredskap = listOf(
-            PleiepengerSøknadDto.BeredskapDto(
+            PleiepengerSyktBarnSøknadDto.BeredskapDto(
                 periode = optionalPeriode,
                 tilleggsinformasjon = optionalTekst
             )
         ),
         nattevaak = listOf(
-            PleiepengerSøknadDto.NattevåkDto(
+            PleiepengerSyktBarnSøknadDto.NattevåkDto(
                 periode = optionalPeriode,
                 tilleggsinformasjon =  optionalTekst
             )
         ),
-        tilsynsordning = PleiepengerSøknadDto.TilsynsordningDto(
+        tilsynsordning = PleiepengerSyktBarnSøknadDto.TilsynsordningDto(
             perioder = listOf(
-                PleiepengerSøknadDto.TilsynsordningInfoDto(
+                PleiepengerSyktBarnSøknadDto.TilsynsordningInfoDto(
                     periode = optionalPeriode,
                     timer = 0,
                     minutter = 0
                 )
             )
         ),
-        uttak = listOf(PleiepengerSøknadDto.UttakDto(
+        uttak = listOf(PleiepengerSyktBarnSøknadDto.UttakDto(
             periode = optionalPeriode,
             timerPleieAvBarnetPerDag = optionalTekst
         )),
-        omsorg = PleiepengerSøknadDto.OmsorgDto(
+        omsorg = PleiepengerSyktBarnSøknadDto.OmsorgDto(
             relasjonTilBarnet = optionalTekst,
             samtykketOmsorgForBarnet = null,
             beskrivelseAvOmsorgsrollen = optionalTekst
         ),
-        bosteder = listOf(PleiepengerSøknadDto.BostederDto(
+        bosteder = listOf(PleiepengerSyktBarnSøknadDto.BostederDto(
             periode = optionalPeriode,
             land = optionalTekst
         )),
         lovbestemtFerie = listOf(requiredPeriode),
         lovbestemtFerieSomSkalSlettes = listOf(requiredPeriode),
-        soknadsinfo = PleiepengerSøknadDto.DataBruktTilUtledningDto(
+        soknadsinfo = PleiepengerSyktBarnSøknadDto.DataBruktTilUtledningDto(
             samtidigHjemme = null,
             harMedsoeker = null
         ),
         utenlandsopphold = listOf(
-            PleiepengerSøknadDto.UtenlandsoppholdDto(
+            PleiepengerSyktBarnSøknadDto.UtenlandsoppholdDto(
                 periode = optionalPeriode,
                 land = optionalTekst,
                 årsak = optionalTekst

@@ -108,7 +108,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertEquals(journalpostid, søknadViaGet.journalposter?.first())
@@ -139,7 +139,7 @@ class PleiepengersyktbarnTests {
             .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(søknadFraFrontend))
-            .awaitStatusWithBody<PleiepengerSøknadDto>()
+            .awaitStatusWithBody<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
@@ -171,7 +171,7 @@ class PleiepengersyktbarnTests {
     fun `sjekker at mapping fungre hele veien`() : Unit = runBlocking {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
 
-        val visningDto = objectMapper().convertValue<PleiepengerSøknadDto>(gyldigSoeknad)
+        val visningDto = objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(gyldigSoeknad)
         val mapTilSendingsformat = MapPsbTilK9Format(
             søknadId = visningDto.soeknadId,
             journalpostIder = visningDto.journalposter?.toSet() ?: emptySet(),
@@ -294,7 +294,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
@@ -311,7 +311,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
@@ -340,7 +340,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
@@ -393,7 +393,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", id).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertThat(søknadViaGet.journalposter).hasSize(2)
         assertThat(søknadViaGet.journalposter).isEqualTo(listOf("9999", "10000"))
@@ -410,7 +410,7 @@ class PleiepengersyktbarnTests {
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         // GUI format
         assertNotNull(søknadViaGet)
@@ -527,7 +527,7 @@ class PleiepengersyktbarnTests {
             .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(soeknadJson))
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadDtoFyltUt.soekerId)
 
@@ -552,7 +552,7 @@ class PleiepengersyktbarnTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): PleiepengerSøknadDto {
+    ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -573,7 +573,7 @@ class PleiepengersyktbarnTests {
             .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .body(BodyInserters.fromValue(soeknadJson))
-            .awaitBodyWithType<PleiepengerSøknadDto>()
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadDtoFyltUt.soekerId)
         return søknadDtoFyltUt

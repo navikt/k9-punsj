@@ -11,7 +11,7 @@ import no.nav.k9punsj.rest.web.dto.SaksnummerDto
 interface PunsjbolleService {
     suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        barn: NorskIdentDto,
+        pleietrengende: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
@@ -20,14 +20,14 @@ interface PunsjbolleService {
 
     suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        barn: NorskIdentDto,
+        pleietrengende: NorskIdentDto,
         søknad: Søknad,
         correlationId: CorrelationId,
     ): SaksnummerDto
 
     suspend fun ruting(
         søker: NorskIdentDto,
-        barn: NorskIdentDto,
+        pleietrengende: NorskIdentDto,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
