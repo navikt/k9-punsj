@@ -242,7 +242,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                 return@RequestContext ServerResponse
                     .created(request.søknadLocation(søknadEntitet.søknadId))
                     .json()
-                    .bodyValueAndAwait(søknadEntitet.tilPsbvisning())
+                    .bodyValueAndAwait(søknadEntitet.tilPlsvisning())
             }
         }
 
