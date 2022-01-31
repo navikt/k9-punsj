@@ -15,7 +15,7 @@ typealias SøknadJson = MutableMap<String, Any?>
 data class OpprettNySøknad(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
-    val barnIdent: NorskIdentDto?,
+    val pleietrengendeIdent: NorskIdentDto?,
 )
 
 data class HentSøknad(
@@ -81,6 +81,9 @@ internal suspend fun ServerRequest.omsorgspengerSøknad() =
 
 internal suspend fun ServerRequest.omsorgspengerKroniskSyktBarnSøknad() =
     body(BodyExtractors.toMono(OmsorgspengerKroniskSyktBarnSøknadDto::class.java)).awaitFirst()
+
+internal suspend fun ServerRequest.omsorgspengerMidlertidigAleneSøknad() =
+    body(BodyExtractors.toMono(OmsorgspengerMidlertidigAleneSøknadDto::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.brevBestilling() =
     body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()

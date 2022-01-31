@@ -10,7 +10,6 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
-import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
@@ -25,7 +24,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
-import java.time.LocalDate
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
@@ -208,7 +206,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private fun opprettSøknad(personnummer: NorskIdentDto, journalpostId: String) = OpprettNySøknad(
         norskIdent = personnummer,
         journalpostId = journalpostId,
-        barnIdent = null
+        pleietrengendeIdent = null
     )
 
     private fun tilpasserSøknadsMalTilTesten(

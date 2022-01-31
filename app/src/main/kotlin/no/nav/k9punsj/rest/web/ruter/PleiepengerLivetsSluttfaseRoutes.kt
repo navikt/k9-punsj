@@ -224,9 +224,9 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     Urls.NySøknad)?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
-                if (opprettNySøknad.barnIdent != null) {
+                if (opprettNySøknad.pleietrengendeIdent != null) {
                     punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.barnIdent,
+                        opprettNySøknad.pleietrengendeIdent,
                         opprettNySøknad.journalpostId,
                         null,
                         coroutineContext.hentCorrelationId(),
