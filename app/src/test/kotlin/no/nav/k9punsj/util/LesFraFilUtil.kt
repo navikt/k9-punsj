@@ -32,6 +32,14 @@ class LesFraFilUtil {
             }
         }
 
+        private fun lesFraFilOmsAo(filnavn: String): String{
+            try {
+                return Files.readString(Path.of("src/test/resources/omp-ao/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
         private fun lesFraOmsMappeFil(filnavn: String): String{
             try {
                 return Files.readString(Path.of("src/test/resources/oms/$filnavn"))
@@ -130,7 +138,14 @@ class LesFraFilUtil {
          *  Omsorgspenger midlertidlig alene
          */
         fun søknadFraFrontendOmsMA() : MutableMap<String, Any?> {
-            return objectMapper().readValue(lesFraFilPls("søknad-fra-frontend.json"))
+            return objectMapper().readValue(lesFraFilOmsMa("søknad-fra-frontend.json"))
+        }
+
+        /**
+         *  Omsorgspenger alene omsorg
+         */
+        fun søknadFraFrontendOmsAO() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFilOmsAo("søknad-fra-frontend.json"))
         }
     }
 }

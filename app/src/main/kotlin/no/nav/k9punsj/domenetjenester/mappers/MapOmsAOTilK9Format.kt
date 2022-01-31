@@ -34,7 +34,7 @@ internal class MapOmsAOTilK9Format(
             val omsorgspengerAleneOmsorg = OmsorgspengerAleneOmsorg(
                 dto.barn?.leggTilBarn(),
                 dto.soeknadsperiode?.somK9Periode(),
-                dto.begrunnelseForInnsending?.tekst
+                dto.begrunnelseForInnsending
             )
 
             // Fullfører søknad & validerer

@@ -51,6 +51,13 @@ data class SvarOmsMADto(
     val søknader: List<OmsorgspengerMidlertidigAleneSøknadDto>?,
 )
 
+data class SvarOmsAODto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?,
+)
+
+
 data class SvarPlsDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
@@ -154,6 +161,23 @@ internal fun Mappe.tilOmsMAVisning(norskIdent: NorskIdentDto): SvarOmsMADto {
     return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, søknader)
 }
 
+internal fun Mappe.tilOmsAOVisning(norskIdent: NorskIdentDto): SvarOmsAODto {
+    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            }
+        }
+    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
+}
+
 internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
     val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
     if (bunke?.søknader.isNullOrEmpty()) {
@@ -223,6 +247,13 @@ internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøk
 internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
     if (søknad == null) {
         return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
+    }
+    return objectMapper().convertValue(søknad)
+}
+
+internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
+    if (søknad == null) {
+        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
     }
     return objectMapper().convertValue(søknad)
 }

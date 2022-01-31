@@ -13,7 +13,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
+import no.nav.k9punsj.domenetjenester.mappers.MapOmsAOTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -45,7 +45,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
 
     private companion object {
         private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgRoutes::class.java)
-        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER_KRONISK_SYKT_BARN
+        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER_ALENE_OM_OMSORGEN
         private const val SøknadIdKey = "soeknad_id"
     }
 
@@ -70,7 +70,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 if (person != null) {
                     val svarDto = mappeService.hentMappe(
                         person = person
-                    ).tilOmsKSBVisning(norskIdent)
+                    ).tilOmsAOVisning(norskIdent)
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
@@ -79,7 +79,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf()))
+                    .bodyValueAndAwait(SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf()))
             }
         }
 
@@ -92,7 +92,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(søknad.tilOmsKSBvisning())
+                        .bodyValueAndAwait(søknad.tilOmsAOvisning())
                 }
                 return@RequestContext ServerResponse
                     .notFound()
@@ -119,25 +119,25 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
-                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, opprettNySøknad.journalpostId)
+                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN, opprettNySøknad.journalpostId)
 
-                val søknadEntitet = mappeService.førsteInnsendingOmsKSB(
+                val søknadEntitet = mappeService.førsteInnsendingOmsAO(
                     nySøknad = opprettNySøknad!!
                 )
                 return@RequestContext ServerResponse
                     .created(request.søknadLocation(søknadEntitet.søknadId))
                     .json()
-                    .bodyValueAndAwait(søknadEntitet.tilOmsKSBvisning())
+                    .bodyValueAndAwait(søknadEntitet.tilOmsAOvisning())
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.omsorgspengerKroniskSyktBarnSøknad()
+                val søknad = request.omsorgspengerAleneOmsorgSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-                val søknadEntitet = mappeService.utfyllendeInnsendingOmsKSB(
-                    omsorgspengerKroniskSyktBarnSøknadDto = søknad,
+                val søknadEntitet = mappeService.utfyllendeInnsendingOmsAO(
+                    dto = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -171,7 +171,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: OmsorgspengerKroniskSyktBarnSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: OmsorgspengerAleneOmsorgSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -188,7 +188,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                                 .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
                         }
 
-                        val (søknadK9Format, feilListe) = MapOmsKSBTilK9Format(
+                        val (søknadK9Format, feilListe) = MapOmsAOTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
                             dto = søknad
@@ -242,7 +242,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val soknadTilValidering = request.omsorgspengerKroniskSyktBarnSøknad()
+                val soknadTilValidering = request.omsorgspengerAleneOmsorgSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
@@ -259,7 +259,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
                 try {
-                    mapTilEksternFormat = MapOmsKSBTilK9Format(
+                    mapTilEksternFormat = MapOmsAOTilK9Format(
                         søknadId = soknadTilValidering.soeknadId,
                         journalpostIder = journalposterDto.journalposter,
                         dto = soknadTilValidering

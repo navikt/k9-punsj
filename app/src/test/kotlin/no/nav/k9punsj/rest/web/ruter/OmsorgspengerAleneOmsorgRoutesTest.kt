@@ -10,13 +10,12 @@ import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarOmsMADto
+import no.nav.k9punsj.rest.web.dto.OmsorgspengerAleneOmsorgSøknadDto
+import no.nav.k9punsj.rest.web.dto.SvarOmsAODto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,16 +25,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class OmsorgspengerMidlertidigAleneRoutesTest {
-
+internal class OmsorgspengerAleneOmsorgRoutesTest{
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_MIDLERTIDIG_ALENE
+    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_ALENE_OM_OMSORGEN
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -48,7 +47,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        val body = client.getAndAssert<SvarOmsMADto>(
+        val body = client.getAndAssert<SvarOmsAODto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -75,7 +74,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
         val pleietrengende = "01010050023"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsAO()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid, pleietrengende)
@@ -86,49 +85,47 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             requestBody = BodyInserters.fromValue(soeknad),
             api, søknadTypeUri, "valider"
         )
-        assertThat(body.feil).isNull()
+        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
     }
 
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val pleietrengende = "01010050023"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsAO()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
-        assertThat(body.feil).isNull()
-        assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
+        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
+        org.assertj.core.api.Assertions.assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
     @Test
     fun `Skal sjekke mapping av felter`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val pleietrengende = "01010050023"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsAO()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
-
 
         val søknad = opprettOgLagreSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
 
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", søknad.soeknadId).build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<OmsorgspengerMidlertidigAleneSøknadDto>()
+            .awaitBodyWithType<OmsorgspengerAleneOmsorgSøknadDto>()
 
-        assertThat(søknadViaGet.annenForelder?.norskIdent).isEqualTo("44444444444")
-        assertThat(søknadViaGet.barn.size).isEqualTo(2)
+        org.assertj.core.api.Assertions.assertThat(søknadViaGet.begrunnelseForInnsending).isEqualTo("JEG VET IKKE")
+        org.assertj.core.api.Assertions.assertThat(søknadViaGet.barn?.foedselsdato).isEqualTo(LocalDate.of(2018,10, 30))
     }
-
 
     private fun opprettSøknad(
         personnummer: NorskIdentDto,
         journalpostId: String,
-        annenPart: String,
+        pleietrengende: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, null, annenPart)
+        return OpprettNySøknad(personnummer, journalpostId, pleietrengende, null)
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -145,7 +142,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
         pleietrengende: String,
-    ): OmsorgspengerMidlertidigAleneSøknadDto {
+    ): OmsorgspengerAleneOmsorgSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
         // oppretter en søknad
@@ -162,7 +159,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerMidlertidigAleneSøknadDto>(
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerAleneOmsorgSøknadDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -204,7 +201,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: OmsorgspengerMidlertidigAleneSøknadDto = client.putAndAssert(
+        val søknadDtoFyltUt: OmsorgspengerAleneOmsorgSøknadDto = client.putAndAssert(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -239,5 +236,4 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
-
 }

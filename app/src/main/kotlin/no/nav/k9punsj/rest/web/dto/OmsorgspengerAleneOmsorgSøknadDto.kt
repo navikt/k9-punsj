@@ -1,7 +1,6 @@
 package no.nav.k9punsj.rest.web.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -16,7 +15,7 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     val barn: BarnDto? = null,
     val journalposter: List<JournalpostIdDto>? = null,
     val soeknadsperiode: PeriodeDto? = null,
-    val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
+    val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes : Boolean? = null,
     val harMedisinskeOpplysninger : Boolean? = null,
 ) {
