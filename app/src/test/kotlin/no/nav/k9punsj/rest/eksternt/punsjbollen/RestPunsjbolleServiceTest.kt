@@ -19,7 +19,7 @@ import java.net.URI
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RestPunsjbolleServiceTest {
 
-    private lateinit var wiremockServer : WireMockServer
+    private lateinit var wiremockServer: WireMockServer
     private lateinit var punsjbolleService: RestPunsjbolleService
 
     @Test
@@ -47,9 +47,10 @@ internal class RestPunsjbolleServiceTest {
             søker = "123",
             pleietrengende = "456",
             journalpostId = "789",
-            null,
-            correlationId,
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            annenPart = null,
+            periode = null,
+            correlationId = correlationId,
+            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
     }
 
@@ -125,7 +126,8 @@ internal class RestPunsjbolleServiceTest {
             correlationId: CorrelationId,
             httpStatus: Int,
             contentType: String = "application/json",
-            responseBody: String): WireMockServer {
+            responseBody: String,
+        ): WireMockServer {
             WireMock.stubFor(
                 WireMock.post(WireMock.urlPathEqualTo("/ruting"))
                     .withHeader("Content-Type", WireMock.equalTo("application/json"))
@@ -136,7 +138,7 @@ internal class RestPunsjbolleServiceTest {
                         .withHeader("Content-Type", contentType)
                         .withBody(responseBody)
                         .withStatus(httpStatus)
-                )
+                    )
             )
             return this
         }

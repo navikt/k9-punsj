@@ -104,7 +104,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         journalpostId: String,
         pleietrengende: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, pleietrengende)
+        return OpprettNySøknad(personnummer, journalpostId, pleietrengende, null)
     }
 
     private fun tilpasserSøknadsMalTilTesten(

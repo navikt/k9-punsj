@@ -206,7 +206,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private fun opprettSøknad(personnummer: NorskIdentDto, journalpostId: String) = OpprettNySøknad(
         norskIdent = personnummer,
         journalpostId = journalpostId,
-        pleietrengendeIdent = null
+        pleietrengendeIdent = null,
+        annenPart = null
     )
 
     private fun tilpasserSøknadsMalTilTesten(

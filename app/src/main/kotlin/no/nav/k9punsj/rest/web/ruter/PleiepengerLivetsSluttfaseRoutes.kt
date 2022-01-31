@@ -46,7 +46,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
     private val k9SakService: K9SakService,
     private val journalpostRepository: JournalpostRepository,
     private val punsjbolleService: PunsjbolleService,
-    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI) {
+    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI,
+) {
 
     private companion object {
         private val logger = LoggerFactory.getLogger(PleiepengerLivetsSluttfaseRoutes::class.java)
@@ -70,7 +71,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)?.let { return@RequestContext it }
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)
+                    ?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
@@ -146,15 +148,19 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: PleiepengerLivetsSluttfaseSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknad.soekerId, søknad.pleietrengende)?.first ?: emptyList()
+                        val søknad: PleiepengerLivetsSluttfaseSøknadDto =
+                            objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val hentPerioderSomFinnesIK9 =
+                            henterPerioderSomFinnesIK9sak(søknad.soekerId, søknad.pleietrengende)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
                         val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn -> if (!kanSendesInn) {
-                                logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
-                            }}
+                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                                if (!kanSendesInn) {
+                                    logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
+                                }
+                            }
                         }.toMutableSet()
 
                         if (journalpostIder.isEmpty()) {
@@ -225,12 +231,13 @@ internal class PleiepengerLivetsSluttfaseRoutes(
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.pleietrengendeIdent != null) {
-                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.pleietrengendeIdent,
-                        opprettNySøknad.journalpostId,
-                        null,
-                        coroutineContext.hentCorrelationId(),
-                    fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+                    punsjbolleService.opprettEllerHentFagsaksnummer(
+                        søker = opprettNySøknad.norskIdent,
+                        pleietrengende = opprettNySøknad.pleietrengendeIdent,
+                        journalpostId = opprettNySøknad.journalpostId,
+                        periode = null,
+                        correlationId = coroutineContext.hentCorrelationId(),
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
@@ -343,7 +350,10 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         correlationId = coroutineContext.hentCorrelationId()
     ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(søkerIdent: NorskIdentDto?, pleietrengendeDto: PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto?): Pair<List<PeriodeDto>?, String?>? {
+    private suspend fun henterPerioderSomFinnesIK9sak(
+        søkerIdent: NorskIdentDto?,
+        pleietrengendeDto: PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto?,
+    ): Pair<List<PeriodeDto>?, String?>? {
         if (søkerIdent.isNullOrBlank() || pleietrengendeDto == null || pleietrengendeDto.norskIdent.isNullOrBlank()) {
             return null
         }

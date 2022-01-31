@@ -108,12 +108,13 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.pleietrengendeIdent != null) {
-                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.pleietrengendeIdent,
-                        opprettNySøknad.journalpostId,
-                        null,
-                        coroutineContext.hentCorrelationId(),
-                        no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
+                    punsjbolleService.opprettEllerHentFagsaksnummer(
+                        søker = opprettNySøknad.norskIdent,
+                        annenPart = opprettNySøknad.annenPart,
+                        journalpostId = opprettNySøknad.journalpostId,
+                        periode = null,
+                        correlationId = coroutineContext.hentCorrelationId(),
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
                     )
                 }
 

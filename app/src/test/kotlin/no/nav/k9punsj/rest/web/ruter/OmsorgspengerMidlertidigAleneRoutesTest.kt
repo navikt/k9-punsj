@@ -102,9 +102,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     private fun opprettSøknad(
         personnummer: NorskIdentDto,
         journalpostId: String,
-        pleietrengende: String,
+        annenPart: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, pleietrengende)
+        return OpprettNySøknad(personnummer, journalpostId, null, annenPart)
     }
 
     private fun tilpasserSøknadsMalTilTesten(

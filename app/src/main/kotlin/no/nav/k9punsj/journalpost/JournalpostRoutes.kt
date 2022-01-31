@@ -222,6 +222,7 @@ internal class JournalpostRoutes(
                 val punsjbolleRuting = punsjbolleService.ruting(
                     søker = dto.brukerIdent,
                     pleietrengende = dto.barnIdent,
+                    annenPart = dto.annenPart,
                     journalpostId = dto.journalpostId,
                     periode = null, // Utledes fra journalposten i Punsjbollen
                     correlationId = coroutineContext.hentCorrelationId(),

@@ -16,6 +16,7 @@ data class OpprettNySøknad(
     val norskIdent: NorskIdentDto,
     val journalpostId: JournalpostIdDto,
     val pleietrengendeIdent: NorskIdentDto?,
+    val annenPart: NorskIdentDto?,
 )
 
 data class HentSøknad(
@@ -49,7 +50,9 @@ data class SøkUferdigJournalposter(
 
 data class PunsjBolleDto(
     val brukerIdent: NorskIdentDto,
-    val barnIdent: NorskIdentDto,
+    //todo bytt navn til pleietrengende
+    val barnIdent: NorskIdentDto?,
+    val annenPart: NorskIdentDto?,
     val journalpostId: JournalpostIdDto,
 )
 
