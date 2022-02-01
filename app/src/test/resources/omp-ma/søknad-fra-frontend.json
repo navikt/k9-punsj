@@ -1,0 +1,30 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "mottattDato": "2020-10-12",
+  "klokkeslett": "12:53",
+  "barn": [
+    {
+      "norskIdent": "22222222222",
+      "foedselsdato": "2018-10-30"
+    },
+    {
+      "norskIdent": "33333333333",
+      "foedselsdato": "2018-10-30"
+    }
+  ],
+  "annenForelder" : {
+    "norskIdent": "44444444444",
+    "situasjonType": "INNLAGT_I_HELSEINSTITUSJON",
+    "situasjonBeskrivelse": "lalalala trolololol LOL",
+    "periode": {
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
+    }
+  },
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
+}

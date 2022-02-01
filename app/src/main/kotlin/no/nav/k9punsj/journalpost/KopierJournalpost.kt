@@ -31,8 +31,16 @@ import kotlin.coroutines.coroutineContext
 data class KopierJournalpostDto(
     val fra: NorskIdentDto,
     val til: NorskIdentDto,
-    val barn: NorskIdentDto
-)
+    //TODO bytt navn til pleietrengende
+    val barn: NorskIdentDto?,
+    val annenPart: NorskIdentDto?
+) {
+    init {
+        require(barn != null || annenPart != null) {
+            "Må sette minst en av barn og annenPart"
+        }
+    }
+}
 
 internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     pepClient: IPepClient,
@@ -43,12 +51,19 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
         pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
         pepClient.sendeInnTilgang(dto.til, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
-        return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
+        if (dto.barn != null ){
+            return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
+        }
+        if (dto.annenPart != null) {
+            return pepClient.sendeInnTilgang(dto.annenPart, JournalpostRoutes.Urls.KopierJournalpost)
+        }
+        return false
     }
 
     suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo,fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.fra,
         pleietrengende = dto.barn,
+        annenPart = dto.annenPart,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId,
@@ -58,6 +73,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
         søker = dto.til,
         pleietrengende = dto.barn,
+        annenPart = dto.annenPart,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
         correlationId = correlationId,

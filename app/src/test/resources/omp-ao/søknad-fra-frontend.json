@@ -1,0 +1,20 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "mottattDato": "2020-10-12",
+  "klokkeslett": "12:53",
+  "soeknadsperiode": {
+    "fom": "2018-12-30",
+    "tom": "2019-10-20"
+  },
+  "barn": {
+    "norskIdent": "22222222222",
+    "foedselsdato": "2018-10-30"
+  },
+  "begrunnelseForInnsending": "JEG VET IKKE",
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
+}

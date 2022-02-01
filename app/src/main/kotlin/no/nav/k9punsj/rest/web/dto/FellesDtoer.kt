@@ -45,6 +45,19 @@ data class SvarOmsKSBDto(
     val søknader: List<OmsorgspengerKroniskSyktBarnSøknadDto>?,
 )
 
+data class SvarOmsMADto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<OmsorgspengerMidlertidigAleneSøknadDto>?,
+)
+
+data class SvarOmsAODto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?,
+)
+
+
 data class SvarPlsDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
@@ -131,6 +144,40 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: NorskIdentDto): SvarOmsKSBDto {
     return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
 }
 
+internal fun Mappe.tilOmsMAVisning(norskIdent: NorskIdentDto): SvarOmsMADto {
+    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            }
+        }
+    return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, søknader)
+}
+
+internal fun Mappe.tilOmsAOVisning(norskIdent: NorskIdentDto): SvarOmsAODto {
+    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            }
+        }
+    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
+}
+
 internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
     val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
     if (bunke?.søknader.isNullOrEmpty()) {
@@ -193,6 +240,20 @@ internal fun SøknadEntitet.tilOmsvisning(): OmsorgspengerSøknadDto {
 internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøknadDto {
     if (søknad == null) {
         return OmsorgspengerKroniskSyktBarnSøknadDto(soeknadId = this.søknadId)
+    }
+    return objectMapper().convertValue(søknad)
+}
+
+internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
+    if (søknad == null) {
+        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
+    }
+    return objectMapper().convertValue(søknad)
+}
+
+internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
+    if (søknad == null) {
+        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
     }
     return objectMapper().convertValue(søknad)
 }

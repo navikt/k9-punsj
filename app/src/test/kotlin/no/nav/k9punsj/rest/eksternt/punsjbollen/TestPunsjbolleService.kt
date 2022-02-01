@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component
 internal class TestPunsjbolleService : PunsjbolleService {
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
@@ -26,14 +27,16 @@ internal class TestPunsjbolleService : PunsjbolleService {
 
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
         correlationId: CorrelationId
     ) = SaksnummerDto("133742069666")
 
     override suspend fun ruting(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,

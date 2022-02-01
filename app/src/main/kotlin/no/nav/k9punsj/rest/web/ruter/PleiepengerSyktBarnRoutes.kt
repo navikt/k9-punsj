@@ -224,13 +224,14 @@ internal class PleiepengerSyktBarnRoutes(
                     Urls.NySøknad)?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
-                if (opprettNySøknad.barnIdent != null) {
-                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.barnIdent,
-                        opprettNySøknad.journalpostId,
-                        null,
-                        coroutineContext.hentCorrelationId(),
-                    fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+                if (opprettNySøknad.pleietrengendeIdent != null) {
+                    punsjbolleService.opprettEllerHentFagsaksnummer(
+                        søker = opprettNySøknad.norskIdent,
+                        pleietrengende = opprettNySøknad.pleietrengendeIdent,
+                        journalpostId = opprettNySøknad.journalpostId,
+                        periode = null,
+                        correlationId = coroutineContext.hentCorrelationId(),
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet

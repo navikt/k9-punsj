@@ -41,7 +41,8 @@ class RestPunsjbolleService(
 
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
@@ -50,6 +51,7 @@ class RestPunsjbolleService(
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
             pleietrengende = pleietrengende,
+            annenPart = annenPart,
             journalpostId = journalpostId,
             periode = periode,
             fagsakYtelseType = fagsakYtelseType
@@ -69,13 +71,15 @@ class RestPunsjbolleService(
 
     override suspend fun opprettEllerHentFagsaksnummer(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
         correlationId: CorrelationId,
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerFraSøknadDto(
             søker = søker,
             pleietrengende = pleietrengende,
+            annenPart = annenPart,
             søknad = søknad
         )
 
@@ -93,7 +97,8 @@ class RestPunsjbolleService(
 
     override suspend fun ruting(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
@@ -102,6 +107,7 @@ class RestPunsjbolleService(
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
             pleietrengende = pleietrengende,
+            annenPart = annenPart,
             journalpostId = journalpostId,
             periode = periode,
             fagsakYtelseType = fagsakYtelseType
@@ -133,16 +139,19 @@ class RestPunsjbolleService(
 
     private suspend fun punsjbolleSaksnummerDto(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
     ): PunsjbolleSaksnummerDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
-        val pleietrengendePerson = personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende)
+        val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
+        val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
-            pleietrengende = PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId),
+            pleietrengende = if (pleietrengendePerson!= null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
+            annenPart = if (annenPartPerson!= null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
             periode = periode?.let {
                 require(it.fom != null || it.tom != null) { "Må sette enten fom eller tom" }
                 "${it.fom.iso8601()}/${it.tom.iso8601()}"
@@ -154,14 +163,17 @@ class RestPunsjbolleService(
 
     private suspend fun punsjbolleSaksnummerFraSøknadDto(
         søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
     ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
-        val pleietrengendePerson = personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende)
+        val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
+        val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerFraSøknadDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
-            pleietrengende = PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId),
+            pleietrengende = if (pleietrengendePerson!= null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
+            annenPart = if (annenPartPerson!= null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
             søknad = søknad.somMap()
         )
     }
@@ -221,7 +233,8 @@ class RestPunsjbolleService(
 
         private data class PunsjbolleSaksnummerDto(
             val søker: PunsjbollePersonDto,
-            val pleietrengende: PunsjbollePersonDto,
+            val pleietrengende: PunsjbollePersonDto?,
+            val annenPart: PunsjbollePersonDto?,
             val søknadstype: String,
             val journalpostId: String? = null,
             val periode: String? = null,
@@ -230,12 +243,16 @@ class RestPunsjbolleService(
                 require(journalpostId != null || periode != null) {
                     "Må sette minst en av journalpostId og periode"
                 }
+                require(pleietrengende != null || annenPart != null) {
+                    "Må sette minst en av pleietrengende og annenPart"
+                }
             }
         }
 
         private data class PunsjbolleSaksnummerFraSøknadDto(
             val søker: PunsjbollePersonDto,
-            val pleietrengende: PunsjbollePersonDto,
+            val pleietrengende: PunsjbollePersonDto?,
+            val annenPart: PunsjbollePersonDto?,
             val søknad: Map<String, *>,
         )
 

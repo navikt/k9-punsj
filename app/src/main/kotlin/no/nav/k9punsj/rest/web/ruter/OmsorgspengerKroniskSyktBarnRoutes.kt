@@ -16,7 +16,6 @@ import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.dto.*
@@ -108,13 +107,14 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
                     Urls.NySøknad)?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
-                if (opprettNySøknad.barnIdent != null) {
-                    punsjbolleService.opprettEllerHentFagsaksnummer(opprettNySøknad.norskIdent,
-                        opprettNySøknad.barnIdent,
-                        opprettNySøknad.journalpostId,
-                        null,
-                        coroutineContext.hentCorrelationId(),
-                        no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
+                if (opprettNySøknad.pleietrengendeIdent != null) {
+                    punsjbolleService.opprettEllerHentFagsaksnummer(
+                        søker = opprettNySøknad.norskIdent,
+                        pleietrengende = opprettNySøknad.pleietrengendeIdent,
+                        journalpostId = opprettNySøknad.journalpostId,
+                        periode = null,
+                        correlationId = coroutineContext.hentCorrelationId(),
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
                     )
                 }
 

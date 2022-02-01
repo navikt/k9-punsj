@@ -4,21 +4,24 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.awaitBodyWithType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarPlsDto
+import no.nav.k9punsj.rest.web.dto.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.rest.web.dto.SvarOmsMADto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
@@ -28,11 +31,11 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class PleiepengerLivetsSluttfaseRoutesTest {
+internal class OmsorgspengerMidlertidigAleneRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = FagsakYtelseTypeUri.PLEIEPENGER_LIVETS_SLUTTFASE
+    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_MIDLERTIDIG_ALENE
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -45,7 +48,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        val body = client.getAndAssert<SvarPlsDto>(
+        val body = client.getAndAssert<SvarOmsMADto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -72,7 +75,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
         val pleietrengende = "01010050023"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendPls()
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid, pleietrengende)
@@ -83,28 +86,49 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             requestBody = BodyInserters.fromValue(soeknad),
             api, søknadTypeUri, "valider"
         )
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
+        assertThat(body.feil).isNull()
     }
 
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val pleietrengende = "01010050023"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendPls()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
-        org.assertj.core.api.Assertions.assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
+        assertThat(body.feil).isNull()
+        assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
+
+    @Test
+    fun `Skal sjekke mapping av felter`(): Unit = runBlocking {
+        val norskIdent = "02020050123"
+        val pleietrengende = "01010050023"
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
+        val journalpostid = abs(Random(56234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
+
+
+        val søknad = opprettOgLagreSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
+
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", søknad.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<OmsorgspengerMidlertidigAleneSøknadDto>()
+
+        assertThat(søknadViaGet.annenForelder?.norskIdent).isEqualTo("44444444444")
+        assertThat(søknadViaGet.barn.size).isEqualTo(2)
+    }
+
 
     private fun opprettSøknad(
         personnummer: NorskIdentDto,
         journalpostId: String,
-        pleietrengende: String,
+        annenPart: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, pleietrengende, null)
+        return OpprettNySøknad(personnummer, journalpostId, null, annenPart)
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -121,7 +145,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
         pleietrengende: String,
-    ): PleiepengerLivetsSluttfaseSøknadDto {
+    ): OmsorgspengerMidlertidigAleneSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
         // oppretter en søknad
@@ -138,7 +162,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, PleiepengerLivetsSluttfaseSøknadDto>(
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerMidlertidigAleneSøknadDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -180,7 +204,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: PleiepengerLivetsSluttfaseSøknadDto = client.putAndAssert(
+        val søknadDtoFyltUt: OmsorgspengerMidlertidigAleneSøknadDto = client.putAndAssert(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -215,4 +239,5 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
+
 }
