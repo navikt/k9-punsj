@@ -114,7 +114,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                         journalpostId = opprettNySøknad.journalpostId,
                         periode = null,
                         correlationId = coroutineContext.hentCorrelationId(),
-                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
+                        fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO
                     )
                 }
 
