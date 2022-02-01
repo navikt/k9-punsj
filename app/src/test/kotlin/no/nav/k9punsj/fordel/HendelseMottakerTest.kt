@@ -5,9 +5,12 @@ import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
@@ -28,6 +31,9 @@ import java.util.UUID
     AksjonspunktServiceImpl::class,
     JournalpostRepository::class,
     AksjonspunktRepository::class,
+    PersonService::class,
+    PersonRepository::class,
+    TestPdlService::class,
     SøknadRepository::class
 ])
 internal class HendelseMottakerTest {

@@ -3,13 +3,20 @@ package no.nav.k9punsj.akjonspunkter
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.SøknadEntitet
+import no.nav.k9punsj.db.repository.BunkeRepository
+import no.nav.k9punsj.db.repository.MappeRepository
+import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,7 +35,13 @@ import java.util.UUID
     AksjonspunktServiceImpl::class,
     JournalpostRepository::class,
     AksjonspunktRepository::class,
+    MappeRepository::class,
+    BunkeRepository::class,
     SøknadRepository::class,
+    SøknadRepository::class,
+    PersonService::class,
+    PersonRepository::class,
+    TestPdlService::class,
     TestBeans::class
 ])
 internal class AksjonspunktServiceImplTest {
@@ -41,6 +54,18 @@ internal class AksjonspunktServiceImplTest {
 
     @Autowired
     private lateinit var aksjonspunktRepository: AksjonspunktRepository
+
+    @Autowired
+    private lateinit var mappeRepository: MappeRepository
+
+    @Autowired
+    private lateinit var bunkeRepository: BunkeRepository
+
+    @Autowired
+    private lateinit var søknadRepository: SøknadRepository
+
+    @Autowired
+    private lateinit var personRepository: PersonRepository
 
     @Autowired
     private lateinit var journalpostRepository: JournalpostRepository
@@ -71,6 +96,45 @@ internal class AksjonspunktServiceImplTest {
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         assertThat(verdiFraKafka.aksjonspunktKoderMedStatusListe).isEqualTo(mutableMapOf(Pair("PUNSJ", "UTFO"), Pair("MER_INFORMASJON", "OPPR")))
+    }
+
+    @Test
+    fun `skal sende riktig aktørId til los hvis en søknad har blitt flippet fra opprinnelig aktørId til en ny på søknaden`(): Unit = runBlocking {
+        val barnetsAktørId = "235612324"
+        val morsAktørId = "1253124234"
+        val journalpostId = "294523"
+        val søknadId = "21707da8-a13b-4927-8776-c53399727b29"
+
+        val melding = FordelPunsjEventDto(aktørId = barnetsAktørId, journalpostId = journalpostId)
+
+        val topicCaptor = ArgumentCaptor.forClass(String::class.java)
+        val keyCaptor = ArgumentCaptor.forClass(String::class.java)
+        val valueCaptor = ArgumentCaptor.forClass(String::class.java)
+        val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
+
+        journalpostRepository.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+
+        aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
+            aksjonspunktId = UUID.randomUUID().toString(),
+            aksjonspunktKode = AksjonspunktKode.PUNSJ,
+            journalpostId = melding.journalpostId,
+            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+
+        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
+        assertThat(hentAlleAksjonspunkter).hasSize(1)
+
+        val person = personRepository.lagre("2123245", morsAktørId)
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(person.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+        søknadRepository.opprettSøknad(SøknadEntitet(søknadId, bunkeId, person.personId))
+
+        Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
+        aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId, søknadId)
+
+        val value = valueCaptor.value
+        val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
+        assertThat(verdiFraKafka.aksjonspunktKoderMedStatusListe).isEqualTo(mutableMapOf(Pair("PUNSJ", "UTFO"), Pair("MER_INFORMASJON", "OPPR")))
+        assertThat(verdiFraKafka.aktørId).isEqualTo(morsAktørId)
     }
 
     private fun captureString(valueCaptor: ArgumentCaptor<String>): String {
