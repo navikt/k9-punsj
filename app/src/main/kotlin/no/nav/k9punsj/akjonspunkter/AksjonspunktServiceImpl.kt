@@ -2,7 +2,9 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -25,6 +27,7 @@ class AksjonspunktServiceImpl(
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,
     val søknadRepository: SøknadRepository,
+    val personService: PersonService
 ) : AksjonspunktService {
 
     private companion object {
@@ -167,7 +170,7 @@ class AksjonspunktServiceImpl(
                 topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
                 data = lagPunsjDto(eksternId,
                     journalpostId = journalpostId,
-                    aktørId = journalpost.aktørId,
+                    aktørId = uteldAktørId(søknadId, journalpost),
                     aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
@@ -191,7 +194,7 @@ class AksjonspunktServiceImpl(
                     topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
                     data = lagPunsjDto(eksternId,
                         journalpostId = journalpostId,
-                        aktørId = journalpost.aktørId,
+                        aktørId = uteldAktørId(søknadId, journalpost),
                         aksjonspunkter = mutableMapOf(
                             AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                         ),
@@ -207,6 +210,20 @@ class AksjonspunktServiceImpl(
                 log.info("Denne journalposten($journalpostId) venter allerede - venter til ${ventePunkt?.frist_tid}")
             }
         }
+    }
+
+    private suspend fun uteldAktørId(søknadId: SøknadIdDto?, journalpost: Journalpost) : AktørId? {
+        if (søknadId == null) {
+            return journalpost.aktørId
+        }
+        val personId = søknadRepository.hentSøknad(søknadId = søknadId)?.søkerId ?: return journalpost.aktørId
+        val aktørIdPåSøknaden = personService.finnPerson(personId).aktørId
+
+        // betyr at søknaden har byttet fra opprinnelig aktørId til ny aktørId (kan skje hvis den opprinnelig journalposten kommer inn på barnet sitt aktørNummer)
+        if (aktørIdPåSøknaden != journalpost.aktørId) {
+            return aktørIdPåSøknaden
+        }
+        return journalpost.aktørId
     }
 
     private fun lagPunsjDto(
