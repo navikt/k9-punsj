@@ -185,6 +185,26 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     }
 
     @Test
+    fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val søknad = client.getAndAssert<OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId
+        )
+
+        Assertions.assertNotNull(søknad)
+        assertThat(søknad.harInfoSomIkkeKanPunsjes).isEqualTo(true)
+        assertThat(søknad.harMedisinskeOpplysninger).isEqualTo(true)
+    }
+
+    @Test
     @Disabled("Test passer ikke fordi k9-format ikke validerer noe på denne ytelsen.")
     fun `skal få feil hvis barn ikke er fylt ut`(): Unit = runBlocking {
         val norskIdent = "02022352122"
@@ -193,11 +213,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        val body= client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.BAD_REQUEST,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri,"valider"
+            api, søknadTypeUri, "valider"
         )
 
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
