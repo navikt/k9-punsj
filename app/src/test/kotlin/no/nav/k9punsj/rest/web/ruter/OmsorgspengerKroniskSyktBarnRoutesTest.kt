@@ -207,7 +207,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         norskIdent = personnummer,
         journalpostId = journalpostId,
         pleietrengendeIdent = null,
-        annenPart = null
+        annenPart = null,
+        barnIdent = null
     )
 
     private fun tilpasserSøknadsMalTilTesten(

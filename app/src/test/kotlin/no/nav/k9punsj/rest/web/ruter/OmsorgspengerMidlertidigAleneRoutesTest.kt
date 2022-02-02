@@ -128,7 +128,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         journalpostId: String,
         annenPart: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, null, annenPart)
+        return OpprettNySøknad(personnummer, journalpostId, null, annenPart, null)
     }
 
     private fun tilpasserSøknadsMalTilTesten(
