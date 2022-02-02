@@ -17,6 +17,8 @@ data class OpprettNySøknad(
     val journalpostId: JournalpostIdDto,
     val pleietrengendeIdent: NorskIdentDto?,
     val annenPart: NorskIdentDto?,
+    //TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
+    val barnIdent: NorskIdentDto?,
 )
 
 data class HentSøknad(

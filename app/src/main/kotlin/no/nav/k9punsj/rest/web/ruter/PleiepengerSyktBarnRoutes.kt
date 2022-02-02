@@ -224,10 +224,10 @@ internal class PleiepengerSyktBarnRoutes(
                     Urls.NySøknad)?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
-                if (opprettNySøknad.pleietrengendeIdent != null) {
+                if (opprettNySøknad.barnIdent != null) {
                     punsjbolleService.opprettEllerHentFagsaksnummer(
                         søker = opprettNySøknad.norskIdent,
-                        pleietrengende = opprettNySøknad.pleietrengendeIdent,
+                        pleietrengende = opprettNySøknad.barnIdent,
                         journalpostId = opprettNySøknad.journalpostId,
                         periode = null,
                         correlationId = coroutineContext.hentCorrelationId(),

@@ -39,7 +39,7 @@ class MappeService(
 
     suspend fun førsteInnsendingPsb(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
-        val barnIdent = nySøknad.pleietrengendeIdent
+        val barnIdent = nySøknad.barnIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
