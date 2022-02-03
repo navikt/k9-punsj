@@ -146,7 +146,8 @@ internal class MapPsbTilK9Format(
         val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { utenlandsopphold ->
 
-            val oppholdet = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, "")
+            val INGEN_ÅRSAK = ""
+            val oppholdet = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, INGEN_ÅRSAK)
 
             val innleggelsesperioder = LocalDateTimeline(utenlandsopphold.innleggelsesperioder.map {
                 LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak!!)
@@ -166,7 +167,7 @@ internal class MapPsbTilK9Format(
                 if (utenlandsopphold.land.erSatt()) {
                     k9Info.medLand(Landkode.of(utenlandsopphold.land))
                 }
-                if (segment.value != "") {
+                if (segment.value != INGEN_ÅRSAK) {
                     mapEllerLeggTilFeil("ytelse.utenlandsopphold.${k9Periode.jsonPath()}.årsak") {
                         Utenlandsopphold.UtenlandsoppholdÅrsak.of(segment.value)
                     }?.also { k9Info.medÅrsak(it) }
