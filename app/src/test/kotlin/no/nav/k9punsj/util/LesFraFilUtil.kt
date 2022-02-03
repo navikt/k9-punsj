@@ -64,6 +64,10 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
         }
 
+        fun søknadFraFrontendUtenlandsoppholdV2() : MutableMap<String, Any?> {
+            return objectMapper().readValue(lesFraFil("søknad-fra-frontend-utlandsoppholdv2.json"))
+        }
+
         fun søknadFraFrontendMed2() : MutableMap<String, Any?> {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend_med_2.json"))
         }

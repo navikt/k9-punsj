@@ -1,0 +1,191 @@
+{
+  "soeknadId": "21707da8-a13b-4927-8776-c53399727b29",
+  "soekerId": "11111111111",
+  "journalposter": [
+    "9999"
+  ],
+  "mottattDato": "2020-10-12",
+  "klokkeslett": "12:53",
+  "barn": {
+    "norskIdent": "22222222222",
+    "foedselsdato": "2018-10-30"
+  },
+  "soeknadsperiode": [
+    {
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
+    }
+  ],
+  "opptjeningAktivitet": {
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "FiskerAS",
+      "organisasjonsnummer": "910909088",
+      "info": {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": null
+        },
+        "virksomhetstyper": [
+          "Fiske",
+          "Jordbruk",
+          "Dagmamma i eget hjem/familiebarnehage",
+          "Annen næringsvirksomhet"
+        ],
+        "landkode": "",
+        "regnskapsførerNavn": "Regskapsfører",
+        "regnskapsførerTlf": "88888889",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "1200000",
+        "erNyoppstartet": false,
+        "erVarigEndring": true,
+        "endringInntekt": "1300000",
+        "endringDato": "2018-12-30",
+        "endringBegrunnelse": "Dota2 er best"
+      }
+    },
+    "frilanser": {
+      "startdato": "2019-10-10",
+      "sluttdato": "2019-11-10",
+      "jobberFortsattSomFrilans": true
+    },
+    "arbeidstaker": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "910909088"
+      }
+    ]
+  },
+  "arbeidstid": {
+    "arbeidstakerList": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "910909088",
+        "arbeidstidInfo": {
+          "perioder": [
+            {
+              "periode": {
+                "fom": "2018-12-30",
+                "tom": "2019-10-20"
+              },
+              "faktiskArbeidTimerPerDag": "7,48",
+              "jobberNormaltTimerPerDag": "7,48"
+            }
+          ]
+        }
+      }
+    ],
+    "frilanserArbeidstidInfo": {
+      "perioder": [
+        {
+          "periode": {
+            "fom": "2018-12-30",
+            "tom": "2019-10-20"
+          },
+          "faktiskArbeidTimerPerDag": "5",
+          "jobberNormaltTimerPerDag": "6"
+        }
+      ]
+    },
+    "selvstendigNæringsdrivendeArbeidstidInfo": {
+      "perioder": [
+        {
+          "periode": {
+            "fom": "2018-12-30",
+            "tom": "2019-10-20"
+          },
+          "faktiskArbeidTimerPerDag": "4",
+          "jobberNormaltTimerPerDag": "7"
+        }
+      ]
+    }
+  },
+  "beredskap": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
+    }
+  ],
+  "nattevaak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "tilleggsinformasjon": "FÅ SLUTT PÅ COVID!!!"
+    }
+  ],
+  "tilsynsordning": {
+    "perioder": [
+      {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": "2019-10-20"
+        },
+        "timer": "7",
+        "minutter": "30"
+      }
+    ]
+  },
+  "uttak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "timerPleieAvBarnetPerDag": "7,5"
+    }
+  ],
+  "omsorg": {
+    "relasjonTilBarnet": "MOR",
+    "samtykketOmsorgForBarnet": true,
+    "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."
+  },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "lovbestemtFerie": [
+    {
+      "fom": "2018-12-30",
+      "tom": "2019-06-20"
+    }
+  ],
+  "lovbestemtFerieSomSkalSlettes": [
+    {
+      "fom": "2019-06-21",
+      "tom": "2019-10-20"
+    }
+  ],
+  "utenlandsoppholdV2": [
+    {
+      "periode": {
+        "fom": "2019-01-01",
+        "tom": "2019-01-31"
+      },
+      "land": "RU",
+      "innleggelsesperioder": [
+        {
+          "årsak": "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd",
+          "periode": {
+            "fom": "2019-01-08",
+            "tom": "2019-01-15"
+          }
+        }
+      ]
+    }
+  ],
+  "soknadsinfo": {
+    "samtidigHjemme": true,
+    "harMedsoeker": true
+  },
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
+}
