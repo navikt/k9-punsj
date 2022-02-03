@@ -138,7 +138,12 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: NorskIdentDto): SvarOmsKSBDto {
             if (s.søknad != null) {
                 objectMapper().convertValue(s.søknad)
             } else {
-                OmsorgspengerKroniskSyktBarnSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerKroniskSyktBarnSøknadDto(
+                    soeknadId = s.søknadId,
+                    journalposter = hentUtJournalposter(s),
+                    harMedisinskeOpplysninger = false,
+                    harInfoSomIkkeKanPunsjes = false
+                )
             }
         }
     return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
@@ -239,7 +244,11 @@ internal fun SøknadEntitet.tilOmsvisning(): OmsorgspengerSøknadDto {
 
 internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerKroniskSyktBarnSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerKroniskSyktBarnSøknadDto(
+            soeknadId = this.søknadId,
+            harMedisinskeOpplysninger = false,
+            harInfoSomIkkeKanPunsjes = false
+        )
     }
     return objectMapper().convertValue(søknad)
 }

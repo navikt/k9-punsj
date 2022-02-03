@@ -30,7 +30,7 @@ internal class MapOmsKSBTilK9Format(
             dto.soekerId?.leggTilSøker()
             dto.barn?.leggTilBarn()
             dto.kroniskEllerFunksjonshemming?.let { dto.leggTilKroniskEllerFunksjonshemming() }
-            leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.leggTilJournalposter(journalpostIder = journalpostIder)
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerKroniskSyktBarn)
@@ -83,11 +83,13 @@ internal class MapOmsKSBTilK9Format(
         }
     }
 
-    private fun leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(
                 Journalpost()
                     .medJournalpostId(journalpostId)
+                    .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
+                    .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
     }

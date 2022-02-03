@@ -9,5 +9,7 @@
   "kroniskEllerFunksjonshemming": true,
   "journalposter": [
     "123456"
-  ]
+  ],
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": true
 }
