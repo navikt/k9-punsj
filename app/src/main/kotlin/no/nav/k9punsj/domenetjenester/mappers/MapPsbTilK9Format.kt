@@ -1,5 +1,8 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
+import no.nav.fpsak.tidsserie.LocalDateInterval
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.opptjening.Frilanser
@@ -29,7 +32,8 @@ internal class MapPsbTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
     perioderSomFinnesIK9: List<PeriodeDto>,
-    dto: PleiepengerSyktBarnSøknadDto) {
+    dto: PleiepengerSyktBarnSøknadDto,
+) {
 
     private val søknad = Søknad()
     private val pleiepengerSyktBarn = PleiepengerSyktBarn()
@@ -49,7 +53,11 @@ internal class MapPsbTilK9Format(
         dto.beredskap?.leggTilBeredskap()
         dto.nattevaak?.leggTilNattevåk()
         dto.bosteder?.leggTilBosteder()
-        dto.utenlandsopphold?.leggTilUtenlandsopphold()
+        if (dto.utenlandsoppholdV2.isNotEmpty()) {
+            dto.utenlandsoppholdV2.leggTilUtenlandsoppholdV2()
+        } else {
+            dto.utenlandsopphold?.leggTilUtenlandsopphold()
+        }
         dto.omsorg?.leggTilOmsorg()
         dto.opptjeningAktivitet?.leggTilOpptjeningAktivitet()
         dto.arbeidstid?.leggTilArbeidstid()
@@ -132,6 +140,51 @@ internal class MapPsbTilK9Format(
         if (k9Utenlandsopphold.isNotEmpty()) {
             pleiepengerSyktBarn.medUtenlandsopphold(Utenlandsopphold().medPerioder(k9Utenlandsopphold))
         }
+    }
+
+    private fun List<PleiepengerSyktBarnSøknadDto.UtenlandsoppholdDtoV2>.leggTilUtenlandsoppholdV2() {
+        val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
+        filter { it.periode.erSatt() }.forEach { utenlandsopphold ->
+
+            val oppholdet = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, INGEN_ÅRSAK)
+            val innleggelsesperioder = LocalDateTimeline(utenlandsopphold.innleggelsesperioder.map {
+                LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak!!)
+            })
+
+            val utenlandsoppholdet = LocalDateTimeline(listOf(oppholdet))
+            val listeMedAllePerioder = utenlandsoppholdet.combine(innleggelsesperioder,
+                { interval, overlappenePeriode, innleggelsesperiode -> slåSammen(interval, overlappenePeriode, innleggelsesperiode) }
+                , LocalDateTimeline.JoinStyle.CROSS_JOIN)
+
+            val intervaller = listeMedAllePerioder.localDateIntervals
+
+            intervaller.forEach{ interval ->
+                val segment = listeMedAllePerioder.getSegment(interval)
+                val k9Periode = segment.localDateInterval.somK9Periode()
+                val k9Info = Utenlandsopphold.UtenlandsoppholdPeriodeInfo()
+                if (utenlandsopphold.land.erSatt()) {
+                    k9Info.medLand(Landkode.of(utenlandsopphold.land))
+                }
+                if (segment.value != INGEN_ÅRSAK) {
+                    mapEllerLeggTilFeil("ytelse.utenlandsopphold.${k9Periode.jsonPath()}.årsak") {
+                        Utenlandsopphold.UtenlandsoppholdÅrsak.of(segment.value)
+                    }?.also { k9Info.medÅrsak(it) }
+                }
+                k9Utenlandsopphold[k9Periode] = k9Info
+            }
+        }
+        if (k9Utenlandsopphold.isNotEmpty()) {
+            pleiepengerSyktBarn.medUtenlandsopphold(Utenlandsopphold().medPerioder(k9Utenlandsopphold))
+        }
+    }
+
+    private fun slåSammen(intervall: LocalDateInterval, utenlandsoppholdet: LocalDateSegment<String>?, innleggelsesperiode: LocalDateSegment<String>?): LocalDateSegment<String> {
+        if (utenlandsoppholdet != null && innleggelsesperiode != null) {
+            return LocalDateSegment(intervall, innleggelsesperiode.value)
+        } else if (innleggelsesperiode != null) {
+            return LocalDateSegment(intervall, innleggelsesperiode.value)
+        }
+        return LocalDateSegment(intervall, "")
     }
 
     private fun List<PleiepengerSyktBarnSøknadDto.NattevåkDto>.leggTilNattevåk() {
@@ -383,12 +436,17 @@ internal class MapPsbTilK9Format(
         private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = PleiepengerSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
+        private const val INGEN_ÅRSAK = ""
         private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
         private fun PeriodeDto.somK9Periode() = when (erSatt()) {
             true -> Periode(fom, tom)
             else -> null
         }
+        private fun LocalDateInterval.somK9Periode() : Periode {
+            return Periode(this.fomDato, this.tomDato)
+        }
+
         private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
         private fun String?.erSatt() = !isNullOrBlank()
         private fun String.blankAsNull() = when (isBlank()) {

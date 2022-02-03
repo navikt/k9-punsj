@@ -401,6 +401,38 @@ class PleiepengersyktbarnTests {
     }
 
     @Test
+    fun `Skal verifisere at v2 av utelandsopphold blir lagret riktig`() : Unit = runBlocking {
+        val norskIdent = "12022352121"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendUtenlandsoppholdV2()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
+
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        // GUI format
+        assertNotNull(søknadViaGet)
+
+        // k9-format, faktisk søknad format
+        val mapTilEksternFormat = MapPsbTilK9Format(
+            søknadViaGet.soeknadId,
+            søknadViaGet.journalposter!!.toSet(),
+            emptyList(),
+            søknadViaGet
+        )
+
+        assertThat(mapTilEksternFormat.feil()).isEmpty()
+        val søknad = mapTilEksternFormat.søknad()
+        val ytelse = søknad.getYtelse<PleiepengerSyktBarn>()
+        assertThat(ytelse.utenlandsopphold.perioder.size).isEqualTo(3)
+        val filter = ytelse.utenlandsopphold.perioder.values.filter { it.Årsak != null }
+        assertThat(filter[0].Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
+    }
+
+    @Test
     fun `Skal verifisere at alle felter blir lagret`() : Unit = runBlocking {
         val norskIdent = "12022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
