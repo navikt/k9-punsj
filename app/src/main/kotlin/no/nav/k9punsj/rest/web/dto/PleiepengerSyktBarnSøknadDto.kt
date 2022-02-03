@@ -31,6 +31,7 @@ data class PleiepengerSyktBarnSøknadDto(
     val lovbestemtFerieSomSkalSlettes: List<PeriodeDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
+    val utenlandsoppholdV2 : List<UtenlandsoppholdDtoV2> = emptyList(),
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
@@ -113,6 +114,18 @@ data class PleiepengerSyktBarnSøknadDto(
         val land: String?,
         val årsak: String?
     )
+
+    data class UtenlandsoppholdDtoV2(
+        val periode: PeriodeDto? = null,
+        val land: String? = null,
+        val innleggelsesperioder : List<InnleggelsesperiodeDto> = emptyList()
+
+    ) {
+        data class InnleggelsesperiodeDto(
+            val årsak: String?,
+            val periode: PeriodeDto?
+        )
+    }
 
     data class BeredskapDto(
         val periode: PeriodeDto?,
