@@ -146,9 +146,7 @@ internal class MapPsbTilK9Format(
         val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { utenlandsopphold ->
 
-            val INGEN_ÅRSAK = ""
             val oppholdet = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, INGEN_ÅRSAK)
-
             val innleggelsesperioder = LocalDateTimeline(utenlandsopphold.innleggelsesperioder.map {
                 LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak!!)
             })
@@ -438,6 +436,7 @@ internal class MapPsbTilK9Format(
         private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = PleiepengerSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
+        private const val INGEN_ÅRSAK = ""
         private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
         private fun PeriodeDto.somK9Periode() = when (erSatt()) {
