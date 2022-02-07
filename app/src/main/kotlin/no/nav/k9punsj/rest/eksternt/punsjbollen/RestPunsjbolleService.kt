@@ -133,6 +133,7 @@ class RestPunsjbolleService(
     private fun FagsakYtelseType.somSøknadstype() = when (this) {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> "PleiepengerSyktBarn"
         FagsakYtelseType.OMSORGSPENGER -> "Omsorgspenger"
+        FagsakYtelseType.OMSORGSPENGER_KS -> "OmsorgspengerKroniskSyktBarn"
         else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
     }
 
