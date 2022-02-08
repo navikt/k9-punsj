@@ -29,7 +29,7 @@ internal class MapOmsKSBTilK9Format(
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
             dto.barn?.leggTilBarn()
-            dto.kroniskEllerFunksjonshemming?.let { dto.leggTilKroniskEllerFunksjonshemming() }
+            leggTilKroniskEllerFunksjonshemming()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
 
             // Fullfører søknad & validerer
@@ -61,8 +61,8 @@ internal class MapOmsKSBTilK9Format(
         }
     }
 
-    private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilKroniskEllerFunksjonshemming() {
-        omsorgspengerKroniskSyktBarn.medKroniskEllerFunksjonshemming(kroniskEllerFunksjonshemming)
+    private fun leggTilKroniskEllerFunksjonshemming() {
+        omsorgspengerKroniskSyktBarn.medKroniskEllerFunksjonshemming(true)
     }
 
     private fun OmsorgspengerKroniskSyktBarnSøknadDto.BarnDto.leggTilBarn() = when {

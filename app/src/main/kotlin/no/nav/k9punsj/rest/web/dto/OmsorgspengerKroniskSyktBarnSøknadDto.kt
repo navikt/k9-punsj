@@ -13,7 +13,6 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
-    val kroniskEllerFunksjonshemming: Boolean? = null,
     val journalposter: List<JournalpostIdDto>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean
