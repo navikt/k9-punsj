@@ -83,7 +83,7 @@ class RestPunsjbolleService(
             søknad = søknad
         )
 
-        val (url, response, responseBody) = "saksnummer-fra-søknad".post(
+        val (url, response, responseBody) = "saksnummer-fra-soknad".post(
             requestBody = requestBody,
             correlationId = correlationId
         )
