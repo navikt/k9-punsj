@@ -148,7 +148,7 @@ internal class MapPsbTilK9Format(
 
             val oppholdet = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, INGEN_ÅRSAK)
             val innleggelsesperioder = LocalDateTimeline(utenlandsopphold.innleggelsesperioder.map {
-                LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak!!)
+                LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak ?: INGEN_ÅRSAK)
             })
 
             val utenlandsoppholdet = LocalDateTimeline(listOf(oppholdet))
