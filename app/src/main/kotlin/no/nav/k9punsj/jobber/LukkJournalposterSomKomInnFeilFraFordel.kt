@@ -3,7 +3,7 @@ package no.nav.k9punsj.jobber
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
-import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class LukkJournalposterSomKomInnFeilFraFordel @Autowired constructor(
     val aksjonspunktServiceImpl: AksjonspunktServiceImpl,
-    val journalpostService: JournalpostService
+    val journalpostRepository: JournalpostRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(LukkJournalposterSomKomInnFeilFraFordel::class.java)
@@ -23,16 +23,16 @@ class LukkJournalposterSomKomInnFeilFraFordel @Autowired constructor(
         runBlocking {
 
             for ((index, journalpostId) in listeMedJournalposterSomSkalLukkes.withIndex()) {
-                if (journalpostService.kanSendeInn(journalpostId)) {
+                if (!journalpostRepository.fantIkke(journalpostId) && journalpostRepository.kanSendeInn(listOf(journalpostId))) {
                     aksjonspunktServiceImpl.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
-                    journalpostService.settTilFerdig(journalpostId)
+                    journalpostRepository.ferdig(journalpostId)
                     logger.info("$journalpostId er sendt til los og lukket")
+                    //venter 1 sekund
+                    delay(1000)
                 } else {
                     logger.info("Har håndert $journalpostId fra før")
                 }
                 logger.info("""Ferdig med $index av ${listeMedJournalposterSomSkalLukkes.size}""")
-                //venter 1 sekund
-                delay(1000)
             }
         }
     }
