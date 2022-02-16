@@ -136,8 +136,8 @@ internal object SafDtos {
         private val erEttersendelse = "ETTERSENDELSE" == k9Type
         private val erSøknad = "SØKNAD" == k9Type
         val erIkkeStøttetDigitalJournalpost = when (erDigital) {
-            false -> erEttersendelse || erSøknad
-            true -> true
+            true -> !(erEttersendelse || erSøknad)
+            false -> false
         }
     }
 
