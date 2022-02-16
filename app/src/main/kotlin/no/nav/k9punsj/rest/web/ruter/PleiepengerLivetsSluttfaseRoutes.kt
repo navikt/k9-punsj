@@ -243,7 +243,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
                 journalpostRepository.settFagsakYtelseType(fagsakYtelseType, opprettNySøknad.journalpostId)
 
-                val søknadEntitet = mappeService.førsteInnsendingPsb(
+                val søknadEntitet = mappeService.forsteInnsendingPls(
                     nySøknad = opprettNySøknad!!
                 )
                 return@RequestContext ServerResponse
