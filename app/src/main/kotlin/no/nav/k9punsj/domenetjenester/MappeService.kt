@@ -67,7 +67,7 @@ class MappeService(
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(soker.personId)
         val bunkeId =
-            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
         val soknadfelles = felles(nySøknad)
         val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
             soeknadId = soknadfelles.søknadsId.toString(),
