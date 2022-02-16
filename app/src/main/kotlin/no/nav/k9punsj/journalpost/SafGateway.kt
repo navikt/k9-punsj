@@ -100,6 +100,9 @@ class SafGateway(
             logger.warn("SafErrors=${safResponse.errors}")
         }
 
+
+        logger.info("JP= $journalpostId Kilde ${journalpost!!.k9Kilde} Type =${journalpost.k9Type}")
+
         // For journalposter som kommer digitalt er det kun ettersendelser som skal kunne punsjes.
         if (journalpost?.erIkkeStøttetDigitalJournalpost == true) throw IkkeStøttetJournalpost().also {
             logger.warn("Ikke støttet digital journalpost. K9Kilde=[${journalpost.k9Kilde}], K9Type=[${journalpost.k9Type}]")
