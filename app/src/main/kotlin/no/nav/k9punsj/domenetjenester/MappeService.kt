@@ -60,6 +60,35 @@ class MappeService(
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, pleiepengerSøknadDto)
     }
 
+    suspend fun forsteInnsendingPls(nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
+        val barnIdent = nySøknad.pleietrengendeIdent
+        val soker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(soker.personId)
+        val bunkeId =
+            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+        val soknadfelles = felles(nySøknad)
+        val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
+            soeknadId = soknadfelles.søknadsId.toString(),
+            soekerId = norskIdent,
+            pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto(barnIdent),
+            journalposter = listOf(nySøknad.journalpostId),
+            mottattDato = soknadfelles.mottattDato?.toLocalDate(),
+            klokkeslett = soknadfelles.klokkeslett,
+            harInfoSomIkkeKanPunsjes = false,
+            harMedisinskeOpplysninger = false
+        )
+
+        return opprettSøknadEntitet(
+            soknadfelles.søknadsId,
+            bunkeId,
+            soker,
+            soknadfelles.journalposter,
+            pleiepengerLivetsSluttfaseSoknadDto
+        )
+    }
+
     private suspend fun felles(nySøknad: OpprettNySøknad): Søknadfelles {
         val søknadId = UUID.randomUUID()
 
