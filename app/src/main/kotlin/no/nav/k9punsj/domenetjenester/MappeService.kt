@@ -62,7 +62,7 @@ class MappeService(
 
     suspend fun forsteInnsendingPls(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
-        val barnIdent = nySøknad.pleietrengendeIdent
+        val pleietrengendeIdent = nySøknad.pleietrengendeIdent
         val soker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(soker.personId)
@@ -72,7 +72,7 @@ class MappeService(
         val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
             soeknadId = soknadfelles.søknadsId.toString(),
             soekerId = norskIdent,
-            pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto(barnIdent),
+            pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto(pleietrengendeIdent),
             journalposter = listOf(nySøknad.journalpostId),
             mottattDato = soknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = soknadfelles.klokkeslett,
