@@ -134,8 +134,9 @@ internal object SafDtos {
         val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
         private val erDigital = "DIGITAL" == k9Kilde
         private val erEttersendelse = "ETTERSENDELSE" == k9Type
+        private val erSøknad = "SØKNAD" == k9Type
         val erIkkeStøttetDigitalJournalpost = when (erDigital) {
-            true -> !erEttersendelse
+            true -> !erEttersendelse || !erSøknad
             false -> false
         }
     }
