@@ -46,6 +46,7 @@ internal class MapPlsfTilK9Format(
         dto.utenlandsopphold?.leggTilUtenlandsopphold()
         dto.opptjeningAktivitet?.leggTilOpptjeningAktivitet()
         dto.arbeidstid?.leggTilArbeidstid()
+        dto.trekkKravPerioder.leggTilTrekkKravPerioder()
         dto.leggTilBegrunnelseForInnsending()
 
         // Fullfører søknad & validerer
@@ -255,6 +256,14 @@ internal class MapPlsfTilK9Format(
         feil.add(Feil(felt, throwable.javaClass.simpleName, throwable.message ?: "Ingen feilmelding"))
         null
     })
+
+    private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
+        if (isNotEmpty()) {
+            pleipengerLivetsSluttfase.leggTilTrekkKravPerioder(this.somK9Perioder())
+        } else {
+            return
+        }
+    }
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)
