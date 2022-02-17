@@ -35,51 +35,59 @@ internal class MapPlsfTilK9Format(
     private val pleipengerLivetsSluttfase = PleipengerLivetsSluttfase()
     private val feil = mutableListOf<Feil>()
 
-    init { kotlin.runCatching {
-        søknadId.leggTilSøknadId()
-        Versjon.leggTilVersjon()
-        dto.leggTilMottattDato()
-        dto.soekerId?.leggTilSøker()
-        dto.leggTilJournalposter(journalpostIder = journalpostIder)
-        dto.pleietrengende?.leggTilPleietrengende()
-        dto.bosteder?.leggTilBosteder()
-        dto.utenlandsopphold?.leggTilUtenlandsopphold()
-        dto.opptjeningAktivitet?.leggTilOpptjeningAktivitet()
-        dto.arbeidstid?.leggTilArbeidstid()
-        dto.trekkKravPerioder.leggTilTrekkKravPerioder()
-        dto.leggTilBegrunnelseForInnsending()
+    init {
+        kotlin.runCatching {
+            søknadId.leggTilSøknadId()
+            Versjon.leggTilVersjon()
+            dto.leggTilMottattDato()
+            dto.soekerId?.leggTilSøker()
+            dto.leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.pleietrengende?.leggTilPleietrengende()
+            dto.bosteder?.leggTilBosteder()
+            dto.utenlandsopphold?.leggTilUtenlandsopphold()
+            dto.opptjeningAktivitet?.leggTilOpptjeningAktivitet()
+            dto.arbeidstid?.leggTilArbeidstid()
+            dto.trekkKravPerioder.leggTilTrekkKravPerioder()
+            dto.leggTilBegrunnelseForInnsending()
 
-        // Fullfører søknad & validerer
-        søknad.medYtelse(pleipengerLivetsSluttfase)
-        feil.addAll(Validator.valider(søknad))
-    }.onFailure { throwable ->
-        logger.error("Uventet mappingfeil", throwable)
-        feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
-    }}
+            // Fullfører søknad & validerer
+            søknad.medYtelse(pleipengerLivetsSluttfase)
+            feil.addAll(Validator.valider(søknad))
+        }.onFailure { throwable ->
+            logger.error("Uventet mappingfeil", throwable)
+            feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
+        }
+    }
 
     internal fun søknad() = søknad
     internal fun feil() = feil.toList()
     internal fun søknadOgFeil() = søknad() to feil()
 
-    private fun String.leggTilSøknadId() { if (erSatt()) {
-        søknad.medSøknadId(this)
-    }}
+    private fun String.leggTilSøknadId() {
+        if (erSatt()) {
+            søknad.medSøknadId(this)
+        }
+    }
 
     private fun String.leggTilVersjon() {
         søknad.medVersjon(this)
     }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
-        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilMottattDato() {
+        if (mottattDato != null && klokkeslett != null) {
+            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
+        }
+    }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto.leggTilPleietrengende() {
         pleipengerLivetsSluttfase.medPleietrengende(Pleietrengende(NorskIdentitetsnummer.of(this.norskIdent)))
     }
 
-    private fun String.leggTilSøker() { if (erSatt()) {
-        søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
-    }}
+    private fun String.leggTilSøker() {
+        if (erSatt()) {
+            søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
+        }
+    }
 
     private fun List<PleiepengerLivetsSluttfaseSøknadDto.BostederDto>.leggTilBosteder() {
         val k9Bosteder = mutableMapOf<Periode, Bosteder.BostedPeriodeInfo>()
@@ -118,36 +126,41 @@ internal class MapPlsfTilK9Format(
     }
 
 
-
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilBegrunnelseForInnsending() {
-        if(begrunnelseForInnsending != null) {
+        if (begrunnelseForInnsending != null) {
             søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
         }
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
-            søknad.medJournalpost(Journalpost()
-                .medJournalpostId(journalpostId)
-                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
-                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
+            søknad.medJournalpost(
+                Journalpost()
+                    .medJournalpostId(journalpostId)
+                    .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
+                    .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.leggTilOpptjeningAktivitet() {
         val k9OpptjeningAktivitet = OpptjeningAktivitet()
-        selvstendigNaeringsdrivende?.mapOpptjeningAktivitetSelvstendigNæringsdrivende()?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it) }
+        selvstendigNaeringsdrivende?.mapOpptjeningAktivitetSelvstendigNæringsdrivende()
+            ?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it) }
         frilanser?.also { k9OpptjeningAktivitet.medFrilanser(it.mapOpptjeningAktivitetFrilanser()) }
         pleipengerLivetsSluttfase.medOpptjeningAktivitet(k9OpptjeningAktivitet)
     }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende() : SelvstendigNæringsdrivende? {
+    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende(): SelvstendigNæringsdrivende? {
         val noeSatt = organisasjonsnummer.erSatt() || virksomhetNavn.erSatt() || info?.periode.erSatt()
         if (!noeSatt) return null
 
         val k9SelvstendigNæringsdrivende = SelvstendigNæringsdrivende()
-        if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.medOrganisasjonsnummer(Organisasjonsnummer.of(organisasjonsnummer))
+        if (organisasjonsnummer.erSatt()) k9SelvstendigNæringsdrivende.medOrganisasjonsnummer(
+            Organisasjonsnummer.of(
+                organisasjonsnummer
+            )
+        )
         if (virksomhetNavn.erSatt()) k9SelvstendigNæringsdrivende.medVirksomhetNavn(virksomhetNavn)
 
         if (info?.periode.erSatt()) {
@@ -169,16 +182,18 @@ internal class MapPlsfTilK9Format(
             }?.also { k9Info.medBruttoInntekt(it) }
 
             if (!info.virksomhetstyper.isNullOrEmpty()) {
-                val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype -> when {
-                    virksomhetstype.isBlank() -> null
-                    virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA
-                    virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
-                    virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
-                    virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
-                    else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.${k9Periode.jsonPath()}.virksomhetstyper[$index]") {
-                        VirksomhetType.valueOf(virksomhetstype.uppercase())
+                val k9Virksomhetstyper = info.virksomhetstyper.mapIndexedNotNull { index, virksomhetstype ->
+                    when {
+                        virksomhetstype.isBlank() -> null
+                        virksomhetstype.lowercase().contains("dagmamma") -> VirksomhetType.DAGMAMMA
+                        virksomhetstype.lowercase().contains("fiske") -> VirksomhetType.FISKE
+                        virksomhetstype.lowercase().contains("jordbruk") -> VirksomhetType.JORDBRUK_SKOGBRUK
+                        virksomhetstype.lowercase().contains("annen") -> VirksomhetType.ANNEN
+                        else -> mapEllerLeggTilFeil("ytelse.opptjening.selvstendigNæringsdrivende.${k9Periode.jsonPath()}.virksomhetstyper[$index]") {
+                            VirksomhetType.valueOf(virksomhetstype.uppercase())
+                        }
                     }
-                }}
+                }
                 k9Info.medVirksomhetstyper(k9Virksomhetstyper)
             }
             k9SelvstendigNæringsdrivende.medPerioder(mutableMapOf(k9Periode to k9Info))
@@ -186,7 +201,7 @@ internal class MapPlsfTilK9Format(
         return k9SelvstendigNæringsdrivende
     }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser() : Frilanser {
+    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser(): Frilanser {
         val k9Frilanser = Frilanser()
         if (startdato.erSatt()) mapEllerLeggTilFeil("ytelse.opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
             k9Frilanser.medStartDato(it)
@@ -211,27 +226,32 @@ internal class MapPlsfTilK9Format(
         pleipengerLivetsSluttfase.medArbeidstid(k9Arbeidstid)
     }
 
-    private fun List<PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() = mapIndexedNotNull { index, arbeidstaker ->
-        val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
-        if (arbeidstaker.norskIdent.erSatt()) {
-            k9Arbeidstaker.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(arbeidstaker.norskIdent))
-        }
-        if (arbeidstaker.organisasjonsnummer.erSatt()) {
-            k9Arbeidstaker.medOrganisasjonsnummer(Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer))
-        }
-        arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")?.let { k9Arbeidstaker.medArbeidstidInfo(it) }
+    private fun List<PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker() =
+        mapIndexedNotNull { index, arbeidstaker ->
+            val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
+            if (arbeidstaker.norskIdent.erSatt()) {
+                k9Arbeidstaker.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(arbeidstaker.norskIdent))
+            }
+            if (arbeidstaker.organisasjonsnummer.erSatt()) {
+                k9Arbeidstaker.medOrganisasjonsnummer(Organisasjonsnummer.of(arbeidstaker.organisasjonsnummer))
+            }
+            arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]")
+                ?.let { k9Arbeidstaker.medArbeidstidInfo(it) }
 
-        val noeSatt = arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
-        if (noeSatt) {
-            k9Arbeidstaker
-        } else {
-            null
+            val noeSatt =
+                arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
+            if (noeSatt) {
+                k9Arbeidstaker
+            } else {
+                null
+            }
         }
-    }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(type: String) : ArbeidstidInfo? {
+    private fun PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
+        type: String
+    ): ArbeidstidInfo? {
         val k9ArbeidstidPeriodeInfo = mutableMapOf<Periode, ArbeidstidPeriodeInfo>()
-        this.perioder?.filter { it.periode.erSatt() }?.forEach{ periode ->
+        this.perioder?.filter { it.periode.erSatt() }?.forEach { periode ->
             val k9Periode = periode.periode!!.somK9Periode()!!
             val k9Info = ArbeidstidPeriodeInfo()
             val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
@@ -250,19 +270,15 @@ internal class MapPlsfTilK9Format(
         }
     }
 
-    private fun <Til>mapEllerLeggTilFeil(felt: String, map: () -> Til?) = kotlin.runCatching {
+    private fun <Til> mapEllerLeggTilFeil(felt: String, map: () -> Til?) = kotlin.runCatching {
         map()
-    }.fold(onSuccess = {it}, onFailure = { throwable ->
+    }.fold(onSuccess = { it }, onFailure = { throwable ->
         feil.add(Feil(felt, throwable.javaClass.simpleName, throwable.message ?: "Ingen feilmelding"))
         null
     })
 
     private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
-        if (isNotEmpty()) {
-            pleipengerLivetsSluttfase.leggTilTrekkKravPerioder(this.somK9Perioder())
-        } else {
-            return
-        }
+        pleipengerLivetsSluttfase.leggTilTrekkKravPerioder(this.somK9Perioder())
     }
 
     internal companion object {
@@ -270,12 +286,15 @@ internal class MapPlsfTilK9Format(
         private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = PleiepengerLivetsSluttfaseSøknadValidator()
         private const val Versjon = "1.0.0"
-        private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
+        private val DefaultUttak =
+            Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
+
         private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
         private fun PeriodeDto.somK9Periode() = when (erSatt()) {
             true -> Periode(fom, tom)
             else -> null
         }
+
         private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
         private fun String?.erSatt() = !isNullOrBlank()
         private fun String.blankAsNull() = when (isBlank()) {
@@ -284,6 +303,7 @@ internal class MapPlsfTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer).plusMinutes(minutter.toLong())
+        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() =
+            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }
