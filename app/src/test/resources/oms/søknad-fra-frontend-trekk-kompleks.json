@@ -30,5 +30,7 @@
       },
       "faktiskTidPrDag": "0"
     }
-  ]
+  ],
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
 }

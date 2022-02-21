@@ -19,6 +19,8 @@ data class OmsorgspengerSøknadDto(
     val organisasjonsnummer: String? = null,
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
+    val harInfoSomIkkeKanPunsjes : Boolean? = null,
+    val harMedisinskeOpplysninger : Boolean? = null
 ) {
     data class FraværPeriode(
         val periode: PeriodeDto,

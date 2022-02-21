@@ -2,6 +2,7 @@ package no.nav.k9punsj
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
+import io.prometheus.client.CollectorRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
@@ -196,6 +197,11 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.ACCEPTED, status)
 
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
+
+        //tester metric ved utsending
+        val antall = CollectorRegistry.defaultRegistry.getSampleValue("antall_innsendinger_total", arrayOf("soknadstype"), arrayOf("PLEIEPENGER_SYKT_BARN"))
+        val forventerAntallSøknaderSendt = 1.0
+        assertEquals(forventerAntallSøknaderSendt, antall)
     }
 
     @Test

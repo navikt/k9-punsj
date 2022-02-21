@@ -35,7 +35,7 @@ internal class MapOmsTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
-            leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioderKorrigeringIm(dto)
 
             // Fullfører søknad & validerer
@@ -125,10 +125,12 @@ internal class MapOmsTilK9Format(
         omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(fraværsperioder)
     }
 
-    private fun leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun OmsorgspengerSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)
+                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
+                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
     }

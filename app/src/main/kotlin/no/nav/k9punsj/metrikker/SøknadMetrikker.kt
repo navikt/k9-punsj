@@ -15,9 +15,11 @@ fun Søknad.publiserMetrikker() {
         .labels(søknadstype)
         .inc()
 
-    periodeSoknadGjelderIUkerHistogram
-        .labels(søknadstype)
-        .observe(hentSøknadsperiode(this.getYtelse()))
+    hentSøknadsperiode(this.getYtelse())?.apply {
+        periodeSoknadGjelderIUkerHistogram
+            .labels(søknadstype)
+            .observe(this)
+    }
 
     this.journalposter.forEach{
         val builder = StringBuilder()
@@ -99,8 +101,8 @@ fun hentArbeidstid(ytelse: Ytelse): Arbeidstid? {
     }
 }
 
-fun hentSøknadsperiode(ytelse: Ytelse): Double {
-    val søknadsperiode = ytelse.søknadsperiode
+fun hentSøknadsperiode(ytelse: Ytelse): Double? {
+    val søknadsperiode = ytelse.søknadsperiode ?: return null
     //legger på en dag siden until ikke tar med siste
     val until = søknadsperiode.fraOgMed.until(søknadsperiode.tilOgMed.plusDays(1))
     // ønsker antall uker

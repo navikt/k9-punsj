@@ -14,5 +14,7 @@
         "tom": "2018-12-31"
       },
       "faktiskTidPrDag": null
-    }]
+    }],
+  "harInfoSomIkkeKanPunsjes": true,
+  "harMedisinskeOpplysninger": false
 }
