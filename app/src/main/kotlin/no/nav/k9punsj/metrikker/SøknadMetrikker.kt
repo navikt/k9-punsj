@@ -47,7 +47,6 @@ fun Søknad.publiserMetrikker() {
     }
 }
 
-
 val journalpost = Counter.build()
     .name("journalpost")
     .labelNames("soknadsId", "soknadstype", "antall_journalposter", "opplysnigner")
@@ -55,13 +54,6 @@ val journalpost = Counter.build()
     .register()
 
 val antallInnsendinger = Counter.build()
-    .name("antall_innsendinger")
-    .labelNames("soknadstype")
-    .help("Teller antall søknader sendt inn til k9-sak fra k9-punsj")
-    .register()
-
-
-val soknadsperiode = Counter.build()
     .name("antall_innsendinger")
     .labelNames("soknadstype")
     .help("Teller antall søknader sendt inn til k9-sak fra k9-punsj")
@@ -81,16 +73,16 @@ val arbeidstidSelvstendigNæringsdrivende = Counter.build()
 
 
 val periodeSoknadGjelderIUkerHistogram = Histogram.build()
-    .buckets(0.00, 1.00, 4.00, 8.00, 12.00, 16.00, 20.00, 24.00, 28.00, 32.00, 36.00, 40.00, 44.00, 48.00, 52.00)
-    .labelNames("soknadstype")
     .name("antall_uker_soknaden_gjelder_histogram")
+    .labelNames("soknadstype")
+    .buckets(0.00, 1.00, 4.00, 8.00, 12.00, 16.00, 20.00, 24.00, 28.00, 32.00, 36.00, 40.00, 44.00, 48.00, 52.00)
     .help("Antall uker søknaden gjelder")
     .register()
 
 val antallArbeidstaker = Histogram.build()
-    .buckets(0.00, 1.00, 2.00, 3.00, 4.00, 5.00, 6.00)
-    .labelNames("soknadstype")
     .name("antall_arbeidstaker_en_søker_har")
+    .labelNames("soknadstype")
+    .buckets(0.00, 1.00, 2.00, 3.00, 4.00, 5.00, 6.00)
     .help("Antall arbeidstakere")
     .register()
 
