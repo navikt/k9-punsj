@@ -208,6 +208,7 @@ internal class PleiepengerSyktBarnRoutes(
                         val sw = StringWriter()
                         e.printStackTrace(PrintWriter(sw))
                         val exceptionAsString = sw.toString()
+                        logger.error(exceptionAsString)
                         return@RequestContext ServerResponse
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .json()

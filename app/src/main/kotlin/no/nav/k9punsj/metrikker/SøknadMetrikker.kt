@@ -11,43 +11,54 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 
 fun Søknad.publiserMetrikker() {
     val søknadstype = hentType(this.getYtelse())
+    val søknadsId = this.søknadId.id
+
     antallInnsendinger
-        .labels(søknadstype)
+        .labels(søknadsId, søknadstype)
         .inc()
 
     hentSøknadsperiode(this.getYtelse())?.apply {
         periodeSoknadGjelderIUkerHistogram
-            .labels(søknadstype)
+            .labels(søknadsId, søknadstype)
             .observe(this)
     }
 
-    this.journalposter.forEach{
+    this.journalposter.forEach {
         val builder = StringBuilder()
         builder.append("IkkeKanPunsjes=" + it.inneholderInformasjonSomIkkeKanPunsjes.toString())
         builder.append("|")
         builder.append("MedOpplysninger=" + it.inneholderMedisinskeOpplysninger.toString())
 
         journalpost
-            .labels(this.søknadId.id, søknadstype, this.journalposter.size.toString(), builder.toString())
+            .labels(søknadsId, søknadstype, this.journalposter.size.toString(), builder.toString())
             .inc()
     }
 
     hentArbeidstid(this.getYtelse())?.apply {
         antallArbeidstaker
-            .labels(søknadstype)
+            .labels(søknadsId, søknadstype)
             .observe(this.arbeidstakerList.size.toDouble())
         this.frilanserArbeidstidInfo.ifPresent {
             arbeidstidFrilanser
-                .labels(søknadstype)
+                .labels(søknadsId, søknadstype)
                 .inc()
         }
         this.selvstendigNæringsdrivendeArbeidstidInfo.ifPresent {
             arbeidstidSelvstendigNæringsdrivende
-                .labels(søknadstype)
+                .labels(søknadsId, søknadstype)
                 .inc()
         }
     }
 }
+
+
+internal const val ANTALL_INNSENDINGER = "antall_innsendinger"
+val antallInnsendinger = Counter.build()
+    .name(ANTALL_INNSENDINGER)
+    .labelNames("soknadsId", "soknadstype")
+    .help("Teller antall søknader sendt inn til k9-sak fra k9-punsj")
+    .register()
+
 
 val journalpost = Counter.build()
     .name("journalpost")
@@ -55,35 +66,28 @@ val journalpost = Counter.build()
     .help("Viser oversikt over journalposter som er lagt ved søknaden")
     .register()
 
-val antallInnsendinger = Counter.build()
-    .name("antall_innsendinger")
-    .labelNames("soknadstype")
-    .help("Teller antall søknader sendt inn til k9-sak fra k9-punsj")
-    .register()
-
 val arbeidstidFrilanser = Counter.build()
     .name("arbeidstid_frilanser")
-    .labelNames("soknadstype")
+    .labelNames("soknadsId", "soknadstype")
     .help("Har søker frilans")
     .register()
 
 val arbeidstidSelvstendigNæringsdrivende = Counter.build()
     .name("arbeidstid_selvstendig")
-    .labelNames("soknadstype")
+    .labelNames("soknadsId", "soknadstype")
     .help("Har søker selvstendig")
     .register()
 
-
 val periodeSoknadGjelderIUkerHistogram = Histogram.build()
     .name("antall_uker_soknaden_gjelder_histogram")
-    .labelNames("soknadstype")
+    .labelNames("soknadsId", "soknadstype")
     .buckets(0.00, 1.00, 4.00, 8.00, 12.00, 16.00, 20.00, 24.00, 28.00, 32.00, 36.00, 40.00, 44.00, 48.00, 52.00)
     .help("Antall uker søknaden gjelder")
     .register()
 
 val antallArbeidstaker = Histogram.build()
     .name("antall_arbeidstaker_en_soker_har")
-    .labelNames("soknadstype")
+    .labelNames("soknadsId", "soknadstype")
     .buckets(0.00, 1.00, 2.00, 3.00, 4.00, 5.00, 6.00)
     .help("Antall arbeidstakere")
     .register()
@@ -102,11 +106,9 @@ fun hentArbeidstid(ytelse: Ytelse): Arbeidstid? {
 }
 
 fun hentSøknadsperiode(ytelse: Ytelse): Double? {
-    val søknadsperiode = ytelse.søknadsperiode ?: return null
+    val søknadsperiode = runCatching { ytelse.søknadsperiode }.getOrNull() ?: return null
     //legger på en dag siden until ikke tar med siste
     val until = søknadsperiode.fraOgMed.until(søknadsperiode.tilOgMed.plusDays(1))
     // ønsker antall uker
     return until.months.div(4).toDouble()
 }
-
-

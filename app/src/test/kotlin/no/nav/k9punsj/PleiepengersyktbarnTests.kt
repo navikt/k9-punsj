@@ -11,6 +11,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
+import no.nav.k9punsj.metrikker.ANTALL_INNSENDINGER
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -199,7 +200,10 @@ class PleiepengersyktbarnTests {
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
 
         //tester metric ved utsending
-        val antall = CollectorRegistry.defaultRegistry.getSampleValue("antall_innsendinger_total", arrayOf("soknadstype"), arrayOf("PLEIEPENGER_SYKT_BARN"))
+        val counter = CollectorRegistry.defaultRegistry.metricFamilySamples().toList()
+            .first { it.name == ANTALL_INNSENDINGER }
+
+        val antall = counter.samples[0].value
         val forventerAntallSøknaderSendt = 1.0
         assertEquals(forventerAntallSøknaderSendt, antall)
     }
