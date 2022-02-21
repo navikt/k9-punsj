@@ -80,7 +80,7 @@ val periodeSoknadGjelderIUkerHistogram = Histogram.build()
     .register()
 
 val antallArbeidstaker = Histogram.build()
-    .name("antall_arbeidstaker_en_søker_har")
+    .name("antall_arbeidstaker_en_soker_har")
     .labelNames("soknadstype")
     .buckets(0.00, 1.00, 2.00, 3.00, 4.00, 5.00, 6.00)
     .help("Antall arbeidstakere")
