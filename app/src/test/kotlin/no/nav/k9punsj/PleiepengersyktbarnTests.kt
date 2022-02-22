@@ -40,26 +40,12 @@ import java.time.Duration
 import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-/*@ContextConfiguration(classes = [
-    SøknadMetrikkService::class,
-    CompositeMeterRegistryAutoConfiguration::class,
-    //PrometheusMeterRegistry::class,
-    MockClock::class
-])*/
 class PleiepengersyktbarnTests {
 
     private val client = TestSetup.client
     private val api = "api"
     private val søknadTypeUri = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-
-    @Autowired
-    lateinit var springCon
-
-    @BeforeEach
-    internal fun setUp() {
-        assertNotNull(søknadMetrikkService)
-    }
 
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
@@ -226,12 +212,6 @@ class PleiepengersyktbarnTests {
         assertEquals(HttpStatus.ACCEPTED, status)
 
         assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
-
-        //tester metric ved utsending
-        println("meters size: " + søknadMetrikkService.meterRegistry.meters.size)
-        val antallInnsendteSøknader = søknadMetrikkService.meterRegistry.get(ANTALL_INNSENDINGER).counter().count()
-        val forventerAntallSøknaderSendt = 1.0
-        assertEquals(forventerAntallSøknaderSendt, antallInnsendteSøknader)
     }
 
     @Test
