@@ -9,6 +9,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.temporal.ChronoUnit
 
 private val logger = LoggerFactory.getLogger("no.nav.k9punsj.metrikker.SøknadMetrikkerKt.publiserMetrikker")
 
@@ -30,7 +31,7 @@ class SøknadMetrikkService(
 
         hentSøknadsperiode(søknad.getYtelse())?.apply {
             meterRegistry.summary(
-                "antall_uker_soknaden_gjelder_histogram", listOf(
+                ANTALL_UKER_SØKNADER_GJELDER_BUCKET, listOf(
                     Tag.of("soknadId", søknadsId),
                     Tag.of("soknadType", søknadstype),
                 )
@@ -44,18 +45,18 @@ class SøknadMetrikkService(
             builder.append("MedOpplysninger=" + it.inneholderMedisinskeOpplysninger.toString())
 
             meterRegistry.counter(
-                "journalpost_counter", listOf(
+                JOURNALPOST_COUNTER, listOf(
                     Tag.of("soknadsId", søknadsId),
                     Tag.of("soknadstype", søknadstype),
                     Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
-                    Tag.of("opplysnigner", builder.toString()),
+                    Tag.of("opplysninger", builder.toString()),
                 )
             ).increment()
         }
 
         hentArbeidstid(søknad.getYtelse())?.apply {
             meterRegistry.summary(
-                "antall_arbeidsgivere_counter", listOf(
+                ANTALL_ARBEIDSGIVERE_BUCKET, listOf(
                     Tag.of("soknadsId", søknadsId),
                     Tag.of("soknadstype", søknadstype)
                 )
@@ -63,7 +64,7 @@ class SøknadMetrikkService(
 
             this.frilanserArbeidstidInfo.ifPresent {
                 meterRegistry.counter(
-                    "arbeidstid_frilanser_counter", listOf(
+                    ARBEIDSTID_FRILANSER_COUNTER, listOf(
                         Tag.of("soknadsId", søknadsId),
                         Tag.of("soknadstype", søknadstype)
                     )
@@ -72,7 +73,7 @@ class SøknadMetrikkService(
 
             this.selvstendigNæringsdrivendeArbeidstidInfo.ifPresent {
                 meterRegistry.counter(
-                    "arbeidstid_selvstendig_counter", listOf(
+                    ARBEIDSTID_SELVSTENDING_COUNTER, listOf(
                         Tag.of("soknadsId", søknadsId),
                         Tag.of("soknadstype", søknadstype)
                     )
@@ -96,12 +97,15 @@ class SøknadMetrikkService(
     fun hentSøknadsperiode(ytelse: Ytelse): Double? {
         val søknadsperiode = runCatching { ytelse.søknadsperiode }.getOrNull() ?: return null
         //legger på en dag siden until ikke tar med siste
-        val until = søknadsperiode.fraOgMed.until(søknadsperiode.tilOgMed.plusDays(1))
-        // ønsker antall uker
-        return until.months.div(4).toDouble()
+        return ChronoUnit.WEEKS.between(søknadsperiode.fraOgMed, søknadsperiode.tilOgMed).toDouble()
     }
 
     companion object {
         val ANTALL_INNSENDINGER = "antall_innsendinger_counter"
+        val ANTALL_UKER_SØKNADER_GJELDER_BUCKET = "antall_uker_soknaden_gjelder_histogram"
+        val JOURNALPOST_COUNTER = "journalpost_counter"
+        val ANTALL_ARBEIDSGIVERE_BUCKET = "antall_arbeidsgivere_histogram"
+        val ARBEIDSTID_FRILANSER_COUNTER = "arbeidstid_frilanser_counter"
+        val ARBEIDSTID_SELVSTENDING_COUNTER = "arbeidstid_selvstendig_counter"
     }
 }
