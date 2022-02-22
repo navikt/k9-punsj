@@ -7,9 +7,12 @@ import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
+import org.slf4j.LoggerFactory
 
+private val logger = LoggerFactory.getLogger("no.nav.k9punsj.metrikker.SøknadMetrikkerKt.publiserMetrikker")
 
 fun Søknad.publiserMetrikker() {
+    logger.info("Publiserer søknadsmetrikker.")
     val søknadstype = hentType(this.getYtelse())
     val søknadsId = this.søknadId.id
 
