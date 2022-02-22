@@ -14,7 +14,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: info, health, prometheus
+        include: info, health, metrics
       base-path: /internal/actuator
 
 kafka:
