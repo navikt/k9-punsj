@@ -15,7 +15,7 @@ private val logger = LoggerFactory.getLogger("no.nav.k9punsj.metrikker.SøknadMe
 
 @Service
 class SøknadMetrikkService(
-    val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry
 ) {
     fun publiserMetrikker(søknad: Søknad) {
         logger.info("Publiserer søknadsmetrikker.")
