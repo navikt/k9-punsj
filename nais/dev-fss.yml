@@ -42,7 +42,7 @@ spec:
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
-    path: /internal/actuator/metrics
+    path: /internal/actuator/prometheus
   vault:
     enabled: true
     paths:
