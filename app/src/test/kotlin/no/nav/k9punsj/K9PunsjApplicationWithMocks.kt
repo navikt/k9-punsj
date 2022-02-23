@@ -38,8 +38,7 @@ internal class K9PunsjApplicationWithMocks {
                 builder.profiles(profiles)
             }
 
-            return builder
-                    .run(*args)
+            return builder.run(*args)
         }
 
         private fun lokaltKjørendeAzureV2OrNull(): URI? {
