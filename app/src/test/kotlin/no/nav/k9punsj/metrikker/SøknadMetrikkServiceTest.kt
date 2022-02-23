@@ -52,10 +52,10 @@ internal class SøknadMetrikkServiceTest {
         assertCounter(metric = ARBEIDSTID_SELVSTENDING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
         assertCounter(metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
         assertCounter(metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        assertBucket(metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = 42.0, søknadstypeTag, søknadsIdTag)
-        assertBucket(metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
         assertCounter(metric = NATTEVAAK_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
         assertCounter(metric = TILSYNSORDNING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertBucket(metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = 42.0, søknadstypeTag, søknadsIdTag)
+        assertBucket(metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         assertCounter(
             metric = JOURNALPOST_COUNTER,
