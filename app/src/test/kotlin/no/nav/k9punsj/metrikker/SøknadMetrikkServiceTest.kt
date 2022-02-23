@@ -4,15 +4,7 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.k9.søknad.ytelse.Ytelse.Type
 import no.nav.k9punsj.domenetjenester.mappers.*
-import no.nav.k9punsj.metrikker.Metrikk.ANTALL_ARBEIDSGIVERE_BUCKET
-import no.nav.k9punsj.metrikker.Metrikk.ANTALL_INNSENDINGER
-import no.nav.k9punsj.metrikker.Metrikk.ANTALL_UKER_SØKNADER_GJELDER_BUCKET
-import no.nav.k9punsj.metrikker.Metrikk.ARBEIDSTID_FRILANSER_COUNTER
-import no.nav.k9punsj.metrikker.Metrikk.ARBEIDSTID_SELVSTENDING_COUNTER
-import no.nav.k9punsj.metrikker.Metrikk.BEREDSKAP_COUNTER
-import no.nav.k9punsj.metrikker.Metrikk.JOURNALPOST_COUNTER
-import no.nav.k9punsj.metrikker.Metrikk.NATTEVAAK_COUNTER
-import no.nav.k9punsj.metrikker.Metrikk.TILSYNSORDNING_COUNTER
+import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
@@ -57,7 +49,7 @@ internal class SøknadMetrikkServiceTest {
         MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET.navn, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag)
         MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_ARBEIDSGIVERE_BUCKET.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, 
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint,
             metric = JOURNALPOST_COUNTER.navn,
             forventetVerdi = 1.0,
             søknadstypeTag,
@@ -108,7 +100,7 @@ internal class SøknadMetrikkServiceTest {
 
     @Test
     internal fun forvent_riktig_publiserte_oms_metrikker() {
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
         val dto = objectMapper().convertValue(gyldigSoeknad, OmsorgspengerSøknadDto::class.java)
         val k9Format = MapOmsTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
