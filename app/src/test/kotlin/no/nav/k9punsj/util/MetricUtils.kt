@@ -13,6 +13,11 @@ class MetricUtils {
             Assertions.assertThat(getCount(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }
+        fun assertGuage(metricsEndpoint: MetricsEndpoint, metric: String, forventetVerdi: Double, vararg tags: Tag) {
+            val metricResponse: MetricsEndpoint.MetricResponse = metricsEndpoint.metric(metric, listOf())
+            Assertions.assertThat(getGuageValue(metricResponse)).isEqualTo(forventetVerdi)
+            Assertions.assertThat(tags(metricResponse)).contains(*tags)
+        }
 
         fun assertBucket(metricsEndpoint: MetricsEndpoint, metric: String, forventetVerdi: Double, vararg tags: Tag) {
             val metricResponse = metricsEndpoint.metric(metric, listOf())
@@ -23,6 +28,12 @@ class MetricUtils {
         fun getCount(response: MetricsEndpoint.MetricResponse): Double? {
             return response.measurements.stream()
                 .filter { it.statistic == Statistic.COUNT }
+                .findAny().map { it.value }.orElse(null)
+        }
+
+        fun getGuageValue(response: MetricsEndpoint.MetricResponse): Double? {
+            return response.measurements.stream()
+                .filter { it.statistic == Statistic.VALUE }
                 .findAny().map { it.value }.orElse(null)
         }
 

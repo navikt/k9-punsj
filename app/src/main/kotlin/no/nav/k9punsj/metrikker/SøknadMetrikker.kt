@@ -41,7 +41,7 @@ class SøknadMetrikkService(
             Tag.of("soknadstype", søknadstype)
         )
         meterRegistry.Config().commonTags(defaultTags)
-        meterRegistry.counter(ANTALL_INNSENDINGER).increment()
+        meterRegistry.counter(Metrikk.ANTALL_INNSENDINGER.navn).increment()
     }
 
     private fun psbMetrikker(søknad: Søknad) {
@@ -50,7 +50,7 @@ class SøknadMetrikkService(
         fellesMetrikker(søknad)
 
         hentSøknadsperiodeUker(ytelse)?.apply {
-            meterRegistry.summary(ANTALL_UKER_SØKNADER_GJELDER_BUCKET).record(this)
+            meterRegistry.summary(Metrikk.ANTALL_UKER_SØKNADER_GJELDER_BUCKET.navn).record(this)
         }
 
         søknad.journalposter.firstOrNull()?.apply {
@@ -60,7 +60,7 @@ class SøknadMetrikkService(
             builder.append("MedOpplysninger=" + this.inneholderMedisinskeOpplysninger.toString())
 
             meterRegistry.counter(
-                JOURNALPOST_COUNTER, listOf(
+                Metrikk.JOURNALPOST_COUNTER.navn, listOf(
                     Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
                     Tag.of("opplysninger", builder.toString())
                 )
@@ -69,34 +69,34 @@ class SøknadMetrikkService(
 
         ytelse.arbeidstid.apply {
             if (this.arbeidstakerList.isNotEmpty()) {
-                meterRegistry.summary(ANTALL_ARBEIDSGIVERE_BUCKET)
+                meterRegistry.summary(Metrikk.ANTALL_ARBEIDSGIVERE_BUCKET.navn)
                     .record(this.arbeidstakerList.size.toDouble())
             }
 
             this.frilanserArbeidstidInfo.ifPresent {
-                meterRegistry.counter(ARBEIDSTID_FRILANSER_COUNTER).increment()
+                meterRegistry.counter(Metrikk.ARBEIDSTID_FRILANSER_COUNTER.navn).increment()
             }
 
             this.selvstendigNæringsdrivendeArbeidstidInfo.ifPresent {
-                meterRegistry.counter(ARBEIDSTID_SELVSTENDING_COUNTER).increment()
+                meterRegistry.counter(Metrikk.ARBEIDSTID_SELVSTENDING_COUNTER.navn).increment()
             }
         }
 
         ytelse.beredskap.apply {
             if (this.perioder.isNotEmpty()) {
-                meterRegistry.counter(BEREDSKAP_COUNTER).increment()
+                meterRegistry.counter(Metrikk.BEREDSKAP_COUNTER.navn).increment()
             }
         }
 
         ytelse.nattevåk.apply {
             if (this.perioder.isNotEmpty()) {
-                meterRegistry.counter(NATTEVAAK_COUNTER).increment()
+                meterRegistry.counter(Metrikk.NATTEVAAK_COUNTER.navn).increment()
             }
         }
 
         ytelse.tilsynsordning.apply {
             if (this.perioder.isNotEmpty()) {
-                meterRegistry.counter(TILSYNSORDNING_COUNTER).increment()
+                meterRegistry.counter(Metrikk.TILSYNSORDNING_COUNTER.navn).increment()
             }
         }
     }
@@ -104,17 +104,5 @@ class SøknadMetrikkService(
     fun hentSøknadsperiodeUker(ytelse: Ytelse): Double? {
         val søknadsperiode = runCatching { ytelse.søknadsperiode }.getOrNull() ?: return null
         return ChronoUnit.WEEKS.between(søknadsperiode.fraOgMed, søknadsperiode.tilOgMed).toDouble()
-    }
-
-    companion object {
-        val ANTALL_INNSENDINGER = "antall_innsendinger_counter"
-        val ANTALL_UKER_SØKNADER_GJELDER_BUCKET = "antall_uker_soknaden_gjelder_histogram"
-        val JOURNALPOST_COUNTER = "journalpost_counter"
-        val ANTALL_ARBEIDSGIVERE_BUCKET = "antall_arbeidsgivere_histogram"
-        val ARBEIDSTID_FRILANSER_COUNTER = "arbeidstid_frilanser_counter"
-        val ARBEIDSTID_SELVSTENDING_COUNTER = "arbeidstid_selvstendig_counter"
-        val BEREDSKAP_COUNTER = "beredskap_counter"
-        val NATTEVAAK_COUNTER = "nattevaak_counter"
-        val TILSYNSORDNING_COUNTER = "tilsynsordning_counter"
     }
 }

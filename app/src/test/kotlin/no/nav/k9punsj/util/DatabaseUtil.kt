@@ -11,6 +11,7 @@ import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.journalpost.JournalpostMetrikkRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import javax.sql.DataSource
 
@@ -39,6 +40,7 @@ class DatabaseUtil {
         fun cleanBunkeRepo() = cleanTable(BunkeRepository.BUNKE_TABLE)
 
         fun getJournalpostRepo(): JournalpostRepository = JournalpostRepository(dataSource)
+        fun journalpostMetrikkRepository(): JournalpostMetrikkRepository = JournalpostMetrikkRepository(dataSource)
         fun cleanJournalpostRepo() = cleanTable(JournalpostRepository.JOURNALPOST_TABLE)
 
         fun getAksjonspunktRepo(): AksjonspunktRepository = AksjonspunktRepository(dataSource)
