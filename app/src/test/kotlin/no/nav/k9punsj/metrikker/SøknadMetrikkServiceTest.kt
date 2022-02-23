@@ -78,11 +78,11 @@ internal class SøknadMetrikkServiceTest {
 
         assertCounter(
             metric = JOURNALPOST_COUNTER,
-            forventetVerdi = 2.0,
+            forventetVerdi = 1.0,
             Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
             Tag.of("soknadsId", dto.soeknadId),
             Tag.of("antall_journalposter", "2"),
-            Tag.of("opplysninger", "IkkeKanPunsjes=true|MedOpplysninger=false")
+            Tag.of("opplysninger", "IkkeKanPunsjes=true | MedOpplysninger=false")
         )
     }
 

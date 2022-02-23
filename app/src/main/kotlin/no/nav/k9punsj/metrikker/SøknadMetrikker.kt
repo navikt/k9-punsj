@@ -34,18 +34,18 @@ class SøknadMetrikkService(
             meterRegistry.summary(ANTALL_UKER_SØKNADER_GJELDER_BUCKET).record(this)
         }
 
-        søknad.journalposter.forEach {
+       søknad.journalposter.firstOrNull()?.apply {
             val builder = StringBuilder()
-            builder.append("IkkeKanPunsjes=" + it.inneholderInformasjonSomIkkeKanPunsjes.toString())
-            builder.append("|")
-            builder.append("MedOpplysninger=" + it.inneholderMedisinskeOpplysninger.toString())
+            builder.append("IkkeKanPunsjes=" + this.inneholderInformasjonSomIkkeKanPunsjes.toString())
+            builder.append(" | ")
+            builder.append("MedOpplysninger=" + this.inneholderMedisinskeOpplysninger.toString())
 
-            meterRegistry.counter(
-                JOURNALPOST_COUNTER, listOf(
-                    Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
-                    Tag.of("opplysninger", builder.toString())
-                )
-            ).increment()
+           meterRegistry.counter(
+               JOURNALPOST_COUNTER, listOf(
+                   Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
+                   Tag.of("opplysninger", builder.toString())
+               )
+           ).increment()
         }
 
         hentArbeidstid(ytelse)?.apply {
