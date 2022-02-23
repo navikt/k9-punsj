@@ -47,40 +47,15 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN")
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        assertCounter(
-            metric = ANTALL_INNSENDINGER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertBucket(
-            metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET,
-            forventetVerdi = 42.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertBucket(
-            metric = ANTALL_ARBEIDSGIVERE_BUCKET,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertCounter(
-            metric = ARBEIDSTID_FRILANSER_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertCounter(
-            metric = ARBEIDSTID_SELVSTENDING_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
+        assertCounter(metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = ARBEIDSTID_FRILANSER_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = ARBEIDSTID_SELVSTENDING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertBucket(metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = 42.0, søknadstypeTag, søknadsIdTag)
+        assertBucket(metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = NATTEVAAK_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        assertCounter(metric = TILSYNSORDNING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         assertCounter(
             metric = JOURNALPOST_COUNTER,
@@ -89,34 +64,6 @@ internal class SøknadMetrikkServiceTest {
             søknadsIdTag,
             Tag.of("antall_journalposter", "2"),
             Tag.of("opplysninger", "IkkeKanPunsjes=true | MedOpplysninger=false")
-        )
-
-        assertCounter(
-            metric = BEREDSKAP_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag,
-        )
-
-        assertCounter(
-            metric = BEREDSKAP_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertCounter(
-            metric = NATTEVAAK_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
-        )
-
-        assertCounter(
-            metric = TILSYNSORDNING_COUNTER,
-            forventetVerdi = 1.0,
-            søknadstypeTag,
-            søknadsIdTag
         )
     }
 
