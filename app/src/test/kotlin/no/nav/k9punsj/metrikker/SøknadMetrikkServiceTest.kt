@@ -9,7 +9,10 @@ import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.ANTALL_INNSENDIN
 import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.ANTALL_UKER_SØKNADER_GJELDER_BUCKET
 import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.ARBEIDSTID_FRILANSER_COUNTER
 import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.ARBEIDSTID_SELVSTENDING_COUNTER
+import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.BEREDSKAP_COUNTER
 import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.JOURNALPOST_COUNTER
+import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.NATTEVAAK_COUNTER
+import no.nav.k9punsj.metrikker.SøknadMetrikkService.Companion.TILSYNSORDNING_COUNTER
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
@@ -41,48 +44,79 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapPsbTilK9Format(dto.soeknadId, setOf("123", "456"), emptyList(), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
+        val søknadstypeTag = Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN")
+        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+
         assertCounter(
             metric = ANTALL_INNSENDINGER,
             forventetVerdi = 1.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId)
+            søknadstypeTag,
+            søknadsIdTag
         )
 
         assertBucket(
             metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET,
             forventetVerdi = 42.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId)
+            søknadstypeTag,
+            søknadsIdTag
         )
 
         assertBucket(
             metric = ANTALL_ARBEIDSGIVERE_BUCKET,
             forventetVerdi = 1.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId)
+            søknadstypeTag,
+            søknadsIdTag
         )
 
         assertCounter(
             metric = ARBEIDSTID_FRILANSER_COUNTER,
             forventetVerdi = 1.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId)
+            søknadstypeTag,
+            søknadsIdTag
         )
 
         assertCounter(
             metric = ARBEIDSTID_SELVSTENDING_COUNTER,
             forventetVerdi = 1.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId)
+            søknadstypeTag,
+            søknadsIdTag
         )
 
         assertCounter(
             metric = JOURNALPOST_COUNTER,
             forventetVerdi = 1.0,
-            Tag.of("soknadstype", "PLEIEPENGER_SYKT_BARN"),
-            Tag.of("soknadsId", dto.soeknadId),
+            søknadstypeTag,
+            søknadsIdTag,
             Tag.of("antall_journalposter", "2"),
             Tag.of("opplysninger", "IkkeKanPunsjes=true | MedOpplysninger=false")
+        )
+
+        assertCounter(
+            metric = BEREDSKAP_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag,
+        )
+
+        assertCounter(
+            metric = BEREDSKAP_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+
+        assertCounter(
+            metric = NATTEVAAK_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+
+        assertCounter(
+            metric = TILSYNSORDNING_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
         )
     }
 

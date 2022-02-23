@@ -34,42 +34,43 @@ class SøknadMetrikkService(
             meterRegistry.summary(ANTALL_UKER_SØKNADER_GJELDER_BUCKET).record(this)
         }
 
-       søknad.journalposter.firstOrNull()?.apply {
+        søknad.journalposter.firstOrNull()?.apply {
             val builder = StringBuilder()
             builder.append("IkkeKanPunsjes=" + this.inneholderInformasjonSomIkkeKanPunsjes.toString())
             builder.append(" | ")
             builder.append("MedOpplysninger=" + this.inneholderMedisinskeOpplysninger.toString())
 
-           meterRegistry.counter(
-               JOURNALPOST_COUNTER, listOf(
-                   Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
-                   Tag.of("opplysninger", builder.toString())
-               )
-           ).increment()
+            meterRegistry.counter(
+                JOURNALPOST_COUNTER, listOf(
+                    Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
+                    Tag.of("opplysninger", builder.toString())
+                )
+            ).increment()
         }
 
         hentArbeidstid(ytelse)?.apply {
-            meterRegistry.summary(
-                ANTALL_ARBEIDSGIVERE_BUCKET, defaultTags
-            ).record(this.arbeidstakerList.size.toDouble())
+            meterRegistry.summary(ANTALL_ARBEIDSGIVERE_BUCKET, defaultTags)
+                .record(this.arbeidstakerList.size.toDouble())
 
             this.frilanserArbeidstidInfo.ifPresent {
-                meterRegistry.counter(
-                    ARBEIDSTID_FRILANSER_COUNTER, defaultTags
-                ).increment()
+                meterRegistry.counter(ARBEIDSTID_FRILANSER_COUNTER, defaultTags).increment()
             }
 
             this.selvstendigNæringsdrivendeArbeidstidInfo.ifPresent {
-                meterRegistry.counter(
-                    ARBEIDSTID_SELVSTENDING_COUNTER, defaultTags
-                ).increment()
+                meterRegistry.counter(ARBEIDSTID_SELVSTENDING_COUNTER, defaultTags).increment()
             }
         }
 
         hentBeredskap(ytelse)?.apply {
-            meterRegistry.counter(
-                BEREDSKAP_COUNTER, defaultTags
-            )
+            meterRegistry.counter(BEREDSKAP_COUNTER, defaultTags).increment()
+        }
+
+        hentNatteVåk(ytelse)?.apply {
+            meterRegistry.counter(NATTEVAAK_COUNTER, defaultTags).increment()
+        }
+
+        hentTilsynsordning(ytelse)?.apply {
+            meterRegistry.counter(TILSYNSORDNING_COUNTER, defaultTags).increment()
         }
     }
 
@@ -93,6 +94,16 @@ class SøknadMetrikkService(
 
     fun hentBeredskap(ytelse: Ytelse) = when (ytelse) {
         is PleiepengerSyktBarn -> ytelse.beredskap
+        else -> null
+    }
+
+    fun hentNatteVåk(ytelse: Ytelse) = when (ytelse) {
+        is PleiepengerSyktBarn -> ytelse.nattevåk
+        else -> null
+    }
+
+    fun hentTilsynsordning(ytelse: Ytelse) = when (ytelse) {
+        is PleiepengerSyktBarn -> ytelse.tilsynsordning
         else -> null
     }
 
