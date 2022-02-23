@@ -27,12 +27,11 @@ import org.springframework.boot.actuate.metrics.MetricsEndpoint.MetricResponse
 internal class SøknadMetrikkServiceTest {
 
     private lateinit var søknadMetrikkService: SøknadMetrikkService
-    private lateinit var simpleMeterRegistry: SimpleMeterRegistry
     private lateinit var metricsEndpoint: MetricsEndpoint
 
     @BeforeEach
     internal fun setUp() {
-        simpleMeterRegistry = SimpleMeterRegistry()
+        val simpleMeterRegistry = SimpleMeterRegistry()
         søknadMetrikkService = SøknadMetrikkService(simpleMeterRegistry)
         metricsEndpoint = MetricsEndpoint(simpleMeterRegistry)
     }
