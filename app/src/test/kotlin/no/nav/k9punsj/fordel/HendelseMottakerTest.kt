@@ -1,8 +1,10 @@
 package no.nav.k9punsj.fordel
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.repository.PersonRepository
@@ -13,10 +15,14 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.util.MetricUtils.Companion.getCount
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -27,7 +33,6 @@ import java.util.UUID
 @ActiveProfiles("test")
 @ContextConfiguration(classes = [
     TestBeans::class,
-    HendelseMottaker::class,
     AksjonspunktServiceImpl::class,
     JournalpostRepository::class,
     AksjonspunktRepository::class,
@@ -37,8 +42,28 @@ import java.util.UUID
     SøknadRepository::class
 ])
 internal class HendelseMottakerTest {
+
     @Autowired
+    private lateinit var journalpostRepository: JournalpostRepository
+
+    @Autowired
+    private lateinit var aksjonspunktService: AksjonspunktService
+
     private lateinit var hendelseMottaker: HendelseMottaker
+
+    private lateinit var metricsEndpoint: MetricsEndpoint
+
+    @BeforeEach
+    internal fun setUp() {
+        val simpleMeterRegistry = SimpleMeterRegistry()
+        hendelseMottaker = HendelseMottaker(
+            journalpostRepository = journalpostRepository,
+            aksjonspunktService = aksjonspunktService,
+            meterRegistry = simpleMeterRegistry
+        )
+
+        metricsEndpoint = MetricsEndpoint(simpleMeterRegistry)
+    }
 
     @Test
     fun `skal lagre ned informasjon om journalpost`() : Unit = runBlocking {
@@ -48,7 +73,11 @@ internal class HendelseMottakerTest {
         hendelseMottaker.prosesser(melding)
 
         val journalpost = hendelseMottaker.journalpostRepository.hent(journalpostId)
-        Assertions.assertThat(journalpost).isNotNull
+        assertThat(journalpost).isNotNull
+
+        val metricResponse = metricsEndpoint.metric("antall_opprettet_journalpost_counter", listOf())
+        val count = getCount(metricResponse)
+        assertThat(count).isEqualTo(1.0)
     }
 
     @Test
