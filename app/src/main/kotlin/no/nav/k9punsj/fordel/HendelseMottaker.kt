@@ -1,5 +1,7 @@
 package no.nav.k9punsj.fordel
 
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tag
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
@@ -16,6 +18,7 @@ import java.util.UUID
 class HendelseMottaker @Autowired constructor(
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktService: AksjonspunktService,
+    val meterRegistry: MeterRegistry
 ) {
     private companion object {
         private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
@@ -28,6 +31,9 @@ class HendelseMottaker @Autowired constructor(
         val fankIkke = journalpostRepository.fantIkke(journalpostId)
 
         if (fankIkke) {
+
+            publiserJournalpostMetrikk(fordelPunsjEventDto)
+
             val uuid = UUID.randomUUID()
             val journalpost = Journalpost(
                 uuid = uuid,
@@ -58,5 +64,14 @@ class HendelseMottaker @Autowired constructor(
             }
 
         }
+    }
+
+    private fun publiserJournalpostMetrikk(fordelPunsjEventDto: FordelPunsjEventDto) {
+        meterRegistry.counter(
+            "antall_opprettet_journalpost_counter", listOf(
+                Tag.of("ytelsestype", fordelPunsjEventDto.ytelse ?: "ukjent"),
+                Tag.of("punsjInnsendingstype", fordelPunsjEventDto.type ?: "ukjent")
+            )
+        ).increment()
     }
 }

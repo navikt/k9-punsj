@@ -1,6 +1,9 @@
 package no.nav.k9punsj.fordel
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.MockClock
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
@@ -38,7 +41,9 @@ import java.util.UUID
     PersonService::class,
     PersonRepository::class,
     TestPdlService::class,
-    SøknadRepository::class
+    SøknadRepository::class,
+    SimpleMeterRegistry::class,
+    MockClock::class
 ])
 internal class FordelKafkaTest {
 
