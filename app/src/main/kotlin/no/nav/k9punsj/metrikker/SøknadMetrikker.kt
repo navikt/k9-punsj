@@ -19,23 +19,19 @@ class SøknadMetrikkService(
 ) {
     fun publiserMetrikker(søknad: Søknad) {
         logger.info("Publiserer søknadsmetrikker.")
-        val søknadstype = hentType(søknad.getYtelse())
+        val ytelse = søknad.getYtelse<Ytelse>()
+        val søknadstype = hentType(ytelse)
         val søknadsId = søknad.søknadId.id
+        val defaultTags = mutableListOf(
+            Tag.of("soknadsId", søknadsId),
+            Tag.of("soknadstype", søknadstype)
+        )
+        meterRegistry.Config().commonTags(defaultTags)
 
-        meterRegistry.counter(
-            ANTALL_INNSENDINGER, listOf(
-                Tag.of("soknadId", søknadsId),
-                Tag.of("soknadType", søknadstype),
-            )
-        ).increment()
+        meterRegistry.counter(ANTALL_INNSENDINGER).increment()
 
-        hentSøknadsperiode(søknad.getYtelse())?.apply {
-            meterRegistry.summary(
-                ANTALL_UKER_SØKNADER_GJELDER_BUCKET, listOf(
-                    Tag.of("soknadId", søknadsId),
-                    Tag.of("soknadType", søknadstype),
-                )
-            ).record(this)
+        hentSøknadsperiode(ytelse)?.apply {
+            meterRegistry.summary(ANTALL_UKER_SØKNADER_GJELDER_BUCKET).record(this)
         }
 
         søknad.journalposter.forEach {
@@ -46,39 +42,34 @@ class SøknadMetrikkService(
 
             meterRegistry.counter(
                 JOURNALPOST_COUNTER, listOf(
-                    Tag.of("soknadsId", søknadsId),
-                    Tag.of("soknadstype", søknadstype),
                     Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
-                    Tag.of("opplysninger", builder.toString()),
+                    Tag.of("opplysninger", builder.toString())
                 )
             ).increment()
         }
 
-        hentArbeidstid(søknad.getYtelse())?.apply {
+        hentArbeidstid(ytelse)?.apply {
             meterRegistry.summary(
-                ANTALL_ARBEIDSGIVERE_BUCKET, listOf(
-                    Tag.of("soknadsId", søknadsId),
-                    Tag.of("soknadstype", søknadstype)
-                )
+                ANTALL_ARBEIDSGIVERE_BUCKET, defaultTags
             ).record(this.arbeidstakerList.size.toDouble())
 
             this.frilanserArbeidstidInfo.ifPresent {
                 meterRegistry.counter(
-                    ARBEIDSTID_FRILANSER_COUNTER, listOf(
-                        Tag.of("soknadsId", søknadsId),
-                        Tag.of("soknadstype", søknadstype)
-                    )
+                    ARBEIDSTID_FRILANSER_COUNTER, defaultTags
                 ).increment()
             }
 
             this.selvstendigNæringsdrivendeArbeidstidInfo.ifPresent {
                 meterRegistry.counter(
-                    ARBEIDSTID_SELVSTENDING_COUNTER, listOf(
-                        Tag.of("soknadsId", søknadsId),
-                        Tag.of("soknadstype", søknadstype)
-                    )
+                    ARBEIDSTID_SELVSTENDING_COUNTER, defaultTags
                 ).increment()
             }
+        }
+
+        hentBeredskap(ytelse)?.apply {
+            meterRegistry.counter(
+                BEREDSKAP_COUNTER, defaultTags
+            )
         }
     }
 
@@ -100,6 +91,11 @@ class SøknadMetrikkService(
         return ChronoUnit.WEEKS.between(søknadsperiode.fraOgMed, søknadsperiode.tilOgMed).toDouble()
     }
 
+    fun hentBeredskap(ytelse: Ytelse) = when (ytelse) {
+        is PleiepengerSyktBarn -> ytelse.beredskap
+        else -> null
+    }
+
     companion object {
         val ANTALL_INNSENDINGER = "antall_innsendinger_counter"
         val ANTALL_UKER_SØKNADER_GJELDER_BUCKET = "antall_uker_soknaden_gjelder_histogram"
@@ -107,5 +103,8 @@ class SøknadMetrikkService(
         val ANTALL_ARBEIDSGIVERE_BUCKET = "antall_arbeidsgivere_histogram"
         val ARBEIDSTID_FRILANSER_COUNTER = "arbeidstid_frilanser_counter"
         val ARBEIDSTID_SELVSTENDING_COUNTER = "arbeidstid_selvstendig_counter"
+        val BEREDSKAP_COUNTER = "beredskap_counter"
+        val NATTEVAAK_COUNTER = "nattevaak_counter"
+        val TILSYNSORDNING_COUNTER = "tilsynsordning_counter"
     }
 }
