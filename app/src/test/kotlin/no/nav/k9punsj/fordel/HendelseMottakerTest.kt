@@ -12,10 +12,11 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
-import no.nav.k9punsj.util.MetricUtils.Companion.getCount
+import no.nav.k9punsj.util.MetricUtils.Companion.assertCounter
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +27,7 @@ import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
+import java.util.*
 
 
 @ExtendWith(SpringExtension::class)
@@ -75,9 +76,11 @@ internal class HendelseMottakerTest {
         val journalpost = hendelseMottaker.journalpostRepository.hent(journalpostId)
         assertThat(journalpost).isNotNull
 
-        val metricResponse = metricsEndpoint.metric("antall_opprettet_journalpost_counter", listOf())
-        val count = getCount(metricResponse)
-        assertThat(count).isEqualTo(1.0)
+        assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = Metrikk.ANTALL_OPPRETTET_JOURNALPOST_COUNTER,
+            forventetVerdi = 1.0
+        )
     }
 
     @Test

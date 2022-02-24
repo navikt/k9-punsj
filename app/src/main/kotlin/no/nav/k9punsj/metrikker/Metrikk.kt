@@ -11,5 +11,6 @@ enum class Metrikk(val navn: String) {
     NATTEVAAK_COUNTER("nattevaak_counter"),
     ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER("antall_ferdig_behandlede_journalposter"),
     ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER("antall_uferdige_behandlede_journalposter"),
+    ANTALL_OPPRETTET_JOURNALPOST_COUNTER("antall_opprettet_journalpost_counter"),
     TILSYNSORDNING_COUNTER("tilsynsordning_counter");
 }

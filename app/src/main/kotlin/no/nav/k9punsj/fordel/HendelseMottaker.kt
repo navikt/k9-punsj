@@ -8,6 +8,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.journalpost.Journalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,7 +69,7 @@ class HendelseMottaker @Autowired constructor(
 
     private fun publiserJournalpostMetrikk(fordelPunsjEventDto: FordelPunsjEventDto) {
         meterRegistry.counter(
-            "antall_opprettet_journalpost_counter", listOf(
+            Metrikk.ANTALL_OPPRETTET_JOURNALPOST_COUNTER.navn, listOf(
                 Tag.of("ytelsestype", fordelPunsjEventDto.ytelse ?: "ukjent"),
                 Tag.of("punsjInnsendingstype", fordelPunsjEventDto.type ?: "ukjent")
             )
