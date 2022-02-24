@@ -46,7 +46,7 @@ internal class SøknadMetrikkServiceTest {
         MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = TILSYNSORDNING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         val forventetAntallUker = 42.0
-        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag, Tag.of("uker", forventetAntallUker.toString()))
         MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint,

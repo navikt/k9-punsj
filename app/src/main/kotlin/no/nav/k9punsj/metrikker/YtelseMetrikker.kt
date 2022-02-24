@@ -117,6 +117,6 @@ fun fellesMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
         ).increment()
     }
     hentSøknadsperiodeUker(ytelse)?.apply {
-        meterRegistry.summary(Metrikk.ANTALL_UKER_SØKNADER_GJELDER_BUCKET.navn).record(this)
+        meterRegistry.summary(Metrikk.ANTALL_UKER_SØKNADER_GJELDER_BUCKET.navn, listOf(Tag.of("uker", this.toString()))).record(this)
     }
 }
