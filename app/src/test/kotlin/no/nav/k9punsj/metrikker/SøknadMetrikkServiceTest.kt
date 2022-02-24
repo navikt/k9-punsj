@@ -37,20 +37,20 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", Type.PLEIEPENGER_SYKT_BARN.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_FRILANSER_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_SELVSTENDING_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = NATTEVAAK_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = TILSYNSORDNING_COUNTER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_FRILANSER_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_SELVSTENDING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = NATTEVAAK_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = TILSYNSORDNING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         val forventetAntallUker = 42.0
-        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET.navn, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_ARBEIDSGIVERE_BUCKET.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
 
         MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint,
-            metric = JOURNALPOST_COUNTER.navn,
+            metric = JOURNALPOST_COUNTER,
             forventetVerdi = 1.0,
             søknadstypeTag,
             søknadsIdTag,
@@ -69,7 +69,7 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_ALENE_OMSORG.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class SøknadMetrikkServiceTest {
             val søknadstypeTag = Tag.of("soknadstype", Type.PLEIEPENGER_LIVETS_SLUTTFASE.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
     }
 
     @Test
@@ -108,7 +108,7 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTBETALING.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
     }
 
     @Test
@@ -121,6 +121,6 @@ internal class SøknadMetrikkServiceTest {
         val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN.name)
         val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER.navn, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
     }
 }

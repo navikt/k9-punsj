@@ -48,7 +48,11 @@ internal class MetrikkJobbTest {
         journalpostRepo.ferdig(journalpost.journalpostId)
         metrikkJobb.oppdaterMetrikkMåling()
 
-        MetricUtils.assertGuage(metricsEndpoint, Metrikk.ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER.navn, 1.0)
+        MetricUtils.assertGuage(
+            metricsEndpoint = metricsEndpoint,
+            metric = Metrikk.ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER,
+            forventetVerdi = 1.0
+        )
 
     }
 
@@ -66,7 +70,11 @@ internal class MetrikkJobbTest {
         journalpostRepo.lagre(journalpost) { journalpost }
         metrikkJobb.oppdaterMetrikkMåling()
 
-        MetricUtils.assertGuage(metricsEndpoint, Metrikk.ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER.navn, 1.0)
+        MetricUtils.assertGuage(
+            metricsEndpoint = metricsEndpoint,
+            metric = Metrikk.ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER,
+            forventetVerdi = 1.0
+        )
 
     }
 }
