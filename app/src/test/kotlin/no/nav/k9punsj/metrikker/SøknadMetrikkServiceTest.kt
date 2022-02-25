@@ -1,6 +1,5 @@
 package no.nav.k9punsj.metrikker
 
-import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.k9.søknad.ytelse.Ytelse.Type
 import no.nav.k9punsj.domenetjenester.mappers.*
@@ -10,6 +9,7 @@ import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.MetricUtils
+import no.nav.k9punsj.util.MetricUtils.MetrikkTag
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
@@ -34,28 +34,84 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapPsbTilK9Format(dto.soeknadId, setOf("123", "456"), emptyList(), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-        val søknadstypeTag = Tag.of("soknadstype", Type.PLEIEPENGER_SYKT_BARN.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.PLEIEPENGER_SYKT_BARN.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_FRILANSER_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ARBEIDSTID_SELVSTENDING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = BEREDSKAP_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = NATTEVAAK_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = TILSYNSORDNING_COUNTER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ARBEIDSTID_FRILANSER_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ARBEIDSTID_SELVSTENDING_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = BEREDSKAP_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = BEREDSKAP_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = NATTEVAAK_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = TILSYNSORDNING_COUNTER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
 
         val forventetAntallUker = 42.0
-        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET, forventetVerdi = forventetAntallUker, søknadstypeTag, søknadsIdTag, Tag.of("uker", forventetAntallUker.toString()))
-        MetricUtils.assertBucket(metricsEndpoint = metricsEndpoint, metric = ANTALL_ARBEIDSGIVERE_BUCKET, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertBucket(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_UKER_SØKNADER_GJELDER_BUCKET,
+            forventetVerdi = forventetAntallUker,
+            søknadstypeTag,
+            søknadsIdTag,
+            MetrikkTag("uker", setOf(forventetAntallUker.toString()))
+        )
+        MetricUtils.assertBucket(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_ARBEIDSGIVERE_BUCKET,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint,
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
             metric = JOURNALPOST_COUNTER,
             forventetVerdi = 1.0,
             søknadstypeTag,
             søknadsIdTag,
-            Tag.of("antall_journalposter", "2"),
-            Tag.of("opplysninger", "IkkeKanPunsjes=true | MedOpplysninger=false")
+            MetrikkTag("antall_journalposter", setOf("2")),
+            MetrikkTag("opplysninger", setOf("IkkeKanPunsjes=true | MedOpplysninger=false"))
         )
     }
 
@@ -66,10 +122,16 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapOmsAOTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-        val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_ALENE_OMSORG.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.OMSORGSPENGER_UTVIDETRETT_ALENE_OMSORG.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
     }
 
     @Test
@@ -79,10 +141,16 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapOmsMATilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-        val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
     }
 
     @Test
@@ -92,10 +160,16 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapPlsfTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-            val søknadstypeTag = Tag.of("soknadstype", Type.PLEIEPENGER_LIVETS_SLUTTFASE.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.PLEIEPENGER_LIVETS_SLUTTFASE.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
     }
 
     @Test
@@ -105,10 +179,16 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapOmsTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-        val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTBETALING.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.OMSORGSPENGER_UTBETALING.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
     }
 
     @Test
@@ -118,9 +198,15 @@ internal class SøknadMetrikkServiceTest {
         val k9Format = MapOmsKSBTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
-        val søknadstypeTag = Tag.of("soknadstype", Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN.name)
-        val søknadsIdTag = Tag.of("soknadsId", dto.soeknadId)
+        val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN.name))
+        val søknadsIdTag = MetrikkTag("soknadsId", setOf(dto.soeknadId))
 
-        MetricUtils.assertCounter(metricsEndpoint = metricsEndpoint, metric = ANTALL_INNSENDINGER, forventetVerdi = 1.0, søknadstypeTag, søknadsIdTag)
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = ANTALL_INNSENDINGER,
+            forventetVerdi = 1.0,
+            søknadstypeTag,
+            søknadsIdTag
+        )
     }
 }

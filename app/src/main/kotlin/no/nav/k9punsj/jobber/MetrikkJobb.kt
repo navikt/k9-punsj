@@ -1,6 +1,7 @@
 package no.nav.k9punsj.jobber
 
 import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tag
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.JournalpostMetrikkRepository
 import no.nav.k9punsj.metrikker.Metrikk
@@ -19,7 +20,7 @@ class MetrikkJobb(
     }
 
     @Scheduled(cron = "0 0 3 * * *")
-    fun oppdaterMetrikkMåling() = runBlocking {
+    fun oppdaterMetrikkMåling(): Unit = runBlocking {
         logger.info("Kjører metrikk jobb: {}", LocalDateTime.now())
         val antallFerdigBehandledeJournalposter = journalpostMetrikkRepo.hentAntallFerdigBehandledeJournalposter(true)
         meterRegistry.gauge(Metrikk.ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER.navn, antallFerdigBehandledeJournalposter)
@@ -27,6 +28,16 @@ class MetrikkJobb(
         val antallUferdigBehandledeJournalposter = journalpostMetrikkRepo.hentAntallFerdigBehandledeJournalposter(false)
         meterRegistry.gauge(Metrikk.ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER.navn, antallUferdigBehandledeJournalposter)
 
-        // TODO: 23/02/2022 antall antall punsj innsendingstyper
+        journalpostMetrikkRepo.hentAntallJournalposttyper()
+            .map {
+                meterRegistry.counter(
+                    Metrikk.ANTALL_JOURNALPOSTTYPER.navn, listOf(
+                        Tag.of("antall", it.first.toString()),
+                        Tag.of("type", it.second.kode)
+                    )
+                )
+            }.forEach {
+                it.increment()
+            }
     }
 }

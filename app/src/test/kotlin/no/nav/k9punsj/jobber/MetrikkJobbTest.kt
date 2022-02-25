@@ -8,22 +8,26 @@ import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.MetricUtils
+import no.nav.k9punsj.util.MetricUtils.MetrikkTag
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import java.util.*
+import java.util.stream.IntStream
 
 internal class MetrikkJobbTest {
 
     private lateinit var metrikkJobb: MetrikkJobb
 
     private lateinit var metricsEndpoint: MetricsEndpoint
+    private val simpleMeterRegistry = SimpleMeterRegistry()
+
+    private val journalpostRepo = DatabaseUtil.getJournalpostRepo()
 
     @BeforeEach
     internal fun setUp() {
         DatabaseUtil.cleanDB()
-        val simpleMeterRegistry = SimpleMeterRegistry()
         metrikkJobb = MetrikkJobb(DatabaseUtil.journalpostMetrikkRepository(), simpleMeterRegistry)
         metricsEndpoint = MetricsEndpoint(simpleMeterRegistry)
     }
@@ -35,7 +39,6 @@ internal class MetrikkJobbTest {
 
     @Test
     fun sjekk_ferdig_behandlede_journalposter(): Unit = runBlocking {
-        val journalpostRepo = DatabaseUtil.getJournalpostRepo()
         val dummyAktørId = IdGenerator.nesteId()
         val journalpost = Journalpost(
             uuid = UUID.randomUUID(),
@@ -53,12 +56,10 @@ internal class MetrikkJobbTest {
             metric = Metrikk.ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER,
             forventetVerdi = 1.0
         )
-
     }
 
     @Test
     fun sjekk_uferdig_behandlede_journalposter(): Unit = runBlocking {
-        val journalpostRepo = DatabaseUtil.getJournalpostRepo()
         val dummyAktørId = IdGenerator.nesteId()
         val journalpost = Journalpost(
             uuid = UUID.randomUUID(),
@@ -75,6 +76,58 @@ internal class MetrikkJobbTest {
             metric = Metrikk.ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER,
             forventetVerdi = 1.0
         )
+    }
 
+    @Test
+    fun sjekk_journalpostertyper(): Unit = runBlocking {
+        genererJournalposter(antall = 9, type = PunsjInnsendingType.PAPIRSØKNAD)
+        genererJournalposter(antall = 8, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE)
+        genererJournalposter(antall = 7, type = PunsjInnsendingType.PAPIRETTERSENDELSE)
+        genererJournalposter(antall = 6, type = PunsjInnsendingType.KOPI)
+        genererJournalposter(antall = 5, type = PunsjInnsendingType.INNLOGGET_CHAT)
+        genererJournalposter(antall = 4, type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT)
+        genererJournalposter(antall = 3, type = PunsjInnsendingType.PAPIRINNTEKTSOPPLYSNINGER)
+        genererJournalposter(antall = 2, type = PunsjInnsendingType.SKRIV_TIL_OSS_SPØRMSÅL)
+        genererJournalposter(antall = 1, type = PunsjInnsendingType.SKRIV_TIL_OSS_SVAR)
+        metrikkJobb.oppdaterMetrikkMåling()
+
+        MetricUtils.assertCounter(
+            metricsEndpoint = metricsEndpoint,
+            metric = Metrikk.ANTALL_JOURNALPOSTTYPER,
+            forventetVerdi = 9.0,
+            MetrikkTag("antall", setOf("1.0", "2.0", "3.0", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0")),
+            MetrikkTag(
+                "type", setOf(
+                    PunsjInnsendingType.PAPIRSØKNAD.name,
+                    PunsjInnsendingType.DIGITAL_ETTERSENDELSE.name,
+                    PunsjInnsendingType.PAPIRETTERSENDELSE.name,
+                    PunsjInnsendingType.KOPI.name,
+                    PunsjInnsendingType.INNLOGGET_CHAT.name,
+                    PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.name,
+                    PunsjInnsendingType.PAPIRINNTEKTSOPPLYSNINGER.name,
+                    PunsjInnsendingType.SKRIV_TIL_OSS_SPØRMSÅL.name,
+                    PunsjInnsendingType.SKRIV_TIL_OSS_SVAR.name
+                )
+            )
+        )
+    }
+
+    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): Journalpost {
+        val journalpost = Journalpost(
+            uuid = UUID.randomUUID(),
+            journalpostId = IdGenerator.nesteId(),
+            aktørId = dummyAktørId,
+            type = type.kode
+        )
+        journalpostRepo.lagre(journalpost) { journalpost }
+        return journalpost
+    }
+
+    private suspend fun genererJournalposter(antall: Int, type: PunsjInnsendingType) {
+        IntStream.range(0, antall).forEach {
+            runBlocking {
+                opprettJournalpost(IdGenerator.nesteId(), type)
+            }
+        }
     }
 }
