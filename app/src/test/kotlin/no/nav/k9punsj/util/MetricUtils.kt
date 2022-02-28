@@ -1,7 +1,6 @@
 package no.nav.k9punsj.util
 
 import io.micrometer.core.instrument.Statistic
-import io.micrometer.core.instrument.Tag
 import no.nav.k9punsj.metrikker.Metrikk
 import org.assertj.core.api.Assertions
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
@@ -9,18 +8,37 @@ import org.springframework.boot.actuate.metrics.MetricsEndpoint
 class MetricUtils {
 
     companion object {
-        fun assertCounter(metricsEndpoint: MetricsEndpoint, metric: Metrikk, forventetVerdi: Double, vararg tags: Tag) {
+        fun assertCounter(
+            metricsEndpoint: MetricsEndpoint,
+            metric: Metrikk,
+            forventetVerdi: Double,
+            vararg tags: MetrikkTag
+        ) {
             val metricResponse: MetricsEndpoint.MetricResponse = metricsEndpoint.metric(metric.navn, listOf())
             Assertions.assertThat(getCount(metricResponse)).isEqualTo(forventetVerdi)
-            if (tags.isNotEmpty()) Assertions.assertThat(tags(metricResponse)).contains(*tags)
+            if (tags.isNotEmpty()) {
+                val tagsResponse = tags(metricResponse)
+                Assertions.assertThat(tagsResponse).containsAnyOf(*tags)
+            }
         }
-        fun assertGuage(metricsEndpoint: MetricsEndpoint, metric: Metrikk, forventetVerdi: Double, vararg tags: Tag) {
+
+        fun assertGuage(
+            metricsEndpoint: MetricsEndpoint,
+            metric: Metrikk,
+            forventetVerdi: Double,
+            vararg tags: MetrikkTag
+        ) {
             val metricResponse: MetricsEndpoint.MetricResponse = metricsEndpoint.metric(metric.navn, listOf())
             Assertions.assertThat(getGuageValue(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }
 
-        fun assertBucket(metricsEndpoint: MetricsEndpoint, metric: Metrikk, forventetVerdi: Double, vararg tags: Tag) {
+        fun assertBucket(
+            metricsEndpoint: MetricsEndpoint,
+            metric: Metrikk,
+            forventetVerdi: Double,
+            vararg tags: MetrikkTag
+        ) {
             val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
             Assertions.assertThat(getBucketValue(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
@@ -44,9 +62,13 @@ class MetricUtils {
                 .findAny().map { it.value }.orElse(null)
         }
 
-        private fun tags(response: MetricsEndpoint.MetricResponse): List<Tag> {
-            return response.availableTags.map { Tag.of(it.tag, it.values.first()) }
+        private fun tags(response: MetricsEndpoint.MetricResponse): List<MetrikkTag> {
+            return response.availableTags.map {
+                MetrikkTag(it.tag, it.values)
+            }
         }
     }
+
+    data class MetrikkTag(val tag: String, val values: Set<String> = setOf())
 
 }

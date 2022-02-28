@@ -22,7 +22,9 @@ enum class PunsjInnsendingType(val kode: String, val navn: String, val erScannin
     companion object {
         @JsonCreator
         @JvmStatic
-        fun fraKode(kode: String): PunsjInnsendingType = values().find { it.kode == kode } ?: throw IllegalStateException("Finner ikke $kode")
+        fun fraKode(kode: String): PunsjInnsendingType = values().find {
+            it.kode == kode
+        } ?: throw IllegalStateException("Finner ikke $kode")
 
         fun sjekkOmDetErScanning(kode: String): Boolean {
             return valueOf(kode).erScanning
