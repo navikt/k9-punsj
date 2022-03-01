@@ -46,12 +46,21 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     pepClient: IPepClient,
     punsjbolleService: PunsjbolleService,
     journalpostService: JournalpostService,
-    innsendingClient: InnsendingClient) {
+    innsendingClient: InnsendingClient
+) {
 
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
-        pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
-        pepClient.sendeInnTilgang(dto.til, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang -> if (!tilgang) { return false }}
-        if (dto.barn != null ){
+        pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang ->
+            if (!tilgang) {
+                return false
+            }
+        }
+        pepClient.sendeInnTilgang(dto.til, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang ->
+            if (!tilgang) {
+                return false
+            }
+        }
+        if (dto.barn != null) {
             return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
         }
         if (dto.annenPart != null) {
@@ -60,7 +69,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         return false
     }
 
-    suspend fun fraKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo,fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
+    suspend fun fraKanRutesTilK9(
+        dto: KopierJournalpostDto,
+        journalpost: JournalpostInfo,
+        fagsakYtelseType: FagsakYtelseType,
+        correlationId: CorrelationId
+    ) = punsjbolleService.ruting(
         søker = dto.fra,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
@@ -70,7 +84,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
-    suspend fun tilKanRutesTilK9(dto: KopierJournalpostDto, journalpost: JournalpostInfo, fagsakYtelseType: FagsakYtelseType, correlationId: CorrelationId) = punsjbolleService.ruting(
+    suspend fun tilKanRutesTilK9(
+        dto: KopierJournalpostDto,
+        journalpost: JournalpostInfo,
+        fagsakYtelseType: FagsakYtelseType,
+        correlationId: CorrelationId
+    ) = punsjbolleService.ruting(
         søker = dto.til,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
@@ -83,18 +102,27 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
             val journalpostId = request.journalpostId()
-            val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId) ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+            val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId)
+                ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
             val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
 
-            if (!harTilgang(dto)) { return@RequestContext ikkeTilgang()}
+            if (!harTilgang(dto)) {
+                return@RequestContext ikkeTilgang()
+            }
             val ytelseType = utledeFagsakYtelseType(journalpost)
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")}
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                    return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")
+                }
             } else {
-                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")}
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) { return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")}
+                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                    return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")
+                }
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                    return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")
+                }
             }
 
             if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
@@ -102,32 +130,40 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
 
-            if (ytelseType != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
-                return@RequestContext kanIkkeKopieres("Støtter bare kopier av pleiepenger sykt barn relaterte journalposter")
+            if (ytelseType != FagsakYtelseType.PLEIEPENGER_SYKT_BARN && ytelseType != FagsakYtelseType.OMSORGSPENGER_KS) {
+                return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${ytelseType.navn} for relaterte journalposter")
             }
 
-            innsendingClient.sendKopierJournalpost(KopierJournalpostInfo(
-                journalpostId = journalpostId,
-                fra = dto.fra,
-                til = dto.til,
-                pleietrengende = dto.barn,
-                correlationId = coroutineContext.hentCorrelationId(),
-                ytelse = ytelseType
-            ))
+            innsendingClient.sendKopierJournalpost(
+                KopierJournalpostInfo(
+                    journalpostId = journalpostId,
+                    fra = dto.fra,
+                    til = dto.til,
+                    pleietrengende = dto.barn,
+                    correlationId = coroutineContext.hentCorrelationId(),
+                    ytelse = ytelseType
+                )
+            )
             return@RequestContext sendtTilKopiering()
         }
     }
 }
 
 private fun utledeFagsakYtelseType(journalpost: Journalpost?): FagsakYtelseType {
-    val ytelse = if (journalpost == null) {
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-    } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse) {
-        FagsakYtelseType.OMSORGSPENGER
-    } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-    } else {
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+    val ytelse = when {
+
+        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse -> {
+            FagsakYtelseType.OMSORGSPENGER
+        }
+        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse -> {
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        }
+        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == journalpost.ytelse -> {
+            FagsakYtelseType.OMSORGSPENGER_KS
+        }
+        else -> {
+            throw IllegalStateException("Ikke støttet journalpost: $journalpost")
+        }
     }
     return ytelse
 }
