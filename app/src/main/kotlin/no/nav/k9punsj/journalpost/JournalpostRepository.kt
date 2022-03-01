@@ -134,7 +134,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun fantIkke(journalpostId: String): Boolean {
+    suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
         return using(sessionOf(dataSource)) {
             val run = it.run(
                 queryOf(
@@ -178,7 +178,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<JournalpostIdDto>?, aktørId: AktørId) {
         journalposter?.forEach {
-            if (fantIkke(it)) {
+            if (journalpostIkkeEksisterer(it)) {
                 val journalpost = Journalpost(UUID.randomUUID(), it, aktørId)
                 lagre(journalpost, KildeType.SAKSBEHANDLER) {
                     journalpost

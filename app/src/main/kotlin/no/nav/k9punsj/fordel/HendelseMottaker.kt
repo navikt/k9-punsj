@@ -29,9 +29,9 @@ class HendelseMottaker @Autowired constructor(
         val journalpostId = fordelPunsjEventDto.journalpostId
         val aktørId = fordelPunsjEventDto.aktørId
 
-        val fankIkke = journalpostRepository.fantIkke(journalpostId)
+        val journalpostIkkeEksisterer = journalpostRepository.journalpostIkkeEksisterer(journalpostId)
 
-        if (fankIkke) {
+        if (journalpostIkkeEksisterer) {
 
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
