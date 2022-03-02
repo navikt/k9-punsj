@@ -458,14 +458,20 @@ internal class JournalpostRoutes(
     }
 
     private fun utledeFagsakYtelseType(journalpost: Journalpost?): no.nav.k9.kodeverk.behandling.FagsakYtelseType {
-        val ytelse = if (journalpost == null) {
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse) {
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
-        } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        } else {
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        val ytelse = when {
+
+            journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse -> {
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
+            }
+            journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse -> {
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            }
+            journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == journalpost.ytelse -> {
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
+            }
+            else -> {
+                throw IllegalStateException("Ikke støttet journalpost: $journalpost")
+            }
         }
         return ytelse
     }
