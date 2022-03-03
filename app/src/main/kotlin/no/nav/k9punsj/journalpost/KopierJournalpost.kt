@@ -111,7 +111,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             if (!harTilgang(dto)) {
                 return@RequestContext ikkeTilgang()
             }
-            val ytelseType = utledeFagsakYtelseType(journalpost)
+            val ytelseType = journalpost.utledeFagsakYtelseType()
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
                 if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
@@ -148,30 +148,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             return@RequestContext sendtTilKopiering()
         }
     }
-}
-
-private fun utledeFagsakYtelseType(journalpost: Journalpost?): FagsakYtelseType {
-    val ytelse = when {
-        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse -> {
-            val type = FagsakYtelseType.OMSORGSPENGER
-            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
-            type
-        }
-        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse -> {
-            val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
-            type
-        }
-        journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == journalpost.ytelse -> {
-            val type = FagsakYtelseType.OMSORGSPENGER_KS
-            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
-            type
-        }
-        else -> {
-            throw IllegalStateException("Ikke støttet journalpost: $journalpost")
-        }
-    }
-    return ytelse
 }
 
 internal object KopierJournalpost {
