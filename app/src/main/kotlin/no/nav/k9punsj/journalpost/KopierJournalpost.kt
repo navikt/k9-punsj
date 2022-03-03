@@ -13,6 +13,7 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
+import no.nav.k9punsj.journalpost.KopierJournalpost.logger
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
@@ -151,15 +152,20 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
 private fun utledeFagsakYtelseType(journalpost: Journalpost?): FagsakYtelseType {
     val ytelse = when {
-
         journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == journalpost.ytelse -> {
-            FagsakYtelseType.OMSORGSPENGER
+            val type = FagsakYtelseType.OMSORGSPENGER
+            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
+            type
         }
         journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse -> {
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
+            type
         }
         journalpost?.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == journalpost.ytelse -> {
-            FagsakYtelseType.OMSORGSPENGER_KS
+            val type = FagsakYtelseType.OMSORGSPENGER_KS
+            logger.info("Utleder fagsakytelsetype fra {} til {}", journalpost.ytelse, type)
+            type
         }
         else -> {
             throw IllegalStateException("Ikke støttet journalpost: $journalpost")
