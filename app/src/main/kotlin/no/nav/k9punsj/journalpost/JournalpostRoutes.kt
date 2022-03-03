@@ -464,8 +464,10 @@ internal class JournalpostRoutes(
             no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
         } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == journalpost.ytelse) {
             no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+        } else if (journalpost.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == journalpost.ytelse) {
+            no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
         } else {
-            no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+           throw IllegalStateException("Journalpost ytelse ${journalpost.ytelse} er ikke støttet")
         }
         return ytelse
     }
