@@ -113,6 +113,8 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
+        logger.info("Sender ruting request: {}", requestBody)
+
         val (url, response, responseBody) = "ruting".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -212,6 +214,8 @@ class RestPunsjbolleService(
     }
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(RestPunsjbolleService::class.java)
+
         private fun LocalDate?.iso8601() = when (this) {
             null -> ".."
             else -> "$this"
