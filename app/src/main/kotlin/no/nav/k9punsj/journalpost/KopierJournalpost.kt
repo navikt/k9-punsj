@@ -189,4 +189,3 @@ internal object KopierJournalpost {
 
     internal fun ServerRequest.journalpostId(): JournalpostId = pathVariable("journalpost_id")
 }
-
