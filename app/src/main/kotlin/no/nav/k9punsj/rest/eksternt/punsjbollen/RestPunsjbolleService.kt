@@ -113,7 +113,7 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
-        logger.info("Sender ruting request: {}", requestBody)
+        logger.info("Sender ruting request for ytelsetype: {}: {}", fagsakYtelseType, requestBody)
 
         val (url, response, responseBody) = "ruting".post(
             requestBody = requestBody,
