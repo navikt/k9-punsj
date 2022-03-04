@@ -46,7 +46,7 @@ fun Journalpost?.utledeFagsakYtelseType(): FagsakYtelseType {
                 type
             }
             this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER_KS
+                val type = FagsakYtelseType.OMSORGSPENGER_MA
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
