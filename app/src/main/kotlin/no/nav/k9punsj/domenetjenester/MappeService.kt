@@ -156,6 +156,23 @@ class MappeService(
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }
 
+    suspend fun førsteInnsendingOmsMA(nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
+        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
+
+        val søknadfelles = felles(nySøknad)
+        val dto = OmsorgspengerMidlertidigAleneSøknadDto(
+            soeknadId = søknadfelles.søknadsId.toString(),
+            journalposter = listOf(nySøknad.journalpostId),
+            mottattDato = søknadfelles.mottattDato?.toLocalDate(),
+            klokkeslett = søknadfelles.klokkeslett,
+            soekerId = norskIdent
+        )
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+    }
+
     private suspend fun opprettSøknadEntitet(
         søknadId: UUID,
         bunkeId: BunkeId,
