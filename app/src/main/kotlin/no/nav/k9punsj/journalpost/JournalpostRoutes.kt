@@ -226,7 +226,7 @@ internal class JournalpostRoutes(
                     journalpostId = dto.journalpostId,
                     periode = null, // Utledes fra journalposten i Punsjbollen
                     correlationId = coroutineContext.hentCorrelationId(),
-                    fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType()
+                    fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType)
                 )
 
                 if (punsjbolleRuting == PunsjbolleRuting.K9Sak || punsjbolleRuting == PunsjbolleRuting.Infotrygd) {
