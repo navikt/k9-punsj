@@ -27,25 +27,32 @@ data class Journalpost(
 }
 
 fun Journalpost?.utledeFagsakYtelseType(): FagsakYtelseType {
-    return if (this == null) FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-    else {
+    return if (this == null) {
+        logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+    } else {
         when {
-            this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
+            this.ytelse == null -> {
+                val pleiepengerSyktBarn = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+                logger.info("Ytelse på journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
+                pleiepengerSyktBarn
+            }
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER_KS
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER_MA
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
