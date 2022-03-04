@@ -45,6 +45,11 @@ fun Journalpost?.utledeFagsakYtelseType(): FagsakYtelseType {
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
+            this.ytelse != null && no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
+                val type = FagsakYtelseType.OMSORGSPENGER_KS
+                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
+                type
+            }
             else -> {
                 throw IllegalStateException("Ikke støttet journalpost: $this")
             }
