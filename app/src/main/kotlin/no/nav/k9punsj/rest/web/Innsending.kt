@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.web
 
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.rest.web.dto.*
@@ -56,6 +57,7 @@ data class PunsjBolleDto(
     val barnIdent: NorskIdentDto?,
     val annenPart: NorskIdentDto?,
     val journalpostId: JournalpostIdDto,
+    val fagsakYtelseType: FagsakYtelseType? = null, // TODO: 04/03/2022 Fjern nullable etter lasnsering
 )
 
 data class SettPåVentDto(

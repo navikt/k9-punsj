@@ -26,7 +26,7 @@ data class Journalpost(
     )
 }
 
-fun Journalpost?.utledeFagsakYtelseType(): FagsakYtelseType {
+fun Journalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
     return if (this == null) {
         logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
@@ -37,13 +37,18 @@ fun Journalpost?.utledeFagsakYtelseType(): FagsakYtelseType {
                 logger.info("Ytelse på journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
                 pleiepengerSyktBarn
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
+                val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
-                val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.UKJENT.kode == this.ytelse -> {
+                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $this")
+                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
+                type
+            }
+            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
+                val type = FagsakYtelseType.OMSORGSPENGER
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
