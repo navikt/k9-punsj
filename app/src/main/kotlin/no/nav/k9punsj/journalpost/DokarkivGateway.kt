@@ -10,6 +10,7 @@ import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
@@ -94,6 +96,36 @@ class DokarkivGateway(
         return awaitFirst.statusCode.value()
     }
 
+    internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val requestBody = BodyInserters.fromValue(journalpostRequest)
+
+        val response = client
+            .post()
+            .uri(URI.create(opprettJournalpostUrl))
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBody)
+            .retrieve()
+            .toEntity(JournalPostResponse::class.java)
+            .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
+            .awaitFirst()
+
+        if (response.statusCode == HttpStatus.OK && response.body != null) {
+            return response.body!!
+        }
+
+        throw IllegalStateException("Feilet med å opprette journalpost")
+    }
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -117,6 +149,7 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
+    private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost"
 
     //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
@@ -170,5 +203,57 @@ class DokarkivGateway(
                     bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
                 )
             }
-
 }
+
+data class JournalPostResponse(val journalpostId: String)
+
+data class JournalPostRequest(
+    internal val journalpostType: JournalpostType = JournalpostType.NOTAT,
+    internal val kanal: DokarkivKanal = DokarkivKanal.INGEN_DISTRIBUSJON,
+    internal val tema: Tema = Tema.OMS,
+    internal val behovssekvensId: String,
+    internal val tittel: String,
+    internal val journalfoerendeEnhet: String = "9999", // TODO: 07/03/2022 Hvilket journalfoerendeEnhet gjelder her?
+    internal val brevkode: Brevkode,
+    internal val sak: DokarkivSak,
+    internal val bruker: DokarkivBruker,
+    internal val avsenderMottaker: DokarkivAvsenderMottaker,
+    internal val dokumenter: List<DokarkivDokument>,
+    internal val tilleggsopplysninger: List<Tilleggsopplysning>
+)
+
+data class Tilleggsopplysning(
+    val nokkel: String,
+    val verdi: String
+)
+
+data class DokarkivSak(
+    val fagsakId: String,
+    val fagsakSystem: FagsakSystem = FagsakSystem.K9,
+    val sakstype: DokarkivSaksType
+)
+
+data class DokarkivDokument(
+    val tittel: String,
+    val brevkode: String? = null, // Eller brevkode + dokumentkategori
+    val dokumentkategori: String? = null,
+    val dokumentVarianter: List<DokarkivDokumentVariant>
+)
+
+data class DokarkivDokumentVariant(
+    val filtype: DokarkivArkivFilType,
+    val variantformat: DokarkivVariantFormat,
+    val fysiskDokument: ByteArray
+)
+
+data class DokarkivAvsenderMottaker(val id: String, val idType: DokarkivIDType, val navn: String? = null)
+data class DokarkivBruker(val id: String, val idType: DokarkivIDType)
+
+enum class DokarkivIDType { FNR, ORGNR, HPRNR, UTL_ORG }
+enum class DokarkivArkivFilType { PDFA, XML, JSON }
+enum class DokarkivVariantFormat { ORIGINAL, ARKIV }
+enum class Tema { OMS }
+enum class JournalpostType { INNGAAENDE, UTGAAENDE, NOTAT }
+enum class FagsakSystem { K9 }
+enum class DokarkivSaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+enum class DokarkivKanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }

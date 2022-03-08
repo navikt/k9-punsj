@@ -9,7 +9,7 @@ internal data class JournalpostId private constructor(private val value: String)
     }
 }
 
-internal data class Identitetsnummer private constructor(private val value: String) {
+data class Identitetsnummer private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "Ugyldig identitetsnummer" } }
     override fun toString() = value
     internal companion object {

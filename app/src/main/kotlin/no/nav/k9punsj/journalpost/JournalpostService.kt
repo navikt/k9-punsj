@@ -3,6 +3,8 @@ package no.nav.k9punsj.journalpost
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9punsj.azuregraph.AzureGraphService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -19,7 +21,8 @@ import java.time.ZoneId
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
+    private val azureGraphService: AzureGraphService
 ) {
 
     private companion object {
@@ -37,10 +40,14 @@ class JournalpostService(
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
             if (!parsedJournalpost.harTilgang) {
-                logger.warn("Saksbehandler har ikke tilgang. ${
-                    safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
-                        bruker = SafDtos.Bruker(null, null))
-                }")
+                logger.warn(
+                    "Saksbehandler har ikke tilgang. ${
+                        safJournalpost.copy(
+                            avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
+                            bruker = SafDtos.Bruker(null, null)
+                        )
+                    }"
+                )
                 throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             } else {
                 val (norskIdent, aktørId) = when {
@@ -61,8 +68,10 @@ class JournalpostService(
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
                     kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also {
                         if (!it) {
-                            logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
-                                keyValue("journalpost_id", journalpostId))
+                            logger.info(
+                                "Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
+                                keyValue("journalpost_id", journalpostId)
+                            )
                         }
                     },
                     journalpostStatus = safJournalpost.journalstatus!!
@@ -77,6 +86,28 @@ class JournalpostService(
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
+    }
+
+    internal suspend fun opprettJournalpost(nyJournalpost: NyJournalpost): JournalPostResponse {
+        val innloggetBrukerIdentitetsnumer = azureGraphService.hentIdentTilInnloggetBruker()
+
+        val journalPostRequest = JournalPostRequest(
+            behovssekvensId = "", // TODO: 07/03/2022 Hva skal vi bruke som unik id her?
+            tittel = nyJournalpost.tittel,
+            brevkode = Brevkode.UDEFINERT, // TODO: 07/03/2022 Utled hvilket brevkode vi skal journalføre på.
+            sak = DokarkivSak(fagsakId = nyJournalpost.fagsakId, sakstype = DokarkivSaksType.FAGSAK),
+            bruker = DokarkivBruker(id = nyJournalpost.søkerIdentitetsnummer, idType = DokarkivIDType.FNR),
+            avsenderMottaker = DokarkivAvsenderMottaker(
+                id = innloggetBrukerIdentitetsnumer,
+                idType = DokarkivIDType.FNR
+            ),
+            dokumenter = listOf(),
+            tilleggsopplysninger = listOf(
+                Tilleggsopplysning(nokkel = "inneholderSensitivePersonopplysninger", verdi = "${nyJournalpost.inneholderSensitivePersonopplysninger}")
+            )
+        )
+
+        return dokarkivGateway.opprettJournalpost(journalPostRequest)
     }
 
     private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {
@@ -194,6 +225,14 @@ data class VentDto(
 
 data class DokumentInfo(
     val dokumentId: DokumentId,
+)
+
+data class NyJournalpost(
+    val søkerIdentitetsnummer: String,
+    val fagsakId: String,
+    val tittel: String,
+    val notat: String,
+    val inneholderSensitivePersonopplysninger: Boolean
 )
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")

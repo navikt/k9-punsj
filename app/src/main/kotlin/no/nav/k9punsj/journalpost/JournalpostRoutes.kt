@@ -113,15 +113,18 @@ internal class JournalpostRoutes(
                                 kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
                                 venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
                                 punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
-                                    punsjInnsendingType) else null,
+                                    punsjInnsendingType
+                                ) else null,
                                 erSaksbehandler = pepClient.erSaksbehandler(),
                                 erInngående = journalpostInfo.erInngående,
                                 kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
                                 journalpostStatus = journalpostInfo.journalpostStatus
                             )
-                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
+                            utvidJournalpostMedMottattDato(
+                                journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
-                                journalpostInfo.aktørId)
+                                journalpostInfo.aktørId
+                            )
                             return@RequestContext ServerResponse
                                 .ok()
                                 .json()
@@ -130,25 +133,30 @@ internal class JournalpostRoutes(
                             val punsjInnsendingType =
                                 journalpostService.hentHvisJournalpostMedId(journalpostId = request.journalpostId())?.type
 
-                            utvidJournalpostMedMottattDato(journalpostInfo.journalpostId,
+                            utvidJournalpostMedMottattDato(
+                                journalpostInfo.journalpostId,
                                 journalpostInfo.mottattDato,
-                                journalpostInfo.aktørId)
+                                journalpostInfo.aktørId
+                            )
                             return@RequestContext ServerResponse
                                 .ok()
                                 .json()
-                                .bodyValueAndAwait(JournalpostInfoDto(
-                                    journalpostId = journalpostInfo.journalpostId,
-                                    norskIdent = journalpostInfo.norskIdent,
-                                    dokumenter = journalpostInfo.dokumenter,
-                                    venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
-                                    punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
-                                        punsjInnsendingType) else null,
-                                    kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
-                                    erSaksbehandler = pepClient.erSaksbehandler(),
-                                    erInngående = journalpostInfo.erInngående,
-                                    kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
-                                    journalpostStatus = journalpostInfo.journalpostStatus
-                                ))
+                                .bodyValueAndAwait(
+                                    JournalpostInfoDto(
+                                        journalpostId = journalpostInfo.journalpostId,
+                                        norskIdent = journalpostInfo.norskIdent,
+                                        dokumenter = journalpostInfo.dokumenter,
+                                        venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                                        punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
+                                            punsjInnsendingType
+                                        ) else null,
+                                        kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
+                                        erSaksbehandler = pepClient.erSaksbehandler(),
+                                        erInngående = journalpostInfo.erInngående,
+                                        kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
+                                        journalpostStatus = journalpostInfo.journalpostStatus
+                                    )
+                                )
                         }
                     }
 
@@ -185,7 +193,8 @@ internal class JournalpostRoutes(
                         dokumenter = dok,
                         it.mottattDato?.toLocalDate(),
                         it.mottattDato?.toLocalTime(),
-                        if (it.type != null) PunsjInnsendingType.fraKode(it.type) else null)
+                        if (it.type != null) PunsjInnsendingType.fraKode(it.type) else null
+                    )
                 }.toList()
 
                 ServerResponse
@@ -210,8 +219,10 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.punsjbolleDto()
-                harInnloggetBrukerTilgangTilOgOpprettesak(dto.brukerIdent,
-                    Urls.SkalTilK9sak)?.let { return@RequestContext it }
+                harInnloggetBrukerTilgangTilOgOpprettesak(
+                    dto.brukerIdent,
+                    Urls.SkalTilK9sak
+                )?.let { return@RequestContext it }
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
 
@@ -393,8 +404,10 @@ internal class JournalpostRoutes(
                         return@RequestContext ServerResponse
                             .ok()
                             .contentType(dokument.contentType)
-                            .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "inline; filename=${request.dokumentId()}.${dokument.contentType.subtype}")
+                            .header(
+                                HttpHeaders.CONTENT_DISPOSITION,
+                                "inline; filename=${request.dokumentId()}.${dokument.contentType.subtype}"
+                            )
                             .header("Content-Security-Policy", "frame-src;")
                             .bodyValueAndAwait(dokument.dataBuffer)
                     }
@@ -440,6 +453,28 @@ internal class JournalpostRoutes(
                 )
             }
         }
+
+        /*POST("") { request ->
+            RequestContext(coroutineContext, request) {
+
+                return@RequestContext kotlin.runCatching {
+                    journalpostService.opprettJournalpost()
+                }
+            }.fold(
+                onSuccess = {
+                    ServerResponse
+                        .status(HttpStatus.CREATED)
+                        .json()
+                        .bodyValueAndAwait(it)
+                },
+                onFailure = {
+                    ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(it.message))
+                }
+            )
+        }*/
 
         kopierJournalpostRoute(
             pepClient = pepClient,

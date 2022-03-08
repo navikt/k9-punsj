@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="NO">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>Bekreftelse til Arbeidsgiver</title>
+    <meta name="subject" content="Notat - {{ tittel }}"/>
+    <meta name="author" content="nav.no"/>
+    <meta name="description" content="{{ tittel }}"/>
+    {{#block 'style-common' }}
+    {{/block}}
+</head>
+
+<body>
+<div class="innholdscontainer">
+    <span id="header"></span>
+
+    <h1>{{ tittel }}</h1>
+    <p><strong>Søkers fødseslnummer:</strong> {{ søkerIdentitetsnummer }}</p>
+    <p><strong>Fagsakid:</strong> {{ fagsakId }}</p>
+    <p><strong>Inneholder sensitive personopplysninger:</strong> {{ jaNeiSvar inneholderSensitivePersonopplysninger }}</p>
+    <p><strong>Notat:</strong></p>
+    <div class="fritekst">
+        <p class="fritekst_textarea">{{ notat }}</p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<p id="footer">
+    <span class="tidspunkt">{{ tidspunkt }}</span>
+    <span class="sidetall">side <span id="pagenumber"></span> av <span id="pagecount"></span></span>
+</p>
+</body>
+
+</html>
