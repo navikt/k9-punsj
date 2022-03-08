@@ -21,8 +21,7 @@ import java.time.ZoneId
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
-    private val dokarkivGateway: DokarkivGateway,
-    private val azureGraphService: AzureGraphService
+    private val dokarkivGateway: DokarkivGateway
 ) {
 
     private companion object {
@@ -88,9 +87,7 @@ class JournalpostService(
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
     }
 
-    internal suspend fun opprettJournalpost(nyJournalpost: NyJournalpost): JournalPostResponse {
-        val innloggetBrukerIdentitetsnumer = azureGraphService.hentIdentTilInnloggetBruker()
-
+    internal suspend fun opprettJournalpost(innloggetBrukerIdentitetsnumer: String, nyJournalpost: NyJournalpost): JournalPostResponse {
         val journalPostRequest = JournalPostRequest(
             behovssekvensId = "", // TODO: 07/03/2022 Hva skal vi bruke som unik id her?
             tittel = nyJournalpost.tittel,

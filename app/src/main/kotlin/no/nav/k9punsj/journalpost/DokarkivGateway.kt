@@ -103,7 +103,7 @@ class DokarkivGateway(
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
-        val requestBody = BodyInserters.fromValue(journalpostRequest)
+        logger.info("Request body: {}", journalpostRequest)
 
         val response = client
             .post()
@@ -113,7 +113,7 @@ class DokarkivGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBody)
+            .bodyValue(journalpostRequest)
             .retrieve()
             .toEntity(JournalPostResponse::class.java)
             .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
@@ -249,11 +249,11 @@ data class DokarkivDokumentVariant(
 data class DokarkivAvsenderMottaker(val id: String, val idType: DokarkivIDType, val navn: String? = null)
 data class DokarkivBruker(val id: String, val idType: DokarkivIDType)
 
-enum class DokarkivIDType { FNR, ORGNR, HPRNR, UTL_ORG }
-enum class DokarkivArkivFilType { PDFA, XML, JSON }
+enum class DokarkivIDType { FNR }
+enum class DokarkivArkivFilType { PDFA, JSON }
 enum class DokarkivVariantFormat { ORIGINAL, ARKIV }
 enum class Tema { OMS }
-enum class JournalpostType { INNGAAENDE, UTGAAENDE, NOTAT }
+enum class JournalpostType { NOTAT }
 enum class FagsakSystem { K9 }
 enum class DokarkivSaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
 enum class DokarkivKanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }

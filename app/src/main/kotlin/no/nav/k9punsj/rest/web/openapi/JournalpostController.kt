@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.journalpost.JournalpostRoutes
+import no.nav.k9punsj.journalpost.NyJournalpost
 import no.nav.k9punsj.rest.web.IdentOgJournalpost
 
 @RestController
@@ -320,6 +321,28 @@ internal class JournalpostController {
     )
     fun JournalførPåGenerellSak(
         @RequestBody body: IdentOgJournalpost,
+    ) {
+    }
+
+    @PostMapping(JournalpostRoutes.Urls.OpprettJournalpost, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Hvis journalposten har blitt opprettet",
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Internal server error eller Doarkiv har fått Internal server error"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Oppretter ny journalpost i dokarkiv",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun opprettJournalpost(
+        @RequestBody body: NyJournalpost,
     ) {
     }
 }
