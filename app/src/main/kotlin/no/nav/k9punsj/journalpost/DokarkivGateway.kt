@@ -128,7 +128,6 @@ class DokarkivGateway(
                 }
             )
             .toEntity(JournalPostResponse::class.java)
-            .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
             .awaitFirst()
 
         if (response.statusCode == HttpStatus.OK && response.body != null) {
