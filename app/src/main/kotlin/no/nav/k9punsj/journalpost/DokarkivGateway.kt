@@ -8,7 +8,6 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.dokument.Brevkode
@@ -26,11 +25,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
@@ -119,7 +120,12 @@ class DokarkivGateway(
             .retrieve()
             .onStatus(
                 { status: HttpStatus -> status.isError },
-                { errorResponse: ClientResponse -> errorResponse.createException() }
+                { errorResponse: ClientResponse ->
+                    errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
+                        logger.error("Feilet med å opprette journalpost", entity.toString())
+                    }
+                    errorResponse.createException()
+                }
             )
             .toEntity(JournalPostResponse::class.java)
             .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
