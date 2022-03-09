@@ -122,7 +122,7 @@ class DokarkivGateway(
                 { status: HttpStatus -> status.isError },
                 { errorResponse: ClientResponse ->
                     errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
-                        logger.error("Feilet med å opprette journalpost", entity.toString())
+                        logger.error("Feilet med å opprette journalpost: {}", entity.toString())
                     }
                     errorResponse.createException()
                 }
@@ -138,7 +138,7 @@ class DokarkivGateway(
     }
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(DokarkivGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
