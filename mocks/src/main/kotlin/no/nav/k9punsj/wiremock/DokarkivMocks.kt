@@ -17,7 +17,7 @@ fun WireMockServer.stubOpprettingAvJournalpost(
             .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
             .withHeader("Nav-Callid", WireMock.matching(".*"))
             .withHeader("Authorization", WireMock.matching(".*"))
-            /*.withRequestBody(WireMock.matchingJsonPath("$.journalpostType", WireMock.matching("NOTAT")))
+            .withRequestBody(WireMock.matchingJsonPath("$.journalpostType", WireMock.matching("NOTAT")))
             .withRequestBody(WireMock.matchingJsonPath("$.kanal", WireMock.matching("NAV_NO|ALTINN|EESSI|INGEN_DISTRIBUSJON")))
             .withRequestBody(WireMock.matchingJsonPath("$.tema", WireMock.equalTo("OMS")))
             .withRequestBody(WireMock.matchingJsonPath("$.brevkode", WireMock.matching(".*")))
@@ -30,7 +30,7 @@ fun WireMockServer.stubOpprettingAvJournalpost(
             .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.id", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.idType", WireMock.equalTo("FNR")))
             .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].nokkel", WireMock.equalTo("inneholderSensitivePersonopplysninger")))
-            .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].verdi", WireMock.matching("true|false")))*/
+            .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].verdi", WireMock.matching("true|false")))
             .willReturn(
                 WireMock.aResponse()
                     .withStatus(responsStatus)

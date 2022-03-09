@@ -219,18 +219,18 @@ class DokarkivGateway(
 data class JournalPostResponse(val journalpostId: String)
 
 data class JournalPostRequest(
-    internal val journalpostType: JournalpostType = JournalpostType.NOTAT,
-    internal val kanal: DokarkivKanal = DokarkivKanal.INGEN_DISTRIBUSJON,
-    internal val tema: Tema = Tema.OMS,
-    internal val behovssekvensId: String,
-    internal val tittel: String,
-    internal val journalfoerendeEnhet: String = "9999", // TODO: 07/03/2022 Hvilket journalfoerendeEnhet gjelder her?
-    internal val brevkode: Brevkode,
-    internal val sak: DokarkivSak,
-    internal val bruker: DokarkivBruker,
-    internal val avsenderMottaker: DokarkivAvsenderMottaker,
-    internal val dokumenter: List<DokarkivDokument>,
-    internal val tilleggsopplysninger: List<Tilleggsopplysning>
+    val journalpostType: JournalpostType = JournalpostType.NOTAT,
+    val kanal: DokarkivKanal = DokarkivKanal.INGEN_DISTRIBUSJON,
+    val tema: Tema = Tema.OMS,
+    val behovssekvensId: String,
+    val tittel: String,
+    val journalfoerendeEnhet: String = "9999", // TODO: 07/03/2022 Hvilket journalfoerendeEnhet gjelder her?
+    val brevkode: Brevkode,
+    val sak: DokarkivSak,
+    val bruker: DokarkivBruker,
+    val avsenderMottaker: DokarkivAvsenderMottaker,
+    val dokumenter: List<DokarkivDokument>,
+    val tilleggsopplysninger: List<Tilleggsopplysning>
 )
 
 data class Tilleggsopplysning(
