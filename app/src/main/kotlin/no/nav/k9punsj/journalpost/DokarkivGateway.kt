@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.dokument.Brevkode
@@ -120,7 +121,7 @@ class DokarkivGateway(
                 { status: HttpStatus -> status.isError },
                 { errorResponse: ClientResponse ->
                     val errorResponseBody = errorResponse.bodyToMono(String::class.java)
-                    logger.error("Feilet med å opprette journalpost", errorResponseBody)
+                    runBlocking { logger.error("Feilet med å opprette journalpost", errorResponseBody.awaitFirst()) }
                     errorResponse.createException()
                 }
             )
