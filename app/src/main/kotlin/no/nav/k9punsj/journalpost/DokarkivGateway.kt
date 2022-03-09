@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
@@ -115,8 +116,16 @@ class DokarkivGateway(
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(journalpostRequest)
             .retrieve()
+            .onStatus(
+                { status: HttpStatus -> status.isError },
+                { errorResponse: ClientResponse ->
+                    val errorResponseBody = errorResponse.bodyToMono(String::class.java)
+                    logger.error("Feilet med å opprette journalpost", errorResponseBody)
+                    errorResponse.createException()
+                }
+            )
             .toEntity(JournalPostResponse::class.java)
-            .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
+            //.doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
             .awaitFirst()
 
         if (response.statusCode == HttpStatus.OK && response.body != null) {
