@@ -119,14 +119,10 @@ class DokarkivGateway(
             .retrieve()
             .onStatus(
                 { status: HttpStatus -> status.isError },
-                { errorResponse: ClientResponse ->
-                    val errorResponseBody = errorResponse.bodyToMono(String::class.java)
-                    runBlocking { logger.error("Feilet med å opprette journalpost", errorResponseBody.awaitFirst()) }
-                    errorResponse.createException()
-                }
+                { errorResponse: ClientResponse -> errorResponse.createException() }
             )
             .toEntity(JournalPostResponse::class.java)
-            //.doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
+            .doOnError { error: Throwable -> logger.error("Feilet med å opprette journalpost", error) }
             .awaitFirst()
 
         if (response.statusCode == HttpStatus.OK && response.body != null) {
