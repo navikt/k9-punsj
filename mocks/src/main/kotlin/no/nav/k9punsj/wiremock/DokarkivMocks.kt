@@ -21,6 +21,7 @@ fun WireMockServer.stubOpprettingAvJournalpost(
             .withRequestBody(WireMock.matchingJsonPath("$.kanal", WireMock.matching("NAV_NO|ALTINN|EESSI|INGEN_DISTRIBUSJON")))
             .withRequestBody(WireMock.matchingJsonPath("$.tema", WireMock.equalTo("OMS")))
             .withRequestBody(WireMock.matchingJsonPath("$.brevkode", WireMock.matching(".*")))
+            .withRequestBody(WireMock.matchingJsonPath("$.eksternReferanseId", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.journalfoerendeEnhet", WireMock.equalTo("9999")))
             .withRequestBody(WireMock.matchingJsonPath("$.sak.fagsakId", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.sak.fagsakSystem", WireMock.equalTo("K9")))

@@ -222,10 +222,10 @@ data class JournalPostRequest(
     val journalpostType: JournalpostType = JournalpostType.NOTAT,
     val kanal: DokarkivKanal = DokarkivKanal.INGEN_DISTRIBUSJON,
     val tema: Tema = Tema.OMS,
-    val behovssekvensId: String,
+    val eksternReferanseId: String,
     val tittel: String,
     val journalfoerendeEnhet: String = "9999", // TODO: 07/03/2022 Hvilket journalfoerendeEnhet gjelder her?
-    val brevkode: Brevkode,
+    val brevkode: String,
     val sak: DokarkivSak,
     val bruker: DokarkivBruker,
     val avsenderMottaker: DokarkivAvsenderMottaker,

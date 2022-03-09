@@ -3,8 +3,6 @@ package no.nav.k9punsj.journalpost
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9punsj.azuregraph.AzureGraphService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 
 @Service
 class JournalpostService(
@@ -89,9 +88,9 @@ class JournalpostService(
 
     internal suspend fun opprettJournalpost(innloggetBrukerIdentitetsnumer: String, nyJournalpost: NyJournalpost): JournalPostResponse {
         val journalPostRequest = JournalPostRequest(
-            behovssekvensId = "", // TODO: 07/03/2022 Hva skal vi bruke som unik id her?
+            eksternReferanseId = UUID.randomUUID().toString(), // TODO: 07/03/2022 Hva skal vi bruke som unik id her?
             tittel = nyJournalpost.tittel,
-            brevkode = Brevkode.UDEFINERT, // TODO: 07/03/2022 Utled hvilket brevkode vi skal journalføre på.
+            brevkode = "K9_PUNSJ_INNSENDING", // TODO: 07/03/2022 Utled hvilket brevkode vi skal journalføre på.
             sak = DokarkivSak(fagsakId = nyJournalpost.fagsakId, sakstype = DokarkivSaksType.FAGSAK),
             bruker = DokarkivBruker(id = nyJournalpost.søkerIdentitetsnummer, idType = DokarkivIDType.FNR),
             avsenderMottaker = DokarkivAvsenderMottaker(
