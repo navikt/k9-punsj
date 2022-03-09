@@ -122,7 +122,7 @@ class DokarkivGateway(
                 { status: HttpStatus -> status.isError },
                 { errorResponse: ClientResponse ->
                     errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
-                        logger.error("Feilet med å opprette journalpost: {}", entity.toString())
+                        logger.error("Feilet med å opprette journalpost. Feil: {}", entity.toString())
                     }
                     errorResponse.createException()
                 }
