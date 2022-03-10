@@ -29,6 +29,9 @@ class JournalpostService(
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? =
         safGateway.hentDokument(journalpostId, dokumentId)
 
+    internal suspend fun hentSafJournalPost(journalpostId: JournalpostId): SafDtos.Journalpost? =
+        safGateway.hentJournalpostInfo(journalpostId)
+
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
 

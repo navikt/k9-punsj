@@ -75,7 +75,7 @@ internal object SafDtos {
     }
 
     enum class JournalpostType {
-        I
+        I, N, U
     }
 
     internal enum class AvsenderType {
