@@ -10,44 +10,45 @@ on:
       - '.gitignore'
       - 'LICENSE'
       - 'CODEOWNERS'
+  workflow_dispatch:
 
 env:
   IMAGE_BASE: ghcr.io/${{ github.repository }}
 
 jobs:
   Build:
-
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-java@v2
         with:
-          java-version: 16
-          distribution: 'adopt'
+          java-version: 17
+          distribution: temurin
           cache: maven
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+
       - name: Bygge JAR
-        run: |
-          mvn clean package --settings ./.m2/settings.xml
+        run: mvn clean package --settings ./.m2/settings.xml
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
-      - name: Sett tags for docker & nais deploy
+
+      - name: Sett tag for docker
         run: |
-          echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "IMAGE=${IMAGE}$IMAGE_BASE:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "TAG=$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bygg & last opp Docker image
         run: |
-          docker build --pull --tag ${IMAGE} --tag ${IMAGE_BASE}:latest ./app/.
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u "x-access-token" --password-stdin ghcr.io
+          docker build --pull --tag ${IMAGE_BASE}:${TAG} --tag ${IMAGE_BASE}:latest ./app/.
           docker push ${IMAGE_BASE} --all-tags
+
+      - name: Sett image for nais deploy
+        run: echo "IMAGE=${IMAGE_BASE}:${TAG}" >> $GITHUB_ENV
 
       - name: Deploy til preprod
         uses: nais/deploy/actions/deploy@v1

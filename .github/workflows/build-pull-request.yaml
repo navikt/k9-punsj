@@ -10,26 +10,16 @@ on:
 
 jobs:
   Build:
-
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-java@v2
         with:
-          java-version: 16
-          distribution: adopt
+          java-version: 17
+          distribution: temurin
           cache: maven
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-pr-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
       - name: Build artifacts & deploy
-        shell: bash
-        run: |
-          mvn clean verify -e --batch-mode --settings ./.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
+        run: mvn clean verify -e --batch-mode --settings ./.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}

@@ -3,37 +3,43 @@ name: Deploy til prod
 on: [workflow_dispatch]
 
 env:
-  IMAGE_BASE_CR: ghcr.io/${{ github.repository }}
-  GITHUB_USERNAME: x-access-token
-  GITHUB_TOKEN: ${{ secrets.PUNSJ_TOKEN }}
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
 
 jobs:
   Build:
-
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-java@v2
         with:
-          java-version: 16
-          distribution: 'adopt'
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: -maven-pr-
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          java-version: 17
+          distribution: temurin
+          cache: maven
+
       - name: Bygge JAR
+        run: mvn clean package -DskipTests
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.PUNSJ_TOKEN }}
+
+      - name: Sett tags for docker
         run: |
-          mvn clean package -DskipTests
-          echo "TAG=${TAG}$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "IMAGE=${IMAGE}$IMAGE_BASE_CR:$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)-p" >> $GITHUB_ENV
+          echo "TAG=$(date "+%Y.%m.%d")-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bygg & last opp Docker image
         run: |
-          docker build --pull --tag ${IMAGE}  ./app/.
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u "x-access-token" --password-stdin ghcr.io
-          docker push ${IMAGE_BASE_CR} --all-tags
+          docker build --pull --tag ${IMAGE_BASE}:${TAG} ./app/.
+          docker push ${IMAGE_BASE} --all-tags
+
+      - name: Sett image for nais deploy
+        run: echo "IMAGE=${IMAGE_BASE}:${TAG}" >> $GITHUB_ENV
+
       - name: Deploy til prod
         uses: nais/deploy/actions/deploy@v1
         env:
