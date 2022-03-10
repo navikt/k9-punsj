@@ -87,7 +87,10 @@ class JournalpostService(
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
     }
 
-    internal suspend fun opprettJournalpost(innloggetBrukerIdentitetsnumer: String, nyJournalpost: NyJournalpost): JournalPostResponse {
+    internal suspend fun opprettJournalpost(
+        innloggetBrukerIdentitetsnumer: String,
+        nyJournalpost: NyJournalpost
+    ): JournalPostResponse {
         val notatPdf = notatPDFGenerator.genererPDF(nyJournalpost)
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = UUID.randomUUID().toString(),
@@ -101,7 +104,12 @@ class JournalpostService(
             saksnummer = nyJournalpost.fagsakId,
             brukerIdent = nyJournalpost.søkerIdentitetsnummer,
             avsenderNavn = innloggetBrukerIdentitetsnumer,
-            tilleggsopplysninger = listOf(),
+            tilleggsopplysninger = listOf(
+                Tilleggsopplysning(
+                    nokkel = "inneholderSensitivePersonopplysninger",
+                    verdi = "${nyJournalpost.inneholderSensitivePersonopplysninger}"
+                )
+            ),
             pdf = notatPdf,
             json = JSONObject(nyJournalpost)
         )

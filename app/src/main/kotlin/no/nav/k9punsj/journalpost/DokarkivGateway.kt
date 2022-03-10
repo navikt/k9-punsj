@@ -17,6 +17,7 @@ import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJourna
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.intellij.lang.annotations.Language
+import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -269,7 +270,8 @@ data class JournalPostRequest(
               "tema": "$tema",
               "journalposttype": "$journalposttype",
               "kanal": "$kanal",
-              "journalfoerendeEnhet": "9999"
+              "journalfoerendeEnhet": "9999",
+              "tilleggsopplysninger": ${JSONArray(tilleggsopplysninger)}
             }
         """.trimIndent()
         return json
