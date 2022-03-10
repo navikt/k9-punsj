@@ -39,6 +39,7 @@ class JournalpostRoutesTest {
             requestBody = BodyInserters.fromValue(
                 NyJournalpost(
                     søkerIdentitetsnummer = søkerIdent,
+                    søkerNavn = "Trane Kreativ",
                     fagsakId = "ABC123",
                     tittel = "Journalføring av notat",
                     notat = "lorem ipmsum osv...",

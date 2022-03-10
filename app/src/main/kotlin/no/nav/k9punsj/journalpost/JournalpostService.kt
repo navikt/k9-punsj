@@ -7,6 +7,7 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.pdf.NotatOpplysninger
 import no.nav.k9punsj.pdf.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.json.JSONObject
@@ -89,9 +90,10 @@ class JournalpostService(
 
     internal suspend fun opprettJournalpost(
         innloggetBrukerIdentitetsnumer: String,
+        innloggetBrukerEnhet: String,
         nyJournalpost: NyJournalpost
     ): JournalPostResponse {
-        val notatPdf = notatPDFGenerator.genererPDF(nyJournalpost)
+        val notatPdf = notatPDFGenerator.genererPDF(nyJournalpost.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer, innloggetBrukerEnhet))
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = UUID.randomUUID().toString(),
             tittel = nyJournalpost.tittel,
@@ -158,6 +160,17 @@ class JournalpostService(
         journalpostRepository.ferdig(journalpostId)
     }
 }
+
+private fun NyJournalpost.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer: String, innloggetBrukerEnhet: String) = NotatOpplysninger(
+    søkerIdentitetsnummer = søkerIdentitetsnummer,
+    søkerNavn = søkerNavn,
+    fagsakId = fagsakId,
+    tittel = tittel,
+    notat = notat,
+    saksbehandlerEnhet = innloggetBrukerEnhet,
+    saksbehandlerNavn = innloggetBrukerIdentitetsnumer,
+    inneholderSensitivePersonopplysninger = inneholderSensitivePersonopplysninger
+)
 
 private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
     val arkivDokumenter = dokumenter
@@ -236,6 +249,7 @@ data class DokumentInfo(
 
 data class NyJournalpost(
     val søkerIdentitetsnummer: String,
+    val søkerNavn: String,
     val fagsakId: String,
     val tittel: String,
     val notat: String,

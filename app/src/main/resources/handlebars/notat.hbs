@@ -15,10 +15,11 @@
 <div class="innholdscontainer">
     <span id="header"></span>
 
-    <h1>{{ tittel }}</h1>
-    <p><strong>Søkers fødseslnummer:</strong> {{ søkerIdentitetsnummer }}</p>
-    <p><strong>Fagsakid:</strong> {{ fagsakId }}</p>
-    <p><strong>Inneholder sensitive personopplysninger:</strong> {{ jaNeiSvar inneholderSensitivePersonopplysninger }}</p>
+    <h1>{{ tittel }} (saknr. {{ fagsakId }})</h1>
+    <p><strong>Hvem saken gjelder: </strong> {{søkerNavn}} (fnr. {{ søkerIdentitetsnummer }})</p>
+    <p><strong>Saksbehandler: </strong> {{saksbehandlerNavn}} (enhet {{ saksbehandlerEnhet }})</p>
+    <p><strong>Inneholder sensitive personopplysninger:</strong> {{ jaNeiSvar inneholderSensitivePersonopplysninger }}
+    </p>
     <p><strong>Notat:</strong></p>
     <div class="fritekst">
         <p class="fritekst_textarea">{{ notat }}</p>

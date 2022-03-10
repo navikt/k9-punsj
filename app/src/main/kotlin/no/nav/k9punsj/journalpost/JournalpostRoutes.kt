@@ -458,8 +458,9 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val nyJournalpostRequest = request.nyJournalpost()
                 val innloggetBrukerIdentitetsnumer = azureGraphService.hentIdentTilInnloggetBruker()
+                val innloggetBrukerEnhet = azureGraphService.hentEnhetForInnloggetBruker()
                 return@RequestContext kotlin.runCatching {
-                    journalpostService.opprettJournalpost(innloggetBrukerIdentitetsnumer, nyJournalpostRequest)
+                    journalpostService.opprettJournalpost(innloggetBrukerIdentitetsnumer, innloggetBrukerEnhet, nyJournalpostRequest)
                 }
             }.fold(
                 onSuccess = {
