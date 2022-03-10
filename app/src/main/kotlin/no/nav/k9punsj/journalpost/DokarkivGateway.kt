@@ -229,7 +229,7 @@ data class JournalPostRequest(
     internal val tema: String,
     internal val kanal: Kanal,
     internal val journalposttype: JournalpostType,
-    internal val dokumentkategori: DokumentKategori,
+    internal val dokumentKategori: DokumentKategori,
     internal val fagsystem: FagsakSystem,
     internal val sakstype: SaksType,
     internal val saksnummer: String,
@@ -272,7 +272,7 @@ data class JournalPostRequest(
               }],
               "tema": "$tema",
               "journalposttype": "$journalposttype",
-              "dokumentkategori": "$dokumentkategori",
+              "dokumentKategori": "$dokumentKategori",
               "kanal": "$kanal",
               "journalfoerendeEnhet": "9999",
               "tilleggsopplysninger": ${JSONArray(tilleggsopplysninger)}

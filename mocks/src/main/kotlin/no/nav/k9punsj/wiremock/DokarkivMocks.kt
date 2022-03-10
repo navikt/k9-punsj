@@ -18,7 +18,7 @@ fun WireMockServer.stubJournalføringAvNotat(
             .withHeader("Nav-Callid", WireMock.matching(".*"))
             .withHeader("Authorization", WireMock.matching(".*"))
             .withRequestBody(WireMock.matchingJsonPath("$.journalposttype", WireMock.matching("NOTAT")))
-            .withRequestBody(WireMock.matchingJsonPath("$.dokumentkategori", WireMock.matching("IS")))
+            .withRequestBody(WireMock.matchingJsonPath("$.dokumentKategori", WireMock.matching("IS")))
             .withRequestBody(WireMock.matchingJsonPath("$.kanal", WireMock.matching("NAV_NO|ALTINN|EESSI|INGEN_DISTRIBUSJON")))
             .withRequestBody(WireMock.matchingJsonPath("$.tema", WireMock.equalTo("OMS")))
             .withRequestBody(WireMock.matchingJsonPath("$.eksternReferanseId", WireMock.matching(".*")))
