@@ -1,6 +1,6 @@
-package no.nav.k9punsj.pdf
+package no.nav.k9punsj.notat
 
-import no.nav.k9punsj.journalpost.NyJournalpost
+import no.nav.k9punsj.pdf.PDFGenerator
 import org.springframework.stereotype.Service
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime

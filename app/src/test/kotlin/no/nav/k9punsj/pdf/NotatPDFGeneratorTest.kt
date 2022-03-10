@@ -1,5 +1,7 @@
 package no.nav.k9punsj.pdf
 
+import no.nav.k9punsj.notat.NotatOpplysninger
+import no.nav.k9punsj.notat.NotatPDFGenerator
 import org.junit.jupiter.api.Test
 import java.io.File
 

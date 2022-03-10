@@ -454,30 +454,6 @@ internal class JournalpostRoutes(
             }
         }
 
-        POST("/api${Urls.OpprettJournalpost}") { request ->
-            RequestContext(coroutineContext, request) {
-                val nyJournalpostRequest = request.nyJournalpost()
-                val innloggetBrukerIdentitetsnumer = azureGraphService.hentIdentTilInnloggetBruker()
-                val innloggetBrukerEnhet = azureGraphService.hentEnhetForInnloggetBruker()
-                return@RequestContext kotlin.runCatching {
-                    journalpostService.opprettJournalpost(innloggetBrukerIdentitetsnumer, innloggetBrukerEnhet, nyJournalpostRequest)
-                }
-            }.fold(
-                onSuccess = {
-                    ServerResponse
-                        .status(HttpStatus.CREATED)
-                        .json()
-                        .bodyValueAndAwait(it)
-                },
-                onFailure = {
-                    ServerResponse
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .json()
-                        .bodyValueAndAwait(OasFeil(it.message))
-                }
-            )
-        }
-
         kopierJournalpostRoute(
             pepClient = pepClient,
             punsjbolleService = punsjbolleService,

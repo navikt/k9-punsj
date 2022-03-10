@@ -7,15 +7,12 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.pdf.NotatOpplysninger
-import no.nav.k9punsj.pdf.NotatPDFGenerator
+import no.nav.k9punsj.notat.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
-import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.*
-import java.util.*
 
 @Service
 class JournalpostService(
@@ -89,33 +86,8 @@ class JournalpostService(
     }
 
     internal suspend fun opprettJournalpost(
-        innloggetBrukerIdentitetsnumer: String,
-        innloggetBrukerEnhet: String,
-        nyJournalpost: NyJournalpost
+        journalPostRequest: JournalPostRequest
     ): JournalPostResponse {
-        val notatPdf = notatPDFGenerator.genererPDF(nyJournalpost.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer, innloggetBrukerEnhet))
-        val journalPostRequest = JournalPostRequest(
-            eksternReferanseId = UUID.randomUUID().toString(),
-            tittel = nyJournalpost.tittel,
-            brevkode = "K9_PUNSJ_INNSENDING",
-            tema = "OMS",
-            kanal = Kanal.INGEN_DISTRIBUSJON,
-            journalposttype = JournalpostType.NOTAT,
-            fagsystem = FagsakSystem.K9,
-            sakstype = SaksType.FAGSAK,
-            saksnummer = nyJournalpost.fagsakId,
-            brukerIdent = nyJournalpost.søkerIdentitetsnummer,
-            avsenderNavn = innloggetBrukerIdentitetsnumer,
-            tilleggsopplysninger = listOf(
-                Tilleggsopplysning(
-                    nokkel = "inneholderSensitivePersonopplysninger",
-                    verdi = "${nyJournalpost.inneholderSensitivePersonopplysninger}"
-                )
-            ),
-            pdf = notatPdf,
-            json = JSONObject(nyJournalpost)
-        )
-
         return dokarkivGateway.opprettJournalpost(journalPostRequest)
     }
 
@@ -160,17 +132,6 @@ class JournalpostService(
         journalpostRepository.ferdig(journalpostId)
     }
 }
-
-private fun NyJournalpost.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer: String, innloggetBrukerEnhet: String) = NotatOpplysninger(
-    søkerIdentitetsnummer = søkerIdentitetsnummer,
-    søkerNavn = søkerNavn,
-    fagsakId = fagsakId,
-    tittel = tittel,
-    notat = notat,
-    saksbehandlerEnhet = innloggetBrukerEnhet,
-    saksbehandlerNavn = innloggetBrukerIdentitetsnumer,
-    inneholderSensitivePersonopplysninger = inneholderSensitivePersonopplysninger
-)
 
 private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
     val arkivDokumenter = dokumenter
@@ -247,7 +208,7 @@ data class DokumentInfo(
     val dokumentId: DokumentId,
 )
 
-data class NyJournalpost(
+data class NyNotat(
     val søkerIdentitetsnummer: String,
     val søkerNavn: String,
     val fagsakId: String,

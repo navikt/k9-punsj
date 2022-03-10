@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.journalpost.JournalpostRoutes
-import no.nav.k9punsj.journalpost.NyJournalpost
+import no.nav.k9punsj.journalpost.NyNotat
 import no.nav.k9punsj.rest.web.IdentOgJournalpost
 
 @RestController
@@ -342,7 +342,7 @@ internal class JournalpostController {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun opprettJournalpost(
-        @RequestBody body: NyJournalpost,
+        @RequestBody body: NyNotat,
     ) {
     }
 }

@@ -133,7 +133,9 @@ class DokarkivGateway(
             .awaitFirst()
 
         if (response.statusCode == HttpStatus.CREATED && response.body != null) {
-            return response.body!!
+            val journalPostResponse = response.body!!
+            logger.info("Journalpost response: {}", journalPostResponse)
+            return journalPostResponse
         }
 
         throw IllegalStateException("Feilet med å opprette journalpost")

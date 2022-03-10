@@ -8,7 +8,7 @@ private const val path = "/dokarkiv-mock"
 
 fun WireMockServer.getDokarkivBaseUrl() = baseUrl() + path
 
-fun WireMockServer.stubOpprettingAvJournalpost(
+fun WireMockServer.stubJournalføringAvNotat(
     responsStatus: Int = 201
 ) : WireMockServer{
     WireMock.stubFor(
@@ -24,14 +24,14 @@ fun WireMockServer.stubOpprettingAvJournalpost(
             .withRequestBody(WireMock.matchingJsonPath("$.journalfoerendeEnhet", WireMock.equalTo("9999")))
             .withRequestBody(WireMock.matchingJsonPath("$.sak.fagsakId", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.sak.fagsaksystem", WireMock.equalTo("K9")))
-            .withRequestBody(WireMock.matchingJsonPath("$.sak.sakstype", WireMock.matching("FAGSAK|GENERELL_SAK|ARKIVSAK")))
+            .withRequestBody(WireMock.matchingJsonPath("$.sak.sakstype", WireMock.equalTo("FAGSAK")))
             .withRequestBody(WireMock.matchingJsonPath("$.bruker.id", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.bruker.idType", WireMock.equalTo("FNR")))
             .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.navn", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].nokkel", WireMock.equalTo("inneholderSensitivePersonopplysninger")))
             .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].verdi", WireMock.matching("true|false")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].tittel", WireMock.matching(".*")))
-            .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].brevkode", WireMock.matching(".*")))
+            .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].brevkode", WireMock.equalTo("K9_PUNSJ_INNSENDING")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[0].filtype", WireMock.equalTo("PDFA")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[0].variantformat", WireMock.equalTo("ARKIV")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[0].fysiskDokument", WireMock.matching(".*")))
