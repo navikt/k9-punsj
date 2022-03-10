@@ -1,7 +1,5 @@
-package no.nav.k9punsj.pdf
+package no.nav.k9punsj.notat
 
-import no.nav.k9punsj.notat.NotatOpplysninger
-import no.nav.k9punsj.notat.NotatPDFGenerator
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -17,7 +15,6 @@ internal class NotatPDFGeneratorTest {
                 søkerNavn = "Trane Kreativ",
                 fagsakId = "ABC123",
                 tittel = "Opprettelse av notat",
-                inneholderSensitivePersonopplysninger = true,
                 saksbehandlerNavn = "Saksbehandler Isaksen",
                 saksbehandlerEnhet = "4403",
                 notat = """

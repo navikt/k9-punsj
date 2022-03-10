@@ -229,6 +229,7 @@ data class JournalPostRequest(
     internal val tema: String,
     internal val kanal: Kanal,
     internal val journalposttype: JournalpostType,
+    internal val dokumentkategori: DokumentKategori,
     internal val fagsystem: FagsakSystem,
     internal val sakstype: SaksType,
     internal val saksnummer: String,
@@ -271,6 +272,7 @@ data class JournalPostRequest(
               }],
               "tema": "$tema",
               "journalposttype": "$journalposttype",
+              "dokumentkategori": "$dokumentkategori",
               "kanal": "$kanal",
               "journalfoerendeEnhet": "9999",
               "tilleggsopplysninger": ${JSONArray(tilleggsopplysninger)}
@@ -321,6 +323,7 @@ enum class FilType { PDFA, JSON }
 enum class VariantFormat { ORIGINAL, ARKIV }
 enum class Tema { OMS }
 enum class JournalpostType { NOTAT }
+enum class DokumentKategori { IS }
 enum class FagsakSystem { K9 }
 enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
 enum class Kanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }

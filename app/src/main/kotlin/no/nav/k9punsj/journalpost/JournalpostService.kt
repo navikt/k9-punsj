@@ -216,8 +216,7 @@ data class NyNotat(
     val søkerNavn: String,
     val fagsakId: String,
     val tittel: String,
-    val notat: String,
-    val inneholderSensitivePersonopplysninger: Boolean
+    val notat: String
 )
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")

@@ -20,7 +20,6 @@ class NotatPDFGenerator : PDFGenerator<NotatOpplysninger>() {
         "søkerNavn" to søkerNavn,
         "saksbehandlerNavn" to saksbehandlerNavn,
         "saksbehandlerEnhet" to saksbehandlerEnhet,
-        "inneholderSensitivePersonopplysninger" to inneholderSensitivePersonopplysninger,
         "tidspunkt" to DATE_TIME_FORMATTER.format(ZonedDateTime.now(UTC))
     )
 
@@ -35,6 +34,5 @@ data class NotatOpplysninger(
     val tittel: String,
     val notat: String,
     val saksbehandlerNavn: String,
-    val saksbehandlerEnhet: String,
-    val inneholderSensitivePersonopplysninger: Boolean
+    val saksbehandlerEnhet: String
 )

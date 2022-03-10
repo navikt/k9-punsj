@@ -16,7 +16,8 @@ class NotatService(
         val innloggetBrukerIdent = azureGraphService.hentIdentTilInnloggetBruker()
         val innloggetBrukerEnhet = azureGraphService.hentEnhetForInnloggetBruker()
 
-        val notatPdf = notatPDFGenerator.genererPDF(notat.mapTilNotatOpplysninger(innloggetBrukerIdent, innloggetBrukerEnhet))
+        val notatPdf =
+            notatPDFGenerator.genererPDF(notat.mapTilNotatOpplysninger(innloggetBrukerIdent, innloggetBrukerEnhet))
 
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = UUID.randomUUID().toString(),
@@ -25,17 +26,13 @@ class NotatService(
             tema = "OMS",
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
+            dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
             saksnummer = notat.fagsakId,
             brukerIdent = notat.søkerIdentitetsnummer,
             avsenderNavn = innloggetBrukerIdent,
-            tilleggsopplysninger = listOf(
-                Tilleggsopplysning(
-                    nokkel = "inneholderSensitivePersonopplysninger",
-                    verdi = "${notat.inneholderSensitivePersonopplysninger}"
-                )
-            ),
+            tilleggsopplysninger = listOf(),
             pdf = notatPdf,
             json = JSONObject(notat)
         )
@@ -43,14 +40,14 @@ class NotatService(
         return journalpostService.opprettJournalpost(journalPostRequest)
     }
 
-    private fun NyNotat.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer: String, innloggetBrukerEnhet: String) = NotatOpplysninger(
-        søkerIdentitetsnummer = søkerIdentitetsnummer,
-        søkerNavn = søkerNavn,
-        fagsakId = fagsakId,
-        tittel = tittel,
-        notat = notat,
-        saksbehandlerEnhet = innloggetBrukerEnhet,
-        saksbehandlerNavn = innloggetBrukerIdentitetsnumer,
-        inneholderSensitivePersonopplysninger = inneholderSensitivePersonopplysninger
-    )
+    private fun NyNotat.mapTilNotatOpplysninger(innloggetBrukerIdentitetsnumer: String, innloggetBrukerEnhet: String) =
+        NotatOpplysninger(
+            søkerIdentitetsnummer = søkerIdentitetsnummer,
+            søkerNavn = søkerNavn,
+            fagsakId = fagsakId,
+            tittel = tittel,
+            notat = notat,
+            saksbehandlerEnhet = innloggetBrukerEnhet,
+            saksbehandlerNavn = innloggetBrukerIdentitetsnumer
+        )
 }

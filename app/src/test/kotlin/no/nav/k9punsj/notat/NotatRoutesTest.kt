@@ -31,8 +31,7 @@ internal class NotatRoutesTest {
                     søkerNavn = "Trane Kreativ",
                     fagsakId = "ABC123",
                     tittel = "Journalføring av notat",
-                    notat = "lorem ipmsum osv...",
-                    inneholderSensitivePersonopplysninger = true
+                    notat = "lorem ipmsum osv..."
                 )
             ),
             api, "notat", "opprett"
