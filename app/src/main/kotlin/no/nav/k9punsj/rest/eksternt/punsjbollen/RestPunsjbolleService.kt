@@ -212,6 +212,8 @@ class RestPunsjbolleService(
     }
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(RestPunsjbolleService::class.java)
+
         private fun LocalDate?.iso8601() = when (this) {
             null -> ".."
             else -> "$this"

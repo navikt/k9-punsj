@@ -29,9 +29,9 @@ class HendelseMottaker @Autowired constructor(
         val journalpostId = fordelPunsjEventDto.journalpostId
         val aktørId = fordelPunsjEventDto.aktørId
 
-        val fankIkke = journalpostRepository.fantIkke(journalpostId)
+        val journalpostIkkeEksisterer = journalpostRepository.journalpostIkkeEksisterer(journalpostId)
 
-        if (fankIkke) {
+        if (journalpostIkkeEksisterer) {
 
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
@@ -40,7 +40,7 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
-                ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null,
+                ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null, // TODO: 04/03/2022 Burde ignorere journalposten om den ikke er en støttet ytelse, ikke lagre den?
                 type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
                 opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
                     fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null

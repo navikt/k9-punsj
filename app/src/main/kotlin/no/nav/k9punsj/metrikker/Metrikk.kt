@@ -9,8 +9,9 @@ enum class Metrikk(val navn: String) {
     ARBEIDSTID_SELVSTENDING_COUNTER("arbeidstid_selvstendig_counter"),
     BEREDSKAP_COUNTER("beredskap_counter"),
     NATTEVAAK_COUNTER("nattevaak_counter"),
-    ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER("antall_ferdig_behandlede_journalposter"),
-    ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER("antall_uferdige_behandlede_journalposter"),
+    TILSYNSORDNING_COUNTER("tilsynsordning_counter"),
+    ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER("antall_ferdig_behandlede_journalposter_guage"),
+    ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER("antall_uferdige_behandlede_journalposter_guage"),
     ANTALL_OPPRETTET_JOURNALPOST_COUNTER("antall_opprettet_journalpost_counter"),
-    TILSYNSORDNING_COUNTER("tilsynsordning_counter");
+    ANTALL_JOURNALPOSTTYPER("antall_journalposttyper_guage");
 }

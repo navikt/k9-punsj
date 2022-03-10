@@ -121,13 +121,13 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
                 journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE, opprettNySøknad.journalpostId)
 
-                val søknadEntitet = mappeService.førsteInnsendingOmsKSB(
+                val søknadEntitet = mappeService.førsteInnsendingOmsMA(
                     nySøknad = opprettNySøknad!!
                 )
                 return@RequestContext ServerResponse
                     .created(request.søknadLocation(søknadEntitet.søknadId))
                     .json()
-                    .bodyValueAndAwait(søknadEntitet.tilOmsKSBvisning())
+                    .bodyValueAndAwait(søknadEntitet.tilOmsMAvisning())
             }
         }
 

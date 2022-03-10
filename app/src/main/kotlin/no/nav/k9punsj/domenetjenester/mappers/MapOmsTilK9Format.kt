@@ -129,8 +129,8 @@ internal class MapOmsTilK9Format(
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)
-                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
-                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
+                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes ?: false) // ikke nødvendig for korrigering av IM
+                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger ?: false) // ikke nødvendig for korrigering av IM
             )
         }
     }
