@@ -26,7 +26,7 @@ class NotatService(
             tema = "OMS",
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
-            dokumentKategori = DokumentKategori.IS,
+            dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
             saksnummer = notat.fagsakId,
