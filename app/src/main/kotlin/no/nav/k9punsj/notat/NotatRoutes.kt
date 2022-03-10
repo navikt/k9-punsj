@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
+import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -44,7 +45,7 @@ internal class NotatRoutes(
                 onSuccess = {
                     logger.info("Notat opprettet.")
                     ServerResponse
-                        .status(HttpStatus.CREATED)
+                        .created(URI.create("journalpost/${it.journalpostId}"))
                         .json()
                         .bodyValueAndAwait(it)
                 },
