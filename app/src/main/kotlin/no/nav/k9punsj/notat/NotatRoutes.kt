@@ -51,7 +51,7 @@ internal class NotatRoutes(
                         .bodyValueAndAwait(it)
                 },
                 onFailure = {
-                    logger.error("Feilet med å opprettet notat.", it)
+                    logger.error("Feilet med å opprette notat.", it)
                     ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
@@ -63,4 +63,4 @@ internal class NotatRoutes(
 }
 
 private fun ServerRequest.journalpostLocation(journalpostId: String): URI =
-    uriBuilder().pathSegment("journalpost", journalpostId).build()
+    uriBuilder().replacePath("journalpost/$journalpostId").build()
