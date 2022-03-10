@@ -23,7 +23,7 @@ class NotatService(
             eksternReferanseId = UUID.randomUUID().toString(),
             tittel = notat.tittel,
             brevkode = "K9_PUNSJ_INNSENDING",
-            tema = "OMS",
+            tema = Tema.OMS,
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
             dokumentkategori = DokumentKategori.IS,

@@ -226,7 +226,7 @@ data class JournalPostRequest(
     internal val eksternReferanseId: String,
     internal val tittel: String,
     internal val brevkode: String,
-    internal val tema: String,
+    internal val tema: Tema,
     internal val kanal: Kanal,
     internal val journalposttype: JournalpostType,
     internal val dokumentkategori: DokumentKategori,
@@ -303,24 +303,6 @@ data class Sak(
     val sakstype: SaksType
 )
 
-data class DokarkivDokument(
-    val tittel: String,
-    val brevkode: String? = null, // Eller brevkode + dokumentkategori
-    val dokumentVarianter: List<DokumentVariant>
-)
-
-data class DokumentVariant(
-    val filtype: FilType,
-    val variantformat: VariantFormat,
-    val fysiskDokument: ByteArray
-)
-
-data class AvsenderMottaker(val id: String, val idType: IdType, val navn: String? = null)
-data class Bruker(val id: String, val idType: IdType)
-
-enum class IdType { FNR }
-enum class FilType { PDFA, JSON }
-enum class VariantFormat { ORIGINAL, ARKIV }
 enum class Tema { OMS }
 enum class JournalpostType { NOTAT }
 enum class DokumentKategori { IS }
