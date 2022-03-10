@@ -113,8 +113,8 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
-            if(safJournalpost == null || safJournalpost.journalposttype == "U") {
-                return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost!!.journalposttype}")
+            if(safJournalpost != null && safJournalpost.journalposttype == "U") {
+                return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
             }
 
             val ytelseType = journalpost.utledeFagsakYtelseType()
