@@ -323,26 +323,4 @@ internal class JournalpostController {
         @RequestBody body: IdentOgJournalpost,
     ) {
     }
-
-    @PostMapping(JournalpostRoutes.Urls.OpprettJournalpost, produces = ["application/json"])
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "201",
-                description = "Hvis journalposten har blitt opprettet",
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "Internal server error eller Doarkiv har fått Internal server error"
-            )
-        ]
-    )
-    @Operation(
-        summary = "Oppretter ny journalpost i dokarkiv",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    fun opprettJournalpost(
-        @RequestBody body: NyNotat,
-    ) {
-    }
 }
