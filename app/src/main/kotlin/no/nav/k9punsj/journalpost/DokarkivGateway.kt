@@ -275,6 +275,11 @@ data class JournalPostRequest(
         return json
     }
 
+    override fun toString(): String {
+        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='$brukerIdent', avsenderNavn='$avsenderNavn', tilleggsopplysninger=$tilleggsopplysninger, json=$json)"
+    }
+
+
     private companion object {
         private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)
         private fun JSONObject.base64() = this.toString().toByteArray().base64()

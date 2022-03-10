@@ -7,6 +7,7 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.pdf.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -19,7 +20,8 @@ import java.util.*
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
+    private val notatPDFGenerator: NotatPDFGenerator
 ) {
 
     private companion object {
@@ -86,6 +88,7 @@ class JournalpostService(
     }
 
     internal suspend fun opprettJournalpost(innloggetBrukerIdentitetsnumer: String, nyJournalpost: NyJournalpost): JournalPostResponse {
+        val notatPdf = notatPDFGenerator.genererPDF(nyJournalpost)
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = UUID.randomUUID().toString(),
             tittel = nyJournalpost.tittel,
@@ -99,7 +102,7 @@ class JournalpostService(
             brukerIdent = nyJournalpost.søkerIdentitetsnummer,
             avsenderNavn = innloggetBrukerIdentitetsnumer,
             tilleggsopplysninger = listOf(),
-            pdf = "lorem ipsum".toByteArray(),
+            pdf = notatPdf,
             json = JSONObject(nyJournalpost)
         )
 
