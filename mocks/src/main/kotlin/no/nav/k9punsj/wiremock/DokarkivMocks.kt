@@ -9,7 +9,7 @@ private const val path = "/dokarkiv-mock"
 fun WireMockServer.getDokarkivBaseUrl() = baseUrl() + path
 
 fun WireMockServer.stubOpprettingAvJournalpost(
-    responsStatus: Int = 200
+    responsStatus: Int = 201
 ) : WireMockServer{
     WireMock.stubFor(
         WireMock.post(
