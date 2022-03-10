@@ -10,13 +10,13 @@ import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,6 +33,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -116,7 +117,7 @@ class DokarkivGateway(
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(journalpostRequest)
+            .bodyValue(journalpostRequest.dokarkivPayload())
             .retrieve()
             .onStatus(
                 { status: HttpStatus -> status.isError },
@@ -219,52 +220,99 @@ class DokarkivGateway(
 data class JournalPostResponse(val journalpostId: String)
 
 data class JournalPostRequest(
-    val journalpostType: JournalpostType = JournalpostType.NOTAT,
-    val kanal: DokarkivKanal = DokarkivKanal.INGEN_DISTRIBUSJON,
-    val tema: Tema = Tema.OMS,
-    val eksternReferanseId: String,
-    val tittel: String,
-    val journalfoerendeEnhet: String = "9999", // TODO: 07/03/2022 Hvilket journalfoerendeEnhet gjelder her?
-    val brevkode: String,
-    val sak: DokarkivSak,
-    val bruker: DokarkivBruker,
-    val avsenderMottaker: DokarkivAvsenderMottaker,
-    val dokumenter: List<DokarkivDokument>,
-    val tilleggsopplysninger: List<Tilleggsopplysning>
-)
+    internal val eksternReferanseId: String,
+    internal val tittel: String,
+    internal val brevkode: String,
+    internal val tema: String,
+    internal val kanal: Kanal,
+    internal val journalposttype: JournalpostType,
+    internal val fagsystem: FagsakSystem,
+    internal val sakstype: SaksType,
+    internal val saksnummer: String,
+    internal val brukerIdent: String,
+    internal val avsenderIdent: String,
+    internal val tilleggsopplysninger: List<Tilleggsopplysning>,
+    internal val pdf: ByteArray,
+    internal val json: JSONObject
+) {
+    internal fun dokarkivPayload(): String {
+        @Language("JSON")
+        val json = """
+            {
+              "eksternReferanseId": "$eksternReferanseId",
+              "tittel": "$tittel",
+              "avsenderMottaker": {
+                "id": "$avsenderIdent",
+                "idType": "FNR"
+              },
+              "bruker": {
+                "id": "$brukerIdent",
+                "idType": "FNR"
+              },
+              "sak": {
+                "sakstype": "$sakstype",
+                "fagsakId": "$saksnummer",
+                "fagsaksystem": "${fagsystem.name}"
+              },
+              "dokumenter": [{
+                "tittel": "$tittel",
+                "brevkode": "$brevkode",
+                "dokumentVarianter": [{
+                  "filtype": "PDFA",
+                  "variantformat": "ARKIV",
+                  "fysiskDokument": "${pdf.base64()}"
+                },{
+                  "filtype": "JSON",
+                  "variantformat": "ORIGINAL",
+                  "fysiskDokument": "${json.base64()}"
+                }]
+              }],
+              "tema": "$tema",
+              "journalposttype": "$journalposttype",
+              "kanal": "$kanal",
+              "journalfoerendeEnhet": "9999"
+            }
+        """.trimIndent()
+        return json
+    }
+
+    private companion object {
+        private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)
+        private fun JSONObject.base64() = this.toString().toByteArray().base64()
+    }
+}
 
 data class Tilleggsopplysning(
     val nokkel: String,
     val verdi: String
 )
 
-data class DokarkivSak(
+data class Sak(
     val fagsakId: String,
     val fagsakSystem: FagsakSystem = FagsakSystem.K9,
-    val sakstype: DokarkivSaksType
+    val sakstype: SaksType
 )
 
 data class DokarkivDokument(
     val tittel: String,
     val brevkode: String? = null, // Eller brevkode + dokumentkategori
-    val dokumentkategori: String? = null,
-    val dokumentVarianter: List<DokarkivDokumentVariant>
+    val dokumentVarianter: List<DokumentVariant>
 )
 
-data class DokarkivDokumentVariant(
-    val filtype: DokarkivArkivFilType,
-    val variantformat: DokarkivVariantFormat,
+data class DokumentVariant(
+    val filtype: FilType,
+    val variantformat: VariantFormat,
     val fysiskDokument: ByteArray
 )
 
-data class DokarkivAvsenderMottaker(val id: String, val idType: DokarkivIDType, val navn: String? = null)
-data class DokarkivBruker(val id: String, val idType: DokarkivIDType)
+data class AvsenderMottaker(val id: String, val idType: IdType, val navn: String? = null)
+data class Bruker(val id: String, val idType: IdType)
 
-enum class DokarkivIDType { FNR }
-enum class DokarkivArkivFilType { PDFA, JSON }
-enum class DokarkivVariantFormat { ORIGINAL, ARKIV }
+enum class IdType { FNR }
+enum class FilType { PDFA, JSON }
+enum class VariantFormat { ORIGINAL, ARKIV }
 enum class Tema { OMS }
 enum class JournalpostType { NOTAT }
 enum class FagsakSystem { K9 }
-enum class DokarkivSaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
-enum class DokarkivKanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }
+enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+enum class Kanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }

@@ -8,12 +8,11 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 
 @Service
@@ -88,19 +87,20 @@ class JournalpostService(
 
     internal suspend fun opprettJournalpost(innloggetBrukerIdentitetsnumer: String, nyJournalpost: NyJournalpost): JournalPostResponse {
         val journalPostRequest = JournalPostRequest(
-            eksternReferanseId = UUID.randomUUID().toString(), // TODO: 07/03/2022 Hva skal vi bruke som unik id her?
+            eksternReferanseId = UUID.randomUUID().toString(),
             tittel = nyJournalpost.tittel,
-            brevkode = "K9_PUNSJ_INNSENDING", // TODO: 07/03/2022 Utled hvilket brevkode vi skal journalføre på.
-            sak = DokarkivSak(fagsakId = nyJournalpost.fagsakId, sakstype = DokarkivSaksType.FAGSAK),
-            bruker = DokarkivBruker(id = nyJournalpost.søkerIdentitetsnummer, idType = DokarkivIDType.FNR),
-            avsenderMottaker = DokarkivAvsenderMottaker(
-                id = innloggetBrukerIdentitetsnumer,
-                idType = DokarkivIDType.FNR
-            ),
-            dokumenter = listOf(),
-            tilleggsopplysninger = listOf(
-                Tilleggsopplysning(nokkel = "inneholderSensitivePersonopplysninger", verdi = "${nyJournalpost.inneholderSensitivePersonopplysninger}")
-            )
+            brevkode = "K9_PUNSJ_INNSENDING",
+            tema = "OMS",
+            kanal = Kanal.INGEN_DISTRIBUSJON,
+            journalposttype = JournalpostType.NOTAT,
+            fagsystem = FagsakSystem.K9,
+            sakstype = SaksType.FAGSAK,
+            saksnummer = nyJournalpost.fagsakId,
+            brukerIdent = nyJournalpost.søkerIdentitetsnummer,
+            avsenderIdent = innloggetBrukerIdentitetsnumer,
+            tilleggsopplysninger = listOf(),
+            pdf = "lorem ipsum".toByteArray(),
+            json = JSONObject(nyJournalpost)
         )
 
         return dokarkivGateway.opprettJournalpost(journalPostRequest)
