@@ -97,7 +97,7 @@ class JournalpostService(
             sakstype = SaksType.FAGSAK,
             saksnummer = nyJournalpost.fagsakId,
             brukerIdent = nyJournalpost.søkerIdentitetsnummer,
-            avsenderIdent = innloggetBrukerIdentitetsnumer,
+            avsenderNavn = innloggetBrukerIdentitetsnumer,
             tilleggsopplysninger = listOf(),
             pdf = "lorem ipsum".toByteArray(),
             json = JSONObject(nyJournalpost)

@@ -230,7 +230,7 @@ data class JournalPostRequest(
     internal val sakstype: SaksType,
     internal val saksnummer: String,
     internal val brukerIdent: String,
-    internal val avsenderIdent: String,
+    internal val avsenderNavn: String,
     internal val tilleggsopplysninger: List<Tilleggsopplysning>,
     internal val pdf: ByteArray,
     internal val json: JSONObject
@@ -242,8 +242,7 @@ data class JournalPostRequest(
               "eksternReferanseId": "$eksternReferanseId",
               "tittel": "$tittel",
               "avsenderMottaker": {
-                "id": "$avsenderIdent",
-                "idType": "FNR"
+                "navn": "$avsenderNavn"
               },
               "bruker": {
                 "id": "$brukerIdent",

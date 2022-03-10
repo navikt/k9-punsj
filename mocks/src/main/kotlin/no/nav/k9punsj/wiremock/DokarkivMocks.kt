@@ -27,8 +27,7 @@ fun WireMockServer.stubOpprettingAvJournalpost(
             .withRequestBody(WireMock.matchingJsonPath("$.sak.sakstype", WireMock.matching("FAGSAK|GENERELL_SAK|ARKIVSAK")))
             .withRequestBody(WireMock.matchingJsonPath("$.bruker.id", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.bruker.idType", WireMock.equalTo("FNR")))
-            .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.id", WireMock.matching(".*")))
-            .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.idType", WireMock.equalTo("FNR")))
+            .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.navn", WireMock.matching(".*")))
             //.withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].nokkel", WireMock.equalTo("inneholderSensitivePersonopplysninger")))
            // .withRequestBody(WireMock.matchingJsonPath("$.tilleggsopplysninger[0].verdi", WireMock.matching("true|false")))
             .willReturn(
