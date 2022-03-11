@@ -1,9 +1,9 @@
 package no.nav.k9punsj.notat
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.rest.web.nyNotat
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.BodyExtractors
+import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
@@ -25,6 +27,9 @@ internal class NotatRoutes(
 
     internal companion object {
         private val logger: Logger = LoggerFactory.getLogger(NotatRoutes::class.java)
+
+        internal suspend fun ServerRequest.nyNotat() =
+            body(BodyExtractors.toMono(NyNotat::class.java)).awaitFirst()
     }
 
     internal object Urls {

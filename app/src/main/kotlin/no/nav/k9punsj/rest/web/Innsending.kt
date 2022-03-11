@@ -105,9 +105,6 @@ internal suspend fun ServerRequest.opprettNy() =
 internal suspend fun ServerRequest.identOgJournalpost() =
     body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
 
-internal suspend fun ServerRequest.nyNotat() =
-    body(BodyExtractors.toMono(NyNotat::class.java)).awaitFirst()
-
 internal suspend fun ServerRequest.søkUferdigJournalposter() =
     body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
