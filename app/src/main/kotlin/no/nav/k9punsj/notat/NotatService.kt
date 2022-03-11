@@ -1,10 +1,11 @@
 package no.nav.k9punsj.notat
 
 import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.*
 import org.json.JSONObject
 import org.springframework.stereotype.Service
-import java.util.*
+import kotlin.coroutines.coroutineContext
 
 @Service
 class NotatService(
@@ -20,7 +21,7 @@ class NotatService(
             notatPDFGenerator.genererPDF(notat.mapTilNotatOpplysninger(innloggetBrukerIdent, innloggetBrukerEnhet))
 
         val journalPostRequest = JournalPostRequest(
-            eksternReferanseId = UUID.randomUUID().toString(),
+            eksternReferanseId = coroutineContext.hentCorrelationId(),
             tittel = notat.tittel,
             brevkode = "K9_PUNSJ_INNSENDING",
             tema = Tema.OMS,
