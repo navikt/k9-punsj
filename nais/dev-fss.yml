@@ -111,7 +111,7 @@ spec:
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
     - name: NOTAT_ENABLED
-      value: true
+      value: "true"
 
       # Integrasjoner (Kafka)
       # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los
