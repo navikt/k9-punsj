@@ -87,9 +87,7 @@ class JournalpostService(
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
     }
 
-    internal suspend fun opprettJournalpost(
-        journalPostRequest: JournalPostRequest
-    ): JournalPostResponse {
+    internal suspend fun opprettJournalpost(journalPostRequest: JournalPostRequest): JournalPostResponse {
         return dokarkivGateway.opprettJournalpost(journalPostRequest)
     }
 
