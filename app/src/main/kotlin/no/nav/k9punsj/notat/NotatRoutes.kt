@@ -46,7 +46,7 @@ internal class NotatRoutes(
                 onSuccess = {
                     logger.info("Notat opprettet.")
                     ServerResponse
-                        .created(request.journalpostLocation(it.journalpostId))
+                        .status(HttpStatus.CREATED)
                         .json()
                         .bodyValueAndAwait(it)
                 },
@@ -61,6 +61,3 @@ internal class NotatRoutes(
         }
     }
 }
-
-private fun ServerRequest.journalpostLocation(journalpostId: String): URI =
-    uriBuilder().replacePath("journalpost/$journalpostId").build()
