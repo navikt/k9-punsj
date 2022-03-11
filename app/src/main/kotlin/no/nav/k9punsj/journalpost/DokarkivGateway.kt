@@ -286,11 +286,6 @@ data class JournalPostRequest(
     }
 }
 
-data class Tilleggsopplysning(
-    val nokkel: String,
-    val verdi: String
-)
-
 data class Sak(
     val fagsakId: String,
     val fagsakSystem: FagsakSystem = FagsakSystem.K9,
