@@ -48,7 +48,6 @@ fun WireMockServer.stubJournalføringAvNotat(
                           "journalpostId": "201"
                         }
                     """.trimIndent())
-                    //.withTransformers("dokarkiv")
             )
     )
     return this
