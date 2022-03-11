@@ -4,7 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.NorskIdent
-import no.nav.k9punsj.journalpost.NyNotat
+import no.nav.k9punsj.notat.NyNotat
 import no.nav.k9punsj.rest.web.dto.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors

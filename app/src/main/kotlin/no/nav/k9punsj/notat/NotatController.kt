@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.journalpost.NyNotat
 
 @RestController
 @SecurityScheme(

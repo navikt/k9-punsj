@@ -18,8 +18,7 @@ import java.time.*
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
-    private val dokarkivGateway: DokarkivGateway,
-    private val notatPDFGenerator: NotatPDFGenerator
+    private val dokarkivGateway: DokarkivGateway
 ) {
 
     private companion object {
@@ -209,14 +208,6 @@ data class VentDto(
 
 data class DokumentInfo(
     val dokumentId: DokumentId,
-)
-
-data class NyNotat(
-    val søkerIdentitetsnummer: String,
-    val søkerNavn: String,
-    val fagsakId: String,
-    val tittel: String,
-    val notat: String
 )
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
