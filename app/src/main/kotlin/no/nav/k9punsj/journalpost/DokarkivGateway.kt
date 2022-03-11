@@ -108,8 +108,6 @@ class DokarkivGateway(
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
-        logger.info("Request body: {}", journalpostRequest)
-
         val response = client
             .post()
             .uri(URI.create(opprettJournalpostUrl))
@@ -133,9 +131,7 @@ class DokarkivGateway(
             .awaitFirst()
 
         if (response.statusCode == HttpStatus.CREATED && response.body != null) {
-            val journalPostResponse = response.body!!
-            logger.info("Journalpost response: {}", journalPostResponse)
-            return journalPostResponse
+            return response.body!!
         }
 
         throw IllegalStateException("Feilet med å opprette journalpost")
@@ -282,7 +278,7 @@ data class JournalPostRequest(
     }
 
     override fun toString(): String {
-        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='$brukerIdent', avsenderNavn='$avsenderNavn', tilleggsopplysninger=$tilleggsopplysninger, json=$json)"
+        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='***', avsenderNavn='***', tilleggsopplysninger=$tilleggsopplysninger, json=$json)"
     }
 
 
