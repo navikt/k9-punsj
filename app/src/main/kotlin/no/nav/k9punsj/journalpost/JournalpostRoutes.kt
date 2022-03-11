@@ -18,8 +18,9 @@ import no.nav.k9punsj.rest.eksternt.pdl.PdlService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.eksternt.punsjbollen.somPunsjbolleRuting
-import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.rest.web.PunsjBolleDto
+import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.rest.web.dto.IdentDto
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.identOgJournalpost
@@ -78,7 +79,6 @@ internal class JournalpostRoutes(
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
-        internal const val OpprettJournalpost = "/journalpost/opprett"
 
 
         //for drift i prod
