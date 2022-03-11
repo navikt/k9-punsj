@@ -231,7 +231,6 @@ data class JournalPostRequest(
     internal val saksnummer: String,
     internal val brukerIdent: String,
     internal val avsenderNavn: String,
-    internal val tilleggsopplysninger: List<Tilleggsopplysning>,
     internal val pdf: ByteArray,
     internal val json: JSONObject
 ) {
@@ -270,15 +269,14 @@ data class JournalPostRequest(
               "tema": "$tema",
               "journalposttype": "$journalposttype",
               "kanal": "$kanal",
-              "journalfoerendeEnhet": "9999",
-              "tilleggsopplysninger": ${JSONArray(tilleggsopplysninger)}
+              "journalfoerendeEnhet": "9999"
             }
         """.trimIndent()
         return json
     }
 
     override fun toString(): String {
-        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='***', avsenderNavn='***', tilleggsopplysninger=$tilleggsopplysninger, json=$json)"
+        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='***', avsenderNavn='***', json=$json)"
     }
 
 

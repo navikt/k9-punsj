@@ -33,7 +33,6 @@ class NotatService(
             saksnummer = notat.fagsakId,
             brukerIdent = notat.søkerIdentitetsnummer,
             avsenderNavn = innloggetBrukerIdent,
-            tilleggsopplysninger = listOf(),
             pdf = notatPdf,
             json = JSONObject(notat)
         )
