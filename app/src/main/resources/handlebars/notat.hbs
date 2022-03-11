@@ -16,8 +16,19 @@
     <span id="header"></span>
 
     <h1>{{ tittel }} (saknr. {{ fagsakId }})</h1>
-    <p><strong>Hvem saken gjelder: </strong> {{søkerNavn}} (fnr. {{ søkerIdentitetsnummer }})</p>
-    <p><strong>Saksbehandler: </strong> {{saksbehandlerNavn}} (enhet {{ saksbehandlerEnhet }})</p>
+    <div class="søker" id="søker">
+        <p>Hvem saken gjelder</p>
+        <p class="navn">
+            {{søkerNavn}} (fnr. {{ søkerIdentitetsnummer }})
+        </p>
+    </div>
+    <div class="saksbehandler" id="saksbehandler">
+        <p>Saksbehandler:</p>
+        <p class="navn">
+            {{saksbehandlerNavn}} (enhet {{ saksbehandlerEnhet }})
+        </p>
+    </div>
+
     <p><strong>Notat:</strong></p>
     <div class="fritekst">
         <p class="fritekst_textarea">{{ notat }}</p>
