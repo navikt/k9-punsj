@@ -2,7 +2,6 @@ package no.nav.k9punsj.wiremock
 
 import com.github.tomakehurst.wiremock.core.Options
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
-import no.nav.k9punsj.wiremock.transformers.DokarkivResponseTransformer
 
 fun initWireMock(
     port: Int,
@@ -13,7 +12,6 @@ fun initWireMock(
     .withNaisStsSupport()
     .wireMockConfiguration {
         it.withRootDirectory(rootDirectory)
-        it.extensions(DokarkivResponseTransformer::class.java)
         it.useChunkedTransferEncoding(Options.ChunkedEncodingPolicy.NEVER)
     }
     .build()
