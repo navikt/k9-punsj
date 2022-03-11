@@ -13,6 +13,7 @@ import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -162,6 +163,36 @@ class SafGateway(
         )
     }
 
+    internal suspend fun hentSakerFraSaf(søkerIdent: String) : JSONArray? {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = henteJournalpostScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val body = objectMapper().writeValueAsString(SafDtos.SakerQuery(søkerIdent))
+        val (request, response, result) = GraphQlUrl
+            .httpPost()
+            .body(body)
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
+            ).awaitStringResponseResult()
+
+        return result.fold(
+            success = {
+                it.safDataList()
+            },
+            failure = {
+                håndterFeil(it, request, response)
+                null
+            }
+        )
+    }
+
     internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -215,6 +246,7 @@ class SafGateway(
     }
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
+    internal fun String.safDataList() = JSONObject(this).getJSONArray("data")
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
