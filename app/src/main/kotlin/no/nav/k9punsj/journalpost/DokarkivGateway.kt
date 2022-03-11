@@ -16,18 +16,25 @@ import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostStatus.Companion.somJour
 import no.nav.k9punsj.journalpost.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.intellij.lang.annotations.Language
+import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -94,8 +101,44 @@ class DokarkivGateway(
         return awaitFirst.statusCode.value()
     }
 
+    internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val response = client
+            .post()
+            .uri(URI.create(opprettJournalpostUrl))
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(journalpostRequest.dokarkivPayload())
+            .retrieve()
+            .onStatus(
+                { status: HttpStatus -> status.isError },
+                { errorResponse: ClientResponse ->
+                    errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
+                        logger.error("Feilet med å opprette journalpost. Feil: {}", entity.toString())
+                    }
+                    errorResponse.createException()
+                }
+            )
+            .toEntity(JournalPostResponse::class.java)
+            .awaitFirst()
+
+        if (response.statusCode == HttpStatus.CREATED && response.body != null) {
+            return response.body!!
+        }
+
+        throw IllegalStateException("Feilet med å opprette journalpost")
+    }
+
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(DokarkivGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
@@ -117,6 +160,7 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
+    private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
 
     //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
@@ -170,5 +214,87 @@ class DokarkivGateway(
                     bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
                 )
             }
-
 }
+
+data class JournalPostResponse(val journalpostId: String)
+
+data class JournalPostRequest(
+    internal val eksternReferanseId: String,
+    internal val tittel: String,
+    internal val brevkode: String,
+    internal val tema: Tema,
+    internal val kanal: Kanal,
+    internal val journalposttype: JournalpostType,
+    internal val dokumentkategori: DokumentKategori,
+    internal val fagsystem: FagsakSystem,
+    internal val sakstype: SaksType,
+    internal val saksnummer: String,
+    internal val brukerIdent: String,
+    internal val avsenderNavn: String,
+    internal val pdf: ByteArray,
+    internal val json: JSONObject
+) {
+    internal fun dokarkivPayload(): String {
+        @Language("JSON")
+        val json = """
+            {
+              "eksternReferanseId": "$eksternReferanseId",
+              "tittel": "$tittel",
+              "avsenderMottaker": {
+                "navn": "$avsenderNavn"
+              },
+              "bruker": {
+                "id": "$brukerIdent",
+                "idType": "FNR"
+              },
+              "sak": {
+                "sakstype": "$sakstype",
+                "fagsakId": "$saksnummer",
+                "fagsaksystem": "${fagsystem.name}"
+              },
+              "dokumenter": [{
+                "tittel": "$tittel",
+                "brevkode": "$brevkode",
+                "dokumentkategori": "$dokumentkategori",
+                "dokumentVarianter": [{
+                  "filtype": "PDFA",
+                  "variantformat": "ARKIV",
+                  "fysiskDokument": "${pdf.base64()}"
+                },{
+                  "filtype": "JSON",
+                  "variantformat": "ORIGINAL",
+                  "fysiskDokument": "${json.base64()}"
+                }]
+              }],
+              "tema": "$tema",
+              "journalposttype": "$journalposttype",
+              "kanal": "$kanal",
+              "journalfoerendeEnhet": "9999"
+            }
+        """.trimIndent()
+        return json
+    }
+
+    override fun toString(): String {
+        return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='***', avsenderNavn='***', json=$json)"
+    }
+
+
+    private companion object {
+        private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)
+        private fun JSONObject.base64() = this.toString().toByteArray().base64()
+    }
+}
+
+data class Sak(
+    val fagsakId: String,
+    val fagsakSystem: FagsakSystem = FagsakSystem.K9,
+    val sakstype: SaksType
+)
+
+enum class Tema { OMS }
+enum class JournalpostType { NOTAT }
+enum class DokumentKategori { IS }
+enum class FagsakSystem { K9 }
+enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+enum class Kanal { NAV_NO, ALTINN, EESSI, INGEN_DISTRIBUSJON }

@@ -128,3 +128,6 @@ spec:
       # topic (p:k9-punsj -> c:k9-formidling) for å opprette en dokumentbestilling
     - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
       value: "privat-k9punsj-aksjonspunkthendelse-v1"
+
+    - name: NOTAT_ENABLED
+      value: "false"

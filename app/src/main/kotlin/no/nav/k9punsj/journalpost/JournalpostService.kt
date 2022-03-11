@@ -7,13 +7,12 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.notat.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 
 @Service
 class JournalpostService(
@@ -40,10 +39,14 @@ class JournalpostService(
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
             if (!parsedJournalpost.harTilgang) {
-                logger.warn("Saksbehandler har ikke tilgang. ${
-                    safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
-                        bruker = SafDtos.Bruker(null, null))
-                }")
+                logger.warn(
+                    "Saksbehandler har ikke tilgang. ${
+                        safJournalpost.copy(
+                            avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
+                            bruker = SafDtos.Bruker(null, null)
+                        )
+                    }"
+                )
                 throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             } else {
                 val (norskIdent, aktørId) = when {
@@ -64,8 +67,10 @@ class JournalpostService(
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
                     kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also {
                         if (!it) {
-                            logger.info("Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
-                                keyValue("journalpost_id", journalpostId))
+                            logger.info(
+                                "Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
+                                keyValue("journalpost_id", journalpostId)
+                            )
                         }
                     },
                     journalpostStatus = safJournalpost.journalstatus!!
@@ -80,6 +85,10 @@ class JournalpostService(
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
+    }
+
+    internal suspend fun opprettJournalpost(journalPostRequest: JournalPostRequest): JournalPostResponse {
+        return dokarkivGateway.opprettJournalpost(journalPostRequest)
     }
 
     private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {
