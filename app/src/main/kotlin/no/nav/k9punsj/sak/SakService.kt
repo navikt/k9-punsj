@@ -11,9 +11,15 @@ class SakService(
 ) {
 
     suspend fun hentSaker(søkerIdent: String): List<SakInfo> {
-        val hentSakerFraSaf: JSONArray? = safGateway.hentSakerFraSaf(søkerIdent)
-        return hentSakerFraSaf?.mapIndexed { index: Int, _ -> hentSakerFraSaf.getJSONObject(index).somSakInfo() }
-            ?: listOf()
+        val sakerFraSaf: JSONArray? = safGateway.hentSakerFraSaf(søkerIdent)
+        return when {
+            sakerFraSaf != null -> {
+                sakerFraSaf
+                    .mapIndexed { index: Int, _ -> sakerFraSaf.getJSONObject(index).somSakInfo() }
+                    .filter { "OMS" === it.tema }
+            }
+            else -> listOf()
+        }
     }
 
     fun JSONObject.somSakInfo(): SakInfo {

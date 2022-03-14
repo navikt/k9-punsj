@@ -56,7 +56,7 @@ class SafGateway(
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
 
-    private val GraphQlUrl : String = "$baseUrl/graphql"
+    private val GraphQlUrl: String = "$baseUrl/graphql"
 
     private val client = WebClient
         .builder()
@@ -133,7 +133,7 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentDataFraSaf(journalpostId: String) : JSONObject? {
+    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -163,7 +163,7 @@ class SafGateway(
         )
     }
 
-    internal suspend fun hentSakerFraSaf(søkerIdent: String) : JSONArray? {
+    internal suspend fun hentSakerFraSaf(søkerIdent: String): JSONArray? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -185,7 +185,7 @@ class SafGateway(
         return result.fold(
             success = {
                 logger.info("hentSaker respons: {}", it)
-                it.safDataList()
+                it.saker()
             },
             failure = {
                 håndterFeil(it, request, response)
@@ -241,13 +241,13 @@ class SafGateway(
             404 -> throw IkkeFunnet(feil)
             500 -> throw InternalServerErrorDoarkiv(feil)
             else -> {
-                throw IllegalStateException("${response.statusCode} -> "+ feil)
+                throw IllegalStateException("${response.statusCode} -> " + feil)
             }
         }
     }
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
-    internal fun String.safDataList() = JSONObject(this).getJSONArray("data")
+    internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
