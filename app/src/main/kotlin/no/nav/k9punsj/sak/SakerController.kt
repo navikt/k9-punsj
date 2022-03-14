@@ -37,6 +37,5 @@ internal class SakerController {
         summary = "Henter saker",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun hentSaker(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
-    }
+    fun hentSaker(@RequestHeader("X-Nav-NorskIdent") norskIdent: String): List<SakService.SakInfo> = listOf()
 }
