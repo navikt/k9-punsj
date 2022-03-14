@@ -21,6 +21,7 @@ private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::cl
 private const val RequestIdHeader = "X-Request-ID"
 private const val RequestIdKey = "request_id"
 private const val CorrelationIdKey = "correlation_id"
+private const val CallIdKey = "callId"
 private const val AuthenticationKey = "authentication"
 
 
@@ -29,42 +30,65 @@ private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
     val attributter: MutableMap<String, Any> = mutableMapOf()
 }
 
-private fun CoroutineContext.requestContext() = get(CoroutineRequestContext.Key) ?: throw IllegalStateException("Request Context ikke satt.")
-internal fun CoroutineContext.hentAttributt(key: String) : Any? = requestContext().attributter.getOrDefault(key, null)
-private fun CoroutineContext.settCorrelationId(correlationId: String) = requestContext().attributter.put(CorrelationIdKey, correlationId)
-internal fun CoroutineContext.hentCorrelationId() : CorrelationId = hentAttributt(CorrelationIdKey) as? CorrelationId ?: throw IllegalStateException("$CorrelationIdKey ikke satt")
-private fun CoroutineContext.settAuthentication(authorizationHeader: String) = requestContext().attributter.put(AuthenticationKey, Authentication(authorizationHeader))
-internal fun CoroutineContext.hentAuthentication() : Authentication = hentAttributt(AuthenticationKey) as? Authentication ?: throw IllegalStateException("$AuthenticationKey ikke satt")
+private fun CoroutineContext.requestContext() =
+    get(CoroutineRequestContext.Key) ?: throw IllegalStateException("Request Context ikke satt.")
+
+internal fun CoroutineContext.hentAttributt(key: String): Any? = requestContext().attributter.getOrDefault(key, null)
+private fun CoroutineContext.settCorrelationId(correlationId: String) =
+    requestContext().attributter.put(CorrelationIdKey, correlationId)
+
+private fun CoroutineContext.settCallId(callId: String) =
+    requestContext().attributter.put(CallIdKey, callId)
+
+internal fun CoroutineContext.hentCallId(): String =
+    hentAttributt(CallIdKey) as? String ?: throw IllegalStateException("$CallIdKey ikke satt")
+
+internal fun CoroutineContext.hentCorrelationId(): CorrelationId =
+    hentAttributt(CorrelationIdKey) as? CorrelationId ?: throw IllegalStateException("$CorrelationIdKey ikke satt")
+
+private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
+    requestContext().attributter.put(AuthenticationKey, Authentication(authorizationHeader))
+
+internal fun CoroutineContext.hentAuthentication(): Authentication =
+    hentAttributt(AuthenticationKey) as? Authentication ?: throw IllegalStateException("$AuthenticationKey ikke satt")
 
 internal typealias CorrelationId = String
 
 internal fun K9SakRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
-        jwtToken.containsClaim("sub", "srvk9sak")
+    routes: CoRouterFunctionDsl.() -> Unit
+) = Routes(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
+    jwtToken.containsClaim("sub", "srvk9sak")
 }
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes(authenticationHandler, routes, setOf("azurev2")) { true }
+    routes: CoRouterFunctionDsl.() -> Unit
+) = Routes(authenticationHandler, routes, setOf("azurev2")) { true }
 
 internal fun PublicRoutes(
-    routes : CoRouterFunctionDsl.() -> Unit) = Routes(null, routes, null, null)
+    routes: CoRouterFunctionDsl.() -> Unit
+) = Routes(null, routes, null, null)
 
 private fun Routes(
     authenticationHandler: AuthenticationHandler?,
-    routes : CoRouterFunctionDsl.() -> Unit,
+    routes: CoRouterFunctionDsl.() -> Unit,
     issuerNames: Set<String>?,
     isAccepted: ((jwtToken: JwtToken) -> Boolean)?
 ) = coRouter {
     before { serverRequest ->
         val requestId = serverRequest
-                .headers()
-                .header(RequestIdHeader)
-                .firstOrNull() ?: UUID.randomUUID().toString()
+            .headers()
+            .header(RequestIdHeader)
+            .firstOrNull() ?: UUID.randomUUID().toString()
+        val callId = serverRequest
+            .headers()
+            .header(CallIdKey)
+            .firstOrNull() ?: UUID.randomUUID().toString()
         val correlationId = UUID.randomUUID().toString()
         serverRequest.attributes()[RequestIdKey] = requestId
         serverRequest.attributes()[CorrelationIdKey] = correlationId
+        serverRequest.attributes()[CallIdKey] = callId
         logger.info("-> ${serverRequest.methodName()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
@@ -106,33 +130,37 @@ private fun Routes(
 }
 
 internal suspend fun <T> RequestContext(
-        context: CoroutineContext,
-        serverRequest: ServerRequest,
-        block: suspend CoroutineScope.() -> T
-) : T {
+    context: CoroutineContext,
+    serverRequest: ServerRequest,
+    block: suspend CoroutineScope.() -> T
+): T {
     return withContext(
-            context
+        context
             .plus(MDCContext(serverRequest.contextMap()))
-            .plus(CoroutineRequestContext())) {
+            .plus(CoroutineRequestContext())
+    ) {
         serverRequest.headers().header(HttpHeaders.AUTHORIZATION).firstOrNull()?.apply {
             coroutineContext.settAuthentication(this)
         }
         coroutineContext.settCorrelationId(serverRequest.correlationId())
+        coroutineContext.settCallId(serverRequest.callId())
         block()
     }
 }
 
 private fun ServerRequest.requestId() = attribute(RequestIdKey).get() as String
 private fun ServerRequest.correlationId() = attribute(CorrelationIdKey).get() as String
+private fun ServerRequest.callId() = attribute(CallIdKey).get() as String
 private fun ServerRequest.contextMap() = pathVariables().toMutableMap().apply {
     put(RequestIdKey, requestId())
     put(CorrelationIdKey, correlationId())
+    put(CallIdKey, callId())
 }
 
 data class Authentication(
-        internal val authorizationHeader : String
+    internal val authorizationHeader: String
 ) {
-    private val tokenType : String
+    private val tokenType: String
     internal val accessToken: String
 
     init {
