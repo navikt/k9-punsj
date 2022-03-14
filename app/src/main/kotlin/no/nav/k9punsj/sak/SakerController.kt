@@ -2,6 +2,7 @@ package no.nav.k9punsj.sak
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -29,8 +30,10 @@ internal class SakerController {
                 responseCode = "200",
                 description = "Hvis saker hentes",
                 content = [Content(
-                    schema = Schema(
-                        implementation = SakService.SakInfoDto::class
+                    array = ArraySchema(
+                        schema = Schema(
+                            implementation = SakService.SakInfoDto::class
+                        )
                     )
                 )]
             ),
