@@ -43,16 +43,14 @@ internal object SafDtos {
     internal open class SakerQuery(søkerIdent: String): GraphqlQuery(
         query =
         """
-            {
-              query {
-                saker(brukerId: "$søkerIdent") {
-                    fagsakId
-                    fagsaksystem
-                    sakstype
-                    tema
-                }
-              }
+          query {
+            saker(brukerId: "$søkerIdent") {
+                fagsakId
+                fagsaksystem
+                sakstype
+                tema
             }
+          }
         """.trimIndent(),
         variables = null
     )
