@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
-import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @SecurityScheme(
@@ -22,7 +24,7 @@ internal class SakerController {
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "201",
+                responseCode = "200",
                 description = "Hvis saker hentes",
             ),
             ApiResponse(
@@ -35,8 +37,6 @@ internal class SakerController {
         summary = "Henter saker",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun hentSaker(
-        @RequestBody body: SakerRoutes.HentSakerRequest,
-    ) {
+    fun hentSaker(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
     }
 }
