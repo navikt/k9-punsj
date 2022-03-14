@@ -2,6 +2,8 @@ package no.nav.k9punsj.sak
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -26,6 +28,11 @@ internal class SakerController {
             ApiResponse(
                 responseCode = "200",
                 description = "Hvis saker hentes",
+                content = [Content(
+                    schema = Schema(
+                        implementation = SakService.SakInfo::class
+                    )
+                )]
             ),
             ApiResponse(
                 responseCode = "500",
@@ -37,5 +44,6 @@ internal class SakerController {
         summary = "Henter saker",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun hentSaker(@RequestHeader("X-Nav-NorskIdent") norskIdent: String): List<SakService.SakInfo> = listOf()
+    fun hentSaker(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
+    }
 }
