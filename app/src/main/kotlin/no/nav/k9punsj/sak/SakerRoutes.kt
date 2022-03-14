@@ -1,9 +1,9 @@
 package no.nav.k9punsj.sak
 
-import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.rest.web.InnloggetUtils
 import no.nav.k9punsj.rest.web.norskIdent
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger
@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
-import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
@@ -23,6 +21,7 @@ import kotlin.coroutines.coroutineContext
 internal class SakerRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val sakService: SakService,
+    private val innloggetUtils: InnloggetUtils,
     @Value("\${SAKER_ENABLED}") private val sakerEnabled: Boolean
 ) {
 
@@ -37,33 +36,36 @@ internal class SakerRoutes(
     @Bean
     fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         if (sakerEnabled) {
-            POST("/api${Urls.HentSaker}") { request ->
-                RequestContext(coroutineContext, request) {
-                    val norskIdent = request.norskIdent()
-
-                    // TODO: 14/03/2022 Sjekk at saksbehandler har tilgang til søkerIdent.
-
-                    return@RequestContext kotlin.runCatching {
-                        logger.info("Henter fagsaker...")
-                        sakService.hentSaker(norskIdent)
-
+            GET("/api${Urls.HentSaker}") { request ->
+                val norskIdent = request.norskIdent()
+                val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
+                return@GET when {
+                    tilganNektet != null -> return@GET tilganNektet
+                    else -> {
+                        RequestContext(coroutineContext, request) {
+                            val norskIdent = request.norskIdent()
+                            return@RequestContext kotlin.runCatching {
+                                logger.info("Henter fagsaker...")
+                                sakService.hentSaker(norskIdent)
+                            }
+                        }.fold(
+                            onSuccess = {
+                                logger.info("Saker hentet")
+                                ServerResponse
+                                    .status(HttpStatus.OK)
+                                    .json()
+                                    .bodyValueAndAwait(it)
+                            },
+                            onFailure = {
+                                logger.error("Feilet med å hente saker.", it)
+                                ServerResponse
+                                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .json()
+                                    .bodyValueAndAwait(OasFeil(it.message))
+                            }
+                        )
                     }
-                }.fold(
-                    onSuccess = {
-                        logger.info("Saker hentet")
-                        ServerResponse
-                            .status(HttpStatus.OK)
-                            .json()
-                            .bodyValueAndAwait(it)
-                    },
-                    onFailure = {
-                        logger.error("Feilet med å hente saker.", it)
-                        ServerResponse
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .json()
-                            .bodyValueAndAwait(OasFeil(it.message))
-                    }
-                )
+                }
             }
         } else {
             throw NotImplementedError("Ikke aktivert")
