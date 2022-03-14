@@ -44,7 +44,7 @@ internal object SafDtos {
         query =
         """
           query {
-            saker(brukerId: "$søkerIdent") {
+            saker(brukerId: {id: "$søkerIdent", type: "FNR"}) {
                 fagsakId
                 fagsaksystem
                 sakstype
@@ -143,7 +143,8 @@ internal object SafDtos {
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,
         val relevanteDatoer: List<RelevantDato>,
-        private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()) {
+        private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()
+    ) {
         val k9Kilde = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.kilde" }?.verdi
         val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
         private val erDigital = "DIGITAL" == k9Kilde
@@ -181,10 +182,12 @@ internal object SafDtos {
 
     data class JournalpostResponseWrapper(
         val data: JournalpostResponse?,
-        val errors: List<Any>?) {
+        val errors: List<Any>?
+    ) {
         private fun inneholderError(error: String) = errors?.toString()?.contains(error) ?: false
         internal val journalpostFinnesIkke = inneholderError("ikke funnet") || inneholderError("not_found")
         internal val manglerTilgang = inneholderError("har ikke tilgang")
-        internal val manglerTilgangPåGrunnAvStatus = manglerTilgang && inneholderError("på grunn av journalposten sin status")
+        internal val manglerTilgangPåGrunnAvStatus =
+            manglerTilgang && inneholderError("på grunn av journalposten sin status")
     }
 }
