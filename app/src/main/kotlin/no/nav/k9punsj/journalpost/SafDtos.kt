@@ -44,7 +44,7 @@ internal object SafDtos {
         query =
         """
           query {
-            saker(brukerId: {id: "$søkerIdent", type: "FNR"}) {
+            saker(brukerId: {id: "$søkerIdent", type: FNR}) {
                 fagsakId
                 fagsaksystem
                 sakstype
