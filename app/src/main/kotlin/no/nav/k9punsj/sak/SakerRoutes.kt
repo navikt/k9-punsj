@@ -37,12 +37,13 @@ internal class SakerRoutes(
     fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         if (sakerEnabled) {
             GET("/api${Urls.HentSaker}") { request ->
-                val norskIdent = request.norskIdent()
-                val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
-                return@GET when {
-                    tilganNektet != null -> return@GET tilganNektet
-                    else -> {
-                        RequestContext(coroutineContext, request) {
+                RequestContext(coroutineContext, request) {
+                    val norskIdent = request.norskIdent()
+                    val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
+                    if (tilganNektet != null) {
+                        return@RequestContext tilganNektet
+                    } else {
+                        RequestContext(kotlin.coroutines.coroutineContext, request) {
                             val norskIdent = request.norskIdent()
                             return@RequestContext kotlin.runCatching {
                                 logger.info("Henter fagsaker...")
