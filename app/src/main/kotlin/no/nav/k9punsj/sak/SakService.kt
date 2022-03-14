@@ -16,7 +16,7 @@ class SakService(
         private val logger = LoggerFactory.getLogger(SakService::class.java)
     }
 
-    suspend fun hentSaker(søkerIdent: String): List<SakInfo> {
+    suspend fun hentSaker(søkerIdent: String): List<SakInfoDto> {
         val sakerFraSaf = safGateway.hentSakerFraSaf(søkerIdent)
         return when {
             sakerFraSaf != null -> sakerFraSaf.somSakInfo()
@@ -25,7 +25,7 @@ class SakService(
         }
     }
 
-    private fun JSONArray.somSakInfo(): List<SakInfo> {
+    private fun JSONArray.somSakInfo(): List<SakInfoDto> {
         return try {
             logger.info("hentSaker respons: {}", this)
             jacksonObjectMapper().readValue(this.toString())
@@ -35,7 +35,7 @@ class SakService(
         }
     }
 
-    data class SakInfo(
+    data class SakInfoDto(
         val fagsakId: String,
         val fagsaksystem: String,
         val sakstype: String,

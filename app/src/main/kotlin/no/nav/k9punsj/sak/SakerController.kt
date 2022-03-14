@@ -30,7 +30,7 @@ internal class SakerController {
                 description = "Hvis saker hentes",
                 content = [Content(
                     schema = Schema(
-                        implementation = SakService.SakInfo::class
+                        implementation = SakService.SakInfoDto::class
                     )
                 )]
             ),
