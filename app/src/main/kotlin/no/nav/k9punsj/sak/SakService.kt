@@ -1,8 +1,9 @@
 package no.nav.k9punsj.sak
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9punsj.journalpost.SafGateway
 import org.json.JSONArray
-import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -16,33 +17,21 @@ class SakService(
     }
 
     suspend fun hentSaker(søkerIdent: String): List<SakInfo> {
-        val sakerFraSaf: JSONArray? = safGateway.hentSakerFraSaf(søkerIdent)
+        val sakerFraSaf = safGateway.hentSakerFraSaf(søkerIdent)
         return when {
-            sakerFraSaf != null -> {
-                sakerFraSaf
-                    .mapIndexed { index: Int, it ->
-                        val jsonObject = sakerFraSaf.getJSONObject(index)
-                        logger.info("Mapper jsonObject til sakInfo: {}", jsonObject.toString())
-                        jsonObject.somSakInfo()
-                    }
-                    .filter { "OMS" === it.tema }
-            }
+            sakerFraSaf != null -> sakerFraSaf.somSakInfo()
             else -> listOf()
         }
     }
 
-    fun JSONObject.somSakInfo(): SakInfo {
-        val fagsakId = getString("fagsakId")
-        val fagsaksystem = getString("fagsaksystem")
-        val sakstype = getString("sakstype")
-        val tema = getString("tema")
-
-        return SakInfo(
-            fagsakId = fagsakId,
-            fagsaksystem = fagsaksystem,
-            sakstype = sakstype,
-            tema = tema
-        )
+    private fun JSONArray.somSakInfo(): List<SakInfo> {
+        return try {
+            logger.info("hentSaker respons: {}", this)
+            jacksonObjectMapper().readValue(this.toString())
+        } catch (ex: Throwable) {
+            logger.error("Feilet med å deserialisere saker: {}", ex)
+            throw ex
+        }
     }
 
     data class SakInfo(

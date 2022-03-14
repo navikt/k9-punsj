@@ -184,7 +184,6 @@ class SafGateway(
 
         return result.fold(
             success = {
-                logger.info("hentSaker respons: {}", it)
                 it.saker()
             },
             failure = {
