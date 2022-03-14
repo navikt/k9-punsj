@@ -20,7 +20,7 @@ class SakService(
         val sakerFraSaf = safGateway.hentSakerFraSaf(søkerIdent)
         return when {
             sakerFraSaf != null -> sakerFraSaf.somSakInfo()
-                .filter { "OMS" === it.tema }
+                .filter { "OMS" == it.tema }
             else -> listOf()
         }
     }

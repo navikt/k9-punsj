@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @Tag(name = "Saker", description = "Håndtering av saker")
 internal class SakerController {
-    @PostMapping(SakerRoutes.Urls.HentSaker, produces = ["application/json"])
+    @GetMapping(SakerRoutes.Urls.HentSaker, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
