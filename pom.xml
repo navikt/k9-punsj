@@ -24,7 +24,7 @@
         <kotlinx-coroutines.version>1.6.0</kotlinx-coroutines.version>
         <logback.logstash.version>7.0.1</logback.logstash.version>
         <token-support.version>2.0.10</token-support.version>
-        <dusseldorf-ktor.version>3.1.6.7-f2a96e8</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>3.1.6.7-8665877</dusseldorf-ktor.version>
         <k9-rapid.version>1.20220215091703-a5f112c</k9-rapid.version>
         <k9-sak.version>3.2.54</k9-sak.version>
         <k9-formidling.version>0.0.19</k9-formidling.version>
