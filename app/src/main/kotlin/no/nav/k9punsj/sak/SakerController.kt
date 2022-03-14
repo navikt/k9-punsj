@@ -40,6 +40,10 @@ internal class SakerController {
             ApiResponse(
                 responseCode = "500",
                 description = "Internal server error eller saf har fått Internal server error"
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "Saksbehandler har ikke tilgang til saker for søker."
             )
         ]
     )
