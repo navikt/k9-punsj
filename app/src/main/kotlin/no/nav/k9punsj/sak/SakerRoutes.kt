@@ -45,6 +45,8 @@ internal class SakerRoutes(
                 RequestContext(coroutineContext, request) {
                     val sakerRequest = request.hentSakerRequest()
 
+                    // TODO: 14/03/2022 Sjekk at saksbehandler har tilgang til søkerIdent.
+
                     return@RequestContext kotlin.runCatching {
                         logger.info("Henter fagsaker...")
                         sakService.hentSaker(sakerRequest.søkerIdent)
