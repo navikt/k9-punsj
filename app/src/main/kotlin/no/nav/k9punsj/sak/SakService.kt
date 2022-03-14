@@ -27,7 +27,6 @@ class SakService(
 
     private fun JSONArray.somSakInfo(): List<SakInfoDto> {
         return try {
-            logger.info("hentSaker respons: {}", this)
             jacksonObjectMapper().readValue(this.toString())
         } catch (ex: Throwable) {
             logger.error("Feilet med å deserialisere saker: {}", ex)
