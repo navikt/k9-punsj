@@ -13,6 +13,7 @@ import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -55,7 +56,7 @@ class SafGateway(
         logger.info("HenteDokumentScopes=${henteDokumentScopes.joinToString()}")
     }
 
-    private val GraphQlUrl : String = "$baseUrl/graphql"
+    private val GraphQlUrl: String = "$baseUrl/graphql"
 
     private val client = WebClient
         .builder()
@@ -132,7 +133,7 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentDataFraSaf(journalpostId: String) : JSONObject? {
+    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -154,6 +155,36 @@ class SafGateway(
         return result.fold(
             success = {
                 it.safData()
+            },
+            failure = {
+                håndterFeil(it, request, response)
+                null
+            }
+        )
+    }
+
+    internal suspend fun hentSakerFraSaf(søkerIdent: String): JSONArray? {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = henteJournalpostScopes,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val body = objectMapper().writeValueAsString(SafDtos.SakerQuery(søkerIdent))
+        val (request, response, result) = GraphQlUrl
+            .httpPost()
+            .body(body)
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
+            ).awaitStringResponseResult()
+
+        return result.fold(
+            success = {
+                it.saker()
             },
             failure = {
                 håndterFeil(it, request, response)
@@ -209,12 +240,13 @@ class SafGateway(
             404 -> throw IkkeFunnet(feil)
             500 -> throw InternalServerErrorDoarkiv(feil)
             else -> {
-                throw IllegalStateException("${response.statusCode} -> "+ feil)
+                throw IllegalStateException("${response.statusCode} -> " + feil)
             }
         }
     }
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
+    internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
