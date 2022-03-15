@@ -111,6 +111,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             if (!harTilgang(dto)) {
                 return@RequestContext ikkeTilgang()
             }
+
+            val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
+            if(safJournalpost != null && safJournalpost.journalposttype == "U") {
+                return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
+            }
+
             val ytelseType = journalpost.utledeFagsakYtelseType()
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
@@ -129,7 +135,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
                 return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
             }
-
 
             if (ytelseType != FagsakYtelseType.PLEIEPENGER_SYKT_BARN && ytelseType != FagsakYtelseType.OMSORGSPENGER_KS) {
                 return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${ytelseType.navn} for relaterte journalposter")

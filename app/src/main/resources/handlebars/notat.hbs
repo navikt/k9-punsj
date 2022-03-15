@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="NO">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>Notat - {{tittel}}</title>
+    <meta name="subject" content="Notat - {{ tittel }}"/>
+    <meta name="author" content="nav.no"/>
+    <meta name="description" content="{{ tittel }}"/>
+    {{#block 'style-common' }}
+    {{/block}}
+</head>
+
+<body>
+<div class="innholdscontainer">
+    <span id="header"></span>
+
+    <h1>{{ tittel }} (saknr. {{ fagsakId }})</h1>
+    <div class="søker" id="søker">
+        <p>Hvem saken gjelder</p>
+        <p class="navn">
+            {{søkerNavn}} (fnr. {{ søkerIdentitetsnummer }})
+        </p>
+    </div>
+    <div class="saksbehandler" id="saksbehandler">
+        <p>Saksbehandler:</p>
+        <p class="navn">
+            {{saksbehandlerNavn}} (enhet {{ saksbehandlerEnhet }})
+        </p>
+    </div>
+
+    <p><strong>Notat:</strong></p>
+    <div class="fritekst">
+        <p class="fritekst_textarea">{{ notat }}</p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<p id="footer">
+    <span class="tidspunkt">{{ tidspunkt }}</span>
+    <span class="sidetall">side <span id="pagenumber"></span> av <span id="pagecount"></span></span>
+</p>
+</body>
+
+</html>
