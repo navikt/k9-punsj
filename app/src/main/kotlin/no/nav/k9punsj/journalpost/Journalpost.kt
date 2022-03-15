@@ -43,7 +43,7 @@ fun Journalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = nu
                 type
             }
             no.nav.k9punsj.db.datamodell.FagsakYtelseType.UKJENT.kode == this.ytelse -> {
-                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $this")
+                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
@@ -68,7 +68,7 @@ fun Journalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = nu
                 type
             }
             else -> {
-                throw IllegalStateException("Ikke støttet journalpost: $this")
+                throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
             }
         }
     }
