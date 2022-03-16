@@ -20,7 +20,9 @@ class SakService(
         val sakerFraSaf = safGateway.hentSakerFraSaf(søkerIdent)
         return when {
             sakerFraSaf != null -> sakerFraSaf.somSakInfo()
-                .filter { "OMS" == it.tema }
+                .filter { "oms" == it.tema.lowercase() }
+                .filter { "k9" == it.fagsaksystem?.lowercase() }
+                .filter { "fagsak" == it.sakstype.lowercase() }
             else -> listOf()
         }
     }
@@ -36,7 +38,7 @@ class SakService(
 
     data class SakInfoDto(
         val fagsakId: String,
-        val fagsaksystem: String,
+        val fagsaksystem: String? = null,
         val sakstype: String,
         val tema: String
     )
