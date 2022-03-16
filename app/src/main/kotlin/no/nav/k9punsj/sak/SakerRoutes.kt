@@ -35,9 +35,9 @@ internal class SakerRoutes(
 
     @Bean
     fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+        if (sakerEnabled) {
+            GET("/api${Urls.HentSaker}") { request ->
 
-        GET("/api${Urls.HentSaker}") { request ->
-            if (sakerEnabled) {
                 RequestContext(coroutineContext, request) {
                     val norskIdent = request.norskIdent()
                     val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
@@ -68,8 +68,6 @@ internal class SakerRoutes(
                         )
                     }
                 }
-            } else {
-                throw NotImplementedError("Ikke aktivert")
             }
         }
     }
