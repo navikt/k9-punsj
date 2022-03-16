@@ -27,11 +27,14 @@ class HendelseMottaker @Autowired constructor(
 
     suspend fun prosesser(fordelPunsjEventDto: FordelPunsjEventDto) {
         val journalpostId = fordelPunsjEventDto.journalpostId
-        val aktørId = fordelPunsjEventDto.aktørId
-
         val journalpostIkkeEksisterer = journalpostRepository.journalpostIkkeEksisterer(journalpostId)
 
         if (journalpostIkkeEksisterer) {
+            val aktørId = fordelPunsjEventDto.aktørId
+            val punsjEventType = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null
+            val ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null
+            val opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null)
+                Journalpost.OpprinneligJournalpost(fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
 
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
@@ -40,16 +43,15 @@ class HendelseMottaker @Autowired constructor(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
-                ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null, // TODO: 04/03/2022 Burde ignorere journalposten om den ikke er en støttet ytelse, ikke lagre den?
-                type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
-                opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null) Journalpost.OpprinneligJournalpost(
-                    fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
+                ytelse = ytelse,
+                type = punsjEventType,
+                opprinneligJournalpost = opprinneligJournalpost
             )
             journalpostRepository.opprettJournalpost(journalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                 journalpost = journalpost,
                 aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-                type = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null,
+                type = punsjEventType,
                 ytelse = fordelPunsjEventDto.ytelse)
         } else {
             if (fordelPunsjEventDto.type != null && PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {

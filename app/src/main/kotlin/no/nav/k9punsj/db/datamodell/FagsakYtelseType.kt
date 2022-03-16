@@ -16,7 +16,7 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
             if (type != null) {
                 return type
             } else {
-                throw IllegalStateException("Fant ingen FagsakYtelseType med koden $kode")
+                return UKJENT
             }
         }
     }
