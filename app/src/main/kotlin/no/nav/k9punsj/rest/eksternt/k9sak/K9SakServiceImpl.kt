@@ -19,31 +19,24 @@ import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
-import reactor.core.publisher.Mono
 import java.net.URI
-import java.util.UUID
+import java.util.*
 
 @Configuration
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
-) : ReactiveHealthIndicator, K9SakService {
+) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    val log = LoggerFactory.getLogger("K9SakService")!!
+    private val log = LoggerFactory.getLogger("K9SakService")
 
     internal object Urls {
         internal const val hentPerioder = "/behandling/soknad/perioder"
         internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
-    }
-
-    override fun health(): Mono<Health> {
-        TODO("Not yet implemented")
     }
 
     override suspend fun hentPerioderSomFinnesIK9(

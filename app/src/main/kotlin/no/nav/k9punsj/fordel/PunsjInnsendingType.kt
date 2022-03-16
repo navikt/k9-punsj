@@ -24,7 +24,7 @@ enum class PunsjInnsendingType(val kode: String, val navn: String, val erScannin
         @JvmStatic
         fun fraKode(kode: String): PunsjInnsendingType = values().find {
             it.kode == kode
-        } ?: throw IllegalStateException("Finner ikke $kode")
+        } ?: UKJENT
 
         fun sjekkOmDetErScanning(kode: String): Boolean {
             return valueOf(kode).erScanning
