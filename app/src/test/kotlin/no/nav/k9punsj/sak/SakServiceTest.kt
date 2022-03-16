@@ -22,7 +22,7 @@ internal class SakServiceTest {
     private lateinit var sakService: SakService
 
     @Test
-    internal fun `gitt jsonArray fra saf, forvent korrekt mapping`() {
+    internal fun `gitt saker fra saf, forvent kun fagsaker fra k9`() {
         coEvery { safGateway.hentSakerFraSaf(any()) } returns JSONArray(
             //language=json
             """
@@ -51,7 +51,7 @@ internal class SakServiceTest {
 
         runBlocking {
             val saker = sakService.hentSaker("123")
-            assertThat(saker).size().isEqualTo(3)
+            assertThat(saker).size().isEqualTo(2)
         }
     }
 }
