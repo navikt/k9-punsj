@@ -21,7 +21,7 @@ class SakService(
         return when {
             sakerFraSaf != null -> sakerFraSaf.somSakInfo()
                 .filter { "oms" == it.tema.lowercase() }
-                .filter { "k9" == it.fagsaksystem?.lowercase() }
+                .filter { "k9" == it.fagsaksystem.lowercase() }
                 .filter { "fagsak" == it.sakstype.lowercase() }
             else -> listOf()
         }
@@ -37,8 +37,8 @@ class SakService(
     }
 
     data class SakInfoDto(
-        val fagsakId: String,
-        val fagsaksystem: String? = null,
+        val fagsakId: String? = null,
+        val fagsaksystem: String,
         val sakstype: String,
         val tema: String
     )
