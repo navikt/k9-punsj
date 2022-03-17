@@ -66,7 +66,8 @@ internal class NotatRoutes(
                 )
             }
         } else {
-            throw NotImplementedError("Ikke aktivert")
+            ServerResponse
+                .status(HttpStatus.NOT_IMPLEMENTED)
         }
     }
 }
