@@ -27,7 +27,6 @@ internal class NotatRoutesTest {
             requestBody = BodyInserters.fromValue(
                 NyNotat(
                     søkerIdentitetsnummer = søkerIdent,
-                    søkerNavn = "Trane Kreativ",
                     fagsakId = "ABC123",
                     tittel = "Journalføring av notat",
                     notat = "lorem ipmsum osv..."
