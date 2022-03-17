@@ -38,8 +38,8 @@ internal class NotatRoutes(
 
     @Bean
     fun NotatRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        if (notatEnabled) {
-            POST("/api${Urls.OpprettNotat}") { request ->
+        POST("/api${Urls.OpprettNotat}") { request ->
+            if (notatEnabled) {
                 RequestContext(coroutineContext, request) {
                     val nyNotat = request.nyNotat()
 
@@ -64,10 +64,13 @@ internal class NotatRoutes(
                             .bodyValueAndAwait(OasFeil(it.message))
                     }
                 )
+            } else {
+                ServerResponse
+                    .status(HttpStatus.NOT_IMPLEMENTED)
+                    .json()
+                    .bodyValueAndAwait("Ikke enablet")
+
             }
-        } else {
-            ServerResponse
-                .status(HttpStatus.NOT_IMPLEMENTED)
         }
     }
 }
