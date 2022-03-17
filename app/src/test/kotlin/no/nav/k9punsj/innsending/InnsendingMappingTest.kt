@@ -5,6 +5,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
+import no.nav.k9punsj.journalpost.KopierJournalpostInfo
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.dto.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto

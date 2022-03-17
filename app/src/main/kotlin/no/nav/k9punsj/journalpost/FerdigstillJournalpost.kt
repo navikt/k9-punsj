@@ -67,10 +67,6 @@ internal data class FerdigstillJournalpost(
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
     }
 
-    internal data class JournalførendeEnhet(
-        internal val journalfoerendeEnhet: String
-    )
-
     internal data class Bruker(
         internal val identitetsnummer: Identitetsnummer,
         internal val sak: Pair<Fagsystem, Saksnummer>? = null,

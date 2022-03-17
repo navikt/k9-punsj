@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.server
+package no.nav.k9punsj.journalpost
 
 import no.nav.k9punsj.rest.web.SøkUferdigJournalposter
 import org.springframework.web.bind.annotation.*

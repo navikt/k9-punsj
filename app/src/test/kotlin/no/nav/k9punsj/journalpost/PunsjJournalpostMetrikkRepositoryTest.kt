@@ -18,7 +18,7 @@ import java.util.stream.IntStream
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 @TestPropertySource(locations = ["classpath:application.yml"])
-internal class JournalpostMetrikkRepositoryTest {
+internal class PunsjJournalpostMetrikkRepositoryTest {
 
     private val journalpostRepo = DatabaseUtil.getJournalpostRepo()
     private val journalpostMetrikkRepository = DatabaseUtil.journalpostMetrikkRepository()
@@ -71,15 +71,15 @@ internal class JournalpostMetrikkRepositoryTest {
         )
     }
 
-    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): Journalpost {
-        val journalpost = Journalpost(
+    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): PunsjJournalpost {
+        val punsjJournalpost = PunsjJournalpost(
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
             aktørId = dummyAktørId,
             type = type.kode
         )
-        journalpostRepo.lagre(journalpost) { journalpost }
-        return journalpost
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
+        return punsjJournalpost
     }
 
     private suspend fun genererJournalposter(antall: Int, type: PunsjInnsendingType) {

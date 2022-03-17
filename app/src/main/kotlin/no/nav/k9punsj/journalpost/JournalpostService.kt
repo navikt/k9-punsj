@@ -7,7 +7,6 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.notat.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -102,15 +101,15 @@ class JournalpostService(
         ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
-    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPersonBareFordel(aktørId)
     }
 
-    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): Journalpost? {
+    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): PunsjJournalpost? {
         return journalpostRepository.hentHvis(journalpostId)
     }
 
@@ -118,9 +117,9 @@ class JournalpostService(
         return journalpostRepository.kanSendeInn(listOf(journalpostId))
     }
 
-    internal suspend fun lagre(journalpost: Journalpost, kilde: KildeType = KildeType.FORDEL) {
-        journalpostRepository.lagre(journalpost, kilde) {
-            journalpost
+    internal suspend fun lagre(punsjJournalpost: PunsjJournalpost, kilde: KildeType = KildeType.FORDEL) {
+        journalpostRepository.lagre(punsjJournalpost, kilde) {
+            punsjJournalpost
         }
     }
 

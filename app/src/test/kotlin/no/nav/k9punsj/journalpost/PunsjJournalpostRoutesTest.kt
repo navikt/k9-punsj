@@ -4,7 +4,7 @@ import no.nav.k9punsj.journalpost.JournalpostRoutes.Companion.hentBareKodeverdie
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-class JournalpostRoutesTest {
+class PunsjJournalpostRoutesTest {
 
     @Test
     internal fun testHentKodeVerdi() {

@@ -6,7 +6,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -19,13 +19,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class SjekkOmUtløptJobb @Autowired constructor(
+class SjekkOmUtloptJobb @Autowired constructor(
     val aksjonspunktRepository: AksjonspunktRepository,
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
 ) {
 
-    private val logger = LoggerFactory.getLogger(SjekkOmUtløptJobb::class.java)
+    private val logger = LoggerFactory.getLogger(SjekkOmUtloptJobb::class.java)
 
     //kjører klokken 04:00
     @Scheduled(cron = "0 0 4 * * *")
@@ -55,22 +55,22 @@ class SjekkOmUtløptJobb @Autowired constructor(
         }
     }
 
-    private fun sendTilLos(journalpost: Journalpost, aksjonspunkt: AksjonspunktEntitet) {
+    private fun sendTilLos(punsjJournalpost: PunsjJournalpost, aksjonspunkt: AksjonspunktEntitet) {
         hendelseProducer.send(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             objectMapper().writeValueAsString(
                 PunsjEventDto(
-                    journalpost.uuid.toString(),
-                    journalpostId = journalpost.journalpostId,
+                    punsjJournalpost.uuid.toString(),
+                    journalpostId = punsjJournalpost.journalpostId,
                     eventTid = LocalDateTime.now(),
-                    aktørId = journalpost.aktørId,
+                    aktørId = punsjJournalpost.aktørId,
                     aksjonspunktKoderMedStatusListe = mutableMapOf(
                         aksjonspunkt.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode,
                         AksjonspunktKode.PUNSJ_HAR_UTLØPT.kode to AksjonspunktStatus.OPPRETTET.kode
                     )
                 )
             ),
-            journalpost.uuid.toString()
+            punsjJournalpost.uuid.toString()
         )
     }
 }

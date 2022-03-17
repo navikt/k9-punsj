@@ -4,7 +4,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
@@ -78,7 +78,7 @@ internal class K9PunsjApplicationWithMocks {
             )
             runBlocking {
                 applicationContext?.getBean(JournalpostService::class.java)?.lagre(
-                    journalpost = Journalpost(
+                    punsjJournalpost = PunsjJournalpost(
                         uuid = UUID.randomUUID(),
                         journalpostId = "56745674",
                         aktørId = "56745674",

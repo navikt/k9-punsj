@@ -1,13 +1,11 @@
-package no.nav.k9punsj.rest.server
+package no.nav.k9punsj.journalpost
 
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.rest.web.dto.AktørIdDto
 import no.nav.k9punsj.rest.web.søkUferdigJournalposter
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -24,11 +22,10 @@ internal class JournalpostInfoRoutes(
 
     private companion object {
         private const val AktørIdKey = "aktor_id"
-        private val logger = LoggerFactory.getLogger(JournalpostInfoRoutes::class.java)
     }
 
     internal object Urls {
-        internal const val HentÅpneJournalposter = "/journalpost/uferdig/{${AktørIdKey}}"
+        internal const val HentÅpneJournalposter = "/journalpost/uferdig/{$AktørIdKey}"
         internal const val HentÅpneJournalposterPost = "/journalpost/uferdig"
     }
 

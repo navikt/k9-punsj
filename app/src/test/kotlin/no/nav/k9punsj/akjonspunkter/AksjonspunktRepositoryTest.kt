@@ -2,7 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ internal class AksjonspunktRepositoryTest {
         val journalpostRepo = DatabaseUtil.getJournalpostRepo()
         val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666")
 
-        journalpostRepo.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepo.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
 
@@ -48,7 +48,7 @@ internal class AksjonspunktRepositoryTest {
         val journalpostRepo = DatabaseUtil.getJournalpostRepo()
         val melding = FordelPunsjEventDto(aktørId = "1234567891", journalpostId = "667")
 
-        journalpostRepo.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepo.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
 

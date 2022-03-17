@@ -1,4 +1,4 @@
-package no.nav.k9punsj.jackson
+package no.nav.k9punsj.utils
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException

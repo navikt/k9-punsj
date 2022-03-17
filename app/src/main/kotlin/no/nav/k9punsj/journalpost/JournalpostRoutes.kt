@@ -484,31 +484,31 @@ internal class JournalpostRoutes(
                 VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(journalpostFraBasen.type, mottattDato)
             journalpostService.lagre(journalpostFraBasen.copy(mottattDato = justertDato))
         } else {
-            val journalpost = Journalpost(
+            val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = jornalpostId,
                 aktørId,
                 mottattDato = mottattDato
             )
-            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, KildeType.SAKSBEHANDLER)
         }
     }
 
     private suspend fun lagreHvorJournalpostSkal(
-        hentHvisJournalpostMedId: Journalpost?,
+        hentHvisPunsjJournalpostMedId: PunsjJournalpost?,
         dto: PunsjBolleDto,
         skalTilK9: Boolean,
     ) {
-        if (hentHvisJournalpostMedId != null) {
-            journalpostService.lagre(hentHvisJournalpostMedId.copy(skalTilK9 = skalTilK9))
+        if (hentHvisPunsjJournalpostMedId != null) {
+            journalpostService.lagre(hentHvisPunsjJournalpostMedId.copy(skalTilK9 = skalTilK9))
         } else {
-            val journalpost = Journalpost(
+            val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = dto.journalpostId,
                 pdlService.aktørIdFor(dto.brukerIdent),
                 skalTilK9 = skalTilK9
             )
-            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, KildeType.SAKSBEHANDLER)
         }
     }
 

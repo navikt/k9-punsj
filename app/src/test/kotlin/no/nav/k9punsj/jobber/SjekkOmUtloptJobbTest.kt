@@ -6,7 +6,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktEntitet
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
@@ -21,7 +21,7 @@ import java.util.UUID
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class SjekkOmUtløptJobbTest {
+internal class SjekkOmUtloptJobbTest {
 
     @MockBean
     lateinit var hendelseProducer: HendelseProducer
@@ -32,28 +32,28 @@ internal class SjekkOmUtløptJobbTest {
         val aksjonspunktRepository = getAksjonspunktRepo()
         val journalpostRepository = getJournalpostRepo()
 
-        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository)
+        val sjekkOmUtloptJobb = SjekkOmUtloptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository)
 
         val dummyAktørId = "1000000000000"
 
-        val journalpost = Journalpost(uuid = UUID.randomUUID(), journalpostId = "466988237", aktørId = dummyAktørId)
-        journalpostRepository.lagre(journalpost) {
-            journalpost
+        val punsjJournalpost = PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = "466988237", aktørId = dummyAktørId)
+        journalpostRepository.lagre(punsjJournalpost) {
+            punsjJournalpost
         }
 
         val aksjonspunktId = UUID.randomUUID().toString()
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(aksjonspunktId,
             AksjonspunktKode.VENTER_PÅ_INFORMASJON,
-            journalpost.journalpostId,
+            punsjJournalpost.journalpostId,
             AksjonspunktStatus.OPPRETTET,
             LocalDateTime.now().minusDays(1),
             VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER))
 
         // Act
-        sjekkOmUtløptJobb.sjekkeOmAksjonspunktHarLøptUt()
+        sjekkOmUtloptJobb.sjekkeOmAksjonspunktHarLøptUt()
 
         // Assert
-        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
+        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(punsjJournalpost.journalpostId)
         assertThat(hentAlleAksjonspunkter).hasSize(2)
 
         val venterPåInformasjon =

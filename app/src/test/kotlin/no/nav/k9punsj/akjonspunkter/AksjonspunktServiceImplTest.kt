@@ -12,7 +12,7 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
@@ -79,7 +79,7 @@ internal class AksjonspunktServiceImplTest {
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
@@ -112,7 +112,7 @@ internal class AksjonspunktServiceImplTest {
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),

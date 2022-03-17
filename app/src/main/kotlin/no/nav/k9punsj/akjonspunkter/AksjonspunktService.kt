@@ -1,6 +1,6 @@
 package no.nav.k9punsj.akjonspunkter
 
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.rest.web.dto.SøknadIdDto
 
@@ -8,7 +8,7 @@ interface AksjonspunktService {
 
 
     suspend fun opprettAksjonspunktOgSendTilK9Los(
-        journalpost: Journalpost,
+        punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
         ytelse: String?

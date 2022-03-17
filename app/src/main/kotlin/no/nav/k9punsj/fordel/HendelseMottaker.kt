@@ -6,7 +6,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.Logger
@@ -33,23 +33,23 @@ class HendelseMottaker @Autowired constructor(
             val aktørId = fordelPunsjEventDto.aktørId
             val punsjEventType = if (fordelPunsjEventDto.type != null) PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode else null
             val ytelse = if (fordelPunsjEventDto.ytelse != null) FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode else null
-            val opprinneligJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null)
-                Journalpost.OpprinneligJournalpost(fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
+            val opprinneligPunsjJournalpost = if (fordelPunsjEventDto.opprinneligJournalpost != null)
+                PunsjJournalpost.OpprinneligJournalpost(fordelPunsjEventDto.opprinneligJournalpost.journalpostId) else null
 
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
             val uuid = UUID.randomUUID()
-            val journalpost = Journalpost(
+            val punsjJournalpost = PunsjJournalpost(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
                 ytelse = ytelse,
                 type = punsjEventType,
-                opprinneligJournalpost = opprinneligJournalpost
+                opprinneligJournalpost = opprinneligPunsjJournalpost
             )
-            journalpostRepository.opprettJournalpost(journalpost)
+            journalpostRepository.opprettJournalpost(punsjJournalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
-                journalpost = journalpost,
+                punsjJournalpost = punsjJournalpost,
                 aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 type = punsjEventType,
                 ytelse = fordelPunsjEventDto.ytelse)

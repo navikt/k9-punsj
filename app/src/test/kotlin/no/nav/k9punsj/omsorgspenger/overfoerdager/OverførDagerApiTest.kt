@@ -1,12 +1,12 @@
 package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.ExceptionResponse
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.awaitStatuscode
-import no.nav.k9punsj.exception.ExceptionResponse
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -68,9 +68,9 @@ internal class OverførDagerApiTest {
             }
             """.trimIndent()
 
-        val journalpost = Journalpost(UUID.randomUUID(), "466988237", aktørId = null)
-        journalpostRepository.lagre(journalpost) {
-            journalpost
+        val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), "466988237", aktørId = null)
+        journalpostRepository.lagre(punsjJournalpost) {
+            punsjJournalpost
         }
 
         val httpStatus = client.post()

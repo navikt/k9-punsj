@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -21,17 +21,17 @@ internal class BrevRepositoryTest {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-        val journalpost1 =
-            Journalpost(uuid = UUID.randomUUID(),
+        val punsjJournalpost1 =
+            PunsjJournalpost(uuid = UUID.randomUUID(),
                 journalpostId = IdGenerator.nesteId(),
                 aktørId = dummyAktørId,
                 type = PunsjInnsendingType.PAPIRSØKNAD.kode)
-        journalpostRepository.lagre(journalpost1) {
-            journalpost1
+        journalpostRepository.lagre(punsjJournalpost1) {
+            punsjJournalpost1
         }
 
         val repo = DatabaseUtil.getBrevRepo()
-        val forJournalpostId = journalpost1.journalpostId
+        val forJournalpostId = punsjJournalpost1.journalpostId
         val brevData = DokumentbestillingDto("1",
             "2",
             "123",

@@ -1,7 +1,6 @@
 package no.nav.k9punsj.fordel
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.MockClock
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
@@ -13,7 +12,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
@@ -69,9 +68,9 @@ internal class FordelKafkaTest {
 
         runBlocking {
             hendelseMottaker.prosesser(melding)
-            val journalpost =
-                Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost,
+            val punsjJournalpost =
+                PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(punsjJournalpost,
                 Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 melding.type,
                 melding.ytelse)
@@ -97,9 +96,9 @@ internal class FordelKafkaTest {
         doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         runBlocking {
             hendelseMottaker.prosesser(melding)
-            val journalpost =
-                Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
-            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(journalpost,
+            val punsjJournalpost =
+                PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
+            aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(punsjJournalpost,
                 Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 melding.type,
                 melding.ytelse)
