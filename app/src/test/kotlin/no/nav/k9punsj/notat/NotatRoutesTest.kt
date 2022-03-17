@@ -20,7 +20,7 @@ internal class NotatRoutesTest {
 
     @Test
     fun `Journalføring av notat`(): Unit = runBlocking {
-        val søkerIdent = "02022352122"
+        val søkerIdent = "66666666666" // no.nav.k9punsj.rest.eksternt.pdl.TestPdlService.harBarn
         val body = client.postAndAssertAwaitWithStatusAndBody<NyNotat, JournalPostResponse>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
