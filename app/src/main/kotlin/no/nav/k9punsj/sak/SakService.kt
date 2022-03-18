@@ -21,7 +21,7 @@ class SakService(
         else return fagsaker!!.map {
             SakInfoDto(
                 fagsakId = it.saksnummer,
-                sakstype = it.sakstype.kode
+                sakstype = it.sakstype.navn
             )
         }
     }
