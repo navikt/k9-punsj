@@ -173,10 +173,11 @@ class K9SakServiceImpl(
         .map { it as JSONObject }
         .map {
             val saksnummer = it.getString("saksnummer")
-            val sakstype = it.getString("sakstype")
+            val sakstypeKode = it.getJSONObject("sakstype").getString("kode")
+            val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
             Fagsak(
                 saksnummer = saksnummer,
-                sakstype = sakstype
+                sakstype = fagsakYtelseType.navn
             )
         }.toSet()
 
