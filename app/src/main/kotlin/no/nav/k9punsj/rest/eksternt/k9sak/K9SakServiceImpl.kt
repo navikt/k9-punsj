@@ -177,7 +177,7 @@ class K9SakServiceImpl(
             val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
             Fagsak(
                 saksnummer = saksnummer,
-                sakstype = fagsakYtelseType.navn
+                sakstype = fagsakYtelseType
             )
         }.toSet()
 
