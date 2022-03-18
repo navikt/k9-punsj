@@ -12,4 +12,5 @@ interface K9SakService {
 
     suspend fun hentArbeidsforholdIdFraInntektsmeldinger(søker: NorskIdent, fagsakYtelseType: FagsakYtelseType, periodeDto: PeriodeDto) : Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?>
 
+    suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
 }

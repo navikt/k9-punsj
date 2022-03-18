@@ -11,11 +11,16 @@ import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.rest.eksternt.k9sak.K9SakServiceImpl.Urls.hentPerioder
+import no.nav.k9punsj.rest.eksternt.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.rest.web.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
+import org.intellij.lang.annotations.Language
+import org.json.JSONArray
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -23,6 +28,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 @Configuration
 @StandardProfil
@@ -37,6 +43,7 @@ class K9SakServiceImpl(
     internal object Urls {
         internal const val hentPerioder = "/behandling/soknad/perioder"
         internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
+        internal const val sokFagsaker = "/api/fagsak/sok"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -45,9 +52,11 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
 
-        val matchDto = MatchDto(FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+        val matchDto = MatchDto(
+            FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
-            barn)
+            barn
+        )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
@@ -71,9 +80,11 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
         periodeDto: PeriodeDto,
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
-        val matchDto = MatchMedPeriodeDto(FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+        val matchDto = MatchMedPeriodeDto(
+            FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
-            periodeDto)
+            periodeDto
+        )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
@@ -93,6 +104,41 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
         }
+    }
+
+    override suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?> {
+        @Language("json")
+        val body = """
+            {
+              "searchString": "$søker"
+            }
+        """.trimIndent()
+
+        val (request, _, result) = "$baseUrl$sokFagsaker"
+            .httpPost()
+            .body(body)
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.CallId to coroutineContext.hentCorrelationId()
+            ).awaitStringResponseResult()
+
+        val (fagsaker: Set<Fagsak>?, feil: String?) = result.fold(
+            { success -> Pair(success.fagsaker(), null) },
+            { error ->
+                log.error(
+                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                )
+                log.error(error.toString())
+                Pair(null, "Feil ved henting av saker fra k9-sak")
+            }
+        )
+
+        if (fagsaker == null) {
+            return Pair(null, feil!!)
+        }
+        return Pair(fagsaker, null)
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
@@ -121,6 +167,18 @@ class K9SakServiceImpl(
             }
         )
     }
+
+    internal fun String.fagsaker() = JSONArray(this)
+        .asSequence()
+        .map { it as JSONObject }
+        .map {
+            val saksnummer = it.getString("saksnummer")
+            val sakstype = it.getString("sakstype")
+            Fagsak(
+                saksnummer = saksnummer,
+                sakstype = sakstype
+            )
+        }.toSet()
 
     data class MatchDto(
         val ytelseType: FagsakYtelseType,
