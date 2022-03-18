@@ -20,6 +20,7 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val soeknadsperiode: List<PeriodeDto>? = null,
     val pleietrengende: PleietrengendeDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
+    val uttak: List<UttakDto>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val bosteder: List<BostederDto>? = null,
     val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
@@ -29,7 +30,8 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null) {
 
     data class PleietrengendeDto(
-        val norskIdent: NorskIdentDto?
+        val norskIdent: NorskIdentDto? = null,
+        val foedselsdato: LocalDate? = null
     )
 
     data class ArbeidAktivitetDto(
@@ -99,10 +101,10 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
         val årsak: String?
     )
 
-    data class OmsorgDto(
-        val relasjonTilBarnet: String?,
-        val samtykketOmsorgForBarnet: Boolean?,
-        val beskrivelseAvOmsorgsrollen: String?
+    data class UttakDto(
+        val periode: PeriodeDto?,
+        val timerPleieAvPleietrengendePerDag: String?,
+        val pleieAvPleietrengendePerDag: TimerOgMinutter? = timerPleieAvPleietrengendePerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
 
     data class TimerOgMinutter(
