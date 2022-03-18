@@ -41,6 +41,7 @@ internal class MapPlsfTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
+            dto.soeknadsperiode?.leggTilSøknadsperiode()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.pleietrengende?.leggTilPleietrengende()
             dto.bosteder?.leggTilBosteder()
@@ -279,6 +280,10 @@ internal class MapPlsfTilK9Format(
 
     private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
         pleipengerLivetsSluttfase.leggTilTrekkKravPerioder(this.somK9Perioder())
+    }
+
+    private fun List<PeriodeDto>.leggTilSøknadsperiode() {
+        pleipengerLivetsSluttfase.medSøknadsperiode(this.somK9Perioder())
     }
 
     internal companion object {
