@@ -30,4 +30,13 @@ class LokalK9SakService : K9SakService {
         fagsakYtelseType: FagsakYtelseType,
         periodeDto: PeriodeDto,
     ) : Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> = Pair(emptyList(), null)
+
+    override suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?> = Pair(
+        first = setOf(
+            Fagsak(saksnummer = "ABC123", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN),
+            Fagsak(saksnummer = "DEF456", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
+            Fagsak(saksnummer = "GHI789", no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS)
+        ),
+        second = null
+    )
 }
