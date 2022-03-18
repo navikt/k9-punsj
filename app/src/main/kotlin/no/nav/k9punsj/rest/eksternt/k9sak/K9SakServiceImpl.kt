@@ -43,7 +43,7 @@ class K9SakServiceImpl(
     internal object Urls {
         internal const val hentPerioder = "/behandling/soknad/perioder"
         internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
-        internal const val sokFagsaker = "/api/fagsak/sok"
+        internal const val sokFagsaker = "/fagsak/sok"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
