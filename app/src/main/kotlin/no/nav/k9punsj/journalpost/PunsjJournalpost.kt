@@ -28,9 +28,9 @@ fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType?
     } else {
         when {
             this.ytelse == null -> {
-                val pleiepengerSyktBarn = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                logger.info("Ytelse på journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
-                pleiepengerSyktBarn
+                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
+                logger.info("Ytelse på journalpost er null. Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
+                type
             }
             no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
