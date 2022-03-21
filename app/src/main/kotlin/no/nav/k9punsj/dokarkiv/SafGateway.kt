@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.dokarkiv.SafDtos
 import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.dokarkiv
 
 internal object JoarkTyper {
     internal data class JournalpostStatus private constructor(private val value: String) {

@@ -62,13 +62,13 @@ internal class PunsjJournalpostRepositoryTest {
 
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
-        journalpostRepository.lagre(punsjJournalpost1, KildeType.SAKSBEHANDLER) {
+        journalpostRepository.lagre(punsjJournalpost1, PunsjJournalpostKildeType.SAKSBEHANDLER) {
             punsjJournalpost1
         }
 
         val punsjJournalpost2 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
-        journalpostRepository.lagre(punsjJournalpost2, KildeType.FORDEL) {
+        journalpostRepository.lagre(punsjJournalpost2, PunsjJournalpostKildeType.FORDEL) {
             punsjJournalpost2
         }
 

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
 
-
 @Repository
 class JournalpostRepository(private val dataSource: DataSource) {
 
@@ -25,7 +24,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun lagre(
         punsjJournalpostId: PunsjJournalpost,
-        kilde: KildeType = KildeType.FORDEL,
+        kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
         function: (PunsjJournalpost?) -> PunsjJournalpost,
     ): PunsjJournalpost {
         return using(sessionOf(dataSource)) {
@@ -180,7 +179,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         journalposter?.forEach {
             if (journalpostIkkeEksisterer(it)) {
                 val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
-                lagre(punsjJournalpost, KildeType.SAKSBEHANDLER) {
+                lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER) {
                     punsjJournalpost
                 }
             }

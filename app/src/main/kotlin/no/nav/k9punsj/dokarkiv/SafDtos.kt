@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.dokarkiv
 
 import java.time.LocalDateTime
 

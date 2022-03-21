@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.metrikker
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -7,7 +7,6 @@ import no.nav.k9punsj.fordel.PunsjInnsendingType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 import javax.sql.DataSource
-import kotlin.math.log
 
 @Repository
 class JournalpostMetrikkRepository(private val dataSource: DataSource) {
@@ -23,7 +22,7 @@ class JournalpostMetrikkRepository(private val dataSource: DataSource) {
                 //language=PostgreSQL
                 val antall = tx.run(
                     queryOf(
-                        """select count(*) as antall from ${JOURNALPOST_TABLE} where ferdig_behandlet = :ferdig_behandlet""",
+                        """select count(*) as antall from $JOURNALPOST_TABLE where ferdig_behandlet = :ferdig_behandlet""",
                         mapOf("ferdig_behandlet" to ferdigBehandlet)
                     ).map { row -> row.int("antall") }.asSingle
                 )

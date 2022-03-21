@@ -3,7 +3,7 @@ package no.nav.k9punsj.jobber
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.journalpost.JournalpostMetrikkRepository
+import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled

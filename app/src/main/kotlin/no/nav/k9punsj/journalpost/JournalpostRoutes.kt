@@ -490,7 +490,7 @@ internal class JournalpostRoutes(
                 aktørId,
                 mottattDato = mottattDato
             )
-            journalpostService.lagre(punsjJournalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
 
@@ -508,7 +508,7 @@ internal class JournalpostRoutes(
                 pdlService.aktørIdFor(dto.brukerIdent),
                 skalTilK9 = skalTilK9
             )
-            journalpostService.lagre(punsjJournalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
 
