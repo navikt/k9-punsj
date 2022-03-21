@@ -12,7 +12,6 @@ import no.nav.k9punsj.domenetjenester.mappers.*
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.SøknadJson
-import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.MetricUtils
 import no.nav.k9punsj.util.MetricUtils.MetrikkTag

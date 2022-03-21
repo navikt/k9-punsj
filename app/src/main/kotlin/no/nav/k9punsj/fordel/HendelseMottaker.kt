@@ -51,7 +51,7 @@ class HendelseMottaker @Autowired constructor(
                 type = punsjEventType,
                 ytelse = fordelPunsjEventDto.ytelse)
         } else {
-            if (fordelPunsjEventDto.type != null && PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+            if (PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                 val journalpostFraDb = journalpostRepository.hent(journalpostId)
                 if (journalpostFraDb.type != null && PunsjInnsendingType.fraKode(journalpostFraDb.type) != PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                     journalpostRepository.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
@@ -69,8 +69,8 @@ class HendelseMottaker @Autowired constructor(
     private fun publiserJournalpostMetrikk(fordelPunsjEventDto: FordelPunsjEventDto) {
         meterRegistry.counter(
             Metrikk.ANTALL_OPPRETTET_JOURNALPOST_COUNTER.navn, listOf(
-                Tag.of("ytelsestype", fordelPunsjEventDto.ytelse ?: "ukjent"),
-                Tag.of("punsjInnsendingstype", fordelPunsjEventDto.type ?: "ukjent")
+                Tag.of("ytelsestype", fordelPunsjEventDto.ytelse),
+                Tag.of("punsjInnsendingstype", fordelPunsjEventDto.type)
             )
         ).increment()
     }

@@ -1,4 +1,4 @@
-name: Build Master
+name: Build master & deploy to dev
 
 on:
   push:

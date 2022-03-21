@@ -16,7 +16,6 @@ import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
-import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
