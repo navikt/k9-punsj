@@ -115,6 +115,15 @@
       "land": "RU"
     }
   ],
+  "uttak": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "timerPleieAvPleietrengendePerDag": "7,5"
+    }
+  ],
   "soknadsinfo": {
     "samtidigHjemme": true,
     "harMedsoeker": true

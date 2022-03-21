@@ -16,6 +16,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
+import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.dto.PeriodeDto
 import no.nav.k9punsj.rest.web.dto.PleiepengerLivetsSluttfaseSøknadDto
@@ -41,6 +42,7 @@ internal class MapPlsfTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDato()
             dto.soekerId?.leggTilSøker()
+            dto.soeknadsperiode?.leggTilSøknadsperiode()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.pleietrengende?.leggTilPleietrengende()
             dto.bosteder?.leggTilBosteder()
@@ -49,6 +51,7 @@ internal class MapPlsfTilK9Format(
             dto.arbeidstid?.leggTilArbeidstid()
             dto.trekkKravPerioder.leggTilTrekkKravPerioder()
             dto.leggTilBegrunnelseForInnsending()
+            dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
 
             // Fullfører søknad & validerer
             søknad.medYtelse(pleipengerLivetsSluttfase)
@@ -80,7 +83,12 @@ internal class MapPlsfTilK9Format(
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto.leggTilPleietrengende() {
-        pleipengerLivetsSluttfase.medPleietrengende(Pleietrengende(NorskIdentitetsnummer.of(this.norskIdent)))
+        val pleietrengende = Pleietrengende()
+        when {
+            norskIdent.erSatt() -> pleietrengende.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(norskIdent))
+            foedselsdato != null -> pleietrengende.medFødselsdato(foedselsdato)
+        }
+        pleipengerLivetsSluttfase.medPleietrengende(pleietrengende)
     }
 
     private fun String.leggTilSøker() {
@@ -281,6 +289,34 @@ internal class MapPlsfTilK9Format(
         pleipengerLivetsSluttfase.leggTilTrekkKravPerioder(this.somK9Perioder())
     }
 
+    private fun List<PeriodeDto>.leggTilSøknadsperiode() {
+        pleipengerLivetsSluttfase.medSøknadsperiode(this.somK9Perioder())
+    }
+
+    private fun List<PleiepengerLivetsSluttfaseSøknadDto.UttakDto>?.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
+        val k9Uttak = mutableMapOf<Periode, Uttak.UttakPeriodeInfo>()
+
+        this?.filter { it.periode.erSatt() }?.forEach { uttak ->
+            val k9Periode = uttak.periode!!.somK9Periode()!!
+            val k9Info = Uttak.UttakPeriodeInfo()
+            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
+            { uttak.timerPleieAvPleietrengendePerDag?.somDuration() }?.also {
+                k9Info.medTimerPleieAvBarnetPerDag(it)
+            }
+            k9Uttak[k9Periode] = k9Info
+        }
+
+        if (k9Uttak.isEmpty() && søknadsperiode != null) {
+            søknadsperiode.forEach {
+                k9Uttak[it.somK9Periode()!!] = DefaultUttak
+            }
+        }
+
+        if (k9Uttak.isNotEmpty()) {
+            pleipengerLivetsSluttfase.medUttak(Uttak().medPerioder(k9Uttak))
+        }
+    }
+
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)
         private val Oslo = ZoneId.of("Europe/Oslo")
@@ -303,7 +339,6 @@ internal class MapPlsfTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() =
-            Duration.ofHours(timer).plusMinutes(minutter.toLong())
+        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }
