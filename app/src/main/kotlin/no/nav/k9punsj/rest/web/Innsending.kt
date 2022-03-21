@@ -58,7 +58,7 @@ data class PunsjBolleDto(
     val barnIdent: NorskIdentDto?,
     val annenPart: NorskIdentDto?,
     val journalpostId: JournalpostIdDto,
-    val fagsakYtelseType: FagsakYtelseType? = null, // TODO: 04/03/2022 Fjern nullable etter lasnsering
+    val fagsakYtelseType: FagsakYtelseType
 )
 
 data class SettPåVentDto(
