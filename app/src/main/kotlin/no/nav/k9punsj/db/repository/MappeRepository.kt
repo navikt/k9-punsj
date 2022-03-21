@@ -18,57 +18,6 @@ class MappeRepository(private val dataSource: DataSource) {
        const val MAPPE_TABLE = "mappe"
    }
 
-    suspend fun hent(personIder: Set<PersonId>): List<Mappe> {
-        return using(sessionOf(dataSource)) {
-            it.transaction { tx ->
-                //language=PostgreSQL
-                tx.run(
-                    queryOf(
-                        "select data from $MAPPE_TABLE where (data -> 'personInfo') ??| array['${personIder.joinToString("','")}']",
-                    )
-                        .map { row ->
-                            objectMapper().readValue<Mappe>(row.string("data"))
-                        }.asList
-                )
-            }
-        }
-    }
-
-    suspend fun lagre(mappeId: MappeId, f: (Mappe?) -> Mappe): Mappe {
-        return using(sessionOf(dataSource)) {
-            return@using it.transaction { tx ->
-                val json = tx.run(
-                    queryOf(
-                        "select data from $MAPPE_TABLE where id = :id for update",
-                        mapOf("id" to UUID.fromString(mappeId))
-                    )
-                        .map { row ->
-                            row.string("data")
-                        }.asSingle
-                )
-
-                val mappe = if (!json.isNullOrEmpty()) {
-                    f(objectMapper().readValue(json, Mappe::class.java))
-                } else {
-                    f(null)
-                }
-                //language=PostgreSQL
-                tx.run(
-                    queryOf(
-                        """
-                    insert into $MAPPE_TABLE as k (id, endret_tid, data)
-                    values (:id, now(), :data :: jsonb)
-                    on conflict (id) do update
-                    set data = :data :: jsonb,
-                    endret_tid = now()
-                 """, mapOf("id" to UUID.fromString(mappeId), "data" to objectMapper().writeValueAsString(mappe))
-                    ).asUpdate
-                )
-                return@transaction mappe
-            }
-        }
-    }
-
     suspend fun hentEierAvMappe(mappeId: MappeId): PersonId? {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->

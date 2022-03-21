@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.BodyInserters
 
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class JournalpostInfoRoutesTest{
+class PunsjJournalpostInfoRoutesTest{
 
     private val client = TestSetup.client
     private val k9sakToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.k9SakToken()}"

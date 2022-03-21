@@ -102,15 +102,15 @@ class JournalpostService(
         ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
-    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPersonBareFordel(aktørId)
     }
 
-    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): Journalpost? {
+    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): PunsjJournalpost? {
         return journalpostRepository.hentHvis(journalpostId)
     }
 
@@ -118,9 +118,9 @@ class JournalpostService(
         return journalpostRepository.kanSendeInn(listOf(journalpostId))
     }
 
-    internal suspend fun lagre(journalpost: Journalpost, kilde: KildeType = KildeType.FORDEL) {
-        journalpostRepository.lagre(journalpost, kilde) {
-            journalpost
+    internal suspend fun lagre(punsjJournalpost: PunsjJournalpost, kilde: KildeType = KildeType.FORDEL) {
+        journalpostRepository.lagre(punsjJournalpost, kilde) {
+            punsjJournalpost
         }
     }
 

@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-private val logger = LoggerFactory.getLogger(Journalpost::class.java)
+private val logger = LoggerFactory.getLogger(PunsjJournalpost::class.java)
 
-data class Journalpost(
+data class PunsjJournalpost(
     val uuid: UUID,
     val journalpostId: JournalpostId,
     val aktørId: AktørId?,
@@ -19,14 +19,9 @@ data class Journalpost(
     val ytelse: String? = null,
     val payload: String? = null,
     val fordelStatusType: String? = null,
-    val opprinneligJournalpost: OpprinneligJournalpost? = null,
-) {
-    data class OpprinneligJournalpost(
-        val journalpostId: JournalpostId?,
-    )
-}
+)
 
-fun Journalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
+fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
     return if (this == null) {
         logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN

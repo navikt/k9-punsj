@@ -3,7 +3,7 @@ package no.nav.k9punsj.jobber
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
@@ -40,15 +40,15 @@ internal class MetrikkJobbTest {
     @Test
     fun sjekk_ferdig_behandlede_journalposter(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpost = Journalpost(
+        val punsjJournalpost = PunsjJournalpost(
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
             aktørId = dummyAktørId,
             type = PunsjInnsendingType.PAPIRSØKNAD.kode
         )
 
-        journalpostRepo.lagre(journalpost) { journalpost }
-        journalpostRepo.ferdig(journalpost.journalpostId)
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
+        journalpostRepo.ferdig(punsjJournalpost.journalpostId)
         metrikkJobb.oppdaterMetrikkMåling()
 
         MetricUtils.assertGuage(
@@ -61,14 +61,14 @@ internal class MetrikkJobbTest {
     @Test
     fun sjekk_uferdig_behandlede_journalposter(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpost = Journalpost(
+        val punsjJournalpost = PunsjJournalpost(
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
             aktørId = dummyAktørId,
             type = PunsjInnsendingType.PAPIRSØKNAD.kode
         )
 
-        journalpostRepo.lagre(journalpost) { journalpost }
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
         metrikkJobb.oppdaterMetrikkMåling()
 
         MetricUtils.assertGuage(
@@ -111,15 +111,15 @@ internal class MetrikkJobbTest {
         )
     }
 
-    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): Journalpost {
-        val journalpost = Journalpost(
+    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): PunsjJournalpost {
+        val punsjJournalpost = PunsjJournalpost(
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
             aktørId = dummyAktørId,
             type = type.kode
         )
-        journalpostRepo.lagre(journalpost) { journalpost }
-        return journalpost
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
+        return punsjJournalpost
     }
 
     private suspend fun genererJournalposter(antall: Int, type: PunsjInnsendingType) {

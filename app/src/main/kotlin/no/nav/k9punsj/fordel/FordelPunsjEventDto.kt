@@ -12,13 +12,8 @@ import org.slf4j.LoggerFactory
 data class FordelPunsjEventDto(
     val aktørId: AktørIdDto? = null,
     val journalpostId: JournalpostIdDto,
-    val type: String? = null,
-    val ytelse: String? = null,
-    val opprinneligJournalpost: OpprinneligJournalpost? = null) {
-
-    data class OpprinneligJournalpost(
-        val journalpostId: JournalpostIdDto,
-    )
+    val type: String,
+    val ytelse: String) {
 
     internal companion object {
 

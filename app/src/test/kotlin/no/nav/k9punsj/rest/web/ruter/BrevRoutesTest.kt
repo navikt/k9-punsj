@@ -12,7 +12,7 @@ import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.util.DatabaseUtil
@@ -103,7 +103,7 @@ internal class BrevRoutesTest {
         val aktørId = "100000000"
 
         val jp =
-            Journalpost(uuid = UUID.randomUUID(),
+            PunsjJournalpost(uuid = UUID.randomUUID(),
                 journalpostId = journalpostId,
                 aktørId = aktørId,
                 type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode)
