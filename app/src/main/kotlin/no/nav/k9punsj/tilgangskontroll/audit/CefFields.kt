@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.audit
+package no.nav.k9punsj.tilgangskontroll.audit
 
 object CefFields {
     private const val BEHANDLING_TEXT = "Behandling"

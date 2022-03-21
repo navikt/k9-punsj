@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.audit
+package no.nav.k9punsj.tilgangskontroll.audit
 
 class AuditdataHeader (
     private val vendor: String,

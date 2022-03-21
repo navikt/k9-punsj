@@ -1,10 +1,10 @@
 package no.nav.k9punsj.arbeidsgivere
 
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.sikkerhet.abac.IPepClient
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus

@@ -2,7 +2,7 @@ package no.nav.k9punsj.oidc
 
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import org.slf4j.Logger

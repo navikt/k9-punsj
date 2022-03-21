@@ -23,16 +23,6 @@ class MappeService(
     val journalpostRepository: JournalpostRepository,
 ) {
 
-    suspend fun hent(mappeId: MappeId): Mappe? {
-        val hentEierAvMappe = mappeRepository.hentEierAvMappe(mappeId)
-        if (hentEierAvMappe != null) {
-            return henterMappeMedAlleKoblinger(mappeId,
-                personService.finnPerson(hentEierAvMappe))
-
-        }
-        return null
-    }
-
     suspend fun hentMappe(person: Person): Mappe {
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
     }

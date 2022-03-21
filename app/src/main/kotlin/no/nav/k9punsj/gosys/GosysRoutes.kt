@@ -2,7 +2,7 @@ package no.nav.k9punsj.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes

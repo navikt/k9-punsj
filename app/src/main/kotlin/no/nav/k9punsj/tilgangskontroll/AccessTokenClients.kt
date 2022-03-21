@@ -1,4 +1,4 @@
-package no.nav.k9punsj
+package no.nav.k9punsj.tilgangskontroll
 
 import com.nimbusds.jose.jwk.JWK
 import no.nav.helse.dusseldorf.oauth2.client.*

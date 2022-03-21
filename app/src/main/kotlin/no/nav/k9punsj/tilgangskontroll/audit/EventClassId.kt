@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.audit
+package no.nav.k9punsj.tilgangskontroll.audit
 
 enum class EventClassId(val cefKode: String) {
     /** Bruker har sett data.  */

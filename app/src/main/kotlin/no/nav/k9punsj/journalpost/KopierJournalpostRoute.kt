@@ -4,7 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.sikkerhet.abac.IPepClient
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient

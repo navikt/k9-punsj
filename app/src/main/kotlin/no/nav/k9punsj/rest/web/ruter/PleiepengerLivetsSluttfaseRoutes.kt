@@ -5,10 +5,10 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.sikkerhet.azuregraph.IAzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
@@ -150,8 +150,6 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     try {
                         val søknad: PleiepengerLivetsSluttfaseSøknadDto =
                             objectMapper.convertValue(søknadEntitet.søknad!!)
-                        val hentPerioderSomFinnesIK9 =
-                            henterPerioderSomFinnesIK9sak(søknad.soekerId, søknad.pleietrengende)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -266,8 +264,6 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                         .badRequest()
                         .buildAndAwait()
 
-                val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(soknadTilValidering.soekerId,
-                    soknadTilValidering.pleietrengende)?.first ?: emptyList()
                 val journalPoster = søknadEntitet.journalposter!!
                 val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 

@@ -9,7 +9,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.sikkerhet.abac.NavHeaders
+import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper

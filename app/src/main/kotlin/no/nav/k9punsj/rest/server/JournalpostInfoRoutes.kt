@@ -1,7 +1,7 @@
 package no.nav.k9punsj.rest.server
 
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.journalpost.JournalpostService

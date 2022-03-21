@@ -1,13 +1,10 @@
 package no.nav.k9punsj.db.repository
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.Mappe
 import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.db.datamodell.PersonId
-import no.nav.k9punsj.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -17,23 +14,6 @@ class MappeRepository(private val dataSource: DataSource) {
    companion object {
        const val MAPPE_TABLE = "mappe"
    }
-
-    suspend fun hentEierAvMappe(mappeId: MappeId): PersonId? {
-        return using(sessionOf(dataSource)) {
-            return@using it.transaction { tx ->
-                return@transaction tx.run(
-                    queryOf(
-                        "select id_person from $MAPPE_TABLE where id = :mappeId",
-                        mapOf("mappeId" to UUID.fromString(mappeId))
-                    )
-                        .map { row ->
-                            row.string("id_person")
-                        }.asSingle
-                )
-            }
-        }
-
-    }
 
     suspend fun opprettEllerHentMappeForPerson(personId: PersonId): MappeId {
         return using(sessionOf(dataSource)) {

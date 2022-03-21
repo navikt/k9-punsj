@@ -1,4 +1,4 @@
-package no.nav.k9punsj
+package no.nav.k9punsj.tilgangskontroll
 
 import no.nav.security.token.support.core.configuration.IssuerProperties
 import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration
@@ -20,7 +20,8 @@ import javax.validation.Valid
 
 @Service
 internal class AuthenticationHandler(
-        multiIssuerProperties: MultiIssuerProperties) {
+        multiIssuerProperties: MultiIssuerProperties
+) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(AuthenticationHandler::class.java)

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.token
+package no.nav.k9punsj.tilgangskontroll.token
 
 
 interface IIdToken {

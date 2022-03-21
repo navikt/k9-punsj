@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.azuregraph
+package no.nav.k9punsj.tilgangskontroll.azuregraph
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

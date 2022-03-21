@@ -1,6 +1,6 @@
 package no.nav.k9punsj.azuregraph
 
-import no.nav.k9punsj.sikkerhet.azuregraph.IAzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.springframework.stereotype.Component
 
 @Component

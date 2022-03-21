@@ -1,4 +1,4 @@
-package no.nav.k9punsj.sikkerhet.audit
+package no.nav.k9punsj.tilgangskontroll.audit
 
 /**
  * Felter skal ikke brukes til andre verdier enn det som er avtalt med ArcSight-gjengen.

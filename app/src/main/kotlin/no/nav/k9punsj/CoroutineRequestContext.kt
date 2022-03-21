@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
