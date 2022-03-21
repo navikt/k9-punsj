@@ -10,6 +10,7 @@ on:
       - '.gitignore'
       - 'LICENSE'
       - 'CODEOWNERS'
+      - 'docs/**'
   workflow_dispatch:
 
 env:
