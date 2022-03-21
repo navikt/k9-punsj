@@ -1,10 +1,10 @@
-package no.nav.k9punsj.azuregraph
+package no.nav.k9punsj.sikkerhet.azuregraph
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class AccountName(
+data class OfficeLocation(
     @JsonProperty("@odata.context")
     val odataContext: String,
-    val onPremisesSamAccountName: String
+    val officeLocation: String
 )

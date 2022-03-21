@@ -4,7 +4,7 @@ import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.sikkerhet.abac.IPepClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -17,7 +17,8 @@ import kotlin.coroutines.coroutineContext
 internal class ArbeidsgiverRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val arbeidsgiverService: ArbeidsgiverService,
-    private val pepClient: IPepClient) {
+    private val pepClient: IPepClient
+) {
 
     suspend fun String.harTilgang() =
         pepClient.harBasisTilgang(this, ArbeidsgiverePath)

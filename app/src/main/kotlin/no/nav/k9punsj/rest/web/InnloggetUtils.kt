@@ -1,6 +1,6 @@
 package no.nav.k9punsj.rest.web
 
-import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.sikkerhet.abac.IPepClient
 import no.nav.k9punsj.rest.web.dto.NorskIdentDto
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -9,9 +9,9 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
 
 @Configuration
-class InnloggetUtils (
+class InnloggetUtils(
     private val pepClient: IPepClient
-        ){
+) {
 
     internal suspend fun harInnloggetBrukerTilgangTilOgSendeInn(
         norskIdentDto: NorskIdentDto,
@@ -27,7 +27,10 @@ class InnloggetUtils (
         return null
     }
 
-    internal suspend fun harInnloggetBrukerTilgangTil(norskIdentDto: List<NorskIdentDto>, url: String): ServerResponse? {
+    internal suspend fun harInnloggetBrukerTilgangTil(
+        norskIdentDto: List<NorskIdentDto>,
+        url: String
+    ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse

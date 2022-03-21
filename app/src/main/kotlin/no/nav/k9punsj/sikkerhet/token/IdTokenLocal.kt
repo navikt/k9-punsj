@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.info
+package no.nav.k9punsj.sikkerhet.token
 
 data class IdTokenLocal(
     override val value: String = "",

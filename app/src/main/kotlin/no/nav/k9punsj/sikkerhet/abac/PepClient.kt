@@ -1,4 +1,4 @@
-package no.nav.k9punsj.abac
+package no.nav.k9punsj.sikkerhet.abac
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.GsonBuilder
@@ -6,9 +6,15 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.AppConfiguration
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.audit.*
-import no.nav.k9punsj.azuregraph.AzureGraphService
+import no.nav.k9punsj.sikkerhet.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.sikkerhet.audit.Auditdata
+import no.nav.k9punsj.sikkerhet.audit.AuditdataHeader
+import no.nav.k9punsj.sikkerhet.audit.Auditlogger
+import no.nav.k9punsj.sikkerhet.audit.CefField
+import no.nav.k9punsj.sikkerhet.audit.CefFieldName
+import no.nav.k9punsj.sikkerhet.audit.EventClassId
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.Logger

@@ -1,6 +1,6 @@
 package no.nav.k9punsj.notat
 
-import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.sikkerhet.azuregraph.IAzureGraphService
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.*
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService

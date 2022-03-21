@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.info
+package no.nav.k9punsj.sikkerhet.token
 
 import no.nav.k9punsj.objectMapper
 import java.nio.charset.Charset

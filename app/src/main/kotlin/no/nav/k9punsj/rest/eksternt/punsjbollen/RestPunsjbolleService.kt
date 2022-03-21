@@ -12,7 +12,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.abac.NavHeaders
+import no.nav.k9punsj.sikkerhet.abac.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.abac
+package no.nav.k9punsj.sikkerhet.abac
 
 
 import com.fasterxml.jackson.annotation.JsonProperty

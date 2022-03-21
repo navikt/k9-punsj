@@ -1,4 +1,4 @@
-package no.nav.k9punsj.audit
+package no.nav.k9punsj.sikkerhet.audit
 
 import no.nav.k9punsj.AppConfiguration
 import org.slf4j.Logger

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.audit
+package no.nav.k9punsj.sikkerhet.audit
 
 class CefField {
     private var key: CefFieldName

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.azuregraph
+package no.nav.k9punsj.sikkerhet.azuregraph
 
 interface IAzureGraphService {
     suspend fun hentIdentTilInnloggetBruker(): String

@@ -3,7 +3,7 @@ package no.nav.k9punsj.rest.web.ruter
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.sikkerhet.azuregraph.IAzureGraphService
 import no.nav.k9punsj.brev.BrevServiceImpl
 import no.nav.k9punsj.brev.BrevType
 import no.nav.k9punsj.brev.BrevVisningDto

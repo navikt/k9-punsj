@@ -3,7 +3,7 @@ package no.nav.k9punsj.person
 import no.nav.k9punsj.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.sikkerhet.abac.IPepClient
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HenteBarn
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HentePerson
 import no.nav.k9punsj.rest.eksternt.pdl.PdlService

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.azuregraph
+package no.nav.k9punsj.sikkerhet.azuregraph
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
@@ -8,7 +8,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.info.ITokenService
+import no.nav.k9punsj.sikkerhet.token.ITokenService
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.LoggerFactory
