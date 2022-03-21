@@ -12,6 +12,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.integrasjoner.punsjbollen.RestPunsjbolleService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.net.URI

@@ -8,10 +8,10 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarPlsDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarPlsDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken

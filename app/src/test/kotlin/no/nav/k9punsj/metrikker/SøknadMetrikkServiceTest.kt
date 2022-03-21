@@ -2,11 +2,16 @@ package no.nav.k9punsj.metrikker
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.k9.søknad.ytelse.Ytelse.Type
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.mappers.*
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.SøknadJson
-import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.MetricUtils
 import no.nav.k9punsj.util.MetricUtils.MetrikkTag

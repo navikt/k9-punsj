@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import no.nav.k9punsj.rest.eksternt.pdl.PdlRoutes
+import no.nav.k9punsj.integrasjoner.pdl.PdlRoutes
 
 @RestController
 @Tag(name = "Pdl", description = "Hent aktørid fra norsk ident")

@@ -1,12 +1,12 @@
 package no.nav.k9punsj.person
 
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HenteBarn
 import no.nav.k9punsj.person.PersonRoutesConfiguration.Urls.HentePerson
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -21,7 +21,8 @@ internal class PersonRoutesConfiguration(
     private val authenticationHandler: AuthenticationHandler,
     private val pepClient: IPepClient,
     private val barnService: BarnService,
-    private val pdlService: PdlService) {
+    private val pdlService: PdlService
+) {
 
     internal object Urls {
         internal const val HenteBarn = "/barn"

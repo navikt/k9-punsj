@@ -6,8 +6,8 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
+import no.nav.k9punsj.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.notat.NotatPDFGenerator
 import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -91,26 +91,26 @@ class JournalpostService(
         return dokarkivGateway.opprettJournalpost(journalPostRequest)
     }
 
-    private fun utledMottattDato(parsedJournalpost: ParsedJournalpost): LocalDateTime {
-        return if (parsedJournalpost.journalpostType == SafDtos.JournalpostType.I) {
-            parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
+    private fun utledMottattDato(parsedSafJournalpost: ParsedSafJournalpost): LocalDateTime {
+        return if (parsedSafJournalpost.journalpostType == SafDtos.JournalpostType.I) {
+            parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
-            parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
-        } ?: parsedJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
+            parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
+        } ?: parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
         ?: logger.warn(
-            "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedJournalpost.relevanteDatoer.map { it.datotype.name }}"
+            "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedSafJournalpost.relevanteDatoer.map { it.datotype.name }}"
         ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
-    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<Journalpost> {
+    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPersonBareFordel(aktørId)
     }
 
-    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): Journalpost? {
+    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): PunsjJournalpost? {
         return journalpostRepository.hentHvis(journalpostId)
     }
 
@@ -118,9 +118,9 @@ class JournalpostService(
         return journalpostRepository.kanSendeInn(listOf(journalpostId))
     }
 
-    internal suspend fun lagre(journalpost: Journalpost, kilde: KildeType = KildeType.FORDEL) {
-        journalpostRepository.lagre(journalpost, kilde) {
-            journalpost
+    internal suspend fun lagre(punsjJournalpost: PunsjJournalpost, kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL) {
+        journalpostRepository.lagre(punsjJournalpost, kilde) {
+            punsjJournalpost
         }
     }
 
@@ -133,7 +133,7 @@ class JournalpostService(
     }
 }
 
-private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
+private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
     val arkivDokumenter = dokumenter
         .filter { it.dokumentvarianter != null && it.dokumentvarianter.isNotEmpty() }
         .onEach { it ->
@@ -142,7 +142,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
             }
         }
 
-    return ParsedJournalpost(
+    return ParsedSafJournalpost(
         journalpostType = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
         brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
         avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
@@ -159,7 +159,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedJournalpost {
     )
 }
 
-private data class ParsedJournalpost(
+private data class ParsedSafJournalpost(
     val journalpostType: SafDtos.JournalpostType?,
     val brukerType: SafDtos.BrukerType?,
     val avsenderType: SafDtos.AvsenderType?,
@@ -194,9 +194,7 @@ data class JournalpostInfoDto(
     val erSaksbehandler: Boolean? = null,
     val journalpostStatus: String,
     val kanOpprettesJournalføringsoppgave: Boolean,
-) {
-    val kanKopieres = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående
-}
+)
 
 data class VentDto(
     val venteÅrsak: String,

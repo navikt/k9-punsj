@@ -45,19 +45,6 @@ class PersonRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hentPersonVedAktørId(aktørId: AktørId): Person? {
-        val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where aktoer_ident = ?"
-
-        return using(sessionOf(dataSource)) {
-            return@using it.transaction { tx ->
-                //language=PostgreSQL
-                return@transaction tx.single(
-                    queryOf(nameQuery, aktørId), toPerson
-                )
-            }
-        }
-    }
-
     suspend fun lagre(norskIdent: String, aktørId: String): Person {
         val uuid = UUID.randomUUID()
 

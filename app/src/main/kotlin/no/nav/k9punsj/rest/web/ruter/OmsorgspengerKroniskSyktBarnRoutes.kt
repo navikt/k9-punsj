@@ -4,22 +4,30 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsKSBDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
+import no.nav.k9punsj.domenetjenester.dto.tilOmsKSBVisning
+import no.nav.k9punsj.domenetjenester.dto.tilOmsKSBvisning
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
-import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -148,7 +156,8 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
                 } else {
                     val (entitet, _) = søknadEntitet
                     val søker = personService.finnPerson(entitet.søkerId)
-                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(entitet),
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+                        hentUtJournalposter(entitet),
                         søker.aktørId)
                     ServerResponse
                         .ok()

@@ -8,11 +8,10 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
-
 
 @Repository
 class JournalpostRepository(private val dataSource: DataSource) {
@@ -24,24 +23,24 @@ class JournalpostRepository(private val dataSource: DataSource) {
     private val objectMapper = objectMapper()
 
     suspend fun lagre(
-        journalpostId: Journalpost,
-        kilde: KildeType = KildeType.FORDEL,
-        function: (Journalpost?) -> Journalpost,
-    ): Journalpost {
+        punsjJournalpostId: PunsjJournalpost,
+        kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
+        function: (PunsjJournalpost?) -> PunsjJournalpost,
+    ): PunsjJournalpost {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val json = tx.run(
                     queryOf(
                         "select data from $JOURNALPOST_TABLE where JOURNALPOST_ID = :id for update",
-                        mapOf("id" to journalpostId.journalpostId)
+                        mapOf("id" to punsjJournalpostId.journalpostId)
                     )
                         .map { row ->
                             row.string("data")
                         }.asSingle
                 )
 
-                val journalpost = if (!json.isNullOrEmpty()) {
-                    function(objectMapper.readValue(json, Journalpost::class.java))
+                val punsjJournalpost = if (!json.isNullOrEmpty()) {
+                    function(objectMapper.readValue(json, PunsjJournalpost::class.java))
                 } else {
                     function(null)
                 }
@@ -54,17 +53,17 @@ class JournalpostRepository(private val dataSource: DataSource) {
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
                  """,
-                        mapOf("id" to journalpostId.journalpostId,
-                            "data" to objectMapper.writeValueAsString(journalpost),
+                        mapOf("id" to punsjJournalpostId.journalpostId,
+                            "data" to objectMapper.writeValueAsString(punsjJournalpost),
                             "kilde" to kilde.kode)
                     ).asUpdate
                 )
-                return@transaction journalpost
+                return@transaction punsjJournalpost
             }
         }
     }
 
-    suspend fun hent(journalpostId: String): Journalpost {
+    suspend fun hent(journalpostId: String): PunsjJournalpost {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 //language=PostgreSQL
@@ -77,12 +76,12 @@ class JournalpostRepository(private val dataSource: DataSource) {
                             row.string("data")
                         }.asSingle
                 )
-                return@transaction objectMapper.readValue(json, Journalpost::class.java)
+                return@transaction objectMapper.readValue(json, PunsjJournalpost::class.java)
             }
         }
     }
 
-    suspend fun hentHvis(journalpostId: String): Journalpost? {
+    suspend fun hentHvis(journalpostId: String): PunsjJournalpost? {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 //language=PostgreSQL
@@ -96,7 +95,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                         }.asSingle
                 )
                 if (json != null) {
-                    return@transaction objectMapper.readValue(json, Journalpost::class.java)
+                    return@transaction objectMapper.readValue(json, PunsjJournalpost::class.java)
 
                 }
                 return@transaction null
@@ -104,7 +103,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<Journalpost> {
+    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
@@ -115,11 +114,11 @@ class JournalpostRepository(private val dataSource: DataSource) {
                         row.string("data")
                     }.asList
             )
-            resultat.map { res ->  objectMapper.readValue(res, Journalpost::class.java) }
+            resultat.map { res ->  objectMapper.readValue(res, PunsjJournalpost::class.java) }
         }
     }
 
-    suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<Journalpost> {
+    suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
@@ -130,7 +129,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                         row.string("data")
                     }.asList
             )
-            resultat.map { res ->  objectMapper.readValue(res, Journalpost::class.java) }
+            resultat.map { res ->  objectMapper.readValue(res, PunsjJournalpost::class.java) }
         }
     }
 
@@ -146,7 +145,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun opprettJournalpost(jp: Journalpost): Journalpost {
+    suspend fun opprettJournalpost(jp: PunsjJournalpost): PunsjJournalpost {
         return lagre(jp) {
             jp
         }
@@ -179,9 +178,9 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<JournalpostIdDto>?, aktørId: AktørId) {
         journalposter?.forEach {
             if (journalpostIkkeEksisterer(it)) {
-                val journalpost = Journalpost(UUID.randomUUID(), it, aktørId)
-                lagre(journalpost, KildeType.SAKSBEHANDLER) {
-                    journalpost
+                val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
+                lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER) {
+                    punsjJournalpost
                 }
             }
         }

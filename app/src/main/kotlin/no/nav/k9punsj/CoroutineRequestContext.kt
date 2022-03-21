@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
-import no.nav.k9punsj.exception.ExceptionResponse
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,6 +13,7 @@ import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.*
+import java.net.URI
 import java.util.UUID
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
@@ -170,3 +171,9 @@ data class Authentication(
         accessToken = split[1]
     }
 }
+
+data class ExceptionResponse(
+    val message: String,
+    val uri: URI,
+    val exceptionId: String
+)

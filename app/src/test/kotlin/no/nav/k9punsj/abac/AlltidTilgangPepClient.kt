@@ -1,5 +1,6 @@
 package no.nav.k9punsj.abac
 
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import org.springframework.stereotype.Component
 
 @Component

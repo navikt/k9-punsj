@@ -17,3 +17,8 @@ internal data class Identitetsnummer private constructor(private val value: Stri
         internal fun String.somIdentitetsnummer() = Identitetsnummer(this)
     }
 }
+
+enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
+    FORDEL ("FORDEL", "Fordel"),
+    SAKSBEHANDLER("SAKSBEHANDLER", "Saksbehandler");
+}

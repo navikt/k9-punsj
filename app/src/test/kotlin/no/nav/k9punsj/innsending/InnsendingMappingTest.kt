@@ -6,8 +6,8 @@ import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject

@@ -11,7 +11,7 @@ import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
-import no.nav.k9punsj.journalpost.JournalpostMetrikkRepository
+import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import javax.sql.DataSource
 

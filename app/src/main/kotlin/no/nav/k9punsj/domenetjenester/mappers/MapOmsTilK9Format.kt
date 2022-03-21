@@ -12,9 +12,9 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId

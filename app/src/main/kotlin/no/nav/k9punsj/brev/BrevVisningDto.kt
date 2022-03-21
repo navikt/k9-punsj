@@ -1,7 +1,7 @@
 package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime

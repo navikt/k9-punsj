@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.eksternt.pdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
 import no.nav.k9punsj.objectMapper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
