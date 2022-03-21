@@ -1,11 +1,11 @@
 package no.nav.k9punsj.omsorgspenger.overfoerdager
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.ExceptionResponse
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.awaitStatuscode
-import no.nav.k9punsj.exception.ExceptionResponse
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import org.assertj.core.api.Assertions.assertThat
