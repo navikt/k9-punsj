@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

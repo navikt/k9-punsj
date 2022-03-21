@@ -12,9 +12,9 @@ import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

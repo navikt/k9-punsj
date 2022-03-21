@@ -9,7 +9,7 @@ import no.nav.k9punsj.brev.BrevType
 import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
-import no.nav.k9punsj.rest.web.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.rest.web.brevBestilling
 import no.nav.k9punsj.rest.web.norskIdent
 import no.nav.k9punsj.rest.web.openapi.OasFeil

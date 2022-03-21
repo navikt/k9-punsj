@@ -14,11 +14,11 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors

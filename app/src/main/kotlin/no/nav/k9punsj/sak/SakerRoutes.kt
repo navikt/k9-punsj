@@ -3,7 +3,7 @@ package no.nav.k9punsj.sak
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.rest.web.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.rest.web.norskIdent
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import org.slf4j.Logger

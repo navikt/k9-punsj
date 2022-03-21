@@ -2,7 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 
 interface AksjonspunktService {
 

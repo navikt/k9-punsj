@@ -1,6 +1,10 @@
 package no.nav.k9punsj.rest.eksternt.pdl
 
 import no.nav.k9punsj.TestProfil
+import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
+import no.nav.k9punsj.integrasjoner.pdl.PdlResponse
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

@@ -8,10 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
-import no.nav.k9punsj.rest.web.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.rest.web.dto.OmsorgspengerSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarOmsDto
-import no.nav.k9punsj.rest.web.dto.SøknadFeil
+import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
 
 @RestController

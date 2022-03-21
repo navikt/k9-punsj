@@ -9,6 +9,11 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarPsbDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad

@@ -9,11 +9,11 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.dokarkiv.SafDtos
-import no.nav.k9punsj.helsesjekk
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger

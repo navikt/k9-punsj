@@ -13,14 +13,23 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
+import no.nav.k9punsj.domenetjenester.dto.tilOmsVisning
+import no.nav.k9punsj.domenetjenester.dto.tilOmsvisning
 import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.rest.eksternt.k9sak.K9SakService
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
-import no.nav.k9punsj.rest.web.dto.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -156,7 +165,8 @@ internal class OmsorgspengerRoutes(
                 } else {
                     val (entitet, _) = søknadEntitet
                     val søker = personService.finnPerson(entitet.søkerId)
-                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(hentUtJournalposter(entitet),
+                    journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+                        hentUtJournalposter(entitet),
                         søker.aktørId)
                     ServerResponse
                         .ok()

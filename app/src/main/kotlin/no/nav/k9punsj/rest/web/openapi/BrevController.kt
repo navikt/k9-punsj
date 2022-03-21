@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
-import no.nav.k9punsj.rest.web.dto.AktørIdDto
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
 import no.nav.k9punsj.rest.web.ruter.BrevRoutes
 
 @RestController

@@ -7,7 +7,7 @@ import no.nav.k9punsj.AppConfiguration
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.tilgangskontroll.audit.Auditdata
 import no.nav.k9punsj.tilgangskontroll.audit.AuditdataHeader
 import no.nav.k9punsj.tilgangskontroll.audit.Auditlogger

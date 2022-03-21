@@ -3,8 +3,8 @@ package no.nav.k9punsj.notat
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.*
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
-import no.nav.k9punsj.rest.eksternt.pdl.Personopplysninger
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
 import org.json.JSONObject
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext

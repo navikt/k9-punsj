@@ -6,6 +6,10 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsKSBDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson

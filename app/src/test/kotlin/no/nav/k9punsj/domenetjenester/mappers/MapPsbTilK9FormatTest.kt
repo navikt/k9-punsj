@@ -1,8 +1,8 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.PleiepengerSøknadVisningDtoUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
