@@ -7,6 +7,8 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.azuregraph.AzureGraphService
+import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -29,7 +31,9 @@ internal class GosysRoutes(
     private val gosysOppgaveService: GosysOppgaveService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
-    private val journalpostService: JournalpostService) {
+    private val journalpostService: JournalpostService,
+    private val azureGraphService: IAzureGraphService
+) {
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(GosysRoutes::class.java)
@@ -90,7 +94,11 @@ internal class GosysRoutes(
                                 .json()
                                 .bodyValueAndAwait(OasFeil(feil))
                         }
-                        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(requestParameters.journalpostId, false)
+                        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                            requestParameters.journalpostId,
+                            erSendtInn = false,
+                            ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+                        )
                         journalpostService.settTilFerdig(requestParameters.journalpostId)
 
                         logger.info("Journalpost sendes til Gosys", keyValue("journalpost_id", requestParameters.journalpostId))

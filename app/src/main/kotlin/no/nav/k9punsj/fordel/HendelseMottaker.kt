@@ -58,7 +58,7 @@ class HendelseMottaker @Autowired constructor(
                 val journalpostFraDb = journalpostRepository.hent(journalpostId)
                 if (journalpostFraDb.type != null && PunsjInnsendingType.fraKode(journalpostFraDb.type) != PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                     journalpostRepository.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
-                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 } else {
                     log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
                 }

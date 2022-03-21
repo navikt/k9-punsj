@@ -259,7 +259,7 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 journalpostService.settTilFerdig(journalpostId)
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
@@ -337,7 +337,7 @@ internal class JournalpostRoutes(
 
                 val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
                 if (kanSendeInn) {
-                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                     journalpostService.settTilFerdig(journalpostId)
                     logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
@@ -431,7 +431,11 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false)
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                    journalpostId,
+                    erSendtInn = false,
+                    ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+                )
                 journalpostService.settTilFerdig(journalpostId)
 
                 return@RequestContext kotlin.runCatching {

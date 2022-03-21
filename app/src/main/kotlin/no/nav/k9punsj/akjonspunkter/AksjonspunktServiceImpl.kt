@@ -69,6 +69,7 @@ class AksjonspunktServiceImpl(
     override suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(
         journalpostId: String,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
+        ansvarligSaksbehandler: String?
     ) {
         val journalpost = journalpostRepository.hent(journalpostId)
         val eksternId = journalpost.uuid
@@ -81,7 +82,7 @@ class AksjonspunktServiceImpl(
                 journalpostId,
                 journalpost.aktørId,
                 mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
-
+                ferdigstiltAv = ansvarligSaksbehandler,
             ),
             eksternId.toString()) {
 
@@ -92,7 +93,11 @@ class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean) {
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(
+        journalpostId: String,
+        erSendtInn: Boolean,
+        ansvarligSaksbehandler: String?
+    ) {
         val aksjonspunkterSomSkalLukkes = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId)
             .filter { it.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET }
 
@@ -111,7 +116,8 @@ class AksjonspunktServiceImpl(
                     journalpostId = journalpostId,
                     aktørId = journalpost.aktørId,
                     aksjonspunkter = mutableMap,
-                    sendtInn = erSendtInn
+                    sendtInn = erSendtInn,
+                    ferdigstiltAv = ansvarligSaksbehandler
                 ),
                 eksternId.toString()) {
                 runBlocking {
@@ -124,15 +130,8 @@ class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: List<String>, erSendtInn: Boolean) {
-        journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it, erSendtInn) }
-    }
-
-    override suspend fun settUtførtForAksjonspunkterOgSendLukkOppgaveTilK9Los(
-        journalpostId: List<String>,
-        aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
-    ) {
-        journalpostId.forEach { settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(it, aksjonspunkt) }
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: Collection<String>, erSendtInn: Boolean, ansvarligSaksbehandler: String?) {
+        journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it, erSendtInn, ansvarligSaksbehandler) }
     }
 
     override suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto? {
@@ -234,7 +233,8 @@ class AksjonspunktServiceImpl(
         ytelse: String? = null,
         type: String? = null,
         barnIdent: String? = null,
-        sendtInn : Boolean? = null
+        sendtInn : Boolean? = null,
+        ferdigstiltAv: String? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId.toString(),
@@ -245,7 +245,8 @@ class AksjonspunktServiceImpl(
             pleietrengendeAktørId = barnIdent,
             ytelse = ytelse,
             type = type,
-            sendtInn = sendtInn
+            sendtInn = sendtInn,
+            ferdigstiltAv = ferdigstiltAv
         )
         return objectMapper().writeValueAsString(punsjEventDto)
     }

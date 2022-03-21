@@ -13,5 +13,6 @@ data class PunsjEventDto(
         val pleietrengendeAktørId: String? = null,
         val type : String? = null,
         val ytelse : String? = null,
-        val sendtInn : Boolean? = null
+        val sendtInn : Boolean? = null,
+        val ferdigstiltAv: String? = null
 )
