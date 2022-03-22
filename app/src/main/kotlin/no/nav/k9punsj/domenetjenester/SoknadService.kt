@@ -2,8 +2,6 @@ package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.azuregraph.AzureGraphService
-import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -11,6 +9,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

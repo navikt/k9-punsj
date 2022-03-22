@@ -1,4 +1,4 @@
-package no.nav.k9punsj.integrasjoner.gosys
+ package no.nav.k9punsj.integrasjoner.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -7,14 +7,13 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.azuregraph.AzureGraphService
-import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
