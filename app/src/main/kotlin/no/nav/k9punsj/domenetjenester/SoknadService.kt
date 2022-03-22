@@ -2,6 +2,8 @@ package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.azuregraph.AzureGraphService
+import no.nav.k9punsj.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -23,7 +25,8 @@ class SoknadService(
     val søknadRepository: SøknadRepository,
     val innsendingClient: InnsendingClient,
     val aksjonspunktService: AksjonspunktService,
-    val søknadMetrikkService: SøknadMetrikkService
+    val søknadMetrikkService: SøknadMetrikkService,
+    val azureGraphService: IAzureGraphService
 ) {
 
     internal suspend fun sendSøknad(
@@ -46,7 +49,14 @@ class SoknadService(
             journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostIder.toList(), true)
+
+            val ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                journalpostIder,
+                erSendtInn = true,
+                ansvarligSaksbehandler = ansvarligSaksbehandler
+            )
+
             søknadMetrikkService.publiserMetrikker(søknad)
             null
         } else {
