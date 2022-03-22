@@ -2,27 +2,27 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.abac.IPepClient
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.azuregraph.IAzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.Identitetsnummer.Companion.somIdentitetsnummer
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleRuting
-import no.nav.k9punsj.rest.eksternt.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.rest.eksternt.punsjbollen.somPunsjbolleRuting
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.integrasjoner.punsjbollen.somPunsjbolleRuting
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
-import no.nav.k9punsj.rest.web.dto.IdentDto
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.IdentDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.rest.web.identOgJournalpost
 import no.nav.k9punsj.rest.web.openapi.*
 import org.slf4j.Logger
@@ -488,31 +488,31 @@ internal class JournalpostRoutes(
                 VirkedagerUtil.tilbakeStillToVirkedagerHvisDetKommerFraScanning(journalpostFraBasen.type, mottattDato)
             journalpostService.lagre(journalpostFraBasen.copy(mottattDato = justertDato))
         } else {
-            val journalpost = Journalpost(
+            val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = jornalpostId,
                 aktørId,
                 mottattDato = mottattDato
             )
-            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
 
     private suspend fun lagreHvorJournalpostSkal(
-        hentHvisJournalpostMedId: Journalpost?,
+        hentHvisPunsjJournalpostMedId: PunsjJournalpost?,
         dto: PunsjBolleDto,
         skalTilK9: Boolean,
     ) {
-        if (hentHvisJournalpostMedId != null) {
-            journalpostService.lagre(hentHvisJournalpostMedId.copy(skalTilK9 = skalTilK9))
+        if (hentHvisPunsjJournalpostMedId != null) {
+            journalpostService.lagre(hentHvisPunsjJournalpostMedId.copy(skalTilK9 = skalTilK9))
         } else {
-            val journalpost = Journalpost(
+            val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = dto.journalpostId,
                 pdlService.aktørIdFor(dto.brukerIdent),
                 skalTilK9 = skalTilK9
             )
-            journalpostService.lagre(journalpost, KildeType.SAKSBEHANDLER)
+            journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
 

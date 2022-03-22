@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.db.config.DbConfiguration
 import no.nav.k9punsj.db.config.hikariConfig
-import no.nav.k9punsj.jackson.UlidDeserializer
+import no.nav.k9punsj.utils.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration

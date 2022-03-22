@@ -1,5 +1,8 @@
 package no.nav.k9punsj.gosys
 
+import no.nav.k9punsj.integrasjoner.gosys.Behandlingstema
+import no.nav.k9punsj.integrasjoner.gosys.Behandlingstype
+import no.nav.k9punsj.integrasjoner.gosys.Gjelder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

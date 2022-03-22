@@ -105,8 +105,7 @@ class K9PunsjApplicationTests {
 	"kanSendeInn": true,
 	"erSaksbehandler": true,
 	"journalpostStatus": "MOTTATT",
-	"kanOpprettesJournalføringsoppgave": true,
-	"kanKopieres": true
+	"kanOpprettesJournalføringsoppgave": true
 }""".trimIndent(), body, true)
     }
 

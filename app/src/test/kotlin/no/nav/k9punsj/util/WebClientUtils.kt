@@ -2,7 +2,7 @@ package no.nav.k9punsj.util
 
 import no.nav.k9punsj.awaitExchangeBlocking
 import no.nav.k9punsj.awaitStatusWithBody
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import org.junit.jupiter.api.Assertions
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus

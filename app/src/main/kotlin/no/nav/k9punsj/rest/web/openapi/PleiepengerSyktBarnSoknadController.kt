@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.rest.web.dto.PerioderDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.rest.web.dto.SvarPsbDto
-import no.nav.k9punsj.rest.web.dto.SøknadFeil
+import no.nav.k9punsj.domenetjenester.dto.PerioderDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarPsbDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.rest.web.ruter.PleiepengerSyktBarnRoutes
 import org.springframework.web.bind.annotation.*
 

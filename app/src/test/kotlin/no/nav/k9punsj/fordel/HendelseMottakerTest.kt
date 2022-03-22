@@ -10,7 +10,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
@@ -89,9 +89,9 @@ internal class HendelseMottakerTest {
         val journalpostRepository = hendelseMottaker.journalpostRepository
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
-        val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
-        journalpostRepository.lagre(journalpostTilDb){
-            journalpostTilDb
+        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
+        journalpostRepository.lagre(punsjJournalpostTilDb){
+            punsjJournalpostTilDb
         }
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
@@ -106,9 +106,9 @@ internal class HendelseMottakerTest {
         val journalpostRepository = hendelseMottaker.journalpostRepository
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
-        val journalpostTilDb = Journalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
-        journalpostRepository.lagre(journalpostTilDb){
-            journalpostTilDb
+        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
+        journalpostRepository.lagre(punsjJournalpostTilDb){
+            punsjJournalpostTilDb
         }
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)

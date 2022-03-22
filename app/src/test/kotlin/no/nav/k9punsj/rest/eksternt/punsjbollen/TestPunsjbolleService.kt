@@ -4,10 +4,12 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.TestProfil
-import no.nav.k9punsj.rest.web.dto.JournalpostIdDto
-import no.nav.k9punsj.rest.web.dto.NorskIdentDto
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.SaksnummerDto
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
 import org.springframework.stereotype.Component
 
 @Component

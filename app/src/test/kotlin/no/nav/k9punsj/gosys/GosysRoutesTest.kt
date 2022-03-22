@@ -4,6 +4,7 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.integrasjoner.gosys.Gjelder
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals

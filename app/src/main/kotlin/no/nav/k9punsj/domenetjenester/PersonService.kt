@@ -4,7 +4,7 @@ import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Person
 import no.nav.k9punsj.db.datamodell.PersonId
 import no.nav.k9punsj.db.repository.PersonRepository
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Service
 
 

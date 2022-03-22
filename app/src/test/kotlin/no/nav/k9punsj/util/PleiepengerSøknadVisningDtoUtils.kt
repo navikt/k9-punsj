@@ -5,8 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalTime
@@ -145,7 +145,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 )
             )
         ),
-        uttak = listOf(PleiepengerSyktBarnSøknadDto.UttakDto(
+        uttak = listOf(
+            PleiepengerSyktBarnSøknadDto.UttakDto(
             periode = optionalPeriode,
             timerPleieAvBarnetPerDag = optionalTekst
         )),
@@ -154,7 +155,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
             samtykketOmsorgForBarnet = null,
             beskrivelseAvOmsorgsrollen = optionalTekst
         ),
-        bosteder = listOf(PleiepengerSyktBarnSøknadDto.BostederDto(
+        bosteder = listOf(
+            PleiepengerSyktBarnSøknadDto.BostederDto(
             periode = optionalPeriode,
             land = optionalTekst
         )),

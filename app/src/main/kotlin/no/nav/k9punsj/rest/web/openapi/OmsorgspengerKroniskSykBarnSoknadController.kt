@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.rest.web.dto.*
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsKSBDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.rest.web.ruter.OmsorgspengerKroniskSyktBarnRoutes
 

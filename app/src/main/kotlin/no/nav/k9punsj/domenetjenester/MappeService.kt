@@ -5,10 +5,17 @@ import no.nav.k9punsj.db.datamodell.*
 import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
-import no.nav.k9punsj.rest.web.dto.*
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -22,16 +29,6 @@ class MappeService(
     val personService: PersonService,
     val journalpostRepository: JournalpostRepository,
 ) {
-
-    suspend fun hent(mappeId: MappeId): Mappe? {
-        val hentEierAvMappe = mappeRepository.hentEierAvMappe(mappeId)
-        if (hentEierAvMappe != null) {
-            return henterMappeMedAlleKoblinger(mappeId,
-                personService.finnPerson(hentEierAvMappe))
-
-        }
-        return null
-    }
 
     suspend fun hentMappe(person: Person): Mappe {
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)

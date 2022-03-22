@@ -3,8 +3,10 @@ package no.nav.k9punsj.rest.eksternt.k9sak
 import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
-import no.nav.k9punsj.rest.web.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.rest.web.dto.PeriodeDto
+import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.springframework.stereotype.Component
 
 @Component

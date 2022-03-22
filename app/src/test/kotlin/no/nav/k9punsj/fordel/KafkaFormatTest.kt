@@ -62,10 +62,7 @@ internal class KafkaFormatTest {
             aktørId = "33333333333",
             journalpostId = "22222222222",
             ytelse = "PSB",
-            type = "KOPI",
-            opprinneligJournalpost = FordelPunsjEventDto.OpprinneligJournalpost(
-                journalpostId = "11111111111"
-            )
+            type = "KOPI"
         )
 
         assertEquals(forventet, melding.somFordelPunsjEventDto("test-topic"))

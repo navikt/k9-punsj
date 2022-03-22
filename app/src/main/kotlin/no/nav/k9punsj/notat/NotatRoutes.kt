@@ -1,7 +1,7 @@
 package no.nav.k9punsj.notat
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.rest.web.openapi.OasFeil

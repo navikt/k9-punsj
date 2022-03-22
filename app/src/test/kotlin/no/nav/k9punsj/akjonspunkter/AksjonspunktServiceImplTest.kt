@@ -12,7 +12,7 @@ import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
@@ -72,14 +72,14 @@ internal class AksjonspunktServiceImplTest {
 
     @Test
     fun `opprett aksjonspunkt og deretter sett på vent`(): Unit = runBlocking {
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666")
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = "test", ytelse = "test")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
@@ -105,14 +105,14 @@ internal class AksjonspunktServiceImplTest {
         val journalpostId = "294523"
         val søknadId = "21707da8-a13b-4927-8776-c53399727b29"
 
-        val melding = FordelPunsjEventDto(aktørId = barnetsAktørId, journalpostId = journalpostId)
+        val melding = FordelPunsjEventDto(aktørId = barnetsAktørId, journalpostId = journalpostId, type = "test", ytelse = "test")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(Journalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),

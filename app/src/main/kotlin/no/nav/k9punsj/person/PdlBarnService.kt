@@ -1,13 +1,14 @@
 package no.nav.k9punsj.person
 
 import no.nav.k9punsj.IkkeLokalProfil
-import no.nav.k9punsj.rest.eksternt.pdl.PdlService
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Component
 
 @Component
 @IkkeLokalProfil
 internal class PdlBarnService(
-    private val pdlService: PdlService) : BarnService {
+    private val pdlService: PdlService
+) : BarnService {
 
     override suspend fun hentBarn(identitetsnummer: String) : Set<Barn> {
         return pdlService.hentPersonopplysninger(

@@ -6,15 +6,15 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.Journalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.dto.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.rest.web.dto.SøknadIdDto
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
+import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -35,24 +35,24 @@ class AksjonspunktServiceImpl(
     }
 
     override suspend fun opprettAksjonspunktOgSendTilK9Los(
-        journalpost: Journalpost,
+        punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
         ytelse: String?,
     ) {
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
-        val eksternId = journalpost.uuid
+        val eksternId = punsjJournalpost.uuid
         val aksjonspunktEntitet = AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),
             aksjonspunktKode = aksjonspunktKode,
-            journalpostId = journalpost.journalpostId,
+            journalpostId = punsjJournalpost.journalpostId,
             aksjonspunktStatus = aksjonspunktStatus)
 
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
             lagPunsjDto(eksternId,
-                journalpostId = journalpost.journalpostId,
-                aktørId = journalpost.aktørId,
+                journalpostId = punsjJournalpost.journalpostId,
+                aktørId = punsjJournalpost.aktørId,
                 aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
                 ytelse = ytelse,
                 type = type
@@ -211,18 +211,18 @@ class AksjonspunktServiceImpl(
         }
     }
 
-    private suspend fun uteldAktørId(søknadId: SøknadIdDto?, journalpost: Journalpost) : AktørId? {
+    private suspend fun uteldAktørId(søknadId: SøknadIdDto?, punsjJournalpost: PunsjJournalpost) : AktørId? {
         if (søknadId == null) {
-            return journalpost.aktørId
+            return punsjJournalpost.aktørId
         }
-        val personId = søknadRepository.hentSøknad(søknadId = søknadId)?.søkerId ?: return journalpost.aktørId
+        val personId = søknadRepository.hentSøknad(søknadId = søknadId)?.søkerId ?: return punsjJournalpost.aktørId
         val aktørIdPåSøknaden = personService.finnPerson(personId).aktørId
 
         // betyr at søknaden har byttet fra opprinnelig aktørId til ny aktørId (kan skje hvis den opprinnelig journalposten kommer inn på barnet sitt aktørNummer)
-        if (aktørIdPåSøknaden != journalpost.aktørId) {
+        if (aktørIdPåSøknaden != punsjJournalpost.aktørId) {
             return aktørIdPåSøknaden
         }
-        return journalpost.aktørId
+        return punsjJournalpost.aktørId
     }
 
     private fun lagPunsjDto(
