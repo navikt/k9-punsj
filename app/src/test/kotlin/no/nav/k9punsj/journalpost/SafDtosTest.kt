@@ -10,6 +10,7 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost() {
         val journalpost = SafDtos.Journalpost(
+            "123456789",
             "test",
             "test",
             "test",
@@ -27,6 +28,7 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost_true() {
         val journalpost = SafDtos.Journalpost(
+            "123456789",
             "test",
             "test",
             "test",
@@ -44,6 +46,7 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost_ikke_digital() {
         val journalpost = SafDtos.Journalpost(
+            "123456789",
             "test",
             "test",
             "test",

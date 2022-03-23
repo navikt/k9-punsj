@@ -10,12 +10,8 @@ import java.util.*
 @Component
 class LoggFilter :WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val callIdKey = exchange.request.headers["x_callId"]?.firstOrNull() ?: UUID.randomUUID().toString()
-        val response = exchange.response
-        response.beforeCommit {
-            response.headers.set("punsj_callId", callIdKey)
-            return@beforeCommit Mono.empty()
-        }
+        val callId = exchange.request.headers["x_callId"]?.firstOrNull() ?: UUID.randomUUID().toString()
+        exchange.response.headers.add("punsj_callId", callId)
         return chain.filter(exchange)
     }
 }

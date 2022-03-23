@@ -3,13 +3,14 @@ package no.nav.k9punsj.domenetjenester
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.SafGateway
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -25,35 +26,49 @@ class SoknadService(
     val innsendingClient: InnsendingClient,
     val aksjonspunktService: AksjonspunktService,
     val søknadMetrikkService: SøknadMetrikkService,
-    val azureGraphService: IAzureGraphService
+    val safGateway: SafGateway
 ) {
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
         journalpostIder: MutableSet<JournalpostId>,
     ): Pair<HttpStatus, String>? {
-        return if (journalpostRepository.kanSendeInn(journalpostIder.toList())) {
+        val journalpostIdListe = journalpostIder.toList()
+        val journalposterHarIkkeBlittSendtInn = journalpostRepository.kanSendeInn(journalpostIdListe)
+        val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"","")
+
+        return if (journalposterHarIkkeBlittSendtInn) {
+            val journalposterMedTypeUtgaaende = safGateway.hentJournalposter(journalpostIdListe)
+                .filterNotNull()
+                .filter { it.journalposttype.equals(SafDtos.JournalpostType.U) }
+                .map { it.journalpostId }
+                .toSet()
+
+            if(journalposterMedTypeUtgaaende.isNotEmpty()) {
+                return Pair(HttpStatus.CONFLICT, "Journalpost type Utgående ikke støttet: $journalposterMedTypeUtgaaende")
+            }
+
             try {
                 innsendingClient.sendSøknad(
                     søknadId = søknad.søknadId.id,
                     søknad = søknad,
                     correlationId = coroutineContext.hentCorrelationId(),
-                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"",""))
+                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to punsjetAvSaksbehandler)
                 )
             } catch (e: Exception) {
+                logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
                 return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
             }
 
             leggerVedPayload(søknad, journalpostIder)
-            journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder.toList())
+            journalpostRepository.settAlleTilFerdigBehandlet(journalpostIdListe)
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
 
-            val ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
             aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
                 journalpostIder,
                 erSendtInn = true,
-                ansvarligSaksbehandler = ansvarligSaksbehandler
+                ansvarligSaksbehandler = punsjetAvSaksbehandler
             )
 
             søknadMetrikkService.publiserMetrikker(søknad)
