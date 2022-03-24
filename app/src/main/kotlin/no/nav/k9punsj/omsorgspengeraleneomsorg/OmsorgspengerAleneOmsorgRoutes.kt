@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -14,14 +14,12 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarOmsAODto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.domenetjenester.dto.tilOmsAOVisning
 import no.nav.k9punsj.domenetjenester.dto.tilOmsAOvisning
-import no.nav.k9punsj.domenetjenester.mappers.MapOmsAOTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
@@ -60,10 +58,10 @@ internal class OmsorgspengerAleneOmsorgRoutes(
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
         internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/${søknadType}" //post
-        internal const val OppdaterEksisterendeSøknad = "/${søknadType}/oppdater" //put
+        internal const val NySøknad = "/$søknadType" //post
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/${søknadType}/valider" //post
+        internal const val ValiderSøknad = "/$søknadType/valider" //post
     }
 
     @Bean
@@ -72,7 +70,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
-                    Urls.HenteMappe)?.let { return@RequestContext it }
+                    Urls.HenteMappe
+                )?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
@@ -112,7 +111,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
-                    Urls.NySøknad)?.let { return@RequestContext it }
+                    Urls.NySøknad
+                )?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.pleietrengendeIdent != null) {
@@ -171,7 +171,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
-                    Urls.SendEksisterendeSøknad)?.let { return@RequestContext it }
+                    Urls.SendEksisterendeSøknad
+                )?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -255,7 +256,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
-                        Urls.ValiderSøknad)?.let { return@RequestContext it }
+                        Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
                 }
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse

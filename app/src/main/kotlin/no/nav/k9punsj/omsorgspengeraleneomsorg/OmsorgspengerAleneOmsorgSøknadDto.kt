@@ -1,6 +1,10 @@
-package no.nav.k9punsj.domenetjenester.dto
+package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import java.time.LocalDate
 import java.time.LocalTime
 
