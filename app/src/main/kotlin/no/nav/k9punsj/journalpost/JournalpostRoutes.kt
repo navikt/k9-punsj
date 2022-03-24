@@ -188,6 +188,7 @@ internal class JournalpostRoutes(
                     val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
                         ?.map { OasDokumentInfo(it.dokumentId) }?.toSet()
 
+                    // TODO: But why OpenApi DTOer her????
                     OasJournalpostDto(
                         journalpostId = it.journalpostId,
                         dokumenter = dok,

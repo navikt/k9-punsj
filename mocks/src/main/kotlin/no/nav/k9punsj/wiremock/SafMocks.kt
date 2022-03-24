@@ -185,6 +185,7 @@ private object SafMockResponses {
           "dokumenter": [
             {
               "dokumentInfoId": "470164680",
+              "brevkode": "test",
               "dokumentvarianter": [
                 {
                   "variantformat": "ARKIV",
@@ -198,6 +199,7 @@ private object SafMockResponses {
             },
             {
               "dokumentInfoId": "470164681",
+              "brevkode": "test",
               "dokumentvarianter": [
                 {
                   "variantformat": "ARKIV",
@@ -262,6 +264,7 @@ private object SafMockResponses {
           "dokumenter": [
             {
               "dokumentInfoId": "470164680",
+              "brevkode": "test",
               "dokumentvarianter": [
                 {
                   "variantformat": "ARKIV",
@@ -275,6 +278,7 @@ private object SafMockResponses {
             },
             {
               "dokumentInfoId": "470164681",
+              "brevkode": "test",
               "dokumentvarianter": [
                 {
                   "variantformat": "ARKIV",
