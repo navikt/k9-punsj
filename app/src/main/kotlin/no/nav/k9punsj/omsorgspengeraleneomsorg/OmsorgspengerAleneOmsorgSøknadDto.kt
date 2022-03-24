@@ -1,10 +1,12 @@
 package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
+import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.Mappe
+import no.nav.k9punsj.domenetjenester.dto.*
+import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
+import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -28,4 +30,27 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val foedselsdato: LocalDate?
     )
+}
+
+data class SvarOmsAODto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?,
+)
+
+internal fun Mappe.tilOmsAOVisning(norskIdent: NorskIdentDto): SvarOmsAODto {
+    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+            }
+        }
+    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
 }

@@ -38,13 +38,6 @@ data class SvarOmsDto(
     val søknader: List<OmsorgspengerSøknadDto>?,
 )
 
-data class SvarOmsAODto(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?,
-)
-
-
 data class SvarPlsDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
@@ -89,23 +82,6 @@ internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
             }
         }
     return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
-}
-
-internal fun Mappe.tilOmsAOVisning(norskIdent: NorskIdentDto): SvarOmsAODto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
-    if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
-    }
-    val søknader = bunke?.søknader
-        ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
-            if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
-            } else {
-                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
-            }
-        }
-    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
 }
 
 internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
