@@ -13,7 +13,7 @@ import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PdlPersonDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType

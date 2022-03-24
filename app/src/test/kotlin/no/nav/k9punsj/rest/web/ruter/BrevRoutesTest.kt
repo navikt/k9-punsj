@@ -6,8 +6,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitBodyWithType
-import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.JsonB
@@ -17,6 +15,8 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

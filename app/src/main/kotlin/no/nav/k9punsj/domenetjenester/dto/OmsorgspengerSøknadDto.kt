@@ -3,7 +3,8 @@ package no.nav.k9punsj.domenetjenester.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 import java.time.LocalTime
 

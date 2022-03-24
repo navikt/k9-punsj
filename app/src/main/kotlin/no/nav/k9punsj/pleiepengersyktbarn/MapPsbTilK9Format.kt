@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.pleiepengersyktbarn
 
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -21,7 +21,6 @@ import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate

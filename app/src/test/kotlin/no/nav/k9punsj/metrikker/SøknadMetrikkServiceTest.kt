@@ -7,10 +7,11 @@ import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.mappers.*
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.MetricUtils

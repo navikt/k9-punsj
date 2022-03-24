@@ -4,7 +4,6 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitStatusWithBody
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
@@ -15,6 +14,11 @@ import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
+import no.nav.k9punsj.util.WebClientUtils.getAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
+import no.nav.k9punsj.util.WebClientUtils.putAndAssert
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

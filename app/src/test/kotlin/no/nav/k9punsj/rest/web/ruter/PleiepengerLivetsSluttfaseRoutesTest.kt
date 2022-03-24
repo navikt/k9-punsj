@@ -14,6 +14,10 @@ import no.nav.k9punsj.domenetjenester.dto.SvarPlsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.WebClientUtils.getAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
+import no.nav.k9punsj.util.WebClientUtils.putAndAssert
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions

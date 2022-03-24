@@ -2,7 +2,7 @@ package no.nav.k9punsj.person
 
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitExchangeBlocking
+import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test

@@ -3,7 +3,7 @@ package no.nav.k9punsj.person
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitBodyWithType
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test

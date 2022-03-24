@@ -1,10 +1,14 @@
-package no.nav.k9punsj.domenetjenester.dto
+package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime

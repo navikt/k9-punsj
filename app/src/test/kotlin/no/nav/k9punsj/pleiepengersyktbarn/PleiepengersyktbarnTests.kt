@@ -1,4 +1,4 @@
-package no.nav.k9punsj
+package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
@@ -8,13 +8,13 @@ import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarPsbDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
-import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.web.OpprettNySøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
@@ -23,6 +23,10 @@ import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
+import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
+import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*

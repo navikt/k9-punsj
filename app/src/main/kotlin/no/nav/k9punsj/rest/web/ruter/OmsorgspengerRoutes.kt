@@ -27,6 +27,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils

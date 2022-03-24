@@ -13,7 +13,7 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

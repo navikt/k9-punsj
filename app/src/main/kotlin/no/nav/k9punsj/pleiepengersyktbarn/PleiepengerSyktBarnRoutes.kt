@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -16,14 +16,12 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarPsbDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.domenetjenester.dto.tilPsbVisning
 import no.nav.k9punsj.domenetjenester.dto.tilPsbvisning
-import no.nav.k9punsj.domenetjenester.mappers.MapPsbTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -146,7 +144,8 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
-                    Urls.SendEksisterendeSøknad)?.let { return@RequestContext it }
+                    Urls.SendEksisterendeSøknad
+                )?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -232,7 +231,8 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
-                    Urls.NySøknad)?.let { return@RequestContext it }
+                    Urls.NySøknad
+                )?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.barnIdent != null) {
@@ -264,7 +264,8 @@ internal class PleiepengerSyktBarnRoutes(
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
-                        Urls.ValiderSøknad)?.let { return@RequestContext it }
+                        Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
                 }
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
@@ -325,7 +326,8 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.matchFagsak()
                 innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
-                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak)?.let { return@RequestContext it }
+                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak
+                )?.let { return@RequestContext it }
 
                 val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
                     matchfagsak.brukerIdent,

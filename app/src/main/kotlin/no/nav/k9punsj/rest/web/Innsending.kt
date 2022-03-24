@@ -13,7 +13,7 @@ import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDt
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
