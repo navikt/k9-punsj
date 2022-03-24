@@ -7,15 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.domenetjenester.dto.*
+import no.nav.k9punsj.journalpost.IdentOgJournalpost
 import org.springframework.web.bind.annotation.*
-import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
-import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
-import no.nav.k9punsj.openapi.OasOpprettNySøknad
-import no.nav.k9punsj.openapi.OasSendSøknad
 
 @RestController
 @Tag(name = "Omsorgspenger søknad", description = "Håndtering av søknader av typen omsorgspenger")
@@ -33,7 +29,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
                 description = "Henter mappen til en person som inneholder alle søknader",
                 content = [Content(
                     schema = Schema(
-                        implementation = KorrigeringInntektsmelding::class
+                        implementation = KorrigeringInntektsmeldingDto::class
                     )
                 )]
             )
@@ -58,14 +54,14 @@ internal class KorrigeringInntektsmeldingOpenApi {
                 description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
                 content = [Content(
                     schema = Schema(
-                        implementation = KorrigeringInntektsmelding::class
+                        implementation = KorrigeringInntektsmeldingDto::class
                     )
                 )]
             )
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: OasOpprettNySøknad,
+        @RequestBody søknad: IdentOgJournalpost,
     ) {
     }
 
@@ -111,14 +107,14 @@ internal class KorrigeringInntektsmeldingOpenApi {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                     schema = Schema(
-                        implementation = KorrigeringInntektsmelding::class
+                        implementation = KorrigeringInntektsmeldingDto::class
                     )
                 )]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: KorrigeringInntektsmelding,
+        @RequestBody søknad: KorrigeringInntektsmeldingDto,
     ) {
     }
 
@@ -171,7 +167,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
         ]
     )
     fun SendSøknad(
-        @RequestBody søknad: OasSendSøknad,
+        @RequestBody søknad: SendSøknad,
     ) {
     }
 
@@ -216,7 +212,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: OasSendSøknad,
+        @RequestBody søknad: SendSøknad,
     ) {
     }
 

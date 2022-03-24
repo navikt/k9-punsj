@@ -5,16 +5,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
-import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.domenetjenester.dto.*
+import no.nav.k9punsj.journalpost.IdentOgJournalpost
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
-import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
-import no.nav.k9punsj.rest.web.SendSøknad
-import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
@@ -38,7 +31,7 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class KorrigeringInntektsmeldingRoutesTest {
+class KorrigeringInntektsmeldingDtoRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
@@ -110,7 +103,7 @@ class KorrigeringInntektsmeldingRoutesTest {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val resPost = client.postAndAssert<OpprettNyOmsSøknad>(
+        val resPost = client.postAndAssert<IdentOgJournalpost>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
@@ -120,7 +113,7 @@ class KorrigeringInntektsmeldingRoutesTest {
         val location = resPost.headers().asHttpHeaders().location
         Assertions.assertNotNull(location)
 
-        val søknadViaGet = client.getAndAssert<KorrigeringInntektsmelding>(
+        val søknadViaGet = client.getAndAssert<KorrigeringInntektsmeldingDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -140,7 +133,7 @@ class KorrigeringInntektsmeldingRoutesTest {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val resPost = client.postAndAssert<OpprettNyOmsSøknad>(
+        val resPost = client.postAndAssert<IdentOgJournalpost>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
@@ -152,7 +145,7 @@ class KorrigeringInntektsmeldingRoutesTest {
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        val body = client.putAndAssert<MutableMap<String, Any?>, KorrigeringInntektsmelding>(
+        val body = client.putAndAssert<MutableMap<String, Any?>, KorrigeringInntektsmeldingDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -256,8 +249,8 @@ class KorrigeringInntektsmeldingRoutesTest {
     private fun opprettSøknad(
         personnummer: NorskIdentDto,
         journalpostId: String,
-    ): OpprettNyOmsSøknad {
-        return OpprettNyOmsSøknad(personnummer, journalpostId)
+    ): IdentOgJournalpost {
+        return IdentOgJournalpost(personnummer, journalpostId)
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -311,7 +304,7 @@ class KorrigeringInntektsmeldingRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: KorrigeringInntektsmelding = client.putAndAssert(
+        val søknadDtoFyltUt: KorrigeringInntektsmeldingDto = client.putAndAssert(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,

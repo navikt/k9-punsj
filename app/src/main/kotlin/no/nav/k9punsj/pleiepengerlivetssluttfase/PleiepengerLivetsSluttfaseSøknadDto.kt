@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.Mappe
+import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.domenetjenester.dto.*
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
@@ -152,4 +153,16 @@ internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
             }
         }
     return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, søknader)
+}
+
+internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDto {
+    if (søknad == null) {
+        return PleiepengerLivetsSluttfaseSøknadDto(
+            soeknadId = this.søknadId,
+            journalposter = hentUtJournalposter(this),
+            harInfoSomIkkeKanPunsjes = false,
+            harMedisinskeOpplysninger = false
+        )
+    }
+    return objectMapper().convertValue(søknad)
 }

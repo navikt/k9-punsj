@@ -16,7 +16,7 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
 import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
@@ -161,7 +161,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsendingOms(
-                    korrigeringInntektsmelding = søknad,
+                    korrigeringInntektsmeldingDto = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -197,7 +197,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: KorrigeringInntektsmelding = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: KorrigeringInntektsmeldingDto = objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -359,7 +359,7 @@ internal class KorrigeringInntektsmeldingRoutes(
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 
     private suspend fun ServerRequest.korrigeringInntektsmelding() =
-        body(BodyExtractors.toMono(KorrigeringInntektsmelding::class.java)).awaitFirst()
+        body(BodyExtractors.toMono(KorrigeringInntektsmeldingDto::class.java)).awaitFirst()
 }
 
 

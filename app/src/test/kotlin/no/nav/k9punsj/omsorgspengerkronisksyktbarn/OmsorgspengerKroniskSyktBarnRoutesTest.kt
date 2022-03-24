@@ -6,10 +6,9 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
+import no.nav.k9punsj.domenetjenester.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
-import no.nav.k9punsj.rest.web.OpprettNySøknad
-import no.nav.k9punsj.rest.web.SendSøknad
-import no.nav.k9punsj.rest.web.SøknadJson
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody

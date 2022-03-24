@@ -2,109 +2,22 @@ package no.nav.k9punsj.domenetjenester.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.Mappe
 import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import java.time.LocalDate
-
-
-typealias NorskIdentDto = String
-typealias MappeIdDto = String
-typealias AktørIdDto = String
-typealias BunkeIdDto = String
-typealias SøknadIdDto = String
-typealias JournalpostIdDto = String
-
-data class PdlPersonDto(
-    val norskIdent: NorskIdentDto,
-    val aktørId: AktørIdDto,
-)
-
-data class BunkeDto<T>(
-    val bunkeId: BunkeIdDto,
-    val fagsakKode: String,
-    val søknader: List<SøknadDto<T>>?,
-)
-
-data class SvarOmsDto(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<KorrigeringInntektsmelding>?,
-)
 
 data class PerioderDto(
     val periodeDto: List<PeriodeDto>
-)
-
-data class SøknadDto<T>(
-    val søknadId: SøknadIdDto,
-    val søkerId: NorskIdentDto,
-    val barnId: NorskIdentDto? = null,
-    val barnFødselsdato: LocalDate? = null,
-    val journalposter: JournalposterDto? = null,
-    val sendtInn: Boolean? = false,
-    val erFraK9: Boolean? = false,
-    val søknad: T? = null,
 )
 
 data class JournalposterDto(
     val journalposter: MutableSet<String>,
 )
 
-data class IdentDto(
-    val norskIdent: NorskIdentDto
-)
-
-internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
-    if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
-    }
-    val søknader = bunke?.søknader
-        ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
-            if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
-            } else {
-                KorrigeringInntektsmelding(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
-            }
-        }
-    return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
-}
-
-internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
+internal fun hentUtJournalposter(s: SøknadEntitet): List<String>? = if (s.journalposter != null) {
     val journalposter = objectMapper().convertValue<JournalposterDto>(s.journalposter)
     journalposter.journalposter.toList()
 } else null
-
-internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDto {
-    if (søknad == null) {
-        return PleiepengerLivetsSluttfaseSøknadDto(
-            soeknadId = this.søknadId,
-            journalposter = hentUtJournalposter(this),
-            harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
-        )
-    }
-    return objectMapper().convertValue(søknad)
-}
-
-internal fun SøknadEntitet.tilOmsvisning(): KorrigeringInntektsmelding {
-    if (søknad == null) {
-        return KorrigeringInntektsmelding(soeknadId = this.søknadId)
-    }
-    return objectMapper().convertValue(søknad)
-}
-
-data class HentPerson(
-    val norskIdent: NorskIdentDto,
-)
-
-data class PdlResponseDto(
-    val person: PdlPersonDto,
-)
 
 data class PeriodeDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -118,3 +31,26 @@ data class ArbeidsgiverMedArbeidsforholdId(
     val arbeidsforholdId: List<String>
 )
 
+data class SendSøknad(
+    val norskIdent: NorskIdentDto,
+    val soeknadId: SøknadIdDto,
+)
+
+data class Matchfagsak(
+    val brukerIdent: NorskIdentDto,
+    val barnIdent: NorskIdentDto,
+)
+
+data class MatchFagsakMedPeriode(
+    val brukerIdent: NorskIdentDto,
+    val periodeDto: PeriodeDto
+)
+
+data class OpprettNySøknad(
+    val norskIdent: NorskIdentDto,
+    val journalpostId: JournalpostIdDto,
+    val pleietrengendeIdent: NorskIdentDto?,
+    val annenPart: NorskIdentDto?,
+    //TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
+    val barnIdent: NorskIdentDto?,
+)

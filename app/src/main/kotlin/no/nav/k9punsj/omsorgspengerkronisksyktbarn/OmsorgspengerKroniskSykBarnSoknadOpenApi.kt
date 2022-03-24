@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.domenetjenester.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
+import no.nav.k9punsj.journalpost.IdentOgJournalpost
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OasOpprettNySøknad
-import no.nav.k9punsj.openapi.OasSendSøknad
 
 @RestController
 @Tag(name = "Omsorgspenger kronisk sykt barn søknad", description = "Håndtering av søknader av typen omsorgspenger - kronisk sykt barn")
@@ -61,7 +61,7 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: OasOpprettNySøknad,
+        @RequestBody søknad: IdentOgJournalpost,
     ) {
     }
 
@@ -167,7 +167,7 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
         ]
     )
     fun SendSøknad(
-        @RequestBody søknad: OasSendSøknad,
+        @RequestBody søknad: SendSøknad,
     ) {
     }
 
@@ -212,7 +212,7 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: OasSendSøknad,
+        @RequestBody søknad: SendSøknad,
     ) {
     }
 }

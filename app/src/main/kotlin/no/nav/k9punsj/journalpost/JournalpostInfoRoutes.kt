@@ -6,7 +6,6 @@ import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.SøkUferdigJournalposter
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

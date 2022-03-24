@@ -10,7 +10,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.SafGateway
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

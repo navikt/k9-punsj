@@ -12,7 +12,7 @@ import no.nav.k9punsj.dokarkiv.SafDtos
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONArray
 import org.json.JSONObject

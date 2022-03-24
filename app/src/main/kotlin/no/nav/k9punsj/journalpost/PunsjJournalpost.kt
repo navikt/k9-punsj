@@ -2,7 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.AktørId
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID

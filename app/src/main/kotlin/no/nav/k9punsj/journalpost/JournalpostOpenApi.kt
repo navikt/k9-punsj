@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.openapi.*
-import no.nav.k9punsj.rest.web.IdentOgJournalpost
 
 @RestController
 @SecurityScheme(

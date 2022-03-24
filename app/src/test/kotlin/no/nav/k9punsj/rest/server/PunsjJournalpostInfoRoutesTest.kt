@@ -5,8 +5,8 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.journalpost.SøkUferdigJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.SøkUferdigJournalposter
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.k9SakToken
 import org.junit.jupiter.api.Assertions.assertEquals

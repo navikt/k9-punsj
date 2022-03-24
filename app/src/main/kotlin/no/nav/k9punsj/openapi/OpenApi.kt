@@ -8,15 +8,12 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.domenetjenester.dto.BunkeIdDto
 import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.PdlPersonDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
@@ -58,9 +55,6 @@ internal class OpenApi {
 }
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
-data class OasHentSøknad(
-    val norskIdent: NorskIdentDto,
-)
 
 data class OasMatchfagsak(
     val brukerIdent: NorskIdentDto,
@@ -83,28 +77,6 @@ data class OasFeil(
 data class OasSøknadId(
     val soeknadId: SøknadIdDto,
 )
-
-data class OasSendSøknad(
-    val norskIdent: NorskIdentDto,
-    val soeknadId: SøknadIdDto,
-)
-
-data class OasOpprettNySøknad(
-    val norskIdent: NorskIdentDto,
-    val journalpostId: JournalpostIdDto,
-)
-
-data class OasPleiepengerSyktBarSoknadMappeSvar(
-    val mappeId: MappeId,
-    val søker: NorskIdentDto,
-    val bunker: List<OasBunkeDto>?,
-) {
-    data class OasBunkeDto(
-        val bunkeId: BunkeIdDto,
-        val fagsakKode: String,
-        val søknader: List<SøknadDto<PleiepengerSyktBarnSøknadDto>>?,
-    )
-}
 
 data class OasSoknadsfeil(
     val mappeId: MappeId?,
