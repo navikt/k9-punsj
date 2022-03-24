@@ -8,6 +8,7 @@ internal object SafDtos {
         query = """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
+                journalpostId
                 tema
                 journalposttype
                 relevanteDatoer {
@@ -135,6 +136,7 @@ internal object SafDtos {
     )
 
     internal data class Journalpost(
+        val journalpostId: String,
         val tema: String?,
         val journalposttype: String,
         val journalstatus: String?,

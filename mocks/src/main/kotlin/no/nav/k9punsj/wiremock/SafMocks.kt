@@ -168,6 +168,7 @@ private object SafMockResponses {
     {
       "data": {
         "journalpost": {
+          "journalpostId": "123456789",
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
@@ -244,6 +245,7 @@ private object SafMockResponses {
     {
       "data": {
         "journalpost": {
+          "journalpostId": "123456789",
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
