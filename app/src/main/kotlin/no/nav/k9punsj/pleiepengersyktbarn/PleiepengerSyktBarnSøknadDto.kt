@@ -1,13 +1,15 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
+import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.Mappe
+import no.nav.k9punsj.domenetjenester.dto.*
+import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -174,4 +176,33 @@ data class PleiepengerSyktBarnSøknadDto(
             }
         }
     }
+}
+
+data class SvarPsbDto(
+    val søker: NorskIdentDto,
+    val fagsakTypeKode: String,
+    val søknader: List<PleiepengerSyktBarnSøknadDto>?,
+)
+
+internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarPsbDto {
+    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+    if (bunke?.søknader.isNullOrEmpty()) {
+        return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
+    }
+    val søknader = bunke?.søknader
+        ?.filter { s -> !s.sendtInn }
+        ?.map { s ->
+            if (s.søknad != null) {
+                objectMapper().convertValue(s.søknad)
+            } else {
+                PleiepengerSyktBarnSøknadDto(
+                    soeknadId = s.søknadId,
+                    soekerId = norskIdent,
+                    journalposter = hentUtJournalposter(s),
+                    harMedisinskeOpplysninger = false,
+                    harInfoSomIkkeKanPunsjes = false
+                )
+            }
+        }
+    return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }

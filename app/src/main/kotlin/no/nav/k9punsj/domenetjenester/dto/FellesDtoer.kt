@@ -32,12 +32,6 @@ data class BunkeDto<T>(
     val søknader: List<SøknadDto<T>>?,
 )
 
-data class SvarPsbDto(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<PleiepengerSyktBarnSøknadDto>?,
-)
-
 data class SvarOmsDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
@@ -85,29 +79,6 @@ data class JournalposterDto(
 data class IdentDto(
     val norskIdent: NorskIdentDto
 )
-
-internal fun Mappe.tilPsbVisning(norskIdent: NorskIdentDto): SvarPsbDto {
-    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-    if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
-    }
-    val søknader = bunke?.søknader
-        ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
-            if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
-            } else {
-                PleiepengerSyktBarnSøknadDto(
-                    soeknadId = s.søknadId,
-                    soekerId = norskIdent,
-                    journalposter = hentUtJournalposter(s),
-                    harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
-                )
-            }
-        }
-    return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
-}
 
 internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
     val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
