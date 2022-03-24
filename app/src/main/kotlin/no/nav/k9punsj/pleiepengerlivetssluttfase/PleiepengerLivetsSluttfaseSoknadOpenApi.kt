@@ -9,10 +9,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.domenetjenester.dto.PerioderDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.rest.web.openapi.OasFeil
-import no.nav.k9punsj.rest.web.openapi.OasMatchfagsak
-import no.nav.k9punsj.rest.web.openapi.OasOpprettNySøknad
-import no.nav.k9punsj.rest.web.openapi.OasSendSøknad
+import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasMatchfagsak
+import no.nav.k9punsj.openapi.OasOpprettNySøknad
+import no.nav.k9punsj.openapi.OasSendSøknad
 import org.springframework.web.bind.annotation.*
 
 @RestController

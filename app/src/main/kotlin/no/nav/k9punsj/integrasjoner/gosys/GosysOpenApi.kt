@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.integrasjoner.gosys
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes
+import no.nav.k9punsj.openapi.OasFeil
 
 @RestController
 @Tag(name = "Gosys", description = "Opprett journalføringsoppgave")
-internal class GosysController {
+internal class GosysOpenApi {
     @PostMapping(
         GosysRoutes.Urls.OpprettJournalføringsoppgave,
         consumes = ["application/json"],

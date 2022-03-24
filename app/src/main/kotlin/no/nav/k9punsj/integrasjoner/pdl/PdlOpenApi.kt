@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.integrasjoner.pdl
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -7,27 +7,24 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import no.nav.k9punsj.openapi.OasHentPerson
+import no.nav.k9punsj.openapi.OasPdlResponse
 
 @RestController
-@Tag(name = "HendelseMottaker", description = "Prosesserer")
-internal class HendelseController {
-    @PostMapping(
-        "/prosesserHendelse/",
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
+@Tag(name = "Pdl", description = "Hent aktørid fra norsk ident")
+internal class PdlOpenApi {
+    @PostMapping(PdlRoutes.Urls.HentIdent, consumes = ["application/json"], produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Prosessert",
+                description = "Henter aktørid fra fnummer",
                 content = [Content(
                     schema = Schema(
-                        implementation = FordelPunsjEventDto::class
+                        implementation = OasPdlResponse::class
                     )
                 )]
             ),
@@ -37,16 +34,20 @@ internal class HendelseController {
             ),
             ApiResponse(
                 responseCode = "403",
-                description = "Ikke tilgang til å opprette journalføringsoppgave"
+                description = "Ikke tilgang til å slå opp personen"
             ),
             ApiResponse(
                 responseCode = "404",
-                description = "Eksisterer ikke"
+                description = "Personen eksisterer ikke"
             )
         ]
     )
 
-    @Operation(summary = "Prosesser hendelse", description = "", security = [SecurityRequirement(name = "BearerAuth")])
-    fun ProsesserHendelse(@RequestBody body: FordelPunsjEventDto) {
+    @Operation(
+        summary = "Henter aktørid fra fnummer",
+        description = "Henter aktørid fra fnummer",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun Hentident(@RequestBody body: OasHentPerson) {
     }
 }

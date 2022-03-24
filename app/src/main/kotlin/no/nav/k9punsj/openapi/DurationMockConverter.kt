@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.openapi
 
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter

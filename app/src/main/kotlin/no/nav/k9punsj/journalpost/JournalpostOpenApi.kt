@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.journalpost
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.journalpost.JournalpostRoutes
+import no.nav.k9punsj.openapi.*
 import no.nav.k9punsj.rest.web.IdentOgJournalpost
 
 @RestController
@@ -21,7 +21,7 @@ import no.nav.k9punsj.rest.web.IdentOgJournalpost
     bearerFormat = "JWT"
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
-internal class JournalpostController {
+internal class JournalpostOpenApi {
     @PostMapping(
         JournalpostRoutes.Urls.OmfordelJournalpost,
         consumes = ["application/json"],

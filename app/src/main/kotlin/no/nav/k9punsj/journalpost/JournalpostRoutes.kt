@@ -23,8 +23,8 @@ import no.nav.k9punsj.rest.web.PunsjBolleDto
 import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.domenetjenester.dto.IdentDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
+import no.nav.k9punsj.openapi.*
 import no.nav.k9punsj.rest.web.identOgJournalpost
-import no.nav.k9punsj.rest.web.openapi.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

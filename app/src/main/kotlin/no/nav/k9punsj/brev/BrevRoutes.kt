@@ -9,7 +9,7 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.rest.web.brevBestilling
 import no.nav.k9punsj.rest.web.norskIdent
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

@@ -12,7 +12,7 @@ import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType

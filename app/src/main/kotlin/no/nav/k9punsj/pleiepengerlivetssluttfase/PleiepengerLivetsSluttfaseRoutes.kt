@@ -26,7 +26,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.rest.web.*
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

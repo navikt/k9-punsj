@@ -5,7 +5,7 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.rest.web.norskIdent
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
