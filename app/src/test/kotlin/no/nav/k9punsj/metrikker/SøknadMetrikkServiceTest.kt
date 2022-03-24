@@ -5,7 +5,7 @@ import no.nav.k9.søknad.ytelse.Ytelse.Type
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.mappers.*
@@ -185,7 +185,7 @@ internal class SøknadMetrikkServiceTest {
     @Test
     internal fun forvent_riktig_publiserte_oms_metrikker() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
-        val dto = objectMapper().convertValue(gyldigSoeknad, OmsorgspengerSøknadDto::class.java)
+        val dto = objectMapper().convertValue(gyldigSoeknad, KorrigeringInntektsmelding::class.java)
         val k9Format = MapOmsTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 

@@ -1,5 +1,6 @@
 package no.nav.k9punsj.brev
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -7,17 +8,14 @@ import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
-import no.nav.k9punsj.rest.web.brevBestilling
 import no.nav.k9punsj.rest.web.norskIdent
 import no.nav.k9punsj.openapi.OasFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
-import org.springframework.web.reactive.function.server.json
+import org.springframework.web.reactive.function.BodyExtractors
+import org.springframework.web.reactive.function.server.*
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -113,4 +111,7 @@ internal class BrevRoutes(
             }
         }
     }
+
+    private suspend fun ServerRequest.brevBestilling() =
+        body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
 }

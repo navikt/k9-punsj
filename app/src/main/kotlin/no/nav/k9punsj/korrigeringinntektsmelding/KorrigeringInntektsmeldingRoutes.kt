@@ -2,6 +2,7 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -15,7 +16,7 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
 import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
@@ -32,15 +33,14 @@ import no.nav.k9punsj.rest.web.*
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -152,11 +152,11 @@ internal class KorrigeringInntektsmeldingRoutes(
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.omsorgspengerSøknad()
+                val søknad = request.korrigeringInntektsmelding()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
                 val søknadEntitet = mappeService.utfyllendeInnsendingOms(
-                    omsorgspengerSøknadDto = søknad,
+                    korrigeringInntektsmelding = søknad,
                     saksbehandler = saksbehandler
                 )
 
@@ -192,7 +192,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: OmsorgspengerSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: KorrigeringInntektsmelding = objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -265,7 +265,7 @@ internal class KorrigeringInntektsmeldingRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val soknadTilValidering = request.omsorgspengerSøknad()
+                val soknadTilValidering = request.korrigeringInntektsmelding()
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
@@ -352,6 +352,9 @@ internal class KorrigeringInntektsmeldingRoutes(
     }
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+
+    private suspend fun ServerRequest.korrigeringInntektsmelding() =
+        body(BodyExtractors.toMono(KorrigeringInntektsmelding::class.java)).awaitFirst()
 }
 
 

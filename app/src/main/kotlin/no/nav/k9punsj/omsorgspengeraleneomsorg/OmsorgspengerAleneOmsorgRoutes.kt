@@ -2,6 +2,7 @@ package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -305,6 +307,9 @@ internal class OmsorgspengerAleneOmsorgRoutes(
     }
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+
+    private suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
+        body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()
 }
 
 

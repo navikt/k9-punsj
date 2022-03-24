@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 
-data class OmsorgspengerSøknadDto(
+data class KorrigeringInntektsmelding(
     val soeknadId: SøknadIdDto,
     val soekerId: NorskIdentDto? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")

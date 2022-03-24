@@ -2,6 +2,7 @@ package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -367,4 +369,7 @@ internal class PleiepengerSyktBarnRoutes(
 
 
     private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+
+    private suspend fun ServerRequest.pleiepengerSøknad() =
+        body(BodyExtractors.toMono(PleiepengerSyktBarnSøknadDto::class.java)).awaitFirst()
 }

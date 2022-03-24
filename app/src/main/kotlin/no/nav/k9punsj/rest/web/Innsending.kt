@@ -2,18 +2,11 @@ package no.nav.k9punsj.rest.web
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
 import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
-import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
@@ -87,35 +80,8 @@ internal fun ServerRequest.norskIdent(): String {
     return headers().header("X-Nav-NorskIdent").first()!!
 }
 
-internal suspend fun ServerRequest.pleiepengerSøknad() =
-    body(BodyExtractors.toMono(PleiepengerSyktBarnSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.pleiepengerPlsSøknad() =
-    body(BodyExtractors.toMono(PleiepengerLivetsSluttfaseSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.omsorgspengerSøknad() =
-    body(BodyExtractors.toMono(OmsorgspengerSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.omsorgspengerKroniskSyktBarnSøknad() =
-    body(BodyExtractors.toMono(OmsorgspengerKroniskSyktBarnSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.omsorgspengerMidlertidigAleneSøknad() =
-    body(BodyExtractors.toMono(OmsorgspengerMidlertidigAleneSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
-    body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.brevBestilling() =
-    body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
-
 internal suspend fun ServerRequest.opprettNy() =
     body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.identOgJournalpost() =
-    body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
-
-internal suspend fun ServerRequest.søkUferdigJournalposter() =
-    body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
 internal suspend fun ServerRequest.sendSøknad() = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
 internal suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()

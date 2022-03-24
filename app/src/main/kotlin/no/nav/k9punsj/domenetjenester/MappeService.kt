@@ -9,7 +9,7 @@ import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
@@ -107,7 +107,7 @@ class MappeService(
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
 
         val søknadfelles = felles(nySøknad)
-        val dto = OmsorgspengerSøknadDto(
+        val dto = KorrigeringInntektsmelding(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
@@ -232,17 +232,17 @@ class MappeService(
     }
 
     suspend fun utfyllendeInnsendingOms(
-        omsorgspengerSøknadDto: OmsorgspengerSøknadDto,
+        korrigeringInntektsmelding: KorrigeringInntektsmelding,
         saksbehandler: String,
-    ): Pair<SøknadEntitet, OmsorgspengerSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerSøknadDto.soeknadId)!!
+    ): Pair<SøknadEntitet, KorrigeringInntektsmelding>? {
+        val hentSøknad = søknadRepository.hentSøknad(korrigeringInntektsmelding.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(omsorgspengerSøknadDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerSøknadDto)
+            val journalposter = leggTilJournalpost(korrigeringInntektsmelding.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(korrigeringInntektsmelding)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = omsorgspengerSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
+            val nySøknad = korrigeringInntektsmelding.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null

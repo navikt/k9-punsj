@@ -1,14 +1,16 @@
 package no.nav.k9punsj.journalpost
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
-import no.nav.k9punsj.rest.web.søkUferdigJournalposter
+import no.nav.k9punsj.rest.web.SøkUferdigJournalposter
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
@@ -66,6 +68,9 @@ internal class JournalpostInfoRoutes(
     }
 
     private fun ServerRequest.aktørId(): AktørIdDto = pathVariable(AktørIdKey)
+
+    private suspend fun ServerRequest.søkUferdigJournalposter() =
+        body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
     data class JournalpostIderDto(
         val journalpostIder: List<JournalpostIdDto>,

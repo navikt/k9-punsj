@@ -6,11 +6,7 @@ import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.Mappe
 import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
-import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import java.time.LocalDate
 
 
@@ -35,7 +31,7 @@ data class BunkeDto<T>(
 data class SvarOmsDto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerSøknadDto>?,
+    val søknader: List<KorrigeringInntektsmelding>?,
 )
 
 data class PerioderDto(
@@ -72,7 +68,7 @@ internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
             if (s.søknad != null) {
                 objectMapper().convertValue(s.søknad)
             } else {
-                OmsorgspengerSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                KorrigeringInntektsmelding(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
             }
         }
     return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
@@ -95,9 +91,9 @@ internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDt
     return objectMapper().convertValue(søknad)
 }
 
-internal fun SøknadEntitet.tilOmsvisning(): OmsorgspengerSøknadDto {
+internal fun SøknadEntitet.tilOmsvisning(): KorrigeringInntektsmelding {
     if (søknad == null) {
-        return OmsorgspengerSøknadDto(soeknadId = this.søknadId)
+        return KorrigeringInntektsmelding(soeknadId = this.søknadId)
     }
     return objectMapper().convertValue(søknad)
 }

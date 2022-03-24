@@ -12,7 +12,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import java.time.ZonedDateTime
 internal class MapOmsTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerSøknadDto,
+    dto: KorrigeringInntektsmelding,
 ) {
     private val søknad = Søknad()
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
@@ -61,7 +61,7 @@ internal class MapOmsTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun OmsorgspengerSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+    private fun KorrigeringInntektsmelding.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }}
 
@@ -71,7 +71,7 @@ internal class MapOmsTilK9Format(
         }
     }
 
-    private fun List<OmsorgspengerSøknadDto.FraværPeriode>.leggTilFraværsperioderKorrigeringIm(dto: OmsorgspengerSøknadDto) {
+    private fun List<KorrigeringInntektsmelding.FraværPeriode>.leggTilFraværsperioderKorrigeringIm(dto: KorrigeringInntektsmelding) {
 
         val perioderMedTrekkAvDager = filter { it.periode.erSatt() }
             .filter { it.tidPrDag?.somDuration() == Duration.ZERO }.map {
@@ -125,7 +125,7 @@ internal class MapOmsTilK9Format(
         omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(fraværsperioder)
     }
 
-    private fun OmsorgspengerSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun KorrigeringInntektsmelding.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)

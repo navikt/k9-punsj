@@ -7,7 +7,7 @@ import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmelding
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
@@ -120,7 +120,7 @@ class KorrigeringInntektsmeldingRoutesTest {
         val location = resPost.headers().asHttpHeaders().location
         Assertions.assertNotNull(location)
 
-        val søknadViaGet = client.getAndAssert<OmsorgspengerSøknadDto>(
+        val søknadViaGet = client.getAndAssert<KorrigeringInntektsmelding>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -152,7 +152,7 @@ class KorrigeringInntektsmeldingRoutesTest {
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerSøknadDto>(
+        val body = client.putAndAssert<MutableMap<String, Any?>, KorrigeringInntektsmelding>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -311,7 +311,7 @@ class KorrigeringInntektsmeldingRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: OmsorgspengerSøknadDto = client.putAndAssert(
+        val søknadDtoFyltUt: KorrigeringInntektsmelding = client.putAndAssert(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,

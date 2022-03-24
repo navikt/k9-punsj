@@ -18,13 +18,11 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.integrasjoner.punsjbollen.somPunsjbolleRuting
-import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.rest.web.PunsjBolleDto
-import no.nav.k9punsj.rest.web.SettPåVentDto
 import no.nav.k9punsj.domenetjenester.dto.IdentDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.openapi.*
-import no.nav.k9punsj.rest.web.identOgJournalpost
+import no.nav.k9punsj.rest.web.*
+import no.nav.k9punsj.rest.web.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -541,6 +539,9 @@ internal class JournalpostRoutes(
 
     private suspend fun ServerRequest.punsjbolleDto() =
         body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.identOgJournalpost() =
+        body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
 
     private suspend fun PunsjbolleRuting.serverResponse() = when (this) {
         PunsjbolleRuting.IkkeStøttet -> status(HttpStatus.CONFLICT)
