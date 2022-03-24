@@ -22,6 +22,7 @@ internal object SafDtos {
                 }
                 dokumenter {
                   dokumentInfoId
+                  brevkode
                   dokumentvarianter {
                     variantformat
                     saksbehandlerHarTilgang
