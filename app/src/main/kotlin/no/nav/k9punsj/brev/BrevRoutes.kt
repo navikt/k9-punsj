@@ -1,12 +1,9 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.brev
 
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.brev.BrevServiceImpl
-import no.nav.k9punsj.brev.BrevType
-import no.nav.k9punsj.brev.BrevVisningDto
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
@@ -99,7 +96,8 @@ internal class BrevRoutes(
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
-                    Urls.HentAktørId)?.let { return@RequestContext it }
+                    Urls.HentAktørId
+                )?.let { return@RequestContext it }
 
                 val person = kotlin.runCatching { personService.finnPersonVedNorskIdentFørstDbSåPdl(norskIdent) }
                     .getOrElse {

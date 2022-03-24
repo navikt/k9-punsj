@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
 import no.nav.k9punsj.rest.web.openapi.OasFeil
-import no.nav.k9punsj.rest.web.ruter.BrevRoutes
 
 @RestController
 @Tag(name = "Brev-bestilling", description = "Håndtering av brevbestillinger fra punsj til k9formidling via kafka")
