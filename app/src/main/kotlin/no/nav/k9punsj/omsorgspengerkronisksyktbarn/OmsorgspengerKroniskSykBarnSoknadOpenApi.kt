@@ -15,7 +15,7 @@ import no.nav.k9punsj.rest.web.openapi.OasSendSøknad
 
 @RestController
 @Tag(name = "Omsorgspenger kronisk sykt barn søknad", description = "Håndtering av søknader av typen omsorgspenger - kronisk sykt barn")
-internal class OmsorgspengerKroniskSykBarnSoknadController {
+internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
     @GetMapping(OmsorgspengerKroniskSyktBarnRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter data på person for omsorgspenger kronisk sykt barn",

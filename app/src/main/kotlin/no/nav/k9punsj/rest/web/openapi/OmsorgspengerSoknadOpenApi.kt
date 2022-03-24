@@ -1,4 +1,4 @@
-package no.nav.k9punsj.pleiepengerlivetssluttfase
+package no.nav.k9punsj.rest.web.openapi
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -7,20 +7,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.domenetjenester.dto.PerioderDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.rest.web.openapi.OasFeil
-import no.nav.k9punsj.rest.web.openapi.OasMatchfagsak
-import no.nav.k9punsj.rest.web.openapi.OasOpprettNySøknad
-import no.nav.k9punsj.rest.web.openapi.OasSendSøknad
 import org.springframework.web.bind.annotation.*
+import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
+import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
 
 @RestController
-@Tag(name = "Pleiepenger livets sluttfase søknad", description = "Håndtering av papirsøknader")
-internal class PleiepengerLivetsSluttfaseSoknadController {
-    @GetMapping(PleiepengerLivetsSluttfaseRoutes.Urls.HenteMappe, produces = ["application/json"])
+@Tag(name = "Omsorgspenger søknad", description = "Håndtering av søknader av typen omsorgspenger")
+internal class OmsorgspengerSoknadOpenApi {
+    @GetMapping(OmsorgspengerRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
-        summary = "Henter mappen til en person som inneholder søknader.",
+        summary = "Henter data på person for omsorgspenger",
         description = "Sendes NorskIdente til person som headere.",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
@@ -31,7 +30,7 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
                 description = "Henter mappen til en person som inneholder alle søknader",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
+                        implementation = OmsorgspengerSøknadDto::class
                     )
                 )]
             )
@@ -40,7 +39,34 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
     fun HenteMappe(@RequestHeader("X-Nav-NorskIdent") norskIdent: String) {
     }
 
-    @GetMapping(PleiepengerLivetsSluttfaseRoutes.Urls.HenteSøknad, produces = ["application/json"])
+    @PostMapping(
+        OmsorgspengerRoutes.Urls.NySøknad,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Starte en helt ny søknad",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "201",
+                description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
+                content = [Content(
+                    schema = Schema(
+                        implementation = OmsorgspengerSøknadDto::class
+                    )
+                )]
+            )
+        ]
+    )
+    fun NySøknad(
+        @RequestBody søknad: OasOpprettNySøknad,
+    ) {
+    }
+
+    @GetMapping(OmsorgspengerRoutes.Urls.HenteSøknad, produces = ["application/json"])
     @Operation(
         summary = "Hente eksisterende mappe"
     )
@@ -51,7 +77,7 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
                 description = "Søknaden",
                 content = [Content(
                     schema = Schema(
-                        implementation = SvarPlsDto::class
+                        implementation = SvarOmsDto::class
                     )
                 )]
             ),
@@ -67,7 +93,7 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
     }
 
     @PutMapping(
-        PleiepengerLivetsSluttfaseRoutes.Urls.OppdaterEksisterendeSøknad,
+        OmsorgspengerRoutes.Urls.OppdaterEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -82,20 +108,19 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
                 content = [Content(
                     schema = Schema(
-                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
+                        implementation = OmsorgspengerSøknadDto::class
                     )
                 )]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: PleiepengerLivetsSluttfaseSøknadDto,
+        @RequestBody søknad: OmsorgspengerSøknadDto,
     ) {
     }
 
-
     @PostMapping(
-        PleiepengerLivetsSluttfaseRoutes.Urls.SendEksisterendeSøknad,
+        OmsorgspengerRoutes.Urls.SendEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -148,7 +173,7 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
     }
 
     @PostMapping(
-        PleiepengerLivetsSluttfaseRoutes.Urls.ValiderSøknad,
+        OmsorgspengerRoutes.Urls.ValiderSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -193,59 +218,32 @@ internal class PleiepengerLivetsSluttfaseSoknadController {
     }
 
     @PostMapping(
-        PleiepengerLivetsSluttfaseRoutes.Urls.NySøknad,
+        OmsorgspengerRoutes.Urls.HentArbeidsforholdIderFraK9sak,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
     @Operation(
-        summary = "Starte en helt ny søknad",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "201",
-                description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = PleiepengerLivetsSluttfaseSøknadDto::class
-                    )
-                )]
-            )
-        ]
-    )
-    fun NySøknad(
-        @RequestBody søknad: OasOpprettNySøknad,
-    ) {
-    }
-
-    @PostMapping(
-        PleiepengerLivetsSluttfaseRoutes.Urls.HentInfoFraK9sak,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @Operation(
-        summary = "Henter perioder som ligger i k9-sak",
-        description = "Henter perioder som ligger i k9-sak",
+        summary = "Henter arbeidsforholdIder som ligger i k9-sak",
+        description = "Henter arbeidsforholdIder som ligger i k9-sak",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Henter siste pleiepengersøknad fra k9-sak og gjør den tilgjengelig for visning",
+                description = "Henter arbeidsforholdIder som ligger i k9-sak",
                 content = [Content(
                     schema = Schema(
-                        implementation = PerioderDto::class
+                        implementation = ArbeidsgiverMedArbeidsforholdId::class
                     )
                 )]
             ),
             ApiResponse(
                 responseCode = "404",
-                description = "Fant ingen gjeldene søknad"
+                description = "Ingen treff"
             )
         ]
     )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsak) {
+    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsakMedPeriode) {
     }
 }

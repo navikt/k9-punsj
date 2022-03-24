@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Pleiepenger sykt barn søknad", description = "Håndtering av papirsøknader")
-internal class PleiepengerSyktBarnSoknadController {
+internal class PleiepengerSyktBarnSoknadOpenApi {
     @GetMapping(PleiepengerSyktBarnRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter mappen til en person som inneholder søknader.",
