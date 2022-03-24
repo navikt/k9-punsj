@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.brev
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -8,9 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
-import no.nav.k9punsj.brev.BrevVisningDto
-import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
+import no.nav.k9punsj.rest.web.openapi.OasFeil
 import no.nav.k9punsj.rest.web.ruter.BrevRoutes
 
 @RestController

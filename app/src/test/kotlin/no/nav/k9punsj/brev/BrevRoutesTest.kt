@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
