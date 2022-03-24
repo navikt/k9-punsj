@@ -17,7 +17,6 @@ import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.domenetjenester.dto.tilOmsKSBvisning
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService

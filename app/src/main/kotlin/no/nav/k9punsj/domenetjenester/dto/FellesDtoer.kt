@@ -83,18 +83,6 @@ internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != nul
     journalposter.journalposter.toList()
 } else null
 
-internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {
-    if (søknad == null) {
-        return PleiepengerSyktBarnSøknadDto(
-            soeknadId = this.søknadId,
-            journalposter = hentUtJournalposter(this),
-            harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
-        )
-    }
-    return objectMapper().convertValue(søknad)
-}
-
 internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDto {
     if (søknad == null) {
         return PleiepengerLivetsSluttfaseSøknadDto(
@@ -110,31 +98,6 @@ internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDt
 internal fun SøknadEntitet.tilOmsvisning(): OmsorgspengerSøknadDto {
     if (søknad == null) {
         return OmsorgspengerSøknadDto(soeknadId = this.søknadId)
-    }
-    return objectMapper().convertValue(søknad)
-}
-
-internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøknadDto {
-    if (søknad == null) {
-        return OmsorgspengerKroniskSyktBarnSøknadDto(
-            soeknadId = this.søknadId,
-            harMedisinskeOpplysninger = false,
-            harInfoSomIkkeKanPunsjes = false
-        )
-    }
-    return objectMapper().convertValue(søknad)
-}
-
-internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
-    if (søknad == null) {
-        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
-    }
-    return objectMapper().convertValue(søknad)
-}
-
-internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
-    if (søknad == null) {
-        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
     }
     return objectMapper().convertValue(søknad)
 }

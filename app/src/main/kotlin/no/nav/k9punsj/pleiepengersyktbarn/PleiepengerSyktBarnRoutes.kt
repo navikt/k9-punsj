@@ -19,7 +19,6 @@ import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.domenetjenester.dto.tilPsbvisning
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService

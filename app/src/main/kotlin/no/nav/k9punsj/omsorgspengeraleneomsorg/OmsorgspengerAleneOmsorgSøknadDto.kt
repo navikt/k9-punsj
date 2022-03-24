@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.Mappe
+import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.domenetjenester.dto.*
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
@@ -53,4 +54,11 @@ internal fun Mappe.tilOmsAOVisning(norskIdent: NorskIdentDto): SvarOmsAODto {
             }
         }
     return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
+}
+
+internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
+    if (søknad == null) {
+        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
+    }
+    return objectMapper().convertValue(søknad)
 }
