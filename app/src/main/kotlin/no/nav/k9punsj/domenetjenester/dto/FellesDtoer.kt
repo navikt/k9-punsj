@@ -38,12 +38,6 @@ data class SvarOmsDto(
     val søknader: List<OmsorgspengerSøknadDto>?,
 )
 
-data class SvarPlsDto(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<PleiepengerLivetsSluttfaseSøknadDto>?,
-)
-
 data class PerioderDto(
     val periodeDto: List<PeriodeDto>
 )
@@ -82,29 +76,6 @@ internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
             }
         }
     return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
-}
-
-internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
-    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
-    if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf())
-    }
-    val søknader = bunke?.søknader
-        ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
-            if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
-            } else {
-                PleiepengerLivetsSluttfaseSøknadDto(
-                    soeknadId = s.søknadId,
-                    soekerId = norskIdent,
-                    journalposter = hentUtJournalposter(s),
-                    harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
-                )
-            }
-        }
-    return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, søknader)
 }
 
 internal fun hentUtJournalposter(s: SøknadEntitet) = if (s.journalposter != null) {
