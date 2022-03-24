@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.korrigeringinntektsmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -29,7 +29,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.rest.web.*
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -44,7 +44,7 @@ import java.net.URI
 import kotlin.coroutines.coroutineContext
 
 @Configuration
-internal class OmsorgspengerRoutes(
+internal class KorrigeringInntektsmeldingRoutes(
     private val objectMapper: ObjectMapper,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
@@ -54,13 +54,12 @@ internal class OmsorgspengerRoutes(
     private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
     private val k9SakService: K9SakService,
-    private val soknadService : SoknadService,
-    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI
+    private val soknadService : SoknadService
 ) {
 
 
     private companion object {
-        private val logger = LoggerFactory.getLogger(OmsorgspengerRoutes::class.java)
+        private val logger = LoggerFactory.getLogger(KorrigeringInntektsmeldingRoutes::class.java)
         private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER
         private const val SøknadIdKey = "soeknad_id"
     }
@@ -68,11 +67,11 @@ internal class OmsorgspengerRoutes(
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
         internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/${søknadType}" //post
-        internal const val OppdaterEksisterendeSøknad = "/${søknadType}/oppdater" //put
+        internal const val NySøknad = "/$søknadType" //post
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/${søknadType}/valider" //post
-        internal const val HentArbeidsforholdIderFraK9sak = "/${søknadType}/k9sak/arbeidsforholdIder" //post
+        internal const val ValiderSøknad = "/$søknadType/valider" //post
+        internal const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" //post
     }
 
 
@@ -82,7 +81,8 @@ internal class OmsorgspengerRoutes(
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
-                    Urls.HenteMappe)?.let { return@RequestContext it }
+                    Urls.HenteMappe
+                )?.let { return@RequestContext it }
 
                 val person = personService.finnPersonVedNorskIdent(norskIdent)
                 if (person != null) {
@@ -122,7 +122,8 @@ internal class OmsorgspengerRoutes(
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
-                    Urls.NySøknad)?.let { return@RequestContext it }
+                    Urls.NySøknad
+                )?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.pleietrengendeIdent != null) {
@@ -181,7 +182,8 @@ internal class OmsorgspengerRoutes(
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
-                    Urls.SendEksisterendeSøknad)?.let { return@RequestContext it }
+                    Urls.SendEksisterendeSøknad
+                )?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {

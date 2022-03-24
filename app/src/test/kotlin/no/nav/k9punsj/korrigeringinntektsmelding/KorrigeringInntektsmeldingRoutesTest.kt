@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.korrigeringinntektsmelding
 
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
@@ -15,8 +15,8 @@ import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.rest.web.OpprettNyOmsSøknad
 import no.nav.k9punsj.rest.web.SendSøknad
 import no.nav.k9punsj.rest.web.SøknadJson
-import no.nav.k9punsj.rest.web.openapi.OasMatchfagsakMedPeriode
-import no.nav.k9punsj.rest.web.openapi.OasSoknadsfeil
+import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
+import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
@@ -38,7 +38,7 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class OmsorgspengerRoutesTest {
+class KorrigeringInntektsmeldingRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"

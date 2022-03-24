@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.openapi
+package no.nav.k9punsj.korrigeringinntektsmelding
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -12,12 +12,15 @@ import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.rest.web.ruter.OmsorgspengerRoutes
+import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
+import no.nav.k9punsj.openapi.OasOpprettNySøknad
+import no.nav.k9punsj.openapi.OasSendSøknad
 
 @RestController
 @Tag(name = "Omsorgspenger søknad", description = "Håndtering av søknader av typen omsorgspenger")
-internal class OmsorgspengerSoknadOpenApi {
-    @GetMapping(OmsorgspengerRoutes.Urls.HenteMappe, produces = ["application/json"])
+internal class KorrigeringInntektsmeldingOpenApi {
+    @GetMapping(KorrigeringInntektsmeldingRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter data på person for omsorgspenger",
         description = "Sendes NorskIdente til person som headere.",
@@ -40,7 +43,7 @@ internal class OmsorgspengerSoknadOpenApi {
     }
 
     @PostMapping(
-        OmsorgspengerRoutes.Urls.NySøknad,
+        KorrigeringInntektsmeldingRoutes.Urls.NySøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -66,7 +69,7 @@ internal class OmsorgspengerSoknadOpenApi {
     ) {
     }
 
-    @GetMapping(OmsorgspengerRoutes.Urls.HenteSøknad, produces = ["application/json"])
+    @GetMapping(KorrigeringInntektsmeldingRoutes.Urls.HenteSøknad, produces = ["application/json"])
     @Operation(
         summary = "Hente eksisterende mappe"
     )
@@ -93,7 +96,7 @@ internal class OmsorgspengerSoknadOpenApi {
     }
 
     @PutMapping(
-        OmsorgspengerRoutes.Urls.OppdaterEksisterendeSøknad,
+        KorrigeringInntektsmeldingRoutes.Urls.OppdaterEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -120,7 +123,7 @@ internal class OmsorgspengerSoknadOpenApi {
     }
 
     @PostMapping(
-        OmsorgspengerRoutes.Urls.SendEksisterendeSøknad,
+        KorrigeringInntektsmeldingRoutes.Urls.SendEksisterendeSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -173,7 +176,7 @@ internal class OmsorgspengerSoknadOpenApi {
     }
 
     @PostMapping(
-        OmsorgspengerRoutes.Urls.ValiderSøknad,
+        KorrigeringInntektsmeldingRoutes.Urls.ValiderSøknad,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
@@ -218,7 +221,7 @@ internal class OmsorgspengerSoknadOpenApi {
     }
 
     @PostMapping(
-        OmsorgspengerRoutes.Urls.HentArbeidsforholdIderFraK9sak,
+        KorrigeringInntektsmeldingRoutes.Urls.HentArbeidsforholdIderFraK9sak,
         consumes = ["application/json"],
         produces = ["application/json"]
     )
