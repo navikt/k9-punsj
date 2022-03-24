@@ -1,4 +1,4 @@
-package no.nav.k9punsj.rest.web.ruter
+package no.nav.k9punsj.pleiepengerlivetssluttfase
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -17,14 +17,12 @@ import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SvarPlsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.domenetjenester.dto.tilPlsVisning
 import no.nav.k9punsj.domenetjenester.dto.tilPlsvisning
-import no.nav.k9punsj.domenetjenester.mappers.MapPlsfTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -150,7 +148,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
-                    Urls.SendEksisterendeSøknad)?.let { return@RequestContext it }
+                    Urls.SendEksisterendeSøknad
+                )?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
 
                 if (søknadEntitet == null) {
@@ -236,7 +235,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
-                    Urls.NySøknad)?.let { return@RequestContext it }
+                    Urls.NySøknad
+                )?.let { return@RequestContext it }
 
                 //oppretter sak i k9-sak hvis det ikke finnes fra før
                 if (opprettNySøknad.pleietrengendeIdent != null) {
@@ -268,7 +268,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent,
-                        Urls.ValiderSøknad)?.let { return@RequestContext it }
+                        Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
                 }
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
@@ -327,12 +328,14 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.matchFagsak()
                 innlogget.harInnloggetBrukerTilgangTil(listOf(matchfagsak.brukerIdent,
-                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak)?.let { return@RequestContext it }
+                    matchfagsak.barnIdent), Urls.HentInfoFraK9sak
+                )?.let { return@RequestContext it }
 
                 val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
                     matchfagsak.brukerIdent,
                     matchfagsak.barnIdent,
-                    fagsakYtelseType)
+                    fagsakYtelseType
+                )
 
                 return@RequestContext if (perioder != null) {
                     ServerResponse

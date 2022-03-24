@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.pleiepengerlivetssluttfase
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
@@ -19,7 +19,6 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
 import no.nav.k9punsj.rest.web.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
