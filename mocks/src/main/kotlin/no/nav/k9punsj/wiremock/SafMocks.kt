@@ -185,7 +185,6 @@ private object SafMockResponses {
           "dokumenter": [
             {
               "dokumentInfoId": "470164680",
-              "brevkode": "test",
               "dokumentvarianter": [
                 {
                   "variantformat": "ARKIV",
