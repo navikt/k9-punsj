@@ -3,7 +3,7 @@ package no.nav.k9punsj.metrikker
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.k9.søknad.ytelse.Ytelse.Type
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
@@ -11,6 +11,7 @@ import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.mappers.*
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
 import no.nav.k9punsj.pleiepengerlivetssluttfase.MapPlsfTilK9Format
 import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.rest.web.SøknadJson

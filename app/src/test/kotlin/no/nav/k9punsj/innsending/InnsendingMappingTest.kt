@@ -3,10 +3,10 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.ytelse.Ytelse
-import no.nav.k9punsj.domenetjenester.mappers.MapOmsKSBTilK9Format
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
 import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
