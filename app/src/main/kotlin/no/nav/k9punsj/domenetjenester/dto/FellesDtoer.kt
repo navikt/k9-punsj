@@ -44,12 +44,6 @@ data class SvarOmsDto(
     val søknader: List<OmsorgspengerSøknadDto>?,
 )
 
-data class SvarOmsKSBDto(
-    val søker: NorskIdentDto,
-    val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerKroniskSyktBarnSøknadDto>?,
-)
-
 data class SvarOmsMADto(
     val søker: NorskIdentDto,
     val fagsakTypeKode: String,
@@ -130,28 +124,6 @@ internal fun Mappe.tilOmsVisning(norskIdent: NorskIdentDto): SvarOmsDto {
             }
         }
     return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
-}
-
-internal fun Mappe.tilOmsKSBVisning(norskIdent: NorskIdentDto): SvarOmsKSBDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
-    if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())
-    }
-    val søknader = bunke?.søknader
-        ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
-            if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
-            } else {
-                OmsorgspengerKroniskSyktBarnSøknadDto(
-                    soeknadId = s.søknadId,
-                    journalposter = hentUtJournalposter(s),
-                    harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
-                )
-            }
-        }
-    return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
 }
 
 internal fun Mappe.tilOmsMAVisning(norskIdent: NorskIdentDto): SvarOmsMADto {

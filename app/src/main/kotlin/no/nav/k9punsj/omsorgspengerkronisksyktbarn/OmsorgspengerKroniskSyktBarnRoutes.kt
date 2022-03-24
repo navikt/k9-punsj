@@ -14,11 +14,9 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.SvarOmsKSBDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.domenetjenester.dto.tilOmsKSBVisning
 import no.nav.k9punsj.domenetjenester.dto.tilOmsKSBvisning
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
