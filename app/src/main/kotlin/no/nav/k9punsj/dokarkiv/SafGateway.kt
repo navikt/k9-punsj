@@ -74,7 +74,7 @@ class SafGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
+    internal suspend fun hentJournalpost(journalpostId: JournalpostId /* = kotlin.String */): SafDtos.Journalpost? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -102,12 +102,6 @@ class SafGateway(
             logger.warn("SafErrors=${safResponse.errors}")
         }
 
-
-        // For journalposter som kommer digitalt er det kun ettersendelser som skal kunne punsjes.
-        if (journalpost?.erIkkeStøttetDigitalJournalpost == true) throw IkkeStøttetJournalpost().also {
-            logger.warn("Ikke støttet digital journalpost. K9Kilde=[${journalpost.k9Kilde}], K9Type=[${journalpost.k9Type}]")
-        }
-
         if (safResponse.journalpostFinnesIkke) return null
         // For journalposter i spesielle statuser. Krever spesialrettighet for å håndtere disse statusene i arkivet.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man har tilgang til disse statusene.
@@ -117,6 +111,20 @@ class SafGateway(
         if (safResponse.manglerTilgang) throw IkkeTilgang("Saksbehandler har ikke tilgang.")
 
         check(errors == null) { "Feil ved oppslag mot SAF graphql. SafErrors=$errors" }
+
+        return journalpost
+    }
+
+    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>): List<SafDtos.Journalpost?> =
+        journalpostIder.map { hentJournalpost(it) }.toList()
+
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
+        val journalpost = hentJournalpost(journalpostId)
+
+        // For journalposter som kommer digitalt er det kun ettersendelser som skal kunne punsjes.
+        if (journalpost?.erIkkeStøttetDigitalJournalpost == true) throw IkkeStøttetJournalpost().also {
+            logger.warn("Ikke støttet digital journalpost. K9Kilde=[${journalpost.k9Kilde}], K9Type=[${journalpost.k9Type}]")
+        }
 
         // For saksbehandlere som har tilgang til å åpne journalposter i spesielle statuser.
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
