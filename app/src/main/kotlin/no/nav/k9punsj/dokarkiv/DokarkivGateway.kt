@@ -16,7 +16,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger

@@ -11,8 +11,8 @@ import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.rest.web.JournalpostId
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

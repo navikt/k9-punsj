@@ -10,7 +10,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

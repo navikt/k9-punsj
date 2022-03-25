@@ -16,7 +16,7 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory

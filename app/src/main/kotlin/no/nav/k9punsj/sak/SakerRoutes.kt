@@ -4,8 +4,8 @@ import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
-import no.nav.k9punsj.rest.web.norskIdent
-import no.nav.k9punsj.rest.web.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -44,7 +44,6 @@ internal class SakerRoutes(
                         return@RequestContext tilganNektet
                     } else {
                         RequestContext(kotlin.coroutines.coroutineContext, request) {
-                            val norskIdent = request.norskIdent()
                             return@RequestContext kotlin.runCatching {
                                 logger.info("Henter fagsaker...")
                                 sakService.hentSaker(norskIdent)

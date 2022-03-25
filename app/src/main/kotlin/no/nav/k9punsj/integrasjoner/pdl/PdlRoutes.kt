@@ -5,9 +5,6 @@ import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.domenetjenester.dto.HentPerson
-import no.nav.k9punsj.domenetjenester.dto.PdlPersonDto
-import no.nav.k9punsj.domenetjenester.dto.PdlResponseDto
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus

@@ -7,7 +7,7 @@ import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
 import java.util.UUID

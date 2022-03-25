@@ -1,6 +1,6 @@
 package no.nav.k9punsj.akjonspunkter
 
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import java.time.LocalDateTime
 
 typealias AksjonspunktId = String

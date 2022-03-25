@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.journalpost.JournalPostResponse
-import no.nav.k9punsj.util.postAndAssertAwaitWithStatusAndBody
+import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

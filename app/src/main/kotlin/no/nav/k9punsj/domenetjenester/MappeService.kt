@@ -6,16 +6,16 @@ import no.nav.k9punsj.db.repository.BunkeRepository
 import no.nav.k9punsj.db.repository.MappeRepository
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
+import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
+import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.OpprettNySøknad
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -107,7 +107,7 @@ class MappeService(
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
 
         val søknadfelles = felles(nySøknad)
-        val dto = OmsorgspengerSøknadDto(
+        val dto = KorrigeringInntektsmeldingDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
@@ -232,17 +232,17 @@ class MappeService(
     }
 
     suspend fun utfyllendeInnsendingOms(
-        omsorgspengerSøknadDto: OmsorgspengerSøknadDto,
+        korrigeringInntektsmeldingDto: KorrigeringInntektsmeldingDto,
         saksbehandler: String,
-    ): Pair<SøknadEntitet, OmsorgspengerSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerSøknadDto.soeknadId)!!
+    ): Pair<SøknadEntitet, KorrigeringInntektsmeldingDto>? {
+        val hentSøknad = søknadRepository.hentSøknad(korrigeringInntektsmeldingDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(omsorgspengerSøknadDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerSøknadDto)
+            val journalposter = leggTilJournalpost(korrigeringInntektsmeldingDto.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(korrigeringInntektsmeldingDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = omsorgspengerSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
+            val nySøknad = korrigeringInntektsmeldingDto.copy(journalposter = journalposter.values.toList().filterIsInstance<JournalpostIdDto>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null

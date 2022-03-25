@@ -3,6 +3,9 @@ package no.nav.k9punsj
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.db.datamodell.Periode
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
+import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.JournalpostIds
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -15,10 +18,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class)
@@ -135,21 +134,4 @@ class K9PunsjApplicationTests {
 
         assertEquals(HttpStatus.FORBIDDEN, httpStatus)
     }
-}
-
-
-suspend fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse {
-    return awaitExchange { it }
-}
-
-suspend inline fun <reified T> WebClient.RequestHeadersSpec<*>.awaitStatusWithBody(): Pair<HttpStatus, T> {
-    return awaitExchange { Pair(it.statusCode(), it.awaitBody()) }
-}
-
-suspend inline fun <reified T> WebClient.RequestHeadersSpec<*>.awaitBodyWithType(): T {
-    return awaitExchange { it.awaitBody() }
-}
-
-suspend fun WebClient.RequestHeadersSpec<*>.awaitStatuscode(): HttpStatus {
-    return awaitExchange { it.statusCode() }
 }

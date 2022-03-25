@@ -4,10 +4,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.ExceptionResponse
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.awaitStatusWithBody
-import no.nav.k9punsj.awaitStatuscode
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
+import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test

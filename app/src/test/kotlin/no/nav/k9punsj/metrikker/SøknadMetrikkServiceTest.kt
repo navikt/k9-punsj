@@ -2,19 +2,24 @@ package no.nav.k9punsj.metrikker
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.k9.søknad.ytelse.Ytelse.Type
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerAleneOmsorgSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerKroniskSyktBarnSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.OmsorgspengerSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerLivetsSluttfaseSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
+import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.domenetjenester.mappers.*
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.SøknadJson
+import no.nav.k9punsj.omsorgspengeraleneomsorg.MapOmsAOTilK9Format
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
+import no.nav.k9punsj.omsorgspengermidlertidigalene.MapOmsMATilK9Format
+import no.nav.k9punsj.pleiepengerlivetssluttfase.MapPlsfTilK9Format
+import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.MetricUtils
 import no.nav.k9punsj.util.MetricUtils.MetrikkTag
+import no.nav.k9punsj.util.SøknadJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
@@ -180,7 +185,7 @@ internal class SøknadMetrikkServiceTest {
     @Test
     internal fun forvent_riktig_publiserte_oms_metrikker() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
-        val dto = objectMapper().convertValue(gyldigSoeknad, OmsorgspengerSøknadDto::class.java)
+        val dto = objectMapper().convertValue(gyldigSoeknad, KorrigeringInntektsmeldingDto::class.java)
         val k9Format = MapOmsTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 

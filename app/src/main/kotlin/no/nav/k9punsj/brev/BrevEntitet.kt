@@ -3,7 +3,7 @@ package no.nav.k9punsj.brev
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.rest.web.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import java.time.LocalDateTime
 import java.util.UUID
 
