@@ -8,7 +8,7 @@ import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.dokarkiv.SafDtos
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
@@ -74,12 +74,18 @@ class SafGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpost(journalpostId: JournalpostId /* = kotlin.String */): SafDtos.Journalpost? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+    internal suspend fun hentJournalpost(
+        journalpostId: JournalpostId,
+        erSystemKall: Boolean = false): SafDtos.Journalpost? {
+
+        val accessToken = when(erSystemKall) {
+            true -> cachedAccessTokenClient.getAccessToken(
+                scopes = henteJournalpostScopes)
+            false -> cachedAccessTokenClient.getAccessToken(
                 scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+        }
+
         val response = client
             .post()
             .uri { it.pathSegment("graphql").build() }
@@ -115,8 +121,8 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>): List<SafDtos.Journalpost?> =
-        journalpostIder.map { hentJournalpost(it) }.toList()
+    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>, erSystemKall: Boolean = false): List<SafDtos.Journalpost?> =
+        journalpostIder.map { hentJournalpost(it, erSystemKall) }.toList()
 
     internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
         val journalpost = hentJournalpost(journalpostId)

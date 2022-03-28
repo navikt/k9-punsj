@@ -1,4 +1,4 @@
-package no.nav.k9punsj.dokarkiv
+package no.nav.k9punsj.integrasjoner.dokarkiv
 
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.sak.typer.Saksnummer

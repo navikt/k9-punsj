@@ -6,7 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.NorskIdent
-import no.nav.k9punsj.dokarkiv.SafDtos
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.Logger
