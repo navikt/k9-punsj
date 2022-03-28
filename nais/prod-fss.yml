@@ -130,6 +130,6 @@ spec:
       value: "privat-k9punsj-aksjonspunkthendelse-v1"
 
     - name: NOTAT_ENABLED
-      value: "false"
+      value: "true"
     - name: SAKER_ENABLED
-      value: "false"
+      value: "true"
