@@ -10,11 +10,11 @@ import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.dokarkiv.FerdigstillJournalpost
+import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
-import no.nav.k9punsj.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.intellij.lang.annotations.Language

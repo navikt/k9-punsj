@@ -1,6 +1,6 @@
 package no.nav.k9punsj.journalpost
 
-import no.nav.k9punsj.dokarkiv.SafDtos
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 

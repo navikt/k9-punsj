@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.openapi
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -10,7 +10,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.openapi.*
+import no.nav.k9punsj.journalpost.IdentOgJournalpost
+import no.nav.k9punsj.journalpost.JournalpostRoutes
 
 @RestController
 @SecurityScheme(
