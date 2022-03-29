@@ -76,14 +76,17 @@ class SafGateway(
 
     internal suspend fun hentJournalpost(
         journalpostId: JournalpostId,
-        erSystemKall: Boolean = false): SafDtos.Journalpost? {
+        erSystemKall: Boolean = false
+    ): SafDtos.Journalpost? {
 
-        val accessToken = when(erSystemKall) {
+        val accessToken = when (erSystemKall) {
             true -> cachedAccessTokenClient.getAccessToken(
-                scopes = henteJournalpostScopes)
+                scopes = henteJournalpostScopes
+            )
             false -> cachedAccessTokenClient.getAccessToken(
                 scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
         }
 
         val response = client
@@ -121,10 +124,15 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>, erSystemKall: Boolean = false): List<SafDtos.Journalpost?> =
+    internal suspend fun hentJournalposter(
+        journalpostIder: List<JournalpostId>,
+        erSystemKall: Boolean = false
+    ): List<SafDtos.Journalpost?> =
         journalpostIder.map { hentJournalpost(it, erSystemKall) }.toList()
 
-    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): SafDtos.Journalpost? {
+    internal suspend fun hentJournalpostInfo(
+        journalpostId: JournalpostId
+    ): SafDtos.Journalpost? {
         val journalpost = hentJournalpost(journalpostId)
 
         // For journalposter som kommer digitalt er det kun ettersendelser som skal kunne punsjes.

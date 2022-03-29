@@ -19,19 +19,25 @@ class FinnJournalposterMedFeilBrevkodeOchLukk @Autowired constructor(
     private val logger = LoggerFactory.getLogger(FinnJournalposterMedFeilBrevkodeOchLukk::class.java)
     private val FEIL_BREVKODE = "CRM_MELDINGSKJEDE"
 
-    //kjører klokken 04:00
-    @Scheduled(cron = "0 0 4 * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     fun finnJournalposterMedBrevkodeSomIkkeSkallBehandlesOchLukk() {
         logger.info("Kjører scheduled job FinnJournalposterMedFeilBrevkodeOchLukk")
         runBlocking {
             val åpneBehandlinger = journalpostRepository.finnAlleÅpneJournalposter()
             logger.info("Fann ${åpneBehandlinger.size} åpne behandlinger")
-            val åpneBehandlingerMedBrevkodeCRM = safGateway.hentJournalposter(åpneBehandlinger)
+
+
+            val testerMedEnLitenListe = listOf(åpneBehandlinger[0], åpneBehandlinger[1], åpneBehandlinger[2])
+
+            val åpneBehandlingerMedBrevkodeCRM = safGateway.hentJournalposter(
+                journalpostIder = testerMedEnLitenListe,
+                erSystemKall = true
+            )
                 .filterNotNull()
                 .filter { journalpost -> journalpost.dokumenter.any { it.brevkode == FEIL_BREVKODE } }
                 .map { it.journalpostId }
 
-            if(åpneBehandlingerMedBrevkodeCRM.isEmpty()) {
+            if (åpneBehandlingerMedBrevkodeCRM.isEmpty()) {
                 logger.info("Fann inga åpne behandlinger som har brevkode $FEIL_BREVKODE i SAF")
                 return@runBlocking
             }
