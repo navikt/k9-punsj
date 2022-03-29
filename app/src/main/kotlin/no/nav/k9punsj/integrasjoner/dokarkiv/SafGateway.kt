@@ -31,6 +31,7 @@ import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -89,11 +90,18 @@ class SafGateway(
             )
         }
 
+        val correlationId = try {
+            coroutineContext.hentCorrelationId()
+        } catch (e: Exception) {
+            logger.warn("Fant ikke correlationId", e)
+            UUID.randomUUID().toString()
+        }
+
         val response = client
             .post()
             .uri { it.pathSegment("graphql").build() }
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(CorrelationIdHeader, correlationId)
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(SafDtos.JournalpostQuery(journalpostId))
