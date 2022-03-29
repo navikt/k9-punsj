@@ -139,7 +139,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 "SELECT journalpost_id FROM $JOURNALPOST_TABLE WHERE " +
                         "FERDIG_BEHANDLET IS FALSE AND " +
                         "KILDE = 'FORDEL' AND " +
-                        "json_field(data, '$.type') = '$journalpostType'"
+                        "data ->> 'type' = '$journalpostType'"
             )
             val resultat = it.run(
                 statement
