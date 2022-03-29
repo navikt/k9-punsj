@@ -93,7 +93,6 @@ class SafGateway(
         val correlationId = try {
             coroutineContext.hentCorrelationId()
         } catch (e: Exception) {
-            logger.warn("Fant ikke correlationId", e)
             UUID.randomUUID().toString()
         }
 

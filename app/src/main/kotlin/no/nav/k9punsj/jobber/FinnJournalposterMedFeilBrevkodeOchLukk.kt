@@ -19,7 +19,8 @@ class FinnJournalposterMedFeilBrevkodeOchLukk @Autowired constructor(
     private val logger = LoggerFactory.getLogger(FinnJournalposterMedFeilBrevkodeOchLukk::class.java)
     private val FEIL_BREVKODE = "CRM_MELDINGSKJEDE"
 
-    @Scheduled(cron = "0 35 9 * * *")
+    // Kjører 02:00
+    @Scheduled(cron = "0 0 2 * * *")
     fun finnJournalposterMedBrevkodeSomIkkeSkallBehandlesOchLukk() {
         logger.info("Kjører scheduled job FinnJournalposterMedFeilBrevkodeOchLukk")
         runBlocking {
