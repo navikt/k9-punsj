@@ -133,10 +133,13 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnAlleÅpneJournalposter(): List<JournalpostId> {
+    suspend fun finnAlleÅpneJournalposterAvType(journalpostType: String): List<JournalpostId> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT journalpost_id FROM $JOURNALPOST_TABLE WHERE FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
+                "SELECT journalpost_id FROM $JOURNALPOST_TABLE WHERE " +
+                        "FERDIG_BEHANDLET IS FALSE AND " +
+                        "KILDE = 'FORDEL' AND " +
+                        "json_field(data, '$.type') = '$journalpostType'"
             )
             val resultat = it.run(
                 statement
