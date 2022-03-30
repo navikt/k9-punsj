@@ -13,10 +13,6 @@
     "fom": "2018-12-30",
     "tom": "2019-10-20"
   }],
-  "trekkKravPerioder": [{
-    "fom": "2020-12-25",
-    "tom": "2021-10-15"
-  }],
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
       "virksomhetNavn": "FiskerAS",

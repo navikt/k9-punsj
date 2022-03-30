@@ -16,7 +16,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
@@ -163,6 +162,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     try {
                         val søknad: PleiepengerLivetsSluttfaseSøknadDto =
                             objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val eksisterendePerioderFraK9Sak = henterPerioderSomFinnesIK9sak(søknad)?.first ?: emptyList()
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -184,7 +184,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                         val (søknadK9Format, feilISøknaden) = MapPlsfTilK9Format(
                             søknadId = søknad.soeknadId,
                             journalpostIder = journalpostIder,
-                            dto = søknad
+                            dto = søknad,
+                            perioderSomFinnesIK9 = eksisterendePerioderFraK9Sak
                         ).søknadOgFeil()
 
                         if (feilISøknaden.isNotEmpty()) {
@@ -274,10 +275,14 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                         Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }
+
+                val eksisterendePerioderFraK9Sak = henterPerioderSomFinnesIK9sak(soknadTilValidering)?.first ?: emptyList()
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
                         .buildAndAwait()
+
+
 
                 val journalPoster = søknadEntitet.journalposter!!
                 val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -288,7 +293,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     mapTilEksternFormat = MapPlsfTilK9Format(
                         søknadId = soknadTilValidering.soeknadId,
                         journalpostIder = journalposterDto.journalposter,
-                        dto = soknadTilValidering
+                        dto = soknadTilValidering,
+                        perioderSomFinnesIK9 = eksisterendePerioderFraK9Sak
                     ).søknadOgFeil()
                 } catch (e: Exception) {
                     val sw = StringWriter()
@@ -363,17 +369,14 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         correlationId = coroutineContext.hentCorrelationId()
     ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(
-        søkerIdent: NorskIdentDto?,
-        pleietrengendeDto: PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto?,
-    ): Pair<List<PeriodeDto>?, String?>? {
-        if (søkerIdent.isNullOrBlank() || pleietrengendeDto == null || pleietrengendeDto.norskIdent.isNullOrBlank()) {
+    private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {
+        if (dto.soekerId.isNullOrBlank() || dto.pleietrengende == null || dto.pleietrengende.norskIdent.isNullOrBlank()) {
             return null
         }
         return k9SakService.hentPerioderSomFinnesIK9(
-            søker = søkerIdent,
-            barn = pleietrengendeDto.norskIdent,
-            fagsakYtelseType = fagsakYtelseType
+            søker = dto.soekerId,
+            barn = dto.pleietrengende.norskIdent,
+            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
         )
     }
 
