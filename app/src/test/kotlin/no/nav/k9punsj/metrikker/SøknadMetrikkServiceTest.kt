@@ -167,7 +167,7 @@ internal class SøknadMetrikkServiceTest {
     internal fun forvent_riktig_publiserte_pls_metrikker() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendPls()
         val dto = objectMapper().convertValue(gyldigSoeknad, PleiepengerLivetsSluttfaseSøknadDto::class.java)
-        val k9Format = MapPlsfTilK9Format(dto.soeknadId, setOf("123", "456"), dto).søknad()
+        val k9Format = MapPlsfTilK9Format(dto.soeknadId, setOf("123", "456"), listOf(), dto).søknad()
         søknadMetrikkService.publiserMetrikker(k9Format)
 
         val søknadstypeTag = MetrikkTag("soknadstype", setOf(Type.PLEIEPENGER_LIVETS_SLUTTFASE.name))

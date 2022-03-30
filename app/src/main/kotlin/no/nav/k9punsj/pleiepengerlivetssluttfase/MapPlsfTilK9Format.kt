@@ -28,6 +28,7 @@ import java.time.ZonedDateTime
 internal class MapPlsfTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
+    perioderSomFinnesIK9: List<PeriodeDto>,
     dto: PleiepengerLivetsSluttfaseSøknadDto
 ) {
 
@@ -54,7 +55,7 @@ internal class MapPlsfTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(pleipengerLivetsSluttfase)
-            feil.addAll(Validator.valider(søknad))
+            feil.addAll(Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder()))
         }.onFailure { throwable ->
             logger.error("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
