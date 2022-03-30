@@ -133,24 +133,6 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnAlleÅpneJournalposterAvType(journalpostType: String): List<JournalpostId> {
-        return using(sessionOf(dataSource)) {
-            val statement = queryOf(
-                "SELECT journalpost_id FROM $JOURNALPOST_TABLE WHERE " +
-                        "FERDIG_BEHANDLET IS FALSE AND " +
-                        "KILDE = 'FORDEL' AND " +
-                        "data ->> 'type' = '$journalpostType'"
-            )
-            val resultat = it.run(
-                statement
-                    .map { row ->
-                        row.string("journalpost_id")
-                    }.asList
-            )
-            resultat.map { res ->  objectMapper.readValue(res, JournalpostId::class.java) }
-        }
-    }
-
     suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
         return using(sessionOf(dataSource)) {
             val run = it.run(
