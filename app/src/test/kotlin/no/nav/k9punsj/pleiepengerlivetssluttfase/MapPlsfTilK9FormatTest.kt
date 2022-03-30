@@ -1,5 +1,6 @@
 package no.nav.k9punsj.pleiepengerlivetssluttfase
 
+import kotliquery.param
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9.søknad.felles.type.Landkode
@@ -17,8 +18,8 @@ internal class MapPlsfTilK9FormatTest {
         val soeknadId = UUID.randomUUID().toString()
         val eksisterendeSøknadsperioder = listOf(
             PeriodeDto(
-                fom = LocalDate.now().minusDays(3),
-                tom = LocalDate.now().plusDays(3)
+                fom = LocalDate.parse("2022-03-27"),
+                tom = LocalDate.parse("2022-03-30")
             )
         )
         val feil = MapPlsfTilK9Format(
@@ -46,8 +47,8 @@ internal class MapPlsfTilK9FormatTest {
         val soeknadId = UUID.randomUUID().toString()
         val eksisterendeSøknadsperioder = listOf(
             PeriodeDto(
-                fom = LocalDate.now().minusDays(3),
-                tom = LocalDate.now().plusDays(3)
+                fom = LocalDate.parse("2022-03-27"),
+                tom = LocalDate.parse("2022-03-30")
             )
         )
         val feil = MapPlsfTilK9Format(
@@ -62,8 +63,8 @@ internal class MapPlsfTilK9FormatTest {
                 pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto("22222222222"),
                 arbeidstid = arbeidstid(
                     PeriodeDto(
-                        fom = LocalDate.now().plusMonths(1),
-                        tom = LocalDate.now().plusMonths(2)
+                        fom = LocalDate.parse("2022-04-27"),
+                        tom = LocalDate.parse("2022-04-30")
                     )
                 ),
                 begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("Fordi..."),
@@ -76,7 +77,7 @@ internal class MapPlsfTilK9FormatTest {
         assertThat(feil.first()).isEqualTo(Feil(
             "ytelse.arbeidstid.arbeidstakerList[0].perioder",
             "ugyldigPeriode",
-            "Perioden er utenfor gyldig interval. Gyldig interval: ([[2022-03-27, 2022-04-02]]), Ugyldig periode: 2022-04-30/2022-05-30"
+            "Perioden er utenfor gyldig interval. Gyldig interval: ([[2022-03-27, 2022-03-30]]), Ugyldig periode: 2022-04-27/2022-04-30"
         ))
     }
 
