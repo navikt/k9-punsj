@@ -75,20 +75,12 @@ class SafGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpost(
-        journalpostId: JournalpostId,
-        erSystemKall: Boolean = false
-    ): SafDtos.Journalpost? {
+    internal suspend fun hentJournalpost(journalpostId: JournalpostId): SafDtos.Journalpost? {
 
-        val accessToken = when (erSystemKall) {
-            true -> cachedAccessTokenClient.getAccessToken(
-                scopes = henteJournalpostScopes
-            )
-            false -> cachedAccessTokenClient.getAccessToken(
+        val accessToken =  cachedAccessTokenClient.getAccessToken(
                 scopes = henteJournalpostScopes,
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-        }
+        )
 
         val correlationId = try {
             coroutineContext.hentCorrelationId()
@@ -131,11 +123,8 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentJournalposter(
-        journalpostIder: List<JournalpostId>,
-        erSystemKall: Boolean = false
-    ): List<SafDtos.Journalpost?> =
-        journalpostIder.map { hentJournalpost(it, erSystemKall) }.toList()
+    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>): List<SafDtos.Journalpost?> =
+        journalpostIder.map { hentJournalpost(it) }.toList()
 
     internal suspend fun hentJournalpostInfo(
         journalpostId: JournalpostId
