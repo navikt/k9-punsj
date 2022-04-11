@@ -19,16 +19,16 @@
         <revision>1.0.0</revision>
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
-        <kotlin.version>1.6.10</kotlin.version>
-        <springdoc.version>1.6.6</springdoc.version>
-        <kotlinx-coroutines.version>1.6.0</kotlinx-coroutines.version>
-        <logback.logstash.version>7.0.1</logback.logstash.version>
-        <token-support.version>2.0.13</token-support.version>
+        <kotlin.version>1.6.20</kotlin.version>
+        <springdoc.version>1.6.7</springdoc.version>
+        <kotlinx-coroutines.version>1.6.1</kotlinx-coroutines.version>
+        <logback.logstash.version>7.1</logback.logstash.version>
+        <token-support.version>2.0.14</token-support.version>
         <dusseldorf-ktor.version>3.1.6.8-248832c</dusseldorf-ktor.version>
-        <k9-rapid.version>1.20220322130655-5752ec9</k9-rapid.version>
-        <k9-sak.version>3.2.56</k9-sak.version>
+        <k9-rapid.version>1.20220406090141-f40e84a</k9-rapid.version>
+        <k9-sak.version>3.2.58</k9-sak.version>
         <k9-formidling.version>0.0.19</k9-formidling.version>
-        <k9-format.version>5.8.4</k9-format.version>
+        <k9-format.version>5.8.5</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <mockk.version>1.12.3</mockk.version>
         <jsonassert.version>1.5.0</jsonassert.version>
