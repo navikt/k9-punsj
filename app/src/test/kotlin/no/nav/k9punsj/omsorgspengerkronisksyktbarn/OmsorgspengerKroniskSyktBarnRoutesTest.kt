@@ -4,7 +4,6 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
 import no.nav.k9punsj.domenetjenester.dto.SendSøknad
@@ -37,7 +36,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_KRONISK_SYKT_BARN
+    private val søknadTypeUri = "omsorgspenger-kronisk-sykt-barn-soknad"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 

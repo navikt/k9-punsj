@@ -4,7 +4,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.IkkeKlarForProduksjon
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -20,7 +19,7 @@ import kotlin.coroutines.coroutineContext
 class OverførDagerApi(
     private val overførDagerSøknadService: OverførDagerSøknadService) {
     companion object {
-        const val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_OVERFØRING_DAGER
+        const val søknadTypeUri = "omsorgspenger-overfoer-dager-soknad"
         private val logger: Logger = LoggerFactory.getLogger(OverførDagerApi::class.java)
     }
 

@@ -10,7 +10,6 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
@@ -53,7 +52,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
 
     private companion object {
         private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgRoutes::class.java)
-        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER_ALENE_OM_OMSORGEN
+        private const val søknadType = "omsorgspenger-alene-om-omsorgen-soknad"
         private const val SøknadIdKey = "soeknad_id"
     }
 

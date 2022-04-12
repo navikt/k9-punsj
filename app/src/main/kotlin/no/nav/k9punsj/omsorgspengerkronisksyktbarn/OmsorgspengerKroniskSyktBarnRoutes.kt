@@ -11,7 +11,6 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.Urls
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
@@ -52,11 +51,9 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
     private val soknadService : SoknadService
 ) {
 
-    private companion object {
-        private val logger = LoggerFactory.getLogger(OmsorgspengerKroniskSyktBarnRoutes::class.java)
-        private const val søknadType = FagsakYtelseTypeUri.OMSORGSPENGER_KRONISK_SYKT_BARN
-        private const val SøknadIdKey = "soeknad_id"
-    }
+    internal val søknadType = "omsorgspenger-kronisk-sykt-barn-soknad"
+    private val logger = LoggerFactory.getLogger(OmsorgspengerKroniskSyktBarnRoutes::class.java)
+    private val SøknadIdKey = "soeknad_id"
 
     @Bean
     fun omsorgspengerKroniskSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
