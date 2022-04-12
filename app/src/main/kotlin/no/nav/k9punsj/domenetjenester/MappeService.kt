@@ -100,7 +100,7 @@ class MappeService(
         return Søknadfelles(søknadId, journalposter, mottattDato, klokkeslett)
     }
 
-    suspend fun førsteInnsendingOms(nySøknad: OpprettNySøknad): SøknadEntitet {
+    suspend fun førsteInnsendingKorrigeringIm(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
@@ -349,7 +349,7 @@ class MappeService(
     }
 }
 
-data class Søknadfelles(
+private data class Søknadfelles(
     val søknadsId: UUID,
     val journalposter: MutableMap<String, Any?>,
     val mottattDato: LocalDateTime?,

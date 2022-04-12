@@ -8,6 +8,7 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.Urls
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
@@ -57,18 +58,9 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
         private const val SøknadIdKey = "soeknad_id"
     }
 
-    internal object Urls {
-        internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/$søknadType" //post
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/$søknadType/valider" //post
-    }
-
     @Bean
     fun omsorgspengerKroniskSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        GET("/api${Urls.HenteMappe}") { request ->
+        GET("/api/$søknadType/${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
@@ -92,7 +84,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
             }
         }
 
-        GET("/api${Urls.HenteSøknad}") { request ->
+        GET("/api/$søknadType/${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
                 val søknad = mappeService.hentSøknad(søknadId)
@@ -109,7 +101,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
             }
         }
 
-        POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        POST("/api/$søknadType/${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.opprettNy()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
@@ -141,7 +133,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
             }
         }
 
-        PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        PUT("/api/$søknadType/${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.omsorgspengerKroniskSyktBarnSøknad()
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
@@ -169,7 +161,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
             }
         }
 
-        POST("/api${Urls.SendEksisterendeSøknad}") { request ->
+        POST("/api/$søknadType/${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
@@ -252,7 +244,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
             }
         }
 
-        POST("/api${Urls.ValiderSøknad}") { request ->
+        POST("/api/$søknadType/${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val soknadTilValidering = request.omsorgspengerKroniskSyktBarnSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
