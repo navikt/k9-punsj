@@ -15,7 +15,6 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -23,7 +22,7 @@ import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
-import no.nav.k9punsj.utils.ServerRequestUtils.opprettNy
+import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.sendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocation
 import org.slf4j.LoggerFactory
@@ -47,18 +46,17 @@ internal class OmsorgspengerAleneOmsorgRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
-    private val soknadService : SoknadService
+    private val soknadService: SoknadService
 ) {
 
     private companion object {
         private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgRoutes::class.java)
         private const val søknadType = "omsorgspenger-alene-om-omsorgen-soknad"
-        private const val SøknadIdKey = "soeknad_id"
     }
 
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
+        internal const val HenteSøknad = "/$søknadType/mappe/soeknad_id" //get
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
@@ -70,7 +68,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.norskIdent()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent,
                     Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
@@ -87,13 +86,19 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf()))
+                    .bodyValueAndAwait(
+                        SvarOmsAODto(
+                            norskIdent,
+                            FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode,
+                            listOf()
+                        )
+                    )
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val søknadId = request.søknadId()
+                val søknadId = request.pathVariable("soeknad_id")
                 val søknad = mappeService.hentSøknad(søknadId)
 
                 if (søknad != null) {
@@ -110,8 +115,9 @@ internal class OmsorgspengerAleneOmsorgRoutes(
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val opprettNySøknad = request.opprettNy()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
+                val opprettNySøknad = request.mapNySøknad()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    opprettNySøknad.norskIdent,
                     Urls.NySøknad
                 )?.let { return@RequestContext it }
 
@@ -128,7 +134,10 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                 }
 
                 //setter riktig type der man jobber på en ukjent i utgangspunktet
-                journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN, opprettNySøknad.journalpostId)
+                journalpostRepository.settFagsakYtelseType(
+                    FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
+                    opprettNySøknad.journalpostId
+                )
 
                 val søknadEntitet = mappeService.førsteInnsendingOmsAO(
                     nySøknad = opprettNySøknad!!
@@ -159,7 +168,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                     val søker = personService.finnPerson(entitet.søkerId)
                     journalpostRepository.settKildeHvisIkkeFinnesFraFør(
                         hentUtJournalposter(entitet),
-                        søker.aktørId)
+                        søker.aktørId
+                    )
                     ServerResponse
                         .ok()
                         .json()
@@ -171,7 +181,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.sendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(sendSøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    sendSøknad.norskIdent,
                     Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
                 val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
@@ -182,14 +193,17 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                         .buildAndAwait()
                 } else {
                     try {
-                        val søknad: OmsorgspengerAleneOmsorgSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
+                        val søknad: OmsorgspengerAleneOmsorgSøknadDto =
+                            objectMapper.convertValue(søknadEntitet.søknad!!)
 
                         val journalPoster = søknadEntitet.journalposter!!
                         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
                         val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn -> if (!kanSendesInn) {
-                                logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
-                            }}
+                            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                                if (!kanSendesInn) {
+                                    logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
+                                }
+                            }
                         }.toMutableSet()
 
                         if (journalpostIder.isEmpty()) {
@@ -254,12 +268,12 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val soknadTilValidering = request.omsorgspengerAleneOmsorgSøknad()
-                soknadTilValidering.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                        norskIdent,
-                        Urls.ValiderSøknad
-                    )?.let { return@RequestContext it }
-                }
+
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = request.norskIdent(),
+                    url = Urls.ValiderSøknad
+                )?.let { return@RequestContext it }
+
                 val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
                     ?: return@RequestContext ServerResponse
                         .badRequest()
@@ -307,8 +321,6 @@ internal class OmsorgspengerAleneOmsorgRoutes(
             }
         }
     }
-
-    private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
 
     private suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()

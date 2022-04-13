@@ -11,7 +11,7 @@ object ServerRequestUtils {
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 
-    internal suspend fun ServerRequest.opprettNy() =
+    internal suspend fun ServerRequest.mapNySøknad() =
         body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
 
     internal suspend fun ServerRequest.sendSøknad(): SendSøknad = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
@@ -19,7 +19,7 @@ object ServerRequestUtils {
     internal suspend fun ServerRequest.matchFagsakMedPerioder() = body(BodyExtractors.toMono(MatchFagsakMedPeriode::class.java)).awaitFirst()
 
 
-    internal fun ServerRequest.søknadLocation(søknadId: SøknadIdDto) =
+    internal fun ServerRequest.søknadLocation(søknadId: String) =
         uriBuilder().pathSegment("mappe", søknadId).build()
 
 }

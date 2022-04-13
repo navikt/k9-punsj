@@ -32,25 +32,25 @@ data class ArbeidsgiverMedArbeidsforholdId(
 )
 
 data class SendSøknad(
-    val norskIdent: NorskIdentDto,
-    val soeknadId: SøknadIdDto,
+    val norskIdent: String,
+    val soeknadId: String,
 )
 
 data class Matchfagsak(
-    val brukerIdent: NorskIdentDto,
-    val barnIdent: NorskIdentDto,
+    val brukerIdent: String,
+    val barnIdent: String,
 )
 
 data class MatchFagsakMedPeriode(
-    val brukerIdent: NorskIdentDto,
+    val brukerIdent: String,
     val periodeDto: PeriodeDto
 )
 
 data class OpprettNySøknad(
-    val norskIdent: NorskIdentDto,
-    val journalpostId: JournalpostIdDto,
-    val pleietrengendeIdent: NorskIdentDto?,
-    val annenPart: NorskIdentDto?,
+    val norskIdent: String,
+    val journalpostId: String,
+    val pleietrengendeIdent: String?,
+    val annenPart: String?,
     //TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
-    val barnIdent: NorskIdentDto?,
+    val barnIdent: String?,
 )

@@ -15,7 +15,6 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -23,7 +22,7 @@ import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
-import no.nav.k9punsj.utils.ServerRequestUtils.opprettNy
+import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.sendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocation
 import org.slf4j.LoggerFactory
@@ -110,7 +109,7 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val opprettNySøknad = request.opprettNy()
+                val opprettNySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(opprettNySøknad.norskIdent,
                     Urls.NySøknad
                 )?.let { return@RequestContext it }
@@ -308,7 +307,7 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
         }
     }
 
-    private fun ServerRequest.søknadId(): SøknadIdDto = pathVariable(SøknadIdKey)
+    private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
 
     private suspend fun ServerRequest.omsorgspengerMidlertidigAleneSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerMidlertidigAleneSøknadDto::class.java)).awaitFirst()
