@@ -8,7 +8,6 @@ import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
-import no.nav.k9punsj.innsending.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto

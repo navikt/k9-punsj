@@ -39,35 +39,13 @@ internal class SakerRoutes(
             if (sakerEnabled) {
                 RequestContext(coroutineContext, request) {
                     val norskIdent = request.hentNorskIdentHeader()
-                    val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
-                    if (tilganNektet != null) {
-                        return@RequestContext tilganNektet
-                    } else {
-                        RequestContext(kotlin.coroutines.coroutineContext, request) {
-                            return@RequestContext kotlin.runCatching {
-                                logger.info("Henter fagsaker...")
-                                sakService.hentSaker(norskIdent)
-                            }
-                        }.fold(
-                            onSuccess = {
-                                logger.info("Saker hentet")
-                                ServerResponse
-                                    .status(HttpStatus.OK)
-                                    .json()
-                                    .bodyValueAndAwait(it)
-                            },
-                            onFailure = {
-                                logger.error("Feilet med å hente saker.", it)
-                                ServerResponse
-                                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .json()
-                                    .bodyValueAndAwait(OasFeil(it.message))
-                            }
-                        )
-                    }
+                    innloggetUtils.harInnloggetBrukerTilgangTil(norskIdentDto = listOf(norskIdent), url = Urls.HentSaker)
+                        ?.let { return@RequestContext it }
+
+                    return@RequestContext sakService.hentSaker(norskIdent)
                 }
             } else {
-                ServerResponse
+                return@GET ServerResponse
                     .status(HttpStatus.NOT_IMPLEMENTED)
                     .json()
                     .bodyValueAndAwait("Ikke enablet")

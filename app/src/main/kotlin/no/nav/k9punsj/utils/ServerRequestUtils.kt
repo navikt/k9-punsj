@@ -14,12 +14,12 @@ object ServerRequestUtils {
     internal suspend fun ServerRequest.mapNySøknad() =
         body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
 
-    internal suspend fun ServerRequest.sendSøknad(): SendSøknad = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
-    internal suspend fun ServerRequest.matchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
-    internal suspend fun ServerRequest.matchFagsakMedPerioder() = body(BodyExtractors.toMono(MatchFagsakMedPeriode::class.java)).awaitFirst()
+    internal suspend fun ServerRequest.mapSendSøknad(): SendSøknad = body(BodyExtractors.toMono(SendSøknad::class.java)).awaitFirst()
+    internal suspend fun ServerRequest.mapMatchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
+    internal suspend fun ServerRequest.mapMatchFagsakMedPerioder() = body(BodyExtractors.toMono(MatchFagsakMedPeriode::class.java)).awaitFirst()
 
 
-    internal fun ServerRequest.søknadLocation(søknadId: String) =
+    internal fun ServerRequest.søknadLocationUri(søknadId: String) =
         uriBuilder().pathSegment("mappe", søknadId).build()
 
 }

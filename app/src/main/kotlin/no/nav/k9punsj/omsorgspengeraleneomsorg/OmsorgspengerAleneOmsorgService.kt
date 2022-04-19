@@ -1,11 +1,10 @@
-package no.nav.k9punsj.omsorgspengerkronisksyktbarn
+package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -18,112 +17,106 @@ import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
-import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Service
-internal class OmsorgspengerKroniskSyktBarnService(
+class OmsorgspengerAleneOmsorgService(
     private val objectMapper: ObjectMapper,
-    private val personService: PersonService,
     private val mappeService: MappeService,
+    private val personService: PersonService,
     private val punsjbolleService: PunsjbolleService,
+    private val azureGraphService: IAzureGraphService,
     private val journalpostRepository: JournalpostRepository,
-    private val azureGraphService: AzureGraphService,
     private val soknadService: SoknadService,
 ) {
 
-    private val logger = LoggerFactory.getLogger(OmsorgspengerKroniskSyktBarnService::class.java)
+    private companion object {
+        private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgService::class.java)
+    }
 
-    suspend fun henteMappe(norskIdent: String): ServerResponse {
+
+    internal suspend fun henteMappe(norskIdent: String): ServerResponse {
         val person = personService.finnPersonVedNorskIdent(norskIdent)
         if (person != null) {
-            val svarDto = mappeService.hentMappe(
-                person = person
-            ).tilOmsKSBVisning(norskIdent)
+            val svarDto = mappeService.hentMappe(person = person)
+                .tilOmsAOVisning(norskIdent)
             return ServerResponse
                 .ok()
                 .json()
                 .bodyValueAndAwait(svarDto)
         }
-
         return ServerResponse
             .ok()
             .json()
             .bodyValueAndAwait(
-                SvarOmsKSBDto(
+                SvarOmsAODto(
                     søker = norskIdent,
-                    fagsakTypeKode = FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode,
+                    fagsakTypeKode = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode,
                     søknader = listOf()
                 )
             )
     }
 
-    suspend fun henteSøknad(søknadId: String): ServerResponse {
+    internal suspend fun henteSøknad(søknadId: String): ServerResponse {
         val søknad = mappeService.hentSøknad(søknadId)
             ?: return ServerResponse.notFound().buildAndAwait()
 
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(søknad.tilOmsKSBvisning())
+            .bodyValueAndAwait(søknad.tilOmsAOvisning())
     }
 
-    suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
+    internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         //oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (nySøknad.pleietrengendeIdent != null) {
+        if (opprettNySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
-                søker = nySøknad.norskIdent,
-                pleietrengende = nySøknad.pleietrengendeIdent,
-                journalpostId = nySøknad.journalpostId,
+                søker = opprettNySøknad.norskIdent,
+                pleietrengende = opprettNySøknad.pleietrengendeIdent,
+                journalpostId = opprettNySøknad.journalpostId,
                 periode = null,
                 correlationId = coroutineContext.hentCorrelationId(),
-                fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
+                fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO
             )
         }
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostRepository.settFagsakYtelseType(
-            FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
-            nySøknad.journalpostId
+            ytelseType = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
+            journalpostId = opprettNySøknad.journalpostId
         )
 
-        val søknadEntitet = mappeService.førsteInnsendingOmsKSB(
-            nySøknad = nySøknad!!
+        val søknadEntitet = mappeService.førsteInnsendingOmsAO(
+            nySøknad = opprettNySøknad!!
         )
         return ServerResponse
+            // TODO: Erstatt denne for o bli kvitt ServerRequest i service. (samme i alla ytelser)
             .created(request.søknadLocationUri(søknadEntitet.søknadId))
             .json()
-            .bodyValueAndAwait(søknadEntitet.tilOmsKSBvisning())
-
+            .bodyValueAndAwait(søknadEntitet.tilOmsAOvisning())
     }
 
-    suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerKroniskSyktBarnSøknadDto): ServerResponse {
+    internal suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-
-        val søknadEntitet = mappeService.utfyllendeInnsendingOmsKSB(
-            omsorgspengerKroniskSyktBarnSøknadDto = søknad,
+        val søknadEntitet = mappeService.utfyllendeInnsendingOmsAO(
+            dto = søknad,
             saksbehandler = saksbehandler
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 
         val (entitet, _) = søknadEntitet
-        val søker = personService.finnPerson(entitet.søkerId)
+        val søker = personService.finnPerson(personId = entitet.søkerId)
         journalpostRepository.settKildeHvisIkkeFinnesFraFør(
-            hentUtJournalposter(entitet),
-            søker.aktørId
+            journalposter = hentUtJournalposter(entitet),
+            aktørId = søker.aktørId
         )
         return ServerResponse
             .ok()
@@ -131,12 +124,12 @@ internal class OmsorgspengerKroniskSyktBarnService(
             .bodyValueAndAwait(søknad)
     }
 
-    suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
+    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
         val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
-            val søknad: OmsorgspengerKroniskSyktBarnSøknadDto =
+            val søknad: OmsorgspengerAleneOmsorgSøknadDto =
                 objectMapper.convertValue(søknadEntitet.søknad!!)
 
             val journalPoster = søknadEntitet.journalposter!!
@@ -153,10 +146,10 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
                 return ServerResponse
                     .status(HttpStatus.CONFLICT)
-                    .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
+                    .bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
-            val (søknadK9Format, feilListe) = MapOmsKSBTilK9Format(
+            val (søknadK9Format, feilListe) = MapOmsAOTilK9Format(
                 søknadId = søknad.soeknadId,
                 journalpostIder = journalpostIder,
                 dto = søknad
@@ -178,8 +171,8 @@ internal class OmsorgspengerKroniskSyktBarnService(
             }
 
             val feil = soknadService.sendSøknad(
-                søknadK9Format,
-                journalpostIder
+                søknad = søknadK9Format,
+                journalpostIder = journalpostIder
             )
 
             if (feil != null) {
@@ -201,14 +194,11 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(e.localizedMessage)
         }
-
     }
 
-    suspend fun validerSøknad(soknadTilValidering: OmsorgspengerKroniskSyktBarnSøknadDto): ServerResponse {
+    internal suspend fun validerSøknad(soknadTilValidering: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
         val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
-            ?: return ServerResponse
-                .badRequest()
-                .buildAndAwait()
+            ?: return ServerResponse.badRequest().buildAndAwait()
 
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -216,7 +206,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
         try {
-            mapTilEksternFormat = MapOmsKSBTilK9Format(
+            mapTilEksternFormat = MapOmsAOTilK9Format(
                 søknadId = soknadTilValidering.soeknadId,
                 journalpostIder = journalposterDto.journalposter,
                 dto = soknadTilValidering
@@ -227,6 +217,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(e.localizedMessage)
         }
+
         val (søknad, feilListe) = mapTilEksternFormat
         if (feilListe.isNotEmpty()) {
             val feil = feilListe.map { feil ->

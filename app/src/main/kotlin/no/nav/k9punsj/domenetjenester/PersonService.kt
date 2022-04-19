@@ -1,8 +1,6 @@
 package no.nav.k9punsj.domenetjenester
 
-import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Person
-import no.nav.k9punsj.db.datamodell.PersonId
 import no.nav.k9punsj.db.repository.PersonRepository
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Service
@@ -14,7 +12,7 @@ class PersonService(
     val pdlService: PdlService,
 ) {
 
-    suspend fun finnEllerOpprettPersonVedNorskIdent(norskIdent: NorskIdent): Person {
+    suspend fun finnEllerOpprettPersonVedNorskIdent(norskIdent: String): Person {
         val person = personRepository.hentPersonVedPersonIdent(norskIdent)
 
         if (person != null) {
@@ -27,20 +25,20 @@ class PersonService(
         return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
     }
 
-    suspend fun finnPerson(personId: PersonId): Person {
+    suspend fun finnPerson(personId: String): Person {
         return personRepository.hentPersonVedPersonId(personId)!!
     }
 
-    suspend fun finnPersonVedNorskIdent(norskIdent: NorskIdent): Person? {
+    suspend fun finnPersonVedNorskIdent(norskIdent: String): Person? {
         return personRepository.hentPersonVedPersonIdent(norskIdent)
     }
 
-    suspend fun finnPersonVedNorskIdentFørstDbSåPdl(norskIdent: NorskIdent): Person {
+    suspend fun finnPersonVedNorskIdentFørstDbSåPdl(norskIdent: String): Person {
         val aktørId = finnAktørId(norskIdent)
         return Person("", norskIdent, aktørId)
     }
 
-    suspend fun finnAktørId(norskIdent: NorskIdent): String {
+    suspend fun finnAktørId(norskIdent: String): String {
         val person = personRepository.hentPersonVedPersonIdent(norskIdent)
         if (person != null) {
             return person.aktørId

@@ -101,7 +101,7 @@ class SafGateway(
             .header(CorrelationIdHeader, correlationId)
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(SafDtos.JournalpostQuery(journalpostId.toString()))
+            .bodyValue(SafDtos.JournalpostQuery(journalpostId))
             .retrieve()
             .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
             .awaitFirst()
@@ -180,36 +180,6 @@ class SafGateway(
         return result.fold(
             success = {
                 it.safData()
-            },
-            failure = {
-                håndterFeil(it, request, response)
-                null
-            }
-        )
-    }
-
-    internal suspend fun hentSakerFraSaf(søkerIdent: String): JSONArray? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val body = objectMapper().writeValueAsString(SafDtos.SakerQuery(søkerIdent))
-        val (request, response, result) = GraphQlUrl
-            .httpPost()
-            .body(body)
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
-            ).awaitStringResponseResult()
-
-        return result.fold(
-            success = {
-                it.saker()
             },
             failure = {
                 håndterFeil(it, request, response)

@@ -101,7 +101,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
+    suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
@@ -116,7 +116,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<PunsjJournalpost> {
+    suspend fun finnJournalposterPåPersonBareFordel(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
@@ -173,7 +173,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: AktørId) {
+    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: String) {
         journalposter?.forEach {
             if (journalpostIkkeEksisterer(it)) {
                 val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
