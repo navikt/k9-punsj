@@ -25,7 +25,7 @@ import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.matchFagsak
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.sendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocation
@@ -78,7 +78,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
     fun pleiepengerLivetsSluttfaseSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.norskIdent()
+                val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent, Urls.HenteMappe)
                     ?.let { return@RequestContext it }
 

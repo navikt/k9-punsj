@@ -20,7 +20,7 @@ import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.matchFagsakMedPerioder
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.sendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocation
@@ -54,7 +54,7 @@ internal class KorrigeringInntektsmeldingService(
 
     internal suspend fun henteMappe(request: ServerRequest): ServerResponse {
         return RequestContext(coroutineContext, request) {
-            val norskIdent = request.norskIdent()
+            val norskIdent = request.hentNorskIdentHeader()
 
             val person = personService.finnPersonVedNorskIdent(norskIdent)
             if (person != null) {

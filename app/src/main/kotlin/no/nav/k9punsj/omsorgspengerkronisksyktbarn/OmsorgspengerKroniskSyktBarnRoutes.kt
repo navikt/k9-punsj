@@ -3,7 +3,7 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -32,7 +32,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
     @Bean
     fun omsorgspengerKroniskSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.norskIdent(), url = Urls.HenteMappe)
+            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.hentNorskIdentHeader(), url = Urls.HenteMappe)
                 ?.let { return@GET it }
             omsorgspengerKroniskSyktBarnService.henteMappe(request)
         }
@@ -42,7 +42,7 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.norskIdent(), url = Urls.NySøknad)
+            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.hentNorskIdentHeader(), url = Urls.NySøknad)
                 ?.let { return@POST it }
             omsorgspengerKroniskSyktBarnService.nySøknad(request)
         }
@@ -52,13 +52,13 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.norskIdent(), url = Urls.SendEksisterendeSøknad)
+            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.hentNorskIdentHeader(), url = Urls.SendEksisterendeSøknad)
                 ?.let { return@POST it }
             omsorgspengerKroniskSyktBarnService.sendEksisterendeSøknad(request)
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.norskIdent(), url = Urls.ValiderSøknad)
+            innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = request.hentNorskIdentHeader(), url = Urls.ValiderSøknad)
                 ?.let { return@POST it }
             omsorgspengerKroniskSyktBarnService.validerSøknad(request)
         }

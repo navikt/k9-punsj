@@ -10,7 +10,6 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.innsending.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
-import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
@@ -99,7 +98,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
-            val journalpostId = request.journalpostId()
+            val journalpostId = request.pathVariable("journalpost_id")
             val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId)
                 ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
@@ -170,6 +169,4 @@ internal object KopierJournalpost {
 
     internal suspend fun ServerRequest.kopierJournalpostDto() =
         body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
-
-    internal fun ServerRequest.journalpostId(): JournalpostId = pathVariable("journalpost_id")
 }

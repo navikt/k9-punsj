@@ -4,9 +4,9 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.journalpost.JournalpostId
 
-internal data class KopierJournalpostInfo(
+data class KopierJournalpostInfo(
     internal val correlationId: CorrelationId,
-    internal val journalpostId: JournalpostId,
+    internal val journalpostId: String,
     internal val fra: String,
     internal val til: String,
     internal val pleietrengende: String? = null,

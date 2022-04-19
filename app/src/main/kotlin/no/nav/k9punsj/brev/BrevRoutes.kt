@@ -6,10 +6,9 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -42,7 +41,7 @@ internal class BrevRoutes(
     fun BrevRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentAlleBrev}") { request ->
             RequestContext(coroutineContext, request) {
-                val journalpostId = request.journalpostId()
+                val journalpostId = request.pathVariable(JournalpostIdKey)
                 val brev = brevService.hentBrevSendtUtPåJournalpost(journalpostId)
 
                 if (brev.isEmpty()) {
@@ -92,7 +91,7 @@ internal class BrevRoutes(
 
         GET("/api${Urls.HentAktørId}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.norskIdent()
+                val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent,
                     Urls.HentAktørId
                 )?.let { return@RequestContext it }

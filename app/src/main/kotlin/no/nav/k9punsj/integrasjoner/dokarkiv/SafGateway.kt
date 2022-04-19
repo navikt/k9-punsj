@@ -81,7 +81,7 @@ class SafGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpost(journalpostId: JournalpostId): SafDtos.Journalpost? {
+    internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
 
         val accessToken =  cachedAccessTokenClient.getAccessToken(
                 scopes = henteJournalpostScopes,
@@ -129,11 +129,11 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>): List<SafDtos.Journalpost?> =
+    internal suspend fun hentJournalposter(journalpostIder: List<String>): List<SafDtos.Journalpost?> =
         journalpostIder.map { hentJournalpost(it) }.toList()
 
     internal suspend fun hentJournalpostInfo(
-        journalpostId: JournalpostId
+        journalpostId: String
     ): SafDtos.Journalpost? {
         val journalpost = hentJournalpost(journalpostId)
 

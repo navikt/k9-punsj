@@ -7,7 +7,7 @@ import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(PunsjJournalpost::class.java)
 
-internal data class PunsjJournalpost(
+data class PunsjJournalpost(
     val uuid: UUID,
     val journalpostId: String,
     val aktørId: String?,

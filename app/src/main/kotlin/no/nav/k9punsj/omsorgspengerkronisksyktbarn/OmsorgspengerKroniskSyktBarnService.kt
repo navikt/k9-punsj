@@ -19,7 +19,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.sendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocation
 import org.slf4j.LoggerFactory
@@ -48,7 +48,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
 
     suspend fun henteMappe(request: ServerRequest): ServerResponse {
         return RequestContext(coroutineContext, request) {
-            val norskIdent = request.norskIdent()
+            val norskIdent = request.hentNorskIdentHeader()
             val person = personService.finnPersonVedNorskIdent(norskIdent)
 
             if (person != null) {

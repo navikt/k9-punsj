@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class AksjonspunktServiceImpl(
+internal class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,

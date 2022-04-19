@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.server.ServerRequest
 
 object ServerRequestUtils {
 
-    internal fun ServerRequest.norskIdent(): String {
+    internal fun ServerRequest.hentNorskIdentHeader(): String {
         return headers().header("X-Nav-NorskIdent").first()!!
     }
 

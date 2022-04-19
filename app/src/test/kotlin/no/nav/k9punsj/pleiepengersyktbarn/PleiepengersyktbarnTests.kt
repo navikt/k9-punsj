@@ -571,7 +571,7 @@ class PleiepengersyktbarnTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): Triple<SøknadIdDto, HttpStatus, OasSoknadsfeil> {
+    ): Triple<String, HttpStatus, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -667,15 +667,15 @@ class PleiepengersyktbarnTests {
 
 
 private fun opprettSøknad(
-    personnummer: NorskIdentDto,
+    personnummer: String,
     journalpostId: String,
 ): OpprettNySøknad {
     return OpprettNySøknad(personnummer, journalpostId, null, null, null)
 }
 
 private fun lagSendSøknad(
-    norskIdent: NorskIdentDto,
-    søknadId: SøknadIdDto,
+    norskIdent: String,
+    søknadId: String,
 ): SendSøknad {
     return SendSøknad(norskIdent, søknadId)
 }

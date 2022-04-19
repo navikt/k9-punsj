@@ -8,7 +8,6 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.JournalpostId
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
@@ -30,7 +29,7 @@ class SoknadService(
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
-        journalpostIder: MutableSet<JournalpostId>,
+        journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
         val journalposterHarIkkeBlittSendtInn = journalpostRepository.kanSendeInn(journalpostIdListe)

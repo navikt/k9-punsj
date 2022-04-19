@@ -11,7 +11,6 @@ import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
@@ -122,7 +121,7 @@ internal class GosysRoutes(
 
     data class GosysOpprettJournalføringsOppgaveRequest(
         val norskIdent: NorskIdent,
-        val journalpostId: JournalpostId,
+        val journalpostId: String,
         val gjelder: Gjelder = Gjelder.Annet
     )
 }

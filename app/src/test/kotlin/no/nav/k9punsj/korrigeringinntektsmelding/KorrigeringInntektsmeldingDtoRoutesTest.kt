@@ -246,7 +246,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     }
 
     private fun opprettSøknad(
-        personnummer: NorskIdentDto,
+        personnummer: String,
         journalpostId: String,
     ): IdentOgJournalpost {
         return IdentOgJournalpost(personnummer, journalpostId)
@@ -275,8 +275,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     }
 
     private fun lagSendSøknad(
-        norskIdent: NorskIdentDto,
-        søknadId: SøknadIdDto,
+        norskIdent: String,
+        søknadId: String,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }

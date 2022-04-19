@@ -4,10 +4,8 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
 import no.nav.k9punsj.domenetjenester.dto.SendSøknad
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -100,7 +98,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     }
 
     private fun opprettSøknad(
-        personnummer: NorskIdentDto,
+        personnummer: String,
         journalpostId: String,
         pleietrengende: String,
     ): OpprettNySøknad {
@@ -210,8 +208,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     }
 
     private fun lagSendSøknad(
-        norskIdent: NorskIdentDto,
-        søknadId: SøknadIdDto,
+        norskIdent: String,
+        søknadId: String,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
