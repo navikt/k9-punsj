@@ -12,13 +12,8 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
-import no.nav.k9punsj.domenetjenester.dto.SvarOmsDto
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.domenetjenester.dto.tilOmsVisning
-import no.nav.k9punsj.domenetjenester.dto.tilOmsvisning
-import no.nav.k9punsj.domenetjenester.mappers.MapOmsTilK9Format
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService

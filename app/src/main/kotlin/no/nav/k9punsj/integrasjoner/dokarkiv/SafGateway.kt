@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.integrasjoner.dokarkiv
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -8,11 +8,17 @@ import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.journalpost.FeilIAksjonslogg
+import no.nav.k9punsj.journalpost.IkkeFunnet
+import no.nav.k9punsj.journalpost.IkkeStøttetJournalpost
+import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
+import no.nav.k9punsj.journalpost.JournalpostId
+import no.nav.k9punsj.journalpost.NotatUnderArbeidFeil
+import no.nav.k9punsj.journalpost.UgyldigToken
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONArray
 import org.json.JSONObject
@@ -95,7 +101,7 @@ class SafGateway(
             .header(CorrelationIdHeader, correlationId)
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+            .bodyValue(SafDtos.JournalpostQuery(journalpostId.toString()))
             .retrieve()
             .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
             .awaitFirst()
@@ -212,7 +218,7 @@ class SafGateway(
         )
     }
 
-    internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
+    internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteDokumentScopes,
@@ -278,8 +284,6 @@ class SafGateway(
         )
     )
 }
-
-typealias DokumentId = String
 
 data class Dokument(
     val contentType: MediaType,

@@ -1,12 +1,10 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.brev.BrevId
-import no.nav.k9punsj.brev.DokumentbestillingDto
 import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper

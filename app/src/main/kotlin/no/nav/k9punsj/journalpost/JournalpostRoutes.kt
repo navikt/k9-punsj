@@ -18,9 +18,7 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.integrasjoner.punsjbollen.somPunsjbolleRuting
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.openapi.*
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -51,7 +49,6 @@ internal class JournalpostRoutes(
 
     internal companion object {
         private const val JournalpostIdKey = "journalpost_id"
-        private const val AktørIdKey = "aktor_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
 
@@ -472,11 +469,11 @@ internal class JournalpostRoutes(
     }
 
     private suspend fun utvidJournalpostMedMottattDato(
-        jornalpostId: JournalpostId,
+        journalpostId: String,
         mottattDato: LocalDateTime,
         aktørId: AktørId?,
     ) {
-        val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(jornalpostId)
+        val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(journalpostId)
         if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {
             return
         }
@@ -487,7 +484,7 @@ internal class JournalpostRoutes(
         } else {
             val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
-                journalpostId = jornalpostId,
+                journalpostId = journalpostId,
                 aktørId,
                 mottattDato = mottattDato
             )
@@ -514,7 +511,7 @@ internal class JournalpostRoutes(
     }
 
     private suspend fun harInnloggetBrukerTilgangTilOgOpprettesak(
-        norskIdentDto: NorskIdentDto,
+        norskIdentDto: String,
         url: String,
     ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
@@ -526,8 +523,8 @@ internal class JournalpostRoutes(
         return null
     }
 
-    private fun ServerRequest.journalpostId(): JournalpostId = pathVariable(JournalpostIdKey)
-    private fun ServerRequest.dokumentId(): DokumentId = pathVariable(DokumentIdKey)
+    private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
+    private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
     private suspend fun ServerRequest.omfordelingRequest() =
         body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 

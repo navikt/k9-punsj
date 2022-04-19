@@ -20,7 +20,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     private val objectMapper = objectMapper()
 
-    suspend fun lagre(
+    internal suspend fun lagre(
         punsjJournalpostId: PunsjJournalpost,
         kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
         function: (PunsjJournalpost?) -> PunsjJournalpost,

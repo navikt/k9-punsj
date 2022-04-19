@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.korrigeringinntektsmelding
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
@@ -11,8 +11,6 @@ import no.nav.k9.søknad.felles.type.Organisasjonsnummer
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.LoggerFactory
@@ -125,7 +123,7 @@ internal class MapOmsTilK9Format(
         omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(fraværsperioder)
     }
 
-    private fun KorrigeringInntektsmeldingDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun KorrigeringInntektsmeldingDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(Journalpost()
                 .medJournalpostId(journalpostId)

@@ -3,6 +3,7 @@ package no.nav.k9punsj.domenetjenester.mappers
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.brev.DokumentbestillingDto
+import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

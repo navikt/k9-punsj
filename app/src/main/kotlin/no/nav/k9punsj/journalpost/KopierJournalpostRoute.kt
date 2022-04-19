@@ -16,8 +16,6 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -29,11 +27,11 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import kotlin.coroutines.coroutineContext
 
 data class KopierJournalpostDto(
-    val fra: NorskIdentDto,
-    val til: NorskIdentDto,
+    val fra: String,
+    val til: String,
     //TODO bytt navn til pleietrengende
-    val barn: NorskIdentDto?,
-    val annenPart: NorskIdentDto?
+    val barn: String?,
+    val annenPart: String?
 ) {
     init {
         require(barn != null || annenPart != null) {

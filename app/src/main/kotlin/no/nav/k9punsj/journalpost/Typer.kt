@@ -1,13 +1,9 @@
 package no.nav.k9punsj.journalpost
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 
 internal data class JournalpostId private constructor(private val value: String) {
-    init { require(value.matches(Regex)) { "$value er en ugylidig journalpostId" } }
+    init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
     override fun toString() = value
     internal companion object {
         private val Regex = "\\d{5,40}".toRegex()
@@ -31,28 +27,28 @@ enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
 
 
 data class PunsjBolleDto(
-    val brukerIdent: NorskIdentDto,
+    val brukerIdent: String,
     //todo bytt navn til pleietrengende
-    val barnIdent: NorskIdentDto?,
-    val annenPart: NorskIdentDto?,
-    val journalpostId: JournalpostIdDto,
+    val barnIdent: String?,
+    val annenPart: String?,
+    val journalpostId: String,
     val fagsakYtelseType: FagsakYtelseType
 )
 
 data class IdentOgJournalpost(
-    val norskIdent: NorskIdentDto,
-    val journalpostId: JournalpostIdDto,
+    val norskIdent: String,
+    val journalpostId: String,
 )
 
 data class SøkUferdigJournalposter(
-    val aktorIdentDto: AktørIdDto,
-    val aktorIdentBarnDto: AktørIdDto?
+    val aktorIdentDto: String,
+    val aktorIdentBarnDto: String?
 )
 
 data class SettPåVentDto(
-    val soeknadId: SøknadIdDto?
+    val soeknadId: String?
 )
 
 data class IdentDto(
-    val norskIdent: NorskIdentDto
+    val norskIdent: String
 )

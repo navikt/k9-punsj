@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
