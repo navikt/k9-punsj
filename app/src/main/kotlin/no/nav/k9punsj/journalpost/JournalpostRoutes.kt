@@ -8,7 +8,6 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
@@ -471,7 +470,7 @@ internal class JournalpostRoutes(
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
-        aktørId: AktørId?,
+        aktørId: String?,
     ) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(journalpostId)
         if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {

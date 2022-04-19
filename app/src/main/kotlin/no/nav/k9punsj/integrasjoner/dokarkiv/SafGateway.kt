@@ -15,12 +15,10 @@ import no.nav.k9punsj.journalpost.IkkeFunnet
 import no.nav.k9punsj.journalpost.IkkeStøttetJournalpost
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
-import no.nav.k9punsj.journalpost.JournalpostId
 import no.nav.k9punsj.journalpost.NotatUnderArbeidFeil
 import no.nav.k9punsj.journalpost.UgyldigToken
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
-import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -83,9 +81,9 @@ class SafGateway(
 
     internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
 
-        val accessToken =  cachedAccessTokenClient.getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        val accessToken = cachedAccessTokenClient.getAccessToken(
+            scopes = henteJournalpostScopes,
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
         )
 
         val correlationId = try {
@@ -159,11 +157,10 @@ class SafGateway(
     }
 
     internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
+        val accessToken = cachedAccessTokenClient.getAccessToken(
+            scopes = henteJournalpostScopes,
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        )
 
         val body = objectMapper().writeValueAsString(SafDtos.FerdigstillJournalpostQuery(journalpostId))
         val (request, response, result) = GraphQlUrl

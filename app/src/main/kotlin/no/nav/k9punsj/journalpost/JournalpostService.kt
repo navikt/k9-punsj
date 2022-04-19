@@ -82,7 +82,8 @@ class JournalpostService(
     }
 
     internal suspend fun journalførMotGenerellSak(
-        journalpostId: String, identitetsnummer: Identitetsnummer,
+        journalpostId: String,
+        identitetsnummer: Identitetsnummer,
         enhetKode: String,
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
@@ -184,7 +185,7 @@ internal data class JournalpostInfo(
     val journalpostStatus: String,
 )
 
-internal data class JournalpostInfoDto(
+data class JournalpostInfoDto(
     val journalpostId: String,
     val norskIdent: String?,
     val dokumenter: List<DokumentInfo>,
