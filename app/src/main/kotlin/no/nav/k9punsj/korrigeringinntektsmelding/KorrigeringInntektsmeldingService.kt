@@ -97,7 +97,7 @@ KorrigeringInntektsmeldingService(
         journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingKorrigeringIm(
-            nySøknad = opprettNySøknad!!
+            nySøknad = opprettNySøknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))

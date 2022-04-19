@@ -170,7 +170,7 @@ class MappeService(
 
     private suspend fun opprettSøknadEntitet(
         søknadId: UUID,
-        bunkeId: BunkeId,
+        bunkeId: String,
         søker: Person,
         journalposter: MutableMap<String, Any?>,
         dto: Any,
@@ -320,9 +320,9 @@ class MappeService(
     }
 
     private suspend fun henterMappeMedAlleKoblinger(
-        mappeId: MappeId?,
+        mappeId: String?,
         søker: Person,
-        søknadId: SøknadId? = null,
+        søknadId: String? = null,
     ): Mappe {
         val alleBunker = bunkeRepository.hentAlleBunkerForMappe(mappeId!!)
         val bunkerId = alleBunker.map { b -> b.bunkeId }.toList()

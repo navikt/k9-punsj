@@ -150,22 +150,22 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     }
 }
 
-internal object KopierJournalpost {
-    internal val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
+private object KopierJournalpost {
+    val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
 
-    internal suspend fun ikkeTilgang() = ServerResponse
+    suspend fun ikkeTilgang() = ServerResponse
         .status(HttpStatus.FORBIDDEN)
         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
 
-    internal suspend fun kanIkkeKopieres(feil: String) = ServerResponse
+    suspend fun kanIkkeKopieres(feil: String) = ServerResponse
         .status(HttpStatus.CONFLICT)
         .bodyValueAndAwait(feil)
         .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
 
-    internal suspend fun sendtTilKopiering() = ServerResponse
+    suspend fun sendtTilKopiering() = ServerResponse
         .status(HttpStatus.ACCEPTED)
         .bodyValueAndAwait("Journalposten vil bli kopiert.")
 
-    internal suspend fun ServerRequest.kopierJournalpostDto() =
+    suspend fun ServerRequest.kopierJournalpostDto() =
         body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
 }

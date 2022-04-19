@@ -96,7 +96,7 @@ class OmsorgspengerAleneOmsorgService(
         )
 
         val søknadEntitet = mappeService.førsteInnsendingOmsAO(
-            nySøknad = opprettNySøknad!!
+            nySøknad = opprettNySøknad
         )
         return ServerResponse
             // TODO: Erstatt denne for o bli kvitt ServerRequest i service. (samme i alla ytelser)

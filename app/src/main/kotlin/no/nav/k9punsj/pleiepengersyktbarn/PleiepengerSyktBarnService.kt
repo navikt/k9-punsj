@@ -206,7 +206,7 @@ internal class PleiepengerSyktBarnService(
         )
 
         val søknadEntitet = mappeService.førsteInnsendingPsb(
-            nySøknad = søknad!!
+            nySøknad = søknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))

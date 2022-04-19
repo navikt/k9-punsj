@@ -6,13 +6,10 @@ import no.nav.k9punsj.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
-typealias BrevId = String
-typealias Mottaker = String
-
 const val DEFAULT_EIER = "PUNSJ"
 
 data class BrevEntitet(
-    val brevId : BrevId = UUID.randomUUID().toString(),
+    val brevId : String = UUID.randomUUID().toString(),
     val forJournalpostId: String,
     val brevData: DokumentbestillingDto,
     val brevType: BrevType,

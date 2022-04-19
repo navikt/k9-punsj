@@ -102,7 +102,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
         )
 
         val søknadEntitet = mappeService.førsteInnsendingOmsKSB(
-            nySøknad = nySøknad!!
+            nySøknad = nySøknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))

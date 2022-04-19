@@ -2,7 +2,6 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
@@ -209,7 +208,7 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
-    private suspend fun uteldAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost) : AktørId? {
+    private suspend fun uteldAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost) : String? {
         if (søknadId == null) {
             return punsjJournalpost.aktørId
         }

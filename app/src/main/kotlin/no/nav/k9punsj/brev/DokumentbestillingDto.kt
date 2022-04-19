@@ -5,7 +5,7 @@ import no.nav.k9punsj.db.datamodell.JsonB
 
 data class DokumentbestillingDto(
     val journalpostId: String,
-    val brevId: BrevId? = null,
+    val brevId: String? = null,
     val saksnummer: String = GENERELL_SAK,
     val soekerId: String,
     val mottaker: Mottaker,

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
-import no.nav.k9punsj.db.datamodell.MappeId
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
@@ -76,7 +75,7 @@ data class OasSøknadId(
 )
 
 data class OasSoknadsfeil(
-    val mappeId: MappeId?,
+    val mappeId: String?,
     val feil: List<FeilDto>?,
 ) {
     data class FeilDto(

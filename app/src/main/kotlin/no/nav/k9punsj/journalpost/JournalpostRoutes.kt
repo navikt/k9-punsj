@@ -17,7 +17,10 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.integrasjoner.punsjbollen.somPunsjbolleRuting
+import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgRoutes
 import no.nav.k9punsj.openapi.*
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -44,7 +47,8 @@ internal class JournalpostRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
     private val azureGraphService: IAzureGraphService,
-) {
+    private val innlogget: InnloggetUtils,
+    ) {
 
     internal companion object {
         private const val JournalpostIdKey = "journalpost_id"
@@ -212,9 +216,11 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.punsjbolleDto()
-                harInnloggetBrukerTilgangTilOgOpprettesak(
-                    dto.brukerIdent,
-                    Urls.SkalTilK9sak
+
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = OmsorgspengerAleneOmsorgRoutes.Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
@@ -459,14 +465,6 @@ internal class JournalpostRoutes(
         )
     }
 
-
-    private suspend fun Throwable.serverResponseMedStatus(httpStatus: HttpStatus): ServerResponse {
-        logger.error("" + httpStatus.value() + this.message)
-        return status(httpStatus)
-            .json()
-            .bodyValueAndAwait(OasFeil(this.message))
-    }
-
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
@@ -507,19 +505,6 @@ internal class JournalpostRoutes(
             )
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
-    }
-
-    private suspend fun harInnloggetBrukerTilgangTilOgOpprettesak(
-        norskIdentDto: String,
-        url: String,
-    ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
-        if (!saksbehandlerHarTilgang) {
-            return status(HttpStatus.FORBIDDEN)
-                .json()
-                .bodyValueAndAwait("Du har ikke lov til og sende på denne personen")
-        }
-        return null
     }
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)

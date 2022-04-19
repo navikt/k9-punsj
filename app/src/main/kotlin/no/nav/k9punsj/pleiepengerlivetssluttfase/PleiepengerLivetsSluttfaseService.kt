@@ -195,7 +195,7 @@ internal class PleiepengerLivetsSluttfaseService(
         )
 
         val søknadEntitet = mappeService.forsteInnsendingPls(
-            nySøknad = opprettNySøknad!!
+            nySøknad = opprettNySøknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))

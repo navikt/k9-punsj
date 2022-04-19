@@ -5,15 +5,14 @@ import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametre
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
-    brevId: BrevId,
+    brevId: String,
     dto: DokumentbestillingDto,
-    aktørId: AktørId,
+    aktørId: String,
 ) {
 
     private val bestilling = Dokumentbestilling()

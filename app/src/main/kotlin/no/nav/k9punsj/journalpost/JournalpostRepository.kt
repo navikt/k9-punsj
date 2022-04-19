@@ -3,7 +3,6 @@ package no.nav.k9punsj.journalpost
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.objectMapper

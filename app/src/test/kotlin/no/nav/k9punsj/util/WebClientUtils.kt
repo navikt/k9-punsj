@@ -1,6 +1,5 @@
 package no.nav.k9punsj.util
 
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import org.junit.jupiter.api.Assertions
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -13,7 +12,7 @@ import org.springframework.web.reactive.function.client.awaitExchange
 
 object WebClientUtils {
     suspend inline fun <reified ResponseType> WebClient.getAndAssert(
-        norskIdent: NorskIdentDto? = null,
+        norskIdent: String? = null,
         authorizationHeader: String,
         assertStatus: HttpStatus,
         vararg pathSegment: String

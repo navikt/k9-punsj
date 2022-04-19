@@ -97,7 +97,7 @@ class OmsorgspengerMidlertidigAleneService(
         )
 
         val søknadEntitet = mappeService.førsteInnsendingOmsMA(
-            nySøknad = opprettNySøknad!!
+            nySøknad = opprettNySøknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))
