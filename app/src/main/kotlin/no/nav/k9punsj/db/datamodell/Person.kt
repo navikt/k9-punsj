@@ -1,7 +1,15 @@
 package no.nav.k9punsj.db.datamodell
 
+typealias PersonId = String
+typealias NorskIdent = String
+typealias AktørId = String
+
 data class Person(
-    val personId: String,
-    val norskIdent: String,
-    val aktørId: String
+    val personId: PersonId,
+    val norskIdent: NorskIdent,
+    val aktørId: AktørId
 )
+
+
+
+

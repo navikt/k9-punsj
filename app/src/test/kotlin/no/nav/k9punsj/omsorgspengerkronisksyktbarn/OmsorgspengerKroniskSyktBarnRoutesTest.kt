@@ -4,8 +4,11 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
 import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
@@ -34,7 +37,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = "omsorgspenger-kronisk-sykt-barn-soknad"
+    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER_KRONISK_SYKT_BARN
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -224,7 +227,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
     }
 
-    private fun opprettSøknad(personnummer: String, journalpostId: String) = OpprettNySøknad(
+    private fun opprettSøknad(personnummer: NorskIdentDto, journalpostId: String) = OpprettNySøknad(
         norskIdent = personnummer,
         journalpostId = journalpostId,
         pleietrengendeIdent = null,
@@ -255,8 +258,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     }
 
     private fun lagSendSøknad(
-        norskIdent: String,
-        søknadId: String,
+        norskIdent: NorskIdentDto,
+        søknadId: SøknadIdDto,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }

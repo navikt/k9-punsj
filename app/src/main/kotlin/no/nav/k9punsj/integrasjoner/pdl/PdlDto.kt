@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import java.time.LocalDate
 
 data class IdentPdl(
@@ -84,7 +86,7 @@ data class PersonPdl(
 }
 
 data class HentPerson(
-    val norskIdent: String,
+    val norskIdent: NorskIdentDto,
 )
 
 internal fun PersonPdl.navn(): String{
@@ -93,8 +95,8 @@ internal fun PersonPdl.navn(): String{
 }
 
 data class PdlPersonDto(
-    val norskIdent: String,
-    val aktørId: String,
+    val norskIdent: NorskIdentDto,
+    val aktørId: AktørIdDto,
 )
 
 data class PdlResponseDto(

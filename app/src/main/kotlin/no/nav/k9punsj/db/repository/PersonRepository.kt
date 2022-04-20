@@ -4,7 +4,10 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.k9punsj.db.datamodell.AktørId
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.db.datamodell.Person
+import no.nav.k9punsj.db.datamodell.PersonId
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -16,7 +19,7 @@ class PersonRepository(private val dataSource: DataSource) {
         const val PERSON_TABLE = "person"
     }
 
-    suspend fun hentPersonVedPersonIdent(norskIdent: String): Person? {
+    suspend fun hentPersonVedPersonIdent(norskIdent: NorskIdent): Person? {
         val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where norsk_ident = ?"
 
         return using(sessionOf(dataSource)) {
@@ -29,7 +32,7 @@ class PersonRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hentPersonVedPersonId(personId: String): Person? {
+    suspend fun hentPersonVedPersonId(personId: PersonId): Person? {
         val nameQuery = "select person_id, aktoer_ident, norsk_ident from $PERSON_TABLE where person_id = ?"
 
         return using(sessionOf(dataSource)) {

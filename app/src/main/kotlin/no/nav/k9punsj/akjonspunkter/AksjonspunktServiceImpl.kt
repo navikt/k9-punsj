@@ -2,6 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
@@ -11,7 +12,9 @@ import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-internal class AksjonspunktServiceImpl(
+class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     val aksjonspunktRepository: AksjonspunktRepository,
@@ -47,7 +50,7 @@ internal class AksjonspunktServiceImpl(
 
         hendelseProducer.sendMedOnSuccess(
             Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-            lagPunsjDto(eksternId = eksternId,
+            lagPunsjDto(eksternId,
                 journalpostId = punsjJournalpost.journalpostId,
                 aktørId = punsjJournalpost.aktørId,
                 aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
@@ -140,7 +143,7 @@ internal class AksjonspunktServiceImpl(
         return null
     }
 
-    override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?) {
+    override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto?) {
         val journalpost = journalpostRepository.hent(journalpostId)
         val søknad = if (søknadId != null) søknadRepository.hentSøknad(søknadId = søknadId)?.søknad else null
         val barnIdent  = if (søknad != null) {
@@ -208,7 +211,7 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
-    private suspend fun uteldAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost) : String? {
+    private suspend fun uteldAktørId(søknadId: SøknadIdDto?, punsjJournalpost: PunsjJournalpost) : AktørId? {
         if (søknadId == null) {
             return punsjJournalpost.aktørId
         }
@@ -225,7 +228,7 @@ internal class AksjonspunktServiceImpl(
     private fun lagPunsjDto(
         eksternId: UUID,
         journalpostId: String,
-        aktørId: String?,
+        aktørId: AktørIdDto?,
         aksjonspunkter: MutableMap<String, String>,
         ytelse: String? = null,
         type: String? = null,

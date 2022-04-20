@@ -3,11 +3,13 @@ package no.nav.k9punsj.db.datamodell
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+typealias SøknadId = String
+
 data class SøknadEntitet(
-    val søknadId: String,
-    val bunkeId: String,
-    val søkerId: String,
-    val barnId: String? = null,
+    val søknadId: SøknadId,
+    val bunkeId: BunkeId,
+    val søkerId: PersonId,
+    val barnId: PersonId? = null,
     val barnFødselsdato: LocalDate? = null,
     val søknad : JsonB? = null,
     val journalposter: JsonB? = null,

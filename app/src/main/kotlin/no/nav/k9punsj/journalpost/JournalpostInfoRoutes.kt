@@ -5,6 +5,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -65,7 +66,7 @@ internal class JournalpostInfoRoutes(
         }
     }
 
-    private fun ServerRequest.aktørId(): String = pathVariable(AktørIdKey)
+    private fun ServerRequest.aktørId(): AktørIdDto = pathVariable(AktørIdKey)
 
     private suspend fun ServerRequest.søkUferdigJournalposter() =
         body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()

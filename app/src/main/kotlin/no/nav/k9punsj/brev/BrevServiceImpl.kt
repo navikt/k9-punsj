@@ -5,10 +5,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.db.datamodell.JsonB
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.mappers.MapDokumentTilK9Formidling
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics.Companion.SEND_BREVBESTILLING_TIL_K9_FORMIDLING
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,12 +27,12 @@ class BrevServiceImpl(
         private val log: Logger = LoggerFactory.getLogger(BrevServiceImpl::class.java)
     }
 
-    override suspend fun hentBrevSendtUtPåJournalpost(journalpostId: String): List<BrevEntitet> {
+    override suspend fun hentBrevSendtUtPåJournalpost(journalpostId: JournalpostId): List<BrevEntitet> {
         return brevRepository.hentAlleBrevPåJournalpost(journalpostId)
     }
 
     override suspend fun bestillBrev(
-        forJournalpostId: String,
+        forJournalpostId: JournalpostId,
         brevData: DokumentbestillingDto,
         brevType: BrevType,
         saksbehandler: String

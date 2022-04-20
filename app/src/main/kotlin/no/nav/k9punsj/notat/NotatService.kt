@@ -2,14 +2,6 @@ package no.nav.k9punsj.notat
 
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
-import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
-import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.journalpost.*
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger

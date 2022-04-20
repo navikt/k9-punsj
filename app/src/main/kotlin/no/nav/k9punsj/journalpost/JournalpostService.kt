@@ -3,14 +3,12 @@ package no.nav.k9punsj.journalpost
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
-import no.nav.k9punsj.integrasjoner.dokarkiv.Dokument
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -27,13 +25,13 @@ class JournalpostService(
         private val logger: Logger = LoggerFactory.getLogger(JournalpostService::class.java)
     }
 
-    internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? =
+    internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? =
         safGateway.hentDokument(journalpostId, dokumentId)
 
-    internal suspend fun hentSafJournalPost(journalpostId: String): SafDtos.Journalpost? =
+    internal suspend fun hentSafJournalPost(journalpostId: JournalpostId): SafDtos.Journalpost? =
         safGateway.hentJournalpostInfo(journalpostId)
 
-    internal suspend fun hentJournalpostInfo(journalpostId: String): JournalpostInfo? {
+    internal suspend fun hentJournalpostInfo(journalpostId: JournalpostId): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
 
         return if (safJournalpost == null) {
@@ -82,8 +80,7 @@ class JournalpostService(
     }
 
     internal suspend fun journalførMotGenerellSak(
-        journalpostId: String,
-        identitetsnummer: Identitetsnummer,
+        journalpostId: JournalpostId, identitetsnummer: Identitetsnummer,
         enhetKode: String,
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
@@ -105,19 +102,19 @@ class JournalpostService(
         ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
-    internal suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
+    internal suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPerson(aktørId)
     }
 
-    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: String): List<PunsjJournalpost> {
+    internal suspend fun finnJournalposterPåPersonBareFraFordel(aktørId: AktørId): List<PunsjJournalpost> {
         return journalpostRepository.finnJournalposterPåPersonBareFordel(aktørId)
     }
 
-    internal suspend fun hentHvisJournalpostMedId(journalpostId: String): PunsjJournalpost? {
+    internal suspend fun hentHvisJournalpostMedId(journalpostId: JournalpostId): PunsjJournalpost? {
         return journalpostRepository.hentHvis(journalpostId)
     }
 
-    internal suspend fun kanSendeInn(journalpostId: String): Boolean {
+    internal suspend fun kanSendeInn(journalpostId: JournalpostId): Boolean {
         return journalpostRepository.kanSendeInn(listOf(journalpostId))
     }
 
@@ -127,11 +124,11 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun omfordelJournalpost(journalpostId: String, ytelse: FagsakYtelseType) {
+    internal suspend fun omfordelJournalpost(journalpostId: JournalpostId, ytelse: FagsakYtelseType) {
         // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
 
-    internal suspend fun settTilFerdig(journalpostId: String) {
+    internal suspend fun settTilFerdig(journalpostId: JournalpostId) {
         journalpostRepository.ferdig(journalpostId)
     }
 }
@@ -174,10 +171,10 @@ private data class ParsedSafJournalpost(
     val relevanteDatoer: List<SafDtos.RelevantDato>,
 )
 
-internal data class JournalpostInfo(
-    val journalpostId: String,
-    val norskIdent: String?,
-    val aktørId: String?,
+data class JournalpostInfo(
+    val journalpostId: JournalpostId,
+    val norskIdent: NorskIdent?,
+    val aktørId: AktørId?,
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
@@ -186,8 +183,8 @@ internal data class JournalpostInfo(
 )
 
 data class JournalpostInfoDto(
-    val journalpostId: String,
-    val norskIdent: String?,
+    val journalpostId: JournalpostId,
+    val norskIdent: NorskIdent?,
     val dokumenter: List<DokumentInfo>,
     val venter: VentDto?,
     val punsjInnsendingType: PunsjInnsendingType?,
@@ -206,7 +203,7 @@ data class VentDto(
 )
 
 data class DokumentInfo(
-    val dokumentId: String,
+    val dokumentId: DokumentId,
 )
 
 internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
