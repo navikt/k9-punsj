@@ -41,8 +41,8 @@ internal class PdlRoutes(
                                 .notFound()
                                 .buildAndAwait()
                     } else {
-                        val aktørId = pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
-                        val pdlResponseDto = PdlResponseDto(PdlPersonDto(norskIdent, aktørId))
+                        val aktørIdDto = pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
+                        val pdlResponseDto = PdlResponseDto(PdlPersonDto(norskIdent, aktørIdDto))
 
                         ServerResponse
                                 .ok()

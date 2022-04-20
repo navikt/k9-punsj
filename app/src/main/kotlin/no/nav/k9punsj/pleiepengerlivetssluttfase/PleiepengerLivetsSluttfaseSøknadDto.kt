@@ -17,9 +17,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class PleiepengerLivetsSluttfaseSøknadDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
-    val journalposter: List<String>? = null,
+    val soeknadId: SøknadIdDto,
+    val soekerId: NorskIdentDto? = null,
+    val journalposter: List<JournalpostIdDto>? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
@@ -37,7 +37,7 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null) {
 
     data class PleietrengendeDto(
-        val norskIdent: String? = null,
+        val norskIdent: NorskIdentDto? = null,
         val foedselsdato: LocalDate? = null
     )
 
@@ -75,7 +75,7 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
         )
 
         data class ArbeidstakerDto(
-            val norskIdent: String?,
+            val norskIdent: NorskIdentDto?,
             val organisasjonsnummer: String?,
             val arbeidstidInfo: ArbeidstidInfoDto?) {
             data class ArbeidstidInfoDto(
@@ -127,12 +127,12 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
 }
 
 data class SvarPlsDto(
-    val søker: String,
+    val søker: NorskIdentDto,
     val fagsakTypeKode: String,
     val søknader: List<PleiepengerLivetsSluttfaseSøknadDto>?,
 )
 
-internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {
+internal fun Mappe.tilPlsVisning(norskIdent: NorskIdentDto): SvarPlsDto {
     val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
     if (bunke?.søknader.isNullOrEmpty()) {
         return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf())

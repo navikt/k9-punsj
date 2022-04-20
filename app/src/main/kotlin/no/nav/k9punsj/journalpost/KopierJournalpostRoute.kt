@@ -8,12 +8,16 @@ import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.innsending.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
+import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -25,11 +29,11 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import kotlin.coroutines.coroutineContext
 
 data class KopierJournalpostDto(
-    val fra: String,
-    val til: String,
+    val fra: NorskIdentDto,
+    val til: NorskIdentDto,
     //TODO bytt navn til pleietrengende
-    val barn: String?,
-    val annenPart: String?
+    val barn: NorskIdentDto?,
+    val annenPart: NorskIdentDto?
 ) {
     init {
         require(barn != null || annenPart != null) {
@@ -97,7 +101,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
-            val journalpostId = request.pathVariable("journalpost_id")
+            val journalpostId = request.journalpostId()
             val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId)
                 ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
@@ -150,22 +154,24 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     }
 }
 
-private object KopierJournalpost {
-    val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
+internal object KopierJournalpost {
+    internal val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
 
-    suspend fun ikkeTilgang() = ServerResponse
+    internal suspend fun ikkeTilgang() = ServerResponse
         .status(HttpStatus.FORBIDDEN)
         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
 
-    suspend fun kanIkkeKopieres(feil: String) = ServerResponse
+    internal suspend fun kanIkkeKopieres(feil: String) = ServerResponse
         .status(HttpStatus.CONFLICT)
         .bodyValueAndAwait(feil)
         .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
 
-    suspend fun sendtTilKopiering() = ServerResponse
+    internal suspend fun sendtTilKopiering() = ServerResponse
         .status(HttpStatus.ACCEPTED)
         .bodyValueAndAwait("Journalposten vil bli kopiert.")
 
-    suspend fun ServerRequest.kopierJournalpostDto() =
+    internal suspend fun ServerRequest.kopierJournalpostDto() =
         body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
+
+    internal fun ServerRequest.journalpostId(): JournalpostId = pathVariable("journalpost_id")
 }

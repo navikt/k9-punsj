@@ -1,6 +1,8 @@
 package no.nav.k9punsj.journalpost
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.db.datamodell.AktørId
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -9,8 +11,8 @@ private val logger = LoggerFactory.getLogger(PunsjJournalpost::class.java)
 
 data class PunsjJournalpost(
     val uuid: UUID,
-    val journalpostId: String,
-    val aktørId: String?,
+    val journalpostId: JournalpostId,
+    val aktørId: AktørId?,
     val skalTilK9: Boolean? = null,
     val mottattDato: LocalDateTime? = null,
     val type: String? = null,
@@ -19,7 +21,7 @@ data class PunsjJournalpost(
     val fordelStatusType: String? = null,
 )
 
-internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
+fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
     return if (this == null) {
         logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN

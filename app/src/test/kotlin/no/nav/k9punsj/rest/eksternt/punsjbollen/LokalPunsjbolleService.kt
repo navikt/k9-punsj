@@ -6,6 +6,8 @@ import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
 import org.springframework.stereotype.Component
@@ -14,10 +16,10 @@ import org.springframework.stereotype.Component
 @LokalProfil
 internal class LokalPunsjbolleService : PunsjbolleService {
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
+        journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
@@ -26,18 +28,18 @@ internal class LokalPunsjbolleService : PunsjbolleService {
     }.let { SaksnummerDto("SAK1") }
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
         correlationId: CorrelationId
     ) = SaksnummerDto("SAK1")
 
     override suspend fun ruting(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
+        journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,

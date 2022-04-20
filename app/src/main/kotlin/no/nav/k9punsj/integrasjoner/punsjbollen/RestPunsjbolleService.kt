@@ -16,6 +16,8 @@ import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
 import org.slf4j.LoggerFactory
@@ -38,10 +40,10 @@ class RestPunsjbolleService(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
+        journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
@@ -68,9 +70,9 @@ class RestPunsjbolleService(
     }
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
         correlationId: CorrelationId,
     ): SaksnummerDto {
@@ -94,10 +96,10 @@ class RestPunsjbolleService(
     }
 
     override suspend fun ruting(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
+        journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
@@ -138,10 +140,10 @@ class RestPunsjbolleService(
 
 
     private suspend fun punsjbolleSaksnummerDto(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
+        journalpostId: JournalpostIdDto?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
     ): PunsjbolleSaksnummerDto {
@@ -162,9 +164,9 @@ class RestPunsjbolleService(
     }
 
     private suspend fun punsjbolleSaksnummerFraSøknadDto(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
+        søker: NorskIdentDto,
+        pleietrengende: NorskIdentDto?,
+        annenPart: NorskIdentDto?,
         søknad: Søknad,
     ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)

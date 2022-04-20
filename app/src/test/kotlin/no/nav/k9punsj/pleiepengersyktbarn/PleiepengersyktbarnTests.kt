@@ -9,6 +9,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.*
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.openapi.OasFeil
@@ -39,7 +40,7 @@ class PleiepengersyktbarnTests {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = "pleiepenger-sykt-barn-soknad"
+    private val søknadTypeUri = FagsakYtelseTypeUri.PLEIEPENGER_SYKT_BARN
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
@@ -571,7 +572,7 @@ class PleiepengersyktbarnTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): Triple<String, HttpStatus, OasSoknadsfeil> {
+    ): Triple<SøknadIdDto, HttpStatus, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -667,15 +668,15 @@ class PleiepengersyktbarnTests {
 
 
 private fun opprettSøknad(
-    personnummer: String,
+    personnummer: NorskIdentDto,
     journalpostId: String,
 ): OpprettNySøknad {
     return OpprettNySøknad(personnummer, journalpostId, null, null, null)
 }
 
 private fun lagSendSøknad(
-    norskIdent: String,
-    søknadId: String,
+    norskIdent: NorskIdentDto,
+    søknadId: SøknadIdDto,
 ): SendSøknad {
     return SendSøknad(norskIdent, søknadId)
 }

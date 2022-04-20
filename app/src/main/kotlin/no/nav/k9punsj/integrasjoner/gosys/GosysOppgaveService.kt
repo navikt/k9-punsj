@@ -7,7 +7,7 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
-import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.opprettOppgaveUrl
+import no.nav.k9punsj.integrasjoner.gosys.GosysOppgaveService.Urls.opprettOppgaveUrl
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
@@ -22,23 +22,23 @@ import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
-internal class OppgaveGateway(
-    @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
+internal class GosysOppgaveService(
+    @Value("\${no.nav.gosys.base_url}") private val safBaseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(OppgaveGateway::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(GosysOppgaveService::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
         private val scope: Set<String> = setOf("openid")
     }
 
-    private object Urls {
-        const val opprettOppgaveUrl = "/api/v1/oppgaver"
+    internal object Urls {
+        internal const val opprettOppgaveUrl = "/api/v1/oppgaver"
     }
 
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
@@ -48,11 +48,10 @@ internal class OppgaveGateway(
             gjelder = gjelder,
         )
 
-        val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest) }
-            .getOrElse {
-                logger.error(it.message)
-                throw it
-            }
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(opprettOppgaveRequest) }.getOrElse {
+            logger.error(it.message)
+            throw it
+        }
 
         val (url, response, responseBody) = httpPost(body, opprettOppgaveUrl)
 
@@ -64,9 +63,11 @@ internal class OppgaveGateway(
     }
 
     private suspend fun httpPost(body: String, url: String): Triple<String, Response, String> {
-        val (_, response, result) = "$oppgaveBaseUrl$url"
+        val (_, response, result) = "$safBaseUrl$url"
             .httpPost()
-            .body(body)
+            .body(
+                body
+            )
             .header(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),

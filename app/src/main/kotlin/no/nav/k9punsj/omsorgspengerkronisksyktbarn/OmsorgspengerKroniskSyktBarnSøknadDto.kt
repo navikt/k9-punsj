@@ -13,31 +13,31 @@ import java.time.LocalTime
 
 
 data class OmsorgspengerKroniskSyktBarnSøknadDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
+    val soeknadId: SøknadIdDto,
+    val soekerId: NorskIdentDto? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
-    val journalposter: List<String>? = null,
+    val journalposter: List<JournalpostIdDto>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean
 ) {
     data class BarnDto(
-        val norskIdent: String?,
+        val norskIdent: NorskIdentDto?,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val foedselsdato: LocalDate?
     )
 }
 
 data class SvarOmsKSBDto(
-    val søker: String,
+    val søker: NorskIdentDto,
     val fagsakTypeKode: String,
     val søknader: List<OmsorgspengerKroniskSyktBarnSøknadDto>?,
 )
 
-internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
+internal fun Mappe.tilOmsKSBVisning(norskIdent: NorskIdentDto): SvarOmsKSBDto {
     val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
     if (bunke?.søknader.isNullOrEmpty()) {
         return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())

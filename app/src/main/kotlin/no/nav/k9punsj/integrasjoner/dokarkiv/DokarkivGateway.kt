@@ -1,4 +1,4 @@
-package no.nav.k9punsj.integrasjoner.dokarkiv
+package no.nav.k9punsj.journalpost
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -10,18 +10,13 @@ import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.journalpost.FeilIAksjonslogg
-import no.nav.k9punsj.journalpost.Identitetsnummer
-import no.nav.k9punsj.journalpost.IkkeFunnet
-import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
-import no.nav.k9punsj.journalpost.JournalpostId
-import no.nav.k9punsj.journalpost.UgyldigToken
+import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -51,7 +46,7 @@ class DokarkivGateway(
 
     internal suspend fun oppdaterJournalpostData(
         dataFraSaf: JSONObject?,
-        journalpostId: String,
+        journalpostId: JournalpostId,
         identitetsnummer: Identitetsnummer,
         enhetKode: String,
     ): Int {
@@ -164,7 +159,7 @@ class DokarkivGateway(
         .build()
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
+    private fun JournalpostId.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
     private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
 
     //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
@@ -199,7 +194,7 @@ class DokarkivGateway(
     }
 
     private fun JSONObject.mapFerdigstillJournalpost(
-        journalpostId: JournalpostId,
+        journalpostId: no.nav.k9punsj.journalpost.JournalpostId,
         identitetsnummer: Identitetsnummer,
     ) =
         getJSONObject("journalpost")
@@ -291,7 +286,7 @@ data class JournalPostRequest(
     }
 }
 
-private data class Sak(
+data class Sak(
     val fagsakId: String,
     val fagsakSystem: FagsakSystem = FagsakSystem.K9,
     val sakstype: SaksType

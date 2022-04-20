@@ -5,7 +5,9 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.k9punsj.db.datamodell.BunkeId
 import no.nav.k9punsj.db.datamodell.SøknadEntitet
+import no.nav.k9punsj.db.datamodell.SøknadId
 import no.nav.k9punsj.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -42,7 +44,7 @@ class SøknadRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun hentAlleSøknaderForBunke(bunkerId: String): List<SøknadEntitet> {
+    fun hentAlleSøknaderForBunke(bunkerId: BunkeId): List<SøknadEntitet> {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 tx.run(
@@ -83,7 +85,7 @@ class SøknadRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hentSøknad(søknadId: String): SøknadEntitet? {
+    suspend fun hentSøknad(søknadId: SøknadId): SøknadEntitet? {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 tx.run(
@@ -111,7 +113,7 @@ class SøknadRepository(private val dataSource: DataSource) {
         endret_av = row.stringOrNull("endret_av")
     )
 
-    suspend fun markerSomSendtInn(søknadId: String) {
+    suspend fun markerSomSendtInn(søknadId: SøknadId) {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 tx.run(

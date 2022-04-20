@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.IkkeKlarForProduksjon
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -19,7 +20,7 @@ import kotlin.coroutines.coroutineContext
 class DelingAvOmsorgsdagerApi(
         private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService) {
     companion object {
-        private const val type = "omsorgspenger-deling-av-omsorgsdager-melding"
+        private const val type = FagsakYtelseTypeUri.OMSORGSPENGER_DELING
         private val logger: Logger = LoggerFactory.getLogger(DelingAvOmsorgsdagerApi::class.java)
     }
 

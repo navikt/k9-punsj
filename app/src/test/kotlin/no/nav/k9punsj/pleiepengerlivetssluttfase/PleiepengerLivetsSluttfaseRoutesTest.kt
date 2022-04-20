@@ -4,8 +4,11 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
+import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
 import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -30,7 +33,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = "pleiepenger-livets-sluttfase-soknad"
+    private val søknadTypeUri = FagsakYtelseTypeUri.PLEIEPENGER_LIVETS_SLUTTFASE
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -98,7 +101,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     }
 
     private fun opprettSøknad(
-        personnummer: String,
+        personnummer: NorskIdentDto,
         journalpostId: String,
         pleietrengende: String,
     ): OpprettNySøknad {
@@ -208,8 +211,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     }
 
     private fun lagSendSøknad(
-        norskIdent: String,
-        søknadId: String,
+        norskIdent: NorskIdentDto,
+        søknadId: SøknadIdDto,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
