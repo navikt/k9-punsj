@@ -2,7 +2,6 @@ package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
@@ -22,23 +21,17 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
-import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.net.URI
 import kotlin.coroutines.coroutineContext
 
@@ -47,7 +40,7 @@ internal class PleiepengerSyktBarnService(
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val journalpostRepository: JournalpostRepository,
-    private val azureGraphService: AzureGraphService,
+    private val azureGraphService: IAzureGraphService,
     private val objectMapper: ObjectMapper,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService,

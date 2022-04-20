@@ -2,10 +2,8 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -19,15 +17,11 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
-import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
@@ -42,7 +36,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
     private val journalpostRepository: JournalpostRepository,
-    private val azureGraphService: AzureGraphService,
+    private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
 ) {
 
@@ -97,8 +91,8 @@ internal class OmsorgspengerKroniskSyktBarnService(
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostRepository.settFagsakYtelseType(
-            FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
-            nySøknad.journalpostId
+            ytelseType = FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
+            journalpostId = nySøknad.journalpostId
         )
 
         val søknadEntitet = mappeService.førsteInnsendingOmsKSB(

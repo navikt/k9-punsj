@@ -5,7 +5,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -22,7 +22,7 @@ internal class GosysService(
     private val journalpostService: JournalpostService,
     private val oppgaveGateway: OppgaveGateway,
     private val aksjonspunktService: AksjonspunktService,
-    private val azureGraphService: AzureGraphService
+    private val azureGraphService: IAzureGraphService
 ) {
 
     private companion object {

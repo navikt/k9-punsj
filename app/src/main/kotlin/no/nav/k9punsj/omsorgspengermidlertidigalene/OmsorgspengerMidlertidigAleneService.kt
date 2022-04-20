@@ -18,7 +18,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -35,7 +35,7 @@ class OmsorgspengerMidlertidigAleneService(
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
     private val journalpostRepository: JournalpostRepository,
-    private val azureGraphService: AzureGraphService,
+    private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val objectMapper: ObjectMapper
     ) {

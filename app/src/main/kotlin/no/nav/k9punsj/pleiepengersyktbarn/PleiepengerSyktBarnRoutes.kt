@@ -45,21 +45,23 @@ internal class PleiepengerSyktBarnRoutes(
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
-                return@RequestContext pleiepengerSyktBarnService.henteMappe(norskIdent)
+
+                pleiepengerSyktBarnService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.pathVariable(SøknadIdKey)
-                return@RequestContext pleiepengerSyktBarnService.henteSøknad(søknadId)
+                pleiepengerSyktBarnService.henteSøknad(søknadId)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.mapPleiepengerSøknad()
-                return@RequestContext pleiepengerSyktBarnService.oppdaterEksisterendeSøknad(request, søknad)
+
+                pleiepengerSyktBarnService.oppdaterEksisterendeSøknad(request, søknad)
             }
         }
 
@@ -71,7 +73,7 @@ internal class PleiepengerSyktBarnRoutes(
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerSyktBarnService.sendEksisterendeSøknad(søknad)
+                pleiepengerSyktBarnService.sendEksisterendeSøknad(søknad)
             }
         }
 
@@ -83,18 +85,21 @@ internal class PleiepengerSyktBarnRoutes(
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerSyktBarnService.nySøknad(request, søknad)
+                pleiepengerSyktBarnService.nySøknad(request, søknad)
             }
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.mapPleiepengerSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
-                    url = Urls.ValiderSøknad
-                )?.let { return@RequestContext it }
-                return@RequestContext pleiepengerSyktBarnService.validerSøknad(søknad)
+                søknad.soekerId?.let { norskIdent ->
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
+                        url = Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
+                }
+
+                pleiepengerSyktBarnService.validerSøknad(søknad)
             }
         }
 
@@ -106,7 +111,7 @@ internal class PleiepengerSyktBarnRoutes(
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerSyktBarnService.hentInfoFraK9Sak(matchfagsak)
+                pleiepengerSyktBarnService.hentInfoFraK9Sak(matchfagsak)
             }
         }
     }

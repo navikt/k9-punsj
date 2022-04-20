@@ -48,68 +48,72 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                return@RequestContext korrigeringInntektsmeldingService.henteMappe(norskIdent)
+                korrigeringInntektsmeldingService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                return@RequestContext korrigeringInntektsmeldingService.henteSøknad(søknadId)
+                korrigeringInntektsmeldingService.henteSøknad(søknadId)
             }
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
+                val opprettNySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
+                    norskIdent = opprettNySøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                val opprettNySøknad = request.mapNySøknad()
-                return@RequestContext korrigeringInntektsmeldingService.nySøknad(request, opprettNySøknad)
+
+                korrigeringInntektsmeldingService.nySøknad(request, opprettNySøknad)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.korrigeringInntektsmelding()
-                return@RequestContext korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
+                korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
+                val sendSøknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
+                    norskIdent = sendSøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                val sendSøknad = request.mapSendSøknad()
-                return@RequestContext korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
+                korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
             }
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
-                    url = request.path()
-                )?.let { return@RequestContext it }
-
                 val søknad = request.korrigeringInntektsmelding()
-                return@RequestContext korrigeringInntektsmeldingService.validerSøknad(søknad)
+                søknad.soekerId?.let { norskIdent ->
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
+                        url = Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
+                }
+
+                korrigeringInntektsmeldingService.validerSøknad(søknad)
             }
         }
 
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
+                val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()
                 innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(request.hentNorskIdentHeader()),
-                    url = request.path()
+                    norskIdentDto = listOf(matchfagsakMedPeriode.brukerIdent),
+                    url = Urls.HentArbeidsforholdIderFraK9sak
                 )?.let { return@RequestContext it }
-                val matchMedPeriode = request.mapMatchFagsakMedPerioder()
-                return@RequestContext korrigeringInntektsmeldingService.hentArbeidsforholdIderFraK9Sak(matchMedPeriode)
+
+                korrigeringInntektsmeldingService.hentArbeidsforholdIderFraK9Sak(matchfagsakMedPeriode)
             }
         }
     }

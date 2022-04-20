@@ -3,6 +3,8 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgRoutes
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
@@ -27,7 +29,6 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
         const val SøknadIdKey = "soeknad_id"
     }
 
-
     internal object Urls {
         const val HenteMappe = "/$søknadType/mappe" //get
         const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
@@ -47,57 +48,59 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
                     url = Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerKroniskSyktBarnService.henteMappe(norskIdent)
+                omsorgspengerKroniskSyktBarnService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                return@RequestContext omsorgspengerKroniskSyktBarnService.henteSøknad(søknadId)
+                omsorgspengerKroniskSyktBarnService.henteSøknad(søknadId)
             }
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
+                val nySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
+                    norskIdent = nySøknad.norskIdent,
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
-                val nySøknad = request.mapNySøknad()
-                return@RequestContext omsorgspengerKroniskSyktBarnService.nySøknad(request, nySøknad)
+                omsorgspengerKroniskSyktBarnService.nySøknad(request, nySøknad)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.body(BodyExtractors.toMono(OmsorgspengerKroniskSyktBarnSøknadDto::class.java))
-                    .awaitFirst()
-                return@RequestContext omsorgspengerKroniskSyktBarnService.oppdaterEksisterendeSøknad(søknad)
+                val søknad = request.omsorgspengerKroniskSyktBarnSøknad()
+                omsorgspengerKroniskSyktBarnService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
+                val sendSøknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
+                    norskIdent = sendSøknad.norskIdent,
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
-                val søknad = request.mapSendSøknad()
-                return@RequestContext omsorgspengerKroniskSyktBarnService.sendEksisterendeSøknad(søknad)
+                omsorgspengerKroniskSyktBarnService.sendEksisterendeSøknad(sendSøknad)
             }
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
-                    url = Urls.ValiderSøknad
-                )?.let { return@RequestContext it }
-                val søknad = request.omsorgspengerKroniskSyktBarnSøknad()
-                return@RequestContext omsorgspengerKroniskSyktBarnService.validerSøknad(søknad)
+                val soknadTilValidering = request.omsorgspengerKroniskSyktBarnSøknad()
+                soknadTilValidering.soekerId?.let { norskIdent ->
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
+                        url = Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
+                }
+
+                omsorgspengerKroniskSyktBarnService.validerSøknad(soknadTilValidering)
             }
 
         }
@@ -108,8 +111,3 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
     private suspend fun ServerRequest.omsorgspengerKroniskSyktBarnSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerKroniskSyktBarnSøknadDto::class.java)).awaitFirst()
 }
-
-
-
-
-

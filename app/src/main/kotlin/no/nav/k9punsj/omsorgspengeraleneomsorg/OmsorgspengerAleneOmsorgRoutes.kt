@@ -48,33 +48,33 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                     url = Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerAleneOmsorgService.henteMappe(norskIdent)
+                omsorgspengerAleneOmsorgService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                return@RequestContext omsorgspengerAleneOmsorgService.henteSøknad(søknadId)
+                omsorgspengerAleneOmsorgService.henteSøknad(søknadId)
             }
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val opprettNySøknad = request.mapNySøknad()
+                val nySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = opprettNySøknad.norskIdent,
+                    norskIdent = nySøknad.norskIdent,
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerAleneOmsorgService.nySøknad(request, opprettNySøknad)
+                omsorgspengerAleneOmsorgService.nySøknad(request, nySøknad)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.omsorgspengerAleneOmsorgSøknad()
-                return@RequestContext omsorgspengerAleneOmsorgService.oppdaterEksisterendeSøknad(søknad)
+                omsorgspengerAleneOmsorgService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
@@ -86,20 +86,21 @@ internal class OmsorgspengerAleneOmsorgRoutes(
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerAleneOmsorgService.sendEksisterendeSøknad(sendSøknad)
+                omsorgspengerAleneOmsorgService.sendEksisterendeSøknad(sendSøknad)
             }
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val soknadTilValidering = request.omsorgspengerAleneOmsorgSøknad()
+                soknadTilValidering.soekerId?.let { norskIdent ->
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
+                        url = Urls.ValiderSøknad
+                    )?.let { return@RequestContext it }
+                }
 
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = request.hentNorskIdentHeader(),
-                    url = Urls.ValiderSøknad
-                )?.let { return@RequestContext it }
-
-                return@RequestContext omsorgspengerAleneOmsorgService.validerSøknad(soknadTilValidering)
+                omsorgspengerAleneOmsorgService.validerSøknad(soknadTilValidering)
             }
         }
     }
@@ -109,8 +110,3 @@ internal class OmsorgspengerAleneOmsorgRoutes(
     private suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()
 }
-
-
-
-
-

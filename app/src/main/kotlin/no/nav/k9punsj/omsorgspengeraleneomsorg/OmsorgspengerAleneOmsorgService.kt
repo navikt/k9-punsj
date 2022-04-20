@@ -29,7 +29,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 
 @Service
-class OmsorgspengerAleneOmsorgService(
+internal class OmsorgspengerAleneOmsorgService(
     private val objectMapper: ObjectMapper,
     private val mappeService: MappeService,
     private val personService: PersonService,
@@ -39,12 +39,9 @@ class OmsorgspengerAleneOmsorgService(
     private val soknadService: SoknadService,
 ) {
 
-    private companion object {
-        private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgService::class.java)
-    }
+    private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgService::class.java)
 
-
-    internal suspend fun henteMappe(norskIdent: String): ServerResponse {
+    suspend fun henteMappe(norskIdent: String): ServerResponse {
         val person = personService.finnPersonVedNorskIdent(norskIdent)
         if (person != null) {
             val svarDto = mappeService.hentMappe(person = person)
@@ -66,7 +63,7 @@ class OmsorgspengerAleneOmsorgService(
             )
     }
 
-    internal suspend fun henteSøknad(søknadId: String): ServerResponse {
+    suspend fun henteSøknad(søknadId: String): ServerResponse {
         val søknad = mappeService.hentSøknad(søknadId)
             ?: return ServerResponse.notFound().buildAndAwait()
 
@@ -76,13 +73,13 @@ class OmsorgspengerAleneOmsorgService(
             .bodyValueAndAwait(søknad.tilOmsAOvisning())
     }
 
-    internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
+    suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
         //oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (opprettNySøknad.pleietrengendeIdent != null) {
+        if (nySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
-                søker = opprettNySøknad.norskIdent,
-                pleietrengende = opprettNySøknad.pleietrengendeIdent,
-                journalpostId = opprettNySøknad.journalpostId,
+                søker = nySøknad.norskIdent,
+                pleietrengende = nySøknad.pleietrengendeIdent,
+                journalpostId = nySøknad.journalpostId,
                 periode = null,
                 correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO
@@ -92,11 +89,11 @@ class OmsorgspengerAleneOmsorgService(
         //setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostRepository.settFagsakYtelseType(
             ytelseType = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
-            journalpostId = opprettNySøknad.journalpostId
+            journalpostId = nySøknad.journalpostId
         )
 
         val søknadEntitet = mappeService.førsteInnsendingOmsAO(
-            nySøknad = opprettNySøknad
+            nySøknad = nySøknad
         )
         return ServerResponse
             // TODO: Erstatt denne for o bli kvitt ServerRequest i service. (samme i alla ytelser)
@@ -105,7 +102,7 @@ class OmsorgspengerAleneOmsorgService(
             .bodyValueAndAwait(søknadEntitet.tilOmsAOvisning())
     }
 
-    internal suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
+    suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
         val søknadEntitet = mappeService.utfyllendeInnsendingOmsAO(
             dto = søknad,
@@ -124,7 +121,7 @@ class OmsorgspengerAleneOmsorgService(
             .bodyValueAndAwait(søknad)
     }
 
-    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
+    suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
         val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
@@ -196,7 +193,7 @@ class OmsorgspengerAleneOmsorgService(
         }
     }
 
-    internal suspend fun validerSøknad(soknadTilValidering: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
+    suspend fun validerSøknad(soknadTilValidering: OmsorgspengerAleneOmsorgSøknadDto): ServerResponse {
         val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 

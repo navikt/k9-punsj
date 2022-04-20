@@ -19,7 +19,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,14 +33,13 @@ import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Service
-internal class
-KorrigeringInntektsmeldingService(
+internal class KorrigeringInntektsmeldingService(
     private val objectMapper: ObjectMapper,
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
     private val journalpostRepository: JournalpostRepository,
-    private val azureGraphService: AzureGraphService,
+    private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService
 ) {
