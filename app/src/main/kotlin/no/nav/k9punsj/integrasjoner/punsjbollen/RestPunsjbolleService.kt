@@ -18,6 +18,7 @@ import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
+import no.nav.k9punsj.hentCorrelationId
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.time.LocalDate
+import kotlin.coroutines.coroutineContext
 
 @Configuration
 @StandardProfil
@@ -43,7 +45,6 @@ class RestPunsjbolleService(
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerDto(
@@ -55,6 +56,7 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
+        val correlationId = coroutineContext.hentCorrelationId()
         val (url, response, responseBody) = "saksnummer".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -72,7 +74,6 @@ class RestPunsjbolleService(
         pleietrengende: String?,
         annenPart: String?,
         søknad: Søknad,
-        correlationId: CorrelationId,
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerFraSøknadDto(
             søker = søker,
@@ -81,6 +82,7 @@ class RestPunsjbolleService(
             søknad = søknad
         )
 
+        val correlationId = coroutineContext.hentCorrelationId()
         val (url, response, responseBody) = "saksnummer-fra-soknad".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -99,7 +101,6 @@ class RestPunsjbolleService(
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
     ): PunsjbolleRuting {
         val requestBody = punsjbolleSaksnummerDto(
@@ -111,6 +112,7 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
+        val correlationId = coroutineContext.hentCorrelationId()
         val (url, response, responseBody) = "ruting".post(
             requestBody = requestBody,
             correlationId = correlationId

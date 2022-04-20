@@ -85,7 +85,6 @@ class OmsorgspengerMidlertidigAleneService(
                 annenPart = opprettNySøknad.annenPart,
                 journalpostId = opprettNySøknad.journalpostId,
                 periode = null,
-                correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
             )
         }

@@ -183,7 +183,6 @@ internal class PleiepengerLivetsSluttfaseService(
                 pleietrengende = opprettNySøknad.pleietrengendeIdent,
                 journalpostId = opprettNySøknad.journalpostId,
                 periode = null,
-                correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
             )
         }
@@ -279,8 +278,7 @@ internal class PleiepengerLivetsSluttfaseService(
     private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
         søker = søknad.søker.personIdent.verdi,
         pleietrengende = søknad.getYtelse<PleipengerLivetsSluttfase>().pleietrengende.personIdent.verdi,
-        søknad = søknad,
-        correlationId = coroutineContext.hentCorrelationId()
+        søknad = søknad
     ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
     private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {

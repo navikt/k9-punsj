@@ -48,21 +48,21 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerLivetsSluttfaseService.henteMappe(norskIdent)
+                pleiepengerLivetsSluttfaseService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                return@RequestContext pleiepengerLivetsSluttfaseService.henteSøknad(søknadId)
+                pleiepengerLivetsSluttfaseService.henteSøknad(søknadId)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.pleiepengerPlsSøknad()
-                return@RequestContext pleiepengerLivetsSluttfaseService.oppdaterEksisterendeSøknad(søknad)
+                pleiepengerLivetsSluttfaseService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
@@ -74,7 +74,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerLivetsSluttfaseService.sendEksisterendeSøknad(sendSøknad)
+                pleiepengerLivetsSluttfaseService.sendEksisterendeSøknad(sendSøknad)
             }
         }
 
@@ -86,7 +86,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerLivetsSluttfaseService.nySøknad(request, opprettNySøknad)
+                pleiepengerLivetsSluttfaseService.nySøknad(request, opprettNySøknad)
             }
         }
 
@@ -100,7 +100,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     )?.let { return@RequestContext it }
                 }
 
-                return@RequestContext pleiepengerLivetsSluttfaseService.validerSøknad(soknadTilValidering)
+                pleiepengerLivetsSluttfaseService.validerSøknad(soknadTilValidering)
             }
         }
 
@@ -112,7 +112,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
-                return@RequestContext pleiepengerLivetsSluttfaseService.hentInfoFraK9Sak(matchfagsak)
+                pleiepengerLivetsSluttfaseService.hentInfoFraK9Sak(matchfagsak)
             }
         }
     }

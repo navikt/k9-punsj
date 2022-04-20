@@ -68,30 +68,26 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     suspend fun fraKanRutesTilK9(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
-        fagsakYtelseType: FagsakYtelseType,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType
     ) = punsjbolleService.ruting(
         søker = dto.fra,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId,
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
     suspend fun tilKanRutesTilK9(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
-        fagsakYtelseType: FagsakYtelseType,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType
     ) = punsjbolleService.ruting(
         søker = dto.til,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId,
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
@@ -115,14 +111,14 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             val ytelseType = journalpost.utledeFagsakYtelseType()
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")
                 }
             } else {
-                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")
                 }
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")
                 }
             }
@@ -141,7 +137,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                     fra = dto.fra,
                     til = dto.til,
                     pleietrengende = dto.barn,
-                    correlationId = coroutineContext.hentCorrelationId(),
                     ytelse = ytelseType
                 )
             )

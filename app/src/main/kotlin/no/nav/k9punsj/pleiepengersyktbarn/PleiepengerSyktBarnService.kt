@@ -104,8 +104,8 @@ internal class PleiepengerSyktBarnService(
             .bodyValueAndAwait(søknad)
     }
 
-    internal suspend fun sendEksisterendeSøknad(søknad: SendSøknad): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(søknad.soeknadId)
+    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
+        val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
@@ -187,7 +187,6 @@ internal class PleiepengerSyktBarnService(
                 pleietrengende = søknad.barnIdent,
                 journalpostId = søknad.journalpostId,
                 periode = null,
-                correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
             )
         }
@@ -278,8 +277,7 @@ internal class PleiepengerSyktBarnService(
     private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
         søker = søknad.søker.personIdent.verdi,
         pleietrengende = søknad.getYtelse<PleiepengerSyktBarn>().barn.personIdent.verdi,
-        søknad = søknad,
-        correlationId = coroutineContext.hentCorrelationId()
+        søknad = søknad
     ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
     private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerSyktBarnSøknadDto): Pair<List<PeriodeDto>?, String?>? {

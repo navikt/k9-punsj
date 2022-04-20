@@ -67,7 +67,6 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-
                 korrigeringInntektsmeldingService.nySøknad(request, opprettNySøknad)
             }
         }

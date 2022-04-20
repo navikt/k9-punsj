@@ -14,7 +14,6 @@ interface PunsjbolleService {
         annenPart: String? = null,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ): SaksnummerDto
 
@@ -23,7 +22,6 @@ interface PunsjbolleService {
         pleietrengende: String? = null,
         annenPart: String? = null,
         søknad: Søknad,
-        correlationId: CorrelationId,
     ): SaksnummerDto
 
     suspend fun ruting(
@@ -32,7 +30,6 @@ interface PunsjbolleService {
         annenPart: String? = null,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ): PunsjbolleRuting
 }

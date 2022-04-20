@@ -84,7 +84,6 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 pleietrengende = nySøknad.pleietrengendeIdent,
                 journalpostId = nySøknad.journalpostId,
                 periode = null,
-                correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS
             )
         }

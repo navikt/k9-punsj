@@ -81,7 +81,6 @@ internal class OmsorgspengerAleneOmsorgService(
                 pleietrengende = nySøknad.pleietrengendeIdent,
                 journalpostId = nySøknad.journalpostId,
                 periode = null,
-                correlationId = coroutineContext.hentCorrelationId(),
                 fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO
             )
         }

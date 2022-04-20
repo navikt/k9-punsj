@@ -99,7 +99,6 @@ internal class InnsendingMappingTest {
     private fun mapKopierJournalpostOgAssert(fagsakYtelseType: FagsakYtelseType, søknadstype: String) {
         val (_, value) = innsendingClient.mapKopierJournalpost(
             KopierJournalpostInfo(
-                correlationId = "5bc73106-a0b1-46a4-a297-54541265934e",
                 journalpostId = "11111111111",
                 fra = "22222222222",
                 til = "33333333333",

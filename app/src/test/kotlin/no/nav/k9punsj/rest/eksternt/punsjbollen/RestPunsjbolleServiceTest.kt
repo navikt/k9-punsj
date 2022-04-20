@@ -51,7 +51,6 @@ internal class RestPunsjbolleServiceTest {
             journalpostId = "789",
             annenPart = null,
             periode = null,
-            correlationId = correlationId,
             fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
     }

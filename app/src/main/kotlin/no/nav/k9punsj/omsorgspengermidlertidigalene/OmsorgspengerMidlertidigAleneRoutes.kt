@@ -55,14 +55,14 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
                     url = Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerMidlertidigAleneService.henteMappe(norskIdent)
+                omsorgspengerMidlertidigAleneService.henteMappe(norskIdent)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                return@RequestContext omsorgspengerMidlertidigAleneService.henteSøknad(søknadId)
+                omsorgspengerMidlertidigAleneService.henteSøknad(søknadId)
             }
         }
 
@@ -74,14 +74,14 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerMidlertidigAleneService.nySøknad(request, opprettNySøknad)
+                omsorgspengerMidlertidigAleneService.nySøknad(request, opprettNySøknad)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.omsorgspengerMidlertidigAleneSøknad()
-                return@RequestContext omsorgspengerMidlertidigAleneService.oppdaterEksisterendeSøknad(søknad)
+                omsorgspengerMidlertidigAleneService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
@@ -93,7 +93,7 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
-                return@RequestContext omsorgspengerMidlertidigAleneService.sendEksisterendeSøknad(sendSøknad)
+                omsorgspengerMidlertidigAleneService.sendEksisterendeSøknad(sendSøknad)
             }
         }
 
@@ -107,7 +107,7 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
                     )?.let { return@RequestContext it }
                 }
 
-                return@RequestContext omsorgspengerMidlertidigAleneService.validerSøknad(soknadTilValidering)
+                omsorgspengerMidlertidigAleneService.validerSøknad(soknadTilValidering)
             }
         }
     }

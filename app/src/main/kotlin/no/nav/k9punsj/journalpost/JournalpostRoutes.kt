@@ -235,7 +235,6 @@ internal class JournalpostRoutes(
                     annenPart = dto.annenPart,
                     journalpostId = dto.journalpostId,
                     periode = null, // Utledes fra journalposten i Punsjbollen
-                    correlationId = coroutineContext.hentCorrelationId(),
                     fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType)
                 )
 

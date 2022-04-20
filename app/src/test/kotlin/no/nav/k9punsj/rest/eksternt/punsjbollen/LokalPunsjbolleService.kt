@@ -19,7 +19,6 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
@@ -30,7 +29,6 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         pleietrengende: String?,
         annenPart: String?,
         søknad: Søknad,
-        correlationId: CorrelationId
     ) = SaksnummerDto("SAK1")
 
     override suspend fun ruting(
@@ -39,7 +37,6 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ) = when (journalpostId) {
         "45537868838" -> PunsjbolleRuting.IkkeStøttet
