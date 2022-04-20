@@ -7,17 +7,15 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.journalpost.SafGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.coroutines.coroutineContext
-
 
 @Service
 class SoknadService(
@@ -31,7 +29,7 @@ class SoknadService(
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
-        journalpostIder: MutableSet<JournalpostId>,
+        journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
         val journalposterHarIkkeBlittSendtInn = journalpostRepository.kanSendeInn(journalpostIdListe)
@@ -86,7 +84,7 @@ class SoknadService(
 
     private suspend fun leggerVedPayload(
         søknad: Søknad,
-        journalpostIder: MutableSet<JournalpostId>,
+        journalpostIder: MutableSet<String>,
     ) {
         val writeValueAsString = objectMapper().writeValueAsString(søknad)
 

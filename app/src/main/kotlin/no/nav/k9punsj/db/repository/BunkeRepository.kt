@@ -4,7 +4,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.db.datamodell.BunkeEntitet
-import no.nav.k9punsj.db.datamodell.BunkeId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -17,7 +16,7 @@ class BunkeRepository(private val dataSource: DataSource) {
         const val BUNKE_TABLE = "bunke"
     }
 
-    suspend fun opprettEllerHentBunkeForFagsakType(mappeId: String, type: FagsakYtelseType): BunkeId {
+    suspend fun opprettEllerHentBunkeForFagsakType(mappeId: String, type: FagsakYtelseType): String {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val resultat = tx.run(

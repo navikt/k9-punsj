@@ -17,7 +17,6 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -140,7 +139,7 @@ internal class MapPlsfTilK9Format(
         }
     }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(
                 Journalpost()

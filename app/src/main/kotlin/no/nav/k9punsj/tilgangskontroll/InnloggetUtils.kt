@@ -1,7 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll
 
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -14,10 +13,10 @@ class InnloggetUtils(
 ) {
 
     internal suspend fun harInnloggetBrukerTilgangTilOgSendeInn(
-        norskIdentDto: NorskIdentDto,
+        norskIdent: String,
         url: String,
     ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
+        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdent, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -28,7 +27,7 @@ class InnloggetUtils(
     }
 
     internal suspend fun harInnloggetBrukerTilgangTil(
-        norskIdentDto: List<NorskIdentDto>,
+        norskIdentDto: List<String>,
         url: String
     ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)

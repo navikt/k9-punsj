@@ -8,6 +8,7 @@ import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
+import no.nav.k9punsj.journalpost.KopierJournalpostInfo
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 

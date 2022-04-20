@@ -10,7 +10,6 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
-import no.nav.k9punsj.db.datamodell.NorskIdent
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
@@ -47,8 +46,8 @@ class K9SakServiceImpl(
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
-        søker: NorskIdent,
-        barn: NorskIdent,
+        søker: String,
+        barn: String,
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
 
@@ -76,7 +75,7 @@ class K9SakServiceImpl(
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
-        søker: NorskIdent,
+        søker: String,
         fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
         periodeDto: PeriodeDto,
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {

@@ -3,6 +3,7 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9punsj.journalpost.KopierJournalpostInfo
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
 import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper

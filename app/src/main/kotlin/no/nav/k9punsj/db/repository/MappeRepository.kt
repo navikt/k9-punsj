@@ -3,8 +3,6 @@ package no.nav.k9punsj.db.repository
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.db.datamodell.PersonId
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -15,7 +13,7 @@ class MappeRepository(private val dataSource: DataSource) {
        const val MAPPE_TABLE = "mappe"
    }
 
-    suspend fun opprettEllerHentMappeForPerson(personId: PersonId): MappeId {
+    suspend fun opprettEllerHentMappeForPerson(personId: String): String {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val resultat = tx.run(

@@ -8,18 +8,15 @@ import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
 import org.intellij.lang.annotations.Language
 
-
 private const val path = "/pdl-mock"
-
-typealias AktørId = String
 
 fun WireMockServer.getPdlBaseUrl() = baseUrl() + path
 
 object AktørIds {
-    const val Ok : AktørId = "200"
-    const val AbacError : AktørId = "500"
-    const val IkkeKomplettTilgang : AktørId = "403"
-    const val FinnesIkke : AktørId = "404"
+    const val Ok : String = "200"
+    const val AbacError : String = "500"
+    const val IkkeKomplettTilgang : String = "403"
+    const val FinnesIkke : String = "404"
 
 }
 
@@ -74,7 +71,7 @@ fun WireMockServer.stubPdlHenteAktøridOkPost(): WireMockServer {
 
 
 private fun WireMockServer.stubPdlHenteAktørId(
-    aktørId: AktørId? = null,
+    aktørId: String? = null,
     responseBody: String = PdlMockResponses.OkResponseHenteAktørId
 ): WireMockServer {
     val contentBodyPattern = if (aktørId == null) AnythingPattern() else ContainsPattern(aktørId)

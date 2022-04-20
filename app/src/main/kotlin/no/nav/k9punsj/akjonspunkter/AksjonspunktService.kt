@@ -2,7 +2,6 @@ package no.nav.k9punsj.akjonspunkter
 
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 
 interface AksjonspunktService {
 
@@ -13,7 +12,7 @@ interface AksjonspunktService {
         ytelse: String?
     )
 
-    suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: SøknadIdDto?)
+    suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?)
 
     suspend fun sjekkOmDenErPåVent(journalpostId: String) : VentDto?
 
