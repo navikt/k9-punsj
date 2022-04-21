@@ -197,6 +197,7 @@ data class JournalpostInfoDto(
     val erSaksbehandler: Boolean? = null,
     val journalpostStatus: String,
     val kanOpprettesJournalføringsoppgave: Boolean,
+    val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående // Brukes av frontend
 )
 
 data class VentDto(
