@@ -26,12 +26,12 @@ internal class OmsorgspengerAleneOmsorgRoutes(
     private companion object {
         private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgRoutes::class.java)
         private const val søknadType = "omsorgspenger-alene-om-omsorgen-soknad"
-        private const val SøknadIdKey = "soeknad_id"
+        private const val søknadIdKey = "soeknad_id"
     }
 
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/soeknad_id" //get
+        internal const val HenteSøknad = "/$søknadType/mappe/$søknadIdKey" //get
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
@@ -105,7 +105,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         }
     }
 
-    private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
+    private fun ServerRequest.søknadId(): String = pathVariable(søknadIdKey)
 
     private suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()

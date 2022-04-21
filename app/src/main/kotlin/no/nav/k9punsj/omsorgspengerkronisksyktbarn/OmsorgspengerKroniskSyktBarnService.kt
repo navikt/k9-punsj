@@ -113,10 +113,10 @@ internal class OmsorgspengerKroniskSyktBarnService(
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 
         val (entitet, _) = søknadEntitet
-        val søker = personService.finnPerson(entitet.søkerId)
+        val søker = personService.finnPerson(personId = entitet.søkerId)
         journalpostRepository.settKildeHvisIkkeFinnesFraFør(
-            hentUtJournalposter(entitet),
-            søker.aktørId
+            journalposter = hentUtJournalposter(entitet),
+            aktørId = søker.aktørId
         )
         return ServerResponse
             .ok()
