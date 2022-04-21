@@ -31,7 +31,7 @@ internal class OmsorgspengerAleneOmsorgRoutes(
 
     internal object Urls {
         internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/$søknadIdKey" //get
+        internal const val HenteSøknad = "/$søknadType/mappe/{$søknadIdKey}" //get
         internal const val NySøknad = "/$søknadType" //post
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
