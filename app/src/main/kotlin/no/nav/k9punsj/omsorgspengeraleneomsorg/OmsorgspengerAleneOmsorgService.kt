@@ -64,7 +64,7 @@ internal class OmsorgspengerAleneOmsorgService(
     }
 
     suspend fun henteSøknad(søknadId: String): ServerResponse {
-        val søknad = mappeService.hentSøknad(søknadId)
+        val søknad = mappeService.hentSøknad(søknad = søknadId)
             ?: return ServerResponse.notFound().buildAndAwait()
 
         return ServerResponse
