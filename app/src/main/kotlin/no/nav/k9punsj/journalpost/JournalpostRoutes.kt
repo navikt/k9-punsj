@@ -207,9 +207,7 @@ internal class JournalpostRoutes(
                 val dto = kotlin.runCatching { request.søknadId() }.getOrDefault(SettPåVentDto(null))
                 aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
 
-                ServerResponse
-                    .ok()
-                    .buildAndAwait()
+                ServerResponse.ok().buildAndAwait()
             }
         }
 
@@ -220,7 +218,7 @@ internal class JournalpostRoutes(
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                     norskIdent = norskIdent,
-                    url = OmsorgspengerAleneOmsorgRoutes.Urls.HenteMappe
+                    url = Urls.SkalTilK9sak
                 )?.let { return@RequestContext it }
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
