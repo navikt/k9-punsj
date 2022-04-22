@@ -1,4 +1,4 @@
-package no.nav.k9punsj.repository
+package no.nav.k9punsj.domenetjenester.repository
 
 import kotliquery.Row
 import kotliquery.queryOf

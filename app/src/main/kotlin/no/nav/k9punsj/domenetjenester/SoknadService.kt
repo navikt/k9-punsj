@@ -2,7 +2,7 @@ package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient

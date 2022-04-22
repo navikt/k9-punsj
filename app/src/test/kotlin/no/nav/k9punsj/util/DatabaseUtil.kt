@@ -7,10 +7,10 @@ import kotliquery.using
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.brev.BrevRepository
 import no.nav.k9punsj.configuration.loadFlyway
-import no.nav.k9punsj.repository.BunkeRepository
-import no.nav.k9punsj.repository.MappeRepository
-import no.nav.k9punsj.repository.PersonRepository
-import no.nav.k9punsj.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
+import no.nav.k9punsj.domenetjenester.repository.MappeRepository
+import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import javax.sql.DataSource

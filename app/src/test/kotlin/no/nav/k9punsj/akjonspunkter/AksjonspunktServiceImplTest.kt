@@ -5,10 +5,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.repository.BunkeRepository
-import no.nav.k9punsj.repository.MappeRepository
-import no.nav.k9punsj.repository.PersonRepository
-import no.nav.k9punsj.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
+import no.nav.k9punsj.domenetjenester.repository.MappeRepository
+import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto

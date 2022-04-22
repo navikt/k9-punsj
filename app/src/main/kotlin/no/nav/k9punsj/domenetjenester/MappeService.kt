@@ -1,9 +1,9 @@
 package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.repository.BunkeRepository
-import no.nav.k9punsj.repository.MappeRepository
-import no.nav.k9punsj.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
+import no.nav.k9punsj.domenetjenester.repository.MappeRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
@@ -27,7 +27,7 @@ import java.util.UUID
 @Service
 class MappeService(
     val mappeRepository: MappeRepository,
-    val søknadRepository: SøknadRepository,
+    val søknadRepository: SøknadRepository, // TODO: Endre till bruk av service
     val bunkeRepository: BunkeRepository,
     val personService: PersonService,
     val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
