@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.felles
 
 import java.time.Duration
 import kotlin.math.roundToLong

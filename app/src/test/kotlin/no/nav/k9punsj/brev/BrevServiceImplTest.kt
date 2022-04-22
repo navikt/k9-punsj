@@ -6,7 +6,7 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.db.datamodell.Person
+import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.db.repository
+package no.nav.k9punsj.domenetjenester.repository
 
 import kotliquery.queryOf
 import kotliquery.sessionOf

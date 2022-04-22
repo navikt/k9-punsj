@@ -1,8 +1,7 @@
-package no.nav.k9punsj.db.datamodell
+package no.nav.k9punsj.util
 
 import java.time.LocalDate
 import java.util.Objects.requireNonNull
-
 
 data class Periode(
     val fom: LocalDate,

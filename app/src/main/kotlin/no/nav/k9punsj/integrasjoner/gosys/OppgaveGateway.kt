@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.opprettOppgaveUrl
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper

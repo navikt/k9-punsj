@@ -1,7 +1,7 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -11,7 +11,8 @@ internal class MapPsbTilK9FormatTest {
 
     @Test
     fun `tom søknad med komplett struktur skal gi feil fra k9-format`() {
-        val periode = PeriodeDto(LocalDate.now(), LocalDate.now().plusMonths(1))
+        val periode =
+            PeriodeDto(LocalDate.now(), LocalDate.now().plusMonths(1))
 
         PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(requiredPeriode = periode,optionalPeriode = null)
             .feil()

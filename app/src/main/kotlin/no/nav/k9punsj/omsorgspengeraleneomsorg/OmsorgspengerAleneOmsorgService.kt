@@ -2,19 +2,17 @@ package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import kotlinx.coroutines.GlobalScope.coroutineContext
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
-import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.JournalposterDto
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService

@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.Tag
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.Metrikk
@@ -17,7 +17,7 @@ import java.util.UUID
 
 @Service
 class HendelseMottaker @Autowired constructor(
-    val journalpostRepository: JournalpostRepository,
+    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
     val aksjonspunktService: AksjonspunktService,
     val meterRegistry: MeterRegistry
 ) {

@@ -30,32 +30,32 @@ internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYt
                 logger.info("Ytelse på journalpost er null. Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.UKJENT.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode == this.ytelse -> {
                 val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER_KS
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER_MA
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.db.datamodell.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode == this.ytelse -> {
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode == this.ytelse -> {
                 val type = FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type

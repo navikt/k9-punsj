@@ -1,7 +1,7 @@
 package no.nav.k9punsj.openapi
 
 import no.nav.k9punsj.journalpost.JournalpostInfoRoutes
-import no.nav.k9punsj.journalpost.SøkUferdigJournalposter
+import no.nav.k9punsj.felles.SøkUferdigJournalposter
 import org.springframework.web.bind.annotation.*
 
 @RestController

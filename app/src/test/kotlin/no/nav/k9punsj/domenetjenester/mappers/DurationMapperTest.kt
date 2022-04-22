@@ -1,7 +1,7 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

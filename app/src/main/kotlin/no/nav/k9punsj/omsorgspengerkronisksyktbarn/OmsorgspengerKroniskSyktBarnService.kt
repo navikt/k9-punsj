@@ -4,16 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
-import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.JournalposterDto
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasFeil
@@ -27,7 +26,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Service
 internal class OmsorgspengerKroniskSyktBarnService(

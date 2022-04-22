@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.db.datamodell.JsonB
-import no.nav.k9punsj.journalpost.SøkUferdigJournalposter
+import no.nav.k9punsj.felles.JsonB
+import no.nav.k9punsj.felles.SøkUferdigJournalposter
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.k9SakToken

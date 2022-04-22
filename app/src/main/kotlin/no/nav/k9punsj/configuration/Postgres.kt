@@ -1,4 +1,4 @@
-package no.nav.k9punsj.db.config
+package no.nav.k9punsj.configuration
 
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil

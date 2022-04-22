@@ -8,16 +8,18 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.IdentDto
+import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
-import no.nav.k9punsj.journalpost.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.k9punsj.felles.PunsjBolleDto
+import no.nav.k9punsj.felles.PunsjJournalpostKildeType
+import no.nav.k9punsj.felles.SettPåVentDto
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.integrasjoner.punsjbollen.somPunsjbolleRuting
-import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgRoutes
 import no.nav.k9punsj.openapi.*
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
@@ -222,9 +224,12 @@ internal class JournalpostRoutes(
                 )?.let { return@RequestContext it }
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
-
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
-                    return@RequestContext hentHvisJournalpostMedId.skalTilK9.somPunsjbolleRuting().serverResponse()
+                    val punsjbolleRuting = when(hentHvisJournalpostMedId.skalTilK9) {
+                        true -> PunsjbolleRuting.K9Sak
+                        false -> PunsjbolleRuting.Infotrygd
+                    }
+                    return@RequestContext punsjbolleRuting.serverResponse()
                 }
 
                 val punsjbolleRuting = punsjbolleService.ruting(

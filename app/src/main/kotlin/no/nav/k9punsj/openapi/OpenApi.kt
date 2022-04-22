@@ -7,7 +7,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
 import org.springframework.beans.factory.annotation.Value

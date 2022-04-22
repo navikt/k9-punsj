@@ -110,8 +110,3 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
     private suspend fun ServerRequest.omsorgspengerMidlertidigAleneSøknad() =
         body(BodyExtractors.toMono(OmsorgspengerMidlertidigAleneSøknadDto::class.java)).awaitFirst()
 }
-
-
-
-
-

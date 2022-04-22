@@ -2,8 +2,8 @@ package no.nav.k9punsj.integrasjoner.dokarkiv
 
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.sak.typer.Saksnummer
-import no.nav.k9punsj.journalpost.Identitetsnummer
-import no.nav.k9punsj.journalpost.JournalpostId
+import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.JournalpostId
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject

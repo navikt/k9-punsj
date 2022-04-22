@@ -5,6 +5,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.felles.SøkUferdigJournalposter
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

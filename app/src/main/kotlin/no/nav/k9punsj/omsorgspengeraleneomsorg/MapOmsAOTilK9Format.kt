@@ -9,8 +9,7 @@ import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorg
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.journalpost.JournalpostId
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
 import java.time.ZonedDateTime

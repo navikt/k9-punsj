@@ -16,8 +16,8 @@ import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate

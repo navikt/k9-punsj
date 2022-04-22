@@ -1,7 +1,7 @@
 package no.nav.k9punsj.brev
 
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.felles.JsonB
 
 data class DokumentbestillingDto(
     val journalpostId: String,

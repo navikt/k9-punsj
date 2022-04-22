@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.domenetjenester.dto.*
-import no.nav.k9punsj.journalpost.IdentOgJournalpost
+import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.SendSøknad
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode

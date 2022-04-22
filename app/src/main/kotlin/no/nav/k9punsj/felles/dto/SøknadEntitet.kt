@@ -1,5 +1,6 @@
-package no.nav.k9punsj.db.datamodell
+package no.nav.k9punsj.felles.dto
 
+import no.nav.k9punsj.felles.JsonB
 import java.time.LocalDate
 import java.time.LocalDateTime
 

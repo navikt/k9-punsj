@@ -14,13 +14,13 @@ import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
-import no.nav.k9punsj.journalpost.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.journalpost.FeilIAksjonslogg
-import no.nav.k9punsj.journalpost.Identitetsnummer
+import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.journalpost.IkkeFunnet
 import no.nav.k9punsj.journalpost.IkkeTilgang
 import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
-import no.nav.k9punsj.journalpost.JournalpostId
+import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.journalpost.UgyldigToken
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject

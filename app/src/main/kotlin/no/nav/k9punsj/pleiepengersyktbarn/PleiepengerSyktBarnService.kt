@@ -5,18 +5,17 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.dto.JournalposterDto
-import no.nav.k9punsj.domenetjenester.dto.Matchfagsak
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.JournalposterDto
+import no.nav.k9punsj.felles.dto.Matchfagsak
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
-import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -33,7 +32,6 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import java.net.URI
-import kotlin.coroutines.coroutineContext
 
 @Service
 internal class PleiepengerSyktBarnService(

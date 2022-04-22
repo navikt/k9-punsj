@@ -2,7 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.PunsjJournalpost
@@ -21,9 +21,9 @@ import java.util.UUID
 @Service
 internal class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
-    val journalpostRepository: JournalpostRepository,
+    val journalpostRepository: JournalpostRepository, // TODO: Endre till bruk av service
     val aksjonspunktRepository: AksjonspunktRepository,
-    val søknadRepository: SøknadRepository,
+    val søknadRepository: SøknadRepository, // TODO: Endre till bruk av service
     val personService: PersonService
 ) : AksjonspunktService {
 

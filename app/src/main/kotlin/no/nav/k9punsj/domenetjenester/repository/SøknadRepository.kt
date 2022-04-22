@@ -1,11 +1,11 @@
-package no.nav.k9punsj.db.repository
+package no.nav.k9punsj.domenetjenester.repository
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.SøknadEntitet
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID

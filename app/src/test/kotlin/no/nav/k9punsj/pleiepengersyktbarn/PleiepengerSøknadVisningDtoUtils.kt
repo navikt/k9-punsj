@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalTime

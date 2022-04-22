@@ -10,9 +10,8 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
 import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
-import no.nav.k9punsj.journalpost.*
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
+import no.nav.k9punsj.journalpost.JournalpostService
 import org.json.JSONObject
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext
@@ -70,9 +69,4 @@ class NotatService(
             saksbehandlerEnhet = innloggetBrukerEnhet,
             saksbehandlerNavn = innloggetBrukerIdentitetsnumer
         )
-}
-
-private fun Personopplysninger.navn(): String = when(mellomnavn) {
-    null -> "$fornavn $etternavn"
-    else -> "$fornavn $mellomnavn $etternavn"
 }

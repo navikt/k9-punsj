@@ -19,7 +19,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate

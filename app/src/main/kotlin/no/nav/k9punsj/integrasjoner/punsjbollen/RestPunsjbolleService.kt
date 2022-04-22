@@ -12,12 +12,12 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value

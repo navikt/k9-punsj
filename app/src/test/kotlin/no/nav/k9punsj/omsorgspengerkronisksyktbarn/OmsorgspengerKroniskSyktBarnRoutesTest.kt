@@ -4,8 +4,8 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
-import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
@@ -224,13 +224,14 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
     }
 
-    private fun opprettSøknad(personnummer: String, journalpostId: String) = OpprettNySøknad(
-        norskIdent = personnummer,
-        journalpostId = journalpostId,
-        pleietrengendeIdent = null,
-        annenPart = null,
-        barnIdent = null
-    )
+    private fun opprettSøknad(personnummer: String, journalpostId: String) =
+        OpprettNySøknad(
+            norskIdent = personnummer,
+            journalpostId = journalpostId,
+            pleietrengendeIdent = null,
+            annenPart = null,
+            barnIdent = null
+        )
 
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
