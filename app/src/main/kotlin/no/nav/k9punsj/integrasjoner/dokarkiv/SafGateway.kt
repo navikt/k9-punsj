@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.integrasjoner.dokarkiv
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -8,13 +8,17 @@ import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.journalpost.FeilIAksjonslogg
+import no.nav.k9punsj.journalpost.IkkeFunnet
+import no.nav.k9punsj.journalpost.IkkeStøttetJournalpost
+import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
+import no.nav.k9punsj.journalpost.NotatUnderArbeidFeil
+import no.nav.k9punsj.journalpost.UgyldigToken
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
-import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -75,11 +79,11 @@ class SafGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
-    internal suspend fun hentJournalpost(journalpostId: JournalpostId): SafDtos.Journalpost? {
+    internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
 
-        val accessToken =  cachedAccessTokenClient.getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        val accessToken = cachedAccessTokenClient.getAccessToken(
+            scopes = henteJournalpostScopes,
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
         )
 
         val correlationId = try {
@@ -123,11 +127,11 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentJournalposter(journalpostIder: List<JournalpostId>): List<SafDtos.Journalpost?> =
+    internal suspend fun hentJournalposter(journalpostIder: List<String>): List<SafDtos.Journalpost?> =
         journalpostIder.map { hentJournalpost(it) }.toList()
 
     internal suspend fun hentJournalpostInfo(
-        journalpostId: JournalpostId
+        journalpostId: String
     ): SafDtos.Journalpost? {
         val journalpost = hentJournalpost(journalpostId)
 
@@ -153,11 +157,10 @@ class SafGateway(
     }
 
     internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
+        val accessToken = cachedAccessTokenClient.getAccessToken(
+            scopes = henteJournalpostScopes,
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        )
 
         val body = objectMapper().writeValueAsString(SafDtos.FerdigstillJournalpostQuery(journalpostId))
         val (request, response, result) = GraphQlUrl
@@ -182,37 +185,7 @@ class SafGateway(
         )
     }
 
-    internal suspend fun hentSakerFraSaf(søkerIdent: String): JSONArray? {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteJournalpostScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val body = objectMapper().writeValueAsString(SafDtos.SakerQuery(søkerIdent))
-        val (request, response, result) = GraphQlUrl
-            .httpPost()
-            .body(body)
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
-            ).awaitStringResponseResult()
-
-        return result.fold(
-            success = {
-                it.saker()
-            },
-            failure = {
-                håndterFeil(it, request, response)
-                null
-            }
-        )
-    }
-
-    internal suspend fun hentDokument(journalpostId: JournalpostId, dokumentId: DokumentId): Dokument? {
+    internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteDokumentScopes,
@@ -278,8 +251,6 @@ class SafGateway(
         )
     )
 }
-
-typealias DokumentId = String
 
 data class Dokument(
     val contentType: MediaType,

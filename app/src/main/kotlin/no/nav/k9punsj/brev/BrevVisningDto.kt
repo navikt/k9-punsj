@@ -1,7 +1,6 @@
 package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -11,7 +10,7 @@ data class BrevVisningDto(
     val mottattDato: LocalDate,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett: LocalTime,
-    val journalpostId: JournalpostIdDto,
+    val journalpostId: String,
     val mottaker: DokumentbestillingDto.Mottaker,
     val saksnummer: String,
     val sendtInnAv: String,

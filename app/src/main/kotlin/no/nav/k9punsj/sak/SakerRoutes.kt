@@ -5,7 +5,7 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.utils.ServerRequestUtils.norskIdent
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -38,36 +38,14 @@ internal class SakerRoutes(
         GET("/api${Urls.HentSaker}") { request ->
             if (sakerEnabled) {
                 RequestContext(coroutineContext, request) {
-                    val norskIdent = request.norskIdent()
-                    val tilganNektet = innloggetUtils.harInnloggetBrukerTilgangTil(listOf(norskIdent), Urls.HentSaker)
-                    if (tilganNektet != null) {
-                        return@RequestContext tilganNektet
-                    } else {
-                        RequestContext(kotlin.coroutines.coroutineContext, request) {
-                            return@RequestContext kotlin.runCatching {
-                                logger.info("Henter fagsaker...")
-                                sakService.hentSaker(norskIdent)
-                            }
-                        }.fold(
-                            onSuccess = {
-                                logger.info("Saker hentet")
-                                ServerResponse
-                                    .status(HttpStatus.OK)
-                                    .json()
-                                    .bodyValueAndAwait(it)
-                            },
-                            onFailure = {
-                                logger.error("Feilet med å hente saker.", it)
-                                ServerResponse
-                                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .json()
-                                    .bodyValueAndAwait(OasFeil(it.message))
-                            }
-                        )
-                    }
+                    val norskIdent = request.hentNorskIdentHeader()
+                    innloggetUtils.harInnloggetBrukerTilgangTil(norskIdentDto = listOf(norskIdent), url = Urls.HentSaker)
+                        ?.let { return@RequestContext it }
+
+                    return@RequestContext sakService.hentSaker(norskIdent)
                 }
             } else {
-                ServerResponse
+                return@GET ServerResponse
                     .status(HttpStatus.NOT_IMPLEMENTED)
                     .json()
                     .bodyValueAndAwait("Ikke enablet")

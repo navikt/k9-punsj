@@ -4,7 +4,6 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -78,7 +77,7 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hentAlleAksjonspunkter(journalpostId: JournalpostId): List<AksjonspunktEntitet> {
+    suspend fun hentAlleAksjonspunkter(journalpostId: String): List<AksjonspunktEntitet> {
         return using(sessionOf(dataSource)) {
             it.run(
                 queryOf("""

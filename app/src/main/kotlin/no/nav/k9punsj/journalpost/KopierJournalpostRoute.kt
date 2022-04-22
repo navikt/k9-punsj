@@ -8,16 +8,12 @@ import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
-import no.nav.k9punsj.innsending.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
-import no.nav.k9punsj.journalpost.KopierJournalpost.journalpostId
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -29,11 +25,11 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import kotlin.coroutines.coroutineContext
 
 data class KopierJournalpostDto(
-    val fra: NorskIdentDto,
-    val til: NorskIdentDto,
+    val fra: String,
+    val til: String,
     //TODO bytt navn til pleietrengende
-    val barn: NorskIdentDto?,
-    val annenPart: NorskIdentDto?
+    val barn: String?,
+    val annenPart: String?
 ) {
     init {
         require(barn != null || annenPart != null) {
@@ -72,36 +68,32 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     suspend fun fraKanRutesTilK9(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
-        fagsakYtelseType: FagsakYtelseType,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType
     ) = punsjbolleService.ruting(
         søker = dto.fra,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = journalpost.journalpostId,
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId,
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
     suspend fun tilKanRutesTilK9(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
-        fagsakYtelseType: FagsakYtelseType,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType
     ) = punsjbolleService.ruting(
         søker = dto.til,
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
         periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
-        correlationId = correlationId,
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
     POST("/api${JournalpostRoutes.Urls.KopierJournalpost}") { request ->
         RequestContext(coroutineContext, request) {
-            val journalpostId = request.journalpostId()
+            val journalpostId = request.pathVariable("journalpost_id")
             val journalpostInfo = journalpostService.hentJournalpostInfo(journalpostId)
                 ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
             val dto = request.kopierJournalpostDto()
@@ -119,14 +111,14 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             val ytelseType = journalpost.utledeFagsakYtelseType()
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9.")
                 }
             } else {
-                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!fraKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet fra-person.")
                 }
-                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType, coroutineContext.hentCorrelationId())) {
+                if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType)) {
                     return@RequestContext kanIkkeKopieres("Kan ikke rutes til K9 grunnet til-person.")
                 }
             }
@@ -145,7 +137,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                     fra = dto.fra,
                     til = dto.til,
                     pleietrengende = dto.barn,
-                    correlationId = coroutineContext.hentCorrelationId(),
                     ytelse = ytelseType
                 )
             )
@@ -154,24 +145,22 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     }
 }
 
-internal object KopierJournalpost {
-    internal val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
+private object KopierJournalpost {
+    val logger = LoggerFactory.getLogger(KopierJournalpost::class.java)
 
-    internal suspend fun ikkeTilgang() = ServerResponse
+    suspend fun ikkeTilgang() = ServerResponse
         .status(HttpStatus.FORBIDDEN)
         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
 
-    internal suspend fun kanIkkeKopieres(feil: String) = ServerResponse
+    suspend fun kanIkkeKopieres(feil: String) = ServerResponse
         .status(HttpStatus.CONFLICT)
         .bodyValueAndAwait(feil)
         .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
 
-    internal suspend fun sendtTilKopiering() = ServerResponse
+    suspend fun sendtTilKopiering() = ServerResponse
         .status(HttpStatus.ACCEPTED)
         .bodyValueAndAwait("Journalposten vil bli kopiert.")
 
-    internal suspend fun ServerRequest.kopierJournalpostDto() =
+    suspend fun ServerRequest.kopierJournalpostDto() =
         body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
-
-    internal fun ServerRequest.journalpostId(): JournalpostId = pathVariable("journalpost_id")
 }

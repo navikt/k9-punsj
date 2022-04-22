@@ -4,7 +4,6 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.db.datamodell.FagsakYtelseTypeUri
 import no.nav.k9punsj.domenetjenester.dto.*
 import no.nav.k9punsj.journalpost.IdentOgJournalpost
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
@@ -35,7 +34,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = FagsakYtelseTypeUri.OMSORGSPENGER
+    private val søknadTypeUri = "omsorgspenger-soknad"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -247,7 +246,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     }
 
     private fun opprettSøknad(
-        personnummer: NorskIdentDto,
+        personnummer: String,
         journalpostId: String,
     ): IdentOgJournalpost {
         return IdentOgJournalpost(personnummer, journalpostId)
@@ -276,8 +275,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     }
 
     private fun lagSendSøknad(
-        norskIdent: NorskIdentDto,
-        søknadId: SøknadIdDto,
+        norskIdent: String,
+        søknadId: String,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }

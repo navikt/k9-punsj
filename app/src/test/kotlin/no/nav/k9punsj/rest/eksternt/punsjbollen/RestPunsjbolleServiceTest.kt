@@ -44,14 +44,13 @@ internal class RestPunsjbolleServiceTest {
         assertThrows<IllegalStateException> { ruting(UventetResponse) }
     }
 
-    private fun ruting(correlationId: CorrelationId) = runBlocking {
+    private fun ruting(journalpostId: String) = runBlocking {
         punsjbolleService.ruting(
             søker = "123",
             pleietrengende = "456",
-            journalpostId = "789",
+            journalpostId = journalpostId,
             annenPart = null,
             periode = null,
-            correlationId = correlationId,
             fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
     }
@@ -93,49 +92,49 @@ internal class RestPunsjbolleServiceTest {
     }
 
     private companion object {
-        private const val TilK9Sak = "1"
-        private const val TilInfotrygd = "2"
-        private const val IkkeStøttet = "3"
-        private const val UventetResponse = "4"
+        private const val TilK9Sak = "ForventetK9Sak"
+        private const val TilInfotrygd = "ForventetInfotrygdRuting"
+        private const val IkkeStøttet = "ForventetIkkeStøttet"
+        private const val UventetResponse = "ForventetUventetResponse"
 
 
         private fun WireMockServer.stubTilK9Sak() = stubPunsjbolleRuting(
-            correlationId = TilK9Sak,
             httpStatus = 200,
-            responseBody = """{"destinasjon":"K9Sak"}"""
+            responseBody = """{"destinasjon":"K9Sak"}""",
+            forventetRuting = TilK9Sak
         )
 
         private fun WireMockServer.stubTilInfotrygd() = stubPunsjbolleRuting(
-            correlationId = TilInfotrygd,
             httpStatus = 200,
-            responseBody = """{"destinasjon":"Infotrygd"}"""
+            responseBody = """{"destinasjon":"Infotrygd"}""",
+            forventetRuting = TilInfotrygd
         )
 
         private fun WireMockServer.stubIkkeStøttet() = stubPunsjbolleRuting(
-            correlationId = IkkeStøttet,
             httpStatus = 409,
-            responseBody = """{"type":"punsjbolle://ikke-støttet-journalpost"}"""
+            responseBody = """{"type":"punsjbolle://ikke-støttet-journalpost"}""",
+            forventetRuting = IkkeStøttet
         )
 
         private fun WireMockServer.stubUventetResponse() = stubPunsjbolleRuting(
-            correlationId = UventetResponse,
             httpStatus = 500,
             responseBody = "Noe gikk gæli",
-            contentType = "text/plain"
+            contentType = "text/plain",
+            forventetRuting = UventetResponse
         )
 
         private fun WireMockServer.stubPunsjbolleRuting(
-            correlationId: CorrelationId,
             httpStatus: Int,
             contentType: String = "application/json",
             responseBody: String,
+            forventetRuting: String
         ): WireMockServer {
             WireMock.stubFor(
                 WireMock.post(WireMock.urlPathEqualTo("/ruting"))
                     .withHeader("Content-Type", WireMock.equalTo("application/json"))
                     .withHeader("Accept", WireMock.equalTo("application/json"))
                     .withHeader("Authorization", WireMock.equalTo("Bearer foo"))
-                    .withHeader("X-Correlation-Id", WireMock.equalTo(correlationId))
+                    .withRequestBody(WireMock.containing(forventetRuting))
                     .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", contentType)
                         .withBody(responseBody)

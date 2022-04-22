@@ -5,10 +5,10 @@ import no.nav.k9.søknad.ytelse.Ytelse.Type
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.domenetjenester.dto.KorrigeringInntektsmeldingDto
+import no.nav.k9punsj.korrigeringinntektsmelding.KorrigeringInntektsmeldingDto
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.domenetjenester.mappers.*
+import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
 import no.nav.k9punsj.metrikker.Metrikk.*
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.omsorgspengeraleneomsorg.MapOmsAOTilK9Format

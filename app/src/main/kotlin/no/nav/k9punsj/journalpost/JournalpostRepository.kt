@@ -3,12 +3,9 @@ package no.nav.k9punsj.journalpost
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.AktørId
 import no.nav.k9punsj.db.datamodell.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -22,7 +19,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     private val objectMapper = objectMapper()
 
-    suspend fun lagre(
+    internal suspend fun lagre(
         punsjJournalpostId: PunsjJournalpost,
         kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
         function: (PunsjJournalpost?) -> PunsjJournalpost,
@@ -103,7 +100,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPerson(aktørId: AktørId): List<PunsjJournalpost> {
+    suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
@@ -118,7 +115,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun finnJournalposterPåPersonBareFordel(aktørId: AktørId): List<PunsjJournalpost> {
+    suspend fun finnJournalposterPåPersonBareFordel(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
                 "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
@@ -158,7 +155,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun settAlleTilFerdigBehandlet(journalpostIder: List<JournalpostId>) {
+    suspend fun settAlleTilFerdigBehandlet(journalpostIder: List<String>) {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 val antallUpdates = using(sessionOf(dataSource)) {
@@ -175,7 +172,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<JournalpostIdDto>?, aktørId: AktørId) {
+    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: String) {
         journalposter?.forEach {
             if (journalpostIkkeEksisterer(it)) {
                 val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
@@ -206,7 +203,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun kanSendeInn(journalpostIder: List<JournalpostId>): Boolean {
+    fun kanSendeInn(journalpostIder: List<String>): Boolean {
         val using = using(sessionOf(dataSource)) {
             it.run(queryOf("select ferdig_behandlet from $JOURNALPOST_TABLE where journalpost_id in (${
                 IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }

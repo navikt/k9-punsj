@@ -7,11 +7,7 @@ import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
 import io.swagger.v3.oas.models.servers.Server
-import no.nav.k9punsj.db.datamodell.MappeId
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SøknadIdDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
 import org.springframework.beans.factory.annotation.Value
@@ -57,17 +53,17 @@ internal class OpenApi {
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 
 data class OasMatchfagsak(
-    val brukerIdent: NorskIdentDto,
-    val barnIdent: NorskIdentDto,
+    val brukerIdent: String,
+    val barnIdent: String,
 )
 
 data class OasMatchfagsakMedPeriode(
-    val brukerIdent: NorskIdentDto,
+    val brukerIdent: String,
     val periodeDto: PeriodeDto,
 )
 
 data class OasIdentDto(
-    val norskIdent: NorskIdentDto,
+    val norskIdent: String,
 )
 
 data class OasFeil(
@@ -75,11 +71,11 @@ data class OasFeil(
 )
 
 data class OasSøknadId(
-    val soeknadId: SøknadIdDto,
+    val soeknadId: String,
 )
 
 data class OasSoknadsfeil(
-    val mappeId: MappeId?,
+    val mappeId: String?,
     val feil: List<FeilDto>?,
 ) {
     data class FeilDto(
@@ -103,7 +99,7 @@ data class OasJournalpostIder(
 )
 
 data class OasJournalpostDto(
-    val journalpostId: JournalpostIdDto,
+    val journalpostId: String,
     val dokumenter: Set<OasDokumentInfo>?,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate?,
@@ -119,9 +115,9 @@ data class OasVentDto(
 )
 
 data class OasPunsjBolleDto(
-    val brukerIdent: NorskIdentDto,
-    val barnIdent: NorskIdentDto,
-    val journalpostId: JournalpostIdDto,
+    val brukerIdent: String,
+    val barnIdent: String,
+    val journalpostId: String,
 )
 
 data class OasSkalTilInfotrygdSvar(
@@ -129,7 +125,7 @@ data class OasSkalTilInfotrygdSvar(
 )
 
 data class OasHentPerson(
-    val norskIdent: NorskIdentDto,
+    val norskIdent: String,
 )
 
 data class OasPdlResponse(

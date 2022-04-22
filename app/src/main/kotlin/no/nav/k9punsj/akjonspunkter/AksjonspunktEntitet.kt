@@ -1,6 +1,5 @@
 package no.nav.k9punsj.akjonspunkter
 
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import java.time.LocalDateTime
 
 typealias AksjonspunktId = String
@@ -8,7 +7,7 @@ typealias AksjonspunktId = String
 data class AksjonspunktEntitet(
     val aksjonspunktId: AksjonspunktId,
     val aksjonspunktKode: AksjonspunktKode,
-    val journalpostId: JournalpostId,
+    val journalpostId: String,
     val aksjonspunktStatus: AksjonspunktStatus,
     val frist_tid: LocalDateTime? = null,
     val vent_årsak: VentÅrsakType? = null,

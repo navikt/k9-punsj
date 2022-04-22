@@ -3,6 +3,7 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9punsj.journalpost.KopierJournalpostInfo
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
 import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
@@ -98,7 +99,6 @@ internal class InnsendingMappingTest {
     private fun mapKopierJournalpostOgAssert(fagsakYtelseType: FagsakYtelseType, søknadstype: String) {
         val (_, value) = innsendingClient.mapKopierJournalpost(
             KopierJournalpostInfo(
-                correlationId = "5bc73106-a0b1-46a4-a297-54541265934e",
                 journalpostId = "11111111111",
                 fra = "22222222222",
                 til = "33333333333",

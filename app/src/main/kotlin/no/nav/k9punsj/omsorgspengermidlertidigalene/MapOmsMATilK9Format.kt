@@ -10,7 +10,6 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.AnnenForelder
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene
-import no.nav.k9punsj.domenetjenester.dto.JournalpostId
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
@@ -90,7 +89,7 @@ internal class MapOmsMATilK9Format(
         }
     }
 
-    private fun OmsorgspengerMidlertidigAleneSøknadDto.leggTilJournalposter(journalpostIder: Set<JournalpostId>) {
+    private fun OmsorgspengerMidlertidigAleneSøknadDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
             søknad.medJournalpost(
                 Journalpost()

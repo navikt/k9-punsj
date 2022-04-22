@@ -6,8 +6,6 @@ import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
 import org.springframework.stereotype.Component
@@ -16,32 +14,29 @@ import org.springframework.stereotype.Component
 @LokalProfil
 internal class LokalPunsjbolleService : PunsjbolleService {
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
-        journalpostId: JournalpostIdDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
+        journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
         søknad: Søknad,
-        correlationId: CorrelationId
     ) = SaksnummerDto("SAK1")
 
     override suspend fun ruting(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
-        journalpostId: JournalpostIdDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
+        journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType,
     ) = when (journalpostId) {
         "45537868838" -> PunsjbolleRuting.IkkeStøttet

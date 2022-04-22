@@ -16,8 +16,6 @@ import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
-import no.nav.k9punsj.domenetjenester.dto.NorskIdentDto
 import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
 import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
 import org.slf4j.LoggerFactory
@@ -27,6 +25,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.time.LocalDate
+import java.util.UUID
 
 @Configuration
 @StandardProfil
@@ -40,12 +39,11 @@ class RestPunsjbolleService(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
-        journalpostId: JournalpostIdDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
+        journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerDto(
@@ -57,6 +55,7 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
+        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "saksnummer".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -70,11 +69,10 @@ class RestPunsjbolleService(
     }
 
     override suspend fun opprettEllerHentFagsaksnummer(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
         søknad: Søknad,
-        correlationId: CorrelationId,
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerFraSøknadDto(
             søker = søker,
@@ -83,6 +81,7 @@ class RestPunsjbolleService(
             søknad = søknad
         )
 
+        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "saksnummer-fra-soknad".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -96,12 +95,11 @@ class RestPunsjbolleService(
     }
 
     override suspend fun ruting(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
-        journalpostId: JournalpostIdDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
+        journalpostId: String?,
         periode: PeriodeDto?,
-        correlationId: CorrelationId,
         fagsakYtelseType: FagsakYtelseType
     ): PunsjbolleRuting {
         val requestBody = punsjbolleSaksnummerDto(
@@ -113,6 +111,7 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
+        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "ruting".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -140,10 +139,10 @@ class RestPunsjbolleService(
 
 
     private suspend fun punsjbolleSaksnummerDto(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
-        journalpostId: JournalpostIdDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
+        journalpostId: String?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
     ): PunsjbolleSaksnummerDto {
@@ -164,9 +163,9 @@ class RestPunsjbolleService(
     }
 
     private suspend fun punsjbolleSaksnummerFraSøknadDto(
-        søker: NorskIdentDto,
-        pleietrengende: NorskIdentDto?,
-        annenPart: NorskIdentDto?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
         søknad: Søknad,
     ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)

@@ -1,13 +1,11 @@
 package no.nav.k9punsj.fordel
 
-import no.nav.k9punsj.domenetjenester.dto.AktørIdDto
-import no.nav.k9punsj.domenetjenester.dto.JournalpostIdDto
 import java.time.LocalDateTime
 
 data class PunsjEventDto(
     val eksternId: String,
-    val journalpostId: JournalpostIdDto,
-    val aktørId: AktørIdDto?,
+    val journalpostId: String,
+    val aktørId: String?,
     val eventTid: LocalDateTime,
     val aksjonspunktKoderMedStatusListe: MutableMap<String, String>,
     val pleietrengendeAktørId: String? = null,

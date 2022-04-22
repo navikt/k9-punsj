@@ -13,26 +13,26 @@ import java.time.LocalTime
 
 
 data class OmsorgspengerMidlertidigAleneSøknadDto(
-    val soeknadId: SøknadIdDto,
-    val soekerId: NorskIdentDto? = null,
+    val soeknadId: String,
+    val soekerId: String? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett : LocalTime? = null,
     val barn: List<BarnDto> = emptyList(),
     val annenForelder: AnnenForelder? = null,
-    val journalposter: List<JournalpostIdDto>? = null,
+    val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean? = null,
     val harMedisinskeOpplysninger : Boolean? = null
 ) {
     data class BarnDto(
-        val norskIdent: NorskIdentDto?,
+        val norskIdent: String?,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val foedselsdato: LocalDate?
     )
 
     data class AnnenForelder(
-        val norskIdent: NorskIdentDto?,
+        val norskIdent: String?,
         val situasjonType: String?,
         val situasjonBeskrivelse: String?,
         val periode: PeriodeDto?,
@@ -40,12 +40,12 @@ data class OmsorgspengerMidlertidigAleneSøknadDto(
 }
 
 data class SvarOmsMADto(
-    val søker: NorskIdentDto,
+    val søker: String,
     val fagsakTypeKode: String,
     val søknader: List<OmsorgspengerMidlertidigAleneSøknadDto>?,
 )
 
-internal fun Mappe.tilOmsMAVisning(norskIdent: NorskIdentDto): SvarOmsMADto {
+internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
     val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
     if (bunke?.søknader.isNullOrEmpty()) {
         return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, listOf())
