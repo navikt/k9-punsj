@@ -1,10 +1,10 @@
-package no.nav.k9punsj.db.repository
+package no.nav.k9punsj.repository
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.BunkeEntitet
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.BunkeEntitet
+import no.nav.k9punsj.felles.FagsakYtelseType
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource

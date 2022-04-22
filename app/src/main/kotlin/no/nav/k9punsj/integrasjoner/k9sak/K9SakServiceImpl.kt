@@ -9,14 +9,14 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.tilgangskontroll.abac.NavHeaders
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
-import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
@@ -48,7 +48,7 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String,
-        fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
 
         val matchDto = MatchDto(
@@ -76,7 +76,7 @@ class K9SakServiceImpl(
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
-        fagsakYtelseType: no.nav.k9punsj.db.datamodell.FagsakYtelseType,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
         periodeDto: PeriodeDto,
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         val matchDto = MatchMedPeriodeDto(

@@ -2,15 +2,14 @@ package no.nav.k9punsj.omsorgspengermidlertidigalene
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.Mappe
-import no.nav.k9punsj.db.datamodell.SøknadEntitet
-import no.nav.k9punsj.domenetjenester.dto.*
-import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
-
 
 data class OmsorgspengerMidlertidigAleneSøknadDto(
     val soeknadId: String,

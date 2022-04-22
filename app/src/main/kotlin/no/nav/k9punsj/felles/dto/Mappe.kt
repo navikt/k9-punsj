@@ -1,4 +1,6 @@
-package no.nav.k9punsj.db.datamodell
+package no.nav.k9punsj.felles.dto
+
+import no.nav.k9punsj.felles.FagsakYtelseType
 
 data class Mappe(
     val mappeId: String,

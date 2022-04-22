@@ -9,10 +9,9 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenResponse
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.CorrelationId
-import no.nav.k9punsj.db.datamodell.Person
+import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.RestPunsjbolleService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -76,11 +75,13 @@ internal class RestPunsjbolleServiceTest {
                 ))
             },
             personService = mockk<PersonService>().also {
-                coEvery { it.finnEllerOpprettPersonVedNorskIdent(any()) }.returns(Person(
+                coEvery { it.finnEllerOpprettPersonVedNorskIdent(any()) }.returns(
+                    Person(
                     personId = "1234",
                     aktørId = "5678",
                     norskIdent = "9101112"
-                ))
+                )
+                )
             }
         )
 

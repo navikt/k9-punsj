@@ -1,7 +1,7 @@
 package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.JsonB
+import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID

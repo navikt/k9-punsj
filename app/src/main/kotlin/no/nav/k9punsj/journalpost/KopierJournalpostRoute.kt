@@ -2,19 +2,17 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleRuting
+import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
@@ -74,7 +72,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = journalpost.journalpostId,
-        periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
+        periode = journalpost.mottattDato.toLocalDate().let {
+            PeriodeDto(
+                it,
+                it
+            )
+        },
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 
@@ -87,7 +90,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         pleietrengende = dto.barn,
         annenPart = dto.annenPart,
         journalpostId = null, // For den det skal kopieres til sender vi ikke med referanse til journalposten som tilhører 'fra'-personen
-        periode = journalpost.mottattDato.toLocalDate().let { PeriodeDto(it, it) },
+        periode = journalpost.mottattDato.toLocalDate().let {
+            PeriodeDto(
+                it,
+                it
+            )
+        },
         fagsakYtelseType = fagsakYtelseType
     ) == PunsjbolleRuting.K9Sak
 

@@ -25,4 +25,9 @@ data class Personopplysninger (
             }
         }
     }
+
+    internal fun navn(): String = when(mellomnavn) {
+        null -> "$fornavn $etternavn"
+        else -> "$fornavn $mellomnavn $etternavn"
+    }
 }

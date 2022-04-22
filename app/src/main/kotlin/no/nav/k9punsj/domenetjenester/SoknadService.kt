@@ -2,7 +2,7 @@ package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.repository.SøknadRepository
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -19,7 +19,7 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class SoknadService(
-    val journalpostRepository: JournalpostRepository,
+    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
     val søknadRepository: SøknadRepository,
     val innsendingClient: InnsendingClient,
     val aksjonspunktService: AksjonspunktService,

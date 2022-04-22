@@ -2,13 +2,13 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.Mappe
-import no.nav.k9punsj.db.datamodell.SøknadEntitet
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.hentUtJournalposter
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somDuration
-import no.nav.k9punsj.domenetjenester.mappers.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
+import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -21,18 +21,19 @@ data class KorrigeringInntektsmeldingDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    val klokkeslett: LocalTime? = null,
     val journalposter: List<String>? = null,
     val organisasjonsnummer: String? = null,
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
-    val harInfoSomIkkeKanPunsjes : Boolean? = null,
-    val harMedisinskeOpplysninger : Boolean? = null
+    val harInfoSomIkkeKanPunsjes: Boolean? = null,
+    val harMedisinskeOpplysninger: Boolean? = null
 ) {
     data class FraværPeriode(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
-        val tidPrDag: PleiepengerSyktBarnSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+        val tidPrDag: PleiepengerSyktBarnSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()
+            ?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
     )
 }
 

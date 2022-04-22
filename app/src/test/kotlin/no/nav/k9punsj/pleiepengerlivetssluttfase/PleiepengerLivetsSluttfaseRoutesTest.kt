@@ -4,8 +4,8 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
-import no.nav.k9punsj.domenetjenester.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -102,7 +102,13 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         journalpostId: String,
         pleietrengende: String,
     ): OpprettNySøknad {
-        return OpprettNySøknad(personnummer, journalpostId, pleietrengende, null, null)
+        return OpprettNySøknad(
+            personnummer,
+            journalpostId,
+            pleietrengende,
+            null,
+            null
+        )
     }
 
     private fun tilpasserSøknadsMalTilTesten(

@@ -1,4 +1,4 @@
-package no.nav.k9punsj.tilgangskontroll.abac
+package no.nav.k9punsj.felles
 
 internal object NavHeaders {
     internal const val CallId = "Nav-Call-Id"

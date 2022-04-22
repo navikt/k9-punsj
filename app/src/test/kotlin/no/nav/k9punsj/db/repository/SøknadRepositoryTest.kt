@@ -1,8 +1,8 @@
 package no.nav.k9punsj.db.repository
 
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.db.datamodell.SøknadEntitet
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat

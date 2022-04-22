@@ -3,7 +3,9 @@ package no.nav.k9punsj.journalpost
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway

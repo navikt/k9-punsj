@@ -3,8 +3,9 @@ package no.nav.k9punsj.tilgangskontroll.abac
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.AppConfiguration
+import no.nav.k9punsj.configuration.AuditConfiguration
 import no.nav.k9punsj.StandardProfil
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
@@ -36,7 +37,7 @@ private const val DOMENE = "k9"
 @Configuration
 @StandardProfil
 class PepClient(
-    private val config: AppConfiguration,
+    private val config: AuditConfiguration,
     private val azureGraphService: AzureGraphService,
     private val auditlogger: Auditlogger,
     private val pdlService: PdlService,

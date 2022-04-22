@@ -1,10 +1,10 @@
-package no.nav.k9punsj.db.repository
+package no.nav.k9punsj.repository
 
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.db.datamodell.Person
+import no.nav.k9punsj.felles.dto.Person
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource

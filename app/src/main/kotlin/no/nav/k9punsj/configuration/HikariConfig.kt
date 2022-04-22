@@ -1,4 +1,4 @@
-package no.nav.k9punsj.db.config
+package no.nav.k9punsj.configuration
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

@@ -1,6 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll.audit
 
-import no.nav.k9punsj.AppConfiguration
+import no.nav.k9punsj.configuration.AuditConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class Auditlogger constructor(
-    val configuration: AppConfiguration,
+    val configuration: AuditConfiguration,
     @Qualifier("isAuditEnabled") val isEnabled: Boolean = configuration.auditEnabled(),
     @Qualifier("auditVendor") val defaultVendor: String = configuration.auditVendor(),
     @Qualifier("auditProduct") val defaultProduct: String = configuration.auditProduct()

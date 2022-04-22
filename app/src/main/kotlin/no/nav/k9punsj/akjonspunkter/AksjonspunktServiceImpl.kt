@@ -2,7 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.PunsjJournalpost

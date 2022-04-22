@@ -1,8 +1,8 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
-import no.nav.k9punsj.db.datamodell.FagsakYtelseType
-import no.nav.k9punsj.domenetjenester.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.PeriodeDto
 
 interface K9SakService {
 

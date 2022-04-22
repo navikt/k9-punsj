@@ -1,7 +1,7 @@
 package no.nav.k9punsj.domenetjenester
 
-import no.nav.k9punsj.db.datamodell.Person
-import no.nav.k9punsj.db.repository.PersonRepository
+import no.nav.k9punsj.felles.dto.Person
+import no.nav.k9punsj.repository.PersonRepository
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Service
 

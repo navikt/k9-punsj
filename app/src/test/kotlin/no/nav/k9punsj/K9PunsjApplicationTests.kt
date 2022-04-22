@@ -2,7 +2,7 @@ package no.nav.k9punsj
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.db.datamodell.Periode
+import no.nav.k9punsj.util.Periode
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode

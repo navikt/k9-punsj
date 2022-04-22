@@ -4,7 +4,7 @@ import kotliquery.param
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9.søknad.felles.type.Landkode
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

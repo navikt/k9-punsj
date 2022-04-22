@@ -1,4 +1,4 @@
-package no.nav.k9punsj.db.datamodell
+package no.nav.k9punsj.felles
 
 enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBehandlingstema: String?, val oppgavetema: String?) {
     PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS"),

@@ -2,10 +2,8 @@ package no.nav.k9punsj.integrasjoner.punsjbollen
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.CorrelationId
-import no.nav.k9punsj.domenetjenester.dto.PeriodeDto
-import no.nav.k9punsj.domenetjenester.dto.SaksnummerDto
-import no.nav.k9punsj.journalpost.JournalpostId
+import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.dto.PeriodeDto
 
 interface PunsjbolleService {
     suspend fun opprettEllerHentFagsaksnummer(

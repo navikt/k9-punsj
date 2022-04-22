@@ -1,8 +1,7 @@
-package no.nav.k9punsj.domenetjenester.dto
+package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.SøknadEntitet
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 

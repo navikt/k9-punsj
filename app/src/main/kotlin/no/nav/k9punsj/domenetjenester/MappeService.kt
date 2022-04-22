@@ -1,15 +1,20 @@
 package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.db.datamodell.*
-import no.nav.k9punsj.db.repository.BunkeRepository
-import no.nav.k9punsj.db.repository.MappeRepository
-import no.nav.k9punsj.db.repository.SøknadRepository
+import no.nav.k9punsj.repository.BunkeRepository
+import no.nav.k9punsj.repository.MappeRepository
+import no.nav.k9punsj.repository.SøknadRepository
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.korrigeringinntektsmelding.KorrigeringInntektsmeldingDto
-import no.nav.k9punsj.domenetjenester.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.JsonB
+import no.nav.k9punsj.felles.dto.BunkeEntitet
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.Person
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -25,7 +30,7 @@ class MappeService(
     val søknadRepository: SøknadRepository,
     val bunkeRepository: BunkeRepository,
     val personService: PersonService,
-    val journalpostRepository: JournalpostRepository,
+    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
 ) {
 
     suspend fun hentMappe(person: Person): Mappe {
