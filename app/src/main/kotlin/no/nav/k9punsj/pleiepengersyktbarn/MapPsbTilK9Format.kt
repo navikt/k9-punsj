@@ -83,9 +83,9 @@ internal class MapPsbTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun PleiepengerSyktBarnSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+    private fun PleiepengerSyktBarnSøknadDto.leggTilMottattDato() {
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    }
 
     private fun List<PeriodeDto>.leggTilSøknadsperiode() { if (this.isNotEmpty()) {
         pleiepengerSyktBarn.medSøknadsperiode(this.somK9Perioder())

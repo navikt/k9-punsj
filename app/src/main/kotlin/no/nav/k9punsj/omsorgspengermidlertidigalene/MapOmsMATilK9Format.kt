@@ -58,9 +58,7 @@ internal class MapOmsMATilK9Format(
     }
 
     private fun OmsorgspengerMidlertidigAleneSøknadDto.leggTilMottattDato() {
-        if (mottattDato != null && klokkeslett != null) {
-            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-        }
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
     private fun OmsorgspengerMidlertidigAleneSøknadDto.AnnenForelder.leggTilAnnenForelder() {

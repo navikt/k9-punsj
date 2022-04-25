@@ -76,9 +76,7 @@ internal class MapPlsfTilK9Format(
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilMottattDato() {
-        if (mottattDato != null && klokkeslett != null) {
-            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-        }
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto.leggTilPleietrengende() {
@@ -338,6 +336,7 @@ internal class MapPlsfTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer).plusMinutes(minutter.toLong())
+        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() =
+            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

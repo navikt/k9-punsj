@@ -59,9 +59,9 @@ internal class MapOmsTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun KorrigeringInntektsmeldingDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+    private fun KorrigeringInntektsmeldingDto.leggTilMottattDato() {
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    }
 
     private fun String.leggTilSøker() {
         if (erSatt()) {

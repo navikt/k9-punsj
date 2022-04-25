@@ -59,13 +59,11 @@ internal class MapOmsAOTilK9Format(
     }
 
     private fun OmsorgspengerAleneOmsorgSøknadDto.leggTilMottattDato() {
-        if (mottattDato != null && klokkeslett != null) {
-            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-        }
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
 
-    private fun OmsorgspengerAleneOmsorgSøknadDto.BarnDto.leggTilBarn() : Barn = when {
+    private fun OmsorgspengerAleneOmsorgSøknadDto.BarnDto.leggTilBarn(): Barn = when {
         norskIdent != null ->
             Barn().medNorskIdentitetsnummer(
                 NorskIdentitetsnummer.of(
@@ -103,6 +101,7 @@ internal class MapOmsAOTilK9Format(
             true -> Periode(fom, tom)
             else -> null
         }
+
         private fun String?.erSatt() = !isNullOrBlank()
     }
 }

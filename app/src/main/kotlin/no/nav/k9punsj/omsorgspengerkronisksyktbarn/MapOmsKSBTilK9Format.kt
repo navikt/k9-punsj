@@ -54,9 +54,7 @@ internal class MapOmsKSBTilK9Format(
     }
 
     private fun OmsorgspengerKroniskSyktBarnSøknadDto.leggTilMottattDato() {
-        if (mottattDato != null && klokkeslett != null) {
-            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-        }
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
     private fun leggTilKroniskEllerFunksjonshemming() {
