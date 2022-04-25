@@ -263,12 +263,19 @@ internal class PleiepengerSyktBarnService(
             matchfagsak.brukerIdent,
             matchfagsak.barnIdent,
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        ).first ?: return ServerResponse.ok().json().bodyValueAndAwait(listOf<PeriodeDto>())
+        )
 
-        return ServerResponse
-            .ok()
-            .json()
-            .bodyValueAndAwait(perioder)
+        return if (perioder != null) {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(perioder)
+        } else {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(listOf<PeriodeDto>())
+        }
     }
 
 
