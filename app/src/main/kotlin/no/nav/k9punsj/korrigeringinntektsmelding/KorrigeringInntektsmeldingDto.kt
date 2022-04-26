@@ -9,6 +9,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.SøknadDto
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -16,19 +17,19 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class KorrigeringInntektsmeldingDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
+    override val soeknadId: String,
+    override val soekerId: String? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val mottattDato: LocalDate? = null,
+    override val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett: LocalTime? = null,
-    val journalposter: List<String>? = null,
+    override val klokkeslett: LocalTime? = null,
+    override val journalposter: List<String>? = null,
     val organisasjonsnummer: String? = null,
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null
-) {
+): SøknadDto {
     data class FraværPeriode(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,

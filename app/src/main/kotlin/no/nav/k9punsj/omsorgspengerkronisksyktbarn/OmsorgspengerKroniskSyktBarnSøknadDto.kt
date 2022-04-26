@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.SøknadDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
@@ -12,17 +13,17 @@ import java.time.LocalTime
 
 
 data class OmsorgspengerKroniskSyktBarnSøknadDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
+    override val soeknadId: String,
+    override val soekerId: String? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val mottattDato: LocalDate? = null,
+    override val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    override val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
-    val journalposter: List<String>? = null,
+    override val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean
-) {
+): SøknadDto {
     data class BarnDto(
         val norskIdent: String?,
         @JsonFormat(pattern = "yyyy-MM-dd")

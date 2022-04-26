@@ -80,8 +80,8 @@ internal class PleiepengerLivetsSluttfaseService(
     internal suspend fun oppdaterEksisterendeSøknad(søknad: PleiepengerLivetsSluttfaseSøknadDto): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-        val søknadEntitet = mappeService.utfyllendeInnsendingPls(
-            dto = søknad,
+        val søknadEntitet = mappeService.utfyllendeInnsending(
+            søknadDto = søknad,
             saksbehandler = saksbehandler
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 
@@ -243,8 +243,8 @@ internal class PleiepengerLivetsSluttfaseService(
                 .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
         }
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-        mappeService.utfyllendeInnsendingPls(
-            dto = soknadTilValidering,
+        mappeService.utfyllendeInnsending(
+            søknadDto = soknadTilValidering,
             saksbehandler = saksbehandler
         )
         return ServerResponse

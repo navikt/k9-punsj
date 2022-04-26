@@ -10,6 +10,7 @@ import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SøknadDto
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.math.BigDecimal
@@ -17,13 +18,13 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class PleiepengerLivetsSluttfaseSøknadDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
-    val journalposter: List<String>? = null,
+    override val soeknadId: String,
+    override val soekerId: String? = null,
+    override val journalposter: List<String>? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val mottattDato: LocalDate? = null,
+    override val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    override val klokkeslett : LocalTime? = null,
     val soeknadsperiode: List<PeriodeDto>? = null,
     val pleietrengende: PleietrengendeDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
@@ -34,7 +35,8 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
-    val begrunnelseForInnsending: BegrunnelseForInnsending? = null) {
+    val begrunnelseForInnsending: BegrunnelseForInnsending? = null
+): SøknadDto {
 
     data class PleietrengendeDto(
         val norskIdent: String? = null,

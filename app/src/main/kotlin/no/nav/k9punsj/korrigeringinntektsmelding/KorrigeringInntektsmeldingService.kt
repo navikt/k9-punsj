@@ -105,8 +105,8 @@ internal class KorrigeringInntektsmeldingService(
     internal suspend fun oppdaterEksisterendeSøknad(søknad: KorrigeringInntektsmeldingDto): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-        val søknadEntitet = mappeService.utfyllendeInnsendingOms(
-            korrigeringInntektsmeldingDto = søknad,
+        val søknadEntitet = mappeService.utfyllendeInnsending(
+            søknadDto = søknad,
             saksbehandler = saksbehandler
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 

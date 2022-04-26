@@ -105,8 +105,8 @@ internal class OmsorgspengerKroniskSyktBarnService(
     suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerKroniskSyktBarnSøknadDto): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-        val søknadEntitet = mappeService.utfyllendeInnsendingOmsKSB(
-            omsorgspengerKroniskSyktBarnSøknadDto = søknad,
+        val søknadEntitet = mappeService.utfyllendeInnsending(
+            søknadDto = søknad,
             saksbehandler = saksbehandler
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 

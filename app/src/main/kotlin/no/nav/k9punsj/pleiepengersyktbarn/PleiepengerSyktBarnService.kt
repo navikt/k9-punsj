@@ -84,8 +84,8 @@ internal class PleiepengerSyktBarnService(
     ): ServerResponse {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-        val søknadEntitet = mappeService.utfyllendeInnsendingPsb(
-            pleiepengerSøknadDto = søknad,
+        val søknadEntitet = mappeService.utfyllendeInnsending(
+            søknadDto = søknad,
             saksbehandler = saksbehandler
         ) ?: return ServerResponse.badRequest().buildAndAwait()
 
@@ -248,8 +248,8 @@ internal class PleiepengerSyktBarnService(
                 .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
         }
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-        mappeService.utfyllendeInnsendingPsb(
-            pleiepengerSøknadDto = soknadTilValidering,
+        mappeService.utfyllendeInnsending(
+            søknadDto = soknadTilValidering,
             saksbehandler = saksbehandler
         )
         return ServerResponse

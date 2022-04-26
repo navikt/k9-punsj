@@ -6,25 +6,26 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SøknadDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 
 data class OmsorgspengerAleneOmsorgSøknadDto(
-    val soeknadId: String,
-    val soekerId: String? = null,
+    override val soeknadId: String,
+    override val soekerId: String? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val mottattDato: LocalDate? = null,
+    override val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    override val klokkeslett : LocalTime? = null,
     val barn: BarnDto? = null,
-    val journalposter: List<String>? = null,
+    override val journalposter: List<String>? = null,
     val soeknadsperiode: PeriodeDto? = null,
     val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes : Boolean? = null,
     val harMedisinskeOpplysninger : Boolean? = null,
-) {
+): SøknadDto {
     data class BarnDto(
         val norskIdent: String?,
         @JsonFormat(pattern = "yyyy-MM-dd")

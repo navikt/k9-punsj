@@ -14,6 +14,7 @@ import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.felles.dto.BunkeEntitet
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.Person
+import no.nav.k9punsj.felles.dto.SøknadDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
@@ -87,20 +88,6 @@ class MappeService(
             soknadfelles.journalposter,
             pleiepengerLivetsSluttfaseSoknadDto
         )
-    }
-
-    private suspend fun felles(nySøknad: OpprettNySøknad): Søknadfelles {
-        val søknadId = UUID.randomUUID()
-
-        val journalposter: MutableMap<String, Any?> = mutableMapOf()
-        journalposter["journalposter"] = listOf(nySøknad.journalpostId)
-
-        val mottattDato: LocalDateTime? = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
-        val klokkeslett: LocalTime? =
-            if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour,
-                mottattDato.toLocalTime().minute) else null
-
-        return Søknadfelles(søknadId, journalposter, mottattDato, klokkeslett)
     }
 
     suspend fun førsteInnsendingKorrigeringIm(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -190,116 +177,44 @@ class MappeService(
         return søknadRepository.opprettSøknad(søknadEntitet)
     }
 
+    private suspend fun felles(nySøknad: OpprettNySøknad): Søknadfelles {
+        val søknadId = UUID.randomUUID()
+
+        val journalposter: MutableMap<String, Any?> = mutableMapOf()
+        journalposter["journalposter"] = listOf(nySøknad.journalpostId)
+
+        val mottattDato: LocalDateTime? = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
+        val klokkeslett: LocalTime? =
+            if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour,
+                mottattDato.toLocalTime().minute) else null
+
+        return Søknadfelles(søknadId, journalposter, mottattDato, klokkeslett)
+    }
+
     private suspend fun hentTidligsteMottattDatoFraJournalposter(journalpostIdDto: String): LocalDateTime? {
         return journalpostRepository.hentHvis(journalpostIdDto)?.mottattDato
     }
 
-    suspend fun utfyllendeInnsendingPsb(
-        pleiepengerSøknadDto: PleiepengerSyktBarnSøknadDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, PleiepengerSyktBarnSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(pleiepengerSøknadDto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(pleiepengerSøknadDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(pleiepengerSøknadDto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+    suspend fun utfyllendeInnsending(
+        søknadDto: SøknadDto,
+        saksbehandler: String
+    ): Pair<SøknadEntitet, SøknadDto>? {
+        val lagretSøknad = søknadRepository.hentSøknad(søknadDto.soeknadId)!!
+
+        return if (lagretSøknad.sendtInn.not()) {
+            val journalposter = leggTilJournalpost(søknadDto.journalposter, lagretSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(søknadDto)
+            val oppdatertSøknad = lagretSøknad.copy(
+                    søknad = søknadJson,
+                    journalposter = journalposter,
+                    endret_av = saksbehandler
+                )
             søknadRepository.oppdaterSøknad(oppdatertSøknad)
-
-            val nySøknad = pleiepengerSøknadDto.copy(journalposter = journalposter.values.toList()
-                .filterIsInstance<String>())
-            Pair(oppdatertSøknad, nySøknad)
-        } else {
-            null
-        }
-    }
-
-    suspend fun utfyllendeInnsendingPls(
-        dto: PleiepengerLivetsSluttfaseSøknadDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, PleiepengerLivetsSluttfaseSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(dto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(dto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(dto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
-
-            val nySøknad = dto.copy(journalposter = journalposter.values.toList()
-                .filterIsInstance<String>())
-            Pair(oppdatertSøknad, nySøknad)
-        } else {
-            null
-        }
-    }
-
-    suspend fun utfyllendeInnsendingOms(
-        korrigeringInntektsmeldingDto: KorrigeringInntektsmeldingDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, KorrigeringInntektsmeldingDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(korrigeringInntektsmeldingDto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(korrigeringInntektsmeldingDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(korrigeringInntektsmeldingDto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = korrigeringInntektsmeldingDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
-            Pair(oppdatertSøknad, nySøknad)
-        } else {
-            null
-        }
-    }
-
-    suspend fun utfyllendeInnsendingOmsKSB(
-        omsorgspengerKroniskSyktBarnSøknadDto: OmsorgspengerKroniskSyktBarnSøknadDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, OmsorgspengerKroniskSyktBarnSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerKroniskSyktBarnSøknadDto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(omsorgspengerKroniskSyktBarnSøknadDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerKroniskSyktBarnSøknadDto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = omsorgspengerKroniskSyktBarnSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
-            Pair(oppdatertSøknad, nySøknad)
-        } else {
-            null
-        }
-    }
-
-    suspend fun utfyllendeInnsendingOmsMA(
-        omsorgspengerMidlertidigAleneSøknadDto: OmsorgspengerMidlertidigAleneSøknadDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, OmsorgspengerMidlertidigAleneSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerMidlertidigAleneSøknadDto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(omsorgspengerMidlertidigAleneSøknadDto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerMidlertidigAleneSøknadDto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = omsorgspengerMidlertidigAleneSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
-            Pair(oppdatertSøknad, nySøknad)
-        } else {
-            null
-        }
-    }
-
-    suspend fun utfyllendeInnsendingOmsAO(
-        dto: OmsorgspengerAleneOmsorgSøknadDto,
-        saksbehandler: String,
-    ): Pair<SøknadEntitet, OmsorgspengerAleneOmsorgSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(dto.soeknadId)!!
-        return if (hentSøknad.sendtInn.not()) {
-            val journalposter = leggTilJournalpost(dto.journalposter, hentSøknad.journalposter)
-            val søknadJson = objectMapper().convertValue<JsonB>(dto)
-            val oppdatertSøknad =
-                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
-            val nySøknad = dto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
+            val nySøknad = søknadDto.copy(
+                journalposter = journalposter.values
+                    .toList()
+                    .filterIsInstance<String>()
+            )
             Pair(oppdatertSøknad, nySøknad)
         } else {
             null
