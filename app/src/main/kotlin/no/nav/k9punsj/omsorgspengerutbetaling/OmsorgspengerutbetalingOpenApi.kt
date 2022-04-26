@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.domenetjenester.dto.*
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.SendSøknad
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
 
 @RestController
 @Tag(name = "Omsorgspengerutbetaling søknad", description = "Håndtering av søknader av typen omsorgspengerutbetaling")
@@ -245,6 +245,6 @@ internal class OmsorgspengerutbetalingOpenApi {
             )
         ]
     )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsakMedPeriode) {
+    fun HentInfoFraK9sak(@RequestBody matchFagsak: MatchFagsakMedPeriode) {
     }
 }

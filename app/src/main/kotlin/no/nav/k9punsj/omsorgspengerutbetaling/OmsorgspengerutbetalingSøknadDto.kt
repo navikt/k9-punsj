@@ -3,15 +3,12 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -32,8 +29,7 @@ data class OmsorgspengerutbetalingSøknadDto(
     data class FraværPeriode(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
-        val tidPrDag: PleiepengerSyktBarnSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()
-            ?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
     )
 }
 

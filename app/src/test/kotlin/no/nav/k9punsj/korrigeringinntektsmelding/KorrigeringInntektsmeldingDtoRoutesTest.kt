@@ -6,10 +6,10 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.openapi.OasMatchfagsakMedPeriode
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -234,12 +234,12 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     fun `Skal hente arbeidsforholdIder fra k9-sak`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val dtoSpørring =
-            OasMatchfagsakMedPeriode(norskIdent,
+            MatchFagsakMedPeriode(norskIdent,
                 PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1))
             )
 
         val oppdatertSoeknadDto =
-            client.postAndAssertAwaitWithStatusAndBody<OasMatchfagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
+            client.postAndAssertAwaitWithStatusAndBody<MatchFagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
                 authorizationHeader = saksbehandlerAuthorizationHeader,
                 assertStatus = HttpStatus.OK,
                 requestBody = BodyInserters.fromValue(dtoSpørring),
