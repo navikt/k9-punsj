@@ -128,7 +128,7 @@ class MappeService(
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGERUTBETALING)
 
         val søknadfelles = felles(nySøknad)
-        val dto = KorrigeringInntektsmeldingDto(
+        val dto = OmsorgspengerutbetalingSøknadDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
