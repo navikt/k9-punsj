@@ -50,6 +50,14 @@ class LesFraFilUtil {
             }
         }
 
+        private fun lesFraOmsUtMappeFil(filnavn: String): String{
+            try {
+                return Files.readString(Path.of("src/test/resources/oms-ut/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
         private fun lesFraOmsKSBFil(filnavn: String): String{
             try {
                 return Files.readString(Path.of("src/test/resources/omp-ksb/$filnavn"))
@@ -127,6 +135,26 @@ class LesFraFilUtil {
 
         fun søknadFraFrontendOmsTrekkKompleks() : SøknadJson {
             return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
+        }
+
+        /**
+         *  Omsorgspengerutbetaling
+         */
+
+        fun søknadFraFrontendOmsUt() : SøknadJson {
+            return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend.json"))
+        }
+
+        fun søknadFraFrontendOmsUtFeil() : SøknadJson {
+            return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-feil.json"))
+        }
+
+        fun søknadFraFrontendOmsUtTrekk() : SøknadJson {
+            return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-trekk.json"))
+        }
+
+        fun søknadFraFrontendOmsUtTrekkKompleks() : SøknadJson {
+            return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
         }
 
         /**

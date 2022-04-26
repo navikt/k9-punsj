@@ -52,16 +52,6 @@ internal class OpenApi {
 
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 
-data class OasMatchfagsak(
-    val brukerIdent: String,
-    val barnIdent: String,
-)
-
-data class OasMatchfagsakMedPeriode(
-    val brukerIdent: String,
-    val periodeDto: PeriodeDto,
-)
-
 data class OasIdentDto(
     val norskIdent: String,
 )

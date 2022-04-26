@@ -1,4 +1,4 @@
-package no.nav.k9punsj.korrigeringinntektsmelding
+package no.nav.k9punsj.omsorgspengerutbetaling
 
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
@@ -9,7 +9,6 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -32,11 +31,11 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class KorrigeringInntektsmeldingDtoRoutesTest {
+class OmsorgspengerutbetalingRoutesTest {
 
     private val client = TestSetup.client
     private val api = "api"
-    private val søknadTypeUri = "omsorgspenger-soknad"
+    private val søknadTypeUri = "omsorgspengerutbetaling-soknad"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -48,7 +47,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        val body = client.getAndAssert<SvarOmsDto>(
+        val body = client.getAndAssert<SvarOmsUtDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -84,7 +83,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             api, søknadTypeUri
         )
 
-        val body = client.getAndAssert<SvarOmsDto>(
+        val body = client.getAndAssert<SvarOmsUtDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -114,7 +113,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
         val location = resPost.headers().asHttpHeaders().location
         Assertions.assertNotNull(location)
 
-        val søknadViaGet = client.getAndAssert<KorrigeringInntektsmeldingDto>(
+        val søknadViaGet = client.getAndAssert<OmsorgspengerutbetalingSøknadDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -127,7 +126,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
 
     @Test
     fun `Oppdaterer en søknad`(): Unit = runBlocking {
-        val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOms()
+        val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsUt()
         val norskIdent = "02030050163"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
@@ -146,7 +145,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        val body = client.putAndAssert<MutableMap<String, Any?>, KorrigeringInntektsmeldingDto>(
+        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerutbetalingSøknadDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -161,7 +160,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050123"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUt()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
@@ -173,7 +172,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`(): Unit = runBlocking {
         val norskIdent = "02020050123"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekk()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekk()
         val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
@@ -185,7 +184,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOms()
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUt()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
@@ -203,7 +202,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `skal få feil hvis mottattDato ikke er fylt ut`(): Unit = runBlocking {
         val norskIdent = "02022352122"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsFeil()
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtFeil()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
@@ -221,7 +220,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     @Test
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`(): Unit = runBlocking {
         val norskIdent = "02020050123"
-        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekkKompleks()
+        val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekkKompleks()
         val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
@@ -307,7 +306,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: KorrigeringInntektsmeldingDto = client.putAndAssert(
+        val søknadDtoFyltUt: OmsorgspengerutbetalingSøknadDto = client.putAndAssert(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
@@ -340,7 +339,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-    ): PleiepengerSyktBarnSøknadDto {
+    ): OmsorgspengerutbetalingSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
@@ -357,7 +356,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, PleiepengerSyktBarnSøknadDto>(
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerutbetalingSøknadDto>(
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,

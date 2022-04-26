@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
@@ -113,17 +111,6 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
         val timerPleieAvPleietrengendePerDag: String?,
         val pleieAvPleietrengendePerDag: TimerOgMinutter? = timerPleieAvPleietrengendePerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
-
-    data class TimerOgMinutter(
-        val timer: Long,
-        val minutter: Int) {
-        internal companion object {
-            internal fun Pair<Long,Int>?.somTimerOgMinutterDto() = when (this) {
-                null -> null
-                else -> TimerOgMinutter(first, second)
-            }
-        }
-    }
 }
 
 data class SvarPlsDto(
