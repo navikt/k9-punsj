@@ -3,6 +3,8 @@ package no.nav.k9punsj.omsorgspengermidlertidigalene
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
@@ -95,8 +97,10 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
-        assertThat(body.feil).isNull()
+        val body: Søknad = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
+        val ytelse = body.getYtelse<OmsorgspengerMidlertidigAlene>()
+        assertThat(ytelse.barn).size().isEqualTo(2)
+        assertThat(ytelse.annenForelder).isNotNull
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -190,7 +194,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
         pleietrengende: String,
-    ): OasSoknadsfeil {
+    ): Søknad {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
         // oppretter en søknad
@@ -227,7 +231,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         org.assertj.core.api.Assertions.assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
+        val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, Søknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
