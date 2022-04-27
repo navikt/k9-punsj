@@ -6,10 +6,12 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
@@ -26,7 +28,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -61,14 +63,21 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
         val norskIdent = "01010050053"
         val pleietrengende = "01010050023"
-        val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString(), pleietrengende)
+        val opprettNySøknad = opprettSøknad(
+            personnummer = norskIdent,
+            journalpostId = UUID.randomUUID().toString(),
+            annenPart = null,
+            barn = listOf(OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = pleietrengende, foedselsdato = null))
+        )
 
-        client.postAndAssert(
+        val response: OmsorgspengerMidlertidigAleneSøknadDto = client.postAndAssertAwaitWithStatusAndBody<NyOmsMASøknad, OmsorgspengerMidlertidigAleneSøknadDto>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
             api, søknadTypeUri
         )
+
+        assertThat(response.barn).size().isOne
     }
 
     @Test
@@ -78,7 +87,12 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
-        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid, pleietrengende)
+        opprettOgLagreSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = journalpostid,
+            barn = listOf(OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = pleietrengende, foedselsdato = null))
+        )
 
         val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -113,7 +127,12 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
 
-        val søknad = opprettOgLagreSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
+        val søknad = opprettOgLagreSoeknad(
+            soeknadJson = gyldigSoeknad,
+            ident = norskIdent,
+            journalpostid = journalpostid,
+            barn = listOf(OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = pleietrengende, foedselsdato = null))
+        )
 
         val søknadViaGet = client.get()
             .uri { it.pathSegment(api, søknadTypeUri, "mappe", søknad.soeknadId).build() }
@@ -128,14 +147,14 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-        annenPart: String,
-    ): OpprettNySøknad {
-        return OpprettNySøknad(
-            personnummer,
-            journalpostId,
-            null,
-            annenPart,
-            null
+        annenPart: String? = null,
+        barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
+    ): NyOmsMASøknad {
+        return NyOmsMASøknad(
+            norskIdent = personnummer,
+            journalpostId = journalpostId,
+            annenPart = annenPart,
+            barn = barn,
         )
     }
 
@@ -152,9 +171,13 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>,
     ): OmsorgspengerMidlertidigAleneSøknadDto {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
+        val innsendingForOpprettelseAvMappe = NyOmsMASøknad(
+            norskIdent = ident,
+            journalpostId = journalpostid,
+            barn = barn
+        )
 
         // oppretter en søknad
         val resPost = client.postAndAssert(
@@ -195,7 +218,11 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         journalpostid: String = IdGenerator.nesteId(),
         pleietrengende: String,
     ): Søknad {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(
+            personnummer = ident,
+            journalpostId = journalpostid,
+            barn = listOf(OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = pleietrengende, foedselsdato = null))
+        )
 
         // oppretter en søknad
         val response = client.postAndAssert(

@@ -19,6 +19,7 @@ import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøkn
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.omsorgspengermidlertidigalene.NyOmsMASøknad
 import no.nav.k9punsj.omsorgspengerutbetaling.OmsorgspengerutbetalingSøknadDto
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -45,7 +46,7 @@ class MappeService(
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val pleiepengerSøknadDto =
             PleiepengerSyktBarnSøknadDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
@@ -69,7 +70,7 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(soker.personId)
         val bunkeId =
             bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
-        val soknadfelles = felles(nySøknad)
+        val soknadfelles = felles(nySøknad.journalpostId)
         val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
             soeknadId = soknadfelles.søknadsId.toString(),
             soekerId = norskIdent,
@@ -90,13 +91,13 @@ class MappeService(
         )
     }
 
-    private suspend fun felles(nySøknad: OpprettNySøknad): Søknadfelles {
+    private suspend fun felles(journalpostId: String): Søknadfelles {
         val søknadId = UUID.randomUUID()
 
         val journalposter: MutableMap<String, Any?> = mutableMapOf()
-        journalposter["journalposter"] = listOf(nySøknad.journalpostId)
+        journalposter["journalposter"] = listOf(journalpostId)
 
-        val mottattDato: LocalDateTime? = hentTidligsteMottattDatoFraJournalposter(nySøknad.journalpostId)
+        val mottattDato: LocalDateTime? = hentTidligsteMottattDatoFraJournalposter(journalpostId)
         val klokkeslett: LocalTime? =
             if (mottattDato?.toLocalTime() != null) LocalTime.of(mottattDato.toLocalTime().hour,
                 mottattDato.toLocalTime().minute) else null
@@ -110,7 +111,7 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
 
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val dto = KorrigeringInntektsmeldingDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
@@ -127,7 +128,7 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGERUTBETALING)
 
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerutbetalingSøknadDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
@@ -144,7 +145,7 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
 
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerKroniskSyktBarnSøknadDto(
                 soeknadId = søknadfelles.søknadsId.toString(),
                 journalposter = listOf(nySøknad.journalpostId),
@@ -163,7 +164,7 @@ class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
 
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerAleneOmsorgSøknadDto(
             soeknadId = søknadfelles.søknadsId.toString(),
             journalposter = listOf(nySøknad.journalpostId),
@@ -174,19 +175,20 @@ class MappeService(
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }
 
-    suspend fun førsteInnsendingOmsMA(nySøknad: OpprettNySøknad): SøknadEntitet {
+    suspend fun førsteInnsendingOmsMA(nySøknad: NyOmsMASøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
 
-        val søknadfelles = felles(nySøknad)
+        val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerMidlertidigAleneSøknadDto(
             soeknadId = søknadfelles.søknadsId.toString(),
             journalposter = listOf(nySøknad.journalpostId),
             mottattDato = søknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = søknadfelles.klokkeslett,
-            soekerId = norskIdent
+            soekerId = norskIdent,
+            barn = nySøknad.barn
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }

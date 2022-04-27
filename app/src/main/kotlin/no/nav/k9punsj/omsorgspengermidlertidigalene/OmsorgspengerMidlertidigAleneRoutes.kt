@@ -6,7 +6,6 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -104,6 +103,9 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
             }
         }
     }
+
+    internal suspend fun ServerRequest.mapNySøknad() =
+        body(BodyExtractors.toMono(NyOmsMASøknad::class.java)).awaitFirst()
 
     private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
 
