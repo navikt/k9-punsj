@@ -8,7 +8,8 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
     OMSORGSPENGER_MIDLERTIDIG_ALENE("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS"),
     OMSORGSPENGER_ALENE_OMSORGEN("OMP_AO", "Alene om omsorgen", "OM", "OMS"),
     OMSORGSPENGERUTBETALING("OMP_UT", "Omsorgspengerutbetaling", "OM", "OMS"),
-    UKJENT("UKJENT", "Ukjent", null, null);
+    UKJENT("UKJENT", "Ukjent", null, null),
+    UDEFINERT("-", "Ikke definert", null, null);
 
     companion object {
         private val map = values().associateBy { v -> v.kode }
