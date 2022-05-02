@@ -11,6 +11,13 @@ import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 
+data class NyOmsMASøknad(
+    val norskIdent: String,
+    val journalpostId: String,
+    val annenPart: String? = null,
+    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
+)
+
 data class OmsorgspengerMidlertidigAleneSøknadDto(
     val soeknadId: String,
     val soekerId: String? = null,

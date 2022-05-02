@@ -18,6 +18,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
@@ -336,7 +337,5 @@ internal class MapPlsfTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerLivetsSluttfaseSøknadDto.TimerOgMinutter.somDuration() =
-            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

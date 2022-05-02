@@ -11,8 +11,8 @@ import no.nav.k9punsj.felles.dto.PerioderDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
 import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OasMatchfagsak
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -246,6 +246,6 @@ internal class PleiepengerLivetsSluttfaseSoknadOpenApi {
             )
         ]
     )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: OasMatchfagsak) {
+    fun HentInfoFraK9sak(@RequestBody matchFagsak: Matchfagsak) {
     }
 }
