@@ -12,7 +12,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId
@@ -60,6 +60,10 @@ internal class MapOmsTilK9Format(
     }
 
     private fun KorrigeringInntektsmeldingDto.leggTilMottattDato() {
+        if(mottattDato == null) {
+            feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
+            return
+        }
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
@@ -153,7 +157,5 @@ internal class MapOmsTilK9Format(
         }
 
         private fun String?.erSatt() = !isNullOrBlank()
-        private fun PleiepengerSyktBarnSøknadDto.TimerOgMinutter.somDuration() =
-            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

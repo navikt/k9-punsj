@@ -9,9 +9,9 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.TimerOgMinutter
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -32,7 +32,7 @@ data class KorrigeringInntektsmeldingDto(
     data class FraværPeriode(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
-        val tidPrDag: PleiepengerSyktBarnSøknadDto.TimerOgMinutter? = faktiskTidPrDag?.somDuration()
+        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()
             ?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
     )
 }

@@ -74,8 +74,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
         soeknadId = "${UUID.randomUUID()}",
         soekerId = "11111111111",
         journalposter = listOf(requiredTekst),
-        mottattDato = null,
-        klokkeslett = null,
+        mottattDato = LocalDate.now(),
+        klokkeslett = LocalTime.now(),
         barn = PleiepengerSyktBarnSøknadDto.BarnDto(
             norskIdent = optionalTekst,
             foedselsdato = null
