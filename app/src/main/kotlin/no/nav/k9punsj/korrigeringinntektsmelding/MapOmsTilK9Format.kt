@@ -12,7 +12,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId
@@ -31,7 +31,7 @@ internal class MapOmsTilK9Format(
         kotlin.runCatching {
             søknadId.leggTilSøknadId()
             Versjon.leggTilVersjon()
-            dto.leggTilMottattDato()
+            dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioderKorrigeringIm(dto)
@@ -59,9 +59,18 @@ internal class MapOmsTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun KorrigeringInntektsmeldingDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+    private fun KorrigeringInntektsmeldingDto.leggTilMottattDatoOgKlokkeslett() {
+        if (mottattDato == null) {
+            feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
+            return
+        }
+        if (klokkeslett == null) {
+            feil.add(Feil("søknad", "klokkeslett", "Klokkeslett mangler"))
+            return
+        }
+
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    }
 
     private fun String.leggTilSøker() {
         if (erSatt()) {
@@ -115,7 +124,7 @@ internal class MapOmsTilK9Format(
                 )
             }.toList()
 
-        val fraværsperioder : MutableList<FraværPeriode> = mutableListOf()
+        val fraværsperioder: MutableList<FraværPeriode> = mutableListOf()
         fraværsperioder.addAll(perioderMedTrekkAvDager)
         fraværsperioder.addAll(fullDagListe)
         fraværsperioder.addAll(delvisDagListe)
@@ -125,10 +134,15 @@ internal class MapOmsTilK9Format(
 
     private fun KorrigeringInntektsmeldingDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
-            søknad.medJournalpost(Journalpost()
-                .medJournalpostId(journalpostId)
-                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes ?: false) // ikke nødvendig for korrigering av IM
-                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger ?: false) // ikke nødvendig for korrigering av IM
+            søknad.medJournalpost(
+                Journalpost()
+                    .medJournalpostId(journalpostId)
+                    .medInformasjonSomIkkeKanPunsjes(
+                        harInfoSomIkkeKanPunsjes ?: false
+                    ) // ikke nødvendig for korrigering av IM
+                    .medInneholderMedisinskeOpplysninger(
+                        harMedisinskeOpplysninger ?: false
+                    ) // ikke nødvendig for korrigering av IM
             )
         }
     }
@@ -144,7 +158,7 @@ internal class MapOmsTilK9Format(
             else -> null
         }
 
-        private fun PeriodeDto.somEnkeltDager() : List<PeriodeDto> {
+        private fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
             val lista: MutableList<PeriodeDto> = mutableListOf()
             for (i in 0 until Duration.between(fom?.atStartOfDay(), tom?.plusDays(1)?.atStartOfDay()).toDays()) {
                 lista.add(PeriodeDto(fom?.plusDays(i), fom?.plusDays(i)))
@@ -153,7 +167,5 @@ internal class MapOmsTilK9Format(
         }
 
         private fun String?.erSatt() = !isNullOrBlank()
-        private fun PleiepengerSyktBarnSøknadDto.TimerOgMinutter.somDuration() =
-            Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

@@ -214,7 +214,7 @@ class OmsorgspengerutbetalingRoutesTest {
             api, søknadTypeUri, "valider"
         )
 
-        assertThat(body.feil?.get(0)?.felt).isEqualTo("mottattDato")
+        assertThat(body.feil?.get(0)?.feilkode).isEqualTo("mottattDato")
     }
 
     @Test

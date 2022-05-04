@@ -13,6 +13,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
+import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.ZoneId
@@ -31,7 +32,7 @@ internal class MapOmsUtTilK9Format(
         kotlin.runCatching {
             søknadId.leggTilSøknadId()
             Versjon.leggTilVersjon()
-            dto.leggTilMottattDato()
+            dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioder(dto)
@@ -59,9 +60,18 @@ internal class MapOmsUtTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun OmsorgspengerutbetalingSøknadDto.leggTilMottattDato() { if (mottattDato != null && klokkeslett != null) {
+    private fun OmsorgspengerutbetalingSøknadDto.leggTilMottattDatoOgKlokkeslett() {
+        if (mottattDato == null) {
+            feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
+            return
+        }
+        if (klokkeslett == null) {
+            feil.add(Feil("søknad", "klokkeslett", "Klokkeslett mangler"))
+            return
+        }
+
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
-    }}
+    }
 
     private fun String.leggTilSøker() {
         if (erSatt()) {

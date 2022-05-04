@@ -19,6 +19,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
+import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
@@ -40,7 +41,7 @@ internal class MapPlsfTilK9Format(
         kotlin.runCatching {
             søknadId.leggTilSøknadId()
             Versjon.leggTilVersjon()
-            dto.leggTilMottattDato()
+            dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
             dto.soeknadsperiode?.leggTilSøknadsperiode()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
@@ -76,10 +77,17 @@ internal class MapPlsfTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilMottattDato() {
-        if (mottattDato != null && klokkeslett != null) {
-            søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
+    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilMottattDatoOgKlokkeslett() {
+        if (mottattDato == null) {
+            feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
+            return
         }
+        if (klokkeslett == null) {
+            feil.add(Feil("søknad", "klokkeslett", "Klokkeslett mangler"))
+            return
+        }
+
+        søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto.leggTilPleietrengende() {
@@ -339,6 +347,5 @@ internal class MapPlsfTilK9Format(
         }
 
         private fun Periode.jsonPath() = "[${this.iso8601}]"
-
     }
 }
