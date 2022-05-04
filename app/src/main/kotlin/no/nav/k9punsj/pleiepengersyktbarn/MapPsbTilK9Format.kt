@@ -20,6 +20,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
@@ -40,7 +41,7 @@ internal class MapPsbTilK9Format(
     init { kotlin.runCatching {
         søknadId.leggTilSøknadId()
         Versjon.leggTilVersjon()
-        dto.leggTilMottattDato()
+        dto.leggTilMottattDatoOgKlokkeslett()
         dto.soekerId?.leggTilSøker()
         dto.leggTilJournalposter(journalpostIder = journalpostIder)
         dto.barn?.leggTilBarn()
@@ -83,7 +84,16 @@ internal class MapPsbTilK9Format(
         søknad.medVersjon(this)
     }
 
-    private fun PleiepengerSyktBarnSøknadDto.leggTilMottattDato() {
+    private fun PleiepengerSyktBarnSøknadDto.leggTilMottattDatoOgKlokkeslett() {
+        if (mottattDato == null) {
+            feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
+            return
+        }
+        if (klokkeslett == null) {
+            feil.add(Feil("søknad", "klokkeslett", "Klokkeslett mangler"))
+            return
+        }
+
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
