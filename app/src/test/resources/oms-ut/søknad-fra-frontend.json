@@ -6,6 +6,16 @@
   "journalposter": [
     "FYLL_INN_I_TESTEN"
   ],
+  "barn": [
+    {
+      "norskIdent": "22222222222",
+      "foedselsdato": null
+    },
+    {
+      "norskIdent": null,
+      "foedselsdato": "2018-10-30"
+    }
+  ],
   "organisasjonsnummer": "910909088",
   "arbeidsforholdId": "1337",
   "fravaersperioder": [{
@@ -15,6 +25,45 @@
       },
       "faktiskTidPrDag": null
     }],
+  "opptjeningAktivitet": {
+    "selvstendigNaeringsdrivende": {
+      "virksomhetNavn": "FiskerAS",
+      "organisasjonsnummer": "910909088",
+      "info": {
+        "periode": {
+          "fom": "2018-12-30",
+          "tom": null
+        },
+        "virksomhetstyper": [
+          "Fiske",
+          "Jordbruk",
+          "Dagmamma i eget hjem/familiebarnehage",
+          "Annen næringsvirksomhet"
+        ],
+        "landkode": "",
+        "regnskapsførerNavn": "Regskapsfører",
+        "regnskapsførerTlf": "88888889",
+        "registrertIUtlandet": false,
+        "bruttoInntekt": "1200000",
+        "erNyoppstartet": false,
+        "erVarigEndring": true,
+        "endringInntekt": "1300000",
+        "endringDato": "2018-12-30",
+        "endringBegrunnelse": "Dota2 er best"
+      }
+    },
+    "frilanser": {
+      "startdato": "2019-10-10",
+      "sluttdato": "2019-11-10",
+      "jobberFortsattSomFrilans": true
+    },
+    "arbeidstaker": [
+      {
+        "norskIdent": null,
+        "organisasjonsnummer": "910909088"
+      }
+    ]
+  },
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false
 }
