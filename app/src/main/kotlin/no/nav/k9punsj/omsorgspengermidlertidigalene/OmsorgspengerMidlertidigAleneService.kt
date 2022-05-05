@@ -76,7 +76,15 @@ class OmsorgspengerMidlertidigAleneService(
 
     internal suspend fun nySøknad(request: ServerRequest, nyOmsMASøknad: NyOmsMASøknad): ServerResponse {
         //oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (nyOmsMASøknad.barn.isNotEmpty()) {
+        punsjbolleService.opprettEllerHentFagsaksnummer(
+            søker = nyOmsMASøknad.norskIdent,
+            annenPart = nyOmsMASøknad.annenPart,
+            journalpostId = nyOmsMASøknad.journalpostId,
+            periode = null,
+            fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
+        )
+        // TODO: Barnet er ikke en del av Midlertidig alene rammevedtak-sakene. Man gjør ingen vurderinger på barnet, vurderer bare om søker er midlertidig alene
+        /*if (nyOmsMASøknad.barn.isNotEmpty()) {
             nyOmsMASøknad.barn.forEach {
                 punsjbolleService.opprettEllerHentFagsaksnummer(
                     søker = nyOmsMASøknad.norskIdent,
@@ -87,7 +95,7 @@ class OmsorgspengerMidlertidigAleneService(
                     fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
                 )
             }
-        }
+        }*/
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostRepository.settFagsakYtelseType(
