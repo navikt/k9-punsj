@@ -4,15 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -50,89 +47,10 @@ data class PleiepengerSyktBarnSøknadDto(
         val foedselsdato: LocalDate?
     )
 
-    data class ArbeidAktivitetDto(
-        val selvstendigNaeringsdrivende: SelvstendigNæringsdrivendeDto?,
-        val frilanser: FrilanserDto?,
-        val arbeidstaker: List<ArbeidstakerDto>?) {
-        data class SelvstendigNæringsdrivendeDto(
-            val organisasjonsnummer: String?,
-            val virksomhetNavn: String?,
-            val info: SelvstendigNæringsdrivendePeriodeInfoDto?) {
-            data class SelvstendigNæringsdrivendePeriodeInfoDto(
-                val periode: PeriodeDto?,
-                val virksomhetstyper: List<String>?,
-                val registrertIUtlandet: Boolean?,
-                val landkode: String?,
-                val regnskapsførerNavn: String?,
-                val regnskapsførerTlf: String?,
-                val bruttoInntekt: BigDecimal?,
-                val erNyoppstartet: Boolean?,
-                val erVarigEndring: Boolean?,
-                val endringInntekt: BigDecimal?,
-                @JsonFormat(pattern = "yyyy-MM-dd")
-                val endringDato: LocalDate?,
-                val endringBegrunnelse: String?
-            )
-        }
-
-        data class FrilanserDto(
-            @JsonFormat(pattern = "yyyy-MM-dd")
-            val startdato: String?,
-            @JsonFormat(pattern = "yyyy-MM-dd")
-            val sluttdato: String?,
-            val jobberFortsattSomFrilans: Boolean?
-        )
-
-        data class ArbeidstakerDto(
-            val norskIdent: String?,
-            val organisasjonsnummer: String?,
-            val arbeidstidInfo: ArbeidstidInfoDto?) {
-            data class ArbeidstidInfoDto(
-                val perioder: List<ArbeidstidPeriodeInfoDto>?) {
-                data class ArbeidstidPeriodeInfoDto(
-                    val periode: PeriodeDto?,
-                    val faktiskArbeidTimerPerDag: String?,
-                    val jobberNormaltTimerPerDag: String?,
-                    val faktiskArbeidPerDag: TimerOgMinutter? = faktiskArbeidTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
-                    val jobberNormaltPerDag: TimerOgMinutter? = jobberNormaltTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
-                )
-            }
-        }
-    }
-
-    data class ArbeidstidDto(
-        val arbeidstakerList: List<ArbeidAktivitetDto.ArbeidstakerDto>?,
-        val frilanserArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?,
-        val selvstendigNæringsdrivendeArbeidstidInfo: ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto?
-    )
-
     data class DataBruktTilUtledningDto(
         val samtidigHjemme: Boolean? = null,
         val harMedsoeker: Boolean? = null
     )
-
-    data class BostederDto(
-        val periode: PeriodeDto?,
-        val land: String?
-    )
-
-    data class UtenlandsoppholdDto(
-        val periode: PeriodeDto?,
-        val land: String?,
-        val årsak: String?
-    )
-
-    data class UtenlandsoppholdDtoV2(
-        val periode: PeriodeDto? = null,
-        val land: String? = null,
-        val innleggelsesperioder : List<InnleggelsesperiodeDto> = emptyList()
-
-    ) {
-        data class InnleggelsesperiodeDto(
-            val årsak: String?,
-            val periode: PeriodeDto?
-        )
-    }
 
     data class BeredskapDto(
         val periode: PeriodeDto?,
@@ -166,17 +84,6 @@ data class PleiepengerSyktBarnSøknadDto(
         val samtykketOmsorgForBarnet: Boolean?,
         val beskrivelseAvOmsorgsrollen: String?
     )
-
-    data class TimerOgMinutter(
-        val timer: Long,
-        val minutter: Int) {
-        internal companion object {
-            internal fun Pair<Long,Int>?.somTimerOgMinutterDto() = when (this) {
-                null -> null
-                else -> TimerOgMinutter(first, second)
-            }
-        }
-    }
 }
 
 data class SvarPsbDto(

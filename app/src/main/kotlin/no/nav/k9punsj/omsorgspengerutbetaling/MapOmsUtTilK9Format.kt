@@ -4,19 +4,22 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
+import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer
-import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
+import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
-import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
+import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
+import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
+import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class MapOmsUtTilK9Format(
@@ -34,6 +37,10 @@ internal class MapOmsUtTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
+            dto.barn.leggTilBarn()
+            dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                omsorgspengerUtbetaling.medAktivitet(this)
+            }
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioder(dto)
 
@@ -77,6 +84,15 @@ internal class MapOmsUtTilK9Format(
         if (erSatt()) {
             søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
         }
+    }
+
+    private fun List<OmsorgspengerutbetalingSøknadDto.BarnDto>.leggTilBarn() {
+        val barnListe = this.map {
+            val barn = Barn()
+            barn.medFødselsdato(it.foedselsdato)
+            barn.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(it.norskIdent))
+        }
+        omsorgspengerUtbetaling.medFosterbarn(barnListe)
     }
 
     private fun List<OmsorgspengerutbetalingSøknadDto.FraværPeriode>.leggTilFraværsperioder(dto: OmsorgspengerutbetalingSøknadDto) {
@@ -145,14 +161,8 @@ internal class MapOmsUtTilK9Format(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsUtTilK9Format::class.java)
-        private val Oslo = ZoneId.of("Europe/Oslo")
         private val Validator = OmsorgspengerUtbetalingSøknadValidator()
         private const val Versjon = "1.0.0"
-        private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
-        private fun PeriodeDto.somK9Periode() = when (erSatt()) {
-            true -> Periode(fom, tom)
-            else -> null
-        }
 
         private fun PeriodeDto.somEnkeltDager() : List<PeriodeDto> {
             val lista: MutableList<PeriodeDto> = mutableListOf()
@@ -161,7 +171,5 @@ internal class MapOmsUtTilK9Format(
             }
             return lista
         }
-
-        private fun String?.erSatt() = !isNullOrBlank()
     }
 }

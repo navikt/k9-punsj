@@ -6,14 +6,13 @@ import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
-import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.AnnenForelder
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
+import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
+import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class MapOmsMATilK9Format(
@@ -111,15 +110,9 @@ internal class MapOmsMATilK9Format(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsMATilK9Format::class.java)
-        private val Oslo = ZoneId.of("Europe/Oslo")
+
         private val Validator = OmsorgspengerKroniskSyktBarn().validator
         private const val Versjon = "1.0.0"
-        private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
-        private fun PeriodeDto.somK9Periode() = when (erSatt()) {
-            true -> Periode(fom, tom)
-            else -> null
-        }
 
-        private fun String?.erSatt() = !isNullOrBlank()
     }
 }

@@ -3,6 +3,9 @@ package no.nav.k9punsj.felles.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 
 data class PerioderDto(
@@ -53,3 +56,31 @@ data class OpprettNySøknad(
     //TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
     val barnIdent: String?,
 )
+
+data class PleietrengendeDto(
+    val norskIdent: String? = null,
+    val foedselsdato: LocalDate? = null
+)
+
+data class BostederDto(
+    val periode: PeriodeDto?,
+    val land: String?
+)
+
+data class UtenlandsoppholdDto(
+    val periode: PeriodeDto?,
+    val land: String?,
+    val årsak: String?
+)
+
+data class UtenlandsoppholdDtoV2(
+    val periode: PeriodeDto? = null,
+    val land: String? = null,
+    val innleggelsesperioder : List<InnleggelsesperiodeDto> = emptyList()
+
+) {
+    data class InnleggelsesperiodeDto(
+        val årsak: String?,
+        val periode: PeriodeDto?
+    )
+}

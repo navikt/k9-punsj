@@ -9,6 +9,8 @@ import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -19,7 +21,9 @@ data class OmsorgspengerutbetalingSøknadDto(
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett: LocalTime? = null,
+    val barn: List<BarnDto> = emptyList(),
     val journalposter: List<String>? = null,
+    val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val organisasjonsnummer: String? = null,
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
@@ -30,6 +34,12 @@ data class OmsorgspengerutbetalingSøknadDto(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
         val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+    )
+
+    data class BarnDto(
+        val norskIdent: String?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val foedselsdato: LocalDate?
     )
 }
 
