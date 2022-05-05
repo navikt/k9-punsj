@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 enum class PunsjInnsendingType(val kode: String, val navn: String, val erScanning: Boolean) {
     PAPIRSØKNAD("PAPIRSØKNAD", "Papirsøknad", true),
+    DIGITAL_SØKNAD("DIGITAL_SØKNAD", "Digital søknad", false),
     PAPIRETTERSENDELSE("PAPIRETTERSENDELSE", "Papirettersendelse",true),
     PAPIRINNTEKTSOPPLYSNINGER("PAPIRINNTEKTSOPPLYSNINGER", "Papirinntektsopplysninger",true),
     DIGITAL_ETTERSENDELSE("DIGITAL_ETTERSENDELSE", "Digital ettersendelse",false),

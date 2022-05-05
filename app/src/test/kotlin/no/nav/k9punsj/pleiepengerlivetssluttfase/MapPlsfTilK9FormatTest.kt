@@ -1,10 +1,11 @@
 package no.nav.k9punsj.pleiepengerlivetssluttfase
 
-import kotliquery.param
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
-import no.nav.k9.søknad.felles.type.Landkode
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
+import no.nav.k9punsj.felles.dto.ArbeidstidDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PleietrengendeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -31,7 +32,7 @@ internal class MapPlsfTilK9FormatTest {
                 soekerId = "11111111111",
                 mottattDato = LocalDate.now(),
                 klokkeslett = LocalTime.now(),
-                pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto("22222222222"),
+                pleietrengende = PleietrengendeDto("22222222222"),
                 arbeidstid = arbeidstid(eksisterendeSøknadsperioder.first()),
                 begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("Fordi..."),
                 harInfoSomIkkeKanPunsjes = true,
@@ -60,7 +61,7 @@ internal class MapPlsfTilK9FormatTest {
                 soekerId = "11111111111",
                 mottattDato = LocalDate.now(),
                 klokkeslett = LocalTime.now(),
-                pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto("22222222222"),
+                pleietrengende = PleietrengendeDto("22222222222"),
                 arbeidstid = arbeidstid(
                     PeriodeDto(
                         fom = LocalDate.parse("2022-04-27"),
@@ -81,14 +82,14 @@ internal class MapPlsfTilK9FormatTest {
         ))
     }
 
-    private fun arbeidstid(periode: PeriodeDto) = PleiepengerLivetsSluttfaseSøknadDto.ArbeidstidDto(
+    private fun arbeidstid(periode: PeriodeDto) = ArbeidstidDto(
         arbeidstakerList = listOf(
-            PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto(
+            ArbeidAktivitetDto.ArbeidstakerDto(
                 norskIdent = null,
                 organisasjonsnummer = "926032925",
-                arbeidstidInfo = PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
+                arbeidstidInfo = ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto(
                     perioder = listOf(
-                        PleiepengerLivetsSluttfaseSøknadDto.ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
+                        ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.ArbeidstidPeriodeInfoDto(
                             periode = periode,
                             faktiskArbeidTimerPerDag = "7,5",
                             jobberNormaltTimerPerDag = "7,5"

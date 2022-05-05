@@ -8,13 +8,9 @@ import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDt
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.korrigeringinntektsmelding.KorrigeringInntektsmeldingDto
-import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.JsonB
-import no.nav.k9punsj.felles.dto.BunkeEntitet
-import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.Person
-import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -74,7 +70,7 @@ class MappeService(
         val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
             soeknadId = soknadfelles.søknadsId.toString(),
             soekerId = norskIdent,
-            pleietrengende = PleiepengerLivetsSluttfaseSøknadDto.PleietrengendeDto(pleietrengendeIdent),
+            pleietrengende = PleietrengendeDto(pleietrengendeIdent),
             journalposter = listOf(nySøknad.journalpostId),
             mottattDato = soknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = soknadfelles.klokkeslett,

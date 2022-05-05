@@ -4,6 +4,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
+import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
@@ -34,6 +35,7 @@ internal class MapOmsUtTilK9Format(
             Versjon.leggTilVersjon()
             dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
+            dto.barn.leggTilBarn()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioder(dto)
 
@@ -77,6 +79,15 @@ internal class MapOmsUtTilK9Format(
         if (erSatt()) {
             søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
         }
+    }
+
+    private fun List<OmsorgspengerutbetalingSøknadDto.BarnDto>.leggTilBarn() {
+        val barnListe = this.map {
+            val barn = Barn()
+            barn.medFødselsdato(it.foedselsdato)
+            barn.medNorskIdentitetsnummer(NorskIdentitetsnummer.of(it.norskIdent))
+        }
+        omsorgspengerUtbetaling.medFosterbarn(barnListe)
     }
 
     private fun List<OmsorgspengerutbetalingSøknadDto.FraværPeriode>.leggTilFraværsperioder(dto: OmsorgspengerutbetalingSøknadDto) {
