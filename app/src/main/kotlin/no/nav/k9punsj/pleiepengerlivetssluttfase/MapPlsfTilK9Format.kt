@@ -13,6 +13,7 @@ import no.nav.k9.søknad.ytelse.pls.v1.Pleietrengende
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.PleietrengendeDto
 import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
@@ -20,9 +21,11 @@ import no.nav.k9punsj.felles.k9format.MappingUtils.mapEllerLeggTilFeil
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
 import no.nav.k9punsj.felles.k9format.mapTilBosteder
+import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class MapPlsfTilK9Format(
@@ -183,25 +186,13 @@ internal class MapPlsfTilK9Format(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)
-        private val Oslo = ZoneId.of("Europe/Oslo")
+
         private val Validator = PleiepengerLivetsSluttfaseSøknadValidator()
         private const val Versjon = "1.0.0"
         private val DefaultUttak =
             Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
 
-        private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
-        private fun PeriodeDto.somK9Periode() = when (erSatt()) {
-            true -> Periode(fom, tom)
-            else -> null
-        }
-
         private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
         private fun String?.erSatt() = !isNullOrBlank()
-        private fun String.blankAsNull() = when (isBlank()) {
-            true -> null
-            false -> this
-        }
-
-        private fun Periode.jsonPath() = "[${this.iso8601}]"
     }
 }

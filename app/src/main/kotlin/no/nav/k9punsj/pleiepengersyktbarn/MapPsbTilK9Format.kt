@@ -10,11 +10,19 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.*
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
+import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.k9format.*
+import no.nav.k9punsj.felles.k9format.MappingUtils.mapEllerLeggTilFeil
+import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
+import no.nav.k9punsj.utils.StringUtils.blankAsNull
+import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class MapPsbTilK9Format(
@@ -150,7 +158,7 @@ internal class MapPsbTilK9Format(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
-            mapEllerLeggTilFeil("ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
+            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
             { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
                 k9Info.medTimerPleieAvBarnetPerDag(it)
             }
@@ -204,7 +212,7 @@ internal class MapPsbTilK9Format(
 
     private fun PleiepengerSyktBarnSøknadDto.OmsorgDto.leggTilOmsorg() {
         val k9Omsorg = Omsorg()
-        mapEllerLeggTilFeil("ytelse.omsorg.relasjonTilBarnet") {
+        mapEllerLeggTilFeil(feil, "ytelse.omsorg.relasjonTilBarnet") {
             relasjonTilBarnet?.blankAsNull()?.let { Omsorg.BarnRelasjon.valueOf(it.uppercase()) }
         }?.also { k9Omsorg.medRelasjonTilBarnet(it) }
 
@@ -237,34 +245,12 @@ internal class MapPsbTilK9Format(
         }
     }
 
-    private fun <Til>mapEllerLeggTilFeil(felt: String, map: () -> Til?) = kotlin.runCatching {
-        map()
-    }.fold(onSuccess = {it}, onFailure = { throwable ->
-        feil.add(Feil(felt, throwable.javaClass.simpleName, throwable.message ?: "Ingen feilmelding"))
-        null
-    })
-
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPsbTilK9Format::class.java)
-        private val Oslo = ZoneId.of("Europe/Oslo")
+
         private val Validator = PleiepengerSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
 
         private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
-        private fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
-        private fun PeriodeDto.somK9Periode() = when (erSatt()) {
-            true -> Periode(fom, tom)
-            else -> null
-        }
-
-        private fun Collection<PeriodeDto>.somK9Perioder() = mapNotNull { it.somK9Periode() }
-        private fun String?.erSatt() = !isNullOrBlank()
-        private fun String.blankAsNull() = when (isBlank()) {
-            true -> null
-            false -> this
-        }
-
-        private fun Periode.jsonPath() = "[${this.iso8601}]"
-        private fun PleiepengerSyktBarnSøknadDto.TimerOgMinutter.somDuration() = Duration.ofHours(timer).plusMinutes(minutter.toLong())
     }
 }

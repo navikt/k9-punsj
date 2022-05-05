@@ -7,10 +7,9 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto.TimerOgMinutter.Companion.somTimerOgMinutterDto
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -85,17 +84,6 @@ data class PleiepengerSyktBarnSøknadDto(
         val samtykketOmsorgForBarnet: Boolean?,
         val beskrivelseAvOmsorgsrollen: String?
     )
-
-    data class TimerOgMinutter(
-        val timer: Long,
-        val minutter: Int) {
-        internal companion object {
-            internal fun Pair<Long,Int>?.somTimerOgMinutterDto() = when (this) {
-                null -> null
-                else -> TimerOgMinutter(first, second)
-            }
-        }
-    }
 }
 
 data class SvarPsbDto(
