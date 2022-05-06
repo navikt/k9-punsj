@@ -247,6 +247,7 @@ class RestPunsjbolleService(
                 require(journalpostId != null || periode != null) {
                     "Må sette minst en av journalpostId og periode"
                 }
+
                 require(pleietrengende != null || annenPart != null) {
                     "Må sette minst en av pleietrengende og annenPart"
                 }

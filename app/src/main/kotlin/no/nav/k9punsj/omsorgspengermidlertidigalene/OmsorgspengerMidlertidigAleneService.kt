@@ -76,18 +76,13 @@ class OmsorgspengerMidlertidigAleneService(
 
     internal suspend fun nySøknad(request: ServerRequest, nyOmsMASøknad: NyOmsMASøknad): ServerResponse {
         //oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (nyOmsMASøknad.barn.isNotEmpty()) {
-            nyOmsMASøknad.barn.forEach {
-                punsjbolleService.opprettEllerHentFagsaksnummer(
-                    søker = nyOmsMASøknad.norskIdent,
-                    annenPart = nyOmsMASøknad.annenPart,
-                    pleietrengende = it.norskIdent,
-                    journalpostId = nyOmsMASøknad.journalpostId,
-                    periode = null,
-                    fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
-                )
-            }
-        }
+        punsjbolleService.opprettEllerHentFagsaksnummer(
+            søker = nyOmsMASøknad.norskIdent,
+            annenPart = nyOmsMASøknad.annenPart,
+            journalpostId = nyOmsMASøknad.journalpostId,
+            periode = null,
+            fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
+        )
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostRepository.settFagsakYtelseType(
