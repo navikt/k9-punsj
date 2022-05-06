@@ -247,10 +247,10 @@ class RestPunsjbolleService(
                 require(journalpostId != null || periode != null) {
                     "Må sette minst en av journalpostId og periode"
                 }
-                //TODO: Deaktivert foreløpig.
-                /*require(pleietrengende != null || annenPart != null) {
+
+                require(pleietrengende != null || annenPart != null) {
                     "Må sette minst en av pleietrengende og annenPart"
-                }*/
+                }
             }
         }
 
