@@ -183,6 +183,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun SkalTilK9Sak(
+        @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
         @RequestBody body: OasPunsjBolleDto,
     ) {
     }
