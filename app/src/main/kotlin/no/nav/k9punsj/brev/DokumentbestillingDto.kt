@@ -1,7 +1,9 @@
 package no.nav.k9punsj.brev
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.felles.JsonB
+import no.nav.k9punsj.objectMapper
 
 data class DokumentbestillingDto(
     val journalpostId: String,
@@ -19,7 +21,12 @@ data class DokumentbestillingDto(
         val id: String,
     )
 
-    companion object {
+    internal companion object {
         const val GENERELL_SAK = "GENERELL_SAK"
+
+        internal fun DokumentbestillingDto.toJsonB() : String {
+            val jsonB = kotlin.runCatching { objectMapper().convertValue<JsonB>(this) }.getOrElse { throw it }
+            return kotlin.runCatching { objectMapper().writeValueAsString(jsonB) }.getOrElse { throw it }
+        }
     }
 }

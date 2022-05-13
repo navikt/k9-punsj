@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
+import no.nav.k9punsj.felles.SøknadFinnsIkke
+import no.nav.k9punsj.felles.ValideringsFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
@@ -102,6 +104,18 @@ private fun Routes(
         ) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
+    }
+    onError<ValideringsFeil> { error, _ ->
+        ServerResponse
+            .badRequest()
+            .json()
+            .bodyValueAndAwait(error.localizedMessage)
+    }
+    onError<SøknadFinnsIkke> { error, _ ->
+        ServerResponse
+            .badRequest()
+            .json()
+            .bodyValueAndAwait("Søknad finns ikke, error: ${error.message}")
     }
     onError<Throwable> { error, serverRequest ->
         val exceptionId = ULID().nextValue().toString()

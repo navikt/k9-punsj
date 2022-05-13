@@ -4,7 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.felles.IkkeTilgang
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus

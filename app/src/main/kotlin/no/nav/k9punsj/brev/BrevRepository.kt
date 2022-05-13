@@ -5,7 +5,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.brev.BrevEntitet.Companion.toJsonB
+import no.nav.k9punsj.brev.DokumentbestillingDto.Companion.toJsonB
 import no.nav.k9punsj.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID

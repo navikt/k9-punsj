@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -211,14 +212,6 @@ data class VentDto(
 data class DokumentInfo(
     val dokumentId: String,
 )
-
-internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
-internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
-internal class IkkeTilgang(feil: String) : Throwable(feil)
-internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
-internal class UgyldigToken(feil: String) : Throwable(feil)
-internal class IkkeFunnet(message: String) : Throwable(message)
-internal class InternalServerErrorDoarkiv(feil: String) : Throwable(feil)
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
     enumValues<T>().find { it.name.equals(name, ignoreCase = true) }

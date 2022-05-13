@@ -216,5 +216,5 @@ class PdlServiceImpl(
         )
     )
 
-    internal class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang til å slå opp personen.")
+    private class IkkeTilgang : Throwable("Saksbehandler har ikke tilgang til å slå opp personen.")
 }
