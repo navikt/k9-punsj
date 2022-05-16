@@ -173,6 +173,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    @Deprecated("Bruk JournalpostService")
     suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: String) {
         journalposter?.forEach {
             if (journalpostIkkeEksisterer(it)) {
@@ -184,6 +185,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    @Deprecated("Bruk JournalpostService")
     suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {

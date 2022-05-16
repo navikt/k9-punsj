@@ -106,7 +106,14 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                val sendtSøknad = korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
+                val (sendtSøknad, søknadFeil) = korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
+                if(søknadFeil.feil.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .json()
+                        .bodyValueAndAwait(søknadFeil)
+                }
+
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
@@ -124,7 +131,14 @@ internal class KorrigeringInntektsmeldingRoutes(
                     )?.let { return@RequestContext it }
                 }
 
-                val validertSøknad = korrigeringInntektsmeldingService.validerSøknad(søknad)
+                val (validertSøknad, søknadFeil) = korrigeringInntektsmeldingService.validerSøknad(søknad)
+                if(søknadFeil.feil.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .json()
+                        .bodyValueAndAwait(søknadFeil)
+                }
+
                 return@RequestContext ServerResponse
                     .accepted()
                     .json()

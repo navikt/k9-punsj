@@ -7,7 +7,7 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.dto.SøknadFeil
+import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.felles.UventetFeil
@@ -20,7 +20,7 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +32,7 @@ internal class KorrigeringInntektsmeldingService(
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
-    private val journalpostRepository: JournalpostRepository,
+    private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService
@@ -75,7 +75,7 @@ internal class KorrigeringInntektsmeldingService(
         }
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+        journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingKorrigeringIm(
             nySøknad = opprettNySøknad
@@ -93,78 +93,50 @@ internal class KorrigeringInntektsmeldingService(
 
         val (entitet, _) = søknadEntitet
         val søker = personService.finnPerson(personId = entitet.søkerId)
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+        journalpostService.settKildeHvisIkkeFinnesFraFør(
             journalposter = hentUtJournalposter(entitet),
             aktørId = søker.aktørId
         )
         return søknad
     }
 
-    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): Søknad {
+    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): Pair<Søknad, SøknadFeil> {
         val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
             ?: throw SøknadFinnsIkke(sendSøknad.soeknadId)
 
         try {
             val søknad: KorrigeringInntektsmeldingDto = objectMapper.convertValue(søknadEntitet.søknad!!)
 
-            val journalPoster = søknadEntitet.journalposter!!
-            val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
-            val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
-                    if (!kanSendesInn) {
-                        logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
-                    }
-                }
-            }.toMutableSet()
-
+            val journalpostIder = journalpostService.kanSendesInn(søknadEntitet)
             if (journalpostIder.isEmpty()) {
                 logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
                 throw ValideringsFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
-            val (søknadK9Format, feilListe) = MapOmsTilK9Format(
-                søknadId = søknad.soeknadId,
-                journalpostIder = journalpostIder,
-                dto = søknad
-            ).søknadOgFeil()
+            val validertSøknad = validerSøknad(søknad)
 
-            if (feilListe.isNotEmpty()) {
-                val feil = feilListe.map { feil ->
-                    SøknadFeil.SøknadFeilDto(
-                        feil.felt,
-                        feil.feilkode,
-                        feil.feilmelding
-                    )
-                }.toList()
-
-                throw ValideringsFeil(feil.joinToString(separator = " - "))
-            }
-
-            val feil = soknadService.sendSøknad(
-                søknadK9Format,
+            soknadService.sendSøknad(
+                validertSøknad.first,
                 journalpostIder
-            )
-
-            if (feil != null) {
+            ) ?.let { feil ->
                 val (httpStatus, feilen) = feil
                 throw ValideringsFeil(feilen)
             }
 
-            return søknadK9Format
 
+            return validertSøknad
         } catch (e: Exception) {
             throw UventetFeil(e.localizedMessage)
         }
 
     }
 
-    internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): Søknad {
+    internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): Pair<Søknad, SøknadFeil> {
         val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
             ?: throw SøknadFinnsIkke(soknadTilValidering.soeknadId)
 
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
-
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
         try {
@@ -176,21 +148,18 @@ internal class KorrigeringInntektsmeldingService(
         } catch (e: Exception) {
             throw UventetFeil(e.localizedMessage)
         }
+
         val (søknad, feilListe) = mapTilEksternFormat
-
-        if (feilListe.isNotEmpty()) {
-            val feil = feilListe.map { feil ->
-                SøknadFeil.SøknadFeilDto(
-                    feil.felt,
-                    feil.feilkode,
-                    feil.feilmelding
-                )
+        val feil = if (feilListe.isNotEmpty()) {
+            feilListe.map { feil ->
+                SøknadFeil.SøknadFeilDto(feil.felt, feil.feilkode, feil.feilmelding)
             }.toList()
-
-            throw ValideringsFeil(feil.joinToString(separator = " - "))
+        } else {
+            emptyList()
         }
+        val søknadFeil = SøknadFeil(soknadTilValidering.soeknadId, feil)
 
-        return søknad
+        return Pair(søknad, søknadFeil)
     }
 
     internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): List<ArbeidsgiverMedArbeidsforholdId> {

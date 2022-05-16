@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.dto
+package no.nav.k9punsj.felles.dto
 
 data class SøknadFeil(
     val søknadIdDto: String,
