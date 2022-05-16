@@ -9,7 +9,6 @@ import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsakMedPerioder
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.mapSøknadTypeDto
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
