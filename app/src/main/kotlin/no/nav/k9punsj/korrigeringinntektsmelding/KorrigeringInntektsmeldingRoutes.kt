@@ -1,5 +1,6 @@
 package no.nav.k9punsj.korrigeringinntektsmelding
 
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -13,6 +14,7 @@ import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
@@ -88,7 +90,7 @@ internal class KorrigeringInntektsmeldingRoutes(
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.mapSøknadTypeDto(søknadType)
+                val søknad = request.korrigeringInntektsmelding()
                 val oppdatertSøknad = korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
 
                 return@RequestContext ServerResponse
@@ -123,7 +125,7 @@ internal class KorrigeringInntektsmeldingRoutes(
 
         POST("/api${Urls.ValiderSøknad}") { request ->
             RequestContext(coroutineContext, request) {
-                val søknad = request.mapSøknadTypeDto(søknadType)
+                val søknad = request.korrigeringInntektsmelding()
                 søknad.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent = norskIdent,
@@ -166,6 +168,9 @@ internal class KorrigeringInntektsmeldingRoutes(
     }
 
     private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
+
+    private suspend fun ServerRequest.korrigeringInntektsmelding() =
+        body(BodyExtractors.toMono(KorrigeringInntektsmeldingDto::class.java)).awaitFirst()
 }
 
 

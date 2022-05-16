@@ -24,11 +24,6 @@ object ServerRequestUtils {
     internal suspend fun ServerRequest.mapMatchFagsak() = body(BodyExtractors.toMono(Matchfagsak::class.java)).awaitFirst()
     internal suspend fun ServerRequest.mapMatchFagsakMedPerioder() = body(BodyExtractors.toMono(MatchFagsakMedPeriode::class.java)).awaitFirst()
 
-    internal suspend fun ServerRequest.mapSøknadTypeDto(søknadType: String) = when (søknadType) {
-        "omsorgspenger-soknad" -> body(BodyExtractors.toMono(KorrigeringInntektsmeldingDto::class.java)).awaitFirst()
-        else -> throw UventetFeil("Fant ikke søknadstype $søknadType i ${this.javaClass.name}")
-    }
-
     internal fun ServerRequest.søknadLocationUri(søknadId: String) =
         uriBuilder().pathSegment("mappe", søknadId).build()
 
