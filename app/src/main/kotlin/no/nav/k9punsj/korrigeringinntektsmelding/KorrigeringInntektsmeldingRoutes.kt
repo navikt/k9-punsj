@@ -115,7 +115,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                 }
 
                 return@RequestContext ServerResponse
-                    .ok()
+                    .accepted()
                     .json()
                     .bodyValueAndAwait(sendtSøknad)
             }
