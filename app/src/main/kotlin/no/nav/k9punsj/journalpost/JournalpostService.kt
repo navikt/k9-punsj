@@ -2,10 +2,15 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.convertValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
+import no.nav.k9punsj.felles.dto.JournalposterDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
@@ -17,12 +22,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.*
+import java.util.*
 
 @Service
 class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
+    private val objectMapper: ObjectMapper
 ) {
 
     private companion object {
@@ -79,6 +86,41 @@ class JournalpostService(
                     },
                     journalpostStatus = safJournalpost.journalstatus!!
                 )
+            }
+        }
+    }
+
+    internal fun kanSendesInn(søknadEntitet: SøknadEntitet): MutableSet<String> {
+        val journalPoster = søknadEntitet.journalposter!!
+        val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+        val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
+            journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                if (!kanSendesInn) {
+                    logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
+                }
+            }
+        }.toMutableSet()
+
+        return journalpostIder
+    }
+
+    internal suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: String) {
+        journalposter?.forEach {
+            if (journalpostRepository.journalpostIkkeEksisterer(it)) {
+                val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
+                journalpostRepository.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER) {
+                    punsjJournalpost
+                }
+            }
+        }
+    }
+
+    internal suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
+        val journalpost = journalpostRepository.hentHvis(journalpostId)
+        if (journalpost != null) {
+            val medType = journalpost.copy(ytelse = ytelseType.kode)
+            journalpostRepository.lagre(medType){
+                medType
             }
         }
     }
@@ -211,14 +253,6 @@ data class VentDto(
 data class DokumentInfo(
     val dokumentId: String,
 )
-
-internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
-internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
-internal class IkkeTilgang(feil: String) : Throwable(feil)
-internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
-internal class UgyldigToken(feil: String) : Throwable(feil)
-internal class IkkeFunnet(message: String) : Throwable(message)
-internal class InternalServerErrorDoarkiv(feil: String) : Throwable(feil)
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
     enumValues<T>().find { it.name.equals(name, ignoreCase = true) }

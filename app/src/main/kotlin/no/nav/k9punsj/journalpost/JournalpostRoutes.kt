@@ -14,6 +14,8 @@ import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.k9punsj.felles.IkkeStøttetJournalpost
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.SettPåVentDto

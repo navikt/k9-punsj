@@ -5,7 +5,7 @@ import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.journalpost.IkkeTilgang
+import no.nav.k9punsj.felles.IkkeTilgang
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

@@ -9,11 +9,16 @@ import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsakMedPerioder
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
+import no.nav.k9punsj.utils.ServerRequestUtils.mapSøknadTypeDto
+import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -48,14 +53,22 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                korrigeringInntektsmeldingService.henteMappe(norskIdent)
+                val svar = korrigeringInntektsmeldingService.henteMappe(norskIdent)
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(svar)
             }
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknadId = request.søknadId()
-                korrigeringInntektsmeldingService.henteSøknad(søknadId)
+                val søknad = korrigeringInntektsmeldingService.henteSøknad(søknadId)
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(søknad)
             }
         }
 
@@ -67,14 +80,23 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                korrigeringInntektsmeldingService.nySøknad(request, opprettNySøknad)
+                val nySøknad = korrigeringInntektsmeldingService.nySøknad(opprettNySøknad)
+                return@RequestContext ServerResponse
+                    .created(request.søknadLocationUri(nySøknad.soeknadId))
+                    .json()
+                    .bodyValueAndAwait(nySøknad)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.korrigeringInntektsmelding()
-                korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
+                val oppdatertSøknad = korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(oppdatertSøknad)
             }
         }
 
@@ -86,7 +108,18 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = request.path()
                 )?.let { return@RequestContext it }
 
-                korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
+                val (sendtSøknad, søknadFeil) = korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
+                if(søknadFeil.feil.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .json()
+                        .bodyValueAndAwait(søknadFeil)
+                }
+
+                return@RequestContext ServerResponse
+                    .accepted()
+                    .json()
+                    .bodyValueAndAwait(sendtSøknad)
             }
         }
 
@@ -100,7 +133,18 @@ internal class KorrigeringInntektsmeldingRoutes(
                     )?.let { return@RequestContext it }
                 }
 
-                korrigeringInntektsmeldingService.validerSøknad(søknad)
+                val (validertSøknad, søknadFeil) = korrigeringInntektsmeldingService.validerSøknad(søknad)
+                if(søknadFeil.feil.isNotEmpty()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .json()
+                        .bodyValueAndAwait(søknadFeil)
+                }
+
+                return@RequestContext ServerResponse
+                    .accepted()
+                    .json()
+                    .bodyValueAndAwait(validertSøknad)
             }
         }
 
@@ -112,7 +156,13 @@ internal class KorrigeringInntektsmeldingRoutes(
                     url = Urls.HentArbeidsforholdIderFraK9sak
                 )?.let { return@RequestContext it }
 
-                korrigeringInntektsmeldingService.hentArbeidsforholdIderFraK9Sak(matchfagsakMedPeriode)
+                val arbeidsforholdIder = korrigeringInntektsmeldingService
+                    .hentArbeidsforholdIderFraK9Sak(matchfagsakMedPeriode)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(arbeidsforholdIder)
             }
         }
     }

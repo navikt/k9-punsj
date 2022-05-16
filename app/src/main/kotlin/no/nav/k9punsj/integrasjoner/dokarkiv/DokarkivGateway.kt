@@ -10,18 +10,18 @@ import com.github.kittinunf.result.onError
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.felles.FeilIAksjonslogg
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.journalpost.FeilIAksjonslogg
 import no.nav.k9punsj.felles.Identitetsnummer
-import no.nav.k9punsj.journalpost.IkkeFunnet
-import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
+import no.nav.k9punsj.felles.IkkeFunnet
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
-import no.nav.k9punsj.journalpost.UgyldigToken
+import no.nav.k9punsj.felles.UgyldigToken
+import no.nav.k9punsj.felles.UventetFeil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -191,7 +191,7 @@ class DokarkivGateway(
             401 -> throw UgyldigToken(feil)
             403 -> throw IkkeTilgang(feil)
             404 -> throw IkkeFunnet(feil)
-            500 -> throw InternalServerErrorDoarkiv(feil)
+            500 -> throw UventetFeil(feil)
             else -> {
                 throw IllegalStateException("${response.statusCode} -> " + feil)
             }

@@ -8,15 +8,15 @@ import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9punsj.felles.FeilIAksjonslogg
+import no.nav.k9punsj.felles.IkkeFunnet
+import no.nav.k9punsj.felles.IkkeStøttetJournalpost
+import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.NotatUnderArbeidFeil
+import no.nav.k9punsj.felles.UgyldigToken
+import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.journalpost.FeilIAksjonslogg
-import no.nav.k9punsj.journalpost.IkkeFunnet
-import no.nav.k9punsj.journalpost.IkkeStøttetJournalpost
-import no.nav.k9punsj.journalpost.IkkeTilgang
-import no.nav.k9punsj.journalpost.InternalServerErrorDoarkiv
-import no.nav.k9punsj.journalpost.NotatUnderArbeidFeil
-import no.nav.k9punsj.journalpost.UgyldigToken
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONObject
@@ -230,7 +230,7 @@ class SafGateway(
             401 -> throw UgyldigToken(feil)
             403 -> throw IkkeTilgang(feil)
             404 -> throw IkkeFunnet(feil)
-            500 -> throw InternalServerErrorDoarkiv(feil)
+            500 -> throw UventetFeil(feil)
             else -> {
                 throw IllegalStateException("${response.statusCode} -> " + feil)
             }
