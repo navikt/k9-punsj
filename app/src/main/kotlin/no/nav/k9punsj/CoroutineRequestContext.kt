@@ -6,7 +6,6 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
 import no.nav.k9punsj.felles.SøknadFinnsIkke
-import no.nav.k9punsj.felles.ValideringsFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
@@ -14,9 +13,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.coRouter
+import org.springframework.web.reactive.function.server.json
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
@@ -104,12 +108,6 @@ private fun Routes(
         ) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
-    }
-    onError<ValideringsFeil> { error, _ ->
-        ServerResponse
-            .badRequest()
-            .json()
-            .bodyValueAndAwait(error.localizedMessage)
     }
     onError<SøknadFinnsIkke> { error, _ ->
         ServerResponse
