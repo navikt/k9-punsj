@@ -184,7 +184,13 @@ class MappeService(
             mottattDato = søknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = søknadfelles.klokkeslett,
             soekerId = norskIdent,
-            barn = nySøknad.barn
+            barn = nySøknad.barn,
+            annenForelder = OmsorgspengerMidlertidigAleneSøknadDto.AnnenForelder(
+                norskIdent = nySøknad.annenPart,
+                situasjonType = null,
+                situasjonBeskrivelse = null,
+                periode = null
+            )
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }
