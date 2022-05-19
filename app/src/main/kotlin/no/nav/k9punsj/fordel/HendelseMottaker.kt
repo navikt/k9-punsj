@@ -7,7 +7,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,9 +17,9 @@ import java.util.UUID
 
 @Service
 class HendelseMottaker @Autowired constructor(
-    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
-    val aksjonspunktService: AksjonspunktService,
-    val meterRegistry: MeterRegistry
+    val journalpostService: JournalpostService,
+    private val aksjonspunktService: AksjonspunktService,
+    private val meterRegistry: MeterRegistry
 ) {
     private companion object {
         private val log: Logger = LoggerFactory.getLogger(HendelseMottaker::class.java)
@@ -27,7 +27,7 @@ class HendelseMottaker @Autowired constructor(
 
     suspend fun prosesser(fordelPunsjEventDto: FordelPunsjEventDto) {
         val journalpostId = fordelPunsjEventDto.journalpostId
-        val journalpostIkkeEksisterer = journalpostRepository.journalpostIkkeEksisterer(journalpostId)
+        val journalpostIkkeEksisterer = journalpostService.journalpostIkkeEksisterer(journalpostId)
 
         if (journalpostIkkeEksisterer) {
             val aktørId = fordelPunsjEventDto.aktørId
@@ -44,7 +44,7 @@ class HendelseMottaker @Autowired constructor(
                 ytelse = ytelse,
                 type = punsjEventType
             )
-            journalpostRepository.opprettJournalpost(punsjJournalpost)
+            journalpostService.opprettJournalpost(punsjJournalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                 punsjJournalpost = punsjJournalpost,
                 aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
@@ -52,9 +52,9 @@ class HendelseMottaker @Autowired constructor(
                 ytelse = fordelPunsjEventDto.ytelse)
         } else {
             if (PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
-                val journalpostFraDb = journalpostRepository.hent(journalpostId)
+                val journalpostFraDb = journalpostService.hent(journalpostId)
                 if (journalpostFraDb.type != null && PunsjInnsendingType.fraKode(journalpostFraDb.type) != PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
-                    journalpostRepository.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
+                    journalpostService.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 } else {
                     log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")

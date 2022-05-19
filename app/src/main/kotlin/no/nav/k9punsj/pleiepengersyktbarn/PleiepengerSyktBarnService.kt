@@ -18,7 +18,7 @@ import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
@@ -37,7 +37,7 @@ import java.net.URI
 internal class PleiepengerSyktBarnService(
     private val personService: PersonService,
     private val mappeService: MappeService,
-    private val journalpostRepository: JournalpostRepository,
+    private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val objectMapper: ObjectMapper,
     private val soknadService: SoknadService,
@@ -91,7 +91,7 @@ internal class PleiepengerSyktBarnService(
 
         val (entitet, _) = søknadEntitet
         val søker = personService.finnPerson(entitet.søkerId)
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+        journalpostService.settKildeHvisIkkeFinnesFraFør(
             hentUtJournalposter(entitet),
             søker.aktørId
         )
@@ -113,7 +113,7 @@ internal class PleiepengerSyktBarnService(
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
             val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                journalpostService.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
                     if (!kanSendesInn) {
                         logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
                     }
@@ -190,7 +190,7 @@ internal class PleiepengerSyktBarnService(
         }
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostRepository.settFagsakYtelseType(
+        journalpostService.settFagsakYtelseType(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             søknad.journalpostId
         )

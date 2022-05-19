@@ -3,11 +3,12 @@ package no.nav.k9punsj.domenetjenester
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
@@ -19,12 +20,12 @@ import kotlin.coroutines.coroutineContext
 
 @Service
 class SoknadService(
-    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
-    val søknadRepository: SøknadRepository,
-    val innsendingClient: InnsendingClient,
-    val aksjonspunktService: AksjonspunktService,
-    val søknadMetrikkService: SøknadMetrikkService,
-    val safGateway: SafGateway
+    private val journalpostService: JournalpostService,
+    private val søknadRepository: SøknadRepository,
+    private val innsendingClient: InnsendingClient,
+    private val aksjonspunktService: AksjonspunktService,
+    private val søknadMetrikkService: SøknadMetrikkService,
+    private val safGateway: SafGateway
 ) {
 
     internal suspend fun sendSøknad(
@@ -32,8 +33,8 @@ class SoknadService(
         journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
-        val journalposterHarIkkeBlittSendtInn = journalpostRepository.kanSendeInn(journalpostIdListe)
-        val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"","")
+        val journalposterHarIkkeBlittSendtInn = journalpostService.kanSendeInn(journalpostIdListe)
+        val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
 
         return if (journalposterHarIkkeBlittSendtInn) {
             val journalposterMedTypeUtgaaende = safGateway.hentJournalposter(journalpostIdListe)
@@ -42,8 +43,11 @@ class SoknadService(
                 .map { it.journalpostId }
                 .toSet()
 
-            if(journalposterMedTypeUtgaaende.isNotEmpty()) {
-                return Pair(HttpStatus.CONFLICT, "Journalpost type Utgående ikke støttet: $journalposterMedTypeUtgaaende")
+            if (journalposterMedTypeUtgaaende.isNotEmpty()) {
+                return Pair(
+                    HttpStatus.CONFLICT,
+                    "Journalpost type Utgående ikke støttet: $journalposterMedTypeUtgaaende"
+                )
             }
 
             try {
@@ -59,7 +63,7 @@ class SoknadService(
             }
 
             leggerVedPayload(søknad, journalpostIder)
-            journalpostRepository.settAlleTilFerdigBehandlet(journalpostIdListe)
+            journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
 
@@ -76,6 +80,22 @@ class SoknadService(
         }
     }
 
+    suspend fun hentSøknad(søknadId: String): SøknadEntitet? {
+        return søknadRepository.hentSøknad(søknadId)
+    }
+
+    suspend fun opprettSøknad(søknad: SøknadEntitet): SøknadEntitet {
+        return søknadRepository.opprettSøknad(søknad)
+    }
+
+    suspend fun oppdaterSøknad(søknad: SøknadEntitet) {
+        søknadRepository.oppdaterSøknad(søknad)
+    }
+
+    suspend fun hentAlleSøknaderForBunke(bunkerId: String): List<SøknadEntitet> {
+        return søknadRepository.hentAlleSøknaderForBunke(bunkerId)
+    }
+
     private fun printStackTrace(e: Exception): String {
         val sw = StringWriter()
         e.printStackTrace(PrintWriter(sw))
@@ -89,11 +109,9 @@ class SoknadService(
         val writeValueAsString = objectMapper().writeValueAsString(søknad)
 
         journalpostIder.forEach {
-            val journalpost = journalpostRepository.hent(it)
+            val journalpost = journalpostService.hent(it)
             val medPayload = journalpost.copy(payload = writeValueAsString)
-            journalpostRepository.lagre(medPayload) {
-                medPayload
-            }
+            journalpostService.lagre(medPayload)
         }
     }
 

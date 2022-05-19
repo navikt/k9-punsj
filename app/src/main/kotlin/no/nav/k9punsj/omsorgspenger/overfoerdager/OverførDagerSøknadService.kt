@@ -5,7 +5,7 @@ import no.nav.k9.rapid.behov.OverføreOmsorgsdagerBehov
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
@@ -18,8 +18,8 @@ import java.util.UUID
 
 @Service
 class OverførDagerSøknadService @Autowired constructor(
-    val hendelseProducer: HendelseProducer,
-    val journalpostRepository: JournalpostRepository,
+    private val hendelseProducer: HendelseProducer,
+    private val journalpostService: JournalpostService
 ){
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
@@ -38,7 +38,7 @@ class OverførDagerSøknadService @Autowired constructor(
         hendelseProducer.send(topicName = rapidTopic, key = id, data = overføring)
 
         for (jornalpostId in søknad.journalpostIder) {
-            val jpost = journalpostRepository.hent(jornalpostId)
+            val jpost = journalpostService.hent(jornalpostId)
             val data = objectMapper().writeValueAsString(PunsjEventDto(
                     jpost.uuid.toString(),
                     jornalpostId,

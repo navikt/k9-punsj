@@ -13,7 +13,7 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
@@ -31,7 +31,7 @@ class OmsorgspengerMidlertidigAleneService(
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
-    private val journalpostRepository: JournalpostRepository,
+    private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val objectMapper: ObjectMapper
@@ -85,7 +85,7 @@ class OmsorgspengerMidlertidigAleneService(
         )
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostRepository.settFagsakYtelseType(
+        journalpostService.settFagsakYtelseType(
             ytelseType = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
             journalpostId = nyOmsMASøknad.journalpostId
         )
@@ -109,7 +109,7 @@ class OmsorgspengerMidlertidigAleneService(
 
         val (entitet, _) = søknadEntitet
         val søker = personService.finnPerson(personId = entitet.søkerId)
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+        journalpostService.settKildeHvisIkkeFinnesFraFør(
             journalposter = hentUtJournalposter(entitet),
             aktørId = søker.aktørId
         )
@@ -129,7 +129,7 @@ class OmsorgspengerMidlertidigAleneService(
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
             val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                journalpostService.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
                     if (!kanSendesInn) {
                         logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
                     }

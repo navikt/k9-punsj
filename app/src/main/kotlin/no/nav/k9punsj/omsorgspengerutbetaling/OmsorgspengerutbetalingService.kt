@@ -17,7 +17,7 @@ import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.Logger
@@ -36,7 +36,7 @@ internal class OmsorgspengerutbetalingService(
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
-    private val journalpostRepository: JournalpostRepository,
+    private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService
@@ -90,7 +90,7 @@ internal class OmsorgspengerutbetalingService(
         }
 
         //setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostRepository.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+        journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingOmsorgspengerutbetaling(
             nySøknad = opprettNySøknad
@@ -112,7 +112,7 @@ internal class OmsorgspengerutbetalingService(
 
         val (entitet, _) = søknadEntitet
         val søker = personService.finnPerson(personId = entitet.søkerId)
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+        journalpostService.settKildeHvisIkkeFinnesFraFør(
             journalposter = hentUtJournalposter(entitet),
             aktørId = søker.aktørId
         )
@@ -132,7 +132,7 @@ internal class OmsorgspengerutbetalingService(
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
             val journalpostIder = journalposterDto.journalposter.filter { journalpostId ->
-                journalpostRepository.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
+                journalpostService.kanSendeInn(listOf(journalpostId)).also { kanSendesInn ->
                     if (!kanSendesInn) {
                         logger.warn("JournalpostId $journalpostId kan ikke sendes inn. Filtreres bort fra innsendingen.")
                     }

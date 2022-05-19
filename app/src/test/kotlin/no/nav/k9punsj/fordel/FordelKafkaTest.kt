@@ -1,7 +1,7 @@
 package no.nav.k9punsj.fordel
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.MockClock
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
@@ -13,8 +13,11 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
@@ -37,6 +40,10 @@ import java.util.UUID
     HendelseMottaker::class,
     AksjonspunktServiceImpl::class,
     JournalpostRepository::class,
+    JournalpostService::class,
+    SafGateway::class,
+    DokarkivGateway::class,
+    ObjectMapper::class,
     AksjonspunktRepository::class,
     PersonService::class,
     PersonRepository::class,
@@ -49,6 +56,12 @@ internal class FordelKafkaTest {
 
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
+
+    @MockBean
+    private lateinit var safGateway: SafGateway
+
+    @MockBean
+    private lateinit var dokarkivGateway: DokarkivGateway
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktServiceImpl

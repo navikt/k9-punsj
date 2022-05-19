@@ -61,7 +61,7 @@ internal class BrevServiceImplTest {
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
-        Mockito.doAnswer { true }.`when`(journalpostService).kanSendeInn(Mockito.anyString())
+        Mockito.doAnswer { true }.`when`(journalpostService).kanSendeInn(Mockito.anyList())
         Mockito.doAnswer { Person("123", "1234", "1000000000000") }.`when`(personService).finnPersonVedNorskIdentFørstDbSåPdl("1234")
 
         val forJournalpostId = IdGenerator.nesteId()
