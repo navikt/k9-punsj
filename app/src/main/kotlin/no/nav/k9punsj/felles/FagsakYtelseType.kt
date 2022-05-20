@@ -7,7 +7,6 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
     OMSORGSPENGER_KRONISK_SYKT_BARN("OMP_KS", "Omsorgspenger kronisk sykt barn", "OM", "OMS"),
     OMSORGSPENGER_MIDLERTIDIG_ALENE("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS"),
     OMSORGSPENGER_ALENE_OMSORGEN("OMP_AO", "Alene om omsorgen", "OM", "OMS"),
-    OMSORGSPENGERUTBETALING("OMP_UT", "Omsorgspengerutbetaling", "OM", "OMS"),
     UKJENT("UKJENT", "Ukjent", null, null),
     UDEFINERT("-", "Ikke definert", null, null);
 

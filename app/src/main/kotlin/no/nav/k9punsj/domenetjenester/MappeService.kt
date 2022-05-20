@@ -121,7 +121,7 @@ class MappeService(
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGERUTBETALING)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
 
         val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerutbetalingSøknadDto(
