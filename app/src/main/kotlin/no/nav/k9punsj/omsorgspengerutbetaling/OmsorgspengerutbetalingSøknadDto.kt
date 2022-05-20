@@ -50,9 +50,9 @@ data class SvarOmsUtDto(
 )
 
 internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGERUTBETALING)
+    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGERUTBETALING.kode, listOf())
+        return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -63,7 +63,7 @@ internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
                 OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
             }
         }
-    return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGERUTBETALING.kode, søknader)
+    return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsUtvisning(): OmsorgspengerutbetalingSøknadDto {

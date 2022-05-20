@@ -45,11 +45,6 @@ internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYt
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
                 type
             }
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGERUTBETALING.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER // TODO: Finnes ikke en for omsorgspengerutbetaling
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
                 val type = FagsakYtelseType.OMSORGSPENGER_KS
                 logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
