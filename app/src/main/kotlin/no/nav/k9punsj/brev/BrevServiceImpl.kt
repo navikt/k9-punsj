@@ -41,7 +41,7 @@ class BrevServiceImpl(
             brevData = brevData
         )
 
-        val kanSendeInn = journalpostService.kanSendeInn(brevEntitet.forJournalpostId)
+        val kanSendeInn = journalpostService.kanSendeInn(listOf(brevEntitet.forJournalpostId))
         if (kanSendeInn) {
             val aktørId = personService.finnPersonVedNorskIdentFørstDbSåPdl(brevData.soekerId).aktørId
             val (bestilling, feil) = MapDokumentTilK9Formidling(brevEntitet.brevId,

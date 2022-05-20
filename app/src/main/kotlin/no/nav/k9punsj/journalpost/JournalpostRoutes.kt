@@ -110,7 +110,7 @@ internal class JournalpostRoutes(
                                 journalpostId = journalpostInfo.journalpostId,
                                 norskIdent = personIdent,
                                 dokumenter = journalpostInfo.dokumenter,
-                                kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
+                                kanSendeInn = journalpostService.kanSendeInn(listOf(request.journalpostId())),
                                 venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
                                 punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
                                     punsjInnsendingType
@@ -150,7 +150,7 @@ internal class JournalpostRoutes(
                                         punsjInnsendingType = if (punsjInnsendingType != null) PunsjInnsendingType.fraKode(
                                             punsjInnsendingType
                                         ) else null,
-                                        kanSendeInn = journalpostService.kanSendeInn(request.journalpostId()),
+                                        kanSendeInn = journalpostService.kanSendeInn(listOf(request.journalpostId())),
                                         erSaksbehandler = pepClient.erSaksbehandler(),
                                         erInngående = journalpostInfo.erInngående,
                                         kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
@@ -312,7 +312,7 @@ internal class JournalpostRoutes(
                     ?: return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
-                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
+                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
 
                 if (kanSendeInn) {
                     val nyVerdi = journalpost.copy(skalTilK9 = null)
@@ -338,7 +338,7 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                val kanSendeInn = journalpostService.kanSendeInn(journalpostId)
+                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
                 if (kanSendeInn) {
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                     journalpostService.settTilFerdig(journalpostId)

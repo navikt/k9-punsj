@@ -161,8 +161,8 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
-    internal suspend fun kanSendeInn(journalpostId: String): Boolean {
-        return journalpostRepository.kanSendeInn(listOf(journalpostId))
+    internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
+        return journalpostRepository.kanSendeInn(journalpostId)
     }
 
     internal suspend fun lagre(punsjJournalpost: PunsjJournalpost, kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL) {
@@ -177,6 +177,26 @@ class JournalpostService(
 
     internal suspend fun settTilFerdig(journalpostId: String) {
         journalpostRepository.ferdig(journalpostId)
+    }
+
+    internal suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
+        return journalpostRepository.journalpostIkkeEksisterer(journalpostId)
+    }
+
+    internal suspend fun hent(journalpostId: String): PunsjJournalpost {
+        return journalpostRepository.hent(journalpostId)
+    }
+
+    internal suspend fun settAlleTilFerdigBehandlet(journalpostIder: List<String>) {
+        return journalpostRepository.settAlleTilFerdigBehandlet(journalpostIder)
+    }
+
+    internal suspend fun opprettJournalpost(jp: PunsjJournalpost): PunsjJournalpost {
+        return journalpostRepository.opprettJournalpost(jp)
+    }
+
+    internal suspend fun settInnsendingstype(type: PunsjInnsendingType, journalpostId: String) {
+        journalpostRepository.settInnsendingstype(type, journalpostId)
     }
 }
 

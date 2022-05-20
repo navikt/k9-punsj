@@ -3,7 +3,6 @@ package no.nav.k9punsj.domenetjenester
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgSøknadDto
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
@@ -13,7 +12,7 @@ import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.omsorgspengermidlertidigalene.NyOmsMASøknad
 import no.nav.k9punsj.omsorgspengerutbetaling.OmsorgspengerutbetalingSøknadDto
@@ -24,11 +23,11 @@ import java.util.UUID
 
 @Service
 class MappeService(
-    val mappeRepository: MappeRepository,
-    val søknadRepository: SøknadRepository, // TODO: Endre till bruk av service
-    val bunkeRepository: BunkeRepository,
-    val personService: PersonService,
-    val journalpostRepository: JournalpostRepository, // TODO: Endre til o bruke JournalpostService
+    private val mappeRepository: MappeRepository,
+    private val soknadService: SoknadService,
+    private val bunkeRepository: BunkeRepository,
+    private val personService: PersonService,
+    private val journalpostService: JournalpostService
 ) {
 
     suspend fun hentMappe(person: Person): Mappe {
@@ -209,24 +208,24 @@ class MappeService(
             journalposter = journalposter,
             søknad = objectMapper().convertValue<JsonB>(dto)
         )
-        return søknadRepository.opprettSøknad(søknadEntitet)
+        return soknadService.opprettSøknad(søknadEntitet)
     }
 
     private suspend fun hentTidligsteMottattDatoFraJournalposter(journalpostIdDto: String): LocalDateTime? {
-        return journalpostRepository.hentHvis(journalpostIdDto)?.mottattDato
+        return journalpostService.hentHvisJournalpostMedId(journalpostIdDto)?.mottattDato
     }
 
     suspend fun utfyllendeInnsendingPsb(
         pleiepengerSøknadDto: PleiepengerSyktBarnSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, PleiepengerSyktBarnSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(pleiepengerSøknadDto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(pleiepengerSøknadDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(pleiepengerSøknadDto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(pleiepengerSøknadDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
 
             val nySøknad = pleiepengerSøknadDto.copy(journalposter = journalposter.values.toList()
                 .filterIsInstance<String>())
@@ -240,13 +239,13 @@ class MappeService(
         dto: PleiepengerLivetsSluttfaseSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, PleiepengerLivetsSluttfaseSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(dto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(dto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(dto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(dto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
 
             val nySøknad = dto.copy(journalposter = journalposter.values.toList()
                 .filterIsInstance<String>())
@@ -260,13 +259,13 @@ class MappeService(
         korrigeringInntektsmeldingDto: KorrigeringInntektsmeldingDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, KorrigeringInntektsmeldingDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(korrigeringInntektsmeldingDto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(korrigeringInntektsmeldingDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(korrigeringInntektsmeldingDto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(korrigeringInntektsmeldingDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = korrigeringInntektsmeldingDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
@@ -278,13 +277,13 @@ class MappeService(
         omsorgspengerutbetalingSøknadDto: OmsorgspengerutbetalingSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, OmsorgspengerutbetalingSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerutbetalingSøknadDto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(omsorgspengerutbetalingSøknadDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(omsorgspengerutbetalingSøknadDto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerutbetalingSøknadDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = omsorgspengerutbetalingSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
@@ -296,13 +295,13 @@ class MappeService(
         omsorgspengerKroniskSyktBarnSøknadDto: OmsorgspengerKroniskSyktBarnSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, OmsorgspengerKroniskSyktBarnSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerKroniskSyktBarnSøknadDto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(omsorgspengerKroniskSyktBarnSøknadDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(omsorgspengerKroniskSyktBarnSøknadDto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerKroniskSyktBarnSøknadDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = omsorgspengerKroniskSyktBarnSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
@@ -314,13 +313,13 @@ class MappeService(
         omsorgspengerMidlertidigAleneSøknadDto: OmsorgspengerMidlertidigAleneSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, OmsorgspengerMidlertidigAleneSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(omsorgspengerMidlertidigAleneSøknadDto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(omsorgspengerMidlertidigAleneSøknadDto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(omsorgspengerMidlertidigAleneSøknadDto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(omsorgspengerMidlertidigAleneSøknadDto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = omsorgspengerMidlertidigAleneSøknadDto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
@@ -332,13 +331,13 @@ class MappeService(
         dto: OmsorgspengerAleneOmsorgSøknadDto,
         saksbehandler: String,
     ): Pair<SøknadEntitet, OmsorgspengerAleneOmsorgSøknadDto>? {
-        val hentSøknad = søknadRepository.hentSøknad(dto.soeknadId)!!
+        val hentSøknad = soknadService.hentSøknad(dto.soeknadId)!!
         return if (hentSøknad.sendtInn.not()) {
             val journalposter = leggTilJournalpost(dto.journalposter, hentSøknad.journalposter)
             val søknadJson = objectMapper().convertValue<JsonB>(dto)
             val oppdatertSøknad =
                 hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
-            søknadRepository.oppdaterSøknad(oppdatertSøknad)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
             val nySøknad = dto.copy(journalposter = journalposter.values.toList().filterIsInstance<String>())
             Pair(oppdatertSøknad, nySøknad)
         } else {
@@ -371,7 +370,7 @@ class MappeService(
     ): Mappe {
         val alleBunker = bunkeRepository.hentAlleBunkerForMappe(mappeId!!)
         val bunkerId = alleBunker.map { b -> b.bunkeId }.toList()
-        val hentAlleSøknaderForBunker = bunkerId.flatMap { id -> søknadRepository.hentAlleSøknaderForBunke(id) }
+        val hentAlleSøknaderForBunker = bunkerId.flatMap { id -> soknadService.hentAlleSøknaderForBunke(id) }
 
         if (søknadId != null) {
             val harFeilet = hentAlleSøknaderForBunker.map { s -> s.søknadId }.contains(søknadId).not()
@@ -388,7 +387,7 @@ class MappeService(
     }
 
     suspend fun hentSøknad(søknad: String): SøknadEntitet? {
-        return søknadRepository.hentSøknad(søknad)
+        return soknadService.hentSøknad(søknad)
     }
 }
 

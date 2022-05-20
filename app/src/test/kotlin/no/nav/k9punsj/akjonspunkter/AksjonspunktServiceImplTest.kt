@@ -1,5 +1,6 @@
 package no.nav.k9punsj.akjonspunkter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
@@ -12,8 +13,11 @@ import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
+import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
@@ -34,10 +38,13 @@ import java.util.UUID
 @ContextConfiguration(classes = [
     AksjonspunktServiceImpl::class,
     JournalpostRepository::class,
+    JournalpostService::class,
+    SafGateway::class,
+    DokarkivGateway::class,
+    ObjectMapper::class,
     AksjonspunktRepository::class,
     MappeRepository::class,
     BunkeRepository::class,
-    SøknadRepository::class,
     SøknadRepository::class,
     PersonService::class,
     PersonRepository::class,
@@ -48,6 +55,12 @@ internal class AksjonspunktServiceImplTest {
 
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
+
+    @MockBean
+    private lateinit var safGateway: SafGateway
+
+    @MockBean
+    private lateinit var dokarkivGateway: DokarkivGateway
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktServiceImpl
@@ -68,7 +81,7 @@ internal class AksjonspunktServiceImplTest {
     private lateinit var personRepository: PersonRepository
 
     @Autowired
-    private lateinit var journalpostRepository: JournalpostRepository
+    private lateinit var journalpostService: JournalpostService
 
     @Test
     fun `opprett aksjonspunkt og deretter sett på vent`(): Unit = runBlocking {
@@ -79,7 +92,7 @@ internal class AksjonspunktServiceImplTest {
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostService.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
@@ -112,7 +125,7 @@ internal class AksjonspunktServiceImplTest {
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
         val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostService.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
             aksjonspunktId = UUID.randomUUID().toString(),
