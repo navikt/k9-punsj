@@ -29,7 +29,7 @@ fun WireMockServer.stubJournalføringAvNotat(
             .withRequestBody(WireMock.matchingJsonPath("$.bruker.idType", WireMock.equalTo("FNR")))
             .withRequestBody(WireMock.matchingJsonPath("$.avsenderMottaker.navn", WireMock.matching(".*")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].tittel", WireMock.matching(".*")))
-            .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].brevkode", WireMock.equalTo("K9_PUNSJ_INNSENDING")))
+            .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].brevkode", WireMock.equalTo("K9_PUNSJ_NOTAT")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentkategori", WireMock.equalTo("IS")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[0].filtype", WireMock.equalTo("PDFA")))
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[0].variantformat", WireMock.equalTo("ARKIV")))
