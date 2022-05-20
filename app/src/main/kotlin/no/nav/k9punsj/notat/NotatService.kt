@@ -38,7 +38,7 @@ class NotatService(
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = coroutineContext.hentCorrelationId(),
             tittel = notat.tittel,
-            brevkode = "K9_PUNSJ_INNSENDING",
+            brevkode = "K9_PUNSJ_NOTAT",
             tema = Tema.OMS,
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
