@@ -4,9 +4,11 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -21,9 +23,9 @@ import java.util.UUID
 @Service
 internal class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
-    val journalpostRepository: JournalpostRepository, // TODO: Endre till bruk av service
+    val journalpostService: JournalpostService,
     val aksjonspunktRepository: AksjonspunktRepository,
-    val søknadRepository: SøknadRepository, // TODO: Endre till bruk av service
+    val søknadsService: SoknadService,
     val personService: PersonService
 ) : AksjonspunktService {
 
@@ -68,7 +70,7 @@ internal class AksjonspunktServiceImpl(
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         ansvarligSaksbehandler: String?
     ) {
-        val journalpost = journalpostRepository.hent(journalpostId)
+        val journalpost = journalpostService.hent(journalpostId)
         val eksternId = journalpost.uuid
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val aksjonspunktEntitet = aksjonspunktRepository.hentAksjonspunkt(journalpostId, aksjonspunktKode.kode)!!
@@ -104,7 +106,7 @@ internal class AksjonspunktServiceImpl(
                 mutableMap.plus(Pair(it.aksjonspunktKode.kode, AksjonspunktStatus.UTFØRT))
             }
 
-            val journalpost = journalpostRepository.hent(journalpostId)
+            val journalpost = journalpostService.hent(journalpostId)
             val eksternId = journalpost.uuid
             hendelseProducer.sendMedOnSuccess(
                 Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
@@ -141,8 +143,8 @@ internal class AksjonspunktServiceImpl(
     }
 
     override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?) {
-        val journalpost = journalpostRepository.hent(journalpostId)
-        val søknad = if (søknadId != null) søknadRepository.hentSøknad(søknadId = søknadId)?.søknad else null
+        val journalpost = journalpostService.hent(journalpostId)
+        val søknad = if (søknadId != null) søknadsService.hentSøknad(søknadId = søknadId)?.søknad else null
         val barnIdent  = if (søknad != null) {
             val vising: PleiepengerSyktBarnSøknadDto = objectMapper().convertValue(søknad)
             val norskIdent = vising.barn?.norskIdent
@@ -212,7 +214,7 @@ internal class AksjonspunktServiceImpl(
         if (søknadId == null) {
             return punsjJournalpost.aktørId
         }
-        val personId = søknadRepository.hentSøknad(søknadId = søknadId)?.søkerId ?: return punsjJournalpost.aktørId
+        val personId = søknadsService.hentSøknad(søknadId = søknadId)?.søkerId ?: return punsjJournalpost.aktørId
         val aktørIdPåSøknaden = personService.finnPerson(personId).aktørId
 
         // betyr at søknaden har byttet fra opprinnelig aktørId til ny aktørId (kan skje hvis den opprinnelig journalposten kommer inn på barnet sitt aktørNummer)

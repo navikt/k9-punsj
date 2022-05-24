@@ -59,7 +59,7 @@ class SoknadService(
                 )
             } catch (e: Exception) {
                 logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
-                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
+                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
             }
 
             leggerVedPayload(søknad, journalpostIder)
@@ -94,12 +94,6 @@ class SoknadService(
 
     suspend fun hentAlleSøknaderForBunke(bunkerId: String): List<SøknadEntitet> {
         return søknadRepository.hentAlleSøknaderForBunke(bunkerId)
-    }
-
-    private fun printStackTrace(e: Exception): String {
-        val sw = StringWriter()
-        e.printStackTrace(PrintWriter(sw))
-        return sw.toString()
     }
 
     private suspend fun leggerVedPayload(
