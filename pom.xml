@@ -20,7 +20,7 @@
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
         <kotlin.version>1.6.21</kotlin.version>
-        <springdoc.version>1.6.8</springdoc.version>
+        <springdoc.version>1.6.9</springdoc.version>
         <kotlinx-coroutines.version>1.6.1</kotlinx-coroutines.version>
         <logback.logstash.version>7.1.1</logback.logstash.version>
         <token-support.version>2.0.15</token-support.version>
