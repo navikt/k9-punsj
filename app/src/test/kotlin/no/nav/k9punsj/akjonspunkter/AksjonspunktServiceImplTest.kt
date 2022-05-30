@@ -11,20 +11,24 @@ import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
+import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -46,6 +50,8 @@ import java.util.UUID
     MappeRepository::class,
     BunkeRepository::class,
     SøknadRepository::class,
+    SoknadService::class,
+    InnsendingClient::class,
     PersonService::class,
     PersonRepository::class,
     TestPdlService::class,
@@ -61,6 +67,15 @@ internal class AksjonspunktServiceImplTest {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
+
+    @MockBean
+    private lateinit var innsendingClient: InnsendingClient
+
+    @MockBean
+    private lateinit var søknadMetrikkService: SøknadMetrikkService
+
+    @Autowired
+    private lateinit var soknadService: SoknadService
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktServiceImpl

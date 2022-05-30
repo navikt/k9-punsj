@@ -11,6 +11,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.PunsjJournalpost
@@ -46,6 +48,9 @@ import java.util.*
     DokarkivGateway::class,
     ObjectMapper::class,
     AksjonspunktRepository::class,
+    AksjonspunktServiceImpl::class,
+    SoknadService::class,
+    InnsendingClient::class,
     PersonService::class,
     PersonRepository::class,
     TestPdlService::class,
@@ -58,6 +63,12 @@ internal class HendelseMottakerTest {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
+
+    @MockBean
+    private lateinit var innsendingClient: InnsendingClient
+
+    @MockBean
+    private lateinit var soknadService: SoknadService
 
     @Autowired
     private lateinit var journalpostService: JournalpostService
