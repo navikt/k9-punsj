@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -37,7 +36,6 @@ internal class OmsorgspengerKroniskSyktBarnService(
     private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
-    private val aksjonspunktService: AksjonspunktService
 ) {
 
     private val logger = LoggerFactory.getLogger(OmsorgspengerKroniskSyktBarnService::class.java)
@@ -182,13 +180,6 @@ internal class OmsorgspengerKroniskSyktBarnService(
                     .json()
                     .bodyValueAndAwait(feilen)
             }
-
-            val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
-            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
-                journalpostId = journalpostIder,
-                erSendtInn = true,
-                ansvarligSaksbehandler = ansvarligSaksbehandler
-            )
 
             return ServerResponse
                 .accepted()
