@@ -2,11 +2,11 @@ package no.nav.k9punsj.akjonspunkter
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.PunsjJournalpost
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.kafka.Topics
@@ -21,9 +21,9 @@ import java.util.UUID
 @Service
 internal class AksjonspunktServiceImpl(
     val hendelseProducer: HendelseProducer,
-    val journalpostRepository: JournalpostRepository, // TODO: Endre till bruk av service
+    val journalpostService: JournalpostService,
     val aksjonspunktRepository: AksjonspunktRepository,
-    val søknadRepository: SøknadRepository, // TODO: Endre till bruk av service
+    val søknadsService: SoknadService,
     val personService: PersonService
 ) : AksjonspunktService {
 
@@ -43,19 +43,22 @@ internal class AksjonspunktServiceImpl(
             aksjonspunktId = UUID.randomUUID().toString(),
             aksjonspunktKode = aksjonspunktKode,
             journalpostId = punsjJournalpost.journalpostId,
-            aksjonspunktStatus = aksjonspunktStatus)
+            aksjonspunktStatus = aksjonspunktStatus
+        )
+        val punsjDtoJson = lagPunsjDto(
+            eksternId = eksternId,
+            journalpostId = punsjJournalpost.journalpostId,
+            aktørId = punsjJournalpost.aktørId,
+            aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
+            ytelse = ytelse,
+            type = type
+        )
 
         hendelseProducer.sendMedOnSuccess(
-            Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-            lagPunsjDto(eksternId = eksternId,
-                journalpostId = punsjJournalpost.journalpostId,
-                aktørId = punsjJournalpost.aktørId,
-                aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
-                ytelse = ytelse,
-                type = type
-            ),
-            eksternId.toString()) {
-
+            topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+            data = punsjDtoJson,
+            key = eksternId.toString()
+        ) {
             runBlocking {
                 aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
                 log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -68,21 +71,23 @@ internal class AksjonspunktServiceImpl(
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         ansvarligSaksbehandler: String?
     ) {
-        val journalpost = journalpostRepository.hent(journalpostId)
+        val journalpost = journalpostService.hent(journalpostId)
         val eksternId = journalpost.uuid
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val aksjonspunktEntitet = aksjonspunktRepository.hentAksjonspunkt(journalpostId, aksjonspunktKode.kode)!!
+        val punsjDtoJson = lagPunsjDto(
+            eksternId = eksternId,
+            journalpostId = journalpostId,
+            aktørId = journalpost.aktørId,
+            aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
+            ferdigstiltAv = ansvarligSaksbehandler,
+        )
 
         hendelseProducer.sendMedOnSuccess(
-            Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-            lagPunsjDto(eksternId,
-                journalpostId,
-                journalpost.aktørId,
-                mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
-                ferdigstiltAv = ansvarligSaksbehandler,
-            ),
-            eksternId.toString()) {
-
+            topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+            data = punsjDtoJson,
+            key = eksternId.toString()
+        ) {
             runBlocking {
                 aksjonspunktRepository.settStatus(aksjonspunktEntitet.aksjonspunktId, AksjonspunktStatus.UTFØRT)
                 log.info("Setter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ") til UTFØRT")
@@ -104,19 +109,22 @@ internal class AksjonspunktServiceImpl(
                 mutableMap.plus(Pair(it.aksjonspunktKode.kode, AksjonspunktStatus.UTFØRT))
             }
 
-            val journalpost = journalpostRepository.hent(journalpostId)
+            val journalpost = journalpostService.hent(journalpostId)
             val eksternId = journalpost.uuid
+            val punsjDtoJson = lagPunsjDto(
+                eksternId = eksternId,
+                journalpostId = journalpostId,
+                aktørId = journalpost.aktørId,
+                aksjonspunkter = mutableMap,
+                sendtInn = erSendtInn,
+                ferdigstiltAv = ansvarligSaksbehandler
+            )
+
             hendelseProducer.sendMedOnSuccess(
-                Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-                lagPunsjDto(
-                    eksternId = eksternId,
-                    journalpostId = journalpostId,
-                    aktørId = journalpost.aktørId,
-                    aksjonspunkter = mutableMap,
-                    sendtInn = erSendtInn,
-                    ferdigstiltAv = ansvarligSaksbehandler
-                ),
-                eksternId.toString()) {
+                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                data = punsjDtoJson,
+                key = eksternId.toString()
+            ) {
                 runBlocking {
                     aksjonspunkterSomSkalLukkes.forEach {
                         aksjonspunktRepository.settStatus(it.aksjonspunktId, AksjonspunktStatus.UTFØRT)
@@ -127,7 +135,11 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: Collection<String>, erSendtInn: Boolean, ansvarligSaksbehandler: String?) {
+    override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(
+        journalpostId: Collection<String>,
+        erSendtInn: Boolean,
+        ansvarligSaksbehandler: String?
+    ) {
         journalpostId.forEach { settUtførtPåAltSendLukkOppgaveTilK9Los(it, erSendtInn, ansvarligSaksbehandler) }
     }
 
@@ -135,15 +147,18 @@ internal class AksjonspunktServiceImpl(
         val aksjonspunkt =
             aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
         if (aksjonspunkt != null && aksjonspunkt.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET) {
-            return VentDto(aksjonspunkt.vent_årsak?.navn!!, aksjonspunkt.frist_tid!!.toLocalDate())
+            return VentDto(
+                venteÅrsak = aksjonspunkt.vent_årsak?.navn!!,
+                venterTil = aksjonspunkt.frist_tid!!.toLocalDate()
+            )
         }
         return null
     }
 
     override suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?) {
-        val journalpost = journalpostRepository.hent(journalpostId)
-        val søknad = if (søknadId != null) søknadRepository.hentSøknad(søknadId = søknadId)?.søknad else null
-        val barnIdent  = if (søknad != null) {
+        val journalpost = journalpostService.hent(journalpostId)
+        val søknad = if (søknadId != null) søknadsService.hentSøknad(søknadId = søknadId)?.søknad else null
+        val barnIdent = if (søknad != null) {
             val vising: PleiepengerSyktBarnSøknadDto = objectMapper().convertValue(søknad)
             val norskIdent = vising.barn?.norskIdent
             norskIdent
@@ -155,30 +170,34 @@ internal class AksjonspunktServiceImpl(
             aksjonspunktKode = AksjonspunktKode.VENTER_PÅ_INFORMASJON,
             journalpostId = journalpost.journalpostId,
             aksjonspunktStatus = AksjonspunktStatus.OPPRETTET,
-            //TODO er det riktig med 3 uker?? ta hensyn til røde dager? + helger?
             frist_tid = LocalDateTime.now().plusWeeks(3),
-            VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER)
+            vent_årsak = VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER
+        )
 
         val nåVærendeAp = aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.PUNSJ.kode)
 
         if (nåVærendeAp != null && nåVærendeAp.aksjonspunktStatus != AksjonspunktStatus.UTFØRT) {
+            val punsjDtoJson = lagPunsjDto(
+                eksternId = eksternId,
+                journalpostId = journalpostId,
+                aktørId = utledAktørId(søknadId, journalpost),
+                aksjonspunkter = mutableMapOf(
+                    AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
+                    AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
+                ),
+                barnIdent = barnIdent
+            )
+
             hendelseProducer.sendMedOnSuccess(
                 topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-                data = lagPunsjDto(eksternId,
-                    journalpostId = journalpostId,
-                    aktørId = uteldAktørId(søknadId, journalpost),
-                    aksjonspunkter = mutableMapOf(
-                        AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
-                        AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
-                    ),
-                    barnIdent = barnIdent
-                ),
-                key = eksternId.toString()) {
+                data = punsjDtoJson,
+                key = eksternId.toString()
+            ) {
                 runBlocking {
+                    log.info("Setter aksjonspunkt(${nåVærendeAp.aksjonspunktId}) med kode (${nåVærendeAp.aksjonspunktKode.kode}) til UTFØRT")
                     aksjonspunktRepository.settStatus(nåVærendeAp.aksjonspunktId, AksjonspunktStatus.UTFØRT)
-                    log.info("Setter aksjonspunkt(" + nåVærendeAp.aksjonspunktId + ") med kode (" + nåVærendeAp.aksjonspunktKode.kode + ") til UTFØRT")
                     aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                    log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
+                    log.info("Opprettet aksjonspunkt(${aksjonspunktEntitet.aksjonspunktId}) med kode (${aksjonspunktEntitet.aksjonspunktKode.kode})")
                 }
             }
         } else {
@@ -186,17 +205,21 @@ internal class AksjonspunktServiceImpl(
             val ventePunkt =
                 aksjonspunktRepository.hentAksjonspunkt(journalpostId, AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode)
             if (ventePunkt != null && ventePunkt.aksjonspunktStatus != AksjonspunktStatus.OPPRETTET) {
+                val punsjDtoJson = lagPunsjDto(
+                    eksternId = eksternId,
+                    journalpostId = journalpostId,
+                    aktørId = utledAktørId(søknadId, journalpost),
+                    aksjonspunkter = mutableMapOf(
+                        AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
+                    ),
+                    barnIdent = barnIdent
+                )
+
                 hendelseProducer.sendMedOnSuccess(
                     topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
-                    data = lagPunsjDto(eksternId,
-                        journalpostId = journalpostId,
-                        aktørId = uteldAktørId(søknadId, journalpost),
-                        aksjonspunkter = mutableMapOf(
-                            AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
-                        ),
-                        barnIdent = barnIdent
-                    ),
-                    key = eksternId.toString()) {
+                    data = punsjDtoJson,
+                    key = eksternId.toString()
+                ) {
                     runBlocking {
                         aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
                         log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -208,15 +231,16 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
-    private suspend fun uteldAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost) : String? {
+    private suspend fun utledAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost): String? {
         if (søknadId == null) {
             return punsjJournalpost.aktørId
         }
-        val personId = søknadRepository.hentSøknad(søknadId = søknadId)?.søkerId ?: return punsjJournalpost.aktørId
+        val personId = søknadsService.hentSøknad(søknadId = søknadId)?.søkerId ?: return punsjJournalpost.aktørId
         val aktørIdPåSøknaden = personService.finnPerson(personId).aktørId
 
-        // betyr at søknaden har byttet fra opprinnelig aktørId til ny aktørId (kan skje hvis den opprinnelig journalposten kommer inn på barnet sitt aktørNummer)
         if (aktørIdPåSøknaden != punsjJournalpost.aktørId) {
+            // Betyr at søknaden har byttet fra opprinnelig aktørId til ny aktørId.
+            // Kan skje hvis den opprinnelig journalposten kommer inn på barnet sitt aktørNummer
             return aktørIdPåSøknaden
         }
         return punsjJournalpost.aktørId
@@ -230,11 +254,11 @@ internal class AksjonspunktServiceImpl(
         ytelse: String? = null,
         type: String? = null,
         barnIdent: String? = null,
-        sendtInn : Boolean? = null,
+        sendtInn: Boolean? = null,
         ferdigstiltAv: String? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
-            eksternId.toString(),
+            eksternId = eksternId.toString(),
             journalpostId = journalpostId,
             eventTid = LocalDateTime.now(),
             aktørId = aktørId,
@@ -245,6 +269,7 @@ internal class AksjonspunktServiceImpl(
             sendtInn = sendtInn,
             ferdigstiltAv = ferdigstiltAv
         )
+
         return objectMapper().writeValueAsString(punsjEventDto)
     }
 }

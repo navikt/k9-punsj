@@ -13,6 +13,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.PunsjJournalpost
@@ -25,6 +27,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Mock
 import org.mockito.Mockito.doNothing
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -49,6 +52,9 @@ import java.util.UUID
     PersonRepository::class,
     TestPdlService::class,
     SøknadRepository::class,
+    AksjonspunktServiceImpl::class,
+    SoknadService::class,
+    InnsendingClient::class,
     SimpleMeterRegistry::class,
     MockClock::class
 ])
@@ -62,6 +68,12 @@ internal class FordelKafkaTest {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
+
+    @MockBean
+    private lateinit var innsendingClient: InnsendingClient
+
+    @MockBean
+    private lateinit var soknadService: SoknadService
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktServiceImpl

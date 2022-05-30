@@ -50,14 +50,8 @@ class JournalpostService(
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
             if (!parsedJournalpost.harTilgang) {
-                logger.warn(
-                    "Saksbehandler har ikke tilgang. ${
-                        safJournalpost.copy(
-                            avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
-                            bruker = SafDtos.Bruker(null, null)
-                        )
-                    }"
-                )
+                val maskertJournalpost = safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null), bruker = SafDtos.Bruker(null, null))
+                logger.warn("Saksbehandler har ikke tilgang. Journalpost: [$maskertJournalpost]")
                 throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             } else {
                 val (norskIdent, aktørId) = when {
