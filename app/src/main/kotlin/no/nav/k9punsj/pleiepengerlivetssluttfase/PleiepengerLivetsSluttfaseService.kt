@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -43,6 +44,7 @@ internal class PleiepengerLivetsSluttfaseService(
     private val soknadService: SoknadService,
     private val punsjbolleService: PunsjbolleService,
     private val k9SakService: K9SakService,
+    private val aksjonspunktService: AksjonspunktService,
     @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI,
 ) {
 
@@ -158,6 +160,13 @@ internal class PleiepengerLivetsSluttfaseService(
                     .json()
                     .bodyValueAndAwait(OasFeil(feilen))
             }
+
+            val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                journalpostId = journalpostIder,
+                erSendtInn = true,
+                ansvarligSaksbehandler = ansvarligSaksbehandler
+            )
 
             return ServerResponse
                 .accepted()

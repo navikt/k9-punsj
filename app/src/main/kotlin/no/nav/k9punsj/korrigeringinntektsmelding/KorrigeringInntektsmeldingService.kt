@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
@@ -35,7 +36,8 @@ internal class KorrigeringInntektsmeldingService(
     private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
-    private val k9SakService: K9SakService
+    private val k9SakService: K9SakService,
+    private val aksjonspunktService: AksjonspunktService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(KorrigeringInntektsmeldingService::class.java)
@@ -116,12 +118,19 @@ internal class KorrigeringInntektsmeldingService(
             val validertSøknad = validerSøknad(søknad)
 
             soknadService.sendSøknad(
-                validertSøknad.first,
-                journalpostIder
+                søknad = validertSøknad.first,
+                journalpostIder = journalpostIder
             ) ?.let { feil ->
                 val (httpStatus, feilen) = feil
                 throw ValideringsFeil(feilen)
             }
+
+            val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                journalpostId = journalpostIder,
+                erSendtInn = true,
+                ansvarligSaksbehandler = ansvarligSaksbehandler
+            )
 
 
             return validertSøknad

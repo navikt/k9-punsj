@@ -1,12 +1,11 @@
 package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
@@ -14,16 +13,13 @@ import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.io.PrintWriter
-import java.io.StringWriter
 import kotlin.coroutines.coroutineContext
 
 @Service
-class SoknadService(
+internal class SoknadService(
     private val journalpostService: JournalpostService,
     private val søknadRepository: SøknadRepository,
     private val innsendingClient: InnsendingClient,
-    private val aksjonspunktService: AksjonspunktService,
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway
 ) {
@@ -59,19 +55,13 @@ class SoknadService(
                 )
             } catch (e: Exception) {
                 logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
-                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, printStackTrace(e))
+                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
             }
 
             leggerVedPayload(søknad, journalpostIder)
             journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
             logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
             søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-
-            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
-                journalpostIder,
-                erSendtInn = true,
-                ansvarligSaksbehandler = punsjetAvSaksbehandler
-            )
 
             søknadMetrikkService.publiserMetrikker(søknad)
             null
@@ -96,10 +86,8 @@ class SoknadService(
         return søknadRepository.hentAlleSøknaderForBunke(bunkerId)
     }
 
-    private fun printStackTrace(e: Exception): String {
-        val sw = StringWriter()
-        e.printStackTrace(PrintWriter(sw))
-        return sw.toString()
+    suspend fun hentSistEndretAvSaksbehandler(søknadId: String): String {
+        return søknadRepository.hentSøknad(søknadId)?.endret_av!!.replace("\"", "")
     }
 
     private suspend fun leggerVedPayload(

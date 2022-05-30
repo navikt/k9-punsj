@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -27,14 +28,15 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 
 @Service
-class OmsorgspengerMidlertidigAleneService(
+internal class OmsorgspengerMidlertidigAleneService(
     private val personService: PersonService,
     private val mappeService: MappeService,
     private val punsjbolleService: PunsjbolleService,
     private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val aksjonspunktService: AksjonspunktService
     ) {
 
     private companion object {
@@ -176,6 +178,13 @@ class OmsorgspengerMidlertidigAleneService(
                     .json()
                     .bodyValueAndAwait(OasFeil(feilen))
             }
+
+            val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
+            aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                journalpostId = journalpostIder,
+                erSendtInn = true,
+                ansvarligSaksbehandler = ansvarligSaksbehandler
+            )
 
             return ServerResponse
                 .accepted()
