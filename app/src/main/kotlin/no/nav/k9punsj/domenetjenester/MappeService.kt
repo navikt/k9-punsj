@@ -22,7 +22,7 @@ import java.time.LocalTime
 import java.util.UUID
 
 @Service
-class MappeService(
+internal class MappeService(
     private val mappeRepository: MappeRepository,
     private val soknadService: SoknadService,
     private val bunkeRepository: BunkeRepository,

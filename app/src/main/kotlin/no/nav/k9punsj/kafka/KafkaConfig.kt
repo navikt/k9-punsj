@@ -20,8 +20,8 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
-import org.springframework.kafka.listener.ContainerStoppingErrorHandler
 import java.net.InetAddress
 import java.time.Duration
 
@@ -77,7 +77,7 @@ class KafkaConfig(
     private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofMillis(RETRY_INTERVAL))
-        factory.setErrorHandler(ContainerStoppingErrorHandler())
+        factory.setCommonErrorHandler(CommonContainerStoppingErrorHandler())
         factory.consumerFactory = consumerFactory
         return factory
     }
