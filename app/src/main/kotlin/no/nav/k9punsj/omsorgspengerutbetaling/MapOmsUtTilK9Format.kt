@@ -101,7 +101,7 @@ internal class MapOmsUtTilK9Format(
             val fraværÅrsak = fraværsPeriode.fraværÅrsak
             val søknadÅrsak = fraværsPeriode.søknadÅrsak
             val aktivitetFravær = listOf(fraværsPeriode.aktivitetsFravær)
-            if (AktivitetFravær.ARBEIDSTAKER == fraværsPeriode.aktivitetsFravær && fraværsPeriode.organisasjonsnummer == null) {
+            if (AktivitetFravær.ARBEIDSTAKER == fraværsPeriode.aktivitetsFravær && fraværsPeriode.organisasjonsnummer.isNullOrEmpty()) {
                 feil.add(
                     Feil(
                         "fraværsPerioder[$index].organisasjonsnummer",
