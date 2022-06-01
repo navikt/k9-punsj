@@ -231,7 +231,12 @@ internal class JournalpostRoutes(
                         true -> PunsjbolleRuting.K9Sak
                         false -> PunsjbolleRuting.Infotrygd
                     }
-                    return@RequestContext punsjbolleRuting.serverResponse()
+                    val skalTilK9Sak = (punsjbolleRuting == PunsjbolleRuting.K9Sak)
+
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
                 }
 
                 val punsjbolleRuting = punsjbolleService.ruting(
@@ -249,7 +254,15 @@ internal class JournalpostRoutes(
                     lagreHvorJournalpostSkal(hentHvisJournalpostMedId, dto, punsjbolleRuting == PunsjbolleRuting.K9Sak)
                 }
 
-                return@RequestContext punsjbolleRuting.serverResponse()
+                if(punsjbolleRuting == PunsjbolleRuting.IkkeStøttet) {
+                    return@RequestContext serverResponseConflict()
+                }
+
+                val skalTilK9Sak = (punsjbolleRuting == PunsjbolleRuting.K9Sak)
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
             }
         }
 
@@ -525,11 +538,6 @@ internal class JournalpostRoutes(
 
     private suspend fun ServerRequest.identOgJournalpost() =
         body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
-
-    private suspend fun PunsjbolleRuting.serverResponse() = when (this) {
-        PunsjbolleRuting.IkkeStøttet -> status(HttpStatus.CONFLICT)
-        else -> ok()
-    }.json().bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = this == PunsjbolleRuting.K9Sak))
 
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
