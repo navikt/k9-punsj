@@ -15,7 +15,6 @@ import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
-import no.nav.k9punsj.utils.PeriodeUtils.erSatt
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
@@ -42,7 +41,7 @@ internal class MapOmsUtTilK9Format(
                 omsorgspengerUtbetaling.medAktivitet(this)
             }
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
-            dto.fravaersperioder?.leggTilFraværsperioder(dto)
+            dto.fravaersperioder?.leggTilFraværsperioder()
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerUtbetaling)
@@ -95,66 +94,41 @@ internal class MapOmsUtTilK9Format(
         omsorgspengerUtbetaling.medFosterbarn(barnListe)
     }
 
-    private fun List<OmsorgspengerutbetalingSøknadDto.FraværPeriode>.leggTilFraværsperioder(dto: OmsorgspengerutbetalingSøknadDto) {
-
-        val perioderMedTrekkAvDager = filter { it.periode.erSatt() }
-            .filter { it.tidPrDag?.somDuration() == Duration.ZERO }.map {
-                val somEnkeltDager = it.periode.somEnkeltDager()
-                somEnkeltDager.map { dag ->
-                    FraværPeriode(
-                        dag.somK9Periode(),
-                        Duration.ZERO,
+    private fun List<OmsorgspengerutbetalingSøknadDto.FraværPeriode>.leggTilFraværsperioder() {
+        val fraværPerioder = mapIndexed { index, fraværsPeriode ->
+            val periode = fraværsPeriode.periode.somK9Periode()
+            val timerBorte = fraværsPeriode.tidPrDag?.somDuration()
+            val fraværÅrsak = fraværsPeriode.fraværÅrsak
+            val søknadÅrsak = fraværsPeriode.søknadÅrsak
+            val aktivitetFravær = listOf(fraværsPeriode.aktivitetsFravær)
+            if (AktivitetFravær.ARBEIDSTAKER == fraværsPeriode.aktivitetsFravær && fraværsPeriode.organisasjonsnummer == null) {
+                feil.add(
+                    Feil(
+                        "fraværsPerioder[$index].organisasjonsnummer",
                         null,
-                        null,
-                        listOf(AktivitetFravær.ARBEIDSTAKER),
-                        Organisasjonsnummer.of(dto.organisasjonsnummer),
-                        dto.arbeidsforholdId
+                        "organisasjonsnummer kan ikke være null dersom aktivitetsFravær er ARBEIDSTAKER"
                     )
-                }
-            }.flatten()
-
-        val fullDagListe = filter { it.periode.erSatt() }
-            .filter { it.faktiskTidPrDag == null }
-            .map {
-                FraværPeriode(
-                    it.periode.somK9Periode(),
-                    it.tidPrDag?.somDuration(),
-                    null,
-                    null,
-                    listOf(AktivitetFravær.ARBEIDSTAKER),
-                    Organisasjonsnummer.of(dto.organisasjonsnummer),
-                    dto.arbeidsforholdId
                 )
-            }.toList()
+            }
 
-        val delvisDagListe = filter { it.periode.erSatt() }
-            .filter { it.faktiskTidPrDag != null && it.tidPrDag?.somDuration() != Duration.ZERO }
-            .map {
-                FraværPeriode(
-                    it.periode.somK9Periode(),
-                    it.tidPrDag?.somDuration(),
-                    null,
-                    null,
-                    listOf(AktivitetFravær.ARBEIDSTAKER),
-                    Organisasjonsnummer.of(dto.organisasjonsnummer),
-                    dto.arbeidsforholdId
-                )
-            }.toList()
+            val organisasjonsnummer = Organisasjonsnummer.of(fraværsPeriode.organisasjonsnummer)
 
-        val fraværsperioder : MutableList<FraværPeriode> = mutableListOf()
-        fraværsperioder.addAll(perioderMedTrekkAvDager)
-        fraværsperioder.addAll(fullDagListe)
-        fraværsperioder.addAll(delvisDagListe)
-
-        omsorgspengerUtbetaling.medFraværsperioderKorrigeringIm(fraværsperioder)
+            FraværPeriode(periode, timerBorte, fraværÅrsak, søknadÅrsak, aktivitetFravær, organisasjonsnummer, null)
+        }
+        omsorgspengerUtbetaling.medFraværsperioder(fraværPerioder)
     }
 
     private fun OmsorgspengerutbetalingSøknadDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
-            søknad.medJournalpost(Journalpost()
-                .medJournalpostId(journalpostId)
-                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes ?: false) // ikke nødvendig for korrigering av IM
-                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger ?: false) // ikke nødvendig for korrigering av IM
+            søknad.medJournalpost(
+                Journalpost()
+                    .medJournalpostId(journalpostId)
+                    .medInformasjonSomIkkeKanPunsjes(
+                        harInfoSomIkkeKanPunsjes ?: false
+                    ) // ikke nødvendig for korrigering av IM
+                    .medInneholderMedisinskeOpplysninger(
+                        harMedisinskeOpplysninger ?: false
+                    ) // ikke nødvendig for korrigering av IM
             )
         }
     }
@@ -164,7 +138,7 @@ internal class MapOmsUtTilK9Format(
         private val Validator = OmsorgspengerUtbetalingSøknadValidator()
         private const val Versjon = "1.0.0"
 
-        private fun PeriodeDto.somEnkeltDager() : List<PeriodeDto> {
+        private fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
             val lista: MutableList<PeriodeDto> = mutableListOf()
             for (i in 0 until Duration.between(fom?.atStartOfDay(), tom?.plusDays(1)?.atStartOfDay()).toDays()) {
                 lista.add(PeriodeDto(fom?.plusDays(i), fom?.plusDays(i)))
