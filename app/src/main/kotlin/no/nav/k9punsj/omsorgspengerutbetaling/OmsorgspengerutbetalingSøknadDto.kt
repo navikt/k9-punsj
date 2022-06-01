@@ -2,6 +2,9 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.søknad.felles.fravær.AktivitetFravær
+import no.nav.k9.søknad.felles.fravær.FraværÅrsak
+import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
@@ -24,14 +27,16 @@ data class OmsorgspengerutbetalingSøknadDto(
     val barn: List<BarnDto> = emptyList(),
     val journalposter: List<String>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
-    val organisasjonsnummer: String? = null,
-    val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null
 ) {
     data class FraværPeriode(
+        val aktivitetsFravær: AktivitetFravær,
+        val organisasjonsnummer: String? = null,
         val periode: PeriodeDto,
+        val fraværÅrsak: FraværÅrsak?,
+        val søknadÅrsak: SøknadÅrsak?,
         val faktiskTidPrDag: String?,
         val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
     )

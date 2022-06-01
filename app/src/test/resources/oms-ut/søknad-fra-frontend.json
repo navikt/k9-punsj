@@ -16,14 +16,16 @@
       "foedselsdato": "2018-10-30"
     }
   ],
-  "organisasjonsnummer": "910909088",
-  "arbeidsforholdId": "1337",
   "fravaersperioder": [{
+    "aktivitetsFravær": "ARBEIDSTAKER",
+    "organisasjonsnummer": "910909088",
+    "fraværÅrsak": "ORDINÆRT_FRAVÆR",
+    "søknadÅrsak": "NYOPPSTARTET_HOS_ARBEIDSGIVER",
       "periode": {
         "fom": "2018-12-26",
         "tom": "2018-12-31"
       },
-      "faktiskTidPrDag": null
+      "faktiskTidPrDag": "7,5"
     }],
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {

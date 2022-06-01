@@ -10,6 +10,10 @@
   "arbeidsforholdId": "",
   "fravaersperioder": [
     {
+      "aktivitetsFravær": "ARBEIDSTAKER",
+      "organisasjonsnummer": "910909088",
+      "fraværÅrsak": "ORDINÆRT_FRAVÆR",
+      "søknadÅrsak": "NYOPPSTARTET_HOS_ARBEIDSGIVER",
       "periode": {
         "fom": "2021-11-08",
         "tom": "2021-11-13"
@@ -17,6 +21,10 @@
       "faktiskTidPrDag": "0"
     },
     {
+      "aktivitetsFravær": "FRILANSER",
+      "organisasjonsnummer": null,
+      "fraværÅrsak": "ORDINÆRT_FRAVÆR",
+      "søknadÅrsak": "NYOPPSTARTET_HOS_ARBEIDSGIVER",
       "periode": {
         "fom": "2021-11-14",
         "tom": "2021-11-14"
@@ -24,6 +32,10 @@
       "faktiskTidPrDag": "0"
     },
     {
+      "aktivitetsFravær": "SELVSTENDIG_VIRKSOMHET",
+      "organisasjonsnummer": null,
+      "fraværÅrsak": "ORDINÆRT_FRAVÆR",
+      "søknadÅrsak": "NYOPPSTARTET_HOS_ARBEIDSGIVER",
       "periode": {
         "fom": "2021-11-16",
         "tom": "2021-11-17"
