@@ -25,7 +25,7 @@
         <logback.logstash.version>7.2</logback.logstash.version>
         <token-support.version>2.0.20</token-support.version>
         <dusseldorf-ktor.version>3.1.6.8-248832c</dusseldorf-ktor.version>
-        <k9-rapid.version>1.20220406090141-f40e84a</k9-rapid.version>
+        <k9-rapid.version>1.20220602105039-77944ce</k9-rapid.version>
         <k9-sak.version>3.3.3</k9-sak.version>
         <k9-formidling.version>0.0.19</k9-formidling.version>
         <k9-format.version>5.8.8</k9-format.version>
