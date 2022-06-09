@@ -1,6 +1,6 @@
 package no.nav.k9punsj.felles
 
-internal class IkkeStøttetJournalpost : Throwable("Punsj støtter ikke denne journalposten.")
+internal class IkkeStøttetJournalpost(feil: String = "Punsj støtter ikke denne journalposten.") : Throwable(feil)
 internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
 internal class IkkeTilgang(feil: String) : Throwable(feil)
 internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
