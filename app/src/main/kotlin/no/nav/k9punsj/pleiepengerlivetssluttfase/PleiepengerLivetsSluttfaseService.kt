@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
-import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -44,8 +43,7 @@ internal class PleiepengerLivetsSluttfaseService(
     private val soknadService: SoknadService,
     private val punsjbolleService: PunsjbolleService,
     private val k9SakService: K9SakService,
-    private val aksjonspunktService: AksjonspunktService,
-    @Value("\${no.nav.k9sak.frontend}") private val k9SakFrontend: URI,
+    private val aksjonspunktService: AksjonspunktService
 ) {
 
     private companion object {
@@ -170,7 +168,6 @@ internal class PleiepengerLivetsSluttfaseService(
 
             return ServerResponse
                 .accepted()
-                .location(k9SakFrontendUrl(søknadK9Format))
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
 
@@ -281,12 +278,6 @@ internal class PleiepengerLivetsSluttfaseService(
                 .bodyValueAndAwait(perioder)
         }
     }
-
-    private suspend fun k9SakFrontendUrl(søknad: Søknad) = punsjbolleService.opprettEllerHentFagsaksnummer(
-        søker = søknad.søker.personIdent.verdi,
-        pleietrengende = søknad.getYtelse<PleipengerLivetsSluttfase>().pleietrengende.personIdent.verdi,
-        søknad = søknad
-    ).let { saksnummer -> URI("$k9SakFrontend/fagsak/${saksnummer.saksnummer}/behandling/") }
 
     private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {
         if (dto.soekerId.isNullOrBlank() || dto.pleietrengende == null || dto.pleietrengende.norskIdent.isNullOrBlank()) {

@@ -106,8 +106,6 @@ spec:
       value: https://k9-punsjbolle.intern.nav.no/api
     - name: K9PUNSJBOLLE_SCOPE
       value: api://prod-gcp.omsorgspenger.k9-punsjbolle/.default
-    - name: K9SAK_FRONTEND
-      value: https://app.adeo.no/k9/web
     - name: AAREG_BASE_URL
       value: https://modapp.adeo.no/aareg-services/api/v1
     - name: EREG_BASE_URL
