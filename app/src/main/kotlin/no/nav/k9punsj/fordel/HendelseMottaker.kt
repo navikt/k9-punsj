@@ -17,7 +17,7 @@ import java.util.UUID
 
 @Service
 class HendelseMottaker @Autowired constructor(
-    val journalpostService: JournalpostService,
+    private val journalpostService: JournalpostService,
     private val aksjonspunktService: AksjonspunktService,
     private val meterRegistry: MeterRegistry
 ) {
