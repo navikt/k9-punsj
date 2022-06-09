@@ -92,7 +92,7 @@ private fun Routes(
             .headers()
             .header(CallIdKey)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        val correlationId = UUID.randomUUID().toString()
+        val correlationId = callId
         serverRequest.attributes()[RequestIdKey] = requestId
         serverRequest.attributes()[CorrelationIdKey] = correlationId
         serverRequest.attributes()[CallIdKey] = callId
@@ -116,7 +116,7 @@ private fun Routes(
             .bodyValueAndAwait("Søknad finns ikke, error: ${error.message}")
     }
     onError<Throwable> { error, serverRequest ->
-        val exceptionId = ULID().nextValue().toString()
+        val exceptionId = serverRequest.headers().header(CallIdKey).firstOrNull() ?: UUID.randomUUID().toString()
         logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
