@@ -1,4 +1,4 @@
-package no.nav.k9punsj.openapi
+package no.nav.k9punsj.fordel
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -7,14 +7,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @Tag(name = "HendelseMottaker", description = "Prosesserer")
-internal class HendelseController {
+internal class HendelseOpenApi {
     @PostMapping(
         "/prosesserHendelse/",
         consumes = ["application/json"],

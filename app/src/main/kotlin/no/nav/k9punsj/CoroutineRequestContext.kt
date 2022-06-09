@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
+import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -17,6 +18,7 @@ import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.coRouter
 import org.springframework.web.reactive.function.server.json
 import java.net.URI
@@ -108,6 +110,11 @@ private fun Routes(
         ) ?: requestedOperation(serverRequest)
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
+    }
+    onError<IkkeFunnet> { _, _ ->
+        ServerResponse
+            .notFound()
+            .buildAndAwait()
     }
     onError<SøknadFinnsIkke> { error, _ ->
         ServerResponse

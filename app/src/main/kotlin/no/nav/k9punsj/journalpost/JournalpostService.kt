@@ -155,6 +155,11 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
+    internal suspend fun hentPunsjInnsendingType(journalpostId: String): PunsjInnsendingType? {
+        return hentHvisJournalpostMedId(journalpostId)?.type
+            .let { if(it != null) PunsjInnsendingType.fraKode(it) else null }
+    }
+
     internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
         return journalpostRepository.kanSendeInn(journalpostId)
     }
@@ -163,10 +168,6 @@ class JournalpostService(
         journalpostRepository.lagre(punsjJournalpost, kilde) {
             punsjJournalpost
         }
-    }
-
-    internal suspend fun omfordelJournalpost(journalpostId: String, ytelse: FagsakYtelseType) {
-        // TODO: Legge på en kafka-topic k9-fordel håndterer.
     }
 
     internal suspend fun settTilFerdig(journalpostId: String) {

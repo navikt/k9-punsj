@@ -5,7 +5,7 @@ internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før 
 internal class IkkeTilgang(feil: String) : Throwable(feil)
 internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
 internal class UgyldigToken(feil: String) : Throwable(feil)
-internal class IkkeFunnet(feil: String) : Throwable(feil)
+internal class IkkeFunnet : Throwable()
 internal class UventetFeil(feil: String) : Throwable(feil)
 internal class SøknadFinnsIkke(id: String) : Throwable("Søknaden med id=$id finnes ikke")
 internal class ValideringsFeil(feil: String) : Throwable(feil)
