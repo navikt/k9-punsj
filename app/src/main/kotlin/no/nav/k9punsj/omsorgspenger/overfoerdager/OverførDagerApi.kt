@@ -14,8 +14,9 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
-@Configuration
-@IkkeKlarForProduksjon(begrunnelse = "Mangler håndtering av token på disse endepunktene")
+// Ikke i bruk
+// @Configuration
+// @IkkeKlarForProduksjon(begrunnelse = "Mangler håndtering av token på disse endepunktene")
 class OverførDagerApi(
     private val overførDagerSøknadService: OverførDagerSøknadService) {
     companion object {
@@ -23,7 +24,7 @@ class OverførDagerApi(
         private val logger: Logger = LoggerFactory.getLogger(OverførDagerApi::class.java)
     }
 
-    @Bean
+    //@Bean
     fun overførDagerRoutes() = PublicRoutes {
 
         POST("/api/$søknadTypeUri") { request ->

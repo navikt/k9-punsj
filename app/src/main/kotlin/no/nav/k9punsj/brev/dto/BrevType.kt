@@ -1,4 +1,4 @@
-package no.nav.k9punsj.brev
+package no.nav.k9punsj.brev.dto
 
 enum class BrevType(val kode: String, val navn: String) {
     FRITEKSTBREV("FRITEKSTBREV", "Fritekstbrev");

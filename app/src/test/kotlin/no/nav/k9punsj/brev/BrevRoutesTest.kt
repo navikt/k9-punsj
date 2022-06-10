@@ -6,6 +6,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.brev.dto.BrevVisningDto
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
@@ -116,7 +118,7 @@ internal class BrevRoutesTest {
             DokumentbestillingDto(
                 journalpostId = journalpostId,
                 soekerId = søker,
-                mottaker = DokumentbestillingDto.Mottaker("ORGNR", "1231245"),
+                mottakerDto = DokumentbestillingDto.Mottaker("ORGNR", "1231245"),
                 fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
                 dokumentMal = "INNTID"
             )

@@ -3,6 +3,8 @@ package no.nav.k9punsj.brev
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
+import no.nav.k9punsj.brev.dto.BrevType
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
