@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
+import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -17,6 +18,7 @@ import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.coRouter
 import org.springframework.web.reactive.function.server.json
 import java.net.URI
@@ -92,7 +94,7 @@ private fun Routes(
             .headers()
             .header(CallIdKey)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        val correlationId = UUID.randomUUID().toString()
+        val correlationId = callId
         serverRequest.attributes()[RequestIdKey] = requestId
         serverRequest.attributes()[CorrelationIdKey] = correlationId
         serverRequest.attributes()[CallIdKey] = callId
@@ -109,6 +111,11 @@ private fun Routes(
         logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
         serverResponse
     }
+    onError<IkkeFunnet> { _, _ ->
+        ServerResponse
+            .notFound()
+            .buildAndAwait()
+    }
     onError<SøknadFinnsIkke> { error, _ ->
         ServerResponse
             .badRequest()
@@ -116,7 +123,7 @@ private fun Routes(
             .bodyValueAndAwait("Søknad finns ikke, error: ${error.message}")
     }
     onError<Throwable> { error, serverRequest ->
-        val exceptionId = ULID().nextValue().toString()
+        val exceptionId = serverRequest.headers().header(CallIdKey).firstOrNull() ?: UUID.randomUUID().toString()
         logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(

@@ -37,7 +37,6 @@ internal object MockConfiguration {
             "PDL_SCOPE" to "pdl/.default",
             "DOKARKIV_SCOPE" to "dokarkiv/.default",
             "K9SAK_BASE_URL" to wireMockServer.getK9sakBaseUrl(),
-            "K9SAK_FRONTEND" to "http://localhost:3000/k9/web",
             "GOSYS_BASE_URL" to wireMockServer.getGosysBaseUrl(),
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",

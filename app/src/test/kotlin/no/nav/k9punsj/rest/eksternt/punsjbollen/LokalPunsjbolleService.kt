@@ -8,6 +8,7 @@ import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 @LokalProfil
@@ -19,6 +20,7 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         journalpostId: String?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("SAK1") }
@@ -28,6 +30,7 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         pleietrengende: String?,
         annenPart: String?,
         søknad: Søknad,
+        correlationId: String
     ) = SaksnummerDto("SAK1")
 
     override suspend fun ruting(
@@ -37,6 +40,7 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         journalpostId: String?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ) = when (journalpostId) {
         "45537868838" -> PunsjbolleRuting.IkkeStøttet
         "463687943" -> PunsjbolleRuting.Infotrygd

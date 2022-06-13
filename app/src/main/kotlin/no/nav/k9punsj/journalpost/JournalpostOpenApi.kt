@@ -1,4 +1,4 @@
-package no.nav.k9punsj.openapi
+package no.nav.k9punsj.journalpost
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
@@ -11,7 +11,12 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
-import no.nav.k9punsj.journalpost.JournalpostRoutes
+import no.nav.k9punsj.openapi.OasIdentDto
+import no.nav.k9punsj.openapi.OasJournalpostIder
+import no.nav.k9punsj.openapi.OasJournalpostInfo
+import no.nav.k9punsj.openapi.OasPunsjBolleDto
+import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.openapi.OasSøknadId
 
 @RestController
 @SecurityScheme(
@@ -22,41 +27,6 @@ import no.nav.k9punsj.journalpost.JournalpostRoutes
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostOpenApi {
-    @PostMapping(
-        JournalpostRoutes.Urls.OmfordelJournalpost,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "204",
-                description = "Journalpost omfordelt"
-            ),
-            ApiResponse(
-                responseCode = "401",
-                description = "Ikke innlogget"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "Ikke tilgang til journalposten"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Journalpost eksisterer ikke"
-            )
-        ]
-    )
-    @Operation(
-        summary = "Omfordele journalpost",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    fun OmfordelJournalpost(
-        @PathVariable("journalpost_id") journalpostId: String,
-        @RequestBody body: JournalpostRoutes.OmfordelingRequest,
-    ) {
-    }
-
     @PostMapping(
         JournalpostRoutes.Urls.HentJournalposter,
         consumes = ["application/json"],

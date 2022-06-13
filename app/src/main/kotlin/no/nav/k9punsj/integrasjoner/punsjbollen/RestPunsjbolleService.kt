@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
+import io.netty.handler.codec.http.HttpResponseStatus
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
@@ -14,7 +15,9 @@ import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
@@ -44,7 +48,8 @@ class RestPunsjbolleService(
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        fagsakYtelseType: FagsakYtelseType
+        fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
@@ -55,7 +60,6 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
-        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "saksnummer".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -73,6 +77,7 @@ class RestPunsjbolleService(
         pleietrengende: String?,
         annenPart: String?,
         søknad: Søknad,
+        correlationId: String
     ): SaksnummerDto {
         val requestBody = punsjbolleSaksnummerFraSøknadDto(
             søker = søker,
@@ -81,7 +86,6 @@ class RestPunsjbolleService(
             søknad = søknad
         )
 
-        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "saksnummer-fra-soknad".post(
             requestBody = requestBody,
             correlationId = correlationId
@@ -89,6 +93,11 @@ class RestPunsjbolleService(
 
         check(response.isSuccessful) {
             "Feil ved opprettEllerHentFagsaksnummer. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody"
+            if(response.statusCode == HttpStatus.CONFLICT.value()) {
+                throw IkkeStøttetJournalpost(responseBody)
+            } else {
+                throw UventetFeil(responseBody)
+            }
         }
 
         return responseBody.deserialiser()
@@ -100,7 +109,8 @@ class RestPunsjbolleService(
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        fagsakYtelseType: FagsakYtelseType
+        fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ): PunsjbolleRuting {
         val requestBody = punsjbolleSaksnummerDto(
             søker = søker,
@@ -111,7 +121,6 @@ class RestPunsjbolleService(
             fagsakYtelseType = fagsakYtelseType
         )
 
-        val correlationId = UUID.randomUUID().toString()
         val (url, response, responseBody) = "ruting".post(
             requestBody = requestBody,
             correlationId = correlationId
