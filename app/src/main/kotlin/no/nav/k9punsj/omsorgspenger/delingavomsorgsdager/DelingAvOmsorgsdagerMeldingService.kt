@@ -47,7 +47,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
                 )
             ) }.onSuccess {
                 hendelseProducer.send(
-                topicName = k9losAksjonspunkthendelseTopic
+                topicName = k9losAksjonspunkthendelseTopic,
                 data = it,
                 key = id
                 )
