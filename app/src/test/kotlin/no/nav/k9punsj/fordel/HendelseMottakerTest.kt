@@ -99,7 +99,7 @@ internal class HendelseMottakerTest {
         val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
         hendelseMottaker.prosesser(melding)
 
-        val journalpost = hendelseMottaker.journalpostService.hent(journalpostId)
+        val journalpost = journalpostService.hent(journalpostId)
         assertThat(journalpost).isNotNull
 
         assertCounter(
@@ -112,7 +112,6 @@ internal class HendelseMottakerTest {
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når det kommer samme uten status`() : Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val journalpostService = hendelseMottaker.journalpostService
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
@@ -121,13 +120,12 @@ internal class HendelseMottakerTest {
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
         val journalpost = journalpostService.hent(journalpostId)
-        Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`() : Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val journalpostService = hendelseMottaker.journalpostService
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
@@ -136,13 +134,12 @@ internal class HendelseMottakerTest {
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
         val journalpost = journalpostService.hent(journalpostId)
-        Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal fjerne oppgave når det kommer info fra fordel`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val journalpostService = hendelseMottaker.journalpostService
         val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
 
         hendelseMottaker.prosesser(førsteMelding)
@@ -152,12 +149,12 @@ internal class HendelseMottakerTest {
         hendelseMottaker.prosesser(meldingSomSkalLukkeOppgave)
 
         val journalpost = journalpostService.hent(meldingSomSkalLukkeOppgave.journalpostId)
-        Assertions.assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
 
         val alleAksjonspunkter =
             DatabaseUtil.getAksjonspunktRepo().hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
 
-        Assertions.assertThat(alleAksjonspunkter).hasSize(1)
-        Assertions.assertThat(alleAksjonspunkter[0].aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)
+        assertThat(alleAksjonspunkter).hasSize(1)
+        assertThat(alleAksjonspunkter[0].aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)
     }
 }

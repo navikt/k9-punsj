@@ -57,7 +57,6 @@ no.nav:
     scope: ${PDL_SCOPE}
   k9sak:
     base_url: ${K9SAK_BASE_URL}
-    frontend: ${K9SAK_FRONTEND}
   k9punsjbolle:
     base_url: ${K9PUNSJBOLLE_BASE_URL}
     scope: ${K9PUNSJBOLLE_SCOPE}

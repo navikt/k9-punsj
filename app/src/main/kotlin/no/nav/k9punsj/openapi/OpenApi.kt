@@ -1,19 +1,24 @@
 package no.nav.k9punsj.openapi
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.converter.ModelConverterContext
+import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.media.ObjectSchema
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.servers.Server
-import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import java.net.URI
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -121,3 +126,32 @@ data class OasHentPerson(
 data class OasPdlResponse(
     val person: PdlPersonDto,
 )
+
+/*
+Denne konvertereren brukes kun fordi OpenAPI
+ikke har implementert java.time.Duration - noe som førte til at api-dokumentasjon ble ubrukelig.
+https://github.com/swagger-api/swagger-core/issues/1445
+https://github.com/swagger-api/swagger-core/issues/2784
+ */
+private class DurationMockConverter : ModelConverter {
+    override fun resolve(
+        type: AnnotatedType,
+        context: ModelConverterContext,
+        chain: Iterator<ModelConverter>): Schema<*>? {
+
+        if (type.isSchemaProperty) {
+            val _type = Json.mapper().constructType(type.type)
+            if (_type != null) {
+                val cls = _type.rawClass
+                if (Duration::class.java.isAssignableFrom(cls)) {
+                    return ObjectSchema().example("PT7H25M")
+                }
+            }
+        }
+        return if (chain.hasNext()) {
+            chain.next().resolve(type, context, chain)
+        } else {
+            null
+        }
+    }
+}

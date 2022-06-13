@@ -19,6 +19,7 @@ internal class TestPunsjbolleService : PunsjbolleService {
         journalpostId: String?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ) = require(journalpostId != null || periode != null) {
         "Må sette minst en av journalpostId og periode"
     }.let { SaksnummerDto("133742069666") }
@@ -28,6 +29,7 @@ internal class TestPunsjbolleService : PunsjbolleService {
         pleietrengende: String?,
         annenPart: String?,
         søknad: Søknad,
+        correlationId: String
     ) = SaksnummerDto("133742069666")
 
     override suspend fun ruting(
@@ -37,5 +39,6 @@ internal class TestPunsjbolleService : PunsjbolleService {
         journalpostId: String?,
         periode: PeriodeDto?,
         fagsakYtelseType: FagsakYtelseType,
+        correlationId: String
     ) = PunsjbolleRuting.K9Sak
 }
