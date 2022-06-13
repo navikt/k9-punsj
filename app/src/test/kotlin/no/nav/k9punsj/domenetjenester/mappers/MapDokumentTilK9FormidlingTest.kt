@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
+import no.nav.k9punsj.brev.dto.MottakerDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,13 +24,13 @@ internal class MapDokumentTilK9FormidlingTest {
             brevId,
             saksnummer,
             "123",
-            DokumentbestillingDto.Mottaker("ORGNR", "1231245"),
+            MottakerDto("ORGNR", "1231245"),
             FagsakYtelseType.OMSORGSPENGER,
             "INNTID",
             null)
 
         // act
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isEmpty()
@@ -46,14 +47,14 @@ internal class MapDokumentTilK9FormidlingTest {
             brevId,
             saksnummer,
             "123",
-            DokumentbestillingDto.Mottaker("ORG2NR", "1231245"),
+            MottakerDto("ORG2NR", "1231245"),
             FagsakYtelseType.OMSORGSPENGER,
             "I2TID",
             null)
 
 
         // act
-        val (_, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
+        val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isNotEmpty

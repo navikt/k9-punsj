@@ -2,7 +2,6 @@ package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
-import no.nav.k9punsj.brev.dto.BrevType
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -11,7 +10,6 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 internal class BrevServiceImpl(
@@ -23,7 +21,6 @@ internal class BrevServiceImpl(
 
     override suspend fun bestillBrev(
         dokumentbestillingDto: DokumentbestillingDto,
-        brevType: BrevType,
         saksbehandler: String
     ): Boolean {
         val aktørId = personService.finnPersonVedNorskIdentFørstDbSåPdl(dokumentbestillingDto.soekerId).aktørId
@@ -39,7 +36,7 @@ internal class BrevServiceImpl(
             hendelseProducer.send(
                 topicName = brevBestillingTopic,
                 data = brevDataJson,
-                key = dokumentbestillingDto.brevId?: UUID.randomUUID().toString()
+                key = dokumentbestillingDto.brevId
             )
         } else {
             throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")

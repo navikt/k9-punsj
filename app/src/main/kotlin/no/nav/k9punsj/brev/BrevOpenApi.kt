@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.brev.dto.BrevVisningDto
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil

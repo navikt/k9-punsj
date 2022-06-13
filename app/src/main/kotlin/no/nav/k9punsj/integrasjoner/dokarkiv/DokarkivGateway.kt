@@ -190,7 +190,7 @@ class DokarkivGateway(
             400 -> throw FeilIAksjonslogg(feil)
             401 -> throw UgyldigToken(feil)
             403 -> throw IkkeTilgang(feil)
-            404 -> throw IkkeFunnet(feil)
+            404 -> throw IkkeFunnet()
             500 -> throw UventetFeil(feil)
             else -> {
                 throw IllegalStateException("${response.statusCode} -> " + feil)

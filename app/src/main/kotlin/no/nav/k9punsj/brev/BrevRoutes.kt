@@ -4,7 +4,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.brev.dto.BrevType
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
@@ -31,7 +30,6 @@ internal class BrevRoutes(
 
     internal object Urls {
         internal const val BestillBrev = "/brev/bestill" //post
-        internal const val HentAktørId = "/brev/aktorId" //get
     }
 
     @Bean
@@ -57,7 +55,6 @@ internal class BrevRoutes(
                 try {
                     brevService.bestillBrev(
                         dokumentbestillingDto = dokumentbestillingDto,
-                        brevType = BrevType.FRITEKSTBREV, // TODO: Dokument/BrevMal?
                         saksbehandler = saksbehandler)
                 } catch(e: Exception) {
                     return@RequestContext ServerResponse

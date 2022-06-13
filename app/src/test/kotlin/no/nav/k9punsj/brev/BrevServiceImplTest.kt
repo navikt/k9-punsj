@@ -6,8 +6,8 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.brev.dto.BrevType
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
+import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -35,7 +35,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @TestPropertySource(properties = ["spring.config.location = classpath:application.yml"])
 @ContextConfiguration(classes = [
     JournalpostRepository::class,
-    BrevRepository::class,
     BrevServiceImpl::class,
     TestBeans::class
 ])
@@ -71,7 +70,7 @@ internal class BrevServiceImplTest {
         val dokumentbestilling = lagDokumentbestillingPåJournalpost(forJournalpostId)
 
         // act
-        brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV, "saksbehandler")
+        brev.bestillBrev(dokumentbestillingDto = dokumentbestilling, saksbehandler = "saksbehandler")
 
         // assert
         Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9-dokumenthendelse")
@@ -98,7 +97,7 @@ internal class BrevServiceImplTest {
             "2",
             "123",
             "1234",
-            DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"),
+            MottakerDto(IdType.ORGNR.name, "Statnett"),
             FagsakYtelseType.OMSORGSPENGER,
             "INNTID"
         )
