@@ -5,9 +5,11 @@ import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -22,6 +24,7 @@ internal class BrevRoutes(
     private val brevService: BrevServiceImpl,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
+    private val personService: PersonService
 ) {
 
     private companion object {
@@ -30,6 +33,7 @@ internal class BrevRoutes(
 
     internal object Urls {
         internal const val BestillBrev = "/brev/bestill" //post
+        internal const val HentAktørId = "/brev/aktorId" //get
     }
 
     @Bean
@@ -66,6 +70,29 @@ internal class BrevRoutes(
                 return@RequestContext ServerResponse
                     .noContent()
                     .buildAndAwait()
+            }
+        }
+
+        // TODO: Skall fjernes når frontend har byttet til aktorId i PersonRoutes
+        GET("/api${Urls.HentAktørId}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent,
+                    Urls.HentAktørId
+                )?.let { return@RequestContext it }
+
+                val person = kotlin.runCatching { personService.finnPersonVedNorskIdentFørstDbSåPdl(norskIdent) }
+                    .getOrElse {
+                        return@RequestContext ServerResponse
+                            .badRequest()
+                            .json()
+                            .bodyValueAndAwait(OasFeil(it.message!!))
+                    }
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(person.aktørId)
             }
         }
     }

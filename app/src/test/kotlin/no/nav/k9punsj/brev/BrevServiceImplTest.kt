@@ -99,7 +99,8 @@ internal class BrevServiceImplTest {
             "1234",
             MottakerDto(IdType.ORGNR.name, "Statnett"),
             FagsakYtelseType.OMSORGSPENGER,
-            "INNTID"
+            "INNTID",
+            dokumentMal = "fritekst"
         )
     }
 }

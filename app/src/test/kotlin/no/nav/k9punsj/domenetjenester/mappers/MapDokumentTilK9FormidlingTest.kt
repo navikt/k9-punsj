@@ -20,14 +20,15 @@ internal class MapDokumentTilK9FormidlingTest {
         // arrange
         val saksnummer = "GSF-123"
         val brevId = "dok123"
-        val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            brevId,
-            saksnummer,
-            "123",
-            MottakerDto("ORGNR", "1231245"),
-            FagsakYtelseType.OMSORGSPENGER,
-            "INNTID",
-            null)
+        val dokumentbestillingDto = DokumentbestillingDto(
+            journalpostId = "ref123",
+            brevId = brevId,
+            saksnummer = saksnummer,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            brevTittel = "INNTID",
+            dokumentMal = "fritekst-mal")
 
         // act
         val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
@@ -43,14 +44,15 @@ internal class MapDokumentTilK9FormidlingTest {
         // arrange
         val saksnummer = "GSF-123"
         val brevId = "dok123"
-        val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            brevId,
-            saksnummer,
-            "123",
-            MottakerDto("ORG2NR", "1231245"),
-            FagsakYtelseType.OMSORGSPENGER,
-            "I2TID",
-            null)
+        val dokumentbestillingDto = DokumentbestillingDto(
+            journalpostId = "ref123",
+            brevId = brevId,
+            saksnummer = saksnummer,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORG2NR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            brevTittel = "I2TID",
+            dokumentMal = "fritekst-mal")
 
 
         // act
