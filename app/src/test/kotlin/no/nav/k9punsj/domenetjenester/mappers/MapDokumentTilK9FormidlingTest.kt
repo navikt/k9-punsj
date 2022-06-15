@@ -1,6 +1,7 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
@@ -28,7 +29,7 @@ internal class MapDokumentTilK9FormidlingTest {
             mottakerDto = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             brevTittel = "INNTID",
-            dokumentMal = "fritekst-mal")
+            dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
 
         // act
         val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()

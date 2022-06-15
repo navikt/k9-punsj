@@ -31,7 +31,7 @@ internal class PersonRoutes(
     }
 
     @Bean
-    fun personRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun personRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentePerson}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()

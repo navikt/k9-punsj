@@ -10,6 +10,7 @@ import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,6 +26,7 @@ import java.util.UUID
     JournalpostRepository::class,
     TestBeans::class
 ])
+@Disabled("Not implemented")
 internal class OverførDagerApiTest {
     @Autowired
     lateinit var journalpostRepository: JournalpostRepository

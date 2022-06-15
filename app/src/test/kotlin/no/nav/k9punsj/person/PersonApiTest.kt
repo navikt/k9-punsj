@@ -36,15 +36,13 @@ class PersonApiTest {
         """.trimIndent()
 
 
-        val body = hentPersonJson(identitetsnummer).awaitBody<String>()
-        JSONAssert.assertEquals(forventet, body, true)
-    }
-
-    private suspend fun hentPersonJson(identitetsnummer: String): ClientResponse {
-        return client.get()
+        val body = client.get()
             .uri { it.pathSegment("api", "person").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .header("X-Nav-NorskIdent", identitetsnummer)
             .awaitExchangeBlocking()
+            .awaitBody<String>()
+
+        JSONAssert.assertEquals(forventet, body, true)
     }
 }

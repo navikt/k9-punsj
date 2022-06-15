@@ -101,7 +101,6 @@ internal class FordelKafkaTest {
                 melding.type,
                 melding.ytelse)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo(melding.aktørId)
@@ -129,7 +128,6 @@ internal class FordelKafkaTest {
                 melding.type,
                 melding.ytelse)
         }
-        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9punsj-aksjonspunkthendelse-v1")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<PunsjEventDto>(value)
         Assertions.assertThat(verdiFraKafka.aktørId).isNull()
