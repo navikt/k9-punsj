@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
     dto: DokumentbestillingDto,
-    aktørId: String,
 ) {
 
     private val bestilling = Dokumentbestilling()
@@ -25,9 +24,9 @@ internal class MapDokumentTilK9Formidling(
             dto.journalpostId?.leggTilEksternRefernase() ?: dto.saksnummer.leggTilEksternRefernase()
             dto.brevId.leggTilDokumentbestillingId() // DokumentbestillingId er en unik ID for dokumentbestilling for å håndtere duplikater
             dto.saksnummer.leggTilSaksnummer()
-            aktørId.leggTilAktørId()
-            dto.mottakerDto.leggTilMottaker()
-            dto.fagsakYtelseType.leggTilFagsakTyelse()
+            dto.aktørId.leggTilAktørId()
+            dto.overstyrtMottaker.leggTilMottaker()
+            dto.ytelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()
             bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9PUNSJ

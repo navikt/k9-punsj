@@ -6,6 +6,7 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.openapi.OasFeil
@@ -40,19 +41,20 @@ internal class BrevRoutes(
     fun BrevRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.BestillBrev}") { request ->
             RequestContext(coroutineContext, request) {
-                val dokumentbestillingDto = kotlin.runCatching {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(norskIdent),
+                    url = request.path()
+                )?.let { return@RequestContext it }
+
+                val dokumentbestillingDto = try {
                     request.body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
-                }.getOrElse {
+                } catch(e: Exception) {
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()
-                        .bodyValueAndAwait(OasFeil(it.message!!))
+                        .bodyValueAndAwait(OasFeil(e.message!!))
                 }
-
-                innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(dokumentbestillingDto.soekerId),
-                    url = request.path()
-                )?.let { return@RequestContext it }
 
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
