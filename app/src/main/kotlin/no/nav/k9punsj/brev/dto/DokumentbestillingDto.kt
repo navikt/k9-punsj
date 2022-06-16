@@ -8,7 +8,7 @@ data class DokumentbestillingDto(
     val brevId: String = UUID.randomUUID().toString(),
     val saksnummer: String = "GENERELL_SAK",
     val soekerId: String,
-    val mottakerDto: MottakerDto,
+    val mottaker: MottakerDto,
     val fagsakYtelseType: FagsakYtelseType,
     val dokumentMal: String,
     val dokumentdata: BrevDataDto? = null

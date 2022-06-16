@@ -26,7 +26,7 @@ internal class MapDokumentTilK9FormidlingTest {
             brevId = brevId,
             saksnummer = saksnummer,
             soekerId = "123",
-            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            mottaker = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
 
@@ -49,7 +49,7 @@ internal class MapDokumentTilK9FormidlingTest {
             brevId = brevId,
             saksnummer = saksnummer,
             soekerId = "123",
-            mottakerDto = MottakerDto("ORG2NR", "1231245"),
+            mottaker = MottakerDto("ORG2NR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = "fritekst-mal")
 

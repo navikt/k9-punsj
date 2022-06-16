@@ -8,7 +8,6 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.brev.dto.BrevDataDto
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
-import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
@@ -26,7 +25,7 @@ internal class MapDokumentTilK9Formidling(
             dto.brevId.leggTilDokumentbestillingId() // DokumentbestillingId er en unik ID for dokumentbestilling for å håndtere duplikater
             dto.saksnummer.leggTilSaksnummer()
             aktørId.leggTilAktørId()
-            dto.mottakerDto.leggTilMottaker()
+            dto.mottaker.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()

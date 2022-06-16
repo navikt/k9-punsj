@@ -38,7 +38,7 @@ internal class BrevRoutesTest {
         val dokumentbestillingDto = DokumentbestillingDto(
             journalpostId = lagJournalpost(),
             soekerId = "01110050053",
-            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            mottaker = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = "INNTID",
             saksnummer = "saksnummer",

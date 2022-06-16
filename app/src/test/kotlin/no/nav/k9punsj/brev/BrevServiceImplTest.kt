@@ -101,7 +101,7 @@ internal class BrevServiceImplTest {
             brevId = "2",
             saksnummer = "123",
             soekerId = "1234",
-            mottakerDto = MottakerDto(IdType.ORGNR.name, "Statnett"),
+            mottaker = MottakerDto(IdType.ORGNR.name, "Statnett"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode
         )
