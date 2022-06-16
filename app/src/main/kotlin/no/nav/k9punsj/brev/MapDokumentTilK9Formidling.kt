@@ -22,7 +22,7 @@ internal class MapDokumentTilK9Formidling(
     init {
         kotlin.runCatching {
             dto.journalpostId?.leggTilEksternRefernase() ?: dto.saksnummer.leggTilEksternRefernase()
-            dto.brevId.leggTilDokumentbestillingId() // DokumentbestillingId er en unik ID for dokumentbestilling for å håndtere duplikater
+            dto.brevId?.leggTilDokumentbestillingId() // DokumentbestillingId er en unik ID for dokumentbestilling for å håndtere duplikater
             dto.saksnummer.leggTilSaksnummer()
             aktørId.leggTilAktørId()
             dto.mottaker.leggTilMottaker()

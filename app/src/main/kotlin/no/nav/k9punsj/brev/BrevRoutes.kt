@@ -56,7 +56,7 @@ internal class BrevRoutes(
 
                 val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
-                try {
+                val sendtBrev = try {
                     brevService.bestillBrev(
                         dokumentbestillingDto = dokumentbestillingDto,
                         saksbehandler = saksbehandler)
@@ -68,8 +68,9 @@ internal class BrevRoutes(
                 }
 
                 return@RequestContext ServerResponse
-                    .noContent()
-                    .buildAndAwait()
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(sendtBrev)
             }
         }
 

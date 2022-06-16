@@ -46,15 +46,15 @@ internal class BrevRoutesTest {
 
         val dokumentBestillingDtoJson = objectMapper().writeValueAsString(dokumentbestillingDto)
 
-        val (httpStatus, feil) = client.post()
+        val (httpStatus, body) = client.post()
             .uri { it.path("api/brev/bestill").build() }
             .header("Authorization", saksbehandlerAuthorizationHeader)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(dokumentBestillingDtoJson))
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull<String>()}
 
-        assertThat(feil).isNull()
-        assertThat(httpStatus).isEqualTo(HttpStatus.NO_CONTENT)
+        assertThat(body).isNotNull
+        assertThat(httpStatus).isEqualTo(HttpStatus.OK)
     }
 
     private suspend fun lagJournalpost(): String {

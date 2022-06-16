@@ -10,6 +10,7 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 internal class BrevServiceImpl(
@@ -22,7 +23,7 @@ internal class BrevServiceImpl(
     override suspend fun bestillBrev(
         dokumentbestillingDto: DokumentbestillingDto,
         saksbehandler: String
-    ): Boolean {
+    ): Dokumentbestilling {
         val aktørId = personService.finnPersonVedNorskIdentFørstDbSåPdl(dokumentbestillingDto.soekerId).aktørId
 
         val (bestilling, feil) = MapDokumentTilK9Formidling(
@@ -36,13 +37,13 @@ internal class BrevServiceImpl(
             hendelseProducer.send(
                 topicName = brevBestillingTopic,
                 data = brevDataJson,
-                key = dokumentbestillingDto.brevId
+                key = dokumentbestillingDto.brevId ?: UUID.randomUUID().toString()
             )
         } else {
             throw IllegalStateException("Klarte ikke bestille brev, feiler med $feil")
         }
 
-        return true
+        return bestilling
     }
 
     private fun Dokumentbestilling.toJsonB(): String {
