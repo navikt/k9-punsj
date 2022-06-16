@@ -14,7 +14,6 @@ import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
@@ -38,10 +37,11 @@ internal class BrevRoutesTest {
 
         val dokumentbestillingDto = DokumentbestillingDto(
             journalpostId = lagJournalpost(),
-            aktørId = "01110050053",
-            overstyrtMottaker = MottakerDto("ORGNR", "1231245"),
-            ytelseType = FagsakYtelseType.OMSORGSPENGER,
+            soekerId = "01110050053",
+            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = "INNTID",
+            brevTittel = "Brev",
             saksnummer = "saksnummer",
         )
 
@@ -50,48 +50,8 @@ internal class BrevRoutesTest {
         val (httpStatus, feil) = client.post()
             .uri { it.path("api/brev/bestill").build() }
             .header("Authorization", saksbehandlerAuthorizationHeader)
-            .header("X-Nav-Norskident", "01110050053")
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(dokumentBestillingDtoJson))
-            .awaitExchange { it.statusCode() to it.awaitBodyOrNull<String>()}
-
-        assertThat(feil).isNull()
-        assertThat(httpStatus).isEqualTo(HttpStatus.NO_CONTENT)
-    }
-
-    @Test
-    fun `bestill generell_sak brev fra inntekt uten søknad dialog`(): Unit = runBlocking {
-        @Language("JSON")
-        val jsonPayload = """
-            {
-              "aktørId": "2400825411610",
-              "eksternReferanse": "525112112",
-              "ytelseType": {
-                "kode": "OMP",
-                "kodeverk": "FAGSAK_YTELSE"
-              },
-              "saksnummer": "GENERELL_SAK",
-              "avsenderApplikasjon": "K9PUNSJ",
-              "overstyrtMottaker": {
-                "type": "ORGNR",
-                "id": "972674818"
-              },
-              "dokumentMal": "GENERELT_FRITEKSTBREV",
-              "dokumentdata": {
-                "fritekstbrev": {
-                  "overskrift": "testtittel",
-                  "brødtekst": "test -fritekst \"#\nflera rader\n\nett mellanrom innan\n\nhei"
-                }
-              }
-            }
-        """.trimIndent()
-
-        val (httpStatus, feil) = client.post()
-            .uri { it.path("api/brev/bestill").build() }
-            .header("Authorization", saksbehandlerAuthorizationHeader)
-            .header("X-Nav-Norskident", "01110050053")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(jsonPayload))
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull<String>()}
 
         assertThat(feil).isNull()

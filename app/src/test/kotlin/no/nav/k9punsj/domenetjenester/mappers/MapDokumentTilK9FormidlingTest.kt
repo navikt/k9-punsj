@@ -25,13 +25,14 @@ internal class MapDokumentTilK9FormidlingTest {
             journalpostId = "ref123",
             brevId = brevId,
             saksnummer = saksnummer,
-            aktørId = "123",
-            overstyrtMottaker = MottakerDto("ORGNR", "1231245"),
-            ytelseType = FagsakYtelseType.OMSORGSPENGER,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            brevTittel = "INNTID",
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
 
         // act
-        val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto).bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isEmpty()
@@ -48,14 +49,15 @@ internal class MapDokumentTilK9FormidlingTest {
             journalpostId = "ref123",
             brevId = brevId,
             saksnummer = saksnummer,
-            aktørId = "123",
-            overstyrtMottaker = MottakerDto("ORG2NR", "1231245"),
-            ytelseType = FagsakYtelseType.OMSORGSPENGER,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORG2NR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            brevTittel = "I2TID",
             dokumentMal = "fritekst-mal")
 
 
         // act
-        val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto).bestillingOgFeil()
+        val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isNotEmpty

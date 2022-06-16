@@ -7,9 +7,10 @@ data class DokumentbestillingDto(
     val journalpostId: String?,
     val brevId: String = UUID.randomUUID().toString(),
     val saksnummer: String,
-    val aktørId: String,
-    val overstyrtMottaker: MottakerDto,
-    val ytelseType: FagsakYtelseType,
+    val soekerId: String,
+    val mottakerDto: MottakerDto,
+    val fagsakYtelseType: FagsakYtelseType,
+    val brevTittel: String,
     val dokumentMal: String,
     val dokumentdata: BrevDataDto? = null
     )

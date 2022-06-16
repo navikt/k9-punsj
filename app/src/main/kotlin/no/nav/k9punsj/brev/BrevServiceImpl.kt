@@ -23,8 +23,11 @@ internal class BrevServiceImpl(
         dokumentbestillingDto: DokumentbestillingDto,
         saksbehandler: String
     ): Boolean {
+        val aktørId = personService.finnPersonVedNorskIdentFørstDbSåPdl(dokumentbestillingDto.soekerId).aktørId
+
         val (bestilling, feil) = MapDokumentTilK9Formidling(
-            dto = dokumentbestillingDto
+            dto = dokumentbestillingDto,
+            aktørId = aktørId
         ).bestillingOgFeil()
 
         if (feil.isEmpty()) {

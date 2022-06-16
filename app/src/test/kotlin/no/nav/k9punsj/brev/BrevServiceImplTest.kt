@@ -100,9 +100,10 @@ internal class BrevServiceImplTest {
             journalpostId = forJournalpostId,
             brevId = "2",
             saksnummer = "123",
-            aktørId = "1234",
-            overstyrtMottaker = MottakerDto(IdType.ORGNR.name, "Statnett"),
-            ytelseType = FagsakYtelseType.OMSORGSPENGER,
+            soekerId = "1234",
+            mottakerDto = MottakerDto(IdType.ORGNR.name, "Statnett"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            brevTittel = "INNTID",
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode
         )
     }
