@@ -103,7 +103,6 @@ internal class BrevServiceImplTest {
             soekerId = "1234",
             mottakerDto = MottakerDto(IdType.ORGNR.name, "Statnett"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-            brevTittel = "INNTID",
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode
         )
     }

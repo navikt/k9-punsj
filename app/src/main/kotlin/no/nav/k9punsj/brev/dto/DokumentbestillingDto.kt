@@ -6,11 +6,10 @@ import java.util.*
 data class DokumentbestillingDto(
     val journalpostId: String?,
     val brevId: String = UUID.randomUUID().toString(),
-    val saksnummer: String,
+    val saksnummer: String = "GENERELL_SAK",
     val soekerId: String,
     val mottakerDto: MottakerDto,
     val fagsakYtelseType: FagsakYtelseType,
-    val brevTittel: String,
     val dokumentMal: String,
     val dokumentdata: BrevDataDto? = null
     )

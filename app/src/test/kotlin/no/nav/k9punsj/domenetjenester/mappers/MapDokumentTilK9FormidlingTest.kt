@@ -28,7 +28,6 @@ internal class MapDokumentTilK9FormidlingTest {
             soekerId = "123",
             mottakerDto = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-            brevTittel = "INNTID",
             dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
 
         // act
@@ -52,7 +51,6 @@ internal class MapDokumentTilK9FormidlingTest {
             soekerId = "123",
             mottakerDto = MottakerDto("ORG2NR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-            brevTittel = "I2TID",
             dokumentMal = "fritekst-mal")
 
 

@@ -41,7 +41,6 @@ internal class BrevRoutesTest {
             mottakerDto = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = "INNTID",
-            brevTittel = "Brev",
             saksnummer = "saksnummer",
         )
 
