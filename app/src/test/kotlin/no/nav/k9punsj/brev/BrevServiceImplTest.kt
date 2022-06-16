@@ -67,9 +67,6 @@ internal class BrevServiceImplTest {
         Mockito.doAnswer { true }
             .`when`(journalpostService).kanSendeInn(Mockito.anyList())
 
-        Mockito.doAnswer { Person("123", "1234", "1000000000000") }
-            .`when`(personService).finnPersonVedNorskIdentFørstDbSåPdl("1234")
-
         val forJournalpostId = IdGenerator.nesteId()
         val saksnummer = "123"
         val dokumentbestilling = lagDokumentbestillingPåJournalpost(forJournalpostId)
@@ -81,7 +78,7 @@ internal class BrevServiceImplTest {
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<Dokumentbestilling>(value)
 
-        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo("1000000000000")
+        Assertions.assertThat(verdiFraKafka.aktørId).isEqualTo("1234")
         Assertions.assertThat(verdiFraKafka.saksnummer).isEqualTo(saksnummer)
     }
 
