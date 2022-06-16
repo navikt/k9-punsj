@@ -7,17 +7,19 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
-@Service
+//@Service
+// Ikke i bruke
 class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
     private val hendelseProducer: HendelseProducer,
-    private val journalpostService: JournalpostService
+    private val journalpostService: JournalpostService,
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
 ) {
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
@@ -45,7 +47,7 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
                 )
             ) }.onSuccess {
                 hendelseProducer.send(
-                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                topicName = k9losAksjonspunkthendelseTopic,
                 data = it,
                 key = id
                 )

@@ -14,8 +14,9 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
-@Configuration
-@IkkeKlarForProduksjon(begrunnelse = "Mangler håndtering av token på disse endepunktene")
+// Ikke i bruk
+//@Configuration
+//@IkkeKlarForProduksjon(begrunnelse = "Mangler håndtering av token på disse endepunktene")
 class DelingAvOmsorgsdagerApi(
         private val delingAvOmsorgsdagerMeldingService: DelingAvOmsorgsdagerMeldingService) {
     companion object {
@@ -23,7 +24,7 @@ class DelingAvOmsorgsdagerApi(
         private val logger: Logger = LoggerFactory.getLogger(DelingAvOmsorgsdagerApi::class.java)
     }
 
-    @Bean
+    //@Bean
     fun delingDagerRoutes() = PublicRoutes {
 
         POST("/api/$type") { request ->

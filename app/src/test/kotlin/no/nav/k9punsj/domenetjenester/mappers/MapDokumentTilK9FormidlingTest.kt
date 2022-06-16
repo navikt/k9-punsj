@@ -1,9 +1,11 @@
 package no.nav.k9punsj.domenetjenester.mappers
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.brev.DokumentbestillingDto
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
+import no.nav.k9punsj.brev.dto.MottakerDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -19,17 +21,17 @@ internal class MapDokumentTilK9FormidlingTest {
         // arrange
         val saksnummer = "GSF-123"
         val brevId = "dok123"
-        val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            brevId,
-            saksnummer,
-            "123",
-            DokumentbestillingDto.Mottaker("ORGNR", "1231245"),
-            FagsakYtelseType.OMSORGSPENGER,
-            "INNTID",
-            null)
+        val dokumentbestillingDto = DokumentbestillingDto(
+            journalpostId = "ref123",
+            brevId = brevId,
+            saksnummer = saksnummer,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORGNR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
 
         // act
-        val (bestilling, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
+        val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isEmpty()
@@ -42,18 +44,18 @@ internal class MapDokumentTilK9FormidlingTest {
         // arrange
         val saksnummer = "GSF-123"
         val brevId = "dok123"
-        val dokumentbestillingDto = DokumentbestillingDto("ref123",
-            brevId,
-            saksnummer,
-            "123",
-            DokumentbestillingDto.Mottaker("ORG2NR", "1231245"),
-            FagsakYtelseType.OMSORGSPENGER,
-            "I2TID",
-            null)
+        val dokumentbestillingDto = DokumentbestillingDto(
+            journalpostId = "ref123",
+            brevId = brevId,
+            saksnummer = saksnummer,
+            soekerId = "123",
+            mottakerDto = MottakerDto("ORG2NR", "1231245"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            dokumentMal = "fritekst-mal")
 
 
         // act
-        val (_, feil) = MapDokumentTilK9Formidling(brevId, dokumentbestillingDto, "321").bestillingOgFeil()
+        val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
 
         // assert
         assertThat(feil).isNotEmpty

@@ -5,12 +5,14 @@ import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametre
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9punsj.brev.dto.BrevDataDto
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
+import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
-    brevId: String,
     dto: DokumentbestillingDto,
     aktørId: String,
 ) {
@@ -20,11 +22,11 @@ internal class MapDokumentTilK9Formidling(
 
     init {
         kotlin.runCatching {
-            dto.journalpostId.leggTilEksternRefernase()
-            brevId.leggTilDokumentbestillingId()
+            dto.journalpostId?.leggTilEksternRefernase() ?: dto.saksnummer.leggTilEksternRefernase()
+            dto.brevId.leggTilDokumentbestillingId() // DokumentbestillingId er en unik ID for dokumentbestilling for å håndtere duplikater
             dto.saksnummer.leggTilSaksnummer()
-            aktørId.sett()
-            dto.mottaker.leggTilMottaker()
+            aktørId.leggTilAktørId()
+            dto.mottakerDto.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()
@@ -48,15 +50,15 @@ internal class MapDokumentTilK9Formidling(
         bestilling.dokumentbestillingId = this
     }
 
-    private fun String?.leggTilSaksnummer() {
-        bestilling.saksnummer = this ?: DokumentbestillingDto.GENERELL_SAK
+    private fun String.leggTilSaksnummer() {
+        bestilling.saksnummer = this
     }
 
-    private fun String.sett() {
+    private fun String.leggTilAktørId() {
         bestilling.aktørId = this
     }
 
-    private fun DokumentbestillingDto.Mottaker.leggTilMottaker() {
+    private fun MottakerDto.leggTilMottaker() {
         kotlin.runCatching { Mottaker(this.id, IdType.valueOf(this.type)) }
             .onSuccess { bestilling.overstyrtMottaker = it }
             .onFailure { feil.add(Feil("Mottaker", "Mottaker", it.message)) }
@@ -72,7 +74,7 @@ internal class MapDokumentTilK9Formidling(
             .onFailure { feil.add(Feil("DokumentMalType", "DokumentMalType", it.message)) }
     }
 
-    private fun JsonB?.leggTilDokumentData() {
+    private fun BrevDataDto?.leggTilDokumentData() {
         kotlin.runCatching { objectMapper().readValue<DokumentdataParametreK9>(objectMapper().writeValueAsString(this)) }
             .onSuccess { bestilling.dokumentdata = it }
             .onFailure { feil.add(Feil("DokumentData", "DokumentData", it.message)) }

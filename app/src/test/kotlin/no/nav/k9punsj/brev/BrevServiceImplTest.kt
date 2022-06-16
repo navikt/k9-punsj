@@ -3,9 +3,12 @@ package no.nav.k9punsj.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
+import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -33,7 +36,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @TestPropertySource(properties = ["spring.config.location = classpath:application.yml"])
 @ContextConfiguration(classes = [
     JournalpostRepository::class,
-    BrevRepository::class,
     BrevServiceImpl::class,
     TestBeans::class
 ])
@@ -58,21 +60,24 @@ internal class BrevServiceImplTest {
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
         val valueCaptor = ArgumentCaptor.forClass(String::class.java)
-        val anyCaptor = ArgumentCaptor.forClass(Any::class.java)
 
-        Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
-        Mockito.doAnswer { true }.`when`(journalpostService).kanSendeInn(Mockito.anyList())
-        Mockito.doAnswer { Person("123", "1234", "1000000000000") }.`when`(personService).finnPersonVedNorskIdentFørstDbSåPdl("1234")
+        Mockito.doNothing().`when`(hendelseProducer)
+            .send(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor))
+
+        Mockito.doAnswer { true }
+            .`when`(journalpostService).kanSendeInn(Mockito.anyList())
+
+        Mockito.doAnswer { Person("123", "1234", "1000000000000") }
+            .`when`(personService).finnPersonVedNorskIdentFørstDbSåPdl("1234")
 
         val forJournalpostId = IdGenerator.nesteId()
         val saksnummer = "123"
         val dokumentbestilling = lagDokumentbestillingPåJournalpost(forJournalpostId)
 
         // act
-        brev.bestillBrev(forJournalpostId, dokumentbestilling, BrevType.FRITEKSTBREV, "saksbehandler")
+        brev.bestillBrev(dokumentbestillingDto = dokumentbestilling, saksbehandler = "saksbehandler")
 
         // assert
-        Assertions.assertThat(topicCaptor.value).isEqualTo("privat-k9-dokumenthendelse")
         val value = valueCaptor.value
         val verdiFraKafka = objectMapper().readValue<Dokumentbestilling>(value)
 
@@ -92,13 +97,13 @@ internal class BrevServiceImplTest {
 
     private fun lagDokumentbestillingPåJournalpost(forJournalpostId: String): DokumentbestillingDto {
         return DokumentbestillingDto(
-            forJournalpostId,
-            "2",
-            "123",
-            "1234",
-            DokumentbestillingDto.Mottaker(IdType.ORGNR.name, "Statnett"),
-            FagsakYtelseType.OMSORGSPENGER,
-            "INNTID"
+            journalpostId = forJournalpostId,
+            brevId = "2",
+            saksnummer = "123",
+            soekerId = "1234",
+            mottakerDto = MottakerDto(IdType.ORGNR.name, "Statnett"),
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            dokumentMal = DokumentMalType.FRITEKST_DOK.kode
         )
     }
 }

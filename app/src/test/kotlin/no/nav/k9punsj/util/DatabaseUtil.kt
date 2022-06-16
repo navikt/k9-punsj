@@ -5,7 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
-import no.nav.k9punsj.brev.BrevRepository
 import no.nav.k9punsj.configuration.loadFlyway
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
@@ -30,9 +29,6 @@ class DatabaseUtil {
         fun getSøknadRepo(): SøknadRepository = SøknadRepository(dataSource)
         fun cleanSøknadRepo() = cleanTable(SøknadRepository.SØKNAD_TABLE)
 
-        fun getBrevRepo(): BrevRepository = BrevRepository(dataSource)
-        fun cleanBrevRepo() = cleanTable(BrevRepository.BREV_TABLE)
-
         fun getPersonRepo(): PersonRepository = PersonRepository(dataSource)
         fun cleanPersonRepo() = cleanTable(PersonRepository.PERSON_TABLE)
 
@@ -52,7 +48,6 @@ class DatabaseUtil {
             cleanMappeRepo()
             cleanPersonRepo()
             cleanAksjonspunktRepo()
-            cleanBrevRepo()
             cleanJournalpostRepo()
         }
 

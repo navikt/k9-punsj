@@ -14,17 +14,20 @@ import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 internal class AksjonspunktServiceImpl(
-    val hendelseProducer: HendelseProducer,
-    val journalpostService: JournalpostService,
-    val aksjonspunktRepository: AksjonspunktRepository,
-    val søknadsService: SoknadService,
-    val personService: PersonService
+    private val hendelseProducer: HendelseProducer,
+    private val journalpostService: JournalpostService,
+    private val aksjonspunktRepository: AksjonspunktRepository,
+    private val søknadsService: SoknadService,
+    private val personService: PersonService,
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
+
 ) : AksjonspunktService {
 
     private companion object {
@@ -55,7 +58,7 @@ internal class AksjonspunktServiceImpl(
         )
 
         hendelseProducer.sendMedOnSuccess(
-            topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+            topicName = k9losAksjonspunkthendelseTopic,
             data = punsjDtoJson,
             key = eksternId.toString()
         ) {
@@ -84,7 +87,7 @@ internal class AksjonspunktServiceImpl(
         )
 
         hendelseProducer.sendMedOnSuccess(
-            topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+            topicName = k9losAksjonspunkthendelseTopic,
             data = punsjDtoJson,
             key = eksternId.toString()
         ) {
@@ -121,7 +124,7 @@ internal class AksjonspunktServiceImpl(
             )
 
             hendelseProducer.sendMedOnSuccess(
-                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                topicName = k9losAksjonspunkthendelseTopic,
                 data = punsjDtoJson,
                 key = eksternId.toString()
             ) {
@@ -189,7 +192,7 @@ internal class AksjonspunktServiceImpl(
             )
 
             hendelseProducer.sendMedOnSuccess(
-                topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                topicName = k9losAksjonspunkthendelseTopic,
                 data = punsjDtoJson,
                 key = eksternId.toString()
             ) {
@@ -216,7 +219,7 @@ internal class AksjonspunktServiceImpl(
                 )
 
                 hendelseProducer.sendMedOnSuccess(
-                    topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS,
+                    topicName = k9losAksjonspunkthendelseTopic,
                     data = punsjDtoJson,
                     key = eksternId.toString()
                 ) {

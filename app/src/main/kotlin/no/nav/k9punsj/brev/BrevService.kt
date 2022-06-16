@@ -1,13 +1,11 @@
 package no.nav.k9punsj.brev
 
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
+
 interface BrevService {
 
-    suspend fun hentBrevSendtUtPåJournalpost(journalpostId: String) : List<BrevEntitet>
-
     suspend fun bestillBrev(
-        forJournalpostId: String,
-        brevData: DokumentbestillingDto,
-        brevType: BrevType,
+        dokumentbestillingDto: DokumentbestillingDto,
         saksbehandler: String
-    ) : BrevEntitet
+    ) : Boolean
 }

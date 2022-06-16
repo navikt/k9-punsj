@@ -32,7 +32,7 @@ internal class SjekkOmUtløptJobbTest {
         val aksjonspunktRepository = getAksjonspunktRepo()
         val journalpostRepository = getJournalpostRepo()
 
-        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository)
+        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository, "test")
 
         val dummyAktørId = "1000000000000"
 

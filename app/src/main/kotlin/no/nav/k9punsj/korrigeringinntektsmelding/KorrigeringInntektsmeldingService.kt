@@ -57,11 +57,8 @@ internal class KorrigeringInntektsmeldingService(
     internal suspend fun henteSøknad(søknadId: String): KorrigeringInntektsmeldingDto {
         val søknad = mappeService.hentSøknad(søknadId)
 
-        return if (søknad == null) {
-            throw SøknadFinnsIkke(søknadId)
-        } else {
-            return søknad.tilOmsvisning()
-        }
+        return søknad?.tilOmsvisning()
+            ?: throw SøknadFinnsIkke(søknadId)
     }
 
     internal suspend fun nySøknad(opprettNySøknad: OpprettNySøknad): KorrigeringInntektsmeldingDto {
@@ -120,8 +117,8 @@ internal class KorrigeringInntektsmeldingService(
             soknadService.sendSøknad(
                 søknad = validertSøknad.first,
                 journalpostIder = journalpostIder
-            ) ?.let { feil ->
-                val (httpStatus, feilen) = feil
+            )?.let { feil ->
+                val (_, feilen) = feil
                 throw ValideringsFeil(feilen)
             }
 

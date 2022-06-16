@@ -12,14 +12,17 @@ import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
-@Service
+//@Service
+// Ikke i bruk
 class OverførDagerSøknadService @Autowired constructor(
     private val hendelseProducer: HendelseProducer,
-    private val journalpostService: JournalpostService
+    private val journalpostService: JournalpostService,
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
 ){
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
@@ -46,8 +49,12 @@ class OverførDagerSøknadService @Autowired constructor(
                     LocalDateTime.now(),
                     aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
             ))
-            log.info(data)
-            hendelseProducer.send(topicName = Topics.SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS, data = data, key = id)
+
+            hendelseProducer.send(
+                topicName = k9losAksjonspunkthendelseTopic,
+                data = data,
+                key = id
+            )
         }
     }
 }
