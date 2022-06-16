@@ -36,7 +36,7 @@ internal class MapDokumentTilK9FormidlingTest {
         // assert
         assertThat(feil).isEmpty()
         assertThat(bestilling.saksnummer).isEqualTo(saksnummer)
-        assertThat(bestilling.aktørId).isEqualTo("123")
+        assertThat(bestilling.aktørId).isEqualTo("321")
     }
 
     @Test
