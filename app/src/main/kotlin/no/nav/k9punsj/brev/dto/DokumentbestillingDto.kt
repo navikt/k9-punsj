@@ -1,7 +1,6 @@
 package no.nav.k9punsj.brev.dto
 
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.felles.JsonB
 import java.util.*
 
 data class DokumentbestillingDto(
@@ -13,10 +12,5 @@ data class DokumentbestillingDto(
     val fagsakYtelseType: FagsakYtelseType,
     val brevTittel: String,
     val dokumentMal: String,
-    val dokumentdata: JsonB? = null,
-    ) {
-
-    internal companion object {
-        const val GENERELL_SAK = "GENERELL_SAK"
-    }
-}
+    val dokumentdata: BrevDataDto? = null
+    )

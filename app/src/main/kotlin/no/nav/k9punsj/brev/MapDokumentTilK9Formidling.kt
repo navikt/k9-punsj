@@ -5,6 +5,7 @@ import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametre
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9punsj.brev.dto.BrevDataDto
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.felles.JsonB
@@ -49,8 +50,8 @@ internal class MapDokumentTilK9Formidling(
         bestilling.dokumentbestillingId = this
     }
 
-    private fun String?.leggTilSaksnummer() {
-        bestilling.saksnummer = this ?: DokumentbestillingDto.GENERELL_SAK
+    private fun String.leggTilSaksnummer() {
+        bestilling.saksnummer = this
     }
 
     private fun String.leggTilAktørId() {
@@ -73,7 +74,7 @@ internal class MapDokumentTilK9Formidling(
             .onFailure { feil.add(Feil("DokumentMalType", "DokumentMalType", it.message)) }
     }
 
-    private fun JsonB?.leggTilDokumentData() {
+    private fun BrevDataDto?.leggTilDokumentData() {
         kotlin.runCatching { objectMapper().readValue<DokumentdataParametreK9>(objectMapper().writeValueAsString(this)) }
             .onSuccess { bestilling.dokumentdata = it }
             .onFailure { feil.add(Feil("DokumentData", "DokumentData", it.message)) }

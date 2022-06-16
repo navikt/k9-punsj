@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
 
 @RestController
-@Tag(name = "Brev-bestilling", description = "Håndtering av brevbestillinger fra punsj til k9formidling via kafka")
+@Tag(
+    name = "Brev",
+    description = "Håndtering av brevbestillinger fra punsj til k9formidling via kafka"
+)
 internal class BrevOpenApi {
     @PostMapping(
         BrevRoutes.Urls.BestillBrev,
