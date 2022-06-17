@@ -166,8 +166,8 @@ internal class MapPsbTilK9Format(
         }
 
         if (k9Uttak.isEmpty() && søknadsperiode != null) {
-            søknadsperiode.forEach {
-                k9Uttak[it.somK9Periode()!!] = DefaultUttak
+            søknadsperiode.forEach { periode ->
+                periode.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
             }
         }
 
