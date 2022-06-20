@@ -19,14 +19,14 @@
         <revision>1.0.0</revision>
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.0</kotlin.version>
         <springdoc.version>1.6.9</springdoc.version>
         <kotlinx-coroutines.version>1.6.2</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
-        <token-support.version>2.0.20</token-support.version>
-        <dusseldorf-ktor.version>3.1.6.8-248832c</dusseldorf-ktor.version>
+        <token-support.version>2.1.0</token-support.version>
+        <dusseldorf-ktor.version>3.2.0.2-b18c5fe</dusseldorf-ktor.version>
         <k9-rapid.version>1.20220602105039-77944ce</k9-rapid.version>
-        <k9-sak.version>3.3.3</k9-sak.version>
+        <k9-sak.version>3.3.4</k9-sak.version>
         <k9-formidling.version>0.0.20</k9-formidling.version>
         <k9-format.version>6.0.2</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
@@ -151,11 +151,6 @@
                 <groupId>io.mockk</groupId>
                 <artifactId>mockk</artifactId>
                 <version>${mockk.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>4.0.2</version>
             </dependency>
             <dependency>
                 <groupId>io.zonky.test.postgres</groupId>
