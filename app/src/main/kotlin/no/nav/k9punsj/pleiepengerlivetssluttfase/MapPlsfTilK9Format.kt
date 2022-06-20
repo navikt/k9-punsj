@@ -14,6 +14,7 @@ import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.PleietrengendeDto
 import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
@@ -52,8 +53,14 @@ internal class MapPlsfTilK9Format(
                 pleipengerLivetsSluttfase.medBosteder(this)
             }
             dto.utenlandsopphold?.leggTilUtenlandsopphold()
-            dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
-                pleipengerLivetsSluttfase.medOpptjeningAktivitet(this)
+            // Enn så lenge støtter vi kun å legge til opptjeningaktivitet eller ignorere
+            // Sletting implementeres ved behov
+            if (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+                dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                    pleipengerLivetsSluttfase.medOpptjeningAktivitet(this)
+                }
+            } else {
+                pleipengerLivetsSluttfase.ignorerOpplysningerOmOpptjening();
             }
             dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
                 pleipengerLivetsSluttfase.medArbeidstid(this)
@@ -183,6 +190,14 @@ internal class MapPlsfTilK9Format(
             pleipengerLivetsSluttfase.medUttak(Uttak().medPerioder(k9Uttak))
         }
     }
+
+    private fun erOpptjeningSatt(
+        dto: PleiepengerLivetsSluttfaseSøknadDto,
+        opptjeningAktivitet: ArbeidAktivitetDto?
+    ) = dto.opptjeningAktivitet != null &&
+            (!opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                    opptjeningAktivitet?.frilanser != null ||
+                    opptjeningAktivitet?.selvstendigNaeringsdrivende != null)
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)

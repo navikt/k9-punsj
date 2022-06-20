@@ -54,6 +54,15 @@ internal class InnsendingMappingTest {
         )
     }
 
+
+    @Test
+    fun `mappe pleiepenger sykt barn endringssøknad med ignorert opptjening`() {
+        mapTilK9FormatOgAssert<PleiepengerSyktBarnSøknadDto>(
+            søknad = LesFraFilUtil.ignorerOpptjening(),
+            ytelse = Ytelse.Type.PLEIEPENGER_SYKT_BARN
+        )
+    }
+
     private inline fun <reified T> mapTilK9FormatOgAssert(søknad: MutableMap<String, Any?>, ytelse: Ytelse.Type) {
         val dto: T = objectMapper().convertValue(søknad)
         val k9Format = when(dto) {
