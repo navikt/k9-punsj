@@ -108,7 +108,8 @@ internal object SafDtos {
     }
 
     internal enum class Journalstatus {
-        MOTTATT
+        MOTTATT,
+        FEILREGISTRERT
     }
 
     internal data class Bruker(
