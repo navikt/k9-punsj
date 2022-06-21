@@ -29,45 +29,50 @@ internal class SoknadService(
         journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
-        val journalposterHarIkkeBlittSendtInn = journalpostService.kanSendeInn(journalpostIdListe)
+        val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
         val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
 
-        return if (journalposterHarIkkeBlittSendtInn) {
-            val journalposterMedTypeUtgaaende = safGateway.hentJournalposter(journalpostIdListe)
-                .filterNotNull()
-                .filter { it.journalposttype.equals(SafDtos.JournalpostType.U) }
-                .map { it.journalpostId }
-                .toSet()
-
-            if (journalposterMedTypeUtgaaende.isNotEmpty()) {
-                return Pair(
-                    HttpStatus.CONFLICT,
-                    "Journalpost type Utgående ikke støttet: $journalposterMedTypeUtgaaende"
-                )
-            }
-
-            try {
-                innsendingClient.sendSøknad(
-                    søknadId = søknad.søknadId.id,
-                    søknad = søknad,
-                    correlationId = coroutineContext.hentCorrelationId(),
-                    tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to punsjetAvSaksbehandler)
-                )
-            } catch (e: Exception) {
-                logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
-                return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
-            }
-
-            leggerVedPayload(søknad, journalpostIder)
-            journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
-            logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
-            søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-
-            søknadMetrikkService.publiserMetrikker(søknad)
-            null
-        } else {
-            Pair(HttpStatus.CONFLICT, "En eller alle journalpostene${journalpostIder} har blitt sendt inn fra før")
+        if (!journalposterKanSendesInn) {
+            return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
         }
+
+        val journalposter = safGateway.hentJournalposter(journalpostIdListe)
+        val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
+            .filter { it.journalposttype.equals(SafDtos.JournalpostType.U) }
+            .map { it.journalpostId }
+            .toSet()
+        if (journalposterMedTypeUtgaaende.isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter av type utgående ikke støttet: $journalposterMedTypeUtgaaende"
+        }
+
+        val journalposterMedStatusFeilregistrert = journalposter.filterNotNull()
+            .filter { it.journalstatus != null }
+            .filter { it.journalstatus!!.equals(SafDtos.Journalstatus.FEILREGISTRERT) }
+            .map { it.journalpostId }
+            .toSet()
+        if (journalposterMedStatusFeilregistrert.isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
+        }
+
+        try {
+            innsendingClient.sendSøknad(
+                søknadId = søknad.søknadId.id,
+                søknad = søknad,
+                correlationId = coroutineContext.hentCorrelationId(),
+                tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to punsjetAvSaksbehandler)
+            )
+        } catch (e: Exception) {
+            logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
+            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
+        }
+
+        leggerVedPayload(søknad, journalpostIder)
+        journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
+        logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
+        søknadRepository.markerSomSendtInn(søknad.søknadId.id)
+
+        søknadMetrikkService.publiserMetrikker(søknad)
+        return null
     }
 
     suspend fun hentSøknad(søknadId: String): SøknadEntitet? {
