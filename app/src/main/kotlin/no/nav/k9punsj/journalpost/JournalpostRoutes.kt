@@ -8,7 +8,6 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -24,7 +23,11 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.openapi.*
+import no.nav.k9punsj.openapi.OasDokumentInfo
+import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.openapi.OasJournalpostDto
+import no.nav.k9punsj.openapi.OasJournalpostIder
+import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
@@ -33,7 +36,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.*
 import org.springframework.web.reactive.function.server.ServerResponse.status
@@ -199,6 +201,7 @@ internal class JournalpostRoutes(
                 }
 
                 val correlationId = coroutineContext.hentCorrelationId()
+                val fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType)
 
                 val punsjbolleRuting = punsjbolleService.ruting(
                     søker = dto.brukerIdent,
@@ -206,7 +209,7 @@ internal class JournalpostRoutes(
                     annenPart = dto.annenPart,
                     journalpostId = dto.journalpostId,
                     periode = null, // Utledes fra journalposten i Punsjbollen
-                    fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType),
+                    fagsakYtelseType = fagsakYtelseType,
                     correlationId = correlationId
                 )
 
@@ -444,7 +447,7 @@ internal class JournalpostRoutes(
             val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = journalpostId,
-                aktørId,
+                aktørId = aktørId,
                 mottattDato = mottattDato
             )
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
@@ -462,7 +465,7 @@ internal class JournalpostRoutes(
             val punsjJournalpost = PunsjJournalpost(
                 uuid = UUID.randomUUID(),
                 journalpostId = dto.journalpostId,
-                pdlService.aktørIdFor(dto.brukerIdent),
+                aktørId = pdlService.aktørIdFor(dto.brukerIdent),
                 skalTilK9 = skalTilK9
             )
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
@@ -471,8 +474,6 @@ internal class JournalpostRoutes(
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
-    private suspend fun ServerRequest.omfordelingRequest() =
-        body(BodyExtractors.toMono(OmfordelingRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
@@ -486,10 +487,6 @@ internal class JournalpostRoutes(
 
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
-
-    data class OmfordelingRequest(
-        val fagsakYtelseTypeKode: String,
-    )
 
     data class ResultatDto(
         val status: String,

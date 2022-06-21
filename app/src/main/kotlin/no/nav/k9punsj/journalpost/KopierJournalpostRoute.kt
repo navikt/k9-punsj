@@ -44,23 +44,10 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
 ) {
 
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
-        pepClient.sendeInnTilgang(dto.fra, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang ->
-            if (!tilgang) {
-                return false
-            }
-        }
-        pepClient.sendeInnTilgang(dto.til, JournalpostRoutes.Urls.KopierJournalpost).also { tilgang ->
-            if (!tilgang) {
-                return false
-            }
-        }
-        if (dto.barn != null) {
-            return pepClient.sendeInnTilgang(dto.barn, JournalpostRoutes.Urls.KopierJournalpost)
-        }
-        if (dto.annenPart != null) {
-            return pepClient.sendeInnTilgang(dto.annenPart, JournalpostRoutes.Urls.KopierJournalpost)
-        }
-        return false
+        val identListe = mutableListOf(dto.fra, dto.til)
+        dto.barn?.let { identListe.add(it) }
+        dto.annenPart?.let { identListe.add(it) }
+        return pepClient.sendeInnTilgang(identListe, JournalpostRoutes.Urls.KopierJournalpost)
     }
 
     suspend fun fraKanRutesTilK9(
@@ -116,7 +103,10 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
             }
 
-            val ytelseType = journalpost.utledeFagsakYtelseType()
+            val ytelseType = journalpost?.ytelse?.let {
+                journalpost.utledeFagsakYtelseType(fagsakYtelseType = FagsakYtelseType.valueOf(it))
+            }?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
+
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {
                 if (!tilKanRutesTilK9(dto, journalpostInfo, ytelseType)) {

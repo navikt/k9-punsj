@@ -4,6 +4,12 @@ Håndterer manuell `punching` av søknader, tilleggsinformasjon og avklaringer s
 
 [![](https://github.com/navikt/k9-punsj/workflows/Build%20and%20deploy/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+master%22)
 
+## Deployment
+
+Push til master deployer til dev-miljø.
+
+Deploy til prod via Github action `Deploy to prod`
+
 ## Bygge lokalt
 ```
 export GITHUB_USERNAME=x-access-token

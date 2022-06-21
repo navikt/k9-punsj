@@ -19,50 +19,22 @@ data class PunsjJournalpost(
     val fordelStatusType: String? = null,
 )
 
-internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType? = null): FagsakYtelseType {
+internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType): FagsakYtelseType {
     return if (this == null) {
         logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
     } else {
-        when {
-            this.ytelse == null -> {
-                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
-                logger.info("Ytelse på journalpost er null. Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode == this.ytelse -> {
-                val type = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode == this.ytelse -> {
-                val type = fagsakYtelseType ?: throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER_KS
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode == this.ytelse -> {
-                val type = FagsakYtelseType.OMSORGSPENGER_MA
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode == this.ytelse -> {
-                val type = FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
-                logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, type)
-                type
-            }
-            else -> {
-                throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
-            }
+        val ytelse = when (this.ytelse) {
+            null -> fagsakYtelseType
+            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> fagsakYtelseType
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode -> FagsakYtelseType.OMSORGSPENGER_MA
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+            else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
         }
+        logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, ytelse)
+        return ytelse
     }
 }

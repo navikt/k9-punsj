@@ -3,9 +3,6 @@ package no.nav.k9punsj.felles.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.felles.DurationMapper.somDuration
-import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.LocalDate
 
 data class PerioderDto(
