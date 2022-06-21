@@ -110,6 +110,10 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
         }
 
+        fun ignorerOpptjening() : SøknadJson {
+            return objectMapper().readValue(lesFraFil("ignorer-opptjening-endringssøknad.json"))
+        }
+
         /**
          *  Pleiepenger livets sluttfase
          */

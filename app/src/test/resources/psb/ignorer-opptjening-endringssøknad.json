@@ -1,0 +1,79 @@
+{
+  "soeknadId": "7a714be9-5d05-4b9a-95e7-cc320f45f883",
+  "versjon": "1.0.0",
+  "mottattDato": "",
+  "soeker": {
+    "norskIdentitetsnummer": "20018409020"
+  },
+  "ytelse": {
+    "type": "PLEIEPENGER_SYKT_BARN",
+    "barn": {
+      "norskIdentitetsnummer": "24041255877",
+      "foedselsdato": null
+    },
+    "soeknadsperiode": [],
+    "endringsperiode": [],
+    "trekkKravPerioder": [],
+    "opptjeningAktivitet": null,
+    "dataBruktTilUtledning": {
+      "harForståttRettigheterOgPlikter": null,
+      "harBekreftetOpplysninger": null,
+      "samtidigHjemme": null,
+      "harMedsoeker": null,
+      "bekrefterPeriodeOver8Uker": null
+    },
+    "infoFraPunsj": null,
+    "bosteder": {
+      "perioder": {},
+      "perioderSomSkalSlettes": {}
+    },
+    "utenlandsopphold": {
+      "perioder": {},
+      "perioderSomSkalSlettes": {}
+    },
+    "beredskap": {
+      "perioder": {},
+      "perioderSomSkalSlettes": {}
+    },
+    "nattevåk": {
+      "perioder": {},
+      "perioderSomSkalSlettes": {}
+    },
+    "tilsynsordning": {
+      "perioder": {}
+    },
+    "lovbestemtFerie": {
+      "perioder": {}
+    },
+    "arbeidstid": {
+      "arbeidstakerList": [
+        {
+          "norskIdentitetsnummer": null,
+          "organisasjonsnummer": "972674818",
+          "arbeidstidInfo": {
+            "perioder": {
+              "2022-04-05/2022-04-05": {
+                "jobberNormaltTimerPerDag": "PT8H",
+                "faktiskArbeidTimerPerDag": "PT3H"
+              }
+            }
+          }
+        }
+      ],
+      "frilanserArbeidstidInfo": null,
+      "selvstendigNæringsdrivendeArbeidstidInfo": null
+    },
+    "uttak": {
+      "perioder": {}
+    },
+    "omsorg": {
+      "relasjonTilBarnet": null,
+      "beskrivelseAvOmsorgsrollen": null
+    }
+  },
+  "språk": "nb",
+  "journalposter": ["525112859"],
+  "begrunnelseForInnsending": {
+    "tekst": ""
+  }
+}

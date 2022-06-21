@@ -11,6 +11,7 @@ import no.nav.k9.søknad.ytelse.psb.v1.*
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.k9format.*
@@ -62,8 +63,14 @@ internal class MapPsbTilK9Format(
             }
         }
         dto.omsorg?.leggTilOmsorg()
-        dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
-            pleiepengerSyktBarn.medOpptjeningAktivitet(this)
+        // Enn så lenge støtter vi kun å legge til opptjeningaktivitet eller ignorere
+        // Sletting implementeres ved behov
+        if  (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+            dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                pleiepengerSyktBarn.medOpptjeningAktivitet(this)
+            }
+        } else {
+            pleiepengerSyktBarn.ignorerOpplysningerOmOpptjening();
         }
         dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
             pleiepengerSyktBarn.medArbeidstid(this)
@@ -81,9 +88,9 @@ internal class MapPsbTilK9Format(
     }}
 
     internal fun søknad() = søknad
+
     internal fun feil() = feil.toList()
     internal fun søknadOgFeil() = søknad() to feil()
-
     private fun String.leggTilSøknadId() { if (erSatt()) {
         søknad.medSøknadId(this)
     }}
@@ -222,13 +229,13 @@ internal class MapPsbTilK9Format(
         pleiepengerSyktBarn.medOmsorg(k9Omsorg)
     }
 
-
     private fun PleiepengerSyktBarnSøknadDto.DataBruktTilUtledningDto.leggTilDataBruktTilUtledning() {
         val k9DataBruktTilUtledning = DataBruktTilUtledning()
         samtidigHjemme?.also { k9DataBruktTilUtledning.medSamtidigHjemme(it) }
         harMedsoeker?.also { k9DataBruktTilUtledning.medHarMedsøker(it) }
         pleiepengerSyktBarn.medSøknadInfo(k9DataBruktTilUtledning)
     }
+
 
     private fun List<PleiepengerSyktBarnSøknadDto.TilsynsordningInfoDto>.leggTilTilsynsordning() {
         val k9Tilsynsordning = mutableMapOf<Periode, TilsynPeriodeInfo>()
@@ -244,6 +251,14 @@ internal class MapPsbTilK9Format(
             pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))
         }
     }
+
+    private fun erOpptjeningSatt(
+        dto: PleiepengerSyktBarnSøknadDto,
+        opptjeningAktivitet: ArbeidAktivitetDto?
+    ) = dto.opptjeningAktivitet != null &&
+            (!opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                    opptjeningAktivitet?.frilanser != null ||
+                    opptjeningAktivitet?.selvstendigNaeringsdrivende != null)
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPsbTilK9Format::class.java)
