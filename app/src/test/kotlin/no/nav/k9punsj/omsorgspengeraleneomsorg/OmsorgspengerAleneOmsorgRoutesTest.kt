@@ -118,6 +118,42 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
         org.assertj.core.api.Assertions.assertThat(søknadViaGet.barn?.foedselsdato).isEqualTo(LocalDate.of(2018,10, 30))
     }
 
+    @Test
+    fun `Oppdatere en søknad med metadata`(): Unit = runBlocking {
+        val norskIdent = "02022352122"
+        val pleietrengende = "01010050023"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsAO()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = journalpostid,
+            pleietrengende = pleietrengende
+        )
+
+        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerAleneOmsorgSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api, søknadTypeUri, "oppdater"
+        )
+
+        Assertions.assertNotNull(body)
+        Assertions.assertEquals(norskIdent, body.soekerId)
+
+        val søknadViaGet = client.getAndAssert<OmsorgspengerAleneOmsorgSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+        )
+
+        Assertions.assertNotNull(søknadViaGet)
+        org.assertj.core.api.Assertions.assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
+    }
+
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,

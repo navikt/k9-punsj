@@ -7,7 +7,11 @@ import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.util.SøknadJson
+import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
@@ -155,6 +159,49 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     }
 
     @Test
+    fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
+        val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
+        val norskIdent = "02030050163"
+        val journalpostid = abs(Random(1234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
+
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+
+        val nySøknadRespons = client.postAndAssert<OpprettNySøknad>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api, søknadTypeUri
+        )
+
+        val location = nySøknadRespons.headers().asHttpHeaders().location
+        Assertions.assertNotNull(location)
+
+        leggerPåNySøknadId(søknadFraFrontend, location)
+
+        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(søknadFraFrontend),
+            api, søknadTypeUri, "oppdater"
+        )
+
+        Assertions.assertNotNull(body)
+        Assertions.assertEquals(norskIdent, body.soekerId)
+
+        val søknadViaGet = client.getAndAssert<OmsorgspengerKroniskSyktBarnSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", hentSøknadId(location)!!
+        )
+
+        Assertions.assertNotNull(søknadViaGet)
+        assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
+    }
+
+    @Test
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
@@ -240,12 +287,6 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
-    }
-
-    private fun hentSøknadId(location: URI?): String? {
-        val path = location?.path
-        val søknadId = path?.substring(path.lastIndexOf('/'))
-        return søknadId?.trim('/')
     }
 
     private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, location: URI?) {

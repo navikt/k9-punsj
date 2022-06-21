@@ -32,7 +32,9 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val harInfoSomIkkeKanPunsjes : Boolean,
     val harMedisinskeOpplysninger : Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
-    val begrunnelseForInnsending: BegrunnelseForInnsending? = null) {
+    val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
+    val metadata: Map<*, *>? = null
+) {
 
     data class UttakDto(
         val periode: PeriodeDto?,

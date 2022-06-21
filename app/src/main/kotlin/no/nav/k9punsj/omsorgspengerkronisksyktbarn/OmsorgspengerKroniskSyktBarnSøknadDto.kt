@@ -21,7 +21,8 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
     val barn: BarnDto? = null,
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean,
-    val harMedisinskeOpplysninger : Boolean
+    val harMedisinskeOpplysninger : Boolean,
+    val metadata: Map<*, *>? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,

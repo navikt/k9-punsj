@@ -12,6 +12,7 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
@@ -263,12 +264,6 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
-    }
-
-    private fun hentSøknadId(location: URI?): String? {
-        val path = location?.path
-        val søknadId = path?.substring(path.lastIndexOf('/'))
-        return søknadId?.trim('/')
     }
 
     private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, location: URI?) {

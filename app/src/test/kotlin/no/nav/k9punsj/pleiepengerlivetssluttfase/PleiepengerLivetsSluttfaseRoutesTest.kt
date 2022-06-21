@@ -13,6 +13,7 @@ import no.nav.k9punsj.util.WebClientUtils.postAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
 import no.nav.k9punsj.util.WebClientUtils.putAndAssert
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -81,7 +82,38 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             requestBody = BodyInserters.fromValue(soeknad),
             api, søknadTypeUri, "valider"
         )
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
+        assertThat(body.feil).isNull()
+    }
+
+    @Test
+    fun `Oppdatere en søknad med metadata`(): Unit = runBlocking {
+        val norskIdent = "02022352122"
+        val pleietrengende = "01010050023"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendPls()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid, pleietrengende)
+
+        val body = client.putAndAssert<MutableMap<String, Any?>, PleiepengerLivetsSluttfaseSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api, søknadTypeUri, "oppdater"
+        )
+
+        Assertions.assertNotNull(body)
+        Assertions.assertEquals(norskIdent, body.soekerId)
+
+        val søknadViaGet = client.getAndAssert<PleiepengerLivetsSluttfaseSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+        )
+
+        Assertions.assertNotNull(søknadViaGet)
+        assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
     }
 
     @Test
@@ -93,8 +125,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
-        org.assertj.core.api.Assertions.assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
+        assertThat(body.feil).isNull()
+        assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
     private fun opprettSøknad(
@@ -200,7 +232,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         val journalposter = søknadDtoFyltUt.journalposter!!
 
         val kanSendeInn = journalpostRepository.kanSendeInn(journalposter)
-        org.assertj.core.api.Assertions.assertThat(kanSendeInn).isTrue
+        assertThat(kanSendeInn).isTrue
 
         // sender en søknad
         val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(

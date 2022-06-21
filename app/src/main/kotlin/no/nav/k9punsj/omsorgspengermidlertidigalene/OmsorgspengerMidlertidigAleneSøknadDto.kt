@@ -29,7 +29,8 @@ data class OmsorgspengerMidlertidigAleneSøknadDto(
     val annenForelder: AnnenForelder? = null,
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes : Boolean? = null,
-    val harMedisinskeOpplysninger : Boolean? = null
+    val harMedisinskeOpplysninger : Boolean? = null,
+    val metadata: Map<*, *>? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
