@@ -143,6 +143,47 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         assertThat(søknadViaGet.barn.size).isEqualTo(2)
     }
 
+    @Test
+    fun `Oppdatere en søknad med metadata`(): Unit = runBlocking {
+        val norskIdent = "02022352122"
+        val pleietrengende = "01010050023"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = journalpostid,
+            barn = listOf(
+                OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(
+                    norskIdent = pleietrengende,
+                    foedselsdato = null
+                )
+            )
+        )
+
+        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerMidlertidigAleneSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api, søknadTypeUri, "oppdater"
+        )
+
+        Assertions.assertNotNull(body)
+        Assertions.assertEquals(norskIdent, body.soekerId)
+
+        val søknadViaGet = client.getAndAssert<OmsorgspengerMidlertidigAleneSøknadDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+        )
+
+        Assertions.assertNotNull(søknadViaGet)
+        assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
+    }
+
 
     private fun opprettSøknad(
         personnummer: String,

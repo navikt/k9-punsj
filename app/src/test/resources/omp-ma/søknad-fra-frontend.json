@@ -26,5 +26,9 @@
     }
   },
   "harInfoSomIkkeKanPunsjes": true,
-  "harMedisinskeOpplysninger": false
+  "harMedisinskeOpplysninger": false,
+  "metadata": {
+    "radioKnapp_1": true,
+    "radioKnapp_2": false
+  }
 }

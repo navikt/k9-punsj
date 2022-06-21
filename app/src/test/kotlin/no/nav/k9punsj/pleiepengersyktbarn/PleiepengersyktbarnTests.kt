@@ -19,6 +19,7 @@ import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
+import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
@@ -158,6 +159,55 @@ class PleiepengersyktbarnTests {
             oppdatertSoeknadDto.soeknadsperiode
         )
         assertEquals(HttpStatus.OK, httpstatus)
+    }
+
+    @Test
+    fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
+        val søknadFraFrontend = LesFraFilUtil.søknadFraFrontend()
+        val norskIdent = "02030050163"
+        val journalpostid = "9999"
+        tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
+
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
+
+        leggerPåNySøknadId(søknadFraFrontend, location)
+
+        val (httpstatus, oppdatertSoeknadDto) = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(søknadFraFrontend))
+            .awaitStatusWithBody<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(oppdatertSoeknadDto)
+        assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
+        assertEquals(
+            listOf(
+                PeriodeDto(
+                    LocalDate.of(2018, 12, 30),
+                    LocalDate.of(2019, 10, 20)
+                )
+            ),
+            oppdatertSoeknadDto.soeknadsperiode
+        )
+        assertEquals(HttpStatus.OK, httpstatus)
+
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(søknadViaGet)
+        assertThat(oppdatertSoeknadDto.metadata).isEqualTo(søknadViaGet.metadata)
     }
 
 
@@ -696,10 +746,4 @@ private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, l
     val søknadId = path?.substring(path.lastIndexOf('/'))
     val trim = søknadId?.trim('/')
     søknadFraFrontend.replace("soeknadId", trim)
-}
-
-private fun hentSøknadId(location: URI?): String? {
-    val path = location?.path
-    val søknadId = path?.substring(path.lastIndexOf('/'))
-    return søknadId?.trim('/')
 }

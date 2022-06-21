@@ -29,7 +29,8 @@ data class OmsorgspengerutbetalingSøknadDto(
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
-    val harMedisinskeOpplysninger: Boolean? = null
+    val harMedisinskeOpplysninger: Boolean? = null,
+    val metadata: Map<*, *>? = null
 ) {
     data class FraværPeriode(
         val aktivitetsFravær: AktivitetFravær,

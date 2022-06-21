@@ -165,5 +165,9 @@
     "harMedsoeker": true
   },
   "harInfoSomIkkeKanPunsjes" : true,
-  "harMedisinskeOpplysninger" : true
+  "harMedisinskeOpplysninger" : true,
+  "metadata": {
+    "radioKnapp_1": true,
+    "radioKnapp_2": false
+  }
 }

@@ -49,5 +49,9 @@
     "relasjonTilBarnet": "",
     "beskrivelseAvOmsorgsrollen": ""
   },
-  "bosteder": []
+  "bosteder": [],
+  "metadata": {
+    "radioKnapp_1": true,
+    "radioKnapp_2": false
+  }
 }

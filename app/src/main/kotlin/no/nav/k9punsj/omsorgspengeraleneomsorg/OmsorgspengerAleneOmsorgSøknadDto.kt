@@ -24,6 +24,7 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes : Boolean? = null,
     val harMedisinskeOpplysninger : Boolean? = null,
+    val metadata: Map<*, *>? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
