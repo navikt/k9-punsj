@@ -71,3 +71,4 @@ For å opprette nye diagrammer, kan du opprette en ny *.mmd-fil og deretter kjø
  Interne henvendelser kan sendes via Slack i kanalen #sif_saksbehandling. 
 
 ![k9-punsj](logo.png)
+
