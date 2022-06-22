@@ -17,7 +17,7 @@ import java.time.ZonedDateTime
 internal class MapOmsAOTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerAleneOmsorgSøknadDto,
+    dto: OmsorgspengerAleneOmsorgSøknadDto
 ) {
     private val søknad = Søknad()
     private val feil = mutableListOf<Feil>()
@@ -31,7 +31,7 @@ internal class MapOmsAOTilK9Format(
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             val omsorgspengerAleneOmsorg = OmsorgspengerAleneOmsorg(
                 dto.barn?.leggTilBarn(),
-                dto.soeknadsperiode?.somK9Periode(),
+                dto.soeknadsperiode?.somK9Periode()
             )
 
             // Fullfører søknad & validerer
@@ -70,7 +70,6 @@ internal class MapOmsAOTilK9Format(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
-
     private fun OmsorgspengerAleneOmsorgSøknadDto.BarnDto.leggTilBarn(): Barn = when {
         norskIdent != null ->
             Barn().medNorskIdentitetsnummer(
@@ -104,6 +103,5 @@ internal class MapOmsAOTilK9Format(
 
         private val Validator = OmsorgspengerKroniskSyktBarn().validator
         private const val Versjon = "1.0.0"
-
     }
 }

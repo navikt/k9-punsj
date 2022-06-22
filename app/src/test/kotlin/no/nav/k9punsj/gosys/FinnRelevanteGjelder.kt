@@ -64,9 +64,10 @@ internal class FinnRelevanteGjelder {
             val underkategori: String,
             val behandlingstema: String?,
             val behandlingstype: String?,
-            val tema: String) {
+            val tema: String
+        ) {
             fun somAktivGjelderOrNull() = Gjelder.aktive()
-                .firstOrNull { behandlingstema == it.behandlingstema?.kodeverksverdi && behandlingstype == it.behandlingstype?.kodeverksverdi}
+                .firstOrNull { behandlingstema == it.behandlingstema?.kodeverksverdi && behandlingstype == it.behandlingstype?.kodeverksverdi }
         }
 
         /**

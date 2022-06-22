@@ -23,29 +23,29 @@ import javax.sql.DataSource
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class, FlywayAutoConfiguration::class])
 class K9PunsjApplication {
 
-	@Bean
-	fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
-		return Jackson2ObjectMapperBuilder()
-				.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-				.modulesToInstall(JavaTimeModule())
-				.featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-				.deserializerByType(ULID.Value::class.java, UlidDeserializer())
-	}
+    @Bean
+    fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
+        return Jackson2ObjectMapperBuilder()
+            .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+            .modulesToInstall(JavaTimeModule())
+            .featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+            .deserializerByType(ULID.Value::class.java, UlidDeserializer())
+    }
 
-	@Bean
-	fun reactiveWebServerFactory(): ReactiveWebServerFactory {
-		return NettyReactiveWebServerFactory()
-	}
+    @Bean
+    fun reactiveWebServerFactory(): ReactiveWebServerFactory {
+        return NettyReactiveWebServerFactory()
+    }
 
-	@Bean
-	@StandardProfil
-	fun databaseInitializer(dbConfiguration: DbConfiguration): DataSource {
-		return hikariConfig(dbConfiguration)
-	}
+    @Bean
+    @StandardProfil
+    fun databaseInitializer(dbConfiguration: DbConfiguration): DataSource {
+        return hikariConfig(dbConfiguration)
+    }
 }
 
 fun main(args: Array<String>) {
-	runApplication<K9PunsjApplication>(*args) {
-		setBannerMode(Banner.Mode.OFF)
-	}
+    runApplication<K9PunsjApplication>(*args) {
+        setBannerMode(Banner.Mode.OFF)
+    }
 }

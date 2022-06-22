@@ -14,7 +14,6 @@ internal class PdlResponseMappingTest {
 
     @Test
     fun `mappe henting av identitetsnummer på barn`() {
-
         @Language("JSON")
         val eksempelResponse = """
         {
@@ -43,12 +42,10 @@ internal class PdlResponseMappingTest {
         val forventet = setOf("11111111111", "22222222222")
 
         assertEquals(forventet, objectNode.mapBarnFraRelasjoner())
-
     }
 
     @Test
     fun `mappe personopplysninger`() {
-
         @Language("JSON")
         val eksempelResponse = """
         {

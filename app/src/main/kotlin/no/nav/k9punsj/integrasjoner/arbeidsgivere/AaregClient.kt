@@ -17,7 +17,7 @@ import kotlin.coroutines.coroutineContext
 @Component
 internal class AaregClient(
     @Value("\${AAREG_BASE_URL}") private val baseUrl: URI,
-    @Qualifier("sts") accessTokenClient: AccessTokenClient,
+    @Qualifier("sts") accessTokenClient: AccessTokenClient
 ) {
     private val scopes: Set<String> = setOf("openid")
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -25,15 +25,15 @@ internal class AaregClient(
     internal suspend fun hentArbeidsforhold(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate,
+        tom: LocalDate
     ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(scopes).asAuthoriationHeader()
         val url = "$baseUrl/arbeidstaker/arbeidsforhold?" +
-                "ansettelsesperiodeFom=$fom&" +
-                "ansettelsesperiodeTom=$tom&" +
-                "regelverk=A_ORDNINGEN&" +
-                "sporingsinformasjon=false&" +
-                "historikk=false"
+            "ansettelsesperiodeFom=$fom&" +
+            "ansettelsesperiodeTom=$tom&" +
+            "regelverk=A_ORDNINGEN&" +
+            "sporingsinformasjon=false&" +
+            "historikk=false"
 
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
@@ -64,12 +64,12 @@ internal class AaregClient(
 
     companion object {
         data class AaregArbeidgiver(
-            val organisasjonsnummer: String?,
+            val organisasjonsnummer: String?
         )
 
         data class AaregArbeidsforhold(
             val arbeidsforholdId: String?,
-            val arbeidsgiver: AaregArbeidgiver,
+            val arbeidsgiver: AaregArbeidgiver
         )
 
         inline fun <reified T> String.deserialiser() = kotlin.runCatching {

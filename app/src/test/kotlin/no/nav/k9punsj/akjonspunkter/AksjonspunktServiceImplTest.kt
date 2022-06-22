@@ -4,22 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.objectMapper
@@ -28,7 +28,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -39,24 +38,26 @@ import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [
-    AksjonspunktServiceImpl::class,
-    JournalpostRepository::class,
-    JournalpostService::class,
-    SafGateway::class,
-    DokarkivGateway::class,
-    ObjectMapper::class,
-    AksjonspunktRepository::class,
-    MappeRepository::class,
-    BunkeRepository::class,
-    SøknadRepository::class,
-    SoknadService::class,
-    InnsendingClient::class,
-    PersonService::class,
-    PersonRepository::class,
-    TestPdlService::class,
-    TestBeans::class
-])
+@ContextConfiguration(
+    classes = [
+        AksjonspunktServiceImpl::class,
+        JournalpostRepository::class,
+        JournalpostService::class,
+        SafGateway::class,
+        DokarkivGateway::class,
+        ObjectMapper::class,
+        AksjonspunktRepository::class,
+        MappeRepository::class,
+        BunkeRepository::class,
+        SøknadRepository::class,
+        SoknadService::class,
+        InnsendingClient::class,
+        PersonService::class,
+        PersonRepository::class,
+        TestPdlService::class,
+        TestBeans::class
+    ]
+)
 internal class AksjonspunktServiceImplTest {
 
     @MockBean
@@ -109,11 +110,14 @@ internal class AksjonspunktServiceImplTest {
 
         journalpostService.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
-        aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
+        aksjonspunktRepository.opprettAksjonspunkt(
+            AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
-        aksjonspunktKode = AksjonspunktKode.PUNSJ,
-        journalpostId = melding.journalpostId,
-        aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         assertThat(hentAlleAksjonspunkter).hasSize(1)
@@ -142,11 +146,14 @@ internal class AksjonspunktServiceImplTest {
 
         journalpostService.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
-        aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(
-            aksjonspunktId = UUID.randomUUID().toString(),
-            aksjonspunktKode = AksjonspunktKode.PUNSJ,
-            journalpostId = melding.journalpostId,
-            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+        aksjonspunktRepository.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId = UUID.randomUUID().toString(),
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         assertThat(hentAlleAksjonspunkter).hasSize(1)

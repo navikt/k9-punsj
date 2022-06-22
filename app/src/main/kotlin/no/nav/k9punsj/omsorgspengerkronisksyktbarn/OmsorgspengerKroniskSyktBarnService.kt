@@ -5,10 +5,10 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
@@ -77,7 +77,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
     }
 
     suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
-        //oppretter sak i k9-sak hvis det ikke finnes fra før
+        // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (nySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
                 søker = nySøknad.norskIdent,
@@ -88,7 +88,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
             )
         }
 
-        //setter riktig type der man jobber på en ukjent i utgangspunktet
+        // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
             ytelseType = FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
             journalpostId = nySøknad.journalpostId
@@ -101,7 +101,6 @@ internal class OmsorgspengerKroniskSyktBarnService(
             .created(request.søknadLocationUri(søknadEntitet.søknadId))
             .json()
             .bodyValueAndAwait(søknadEntitet.tilOmsKSBvisning())
-
     }
 
     suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerKroniskSyktBarnSøknadDto): ServerResponse {
@@ -194,14 +193,12 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .accepted()
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
-
         } catch (e: Exception) {
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .json()
                 .bodyValueAndAwait(e.localizedMessage)
         }
-
     }
 
     suspend fun validerSøknad(soknadTilValidering: OmsorgspengerKroniskSyktBarnSøknadDto): ServerResponse {

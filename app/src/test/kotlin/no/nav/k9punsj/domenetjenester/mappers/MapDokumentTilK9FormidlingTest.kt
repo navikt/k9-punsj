@@ -3,8 +3,8 @@ package no.nav.k9punsj.domenetjenester.mappers
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
+import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -28,7 +28,8 @@ internal class MapDokumentTilK9FormidlingTest {
             soekerId = "123",
             mottaker = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-            dokumentMal = DokumentMalType.FRITEKST_DOK.kode)
+            dokumentMal = DokumentMalType.FRITEKST_DOK.kode
+        )
 
         // act
         val (bestilling, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()
@@ -51,8 +52,8 @@ internal class MapDokumentTilK9FormidlingTest {
             soekerId = "123",
             mottaker = MottakerDto("ORG2NR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-            dokumentMal = "fritekst-mal")
-
+            dokumentMal = "fritekst-mal"
+        )
 
         // act
         val (_, feil) = MapDokumentTilK9Formidling(dokumentbestillingDto, "321").bestillingOgFeil()

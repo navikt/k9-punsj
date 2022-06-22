@@ -27,7 +27,6 @@ internal class PunsjJournalpostRepositoryTest {
     val client = TestSetup.client
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
-
     @Test
     fun `Skal finne alle journalposter på personen`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
@@ -212,7 +211,7 @@ internal class PunsjJournalpostRepositoryTest {
     }
 
     @Test
-    fun `skal kunne sette alle til ferdig`(): Unit = runBlocking  {
+    fun `skal kunne sette alle til ferdig`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -233,7 +232,7 @@ internal class PunsjJournalpostRepositoryTest {
     }
 
     @Test
-    fun `skal feil hvis ikke alle kan settes til ferdig`(): Unit = runBlocking  {
+    fun `skal feil hvis ikke alle kan settes til ferdig`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
         val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
@@ -247,8 +246,12 @@ internal class PunsjJournalpostRepositoryTest {
 
         var harFåttEx = false
         try {
-            journalpostRepository.settAlleTilFerdigBehandlet(listOf(punsjJournalpost1.journalpostId,
-                punsjJournalpost2.journalpostId))
+            journalpostRepository.settAlleTilFerdigBehandlet(
+                listOf(
+                    punsjJournalpost1.journalpostId,
+                    punsjJournalpost2.journalpostId
+                )
+            )
         } catch (e: IllegalStateException) {
             assertThat(e.message).isEqualTo("Klarte ikke sette alle til ferdig")
             harFåttEx = true
@@ -256,4 +259,3 @@ internal class PunsjJournalpostRepositoryTest {
         assertThat(harFåttEx).isTrue()
     }
 }
-

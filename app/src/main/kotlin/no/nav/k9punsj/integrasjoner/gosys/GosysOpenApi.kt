@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.openapi.OasFeil
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import no.nav.k9punsj.openapi.OasFeil
 
 @RestController
 @Tag(name = "Gosys", description = "Opprett journalføringsoppgave")
@@ -43,11 +43,13 @@ internal class GosysOpenApi {
             ApiResponse(
                 responseCode = "500",
                 description = "Eksisterer ikke",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )

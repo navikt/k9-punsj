@@ -29,13 +29,13 @@ internal class OmsorgspengerutbetalingRoutes(
     }
 
     internal object Urls {
-        const val HenteMappe = "/$søknadType/mappe" //get
-        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        const val NySøknad = "/$søknadType" //post
-        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        const val ValiderSøknad = "/$søknadType/valider" //post
-        const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" //post
+        const val HenteMappe = "/$søknadType/mappe" // get
+        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" // get
+        const val NySøknad = "/$søknadType" // post
+        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
+        const val SendEksisterendeSøknad = "/$søknadType/send" // post
+        const val ValiderSøknad = "/$søknadType/valider" // post
+        const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" // post
     }
 
     @Bean
@@ -122,8 +122,3 @@ internal class OmsorgspengerutbetalingRoutes(
     private suspend fun ServerRequest.omsorgspengerutbetalingSøknadDto() =
         body(BodyExtractors.toMono(OmsorgspengerutbetalingSøknadDto::class.java)).awaitFirst()
 }
-
-
-
-
-

@@ -1,10 +1,10 @@
 package no.nav.k9punsj.integrasjoner.pdl
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -15,7 +15,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
-
 
 @Configuration
 internal class PdlRoutes(
@@ -34,31 +33,29 @@ internal class PdlRoutes(
                 val norskIdent = request.hentSøknad().norskIdent
                 try {
                     val pdlResponse = pdlService.identifikator(
-                            fnummer = norskIdent
+                        fnummer = norskIdent
                     )
                     if (pdlResponse == null) {
                         ServerResponse
-                                .notFound()
-                                .buildAndAwait()
+                            .notFound()
+                            .buildAndAwait()
                     } else {
                         val aktørId = pdlResponse.identPdl?.data?.hentIdenter?.identer?.first()?.ident!!
                         val pdlResponseDto = PdlResponseDto(PdlPersonDto(norskIdent, aktørId))
 
                         ServerResponse
-                                .ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValueAndAwait(pdlResponseDto)
+                            .ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValueAndAwait(pdlResponseDto)
                     }
-
-                }  catch (case: IkkeTilgang) {
+                } catch (case: IkkeTilgang) {
                     ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
                 }
             }
         }
     }
 
     private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentPerson::class.java)).awaitFirst()
-
 }

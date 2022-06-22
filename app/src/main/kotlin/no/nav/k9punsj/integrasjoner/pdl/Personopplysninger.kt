@@ -2,7 +2,7 @@ package no.nav.k9punsj.integrasjoner.pdl
 
 import java.time.LocalDate
 
-data class Personopplysninger (
+data class Personopplysninger(
     internal val identitetsnummer: String,
     internal val fødselsdato: LocalDate,
     internal val fornavn: String,
@@ -26,7 +26,7 @@ data class Personopplysninger (
         }
     }
 
-    internal fun navn(): String = when(mellomnavn) {
+    internal fun navn(): String = when (mellomnavn) {
         null -> "$fornavn $etternavn"
         else -> "$fornavn $mellomnavn $etternavn"
     }

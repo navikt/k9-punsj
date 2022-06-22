@@ -11,12 +11,12 @@ import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.Dokument
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -113,7 +113,7 @@ class JournalpostService(
         val journalpost = journalpostRepository.hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(ytelse = ytelseType.kode)
-            journalpostRepository.lagre(medType){
+            journalpostRepository.lagre(medType) {
                 medType
             }
         }
@@ -122,7 +122,7 @@ class JournalpostService(
     internal suspend fun journalførMotGenerellSak(
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String,
+        enhetKode: String
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
@@ -138,9 +138,9 @@ class JournalpostService(
         } else {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
         } ?: parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
-        ?: logger.warn(
-            "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedSafJournalpost.relevanteDatoer.map { it.datotype.name }}"
-        ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
+            ?: logger.warn(
+                "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedSafJournalpost.relevanteDatoer.map { it.datotype.name }}"
+            ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
@@ -157,7 +157,7 @@ class JournalpostService(
 
     internal suspend fun hentPunsjInnsendingType(journalpostId: String): PunsjInnsendingType? {
         return hentHvisJournalpostMedId(journalpostId)?.type
-            .let { if(it != null) PunsjInnsendingType.fraKode(it) else null }
+            .let { if (it != null) PunsjInnsendingType.fraKode(it) else null }
     }
 
     internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
@@ -230,7 +230,7 @@ private data class ParsedSafJournalpost(
     val arkivDokumenter: List<SafDtos.Dokument>,
     val harTilgang: Boolean,
     val avsenderMottakertype: SafDtos.AvsenderMottakertype?,
-    val relevanteDatoer: List<SafDtos.RelevantDato>,
+    val relevanteDatoer: List<SafDtos.RelevantDato>
 )
 
 internal data class JournalpostInfo(
@@ -241,7 +241,7 @@ internal data class JournalpostInfo(
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
     val kanOpprettesJournalføringsoppgave: Boolean,
-    val journalpostStatus: String,
+    val journalpostStatus: String
 )
 
 data class JournalpostInfoDto(
@@ -262,11 +262,11 @@ data class JournalpostInfoDto(
 data class VentDto(
     val venteÅrsak: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil: LocalDate,
+    val venterTil: LocalDate
 )
 
 data class DokumentInfo(
-    val dokumentId: String,
+    val dokumentId: String
 )
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =

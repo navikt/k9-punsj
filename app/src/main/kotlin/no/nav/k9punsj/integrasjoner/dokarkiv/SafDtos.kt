@@ -38,11 +38,11 @@ internal object SafDtos {
                 }
               }
             }
-            """.trimIndent(),
+        """.trimIndent(),
         variables = null
     )
 
-    internal open class SakerQuery(søkerIdent: String): GraphqlQuery(
+    internal open class SakerQuery(søkerIdent: String) : GraphqlQuery(
         query =
         """
           query {
@@ -72,7 +72,7 @@ internal object SafDtos {
                 }
               }
             }
-            """.trimIndent(),
+        """.trimIndent(),
         variables = null
     )
 
@@ -114,28 +114,28 @@ internal object SafDtos {
 
     internal data class Bruker(
         val id: String?,
-        val type: String?,
+        val type: String?
     )
 
     internal data class Avsender(
         val id: String?,
-        val type: String?,
+        val type: String?
     )
 
     internal data class AvsenderMottaker(
         val id: String?,
-        val type: String?,
+        val type: String?
     )
 
     internal data class DokumentVariant(
         val variantformat: String,
-        val saksbehandlerHarTilgang: Boolean,
+        val saksbehandlerHarTilgang: Boolean
     )
 
     internal data class Dokument(
         val dokumentInfoId: String,
         val brevkode: String?,
-        val dokumentvarianter: MutableList<DokumentVariant>?,
+        val dokumentvarianter: MutableList<DokumentVariant>?
     )
 
     internal data class Journalpost(
@@ -168,7 +168,7 @@ internal object SafDtos {
 
     internal data class RelevantDato(
         val dato: LocalDateTime,
-        val datotype: Datotype,
+        val datotype: Datotype
     )
 
     internal enum class Datotype {
@@ -182,7 +182,7 @@ internal object SafDtos {
     }
 
     internal data class JournalpostResponse(
-        val journalpost: Journalpost?,
+        val journalpost: Journalpost?
     )
 
     data class JournalpostResponseWrapper(

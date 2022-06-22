@@ -4,9 +4,9 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 
 fun createHikariConfig(
-        jdbcUrl: String,
-        username: String? = null,
-        password: String? = null
+    jdbcUrl: String,
+    username: String? = null,
+    password: String? = null
 ) = HikariConfig().apply {
     this.jdbcUrl = jdbcUrl
     maximumPoolSize = 10

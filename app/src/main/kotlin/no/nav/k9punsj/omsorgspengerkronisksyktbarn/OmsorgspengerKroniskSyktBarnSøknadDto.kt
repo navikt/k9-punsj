@@ -10,18 +10,17 @@ import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 
-
 data class OmsorgspengerKroniskSyktBarnSøknadDto(
     val soeknadId: String,
     val soekerId: String? = null,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    val klokkeslett: LocalTime? = null,
     val barn: BarnDto? = null,
     val journalposter: List<String>? = null,
-    val harInfoSomIkkeKanPunsjes : Boolean,
-    val harMedisinskeOpplysninger : Boolean,
+    val harInfoSomIkkeKanPunsjes: Boolean,
+    val harMedisinskeOpplysninger: Boolean,
     val metadata: Map<*, *>? = null
 ) {
     data class BarnDto(
@@ -34,7 +33,7 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
 data class SvarOmsKSBDto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerKroniskSyktBarnSøknadDto>?,
+    val søknader: List<OmsorgspengerKroniskSyktBarnSøknadDto>?
 )
 
 internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {

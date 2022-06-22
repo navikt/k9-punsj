@@ -33,19 +33,20 @@ class KafkaConfig(
     @Value("\${systembruker.username}") private val username: String,
     @Value("\${systembruker.password}") private val password: String,
     @Value("\${javax.net.ssl.trustStore}") private val trustStorePath: String,
-    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String) {
+    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String
+) {
 
     @Bean
     @Qualifier(ON_PREM)
-    fun onPremKafkaBaseProperties() : Map<String, Any> {
-        requireNotBlank(username) {"Mangler username"}
-        requireNotBlank(password) {"Mangler password"}
+    fun onPremKafkaBaseProperties(): Map<String, Any> {
+        requireNotBlank(username) { "Mangler username" }
+        requireNotBlank(password) { "Mangler password" }
         return mapOf(
-            CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to requireNotBlank(bootstrapServers) {"Mangler bootstrapServers"},
-            CommonClientConfigs.CLIENT_ID_CONFIG to requireNotBlank(clientId) {"Mangler clientId"},
+            CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to requireNotBlank(bootstrapServers) { "Mangler bootstrapServers" },
+            CommonClientConfigs.CLIENT_ID_CONFIG to requireNotBlank(clientId) { "Mangler clientId" },
             CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
-            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to requireNotBlank(trustStorePath) {"Mangler trustStorePath"},
-            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to requireNotBlank(trustStorePassword) {"Mangler trustStorePassword"},
+            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to requireNotBlank(trustStorePath) { "Mangler trustStorePath" },
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to requireNotBlank(trustStorePassword) { "Mangler trustStorePassword" },
             SaslConfigs.SASL_MECHANISM to "PLAIN",
             SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"${username}\" password=\"${password}\";"
         )
@@ -54,7 +55,7 @@ class KafkaConfig(
     @Bean
     @Qualifier(AIVEN)
     @IkkeLokalProfil
-    fun aivenKafkaBaseProperties() : Map<String, Any> {
+    fun aivenKafkaBaseProperties(): Map<String, Any> {
         val env = System.getenv()
 
         return mapOf(
@@ -74,7 +75,7 @@ class KafkaConfig(
     private fun kafkaConsumerFactory(baseProperties: Map<String, Any>): ConsumerFactory<String, String> =
         DefaultKafkaConsumerFactory(baseProperties.medConsumerConfig())
 
-    private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>) : KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
+    private fun kafkaListenerContainerFactory(consumerFactory: ConsumerFactory<String, String>): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofMillis(RETRY_INTERVAL))
         factory.setCommonErrorHandler(CommonContainerStoppingErrorHandler())
@@ -82,7 +83,7 @@ class KafkaConfig(
         return factory
     }
 
-    private fun kafkaTemplate(baseProperties: Map<String, Any>) : KafkaTemplate<String, String> =
+    private fun kafkaTemplate(baseProperties: Map<String, Any>): KafkaTemplate<String, String> =
         KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig()))
 
     @Bean
@@ -135,7 +136,7 @@ class KafkaConfig(
 
         private const val RETRY_INTERVAL = 1000L
 
-        private fun requireNotBlank(verdi: String, feilmelding:() -> String) = verdi.also {
+        private fun requireNotBlank(verdi: String, feilmelding: () -> String) = verdi.also {
             require(it.isNotBlank()) { feilmelding() }
         }
 

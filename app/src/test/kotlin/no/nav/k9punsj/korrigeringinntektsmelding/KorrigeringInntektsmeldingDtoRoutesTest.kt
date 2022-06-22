@@ -9,8 +9,8 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.openapi.OasSoknadsfeil
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.*
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
@@ -53,7 +53,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
 
         Assertions.assertTrue(body.søknader!!.isEmpty())
@@ -68,7 +70,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
     }
 
@@ -82,14 +85,17 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val body = client.getAndAssert<SvarOmsDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
 
         val journalposterDto = body.søknader?.first()?.journalposter
@@ -109,7 +115,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -119,7 +126,10 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", hentSøknadId(location)!!
+            api,
+            søknadTypeUri,
+            "mappe",
+            hentSøknadId(location)!!
         )
 
         Assertions.assertNotNull(søknadViaGet)
@@ -139,7 +149,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -152,7 +163,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(søknadFraFrontend),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -195,7 +208,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
 
         assertThat(body.feil).isNull()
@@ -213,7 +228,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.BAD_REQUEST,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
 
         assertThat(body.feil?.get(0)?.feilkode).isEqualTo("mottattDato")
@@ -235,7 +252,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     fun `Skal hente arbeidsforholdIder fra k9-sak`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val dtoSpørring =
-            MatchFagsakMedPeriode(norskIdent,
+            MatchFagsakMedPeriode(
+                norskIdent,
                 PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1))
             )
 
@@ -244,7 +262,10 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
                 authorizationHeader = saksbehandlerAuthorizationHeader,
                 assertStatus = HttpStatus.OK,
                 requestBody = BodyInserters.fromValue(dtoSpørring),
-                api, søknadTypeUri, "k9sak", "arbeidsforholdIder"
+                api,
+                søknadTypeUri,
+                "k9sak",
+                "arbeidsforholdIder"
             )
 
         Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
@@ -252,7 +273,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
 
     private fun opprettSøknad(
         personnummer: String,
-        journalpostId: String,
+        journalpostId: String
     ): IdentOgJournalpost {
         return IdentOgJournalpost(personnummer, journalpostId)
     }
@@ -260,7 +281,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -275,7 +296,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
@@ -283,7 +304,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -292,7 +313,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = response.headers().asHttpHeaders().location
@@ -307,7 +329,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -325,7 +349,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
-            api, søknadTypeUri, "send"
+            api,
+            søknadTypeUri,
+            "send"
         )
 
         return body
@@ -334,7 +360,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -343,7 +369,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -357,7 +384,9 @@ class KorrigeringInntektsmeldingDtoRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)

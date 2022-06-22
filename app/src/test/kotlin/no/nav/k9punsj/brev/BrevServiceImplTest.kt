@@ -9,8 +9,8 @@ import no.nav.k9.formidling.kontrakt.kodeverk.IdType
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
-import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -29,16 +29,17 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
 @SpringBootTest
 @TestPropertySource(properties = ["spring.config.location = classpath:application.yml"])
-@ContextConfiguration(classes = [
-    JournalpostRepository::class,
-    BrevServiceImpl::class,
-    TestBeans::class
-])
+@ContextConfiguration(
+    classes = [
+        JournalpostRepository::class,
+        BrevServiceImpl::class,
+        TestBeans::class
+    ]
+)
 internal class BrevServiceImplTest {
 
     @MockBean
@@ -49,7 +50,6 @@ internal class BrevServiceImplTest {
 
     @MockBean
     private lateinit var personService: PersonService
-
 
     @Autowired
     private lateinit var brev: BrevServiceImpl

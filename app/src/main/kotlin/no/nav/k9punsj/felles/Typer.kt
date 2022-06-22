@@ -21,14 +21,13 @@ internal data class Identitetsnummer private constructor(private val value: Stri
 }
 
 enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
-    FORDEL ("FORDEL", "Fordel"),
+    FORDEL("FORDEL", "Fordel"),
     SAKSBEHANDLER("SAKSBEHANDLER", "Saksbehandler");
 }
 
-
 data class PunsjBolleDto(
     val brukerIdent: String,
-    //todo bytt navn til pleietrengende
+    // todo bytt navn til pleietrengende
     val barnIdent: String?,
     val annenPart: String?,
     val journalpostId: String,
@@ -37,7 +36,7 @@ data class PunsjBolleDto(
 
 data class IdentOgJournalpost(
     val norskIdent: String,
-    val journalpostId: String,
+    val journalpostId: String
 )
 
 data class SøkUferdigJournalposter(

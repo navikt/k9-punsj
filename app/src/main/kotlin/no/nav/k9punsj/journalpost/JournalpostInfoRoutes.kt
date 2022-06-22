@@ -2,10 +2,10 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.felles.SøkUferdigJournalposter
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,7 +19,7 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 internal class JournalpostInfoRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    private val journalpostService: JournalpostService,
+    private val journalpostService: JournalpostService
 ) {
 
     private companion object {
@@ -40,7 +40,7 @@ internal class JournalpostInfoRoutes(
                 val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
                     .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
 
-             return@RequestContext ServerResponse
+                return@RequestContext ServerResponse
                     .ok()
                     .json()
                     .bodyValueAndAwait(JournalpostIderDto(journalpostIder))

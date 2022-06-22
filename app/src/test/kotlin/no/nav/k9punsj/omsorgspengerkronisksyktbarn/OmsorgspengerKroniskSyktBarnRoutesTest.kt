@@ -53,7 +53,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             norskIdent = "01110050053",
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
         Assertions.assertTrue(responsebody.søknader!!.isEmpty())
     }
@@ -67,7 +69,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
     }
 
@@ -81,14 +84,17 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val responsebody = client.getAndAssert<SvarOmsKSBDto>(
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
 
         val journalposterDto = responsebody.søknader?.first()?.journalposter
@@ -108,7 +114,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -118,7 +125,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             norskIdent = "",
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", hentSøknadId(location)!!
+            api,
+            søknadTypeUri,
+            "mappe",
+            hentSøknadId(location)!!
         )
 
         Assertions.assertNotNull(res)
@@ -138,7 +148,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = nySøknadRespons.headers().asHttpHeaders().location
@@ -151,7 +162,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(søknadFraFrontend),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -171,7 +184,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = nySøknadRespons.headers().asHttpHeaders().location
@@ -184,7 +198,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(søknadFraFrontend),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -194,7 +210,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", hentSøknadId(location)!!
+            api,
+            søknadTypeUri,
+            "mappe",
+            hentSøknadId(location)!!
         )
 
         Assertions.assertNotNull(søknadViaGet)
@@ -244,7 +263,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             norskIdent = null,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId
+            api,
+            søknadTypeUri,
+            "mappe",
+            oppdatertSoeknadDto.soeknadId
         )
 
         Assertions.assertNotNull(søknad)
@@ -265,7 +287,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.BAD_REQUEST,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
 
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
@@ -283,7 +307,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -298,7 +322,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
@@ -306,7 +330,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -315,7 +339,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = response.headers().asHttpHeaders().location
@@ -330,7 +355,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -348,7 +375,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
-            api, søknadTypeUri, "send"
+            api,
+            søknadTypeUri,
+            "send"
         )
 
         return body
@@ -357,7 +386,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): OmsorgspengerKroniskSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -366,7 +395,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -380,7 +410,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)

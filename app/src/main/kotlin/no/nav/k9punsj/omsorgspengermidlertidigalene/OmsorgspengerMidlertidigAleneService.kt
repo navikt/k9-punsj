@@ -5,10 +5,10 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
@@ -37,7 +37,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     private val soknadService: SoknadService,
     private val objectMapper: ObjectMapper,
     private val aksjonspunktService: AksjonspunktService
-    ) {
+) {
 
     private companion object {
         private val logger = LoggerFactory.getLogger(OmsorgspengerMidlertidigAleneService::class.java)
@@ -77,7 +77,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     }
 
     internal suspend fun nySøknad(request: ServerRequest, nyOmsMASøknad: NyOmsMASøknad): ServerResponse {
-        //oppretter sak i k9-sak hvis det ikke finnes fra før
+        // oppretter sak i k9-sak hvis det ikke finnes fra før
         punsjbolleService.opprettEllerHentFagsaksnummer(
             søker = nyOmsMASøknad.norskIdent,
             annenPart = nyOmsMASøknad.annenPart,
@@ -86,7 +86,7 @@ internal class OmsorgspengerMidlertidigAleneService(
             fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA
         )
 
-        //setter riktig type der man jobber på en ukjent i utgangspunktet
+        // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
             ytelseType = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
             journalpostId = nyOmsMASøknad.journalpostId
@@ -190,7 +190,6 @@ internal class OmsorgspengerMidlertidigAleneService(
                 .accepted()
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
-
         } catch (e: Exception) {
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

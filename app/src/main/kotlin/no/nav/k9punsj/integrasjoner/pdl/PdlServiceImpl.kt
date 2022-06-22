@@ -45,9 +45,9 @@ class PdlServiceImpl(
         private fun getStringFromResource(path: String) =
             PdlServiceImpl::class.java.getResourceAsStream(path)!!.bufferedReader().use { it.readText() }
 
-        private val HENT_IDENT =  getStringFromResource("/pdl/hentIdent.graphql")
-        private val HENT_RELASJONER =  getStringFromResource("/pdl/hent-relasjoner.graphql")
-        private val HENT_PERSONOPPLYSNINGER =  getStringFromResource("/pdl/hent-personopplysninger.graphql")
+        private val HENT_IDENT = getStringFromResource("/pdl/hentIdent.graphql")
+        private val HENT_RELASJONER = getStringFromResource("/pdl/hent-relasjoner.graphql")
+        private val HENT_PERSONOPPLYSNINGER = getStringFromResource("/pdl/hent-personopplysninger.graphql")
     }
 
     init {
@@ -76,7 +76,6 @@ class PdlServiceImpl(
             logger.warn(objectMapper().writeValueAsString(errors))
         }
         return PdlResponse(false, identPdl = IdentPdl(data, errors))
-
     }
 
     @Throws(IkkeTilgang::class)
@@ -146,13 +145,14 @@ class PdlServiceImpl(
 
         return requestPdlJson(
             queryRequest = request,
-            getAuthorizationHeader = {systemAuthorizationHeader()}
+            getAuthorizationHeader = { systemAuthorizationHeader() }
         ).mapPersonopplysninger()
     }
 
     private suspend fun requestPdl(
         queryRequest: QueryRequest,
-        getAuthorizationHeader: suspend () -> String = {userAuthorizationHeader()}) : String {
+        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() }
+    ): String {
         val response = client
             .post()
             .uri { it.build() }
@@ -175,7 +175,8 @@ class PdlServiceImpl(
 
     private suspend fun requestPdlJson(
         queryRequest: QueryRequest,
-        getAuthorizationHeader: suspend () -> String = {userAuthorizationHeader()}) : ObjectNode {
+        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() }
+    ): ObjectNode {
         val response = objectMapper().readTree(requestPdl(queryRequest, getAuthorizationHeader)) as ObjectNode
 
         val errors = when (response.hasNonNull("errors")) {

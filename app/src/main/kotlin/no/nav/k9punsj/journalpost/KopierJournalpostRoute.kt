@@ -3,16 +3,16 @@ package no.nav.k9punsj.journalpost
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
+import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
-import no.nav.k9punsj.felles.PunsjbolleRuting
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
-import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
@@ -25,7 +25,7 @@ import kotlin.coroutines.coroutineContext
 data class KopierJournalpostDto(
     val fra: String,
     val til: String,
-    //TODO bytt navn til pleietrengende
+    // TODO bytt navn til pleietrengende
     val barn: String?,
     val annenPart: String?
 ) {
@@ -42,7 +42,6 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
     journalpostService: JournalpostService,
     innsendingClient: InnsendingClient
 ) {
-
     suspend fun harTilgang(dto: KopierJournalpostDto): Boolean {
         val identListe = mutableListOf(dto.fra, dto.til)
         dto.barn?.let { identListe.add(it) }
@@ -99,13 +98,13 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
-            if(safJournalpost != null && safJournalpost.journalposttype == "U") {
+            if (safJournalpost != null && safJournalpost.journalposttype == "U") {
                 return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
             }
 
             val ytelseType = journalpost?.ytelse?.let {
                 journalpost.utledeFagsakYtelseType(fagsakYtelseType = FagsakYtelseType.valueOf(it))
-            }?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
+            } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
 
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
             if (dto.fra == dto.til) {

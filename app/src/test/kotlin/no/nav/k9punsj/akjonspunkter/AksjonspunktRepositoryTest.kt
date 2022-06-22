@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.UUID
 
-
 @ExtendWith(SpringExtension::class)
 internal class AksjonspunktRepositoryTest {
 
@@ -23,24 +22,29 @@ internal class AksjonspunktRepositoryTest {
 
         val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
 
-        aksjonspunktRepo.opprettAksjonspunkt(AksjonspunktEntitet(
-            aksjonspunktId = UUID.randomUUID().toString(),
-            aksjonspunktKode = AksjonspunktKode.PUNSJ,
-            journalpostId = melding.journalpostId,
-            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+        aksjonspunktRepo.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId = UUID.randomUUID().toString(),
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         val hentAlleAksjonspunkter = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter).hasSize(1)
 
-        aksjonspunktRepo.opprettAksjonspunkt(AksjonspunktEntitet(
-            aksjonspunktId = UUID.randomUUID().toString(),
-            aksjonspunktKode = AksjonspunktKode.PUNSJ,
-            journalpostId = melding.journalpostId,
-            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+        aksjonspunktRepo.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId = UUID.randomUUID().toString(),
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         val hentAlleAksjonspunkter2 = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter2).hasSize(1)
-
     }
 
     @Test
@@ -53,26 +57,30 @@ internal class AksjonspunktRepositoryTest {
         val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
 
         val aksjonspunktId = UUID.randomUUID().toString()
-        aksjonspunktRepo.opprettAksjonspunkt(AksjonspunktEntitet(
-            aksjonspunktId = aksjonspunktId,
-            aksjonspunktKode = AksjonspunktKode.PUNSJ,
-            journalpostId = melding.journalpostId,
-            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+        aksjonspunktRepo.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId = aksjonspunktId,
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         aksjonspunktRepo.settStatus(aksjonspunktId, AksjonspunktStatus.UTFØRT)
 
         val hentAlleAksjonspunkter = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter).hasSize(1)
 
-
-        aksjonspunktRepo.opprettAksjonspunkt(AksjonspunktEntitet(
-            aksjonspunktId = UUID.randomUUID().toString(),
-            aksjonspunktKode = AksjonspunktKode.PUNSJ,
-            journalpostId = melding.journalpostId,
-            aksjonspunktStatus = AksjonspunktStatus.OPPRETTET))
+        aksjonspunktRepo.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId = UUID.randomUUID().toString(),
+                aksjonspunktKode = AksjonspunktKode.PUNSJ,
+                journalpostId = melding.journalpostId,
+                aksjonspunktStatus = AksjonspunktStatus.OPPRETTET
+            )
+        )
 
         val hentAlleAksjonspunkter2 = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter2).hasSize(2)
-
     }
 }

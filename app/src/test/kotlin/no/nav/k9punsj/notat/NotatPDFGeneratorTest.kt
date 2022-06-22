@@ -32,7 +32,7 @@ internal class NotatPDFGeneratorTest {
                 Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; 
                 Donec luctus nibh quis enim ullamcorper, eu pellentesque erat vehicula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. 
                 Aliquam erat volutpat. Nulla facilisi.
-            """.trimIndent()
+                """.trimIndent()
             )
         )
         File(pdfPath("notat")).writeBytes(pdf)

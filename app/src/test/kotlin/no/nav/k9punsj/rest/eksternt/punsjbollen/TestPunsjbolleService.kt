@@ -4,8 +4,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.PunsjbolleRuting
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
 import org.springframework.stereotype.Component
 

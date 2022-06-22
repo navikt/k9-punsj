@@ -10,13 +10,13 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.NavHeaders
+import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
-import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
-import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,7 +33,7 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -48,9 +48,8 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> {
-
         val matchDto = MatchDto(
             FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             søker,
@@ -77,7 +76,7 @@ class K9SakServiceImpl(
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
-        periodeDto: PeriodeDto,
+        periodeDto: PeriodeDto
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         val matchDto = MatchMedPeriodeDto(
             FagsakYtelseType.fraKode(fagsakYtelseType.kode),
@@ -96,8 +95,10 @@ class K9SakServiceImpl(
             }
             val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json)
             val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
-                ArbeidsgiverMedArbeidsforholdId(entry.key.identifikator,
-                    entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId })
+                ArbeidsgiverMedArbeidsforholdId(
+                    entry.key.identifikator,
+                    entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId }
+                )
             }
             Pair(map, null)
         } catch (e: Exception) {
@@ -183,7 +184,7 @@ class K9SakServiceImpl(
     data class MatchDto(
         val ytelseType: FagsakYtelseType,
         val bruker: String,
-        val pleietrengende: String,
+        val pleietrengende: String
     )
 
     data class MatchMedPeriodeDto(

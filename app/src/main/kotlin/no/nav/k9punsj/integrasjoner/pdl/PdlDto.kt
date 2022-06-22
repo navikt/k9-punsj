@@ -11,15 +11,15 @@ data class IdentPdl(
     val errors: List<Error>?
 ) {
     data class Data(
-            var hentIdenter: HentIdenter?
+        var hentIdenter: HentIdenter?
     ) {
         data class HentIdenter(
-                val identer: List<Identer>
+            val identer: List<Identer>
         ) {
             data class Identer(
-                    val gruppe: String,
-                    val historisk: Boolean,
-                    var ident: String
+                val gruppe: String,
+                val historisk: Boolean,
+                var ident: String
             )
         }
     }
@@ -30,75 +30,72 @@ data class IdentPdl(
         val path: List<String>
     ) {
         data class Extensions(
-                val classification: String,
-                val code: String
+            val classification: String,
+            val code: String
         )
 
         data class Location(
-                val column: Int,
-                val line: Int
+            val column: Int,
+            val line: Int
         )
     }
 }
 
 data class PdlResponse(
-        val ikkeTilgang: Boolean,
-        val identPdl: IdentPdl?
+    val ikkeTilgang: Boolean,
+    val identPdl: IdentPdl?
 )
 
-
 data class PersonPdl(
-        val `data`: Data
+    val `data`: Data
 ) {
     data class Data(
-            val hentPerson: HentPerson
+        val hentPerson: HentPerson
     ) {
         data class HentPerson(
             val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
             val navn: List<Navn>,
             val kjoenn: List<Kjoenn>,
-            val doedsfall:List<Doedsfall>
+            val doedsfall: List<Doedsfall>
         ) {
             data class Kjoenn(
-                    val kjoenn: String
+                val kjoenn: String
             )
 
             data class Doedsfall(
-                    @JsonSerialize(using = ToStringSerializer::class)
-                    @JsonDeserialize(using = LocalDateDeserializer::class)
-                    val doedsdato: LocalDate
+                @JsonSerialize(using = ToStringSerializer::class)
+                @JsonDeserialize(using = LocalDateDeserializer::class)
+                val doedsdato: LocalDate
             )
 
             data class Folkeregisteridentifikator(
-                    val identifikasjonsnummer: String
+                val identifikasjonsnummer: String
             )
 
             data class Navn(
-                    val etternavn: String,
-                    val forkortetNavn: String?,
-                    val fornavn: String,
-                    val mellomnavn: String?
+                val etternavn: String,
+                val forkortetNavn: String?,
+                val fornavn: String,
+                val mellomnavn: String?
             )
         }
     }
 }
 
 data class HentPerson(
-    val norskIdent: String,
+    val norskIdent: String
 )
 
-internal fun PersonPdl.navn(): String{
+internal fun PersonPdl.navn(): String {
     return data.hentPerson.navn[0].forkortetNavn
         ?: (data.hentPerson.navn[0].fornavn + " " + data.hentPerson.navn[0].etternavn)
 }
 
 data class PdlPersonDto(
     val norskIdent: String,
-    val aktørId: String,
+    val aktørId: String
 )
 
 data class PdlResponseDto(
-    val person: PdlPersonDto,
+    val person: PdlPersonDto
 )
-
-

@@ -10,37 +10,37 @@ internal class OverførDagerConverter {
             val (journalpostIder, søknad) = dto
             val (mottaksdato, identitetsnummer, arbeidssituasjon, _, aleneOmOmsorgen, barn, omsorgenDelesMed) = søknad
             val jobberINorge = listOf(arbeidssituasjon.erArbeidstaker, arbeidssituasjon.erFrilanser, arbeidssituasjon.erSelvstendigNæringsdrivende)
-                    .any { it == true }
+                .any { it == true }
 
             return OverføreOmsorgsdagerBehov(
-                    fra = OverføreOmsorgsdagerBehov.OverførerFra(
-                            identitetsnummer = identitetsnummer,
-                            jobberINorge = jobberINorge
-                    ),
-                    til = OverføreOmsorgsdagerBehov.OverførerTil(
-                            identitetsnummer = omsorgenDelesMed.norskIdent,
-                            relasjon = when (omsorgenDelesMed.mottaker) {
-                                Mottaker.Samboer -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeSamboer
-                                Mottaker.Ektefelle -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeEktefelle
-                            },
-                            harBoddSammenMinstEttÅr = when (omsorgenDelesMed.mottaker) {
-                                Mottaker.Samboer -> mottaksdato.isAfter(omsorgenDelesMed.samboerSiden?.plusYears(1))
-                                Mottaker.Ektefelle -> null
-                            }
-                    ),
-                    omsorgsdagerTattUtIÅr = 0,
-                    omsorgsdagerÅOverføre = omsorgenDelesMed.antallOverførteDager,
-                    barn = barn.map {
-                        OverføreOmsorgsdagerBehov.Barn(
-                                identitetsnummer = it.norskIdent,
-                                fødselsdato = it.fødselsdato!!,
-                                aleneOmOmsorgen = aleneOmOmsorgen == JaNei.ja,
-                                utvidetRett = false
-                        )
+                fra = OverføreOmsorgsdagerBehov.OverførerFra(
+                    identitetsnummer = identitetsnummer,
+                    jobberINorge = jobberINorge
+                ),
+                til = OverføreOmsorgsdagerBehov.OverførerTil(
+                    identitetsnummer = omsorgenDelesMed.norskIdent,
+                    relasjon = when (omsorgenDelesMed.mottaker) {
+                        Mottaker.Samboer -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeSamboer
+                        Mottaker.Ektefelle -> OverføreOmsorgsdagerBehov.Relasjon.NåværendeEktefelle
                     },
-                    kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
-                    journalpostIder = journalpostIder,
-                    mottatt = mottaksdato.osloNå()
+                    harBoddSammenMinstEttÅr = when (omsorgenDelesMed.mottaker) {
+                        Mottaker.Samboer -> mottaksdato.isAfter(omsorgenDelesMed.samboerSiden?.plusYears(1))
+                        Mottaker.Ektefelle -> null
+                    }
+                ),
+                omsorgsdagerTattUtIÅr = 0,
+                omsorgsdagerÅOverføre = omsorgenDelesMed.antallOverførteDager,
+                barn = barn.map {
+                    OverføreOmsorgsdagerBehov.Barn(
+                        identitetsnummer = it.norskIdent,
+                        fødselsdato = it.fødselsdato!!,
+                        aleneOmOmsorgen = aleneOmOmsorgen == JaNei.ja,
+                        utvidetRett = false
+                    )
+                },
+                kilde = OverføreOmsorgsdagerBehov.Kilde.Brev,
+                journalpostIder = journalpostIder,
+                mottatt = mottaksdato.osloNå()
             )
         }
     }

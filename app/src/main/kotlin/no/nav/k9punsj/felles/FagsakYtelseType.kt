@@ -22,6 +22,3 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
         }
     }
 }
-
-
-

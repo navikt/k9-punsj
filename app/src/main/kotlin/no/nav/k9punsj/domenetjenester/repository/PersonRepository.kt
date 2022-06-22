@@ -23,7 +23,8 @@ class PersonRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 //language=PostgreSQL
                 return@transaction tx.single(
-                    queryOf(nameQuery, norskIdent), toPerson
+                    queryOf(nameQuery, norskIdent),
+                    toPerson
                 )
             }
         }
@@ -36,7 +37,8 @@ class PersonRepository(private val dataSource: DataSource) {
             return@using it.transaction { tx ->
                 //language=PostgreSQL
                 return@transaction tx.single(
-                    queryOf(nameQuery, UUID.fromString(personId)), toPerson
+                    queryOf(nameQuery, UUID.fromString(personId)),
+                    toPerson
                 )
             }
         }

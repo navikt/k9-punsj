@@ -6,8 +6,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ class SjekkOmUtløptJobb @Autowired constructor(
 
     private val logger = LoggerFactory.getLogger(SjekkOmUtløptJobb::class.java)
 
-    //kjører klokken 04:00
+    // kjører klokken 04:00
     @Scheduled(cron = "0 0 4 * * *")
     fun sjekkeOmAksjonspunktHarLøptUt() {
         runBlocking {

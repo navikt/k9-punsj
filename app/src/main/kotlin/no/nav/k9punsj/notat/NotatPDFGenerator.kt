@@ -11,7 +11,6 @@ class NotatPDFGenerator : PDFGenerator<NotatOpplysninger>() {
     override val templateNavn: String
         get() = "notat"
 
-
     override fun NotatOpplysninger.tilMap(): Map<String, Any?> = mapOf(
         "tittel" to tittel,
         "fagsakId" to fagsakId,

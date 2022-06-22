@@ -10,8 +10,8 @@ import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import javax.sql.DataSource
 
 class DatabaseUtil {
@@ -59,4 +59,3 @@ class DatabaseUtil {
         }
     }
 }
-

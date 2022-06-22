@@ -16,14 +16,16 @@ internal data class FerdigstillJournalpost(
     private val avsendernavn: String? = null,
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
-    private val bruker: Bruker? = null) {
+    private val bruker: Bruker? = null
+) {
 
     private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
     private val kanFerdigstilles = !erFerdigstilt
 
-    internal fun oppdaterPayloadGenerellSak() : String {
+    internal fun oppdaterPayloadGenerellSak(): String {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
         val utfyllendeInformasjon = mutableListOf<String>()
+
         @Language("JSON")
         val json = """
         {
@@ -47,10 +49,12 @@ internal data class FerdigstillJournalpost(
         dokumenter.filter { it.tittel.isNullOrBlank() }.takeIf { it.isNotEmpty() }?.also { dokumenterUtenTittel ->
             val jsonDokumenter = JSONArray()
             dokumenterUtenTittel.forEach { dokumentUtenTittel ->
-                jsonDokumenter.put(JSONObject().also {
-                    it.put("dokumentInfoId", dokumentUtenTittel.dokumentId)
-                    it.put("tittel", ManglerTittel)
-                })
+                jsonDokumenter.put(
+                    JSONObject().also {
+                        it.put("dokumentInfoId", dokumentUtenTittel.dokumentId)
+                        it.put("tittel", ManglerTittel)
+                    }
+                )
                 utfyllendeInformasjon.add("dokumenter[${dokumentUtenTittel.dokumentId}].tittel=[$ManglerTittel]")
             }
             json.put("dokumenter", jsonDokumenter)
@@ -60,9 +64,11 @@ internal data class FerdigstillJournalpost(
             json.put("avsenderMottaker", JSONObject().also { it.put("navn", bruker.navn!!) })
             utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
         }
-        return json.toString().also { if (utfyllendeInformasjon.isNotEmpty()) {
-            logger.info("Utfyllende informasjon ved oppdatering: ${utfyllendeInformasjon.joinToString(", ")}")
-        }}
+        return json.toString().also {
+            if (utfyllendeInformasjon.isNotEmpty()) {
+                logger.info("Utfyllende informasjon ved oppdatering: ${utfyllendeInformasjon.joinToString(", ")}")
+            }
+        }
     }
 
     internal fun kanFerdigstilles() {

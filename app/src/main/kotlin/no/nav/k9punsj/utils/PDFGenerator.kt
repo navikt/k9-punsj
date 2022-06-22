@@ -32,9 +32,9 @@ abstract class PDFGenerator<in T> {
     protected abstract val bilder: Map<String, String>
 
     private val ROOT = "handlebars"
-    private val REGULAR_FONT = ClassPathResource("${ROOT}/fonts/SourceSansPro-Regular.ttf").inputStream.readAllBytes()
-    private val BOLD_FONT = ClassPathResource("${ROOT}/fonts/SourceSansPro-Bold.ttf").inputStream.readAllBytes()
-    private val ITALIC_FONT = ClassPathResource("${ROOT}/fonts/SourceSansPro-Italic.ttf").inputStream.readAllBytes()
+    private val REGULAR_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Regular.ttf").inputStream.readAllBytes()
+    private val BOLD_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Bold.ttf").inputStream.readAllBytes()
+    private val ITALIC_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Italic.ttf").inputStream.readAllBytes()
     protected val handlebars = configureHandlebars()
     private val søknadsTemplate: Template = handlebars.compile(templateNavn)
 
@@ -66,33 +66,48 @@ abstract class PDFGenerator<in T> {
     }
 
     protected fun loadPng(name: String): String {
-        val bytes = ClassPathResource("${ROOT}/images/$name.png").inputStream.readAllBytes()
+        val bytes = ClassPathResource("$ROOT/images/$name.png").inputStream.readAllBytes()
         val base64string = Base64.getEncoder().encodeToString(bytes)
         return "data:image/png;base64,$base64string"
     }
 
     private fun configureHandlebars(): Handlebars {
-        return Handlebars(ClassPathTemplateLoader("/${ROOT}")).apply {
-            registerHelper("image", Helper<String> { context, _ ->
-                if (context == null) "" else bilder[context]
-            })
-            registerHelper("eq", Helper<String> { context, options ->
-                if (context == options.param(0)) options.fn() else options.inverse()
-            })
-            registerHelper("eqTall", Helper<Int> { context, options ->
-                if (context == options.param(0)) options.fn() else options.inverse()
-            })
-            registerHelper("fritekst", Helper<String> { context, _ ->
-                if (context == null) "" else {
-                    val text = Handlebars.Utils.escapeExpression(context)
-                        .toString()
-                        .replace(Regex("\\r\\n|[\\n\\r]"), "<br/>")
-                    Handlebars.SafeString(text)
+        return Handlebars(ClassPathTemplateLoader("/$ROOT")).apply {
+            registerHelper(
+                "image",
+                Helper<String> { context, _ ->
+                    if (context == null) "" else bilder[context]
                 }
-            })
-            registerHelper("jaNeiSvar", Helper<Boolean> { context, _ ->
-                if (context == true) "Ja" else "Nei"
-            })
+            )
+            registerHelper(
+                "eq",
+                Helper<String> { context, options ->
+                    if (context == options.param(0)) options.fn() else options.inverse()
+                }
+            )
+            registerHelper(
+                "eqTall",
+                Helper<Int> { context, options ->
+                    if (context == options.param(0)) options.fn() else options.inverse()
+                }
+            )
+            registerHelper(
+                "fritekst",
+                Helper<String> { context, _ ->
+                    if (context == null) "" else {
+                        val text = Handlebars.Utils.escapeExpression(context)
+                            .toString()
+                            .replace(Regex("\\r\\n|[\\n\\r]"), "<br/>")
+                        Handlebars.SafeString(text)
+                    }
+                }
+            )
+            registerHelper(
+                "jaNeiSvar",
+                Helper<Boolean> { context, _ ->
+                    if (context == true) "Ja" else "Nei"
+                }
+            )
 
             infiniteLoops(true)
         }

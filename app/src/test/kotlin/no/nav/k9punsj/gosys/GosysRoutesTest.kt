@@ -60,18 +60,22 @@ internal class GosysRoutesTest {
         assertEquals(HttpStatus.OK, statusCode)
     }
 
-    private fun String.get(): Pair<HttpStatus, String?> = this.let { path -> runBlocking {
-        client.get()
-            .uri { it.path(path).build() }
-            .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
-    }}
+    private fun String.get(): Pair<HttpStatus, String?> = this.let { path ->
+        runBlocking {
+            client.get()
+                .uri { it.path(path).build() }
+                .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+        }
+    }
 
-    private fun String.post(body: String): Pair<HttpStatus, String?> = this.let { path -> runBlocking {
-        client.post()
-            .uri { it.path(path).build() }
-            .header("Authorization", saksbehandlerAuthorizationHeader)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
-            .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
-    }}
+    private fun String.post(body: String): Pair<HttpStatus, String?> = this.let { path ->
+        runBlocking {
+            client.post()
+                .uri { it.path(path).build() }
+                .header("Authorization", saksbehandlerAuthorizationHeader)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+        }
+    }
 }

@@ -9,7 +9,7 @@ internal data class OpprettOppgaveRequest(
     val aktoerId: String,
     val journalpostId: String,
     @JsonIgnore
-    private val gjelder: Gjelder,
+    private val gjelder: Gjelder
 ) {
 
     val prioritet = "NORM"

@@ -65,23 +65,19 @@ fun PleipengerLivetsSluttfase.publiserMetrikker(søknad: Søknad, meterRegistry:
             meterRegistry.counter(Metrikk.ARBEIDSTID_SELVSTENDING_COUNTER.navn).increment()
         }
     }
-
 }
 
 fun OmsorgspengerMidlertidigAlene.publiserMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
     fellesMetrikker(søknad, meterRegistry)
 }
 
-
 fun OmsorgspengerAleneOmsorg.publiserMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
     fellesMetrikker(søknad, meterRegistry)
 }
 
-
 fun OmsorgspengerKroniskSyktBarn.publiserMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
     fellesMetrikker(søknad, meterRegistry)
 }
-
 
 fun OmsorgspengerUtbetaling.publiserMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
     fellesMetrikker(søknad, meterRegistry)
@@ -110,7 +106,8 @@ fun fellesMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
         builder.append("MedOpplysninger=" + this.inneholderMedisinskeOpplysninger.toString())
 
         meterRegistry.counter(
-            Metrikk.JOURNALPOST_COUNTER.navn, listOf(
+            Metrikk.JOURNALPOST_COUNTER.navn,
+            listOf(
                 Tag.of("antall_journalposter", søknad.journalposter.size.toString()),
                 Tag.of("opplysninger", builder.toString())
             )

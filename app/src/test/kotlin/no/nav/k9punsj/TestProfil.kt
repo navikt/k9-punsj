@@ -14,12 +14,11 @@ annotation class TestProfil
 @TestProfil
 class TestBeans {
     @Bean
-    fun testDataSource() : DataSource = DatabaseUtil.dataSource
+    fun testDataSource(): DataSource = DatabaseUtil.dataSource
 
     @Bean
     fun testHendelseProducer() = object : HendelseProducer {
         override fun send(topicName: String, data: String, key: String) {
-
         }
         override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {
             onSuccess.invoke()

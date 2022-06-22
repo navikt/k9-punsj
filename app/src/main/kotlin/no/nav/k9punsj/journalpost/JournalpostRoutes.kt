@@ -2,33 +2,33 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
-import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
-import no.nav.k9punsj.felles.SettPåVentDto
-import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.SettPåVentDto
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,7 +54,7 @@ internal class JournalpostRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
     private val azureGraphService: IAzureGraphService,
-    private val innlogget: InnloggetUtils,
+    private val innlogget: InnloggetUtils
 ) {
 
     internal companion object {
@@ -73,8 +73,7 @@ internal class JournalpostRoutes(
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
 
-
-        //for drift i prod
+        // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
@@ -82,7 +81,6 @@ internal class JournalpostRoutes(
 
     @Bean
     fun JournalpostRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-
         GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
@@ -308,7 +306,6 @@ internal class JournalpostRoutes(
             }
         }
 
-
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
@@ -370,7 +367,6 @@ internal class JournalpostRoutes(
                         .status(HttpStatus.FORBIDDEN)
                         .buildAndAwait()
                 }
-
             }
         }
 
@@ -398,7 +394,6 @@ internal class JournalpostRoutes(
                 if (!bareTall) {
                     throw IllegalStateException("Klarte ikke hente riktig enhetkode")
                 }
-
 
                 val resultat = kotlin.runCatching {
                     journalpostService.journalførMotGenerellSak(
@@ -433,7 +428,7 @@ internal class JournalpostRoutes(
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
-        aktørId: String?,
+        aktørId: String?
     ) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(journalpostId)
         if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {
@@ -457,7 +452,7 @@ internal class JournalpostRoutes(
     private suspend fun lagreHvorJournalpostSkal(
         hentHvisPunsjJournalpostMedId: PunsjJournalpost?,
         dto: PunsjBolleDto,
-        skalTilK9: Boolean,
+        skalTilK9: Boolean
     ) {
         if (hentHvisPunsjJournalpostMedId != null) {
             journalpostService.lagre(hentHvisPunsjJournalpostMedId.copy(skalTilK9 = skalTilK9))
@@ -489,6 +484,6 @@ internal class JournalpostRoutes(
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
     data class ResultatDto(
-        val status: String,
+        val status: String
     )
 }

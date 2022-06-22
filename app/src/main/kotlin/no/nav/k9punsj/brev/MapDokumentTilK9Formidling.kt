@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
     dto: DokumentbestillingDto,
-    aktørId: String,
+    aktørId: String
 ) {
 
     private val bestilling = Dokumentbestilling()
@@ -82,6 +82,5 @@ internal class MapDokumentTilK9Formidling(
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapDokumentTilK9Formidling::class.java)
         private val validator = javax.validation.Validation.buildDefaultValidatorFactory().validator
-
     }
 }

@@ -2,10 +2,10 @@ package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,15 +14,15 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String,
-        fagsakYtelseType: FagsakYtelseType,
+        fagsakYtelseType: FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
         fagsakYtelseType: FagsakYtelseType,
-        periodeDto: PeriodeDto,
+        periodeDto: PeriodeDto
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
-        //simulerer svar på denne
+        // simulerer svar på denne
         return if (søker == "02020050123") {
             Pair(listOf(ArbeidsgiverMedArbeidsforholdId("randomOrgNummer", listOf("randomArbeidsforholdId"))), null)
         } else {
@@ -39,4 +39,3 @@ internal class TestK9SakService : K9SakService {
         second = null
     )
 }
-

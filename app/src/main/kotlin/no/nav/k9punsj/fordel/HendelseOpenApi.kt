@@ -24,11 +24,13 @@ internal class HendelseOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Prosessert",
-                content = [Content(
-                    schema = Schema(
-                        implementation = FordelPunsjEventDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = FordelPunsjEventDto::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "401",

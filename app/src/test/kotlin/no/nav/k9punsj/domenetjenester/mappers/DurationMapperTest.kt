@@ -13,7 +13,7 @@ internal class DurationMapperTest {
     @Test
     fun `mapping av tid fra optional string`() {
         assertThat(setOf(null.somDuration(), "".somDuration(), " ".somDuration())).hasSameElementsAs(setOf(null))
-        assertThat(setOf("4".somDuration(),"4.0".somDuration(),"4,0".somDuration(), "4:00".somDuration(), "PT4H".somDuration())).hasSameElementsAs(setOf(Duration.ofHours(4)))
+        assertThat(setOf("4".somDuration(), "4.0".somDuration(), "4,0".somDuration(), "4:00".somDuration(), "PT4H".somDuration())).hasSameElementsAs(setOf(Duration.ofHours(4)))
         assertThat(setOf("5.75".somDuration(), "5,75".somDuration(), "5:45".somDuration(), "PT5H45M".somDuration())).hasSameElementsAs(setOf(Duration.ofHours(5).plusMinutes(45)))
         assertThat(setOf("0".somDuration(), "0:0".somDuration(), "PT0S".somDuration())).hasSameElementsAs(setOf(Duration.ofSeconds(0)))
         assertThrows<IllegalArgumentException> { "5:61".somDuration() }
@@ -33,7 +33,7 @@ internal class DurationMapperTest {
             .plusMillis(999) // Strykes
             .plusNanos(1) // Strykes
 
-        val forventet = ((7*24) + 13).toLong() to 27
+        val forventet = ((7 * 24) + 13).toLong() to 27
         assertEquals(forventet, duration.somTimerOgMinutter())
     }
 }

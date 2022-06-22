@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger.Gradering.Companion.fraPdlDto
 import java.time.LocalDate
 
-internal fun ObjectNode.mapBarnFraRelasjoner() : Set<String> {
+internal fun ObjectNode.mapBarnFraRelasjoner(): Set<String> {
     return (this.get("data").get("hentPerson").get("forelderBarnRelasjon") as ArrayNode)
         .map { it as ObjectNode }
         .filter { it.get("relatertPersonsRolle").asText() == "BARN" }
@@ -13,7 +13,7 @@ internal fun ObjectNode.mapBarnFraRelasjoner() : Set<String> {
         .toSet()
 }
 
-internal fun ObjectNode.mapPersonopplysninger() : Set<Personopplysninger> {
+internal fun ObjectNode.mapPersonopplysninger(): Set<Personopplysninger> {
     return (this.get("data").get("hentPersonBolk") as ArrayNode)
         .map { it as ObjectNode }
         .map {

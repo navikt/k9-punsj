@@ -1,6 +1,5 @@
 package no.nav.k9punsj.tilgangskontroll.token
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class JWTToken(

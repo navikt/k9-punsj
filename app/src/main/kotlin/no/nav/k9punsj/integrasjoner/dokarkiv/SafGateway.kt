@@ -43,7 +43,7 @@ class SafGateway(
     @Value("\${no.nav.saf.base_url}") private val baseUrl: URI,
     @Value("#{'\${no.nav.saf.scopes.hente_journalpost_scopes}'.split(',')}") private val henteJournalpostScopes: Set<String>,
     @Value("#{'\${no.nav.saf.scopes.hente_dokument_scopes}'.split(',')}") private val henteDokumentScopes: Set<String>,
-    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
 
     private companion object {
@@ -80,7 +80,6 @@ class SafGateway(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
-
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
             onBehalfOf = coroutineContext.hentAuthentication().accessToken
@@ -218,7 +217,7 @@ class SafGateway(
     internal fun håndterFeil(
         it: FuelError,
         request: Request,
-        response: Response,
+        response: Response
     ) {
         val feil = it.response.body().asString("text/plain")
         logger.error(
@@ -254,5 +253,5 @@ class SafGateway(
 
 data class Dokument(
     val contentType: MediaType,
-    val dataBuffer: DataBuffer,
+    val dataBuffer: DataBuffer
 )

@@ -11,7 +11,8 @@ import java.io.IOException
 @Component
 @IkkeTestProfil
 class OnPremConsumer(
-    val hendelseMottaker: HendelseMottaker) {
+    val hendelseMottaker: HendelseMottaker
+) {
 
     @KafkaListener(
         topics = [ON_PREM_TOPIC],

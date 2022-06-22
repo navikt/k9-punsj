@@ -86,7 +86,5 @@ internal class GosysService(
             .status(HttpStatus.OK)
             .contentType(MediaType.APPLICATION_JSON)
             .buildAndAwait()
-
     }
-
 }

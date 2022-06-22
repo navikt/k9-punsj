@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test
 
 internal class AaregClientTest {
 
-
     @Test
     internal fun sjekk_at_deserialiser_takler_navArbeidsforholdId() {
-
         val json = """[{
                         "arbeidstaker": {
                             "type": "Person",

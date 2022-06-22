@@ -10,11 +10,10 @@ import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
-//@Service
+// @Service
 // Ikke i bruke
 class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
     private val hendelseProducer: HendelseProducer,
@@ -37,19 +36,21 @@ class DelingAvOmsorgsdagerMeldingService @Autowired constructor(
         for (jornalpostId in melding.journalpostIder) {
             val jpost = journalpostService.hent(jornalpostId)
 
-            kotlin.runCatching { objectMapper().writeValueAsString(
-                PunsjEventDto(
-                    jpost.uuid.toString(),
-                    jornalpostId,
-                    jpost.aktørId,
-                    LocalDateTime.now(),
-                    aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+            kotlin.runCatching {
+                objectMapper().writeValueAsString(
+                    PunsjEventDto(
+                        jpost.uuid.toString(),
+                        jornalpostId,
+                        jpost.aktørId,
+                        LocalDateTime.now(),
+                        aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
+                    )
                 )
-            ) }.onSuccess {
+            }.onSuccess {
                 hendelseProducer.send(
-                topicName = k9losAksjonspunkthendelseTopic,
-                data = it,
-                key = id
+                    topicName = k9losAksjonspunkthendelseTopic,
+                    data = it,
+                    key = id
                 )
             }.onFailure {
                 throw IllegalArgumentException("Uventet mappingfeil", it)

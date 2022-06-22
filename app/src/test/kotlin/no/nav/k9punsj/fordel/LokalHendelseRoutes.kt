@@ -17,7 +17,8 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 @LokalProfil
 class LokalHendelseRoutes(
-    private val hendelseMottaker: HendelseMottaker) {
+    private val hendelseMottaker: HendelseMottaker
+) {
 
     internal object Urls {
         internal const val ProsesserHendelse = "/prosesserHendelse/"
@@ -34,7 +35,6 @@ class LokalHendelseRoutes(
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .buildAndAwait()
-
                 } catch (e: Exception) {
                     ServerResponse
                         .status(HttpStatus.BAD_REQUEST)

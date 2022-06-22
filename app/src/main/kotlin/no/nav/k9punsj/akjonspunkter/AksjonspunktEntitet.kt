@@ -14,6 +14,5 @@ data class AksjonspunktEntitet(
     val opprettet_av: String? = null,
     val opprettet_tid: LocalDateTime? = null,
     val endret_av: String? = null,
-    val endret_tid: LocalDateTime? = null,
+    val endret_tid: LocalDateTime? = null
 )
-

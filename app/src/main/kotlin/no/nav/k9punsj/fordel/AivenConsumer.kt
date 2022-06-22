@@ -11,7 +11,8 @@ import java.io.IOException
 @Component
 @StandardProfil
 class AivenConsumer(
-    val hendelseMottaker: HendelseMottaker) {
+    val hendelseMottaker: HendelseMottaker
+) {
 
     @KafkaListener(
         topics = [AIVEN_TOPIC],

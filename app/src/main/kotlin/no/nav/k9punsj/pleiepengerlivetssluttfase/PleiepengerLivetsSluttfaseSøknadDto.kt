@@ -3,14 +3,13 @@ package no.nav.k9punsj.pleiepengerlivetssluttfase
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -21,16 +20,16 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    val klokkeslett: LocalTime? = null,
     val soeknadsperiode: List<PeriodeDto>? = null,
     val pleietrengende: PleietrengendeDto? = null,
     val arbeidstid: ArbeidstidDto? = null,
     val uttak: List<UttakDto>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val bosteder: List<BostederDto>? = null,
-    val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
-    val harInfoSomIkkeKanPunsjes : Boolean,
-    val harMedisinskeOpplysninger : Boolean,
+    val utenlandsopphold: List<UtenlandsoppholdDto>? = null,
+    val harInfoSomIkkeKanPunsjes: Boolean,
+    val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
     val metadata: Map<*, *>? = null
@@ -46,7 +45,7 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
 data class SvarPlsDto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<PleiepengerLivetsSluttfaseSøknadDto>?,
+    val søknader: List<PleiepengerLivetsSluttfaseSøknadDto>?
 )
 
 internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {

@@ -41,7 +41,6 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-
     @AfterEach
     internal fun tearDown() {
         DatabaseUtil.cleanDB()
@@ -54,7 +53,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
         Assertions.assertTrue(body.søknader!!.isEmpty())
     }
@@ -74,7 +75,8 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         assertThat(response.barn).size().isOne
@@ -98,7 +100,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
         assertThat(body.feil).isNull()
     }
@@ -125,7 +129,6 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsMA()
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
-
 
         val søknad = opprettOgLagreSoeknad(
             soeknadJson = gyldigSoeknad,
@@ -167,7 +170,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -177,13 +182,15 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+            api,
+            søknadTypeUri,
+            "mappe",
+            soeknad["soeknadId"] as String
         )
 
         Assertions.assertNotNull(søknadViaGet)
         assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
     }
-
 
     private fun opprettSøknad(
         personnummer: String,
@@ -195,14 +202,14 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             norskIdent = personnummer,
             journalpostId = journalpostId,
             annenPart = annenPart,
-            barn = barn,
+            barn = barn
         )
     }
 
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -212,7 +219,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>,
+        barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
     ): OmsorgspengerMidlertidigAleneSøknadDto {
         val innsendingForOpprettelseAvMappe = NyOmsMASøknad(
             norskIdent = ident,
@@ -225,7 +232,8 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -239,7 +247,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -257,7 +267,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        pleietrengende: String
     ): Søknad {
         val innsendingForOpprettelseAvMappe = opprettSøknad(
             personnummer = ident,
@@ -270,7 +280,8 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = response.headers().asHttpHeaders().location
@@ -285,7 +296,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -303,7 +316,9 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
-            api, søknadTypeUri, "send"
+            api,
+            søknadTypeUri,
+            "send"
         )
 
         return body
@@ -311,9 +326,8 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
-
 }

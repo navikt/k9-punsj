@@ -24,24 +24,21 @@ import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.*
 
-
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 internal class BrevRoutesTest {
 
     private val client = TestSetup.client
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
-
     @Test
     fun `Bestill brev og send til k9-formidling på kafka`(): Unit = runBlocking {
-
         val dokumentbestillingDto = DokumentbestillingDto(
             journalpostId = lagJournalpost(),
             soekerId = "01110050053",
             mottaker = MottakerDto("ORGNR", "1231245"),
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
             dokumentMal = "INNTID",
-            saksnummer = "saksnummer",
+            saksnummer = "saksnummer"
         )
 
         val dokumentBestillingDtoJson = objectMapper().writeValueAsString(dokumentbestillingDto)
@@ -51,7 +48,7 @@ internal class BrevRoutesTest {
             .header("Authorization", saksbehandlerAuthorizationHeader)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(dokumentBestillingDtoJson))
-            .awaitExchange { it.statusCode() to it.awaitBodyOrNull<String>()}
+            .awaitExchange { it.statusCode() to it.awaitBodyOrNull<String>() }
 
         assertThat(body).isNotNull
         assertThat(httpStatus).isEqualTo(HttpStatus.OK)
@@ -73,5 +70,4 @@ internal class BrevRoutesTest {
         }
         return journalpostId
     }
-
 }

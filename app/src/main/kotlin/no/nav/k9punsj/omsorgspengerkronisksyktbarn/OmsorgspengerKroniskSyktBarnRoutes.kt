@@ -3,8 +3,6 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.omsorgspengeraleneomsorg.OmsorgspengerAleneOmsorgRoutes
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
@@ -30,12 +28,12 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
     }
 
     internal object Urls {
-        const val HenteMappe = "/$søknadType/mappe" //get
-        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        const val NySøknad = "/$søknadType" //post
-        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        const val ValiderSøknad = "/$søknadType/valider" //post
+        const val HenteMappe = "/$søknadType/mappe" // get
+        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" // get
+        const val NySøknad = "/$søknadType" // post
+        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
+        const val SendEksisterendeSøknad = "/$søknadType/send" // post
+        const val ValiderSøknad = "/$søknadType/valider" // post
     }
 
     @Bean
@@ -102,7 +100,6 @@ internal class OmsorgspengerKroniskSyktBarnRoutes(
 
                 omsorgspengerKroniskSyktBarnService.validerSøknad(soknadTilValidering)
             }
-
         }
     }
 

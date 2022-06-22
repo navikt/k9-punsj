@@ -22,7 +22,7 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class AzureGraphService(
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
-    private val tokenService: ITokenService,
+    private val tokenService: ITokenService
 ) : IAzureGraphService {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val cache = Cache<String>()
@@ -64,11 +64,11 @@ class AzureGraphService(
                 ident
             } catch (e: Exception) {
                 log.error(
-                    "Feilet deserialisering", e
+                    "Feilet deserialisering",
+                    e
                 )
                 ""
             }
-
         } else {
             return cachedObject.value
         }
@@ -111,7 +111,8 @@ class AzureGraphService(
                 return officeLocation
             } catch (e: Exception) {
                 log.error(
-                    "Feilet deserialisering", e
+                    "Feilet deserialisering",
+                    e
                 )
                 ""
             }
@@ -120,6 +121,3 @@ class AzureGraphService(
         }
     }
 }
-
-
-

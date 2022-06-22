@@ -19,7 +19,7 @@ internal class AccessTokenClients(
 
     @Value("\${systembruker.username}") clientId: String,
     @Value("\${systembruker.password}") clientSecret: String,
-    @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI,
+    @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI
 ) {
 
     private companion object {
@@ -62,12 +62,11 @@ internal class AccessTokenClients(
     internal fun stsAccessTokenClient(): AccessTokenClient = naisStsClient
 }
 
-
 private val logger: Logger = LoggerFactory.getLogger("no.nav.k9.AccessTokenHelsesjekk")
 internal fun AccessTokenClient.helsesjekk(
     scopes: Set<String>,
     operasjon: String,
-    initialHealth: Health = Health.up().build(),
+    initialHealth: Health = Health.up().build()
 ): Health {
     val builder = Health.Builder(initialHealth.status, initialHealth.details)
     return try {

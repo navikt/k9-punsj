@@ -20,7 +20,7 @@ import javax.validation.Valid
 
 @Service
 internal class AuthenticationHandler(
-        multiIssuerProperties: MultiIssuerProperties
+    multiIssuerProperties: MultiIssuerProperties
 ) {
 
     private companion object {
@@ -28,23 +28,21 @@ internal class AuthenticationHandler(
     }
 
     private val jwtTokenValidationHandler = JwtTokenValidationHandler(
-            MultiIssuerConfiguration(
-                    multiIssuerProperties.issuer,
-            )
+        MultiIssuerConfiguration(
+            multiIssuerProperties.issuer
+        )
     )
-
 
     init {
         logger.info("Konfigurerte issuers = ${multiIssuerProperties.issuer}")
-
     }
 
     internal suspend fun authenticatedRequest(
-            serverRequest: ServerRequest,
-            issuerNames: Set<String>,
-            isAccepted: (jwtToken: JwtToken) -> Boolean,
-            requestedOperation: suspend (serverRequest: ServerRequest) -> ServerResponse
-    ) : ServerResponse {
+        serverRequest: ServerRequest,
+        issuerNames: Set<String>,
+        isAccepted: (jwtToken: JwtToken) -> Boolean,
+        requestedOperation: suspend (serverRequest: ServerRequest) -> ServerResponse
+    ): ServerResponse {
         val jwtToken = try {
             jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).issuers.intersect(issuerNames).firstOrNull()?.let {
                 jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).getJwtToken(it)
@@ -70,7 +68,6 @@ internal class AuthenticationHandler(
 private class ServerHttpRequest(private val serverRequest: ServerRequest) : HttpRequest {
     override fun getCookies() = emptyArray<HttpRequest.NameValue>()
     override fun getHeader(headerNavn: String) = serverRequest.headers().header(headerNavn).firstOrNull()
-
 }
 
 @Configuration

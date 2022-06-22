@@ -88,7 +88,8 @@ class K9PunsjApplicationTests {
         val body: String = client.get().uri {
             it.pathSegment("api", "journalpost", "1").build()
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitBodyWithType()
-        JSONAssert.assertEquals("""{
+        JSONAssert.assertEquals(
+            """{
             "journalpostId": "1",
             "norskIdent": "29099000129",
             "dokumenter": [
@@ -106,7 +107,11 @@ class K9PunsjApplicationTests {
             "journalpostStatus": "MOTTATT",
             "kanOpprettesJournalføringsoppgave": true,
             "kanKopieres": true,
-        }""".trimIndent(), body, true)
+        }
+            """.trimIndent(),
+            body,
+            true
+        )
     }
 
     @Test

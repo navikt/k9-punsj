@@ -11,7 +11,8 @@ data class FordelPunsjEventDto(
     val aktørId: String? = null,
     val journalpostId: String,
     val type: String,
-    val ytelse: String) {
+    val ytelse: String
+) {
 
     internal companion object {
 
@@ -19,25 +20,24 @@ data class FordelPunsjEventDto(
         private val objectMapper = objectMapper()
         private val maskertText = TextNode("***")
 
-        internal fun String.somFordelPunsjEventDto(topic: String) : FordelPunsjEventDto {
-            val maskert = kotlin.runCatching { objectMapper.readTree(this).let { it as ObjectNode }.also {
-                if (it.hasNonNull("aktørId")) {
-                    it.replace("aktørId", maskertText)
-                }
-            }.toString()}.fold(onSuccess = {it}, onFailure = {
+        internal fun String.somFordelPunsjEventDto(topic: String): FordelPunsjEventDto {
+            val maskert = kotlin.runCatching {
+                objectMapper.readTree(this).let { it as ObjectNode }.also {
+                    if (it.hasNonNull("aktørId")) {
+                        it.replace("aktørId", maskertText)
+                    }
+                }.toString()
+            }.fold(onSuccess = { it }, onFailure = {
                 throw IllegalStateException("Mottatt melding på Topic=[$topic] som ikke er gyldig JSON. Melding=$this", it)
             })
 
-            return kotlin.runCatching { objectMapper.readValue<FordelPunsjEventDto>(this).also {
-                logger.info("Mottatt punsjbar journalpost på Topic=[$topic], PunsjbarJournalpost=$maskert")
-            }}.fold(onSuccess = {it}, onFailure = {
+            return kotlin.runCatching {
+                objectMapper.readValue<FordelPunsjEventDto>(this).also {
+                    logger.info("Mottatt punsjbar journalpost på Topic=[$topic], PunsjbarJournalpost=$maskert")
+                }
+            }.fold(onSuccess = { it }, onFailure = {
                 throw IllegalStateException("Mottatt melding på Topic=[$topic] som ikke kan deserialisers. Melding=$maskert", it)
             })
         }
     }
 }
-
-
-
-
-

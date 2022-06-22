@@ -26,7 +26,7 @@ internal class SoknadService(
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
-        journalpostIder: MutableSet<String>,
+        journalpostIder: MutableSet<String>
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
@@ -97,7 +97,7 @@ internal class SoknadService(
 
     private suspend fun leggerVedPayload(
         søknad: Søknad,
-        journalpostIder: MutableSet<String>,
+        journalpostIder: MutableSet<String>
     ) {
         val writeValueAsString = objectMapper().writeValueAsString(søknad)
 

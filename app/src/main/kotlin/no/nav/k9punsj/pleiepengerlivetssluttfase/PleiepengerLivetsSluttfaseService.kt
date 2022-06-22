@@ -23,7 +23,6 @@ import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -31,7 +30,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
-import java.net.URI
 
 @Service
 internal class PleiepengerLivetsSluttfaseService(
@@ -170,7 +168,6 @@ internal class PleiepengerLivetsSluttfaseService(
                 .accepted()
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
-
         } catch (e: Exception) {
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -180,7 +177,7 @@ internal class PleiepengerLivetsSluttfaseService(
     }
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
-        //oppretter sak i k9-sak hvis det ikke finnes fra før
+        // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (opprettNySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
                 søker = opprettNySøknad.norskIdent,
@@ -191,7 +188,7 @@ internal class PleiepengerLivetsSluttfaseService(
             )
         }
 
-        //setter riktig type der man jobber på en ukjent i utgangspunktet
+        // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
             FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE,
             opprettNySøknad.journalpostId

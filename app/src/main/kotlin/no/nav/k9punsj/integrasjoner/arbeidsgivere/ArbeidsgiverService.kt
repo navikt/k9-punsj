@@ -9,7 +9,7 @@ import java.time.LocalDate
 @Service
 internal class ArbeidsgiverService(
     private val aaregClient: AaregClient,
-    private val eregClient: EregClient,
+    private val eregClient: EregClient
 ) {
 
     private val arbeidsgivereCache: Cache<Triple<String, LocalDate, LocalDate>, Arbeidsgivere> = Caffeine.newBuilder()
@@ -30,7 +30,7 @@ internal class ArbeidsgiverService(
     internal suspend fun hentArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate,
+        tom: LocalDate
     ): Arbeidsgivere {
         val cacheKey = Triple(identitetsnummer, fom, tom)
 
@@ -47,7 +47,7 @@ internal class ArbeidsgiverService(
     internal suspend fun hentArbeidsgivereMedId(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate,
+        tom: LocalDate
     ): ArbeidsgivereMedArbeidsforholdId {
         val cacheKey = Triple(identitetsnummer, fom, tom)
 
@@ -64,8 +64,10 @@ internal class ArbeidsgiverService(
     internal suspend fun hentOrganisasjonsnavn(organisasjonsnummer: String) =
         when (val cacheValue = organisasjonsnavnCache.getIfPresent(organisasjonsnummer)) {
             null -> slåOppOrganisasjonsnavn(organisasjonsnummer)?.also {
-                organisasjonsnavnCache.put(organisasjonsnummer,
-                    it)
+                organisasjonsnavnCache.put(
+                    organisasjonsnummer,
+                    it
+                )
             }
             else -> cacheValue
         }
@@ -73,7 +75,7 @@ internal class ArbeidsgiverService(
     private suspend fun slåOppArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate,
+        tom: LocalDate
     ): Arbeidsgivere {
         val arbeidsforhold = aaregClient.hentArbeidsforhold(
             identitetsnummer = identitetsnummer,
@@ -94,7 +96,7 @@ internal class ArbeidsgiverService(
     private suspend fun slåOppArbeidsgivereMedId(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate,
+        tom: LocalDate
     ): ArbeidsgivereMedArbeidsforholdId {
         val arbeidsforhold = aaregClient.hentArbeidsforhold(
             identitetsnummer = identitetsnummer,
@@ -102,16 +104,20 @@ internal class ArbeidsgiverService(
             tom = tom
         )
 
-        return ArbeidsgivereMedArbeidsforholdId(arbeidsforhold.organisasjoner.groupBy { it.organisasjonsnummer }
-            .map { entry ->
-                OrganisasjonArbeidsgiverMedId(entry.key,
-                    hentOrganisasjonsnavn(entry.key) ?: "Ikke tilgjengelig",
-                    entry.value.filter { it.arbeidsforholdId != null }
-                        .map { it.arbeidsforholdId!! })
-            }.toSet())
+        return ArbeidsgivereMedArbeidsforholdId(
+            arbeidsforhold.organisasjoner.groupBy { it.organisasjonsnummer }
+                .map { entry ->
+                    OrganisasjonArbeidsgiverMedId(
+                        entry.key,
+                        hentOrganisasjonsnavn(entry.key) ?: "Ikke tilgjengelig",
+                        entry.value.filter { it.arbeidsforholdId != null }
+                            .map { it.arbeidsforholdId!! }
+                    )
+                }.toSet()
+        )
     }
 
     private suspend fun slåOppOrganisasjonsnavn(
-        organisasjonsnummer: String,
+        organisasjonsnummer: String
     ) = eregClient.hentOrganisasjonsnavn(organisasjonsnummer)
 }

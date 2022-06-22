@@ -23,7 +23,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
     internal suspend fun lagre(
         punsjJournalpostId: PunsjJournalpost,
         kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
-        function: (PunsjJournalpost?) -> PunsjJournalpost,
+        function: (PunsjJournalpost?) -> PunsjJournalpost
     ): PunsjJournalpost {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
@@ -51,9 +51,11 @@ class JournalpostRepository(private val dataSource: DataSource) {
                     on conflict (JOURNALPOST_ID) do update
                     set data = :data :: jsonb
                  """,
-                        mapOf("id" to punsjJournalpostId.journalpostId,
+                        mapOf(
+                            "id" to punsjJournalpostId.journalpostId,
                             "data" to objectMapper.writeValueAsString(punsjJournalpost),
-                            "kilde" to kilde.kode)
+                            "kilde" to kilde.kode
+                        )
                     ).asUpdate
                 )
                 return@transaction punsjJournalpost
@@ -94,7 +96,6 @@ class JournalpostRepository(private val dataSource: DataSource) {
                 )
                 if (json != null) {
                     return@transaction objectMapper.readValue(json, PunsjJournalpost::class.java)
-
                 }
                 return@transaction null
             }
@@ -112,7 +113,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                         row.string("data")
                     }.asList
             )
-            resultat.map { res ->  objectMapper.readValue(res, PunsjJournalpost::class.java) }
+            resultat.map { res -> objectMapper.readValue(res, PunsjJournalpost::class.java) }
         }
     }
 
@@ -127,7 +128,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
                         row.string("data")
                     }.asList
             )
-            resultat.map { res ->  objectMapper.readValue(res, PunsjJournalpost::class.java) }
+            resultat.map { res -> objectMapper.readValue(res, PunsjJournalpost::class.java) }
         }
     }
 
@@ -151,8 +152,12 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     suspend fun ferdig(journalpostId: String) {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID = ?",
-                journalpostId).asUpdate)
+            it.run(
+                queryOf(
+                    "UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID = ?",
+                    journalpostId
+                ).asUpdate
+            )
         }
     }
 
@@ -160,11 +165,17 @@ class JournalpostRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) {
             it.transaction { tx ->
                 val antallUpdates = using(sessionOf(dataSource)) {
-                    tx.run(queryOf("UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID in (${
-                        IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
-                    })",
-                        IntRange(0,
-                            journalpostIder.size - 1).associate { t -> "p$t" to journalpostIder[t] as Any }).asUpdate)
+                    tx.run(
+                        queryOf(
+                            "UPDATE $JOURNALPOST_TABLE SET FERDIG_BEHANDLET = true, endret_tid = now(), endret_av = 'PUNSJ' where JOURNALPOST_ID in (${
+                            IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
+                            })",
+                            IntRange(
+                                0,
+                                journalpostIder.size - 1
+                            ).associate { t -> "p$t" to journalpostIder[t] as Any }
+                        ).asUpdate
+                    )
                 }
                 if (antallUpdates != journalpostIder.size) {
                     throw IllegalStateException("Klarte ikke sette alle til ferdig")
@@ -190,7 +201,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(ytelse = ytelseType.kode)
-            lagre(medType){
+            lagre(medType) {
                 medType
             }
         }
@@ -200,7 +211,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(type = type.kode)
-            lagre(medType){
+            lagre(medType) {
                 medType
             }
         }
@@ -208,13 +219,19 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
     fun kanSendeInn(journalpostIder: List<String>): Boolean {
         val using = using(sessionOf(dataSource)) {
-            it.run(queryOf("select ferdig_behandlet from $JOURNALPOST_TABLE where journalpost_id in (${
-                IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
-            })",
-                IntRange(0,
-                    journalpostIder.size - 1).associate { t -> "p$t" to journalpostIder[t] as Any }).map { row ->
-                row.boolean("ferdig_behandlet")
-            }.asList)
+            it.run(
+                queryOf(
+                    "select ferdig_behandlet from $JOURNALPOST_TABLE where journalpost_id in (${
+                    IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
+                    })",
+                    IntRange(
+                        0,
+                        journalpostIder.size - 1
+                    ).associate { t -> "p$t" to journalpostIder[t] as Any }
+                ).map { row ->
+                    row.boolean("ferdig_behandlet")
+                }.asList
+            )
         }
 
         return !using.contains(true)

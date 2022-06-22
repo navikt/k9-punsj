@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.awaitBody
 
 @ExtendWith(SpringExtension::class)
@@ -34,7 +33,6 @@ class PersonApiTest {
             "sammensattNavn": "Søker Søkersen"
         }
         """.trimIndent()
-
 
         val body = client.get()
             .uri { it.pathSegment("api", "person").build() }

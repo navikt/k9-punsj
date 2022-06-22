@@ -5,7 +5,7 @@ import java.util.Objects.requireNonNull
 
 data class Periode(
     val fom: LocalDate,
-    val tom: LocalDate,
+    val tom: LocalDate
 ) {
     init {
         requireNonNull(fom, "fom")

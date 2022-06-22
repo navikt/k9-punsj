@@ -96,7 +96,8 @@ internal class MetrikkJobbTest {
             metric = Metrikk.ANTALL_JOURNALPOSTTYPER,
             forventetVerdi = 45.0,
             MetrikkTag(
-                "type", setOf(
+                "type",
+                setOf(
                     PunsjInnsendingType.PAPIRSØKNAD.name,
                     PunsjInnsendingType.DIGITAL_ETTERSENDELSE.name,
                     PunsjInnsendingType.PAPIRETTERSENDELSE.name,

@@ -32,7 +32,9 @@ internal class NotatRoutesTest {
                     notat = "lorem ipmsum osv..."
                 )
             ),
-            api, "notat", "opprett"
+            api,
+            "notat",
+            "opprett"
         )
         Assertions.assertThat(body.journalpostId).isEqualTo("201")
     }

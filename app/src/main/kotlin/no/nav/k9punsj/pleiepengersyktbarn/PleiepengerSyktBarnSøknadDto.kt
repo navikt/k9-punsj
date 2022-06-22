@@ -3,9 +3,9 @@ package no.nav.k9punsj.pleiepengersyktbarn
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -20,7 +20,7 @@ data class PleiepengerSyktBarnSøknadDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    val klokkeslett: LocalTime? = null,
     val barn: BarnDto? = null,
     val soeknadsperiode: List<PeriodeDto>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
@@ -34,10 +34,10 @@ data class PleiepengerSyktBarnSøknadDto(
     val lovbestemtFerie: List<PeriodeDto>? = null,
     val lovbestemtFerieSomSkalSlettes: List<PeriodeDto>? = null,
     val soknadsinfo: DataBruktTilUtledningDto? = null,
-    val utenlandsopphold : List<UtenlandsoppholdDto>? = null,
-    val utenlandsoppholdV2 : List<UtenlandsoppholdDtoV2> = emptyList(),
-    val harInfoSomIkkeKanPunsjes : Boolean,
-    val harMedisinskeOpplysninger : Boolean,
+    val utenlandsopphold: List<UtenlandsoppholdDto>? = null,
+    val utenlandsoppholdV2: List<UtenlandsoppholdDtoV2> = emptyList(),
+    val harInfoSomIkkeKanPunsjes: Boolean,
+    val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
     val metadata: Map<*, *>? = null
@@ -58,7 +58,7 @@ data class PleiepengerSyktBarnSøknadDto(
         val periode: PeriodeDto?,
         val tilleggsinformasjon: String?
 
-        )
+    )
 
     data class NattevåkDto(
         val periode: PeriodeDto?,
@@ -91,7 +91,7 @@ data class PleiepengerSyktBarnSøknadDto(
 data class SvarPsbDto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<PleiepengerSyktBarnSøknadDto>?,
+    val søknader: List<PleiepengerSyktBarnSøknadDto>?
 )
 
 internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
