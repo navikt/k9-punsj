@@ -27,7 +27,7 @@ internal class SakService(
             else fagsaker!!.map {
                 SakInfoDto(
                     fagsakId = it.saksnummer,
-                    sakstype = it.sakstype.navn
+                    sakstype = it.sakstype.kode
                 )
             }
         }.fold(
