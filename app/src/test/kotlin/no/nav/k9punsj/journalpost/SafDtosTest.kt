@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 
 internal class SafDtosTest {
 
-
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost() {
         val journalpost = SafDtos.Journalpost(

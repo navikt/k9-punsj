@@ -36,7 +36,7 @@ class LokalBeans {
         return try {
             load.migrate()
         } catch (fwe: FlywayException) {
-            //prøver igjen siden kjører lokalt
+            // prøver igjen siden kjører lokalt
             load.clean()
             try {
                 load.migrate()
@@ -45,5 +45,4 @@ class LokalBeans {
             }
         }
     }
-
 }

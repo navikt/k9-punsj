@@ -1,11 +1,12 @@
- package no.nav.k9punsj.integrasjoner.gosys
+ 
+package no.nav.k9punsj.integrasjoner.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -19,7 +20,7 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 internal class GosysRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    private val gosysService: GosysService,
+    private val gosysService: GosysService
 ) {
 
     private companion object {

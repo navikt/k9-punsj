@@ -3,18 +3,18 @@ package no.nav.k9punsj.tilgangskontroll.abac
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.configuration.AuditConfiguration
 import no.nav.k9punsj.StandardProfil
+import no.nav.k9punsj.configuration.AuditConfiguration
 import no.nav.k9punsj.felles.NavHeaders
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
-import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.tilgangskontroll.audit.Auditdata
 import no.nav.k9punsj.tilgangskontroll.audit.AuditdataHeader
 import no.nav.k9punsj.tilgangskontroll.audit.Auditlogger
 import no.nav.k9punsj.tilgangskontroll.audit.CefField
 import no.nav.k9punsj.tilgangskontroll.audit.CefFieldName
 import no.nav.k9punsj.tilgangskontroll.audit.EventClassId
+import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
 import org.slf4j.Logger
@@ -28,7 +28,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
-
 private val gson = GsonBuilder().setPrettyPrinting().create()
 
 private const val XACML_CONTENT_TYPE = "application/xacml+json"
@@ -40,7 +39,7 @@ class PepClient(
     private val config: AuditConfiguration,
     private val azureGraphService: AzureGraphService,
     private val auditlogger: Auditlogger,
-    private val pdlService: PdlService,
+    private val pdlService: PdlService
 ) : IPepClient {
 
     private val url = config.abacEndpointUrl()
@@ -71,7 +70,7 @@ class PepClient(
 
     private fun basisTilgangRequest(
         identTilInnloggetBruker: String,
-        fnr: String,
+        fnr: String
     ): XacmlRequestBuilder {
         return XacmlRequestBuilder()
             .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
@@ -85,7 +84,7 @@ class PepClient(
 
     private fun sendeInnTilgangRequest(
         identTilInnloggetBruker: String,
-        fnr: String,
+        fnr: String
     ): XacmlRequestBuilder {
         return XacmlRequestBuilder()
             .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
@@ -141,13 +140,14 @@ class PepClient(
                     eventClassId = eventClassId,
                     name = "ABAC Sporingslogg",
                     severity = "INFO"
-                ), fields = setOf(
+                ),
+                fields = setOf(
                     CefField(CefFieldName.EVENT_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000L),
                     CefField(CefFieldName.REQUEST, url),
                     CefField(CefFieldName.ABAC_RESOURCE_TYPE, type),
                     CefField(CefFieldName.ABAC_ACTION, action),
                     CefField(CefFieldName.USER_ID, identTilInnloggetBruker),
-                    CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(it)),
+                    CefField(CefFieldName.BERORT_BRUKER_ID, pdlService.aktørIdFor(it))
                 )
             )
         )
@@ -177,7 +177,8 @@ class PepClient(
                 objectMapper().readValue<Response>(response.body ?: "").response[0].decision == "Permit"
             } catch (e: Exception) {
                 log.error(
-                    "Feilet deserialisering", e
+                    "Feilet deserialisering",
+                    e
                 )
                 false
             }

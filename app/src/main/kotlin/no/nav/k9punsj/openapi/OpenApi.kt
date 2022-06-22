@@ -34,7 +34,7 @@ internal class OpenApi {
         @Value("\${no.nav.beskrivelse}") beskrivelse: String,
         @Value("\${no.nav.versjon}") versjon: String,
         @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
-        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
+        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
     ): OpenAPI = OpenAPI()
         .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
         .info(
@@ -58,39 +58,39 @@ internal class OpenApi {
 // Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
 
 data class OasIdentDto(
-    val norskIdent: String,
+    val norskIdent: String
 )
 
 data class OasFeil(
-    val feil: String?,
+    val feil: String?
 )
 
 data class OasSøknadId(
-    val soeknadId: String,
+    val soeknadId: String
 )
 
 data class OasSoknadsfeil(
     val mappeId: String?,
-    val feil: List<FeilDto>?,
+    val feil: List<FeilDto>?
 ) {
     data class FeilDto(
         val felt: String?,
         val feilkode: String?,
-        val feilmelding: String?,
+        val feilmelding: String?
     )
 }
 
 data class OasDokumentInfo(
-    val dokument_id: String,
+    val dokument_id: String
 )
 
 data class OasJournalpostInfo(
     val dokumenter: Set<OasDokumentInfo>,
-    val venter: OasVentDto?,
+    val venter: OasVentDto?
 )
 
 data class OasJournalpostIder(
-    val poster: List<OasJournalpostDto>,
+    val poster: List<OasJournalpostDto>
 )
 
 data class OasJournalpostDto(
@@ -100,31 +100,31 @@ data class OasJournalpostDto(
     val dato: LocalDate?,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett: LocalTime?,
-    val punsjInnsendingType: PunsjInnsendingType?,
+    val punsjInnsendingType: PunsjInnsendingType?
 )
 
 data class OasVentDto(
     val venteÅrsak: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil: LocalDate,
+    val venterTil: LocalDate
 )
 
 data class OasPunsjBolleDto(
     val brukerIdent: String,
     val barnIdent: String,
-    val journalpostId: String,
+    val journalpostId: String
 )
 
 data class OasSkalTilInfotrygdSvar(
-    val k9sak: Boolean,
+    val k9sak: Boolean
 )
 
 data class OasHentPerson(
-    val norskIdent: String,
+    val norskIdent: String
 )
 
 data class OasPdlResponse(
-    val person: PdlPersonDto,
+    val person: PdlPersonDto
 )
 
 /*
@@ -137,8 +137,8 @@ private class DurationMockConverter : ModelConverter {
     override fun resolve(
         type: AnnotatedType,
         context: ModelConverterContext,
-        chain: Iterator<ModelConverter>): Schema<*>? {
-
+        chain: Iterator<ModelConverter>
+    ): Schema<*>? {
         if (type.isSchemaProperty) {
             val _type = Json.mapper().constructType(type.type)
             if (_type != null) {

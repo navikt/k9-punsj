@@ -8,7 +8,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.felles.UventetFeil
@@ -18,6 +17,7 @@ import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
+import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
@@ -42,7 +42,6 @@ internal class KorrigeringInntektsmeldingService(
 
     private val logger: Logger = LoggerFactory.getLogger(KorrigeringInntektsmeldingService::class.java)
 
-
     internal suspend fun henteMappe(norskIdent: String): SvarOmsDto {
         val person = personService.finnPersonVedNorskIdent(norskIdent = norskIdent)
         if (person != null) {
@@ -51,7 +50,6 @@ internal class KorrigeringInntektsmeldingService(
             return svarDto
         }
         return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
-
     }
 
     internal suspend fun henteSøknad(søknadId: String): KorrigeringInntektsmeldingDto {
@@ -62,7 +60,7 @@ internal class KorrigeringInntektsmeldingService(
     }
 
     internal suspend fun nySøknad(opprettNySøknad: OpprettNySøknad): KorrigeringInntektsmeldingDto {
-        //oppretter sak i k9-sak hvis det ikke finnes fra før
+        // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (opprettNySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
                 søker = opprettNySøknad.norskIdent,
@@ -73,7 +71,7 @@ internal class KorrigeringInntektsmeldingService(
             )
         }
 
-        //setter riktig type der man jobber på en ukjent i utgangspunktet
+        // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingKorrigeringIm(
@@ -129,12 +127,10 @@ internal class KorrigeringInntektsmeldingService(
                 ansvarligSaksbehandler = ansvarligSaksbehandler
             )
 
-
             return validertSøknad
         } catch (e: Exception) {
             throw UventetFeil(e.localizedMessage)
         }
-
     }
 
     internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): Pair<Søknad, SøknadFeil> {
@@ -182,6 +178,5 @@ internal class KorrigeringInntektsmeldingService(
         } else {
             emptyList()
         }
-
     }
 }

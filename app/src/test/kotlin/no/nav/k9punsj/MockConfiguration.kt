@@ -14,7 +14,7 @@ internal object MockConfiguration {
     internal fun config(
         wireMockServer: WireMockServer,
         port: Int,
-        azureV2Url: URI?,
+        azureV2Url: URI?
     ): Map<String, String> {
         val (wellKnownUrl, tokenUrl) = when (azureV2Url) {
             null -> wireMockServer.getAzureV2WellKnownUrl() to wireMockServer.getAzureV2TokenUrl()

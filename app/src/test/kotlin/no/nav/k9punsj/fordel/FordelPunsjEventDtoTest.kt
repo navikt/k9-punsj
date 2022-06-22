@@ -15,7 +15,8 @@ internal class FordelPunsjEventDtoTest {
             "journalpostId": "23452352",
             "type": "INNTEKTSMELDING_UTGÅTT",
             "ytelse": "OMP"
-            }""".trimIndent()
+            }
+        """.trimIndent()
 
         val fordelPunsjEventDto = dto.somFordelPunsjEventDto(topic)
 

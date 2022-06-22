@@ -23,7 +23,7 @@ import java.time.ZonedDateTime
 internal class MapOmsTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: KorrigeringInntektsmeldingDto,
+    dto: KorrigeringInntektsmeldingDto
 ) {
     private val søknad = Søknad()
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
@@ -81,7 +81,6 @@ internal class MapOmsTilK9Format(
     }
 
     private fun List<KorrigeringInntektsmeldingDto.FraværPeriode>.leggTilFraværsperioderKorrigeringIm(dto: KorrigeringInntektsmeldingDto) {
-
         val perioderMedTrekkAvDager = filter { it.periode.erSatt() }
             .filter { it.tidPrDag?.somDuration() == Duration.ZERO }.map {
                 val somEnkeltDager = it.periode.somEnkeltDager()

@@ -17,13 +17,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 
-
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-class PunsjJournalpostInfoRoutesTest{
+class PunsjJournalpostInfoRoutesTest {
 
     private val client = TestSetup.client
     private val k9sakToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.k9SakToken()}"
-
 
     @Test
     fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj`(): Unit = runBlocking {
@@ -37,10 +35,11 @@ class PunsjJournalpostInfoRoutesTest{
 
     @Test
     fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj post`(): Unit = runBlocking {
-        val json : JsonB = objectMapper().convertValue(SøkUferdigJournalposter("1000000000000", null))
+        val json: JsonB = objectMapper().convertValue(SøkUferdigJournalposter("1000000000000", null))
 
         val res = client.post().uri {
-            it.pathSegment("api", "journalpost", "uferdig").build()}
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
             .header(HttpHeaders.AUTHORIZATION, k9sakToken)
             .body(BodyInserters.fromValue(json))
 

@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
-import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(
@@ -33,31 +33,37 @@ internal class BrevOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Bestillt brev.",
-                content = [Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = Dokumentbestilling::class)
-                )]
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = Dokumentbestilling::class)
+                    )
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Innsending feilet grunnet mangler i bestillingen.",
-                content = [Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = OasFeil::class)
-                )]
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = OasFeil::class)
+                    )
+                ]
             ),
             ApiResponse(
                 responseCode = "500",
                 description = "Innsending feilet grunnet intern feil.",
-                content = [Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = OasFeil::class)
-                )]
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = OasFeil::class)
+                    )
+                ]
             )
         ]
     )
     fun BestillBrev(
-        @RequestBody bestilling: DokumentbestillingDto,
+        @RequestBody bestilling: DokumentbestillingDto
     ) {
     }
 }

@@ -33,13 +33,13 @@ internal class KorrigeringInntektsmeldingRoutes(
     }
 
     internal object Urls {
-        const val HenteMappe = "/$søknadType/mappe" //get
-        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        const val NySøknad = "/$søknadType" //post
-        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        const val ValiderSøknad = "/$søknadType/valider" //post
-        const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" //post
+        const val HenteMappe = "/$søknadType/mappe" // get
+        const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" // get
+        const val NySøknad = "/$søknadType" // post
+        const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
+        const val SendEksisterendeSøknad = "/$søknadType/send" // post
+        const val ValiderSøknad = "/$søknadType/valider" // post
+        const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" // post
     }
 
     @Bean
@@ -108,7 +108,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                 )?.let { return@RequestContext it }
 
                 val (sendtSøknad, søknadFeil) = korrigeringInntektsmeldingService.sendEksisterendeSøknad(sendSøknad)
-                if(søknadFeil.feil.isNotEmpty()) {
+                if (søknadFeil.feil.isNotEmpty()) {
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()
@@ -133,7 +133,7 @@ internal class KorrigeringInntektsmeldingRoutes(
                 }
 
                 val (validertSøknad, søknadFeil) = korrigeringInntektsmeldingService.validerSøknad(søknad)
-                if(søknadFeil.feil.isNotEmpty()) {
+                if (søknadFeil.feil.isNotEmpty()) {
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()
@@ -171,8 +171,3 @@ internal class KorrigeringInntektsmeldingRoutes(
     private suspend fun ServerRequest.korrigeringInntektsmelding() =
         body(BodyExtractors.toMono(KorrigeringInntektsmeldingDto::class.java)).awaitFirst()
 }
-
-
-
-
-

@@ -14,4 +14,3 @@ class UlidDeserializer : JsonDeserializer<ULID.Value>() {
         return ULID.parseULID(jsonParser.valueAsString)
     }
 }
-

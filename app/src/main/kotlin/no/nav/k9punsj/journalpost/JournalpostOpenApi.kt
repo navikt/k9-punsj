@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
-import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.openapi.OasIdentDto
@@ -17,6 +16,7 @@ import no.nav.k9punsj.openapi.OasJournalpostInfo
 import no.nav.k9punsj.openapi.OasPunsjBolleDto
 import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasSøknadId
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @SecurityScheme(
@@ -37,12 +37,14 @@ internal class JournalpostOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Hent journalposter som ikke er ferdig behandlet på person",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasJournalpostIder::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasJournalpostIder::class
+                        )
                     )
-                )]
-            ),
+                ]
+            )
         ]
     )
     @Operation(
@@ -50,7 +52,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentJournalposter(
-        @RequestBody body: OasIdentDto,
+        @RequestBody body: OasIdentDto
     ) {
     }
 
@@ -60,11 +62,13 @@ internal class JournalpostOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Liste med dokumenter som er i journalposten.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasJournalpostInfo::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasJournalpostInfo::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
@@ -89,7 +93,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteJournalpostInfo(
-        @PathVariable("journalpost_id") journalpostId: String,
+        @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
@@ -100,7 +104,7 @@ internal class JournalpostOpenApi {
     )
     fun SettPåVent(
         @PathVariable("journalpost_id") journalpostId: String,
-        @RequestBody body: OasSøknadId,
+        @RequestBody body: OasSøknadId
     ) {
     }
 
@@ -109,7 +113,7 @@ internal class JournalpostOpenApi {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Lukket ok",
+                description = "Lukket ok"
             ),
             ApiResponse(
                 responseCode = "404",
@@ -122,7 +126,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun LukkJournalpost(
-        @PathVariable("journalpost_id") journalpostId: String,
+        @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
@@ -132,11 +136,13 @@ internal class JournalpostOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "True når den skal til k9sak, false hvis den skal til infotrygd",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasSkalTilInfotrygdSvar::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasSkalTilInfotrygdSvar::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "403",
@@ -154,7 +160,7 @@ internal class JournalpostOpenApi {
     )
     fun SkalTilK9Sak(
         @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: OasPunsjBolleDto,
+        @RequestBody body: OasPunsjBolleDto
     ) {
     }
 
@@ -185,7 +191,7 @@ internal class JournalpostOpenApi {
     )
     fun HenteDokument(
         @PathVariable("journalpost_id") journalpostId: String,
-        @PathVariable("dokument_id") dokumentId: String,
+        @PathVariable("dokument_id") dokumentId: String
     ) {
     }
 
@@ -194,7 +200,7 @@ internal class JournalpostOpenApi {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Når resett er gjennomført",
+                description = "Når resett er gjennomført"
             ),
             ApiResponse(
                 responseCode = "400",
@@ -211,7 +217,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun ResettInfoOmJournalpost(
-        @PathVariable("journalpost_id") journalpostId: String,
+        @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
@@ -221,11 +227,13 @@ internal class JournalpostOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Gir hva som har blitt sendt inn for journalposten",
-                content = [Content(
-                    schema = Schema(
-                        implementation = no.nav.k9.søknad.Søknad::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = no.nav.k9.søknad.Søknad::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
@@ -242,7 +250,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentHvaSomHarBlittSendtInn(
-        @PathVariable("journalpost_id") journalpostId: String,
+        @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
@@ -251,7 +259,7 @@ internal class JournalpostOpenApi {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Hvis journalposten har blitt lukket",
+                description = "Hvis journalposten har blitt lukket"
             ),
             ApiResponse(
                 responseCode = "400",
@@ -268,7 +276,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun LukkJournalpostDebugg(
-        @PathVariable("journalpost_id") journalpostId: String,
+        @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
@@ -277,7 +285,7 @@ internal class JournalpostOpenApi {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Hvis journalposten har blitt ferdigstilt på generell sak",
+                description = "Hvis journalposten har blitt ferdigstilt på generell sak"
             ),
             ApiResponse(
                 responseCode = "500",
@@ -290,7 +298,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun JournalførPåGenerellSak(
-        @RequestBody body: IdentOgJournalpost,
+        @RequestBody body: IdentOgJournalpost
     ) {
     }
 }

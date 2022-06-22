@@ -4,8 +4,8 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
@@ -17,22 +17,22 @@ import java.util.UUID
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
         internal fun startup(
-                wireMockServer: WireMockServer,
-                port: Int,
-                args: Array<String> = arrayOf(),
-                azureV2Url: URI? = null,
-                profiles: String? = null
+            wireMockServer: WireMockServer,
+            port: Int,
+            args: Array<String> = arrayOf(),
+            azureV2Url: URI? = null,
+            profiles: String? = null
         ): ConfigurableApplicationContext? {
             val builder = SpringApplicationBuilder(K9PunsjApplication::class.java)
-                    .bannerMode(Banner.Mode.OFF)
-                    .properties(
-                        MockConfiguration.config(
-                            wireMockServer = wireMockServer,
-                            port = port,
-                            azureV2Url = azureV2Url
-                        )
+                .bannerMode(Banner.Mode.OFF)
+                .properties(
+                    MockConfiguration.config(
+                        wireMockServer = wireMockServer,
+                        port = port,
+                        azureV2Url = azureV2Url
                     )
-                    .main(K9PunsjApplication::class.java)
+                )
+                .main(K9PunsjApplication::class.java)
 
             if (profiles != null) {
                 builder.profiles(profiles)
@@ -60,20 +60,22 @@ internal class K9PunsjApplicationWithMocks {
         @JvmStatic
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
-                    port = 8084,
-                    rootDirectory = "mock-server/src/main/resources"
+                port = 8084,
+                rootDirectory = "mock-server/src/main/resources"
             )
 
-            Runtime.getRuntime().addShutdownHook(Thread {
-                DatabaseUtil.embeddedPostgres.close()
-                wireMockServer.stop()
-            })
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    DatabaseUtil.embeddedPostgres.close()
+                    wireMockServer.stop()
+                }
+            )
 
             val applicationContext = startup(
-                    wireMockServer = wireMockServer,
-                    port = 8085,
-                    azureV2Url = lokaltKjørendeAzureV2OrNull(),
-                    profiles = "local"
+                wireMockServer = wireMockServer,
+                port = 8085,
+                azureV2Url = lokaltKjørendeAzureV2OrNull(),
+                profiles = "local"
 
             )
             runBlocking {

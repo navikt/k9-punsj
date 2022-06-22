@@ -1,6 +1,5 @@
 package no.nav.k9punsj.tilgangskontroll.abac
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Response(

@@ -30,70 +30,74 @@ internal class MapPsbTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
     perioderSomFinnesIK9: List<PeriodeDto>,
-    dto: PleiepengerSyktBarnSøknadDto,
+    dto: PleiepengerSyktBarnSøknadDto
 ) {
 
     private val søknad = Søknad()
     private val pleiepengerSyktBarn = PleiepengerSyktBarn()
     private val feil = mutableListOf<Feil>()
 
-    init { kotlin.runCatching {
-        søknadId.leggTilSøknadId()
-        Versjon.leggTilVersjon()
-        dto.leggTilMottattDatoOgKlokkeslett()
-        dto.soekerId?.leggTilSøker()
-        dto.leggTilJournalposter(journalpostIder = journalpostIder)
-        dto.barn?.leggTilBarn()
-        dto.soeknadsperiode?.leggTilSøknadsperiode()
-        dto.trekkKravPerioder.leggTilTrekkKravPerioder()
-        dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
-        dto.leggTilLovestemtFerie()
-        dto.beredskap?.leggTilBeredskap()
-        dto.nattevaak?.leggTilNattevåk()
-        dto.bosteder?.mapTilBosteder()?.apply {
-            pleiepengerSyktBarn.medBosteder(this)
-        }
-        if (dto.utenlandsoppholdV2.isNotEmpty()) {
-            dto.utenlandsoppholdV2.leggTilUtenlandsoppholdV2(feil).apply {
-                pleiepengerSyktBarn.medUtenlandsopphold(this)
+    init {
+        kotlin.runCatching {
+            søknadId.leggTilSøknadId()
+            Versjon.leggTilVersjon()
+            dto.leggTilMottattDatoOgKlokkeslett()
+            dto.soekerId?.leggTilSøker()
+            dto.leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.barn?.leggTilBarn()
+            dto.soeknadsperiode?.leggTilSøknadsperiode()
+            dto.trekkKravPerioder.leggTilTrekkKravPerioder()
+            dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
+            dto.leggTilLovestemtFerie()
+            dto.beredskap?.leggTilBeredskap()
+            dto.nattevaak?.leggTilNattevåk()
+            dto.bosteder?.mapTilBosteder()?.apply {
+                pleiepengerSyktBarn.medBosteder(this)
             }
-        } else {
-            dto.utenlandsopphold?.leggTilUtenlandsopphold(feil)?.apply {
-                pleiepengerSyktBarn.medUtenlandsopphold(this)
+            if (dto.utenlandsoppholdV2.isNotEmpty()) {
+                dto.utenlandsoppholdV2.leggTilUtenlandsoppholdV2(feil).apply {
+                    pleiepengerSyktBarn.medUtenlandsopphold(this)
+                }
+            } else {
+                dto.utenlandsopphold?.leggTilUtenlandsopphold(feil)?.apply {
+                    pleiepengerSyktBarn.medUtenlandsopphold(this)
+                }
             }
-        }
-        dto.omsorg?.leggTilOmsorg()
-        // Enn så lenge støtter vi kun å legge til opptjeningaktivitet eller ignorere
-        // Sletting implementeres ved behov
-        if  (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
-            dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
-                pleiepengerSyktBarn.medOpptjeningAktivitet(this)
+            dto.omsorg?.leggTilOmsorg()
+            // Enn så lenge støtter vi kun å legge til opptjeningaktivitet eller ignorere
+            // Sletting implementeres ved behov
+            if (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+                dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                    pleiepengerSyktBarn.medOpptjeningAktivitet(this)
+                }
+            } else {
+                pleiepengerSyktBarn.ignorerOpplysningerOmOpptjening()
             }
-        } else {
-            pleiepengerSyktBarn.ignorerOpplysningerOmOpptjening();
-        }
-        dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
-            pleiepengerSyktBarn.medArbeidstid(this)
-        }
-        dto.soknadsinfo?.leggTilDataBruktTilUtledning()
-        dto.tilsynsordning?.perioder?.leggTilTilsynsordning()
-        dto.leggTilBegrunnelseForInnsending()
+            dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
+                pleiepengerSyktBarn.medArbeidstid(this)
+            }
+            dto.soknadsinfo?.leggTilDataBruktTilUtledning()
+            dto.tilsynsordning?.perioder?.leggTilTilsynsordning()
+            dto.leggTilBegrunnelseForInnsending()
 
-        // Fullfører søknad & validerer
-        søknad.medYtelse(pleiepengerSyktBarn)
-        feil.addAll(Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder()))
-    }.onFailure { throwable ->
-        logger.error("Uventet mappingfeil", throwable)
-        feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
-    }}
+            // Fullfører søknad & validerer
+            søknad.medYtelse(pleiepengerSyktBarn)
+            feil.addAll(Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder()))
+        }.onFailure { throwable ->
+            logger.error("Uventet mappingfeil", throwable)
+            feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
+        }
+    }
 
     internal fun søknad() = søknad
 
     internal fun feil() = feil.toList()
     internal fun søknadOgFeil() = søknad() to feil()
-    private fun String.leggTilSøknadId() { if (erSatt()) {
-        søknad.medSøknadId(this)
-    }}
+    private fun String.leggTilSøknadId() {
+        if (erSatt()) {
+            søknad.medSøknadId(this)
+        }
+    }
 
     private fun String.leggTilVersjon() {
         søknad.medVersjon(this)
@@ -112,9 +116,11 @@ internal class MapPsbTilK9Format(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
-    private fun List<PeriodeDto>.leggTilSøknadsperiode() { if (this.isNotEmpty()) {
-        pleiepengerSyktBarn.medSøknadsperiode(this.somK9Perioder())
-    }}
+    private fun List<PeriodeDto>.leggTilSøknadsperiode() {
+        if (this.isNotEmpty()) {
+            pleiepengerSyktBarn.medSøknadsperiode(this.somK9Perioder())
+        }
+    }
 
     private fun PleiepengerSyktBarnSøknadDto.BarnDto.leggTilBarn() {
         val barn = Barn()
@@ -125,9 +131,11 @@ internal class MapPsbTilK9Format(
         pleiepengerSyktBarn.medBarn(barn)
     }
 
-    private fun String.leggTilSøker() { if (erSatt()) {
-        søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
-    }}
+    private fun String.leggTilSøker() {
+        if (erSatt()) {
+            søknad.medSøker(Søker(NorskIdentitetsnummer.of(this)))
+        }
+    }
 
     private fun List<PleiepengerSyktBarnSøknadDto.NattevåkDto>.leggTilNattevåk() {
         val k9Nattevåk = mutableMapOf<Periode, Nattevåk.NattevåkPeriodeInfo>()
@@ -165,8 +173,7 @@ internal class MapPsbTilK9Format(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
-            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
-            { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
                 k9Info.medTimerPleieAvBarnetPerDag(it)
             }
             k9Uttak[k9Periode] = k9Info
@@ -202,17 +209,18 @@ internal class MapPsbTilK9Format(
     }
 
     private fun PleiepengerSyktBarnSøknadDto.leggTilBegrunnelseForInnsending() {
-        if(begrunnelseForInnsending != null) {
+        if (begrunnelseForInnsending != null) {
             søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
         }
     }
 
     private fun PleiepengerSyktBarnSøknadDto.leggTilJournalposter(journalpostIder: Set<String>) {
         journalpostIder.forEach { journalpostId ->
-            søknad.medJournalpost(Journalpost()
-                .medJournalpostId(journalpostId)
-                .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
-                .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
+            søknad.medJournalpost(
+                Journalpost()
+                    .medJournalpostId(journalpostId)
+                    .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
+                    .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
     }
@@ -236,16 +244,18 @@ internal class MapPsbTilK9Format(
         pleiepengerSyktBarn.medSøknadInfo(k9DataBruktTilUtledning)
     }
 
-
     private fun List<PleiepengerSyktBarnSøknadDto.TilsynsordningInfoDto>.leggTilTilsynsordning() {
         val k9Tilsynsordning = mutableMapOf<Periode, TilsynPeriodeInfo>()
         filter { it.periode.erSatt() }.forEach { tilsynsordning ->
             val k9Periode = tilsynsordning.periode!!.somK9Periode()!!
             k9Tilsynsordning[k9Periode] = TilsynPeriodeInfo()
-                .medEtablertTilsynTimerPerDag(Duration
-                    .ofHours(tilsynsordning.timer.toLong())
-                    .plusMinutes(tilsynsordning.minutter.toLong()
-                ))
+                .medEtablertTilsynTimerPerDag(
+                    Duration
+                        .ofHours(tilsynsordning.timer.toLong())
+                        .plusMinutes(
+                            tilsynsordning.minutter.toLong()
+                        )
+                )
         }
         if (k9Tilsynsordning.isNotEmpty()) {
             pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))
@@ -256,9 +266,11 @@ internal class MapPsbTilK9Format(
         dto: PleiepengerSyktBarnSøknadDto,
         opptjeningAktivitet: ArbeidAktivitetDto?
     ) = dto.opptjeningAktivitet != null &&
-            (!opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
-                    opptjeningAktivitet?.frilanser != null ||
-                    opptjeningAktivitet?.selvstendigNaeringsdrivende != null)
+        (
+            !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                opptjeningAktivitet?.frilanser != null ||
+                opptjeningAktivitet?.selvstendigNaeringsdrivende != null
+            )
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPsbTilK9Format::class.java)

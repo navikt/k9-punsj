@@ -2,15 +2,15 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
@@ -33,14 +33,14 @@ data class KorrigeringInntektsmeldingDto(
         val periode: PeriodeDto,
         val faktiskTidPrDag: String?,
         val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()
-            ?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+            ?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
 }
 
 data class SvarOmsDto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<KorrigeringInntektsmeldingDto>?,
+    val søknader: List<KorrigeringInntektsmeldingDto>?
 )
 
 internal fun Mappe.tilOmsVisning(norskIdent: String): SvarOmsDto {

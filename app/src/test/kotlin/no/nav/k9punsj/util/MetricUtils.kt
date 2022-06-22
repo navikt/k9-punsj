@@ -70,5 +70,4 @@ class MetricUtils {
     }
 
     data class MetrikkTag(val tag: String, val values: Set<String> = setOf())
-
 }

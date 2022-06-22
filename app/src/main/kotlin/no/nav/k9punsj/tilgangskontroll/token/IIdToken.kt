@@ -1,6 +1,5 @@
 package no.nav.k9punsj.tilgangskontroll.token
 
-
 interface IIdToken {
     val value: String
     val jwt: JWTToken?

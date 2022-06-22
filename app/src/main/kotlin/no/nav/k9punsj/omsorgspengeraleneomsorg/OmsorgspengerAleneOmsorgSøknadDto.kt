@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
-import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
@@ -17,13 +17,13 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val mottattDato: LocalDate? = null,
     @JsonFormat(pattern = "HH:mm")
-    val klokkeslett : LocalTime? = null,
+    val klokkeslett: LocalTime? = null,
     val barn: BarnDto? = null,
     val journalposter: List<String>? = null,
     val soeknadsperiode: PeriodeDto? = null,
     val begrunnelseForInnsending: String? = null,
-    val harInfoSomIkkeKanPunsjes : Boolean? = null,
-    val harMedisinskeOpplysninger : Boolean? = null,
+    val harInfoSomIkkeKanPunsjes: Boolean? = null,
+    val harMedisinskeOpplysninger: Boolean? = null,
     val metadata: Map<*, *>? = null
 ) {
     data class BarnDto(
@@ -36,7 +36,7 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
 data class SvarOmsAODto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?,
+    val søknader: List<OmsorgspengerAleneOmsorgSøknadDto>?
 )
 
 internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {

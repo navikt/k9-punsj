@@ -29,13 +29,15 @@ internal class SakerController {
             ApiResponse(
                 responseCode = "200",
                 description = "Hvis saker hentes",
-                content = [Content(
-                    array = ArraySchema(
-                        schema = Schema(
-                            implementation = SakService.SakInfoDto::class
+                content = [
+                    Content(
+                        array = ArraySchema(
+                            schema = Schema(
+                                implementation = SakService.SakInfoDto::class
+                            )
                         )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "500",

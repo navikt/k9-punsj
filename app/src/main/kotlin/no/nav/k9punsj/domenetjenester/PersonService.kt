@@ -1,15 +1,14 @@
 package no.nav.k9punsj.domenetjenester
 
-import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Service
-
 
 @Service
 class PersonService(
     val personRepository: PersonRepository,
-    val pdlService: PdlService,
+    val pdlService: PdlService
 ) {
 
     suspend fun finnEllerOpprettPersonVedNorskIdent(norskIdent: String): Person {
@@ -47,5 +46,4 @@ class PersonService(
         return pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
             ?: throw IllegalStateException("Fant ikke aktørId i PDL")
     }
-
 }

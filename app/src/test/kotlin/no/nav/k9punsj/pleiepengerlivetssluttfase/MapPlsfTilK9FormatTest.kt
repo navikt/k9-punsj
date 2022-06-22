@@ -75,11 +75,13 @@ internal class MapPlsfTilK9FormatTest {
         ).feil()
 
         assertThat(feil).size().isEqualTo(1)
-        assertThat(feil.first()).isEqualTo(Feil(
-            "ytelse.arbeidstid.arbeidstakerList[0].perioder",
-            "ugyldigPeriode",
-            "Perioden er utenfor gyldig interval. Gyldig interval: ([[2022-03-27, 2022-03-30]]), Ugyldig periode: 2022-04-27/2022-04-30"
-        ))
+        assertThat(feil.first()).isEqualTo(
+            Feil(
+                "ytelse.arbeidstid.arbeidstakerList[0].perioder",
+                "ugyldigPeriode",
+                "Perioden er utenfor gyldig interval. Gyldig interval: ([[2022-03-27, 2022-03-30]]), Ugyldig periode: 2022-04-27/2022-04-30"
+            )
+        )
     }
 
     private fun arbeidstid(periode: PeriodeDto) = ArbeidstidDto(

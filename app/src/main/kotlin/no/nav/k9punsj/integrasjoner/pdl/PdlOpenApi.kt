@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.openapi.OasHentPerson
+import no.nav.k9punsj.openapi.OasPdlResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import no.nav.k9punsj.openapi.OasHentPerson
-import no.nav.k9punsj.openapi.OasPdlResponse
 
 @RestController
 @Tag(name = "Pdl", description = "Hent aktørid fra norsk ident")
@@ -22,11 +22,13 @@ internal class PdlOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Henter aktørid fra fnummer",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasPdlResponse::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasPdlResponse::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "401",

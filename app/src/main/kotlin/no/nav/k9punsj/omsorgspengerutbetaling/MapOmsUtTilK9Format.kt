@@ -24,7 +24,7 @@ import java.time.ZonedDateTime
 internal class MapOmsUtTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerutbetalingSøknadDto,
+    dto: OmsorgspengerutbetalingSøknadDto
 ) {
     private val søknad = Søknad()
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()

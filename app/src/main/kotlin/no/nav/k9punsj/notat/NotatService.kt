@@ -1,6 +1,5 @@
 package no.nav.k9punsj.notat
 
-import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
 import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
@@ -12,6 +11,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.json.JSONObject
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext
@@ -29,11 +29,13 @@ class NotatService(
         val person = pdlService.hentPersonopplysninger(setOf(notat.søkerIdentitetsnummer)).first()
 
         val notatPdf =
-            notatPDFGenerator.genererPDF(notat.mapTilNotatOpplysninger(
-                innloggetBrukerIdentitetsnumer = innloggetBrukerIdent,
-                innloggetBrukerEnhet = innloggetBrukerEnhet,
-                søkerNavn = person.navn()
-            ))
+            notatPDFGenerator.genererPDF(
+                notat.mapTilNotatOpplysninger(
+                    innloggetBrukerIdentitetsnumer = innloggetBrukerIdent,
+                    innloggetBrukerEnhet = innloggetBrukerEnhet,
+                    søkerNavn = person.navn()
+                )
+            )
 
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = coroutineContext.hentCorrelationId(),

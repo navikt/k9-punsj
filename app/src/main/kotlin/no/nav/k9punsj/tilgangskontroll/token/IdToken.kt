@@ -5,7 +5,7 @@ import java.nio.charset.Charset
 import java.util.Base64
 
 data class IdToken(
-    override val value: String,
+    override val value: String
 ) : IIdToken {
     override val jwt: JWTToken = try {
         val split = value.split(".")
@@ -23,4 +23,3 @@ data class IdToken(
     override fun kanBehandleEgneAnsatte(): Boolean = jwt.groups.any { s -> s == "de44052d-b062-4497-89a2-0c85b935b808" }
     override fun erOppgavebehandler(): Boolean = jwt.groups.any { s -> s == "a9f5ef81-4e81-42e8-b368-0273071b64b9" }
 }
-

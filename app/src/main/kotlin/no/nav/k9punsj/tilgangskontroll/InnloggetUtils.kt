@@ -14,7 +14,7 @@ class InnloggetUtils(
 
     internal suspend fun harInnloggetBrukerTilgangTilOgSendeInn(
         norskIdent: String,
-        url: String,
+        url: String
     ): ServerResponse? {
         val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdent, url)
         if (!saksbehandlerHarTilgang) {

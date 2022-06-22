@@ -60,7 +60,7 @@ internal class MapPlsfTilK9Format(
                     pleipengerLivetsSluttfase.medOpptjeningAktivitet(this)
                 }
             } else {
-                pleipengerLivetsSluttfase.ignorerOpplysningerOmOpptjening();
+                pleipengerLivetsSluttfase.ignorerOpplysningerOmOpptjening()
             }
             dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
                 pleipengerLivetsSluttfase.medArbeidstid(this)
@@ -141,7 +141,6 @@ internal class MapPlsfTilK9Format(
         }
     }
 
-
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilBegrunnelseForInnsending() {
         if (begrunnelseForInnsending != null) {
             søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
@@ -173,8 +172,7 @@ internal class MapPlsfTilK9Format(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
-            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag")
-            { uttak.timerPleieAvPleietrengendePerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.timerPleieAvPleietrengendePerDag?.somDuration() }?.also {
                 k9Info.medTimerPleieAvBarnetPerDag(it)
             }
             k9Uttak[k9Periode] = k9Info
@@ -195,9 +193,11 @@ internal class MapPlsfTilK9Format(
         dto: PleiepengerLivetsSluttfaseSøknadDto,
         opptjeningAktivitet: ArbeidAktivitetDto?
     ) = dto.opptjeningAktivitet != null &&
-            (!opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
-                    opptjeningAktivitet?.frilanser != null ||
-                    opptjeningAktivitet?.selvstendigNaeringsdrivende != null)
+        (
+            !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                opptjeningAktivitet?.frilanser != null ||
+                opptjeningAktivitet?.selvstendigNaeringsdrivende != null
+            )
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapPlsfTilK9Format::class.java)

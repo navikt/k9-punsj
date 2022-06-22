@@ -34,7 +34,7 @@ class MetrikkJobb(
                 listOf(
                     Tag.of("type", it.second.kode)
                 ),
-                it.first,
+                it.first
             )
         }
     }

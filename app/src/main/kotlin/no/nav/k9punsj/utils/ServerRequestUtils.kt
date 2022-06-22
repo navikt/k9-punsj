@@ -27,5 +27,4 @@ object ServerRequestUtils {
 
     internal fun ServerRequest.søknadLocationUri(søknadId: String) =
         uriBuilder().pathSegment("mappe", søknadId).build()
-
 }

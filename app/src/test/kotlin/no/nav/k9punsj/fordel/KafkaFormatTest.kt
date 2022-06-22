@@ -43,6 +43,7 @@ internal class KafkaFormatTest {
 
         assertEquals(forventet, melding.somFordelPunsjEventDto("test-topic"))
     }
+
     @Test
     fun `kopiert punsjbar journalpost`() {
         @Language("JSON")

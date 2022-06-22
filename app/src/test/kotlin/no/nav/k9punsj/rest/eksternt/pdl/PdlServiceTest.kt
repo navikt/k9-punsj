@@ -8,14 +8,15 @@ import org.junit.jupiter.api.Test
 
 class PdlServiceTest {
     @Test
-    fun deserialisereError()  {
+    fun deserialisereError() {
         val s = """{"errors":[{"message":"Ikke autentisert","locations":[{"line":3,"column":5}],"path":["hentIdenter"],"extensions":{"code":"unauthenticated","classification":"ExecutionAborted"}}],"data":{"hentIdenter":null}}"""
         val (data, errors) = objectMapper().readValue<IdentPdl>(s)
         Assertions.assertThat(data).isNotNull
         Assertions.assertThat(errors).isNotNull
     }
+
     @Test
-    fun deserialisereOk()  {
+    fun deserialisereOk() {
         val aktørId = "2002220522526"
         val s = """{"data":{"hentIdenter":{"identer":[{"ident":$aktørId,"historisk":false,"gruppe":"AKTORID"}]}}}"""
         val (data, errors) = objectMapper().readValue<IdentPdl>(s)

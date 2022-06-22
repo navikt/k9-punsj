@@ -9,7 +9,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -67,7 +66,7 @@ internal class PunsjJournalpostMetrikkRepositoryTest {
             Pair(4, PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT),
             Pair(3, PunsjInnsendingType.PAPIRINNTEKTSOPPLYSNINGER),
             Pair(2, PunsjInnsendingType.SKRIV_TIL_OSS_SPØRMSÅL),
-            Pair(1, PunsjInnsendingType.SKRIV_TIL_OSS_SVAR),
+            Pair(1, PunsjInnsendingType.SKRIV_TIL_OSS_SVAR)
         )
     }
 

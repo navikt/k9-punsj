@@ -5,9 +5,9 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 data class Mappe(
     val mappeId: String,
     val søker: Person,
-    val bunke: List<BunkeEntitet>,
+    val bunke: List<BunkeEntitet>
 ) {
-    fun hentFor(fagsakYtelseType: FagsakYtelseType) : BunkeEntitet? {
+    fun hentFor(fagsakYtelseType: FagsakYtelseType): BunkeEntitet? {
         return bunke.firstOrNull { it.fagsakYtelseType == fagsakYtelseType }
     }
 }

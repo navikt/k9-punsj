@@ -5,7 +5,7 @@ import org.springframework.web.reactive.function.client.WebClient
 
 object TestSetup {
     private val wireMockServer = initWireMock(
-            port = 9192
+        port = 9192
     )
 
     private const val port = 9194

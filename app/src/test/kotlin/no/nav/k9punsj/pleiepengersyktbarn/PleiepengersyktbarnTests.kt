@@ -210,7 +210,6 @@ class PleiepengersyktbarnTests {
         assertThat(oppdatertSoeknadDto.metadata).isEqualTo(søknadViaGet.metadata)
     }
 
-
     @Test
     fun `Innsending av søknad returnerer 404 når mappe ikke finnes`(): Unit = runBlocking {
         val norskIdent = "12030050163"
@@ -334,7 +333,6 @@ class PleiepengersyktbarnTests {
         assertThat(body.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, status)
     }
-
 
     @Test
     fun `Skal kunne lagre med ferie null`(): Unit = runBlocking {
@@ -622,7 +620,7 @@ class PleiepengersyktbarnTests {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): Triple<String, HttpStatus, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -668,7 +666,7 @@ class PleiepengersyktbarnTests {
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -698,7 +696,7 @@ class PleiepengersyktbarnTests {
 
     private suspend fun opprettSoeknad(
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): URI? {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
@@ -717,17 +715,16 @@ class PleiepengersyktbarnTests {
     }
 }
 
-
 private fun opprettSøknad(
     personnummer: String,
-    journalpostId: String,
+    journalpostId: String
 ): OpprettNySøknad {
     return OpprettNySøknad(personnummer, journalpostId, null, null, null)
 }
 
 private fun lagSendSøknad(
     norskIdent: String,
-    søknadId: String,
+    søknadId: String
 ): SendSøknad {
     return SendSøknad(norskIdent, søknadId)
 }
@@ -735,7 +732,7 @@ private fun lagSendSøknad(
 private fun tilpasserSøknadsMalTilTesten(
     søknad: MutableMap<String, Any?>,
     norskIdent: String,
-    journalpostId: String? = null,
+    journalpostId: String? = null
 ) {
     søknad.replace("soekerId", norskIdent)
     if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))

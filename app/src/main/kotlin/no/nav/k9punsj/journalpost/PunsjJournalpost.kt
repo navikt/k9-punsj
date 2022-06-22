@@ -16,7 +16,7 @@ data class PunsjJournalpost(
     val type: String? = null,
     val ytelse: String? = null,
     val payload: String? = null,
-    val fordelStatusType: String? = null,
+    val fordelStatusType: String? = null
 )
 
 internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType): FagsakYtelseType {

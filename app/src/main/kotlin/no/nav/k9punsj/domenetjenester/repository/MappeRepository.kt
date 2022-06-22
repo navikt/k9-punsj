@@ -9,9 +9,9 @@ import javax.sql.DataSource
 
 @Repository
 class MappeRepository(private val dataSource: DataSource) {
-   companion object {
-       const val MAPPE_TABLE = "mappe"
-   }
+    companion object {
+        const val MAPPE_TABLE = "mappe"
+    }
 
     suspend fun opprettEllerHentMappeForPerson(personId: String): String {
         return using(sessionOf(dataSource)) {
@@ -36,7 +36,8 @@ class MappeRepository(private val dataSource: DataSource) {
                     insert into $MAPPE_TABLE as k (id, id_person)
                     values (:id, :id_person)
                     
-                 """, mapOf("id" to mappeId, "id_person" to UUID.fromString(personId))
+                 """,
+                        mapOf("id" to mappeId, "id_person" to UUID.fromString(personId))
                     ).asUpdate
                 )
                 return@transaction mappeId.toString()

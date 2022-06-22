@@ -5,10 +5,10 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
@@ -46,7 +46,6 @@ internal class OmsorgspengerutbetalingService(
 
     private val logger: Logger = LoggerFactory.getLogger(OmsorgspengerutbetalingService::class.java)
 
-
     internal suspend fun henteMappe(norskIdent: String): ServerResponse {
         val person = personService.finnPersonVedNorskIdent(norskIdent = norskIdent)
         if (person != null) {
@@ -61,7 +60,6 @@ internal class OmsorgspengerutbetalingService(
             .ok()
             .json()
             .bodyValueAndAwait(SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
-
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -80,7 +78,7 @@ internal class OmsorgspengerutbetalingService(
     }
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
-        //oppretter sak i k9-sak hvis det ikke finnes fra før
+        // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (opprettNySøknad.pleietrengendeIdent != null) {
             punsjbolleService.opprettEllerHentFagsaksnummer(
                 søker = opprettNySøknad.norskIdent,
@@ -91,7 +89,7 @@ internal class OmsorgspengerutbetalingService(
             )
         }
 
-        //setter riktig type der man jobber på en ukjent i utgangspunktet
+        // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingOmsorgspengerutbetaling(
@@ -101,7 +99,6 @@ internal class OmsorgspengerutbetalingService(
             .created(request.søknadLocationUri(søknadEntitet.søknadId))
             .json()
             .bodyValueAndAwait(søknadEntitet.tilOmsUtvisning())
-
     }
 
     internal suspend fun oppdaterEksisterendeSøknad(søknad: OmsorgspengerutbetalingSøknadDto): ServerResponse {
@@ -193,14 +190,12 @@ internal class OmsorgspengerutbetalingService(
                 .accepted()
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
-
         } catch (e: Exception) {
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .json()
                 .bodyValueAndAwait(e.localizedMessage)
         }
-
     }
 
     internal suspend fun validerSøknad(soknadTilValidering: OmsorgspengerutbetalingSøknadDto): ServerResponse {
@@ -250,27 +245,27 @@ internal class OmsorgspengerutbetalingService(
     }
 
     internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): ServerResponse {
-            val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
-                søker = matchFagsakMedPeriode.brukerIdent,
-                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
-                periodeDto = matchFagsakMedPeriode.periodeDto
-            )
+        val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
+            søker = matchFagsakMedPeriode.brukerIdent,
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            periodeDto = matchFagsakMedPeriode.periodeDto
+        )
 
-            return if (arbeidsgiverMedArbeidsforholdId != null) {
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(arbeidsgiverMedArbeidsforholdId)
-            } else if (feil != null) {
-                ServerResponse
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json()
-                    .bodyValueAndAwait(feil)
-            } else {
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
-            }
+        return if (arbeidsgiverMedArbeidsforholdId != null) {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(arbeidsgiverMedArbeidsforholdId)
+        } else if (feil != null) {
+            ServerResponse
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .json()
+                .bodyValueAndAwait(feil)
+        } else {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
+        }
     }
 }

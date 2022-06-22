@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
-import no.nav.k9punsj.felles.IdentOgJournalpost
-import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Omsorgspenger kronisk sykt barn søknad", description = "Håndtering av søknader av typen omsorgspenger - kronisk sykt barn")
@@ -27,11 +27,13 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Henter mappen til en person som inneholder alle søknader",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
@@ -52,16 +54,18 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "201",
                 description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: IdentOgJournalpost,
+        @RequestBody søknad: IdentOgJournalpost
     ) {
     }
 
@@ -74,11 +78,13 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Søknaden",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SvarOmsKSBDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SvarOmsKSBDto::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "404",
@@ -87,7 +93,7 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
         ]
     )
     fun HenteSøknad(
-        @PathVariable("soeknad_id") søknadId: String,
+        @PathVariable("soeknad_id") søknadId: String
     ) {
     }
 
@@ -105,16 +111,18 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerKroniskSyktBarnSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: OmsorgspengerKroniskSyktBarnSøknadDto,
+        @RequestBody søknad: OmsorgspengerKroniskSyktBarnSøknadDto
     ) {
     }
 
@@ -132,42 +140,50 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "202",
                 description = "Søknaden er lukket for endring og sendt til behandling.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = no.nav.k9.søknad.Søknad::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = no.nav.k9.søknad.Søknad::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Innsending feilet grunnet mangler i søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SøknadFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SøknadFeil::class
+                        )
                     )
-                )]
+                ]
             ), ApiResponse(
                 responseCode = "409",
                 description = "En eller flere journalposter har blitt sendt inn fra før",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "500",
                 description = "Hvis det feiler uventet på server",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun SendSøknad(
-        @RequestBody søknad: SendSøknad,
+        @RequestBody søknad: SendSøknad
     ) {
     }
 
@@ -185,34 +201,40 @@ internal class OmsorgspengerKroniskSykBarnSoknadOpenApi {
             ApiResponse(
                 responseCode = "202",
                 description = "Søknaden er valider ok.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = no.nav.k9.søknad.Søknad::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = no.nav.k9.søknad.Søknad::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Innsending feilet grunnet mangler i søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SøknadFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SøknadFeil::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "500",
                 description = "Hvis det feiler uventet på server",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: SendSøknad,
+        @RequestBody søknad: SendSøknad
     ) {
     }
 }

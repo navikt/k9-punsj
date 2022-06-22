@@ -12,5 +12,4 @@ enum class EventClassId(val cefKode: String) {
 
     /** Bruker har endret data  */
     AUDIT_UPDATE("audit:update");
-
 }

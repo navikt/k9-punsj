@@ -29,12 +29,12 @@ internal class OmsorgspengerMidlertidigAleneRoutes(
     }
 
     internal object Urls {
-        internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/$søknadType" //post
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/$søknadType/valider" //post
+        internal const val HenteMappe = "/$søknadType/mappe" // get
+        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" // get
+        internal const val NySøknad = "/$søknadType" // post
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
+        internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
+        internal const val ValiderSøknad = "/$søknadType/valider" // post
     }
 
     @Bean

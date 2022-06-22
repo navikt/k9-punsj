@@ -18,7 +18,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         barn: String = "22222222222",
         søknadsperiode: Pair<LocalDate, LocalDate>? = null,
         manipuler: (MutableMap<String, Any?>) -> Unit = {}
-    ) : PleiepengerSyktBarnSøknadDto {
+    ): PleiepengerSyktBarnSøknadDto {
         @Language("JSON")
         val json = """
             {
@@ -44,14 +44,14 @@ internal object PleiepengerSøknadVisningDtoUtils {
     }
 
     private fun PleiepengerSyktBarnSøknadDto.mapTilK9Format(
-        perioderSomFinnesIK9: List<PeriodeDto> = emptyList()) =
+        perioderSomFinnesIK9: List<PeriodeDto> = emptyList()
+    ) =
         MapPsbTilK9Format(
             søknadId = soeknadId,
             perioderSomFinnesIK9 = perioderSomFinnesIK9,
             journalpostIder = journalposter?.toSet() ?: emptySet(),
             dto = this
         ).søknadOgFeil()
-
 
     private fun arbeidstidInfoKomplettStruktur(
         optionalTekst: String?,
@@ -62,7 +62,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 periode = periode,
                 faktiskArbeidTimerPerDag = optionalTekst,
                 jobberNormaltTimerPerDag = optionalTekst
-            ))
+            )
+        )
     )
 
     internal fun søknadMedKomplettStruktur(
@@ -105,7 +106,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
                     arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode),
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst
-                )),
+                )
+            ),
             frilanser = ArbeidAktivitetDto.FrilanserDto(
                 startdato = optionalTekst,
                 sluttdato = optionalTekst,
@@ -118,7 +120,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
                     norskIdent = optionalTekst,
                     organisasjonsnummer = optionalTekst,
                     arbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
-                )),
+                )
+            ),
             frilanserArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode),
             selvstendigNæringsdrivendeArbeidstidInfo = arbeidstidInfoKomplettStruktur(optionalTekst, optionalPeriode)
         ),
@@ -131,7 +134,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         nattevaak = listOf(
             PleiepengerSyktBarnSøknadDto.NattevåkDto(
                 periode = optionalPeriode,
-                tilleggsinformasjon =  optionalTekst
+                tilleggsinformasjon = optionalTekst
             )
         ),
         tilsynsordning = PleiepengerSyktBarnSøknadDto.TilsynsordningDto(
@@ -145,9 +148,10 @@ internal object PleiepengerSøknadVisningDtoUtils {
         ),
         uttak = listOf(
             PleiepengerSyktBarnSøknadDto.UttakDto(
-            periode = optionalPeriode,
-            timerPleieAvBarnetPerDag = optionalTekst
-        )),
+                periode = optionalPeriode,
+                timerPleieAvBarnetPerDag = optionalTekst
+            )
+        ),
         omsorg = PleiepengerSyktBarnSøknadDto.OmsorgDto(
             relasjonTilBarnet = optionalTekst,
             samtykketOmsorgForBarnet = null,
@@ -155,9 +159,9 @@ internal object PleiepengerSøknadVisningDtoUtils {
         ),
         bosteder = listOf(
             BostederDto(
-            periode = optionalPeriode,
-            land = optionalTekst
-        )
+                periode = optionalPeriode,
+                land = optionalTekst
+            )
         ),
         lovbestemtFerie = listOf(requiredPeriode),
         lovbestemtFerieSomSkalSlettes = listOf(requiredPeriode),
@@ -188,8 +192,8 @@ internal object PleiepengerSøknadVisningDtoUtils {
         }
     }
 
-    private fun optionalTilPeriode(periodeDto: PeriodeDto?):  List<PeriodeDto>? {
-        if(periodeDto != null) {
+    private fun optionalTilPeriode(periodeDto: PeriodeDto?): List<PeriodeDto>? {
+        if (periodeDto != null) {
             return listOf(periodeDto)
         }
         return null

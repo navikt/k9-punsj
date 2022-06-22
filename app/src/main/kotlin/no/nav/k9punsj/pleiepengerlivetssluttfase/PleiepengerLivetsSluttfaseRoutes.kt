@@ -21,7 +21,7 @@ import kotlin.coroutines.coroutineContext
 internal class PleiepengerLivetsSluttfaseRoutes(
     private val pleiepengerLivetsSluttfaseService: PleiepengerLivetsSluttfaseService,
     private val authenticationHandler: AuthenticationHandler,
-    private val innlogget: InnloggetUtils,
+    private val innlogget: InnloggetUtils
 ) {
 
     private companion object {
@@ -31,13 +31,13 @@ internal class PleiepengerLivetsSluttfaseRoutes(
     }
 
     internal object Urls {
-        internal const val HenteMappe = "/$søknadType/mappe" //get
-        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" //get
-        internal const val NySøknad = "/$søknadType" //post
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" //put
-        internal const val SendEksisterendeSøknad = "/$søknadType/send" //post
-        internal const val ValiderSøknad = "/$søknadType/valider" //post
-        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" //post
+        internal const val HenteMappe = "/$søknadType/mappe" // get
+        internal const val HenteSøknad = "/$søknadType/mappe/{$SøknadIdKey}" // get
+        internal const val NySøknad = "/$søknadType" // post
+        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
+        internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
+        internal const val ValiderSøknad = "/$søknadType/valider" // post
+        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
     }
 
     @Bean
@@ -116,7 +116,6 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             }
         }
     }
-
 
     private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
 

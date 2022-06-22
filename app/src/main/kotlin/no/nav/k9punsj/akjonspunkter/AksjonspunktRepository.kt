@@ -35,19 +35,25 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
                             """
                     insert into $AKSJONSPUNKT_TABLE as a (aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak)
                     values (:aksjonspunkt_id, :aksjonspunkt_kode, :id_journalpost, :aksjonspunkt_status, :frist_tid, :vent_aarsak)
-                    """, mapOf(
+                    """,
+                            mapOf(
                                 "aksjonspunkt_id" to UUID.fromString(aksjonspunktEntitet.aksjonspunktId),
                                 "aksjonspunkt_kode" to aksjonspunktEntitet.aksjonspunktKode.kode,
                                 "id_journalpost" to aksjonspunktEntitet.journalpostId,
                                 "aksjonspunkt_status" to aksjonspunktEntitet.aksjonspunktStatus.kode,
                                 "frist_tid" to aksjonspunktEntitet.frist_tid,
-                                "vent_aarsak" to if (aksjonspunktEntitet.vent_årsak != null) aksjonspunktEntitet.vent_årsak.kode else null)
+                                "vent_aarsak" to if (aksjonspunktEntitet.vent_årsak != null) aksjonspunktEntitet.vent_årsak.kode else null
+                            )
                         ).asUpdate
                     )
                 } else {
-                    tx.run(queryOf("UPDATE $AKSJONSPUNKT_TABLE SET FRIST_TID = ? WHERE AKSJONSPUNKT_ID = ?",
-                        aksjonspunktEntitet.frist_tid,
-                        UUID.fromString(aksjonspunktId)).asUpdate)
+                    tx.run(
+                        queryOf(
+                            "UPDATE $AKSJONSPUNKT_TABLE SET FRIST_TID = ? WHERE AKSJONSPUNKT_ID = ?",
+                            aksjonspunktEntitet.frist_tid,
+                            UUID.fromString(aksjonspunktId)
+                        ).asUpdate
+                    )
                 }
                 aksjonspunktEntitet
             }
@@ -56,20 +62,26 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
 
     suspend fun settStatus(aksjonspunktId: AksjonspunktId, aksjonspunktStatus: AksjonspunktStatus) {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("UPDATE $AKSJONSPUNKT_TABLE SET AKSJONSPUNKT_STATUS = ? WHERE AKSJONSPUNKT_ID = ?",
-                aksjonspunktStatus.kode,
-                UUID.fromString(aksjonspunktId)).asUpdate)
+            it.run(
+                queryOf(
+                    "UPDATE $AKSJONSPUNKT_TABLE SET AKSJONSPUNKT_STATUS = ? WHERE AKSJONSPUNKT_ID = ?",
+                    aksjonspunktStatus.kode,
+                    UUID.fromString(aksjonspunktId)
+                ).asUpdate
+            )
         }
     }
 
     suspend fun hentAksjonspunkterDerFristenHarLøptUt(): List<AksjonspunktEntitet> {
         return using(sessionOf(dataSource)) {
             it.run(
-                queryOf("""
+                queryOf(
+                    """
                         select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
                         from $AKSJONSPUNKT_TABLE
                         where frist_tid IS NOT NULL and frist_tid < now() and aksjonspunkt_status = 'OPPR'
-                    """)
+                    """
+                )
                     .map { row ->
                         aksjonspunktEntitet(row)
                     }.asList
@@ -80,11 +92,14 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
     suspend fun hentAlleAksjonspunkter(journalpostId: String): List<AksjonspunktEntitet> {
         return using(sessionOf(dataSource)) {
             it.run(
-                queryOf("""
+                queryOf(
+                    """
                         select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
                         from $AKSJONSPUNKT_TABLE
                         where id_journalpost = :journalpostId
-                    """, mapOf("journalpostId" to journalpostId))
+                    """,
+                    mapOf("journalpostId" to journalpostId)
+                )
                     .map { row ->
                         aksjonspunktEntitet(row)
                     }.asList
@@ -95,9 +110,12 @@ class AksjonspunktRepository(private val dataSource: DataSource) {
     fun hentAksjonspunkt(journalpostId: String, kode: String): AksjonspunktEntitet? {
         return using(sessionOf(dataSource)) {
             it.run(
-                queryOf("""select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
+                queryOf(
+                    """select aksjonspunkt_id, aksjonspunkt_kode, id_journalpost, aksjonspunkt_status, frist_tid, vent_aarsak
                         from $AKSJONSPUNKT_TABLE
-                        where id_journalpost = ? and aksjonspunkt_kode = ?""", journalpostId, kode
+                        where id_journalpost = ? and aksjonspunkt_kode = ?""",
+                    journalpostId,
+                    kode
                 )
                     .map { row ->
                         aksjonspunktEntitet(row)

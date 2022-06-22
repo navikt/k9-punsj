@@ -25,7 +25,7 @@ internal class MapOmsMATilK9FormatTest {
                 klokkeslett = LocalTime.now(),
                 barn = listOf(
                     OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = "22222222222", foedselsdato = null),
-                    OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = "33333333333", foedselsdato = null),
+                    OmsorgspengerMidlertidigAleneSøknadDto.BarnDto(norskIdent = "33333333333", foedselsdato = null)
                 ),
                 annenForelder = OmsorgspengerMidlertidigAleneSøknadDto.AnnenForelder(
                     norskIdent = "44444444444",

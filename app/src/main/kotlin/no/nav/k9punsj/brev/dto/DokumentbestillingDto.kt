@@ -1,6 +1,5 @@
 package no.nav.k9punsj.brev.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import java.util.*
 
@@ -13,4 +12,4 @@ data class DokumentbestillingDto(
     val fagsakYtelseType: FagsakYtelseType,
     val dokumentMal: String,
     val dokumentdata: BrevDataDto? = null
-    )
+)

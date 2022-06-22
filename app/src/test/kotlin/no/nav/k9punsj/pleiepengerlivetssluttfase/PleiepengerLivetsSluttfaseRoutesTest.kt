@@ -35,7 +35,6 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-
     @AfterEach
     internal fun tearDown() {
         DatabaseUtil.cleanDB()
@@ -48,7 +47,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
         Assertions.assertTrue(body.søknader!!.isEmpty())
     }
@@ -63,7 +64,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
     }
 
@@ -80,7 +82,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
         assertThat(body.feil).isNull()
     }
@@ -99,7 +103,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -109,7 +115,10 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+            api,
+            søknadTypeUri,
+            "mappe",
+            soeknad["soeknadId"] as String
         )
 
         Assertions.assertNotNull(søknadViaGet)
@@ -132,7 +141,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-        pleietrengende: String,
+        pleietrengende: String
     ): OpprettNySøknad {
         return OpprettNySøknad(
             personnummer,
@@ -146,7 +155,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -156,7 +165,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        pleietrengende: String
     ): PleiepengerLivetsSluttfaseSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
@@ -165,7 +174,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -179,7 +189,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -197,7 +209,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        pleietrengende: String
     ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
@@ -206,7 +218,8 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = response.headers().asHttpHeaders().location
@@ -221,7 +234,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -239,7 +254,9 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
-            api, søknadTypeUri, "send"
+            api,
+            søknadTypeUri,
+            "send"
         )
 
         return body
@@ -247,7 +264,7 @@ class PleiepengerLivetsSluttfaseRoutesTest {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }

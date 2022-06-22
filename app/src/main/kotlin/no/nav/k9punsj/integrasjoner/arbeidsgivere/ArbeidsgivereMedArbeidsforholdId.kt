@@ -7,5 +7,5 @@ internal data class ArbeidsgivereMedArbeidsforholdId(
 internal data class OrganisasjonArbeidsgiverMedId(
     val organisasjonsnummer: String,
     val navn: String,
-    val arbeidsforhold : List<String>
+    val arbeidsforhold: List<String>
 )

@@ -29,13 +29,12 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class OmsorgspengerAleneOmsorgRoutesTest{
+internal class OmsorgspengerAleneOmsorgRoutesTest {
     private val client = TestSetup.client
     private val api = "api"
     private val søknadTypeUri = "omsorgspenger-alene-om-omsorgen-soknad"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
-
 
     @AfterEach
     internal fun tearDown() {
@@ -49,7 +48,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe"
+            api,
+            søknadTypeUri,
+            "mappe"
         )
         Assertions.assertTrue(body.søknader!!.isEmpty())
     }
@@ -64,7 +65,8 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
     }
 
@@ -81,7 +83,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "valider"
+            api,
+            søknadTypeUri,
+            "valider"
         )
         org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
     }
@@ -115,7 +119,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             .awaitBodyWithType<OmsorgspengerAleneOmsorgSøknadDto>()
 
         org.assertj.core.api.Assertions.assertThat(søknadViaGet.begrunnelseForInnsending).isEqualTo("JEG VET IKKE")
-        org.assertj.core.api.Assertions.assertThat(søknadViaGet.barn?.foedselsdato).isEqualTo(LocalDate.of(2018,10, 30))
+        org.assertj.core.api.Assertions.assertThat(søknadViaGet.barn?.foedselsdato).isEqualTo(LocalDate.of(2018, 10, 30))
     }
 
     @Test
@@ -137,7 +141,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknad),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(body)
@@ -147,7 +153,10 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             norskIdent = norskIdent,
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
-            api, søknadTypeUri, "mappe", soeknad["soeknadId"] as String
+            api,
+            søknadTypeUri,
+            "mappe",
+            soeknad["soeknadId"] as String
         )
 
         Assertions.assertNotNull(søknadViaGet)
@@ -157,7 +166,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-        pleietrengende: String,
+        pleietrengende: String
     ): OpprettNySøknad {
         return OpprettNySøknad(
             personnummer,
@@ -171,7 +180,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -181,7 +190,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        pleietrengende: String
     ): OmsorgspengerAleneOmsorgSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
@@ -190,7 +199,8 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = resPost.headers().asHttpHeaders().location
@@ -204,7 +214,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -222,7 +234,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String,
+        pleietrengende: String
     ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
@@ -231,7 +243,8 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api, søknadTypeUri
+            api,
+            søknadTypeUri
         )
 
         val location = response.headers().asHttpHeaders().location
@@ -246,7 +259,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(soeknadJson),
-            api, søknadTypeUri, "oppdater"
+            api,
+            søknadTypeUri,
+            "oppdater"
         )
 
         Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
@@ -264,7 +279,9 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
             authorizationHeader = saksbehandlerAuthorizationHeader,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
-            api, søknadTypeUri, "send"
+            api,
+            søknadTypeUri,
+            "send"
         )
 
         return body
@@ -272,7 +289,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest{
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }

@@ -42,12 +42,16 @@ internal class SjekkOmUtløptJobbTest {
         }
 
         val aksjonspunktId = UUID.randomUUID().toString()
-        aksjonspunktRepository.opprettAksjonspunkt(AksjonspunktEntitet(aksjonspunktId,
-            AksjonspunktKode.VENTER_PÅ_INFORMASJON,
-            punsjJournalpost.journalpostId,
-            AksjonspunktStatus.OPPRETTET,
-            LocalDateTime.now().minusDays(1),
-            VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER))
+        aksjonspunktRepository.opprettAksjonspunkt(
+            AksjonspunktEntitet(
+                aksjonspunktId,
+                AksjonspunktKode.VENTER_PÅ_INFORMASJON,
+                punsjJournalpost.journalpostId,
+                AksjonspunktStatus.OPPRETTET,
+                LocalDateTime.now().minusDays(1),
+                VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER
+            )
+        )
 
         // Act
         sjekkOmUtløptJobb.sjekkeOmAksjonspunktHarLøptUt()

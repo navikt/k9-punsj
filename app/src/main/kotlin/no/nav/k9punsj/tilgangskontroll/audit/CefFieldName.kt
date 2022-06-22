@@ -67,5 +67,4 @@ enum class CefFieldName(val kode: String) {
      * @see CefFields.forBehandling
      */
     BEHANDLING_LABEL("flexString2Label");
-
 }

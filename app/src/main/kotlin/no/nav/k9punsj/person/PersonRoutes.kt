@@ -1,11 +1,11 @@
 package no.nav.k9punsj.person
 
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.springframework.context.annotation.Bean
@@ -40,13 +40,15 @@ internal class PersonRoutes(
                     url = Urls.HentePerson
                 )?.let { return@RequestContext it }
 
-                val person = pdlService.hentPersonopplysninger(setOf(norskIdent)).first().let { Person(
-                    identitetsnummer = norskIdent,
-                    fødselsdato = it.fødselsdato,
-                    fornavn = it.fornavn,
-                    mellomnavn = it.mellomnavn,
-                    etternavn = it.etternavn
-                )}
+                val person = pdlService.hentPersonopplysninger(setOf(norskIdent)).first().let {
+                    Person(
+                        identitetsnummer = norskIdent,
+                        fødselsdato = it.fødselsdato,
+                        fornavn = it.fornavn,
+                        mellomnavn = it.mellomnavn,
+                        etternavn = it.etternavn
+                    )
+                }
 
                 return@RequestContext ServerResponse
                     .ok()
@@ -70,7 +72,6 @@ internal class PersonRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(BarnResponse(barn))
-
             }
         }
 

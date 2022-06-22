@@ -9,8 +9,8 @@ import java.nio.file.Path
 typealias SøknadJson = MutableMap<String, Any?>
 
 class LesFraFilUtil {
-    companion object{
-        private fun lesFraFil(filnavn: String): String{
+    companion object {
+        private fun lesFraFil(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/psb/$filnavn"))
             } catch (e: IOException) {
@@ -18,7 +18,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraFilPls(filnavn: String): String{
+        private fun lesFraFilPls(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/pls/$filnavn"))
             } catch (e: IOException) {
@@ -26,7 +26,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraFilOmsMa(filnavn: String): String{
+        private fun lesFraFilOmsMa(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/omp-ma/$filnavn"))
             } catch (e: IOException) {
@@ -34,7 +34,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraFilOmsAo(filnavn: String): String{
+        private fun lesFraFilOmsAo(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/omp-ao/$filnavn"))
             } catch (e: IOException) {
@@ -42,7 +42,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraOmsMappeFil(filnavn: String): String{
+        private fun lesFraOmsMappeFil(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/oms/$filnavn"))
             } catch (e: IOException) {
@@ -50,7 +50,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraOmsUtMappeFil(filnavn: String): String{
+        private fun lesFraOmsUtMappeFil(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/oms-ut/$filnavn"))
             } catch (e: IOException) {
@@ -58,7 +58,7 @@ class LesFraFilUtil {
             }
         }
 
-        private fun lesFraOmsKSBFil(filnavn: String): String{
+        private fun lesFraOmsKSBFil(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/omp-ksb/$filnavn"))
             } catch (e: IOException) {
@@ -70,54 +70,54 @@ class LesFraFilUtil {
          *  Pleiepenger
          */
 
-        fun søknadFraFrontend() : SøknadJson {
+        fun søknadFraFrontend(): SøknadJson {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend.json"))
         }
 
-        fun søknadFraFrontendUtenlandsoppholdV2() : SøknadJson {
+        fun søknadFraFrontendUtenlandsoppholdV2(): SøknadJson {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend-utlandsoppholdv2.json"))
         }
 
-        fun søknadFraFrontendMed2() : SøknadJson {
+        fun søknadFraFrontendMed2(): SøknadJson {
             return objectMapper().readValue(lesFraFil("søknad-fra-frontend_med_2.json"))
         }
 
-        fun minimalSøknad() : SøknadJson {
+        fun minimalSøknad(): SøknadJson {
             return objectMapper().readValue(lesFraFil("tom-søknad.json"))
         }
 
-        fun ferieSøknad() : SøknadJson {
+        fun ferieSøknad(): SøknadJson {
             return objectMapper().readValue(lesFraFil("ferie-søknad.json"))
         }
 
-        fun tidSøknad() : SøknadJson {
+        fun tidSøknad(): SøknadJson {
             return objectMapper().readValue(lesFraFil("med-tid-søknad.json"))
         }
 
-        fun utenUttak() : SøknadJson {
+        fun utenUttak(): SøknadJson {
             return objectMapper().readValue(lesFraFil("uten-uttak-søknad.json"))
         }
 
-        fun ferieNull() : SøknadJson {
+        fun ferieNull(): SøknadJson {
             return objectMapper().readValue(lesFraFil("ferie-null-søknad.json"))
         }
 
-        fun sn() : SøknadJson {
+        fun sn(): SøknadJson {
             return objectMapper().readValue(lesFraFil("sn-søknad.json"))
         }
 
-        fun tomtLand() : SøknadJson {
+        fun tomtLand(): SøknadJson {
             return objectMapper().readValue(lesFraFil("land_tom_string.json"))
         }
 
-        fun ignorerOpptjening() : SøknadJson {
+        fun ignorerOpptjening(): SøknadJson {
             return objectMapper().readValue(lesFraFil("ignorer-opptjening-endringssøknad.json"))
         }
 
         /**
          *  Pleiepenger livets sluttfase
          */
-        fun søknadFraFrontendPls() : SøknadJson {
+        fun søknadFraFrontendPls(): SøknadJson {
             return objectMapper().readValue(lesFraFilPls("søknad-fra-frontend.json"))
         }
 
@@ -125,19 +125,19 @@ class LesFraFilUtil {
          *  Omsorgspenger
          */
 
-        fun søknadFraFrontendOms() : SøknadJson {
+        fun søknadFraFrontendOms(): SøknadJson {
             return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend.json"))
         }
 
-        fun søknadFraFrontendOmsFeil() : SøknadJson {
+        fun søknadFraFrontendOmsFeil(): SøknadJson {
             return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-feil.json"))
         }
 
-        fun søknadFraFrontendOmsTrekk() : SøknadJson {
+        fun søknadFraFrontendOmsTrekk(): SøknadJson {
             return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk.json"))
         }
 
-        fun søknadFraFrontendOmsTrekkKompleks() : SøknadJson {
+        fun søknadFraFrontendOmsTrekkKompleks(): SøknadJson {
             return objectMapper().readValue(lesFraOmsMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
         }
 
@@ -145,19 +145,19 @@ class LesFraFilUtil {
          *  Omsorgspengerutbetaling
          */
 
-        fun søknadFraFrontendOmsUt() : SøknadJson {
+        fun søknadFraFrontendOmsUt(): SøknadJson {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend.json"))
         }
 
-        fun søknadFraFrontendOmsUtFeil() : SøknadJson {
+        fun søknadFraFrontendOmsUtFeil(): SøknadJson {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-feil.json"))
         }
 
-        fun søknadFraFrontendOmsUtTrekk() : SøknadJson {
+        fun søknadFraFrontendOmsUtTrekk(): SøknadJson {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-trekk.json"))
         }
 
-        fun søknadFraFrontendOmsUtTrekkKompleks() : SøknadJson {
+        fun søknadFraFrontendOmsUtTrekkKompleks(): SøknadJson {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-trekk-kompleks.json"))
         }
 
@@ -165,24 +165,24 @@ class LesFraFilUtil {
          *  Omsorgspenger kronisk sykt barn
          */
 
-        fun søknadFraFrontendOmsKSB() : SøknadJson {
+        fun søknadFraFrontendOmsKSB(): SøknadJson {
             return objectMapper().readValue(lesFraOmsKSBFil("søknad-fra-frontend.json"))
         }
-        fun søknadUtenBarnFraFrontendOmsKSB() : SøknadJson {
+        fun søknadUtenBarnFraFrontendOmsKSB(): SøknadJson {
             return objectMapper().readValue(lesFraOmsKSBFil("søknad-uten-barn-fra-frontend.json"))
         }
 
         /**
          *  Omsorgspenger midlertidlig alene
          */
-        fun søknadFraFrontendOmsMA() : SøknadJson {
+        fun søknadFraFrontendOmsMA(): SøknadJson {
             return objectMapper().readValue(lesFraFilOmsMa("søknad-fra-frontend.json"))
         }
 
         /**
          *  Omsorgspenger alene omsorg
          */
-        fun søknadFraFrontendOmsAO() : SøknadJson {
+        fun søknadFraFrontendOmsAO(): SøknadJson {
             return objectMapper().readValue(lesFraFilOmsAo("søknad-fra-frontend.json"))
         }
     }

@@ -2,7 +2,6 @@ package no.nav.k9punsj.tilgangskontroll.audit
 
 import java.util.stream.Collectors
 
-
 /**
  * Data som utgjør et innslag i sporingsloggen i "Common Event Format (CEF)".
  */

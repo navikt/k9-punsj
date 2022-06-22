@@ -5,11 +5,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.PunsjEventDto
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.Logger
@@ -38,7 +37,7 @@ internal class AksjonspunktServiceImpl(
         punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
-        ytelse: String?,
+        ytelse: String?
     ) {
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val eksternId = punsjJournalpost.uuid
@@ -83,7 +82,7 @@ internal class AksjonspunktServiceImpl(
             journalpostId = journalpostId,
             aktørId = journalpost.aktørId,
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
-            ferdigstiltAv = ansvarligSaksbehandler,
+            ferdigstiltAv = ansvarligSaksbehandler
         )
 
         hendelseProducer.sendMedOnSuccess(

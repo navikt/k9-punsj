@@ -33,7 +33,6 @@ private const val CorrelationIdKey = "correlation_id"
 private const val CallIdKey = "callId"
 private const val AuthenticationKey = "authentication"
 
-
 private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
     companion object Key : CoroutineContext.Key<CoroutineRequestContext>
     val attributter: MutableMap<String, Any> = mutableMapOf()

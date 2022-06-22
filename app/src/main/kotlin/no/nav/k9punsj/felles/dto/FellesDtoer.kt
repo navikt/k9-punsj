@@ -10,7 +10,7 @@ data class PerioderDto(
 )
 
 data class JournalposterDto(
-    val journalposter: MutableSet<String>,
+    val journalposter: MutableSet<String>
 )
 
 internal fun hentUtJournalposter(s: SøknadEntitet): List<String>? = if (s.journalposter != null) {
@@ -22,7 +22,7 @@ data class PeriodeDto(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate?,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val tom: LocalDate?,
+    val tom: LocalDate?
 )
 
 data class ArbeidsgiverMedArbeidsforholdId(
@@ -32,12 +32,12 @@ data class ArbeidsgiverMedArbeidsforholdId(
 
 data class SendSøknad(
     val norskIdent: String,
-    val soeknadId: String,
+    val soeknadId: String
 )
 
 data class Matchfagsak(
     val brukerIdent: String,
-    val barnIdent: String,
+    val barnIdent: String
 )
 
 data class MatchFagsakMedPeriode(
@@ -50,8 +50,8 @@ data class OpprettNySøknad(
     val journalpostId: String,
     val pleietrengendeIdent: String?,
     val annenPart: String?,
-    //TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
-    val barnIdent: String?,
+    // TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
+    val barnIdent: String?
 )
 
 data class PleietrengendeDto(
@@ -73,7 +73,7 @@ data class UtenlandsoppholdDto(
 data class UtenlandsoppholdDtoV2(
     val periode: PeriodeDto? = null,
     val land: String? = null,
-    val innleggelsesperioder : List<InnleggelsesperiodeDto> = emptyList()
+    val innleggelsesperioder: List<InnleggelsesperiodeDto> = emptyList()
 
 ) {
     data class InnleggelsesperiodeDto(

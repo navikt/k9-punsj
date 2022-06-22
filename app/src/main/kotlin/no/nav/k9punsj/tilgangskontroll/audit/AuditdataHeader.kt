@@ -1,6 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll.audit
 
-class AuditdataHeader (
+class AuditdataHeader(
     private val vendor: String,
     private val product: String,
     private val eventClassId: EventClassId,

@@ -8,22 +8,21 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.MetricUtils.Companion.assertCounter
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,26 +35,27 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
-
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [
-    TestBeans::class,
-    AksjonspunktServiceImpl::class,
-    JournalpostRepository::class,
-    JournalpostService::class,
-    SafGateway::class,
-    DokarkivGateway::class,
-    ObjectMapper::class,
-    AksjonspunktRepository::class,
-    AksjonspunktServiceImpl::class,
-    SoknadService::class,
-    InnsendingClient::class,
-    PersonService::class,
-    PersonRepository::class,
-    TestPdlService::class,
-    SøknadRepository::class
-])
+@ContextConfiguration(
+    classes = [
+        TestBeans::class,
+        AksjonspunktServiceImpl::class,
+        JournalpostRepository::class,
+        JournalpostService::class,
+        SafGateway::class,
+        DokarkivGateway::class,
+        ObjectMapper::class,
+        AksjonspunktRepository::class,
+        AksjonspunktServiceImpl::class,
+        SoknadService::class,
+        InnsendingClient::class,
+        PersonService::class,
+        PersonRepository::class,
+        TestPdlService::class,
+        SøknadRepository::class
+    ]
+)
 internal class HendelseMottakerTest {
 
     @MockBean
@@ -93,7 +93,7 @@ internal class HendelseMottakerTest {
     }
 
     @Test
-    fun `skal lagre ned informasjon om journalpost`() : Unit = runBlocking {
+    fun `skal lagre ned informasjon om journalpost`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
 
         val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
@@ -110,7 +110,7 @@ internal class HendelseMottakerTest {
     }
 
     @Test
-    fun `skal ikke lagre ned informasjon om journalpost når det kommer samme uten status`() : Unit = runBlocking {
+    fun `skal ikke lagre ned informasjon om journalpost når det kommer samme uten status`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
@@ -124,7 +124,7 @@ internal class HendelseMottakerTest {
     }
 
     @Test
-    fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`() : Unit = runBlocking {
+    fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
         val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 

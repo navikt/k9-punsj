@@ -4,7 +4,8 @@ import no.nav.k9punsj.objectMapper
 
 // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
 enum class Behandlingstema(
-    internal val kodeverksverdi: String) {
+    internal val kodeverksverdi: String
+) {
     Omsorgspenger(kodeverksverdi = "ab0149"),
     PleiepengerSyktBarn(kodeverksverdi = "ab0320"),
     PleiepengerVedInstitusjonsopphold(kodeverksverdi = "ab0137"),
@@ -14,7 +15,8 @@ enum class Behandlingstema(
 
 // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
 enum class Behandlingstype(
-    internal val kodeverksverdi: String) {
+    internal val kodeverksverdi: String
+) {
     Overføring(kodeverksverdi = "ae0085"),
     Utbetaling(kodeverksverdi = "ae0007"),
     DigitalEttersendelse(kodeverksverdi = "ae0246"),
@@ -30,7 +32,8 @@ enum class Gjelder(
     internal val tekst: String,
     internal val behandlingstema: Behandlingstema? = null,
     internal val behandlingstype: Behandlingstype? = null,
-    internal val aktiv: Boolean = true) {
+    internal val aktiv: Boolean = true
+) {
     /** Pleiepenger sykt barn **/
     PleiepengerSyktBarn(
         tekst = "Pleiepenger ny ordning",
@@ -47,6 +50,7 @@ enum class Gjelder(
         behandlingstype = Behandlingstype.DigitalEttersendelse,
         aktiv = false
     ),
+
     /** Omsorgspenger **/
     Omsorgspenger(
         tekst = "Omsorgspenger",
@@ -82,16 +86,19 @@ enum class Gjelder(
         behandlingstype = Behandlingstype.SelvstendigNæringsdrivende,
         aktiv = false
     ),
+
     /** Opplæringspenger **/
     Opplæringspenger(
         tekst = "Opplæringspenger",
         behandlingstema = Behandlingstema.Opplæringspenger
     ),
+
     /** Pleiepenger pårørende **/
     PleiepengerPårørende(
         tekst = "Pleiepenger pårørende",
         behandlingstema = Behandlingstema.PleiepengerPårørende
     ),
+
     /** Felles **/
     Klage(
         tekst = "Klage",
@@ -101,6 +108,7 @@ enum class Gjelder(
         tekst = "Anke",
         behandlingstype = Behandlingstype.Anke
     ),
+
     /** Annet **/
     Annet(
         tekst = "Gjelder noe annet, må velges i Gosys"

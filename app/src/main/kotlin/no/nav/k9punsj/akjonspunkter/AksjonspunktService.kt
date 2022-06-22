@@ -14,7 +14,7 @@ interface AksjonspunktService {
 
     suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?)
 
-    suspend fun sjekkOmDenErPåVent(journalpostId: String) : VentDto?
+    suspend fun sjekkOmDenErPåVent(journalpostId: String): VentDto?
 
     suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: Collection<String>, erSendtInn: Boolean, ansvarligSaksbehandler: String?)
     suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean, ansvarligSaksbehandler: String?)

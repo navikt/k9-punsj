@@ -27,14 +27,16 @@ class SøknadRepository(private val dataSource: DataSource) {
                         """
                     insert into $SØKNAD_TABLE as k (soknad_id, id_bunke, id_person, id_person_barn, barn_fodselsdato, soknad, journalposter)
                     values (:soknad_id, :id_bunke, :id_person, :id_person_barn, :barn_fodselsdato, :soknad :: jsonb, :journalposter :: jsonb)
-                    """, mapOf(
+                    """,
+                        mapOf(
                             "soknad_id" to UUID.fromString(søknad.søknadId),
                             "id_bunke" to UUID.fromString(søknad.bunkeId),
                             "id_person" to UUID.fromString(søknad.søkerId),
                             "id_person_barn" to if (søknad.barnId != null) UUID.fromString(søknad.barnId) else null,
                             "barn_fodselsdato" to søknad.barnFødselsdato,
                             "soknad" to objectMapper().writeValueAsString(søknad.søknad),
-                            "journalposter" to objectMapper().writeValueAsString(søknad.journalposter))
+                            "journalposter" to objectMapper().writeValueAsString(søknad.journalposter)
+                        )
                     ).asUpdate
                 )
                 return@transaction søknad
@@ -76,7 +78,7 @@ class SøknadRepository(private val dataSource: DataSource) {
                             "soknad" to objectMapper().writeValueAsString(søknad.søknad),
                             "journalposter" to objectMapper().writeValueAsString(søknad.journalposter),
                             "endret_av" to objectMapper().writeValueAsString(søknad.endret_av)
-                        ),
+                        )
                     ).asUpdate
                 )
             }
@@ -121,8 +123,10 @@ class SøknadRepository(private val dataSource: DataSource) {
                     set SENDT_INN = true,
                     SENDT_INN_TIDSPUNKT = now()
                     where soknad_id = :soknad_id
-                    """, mapOf(
-                            "soknad_id" to UUID.fromString(søknadId))
+                    """,
+                        mapOf(
+                            "soknad_id" to UUID.fromString(søknadId)
+                        )
                     ).asUpdate
                 )
             }

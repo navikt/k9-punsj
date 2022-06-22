@@ -14,7 +14,7 @@ internal class TestPdlService : PdlService {
     private val dummyFnr = "11111111111"
     private val dummyAktørId = "1000000000000"
     private val harBarn = "66666666666"
-    private val barn = setOf("77777777777","88888888888","99999999999")
+    private val barn = setOf("77777777777", "88888888888", "99999999999")
 
     override suspend fun identifikator(fnummer: String): PdlResponse {
         val identer = IdentPdl.Data.HentIdenter.Identer(gruppe = "AKTORID", false, dummyAktørId)

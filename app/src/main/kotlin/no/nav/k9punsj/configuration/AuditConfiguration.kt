@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-
 @Configuration
 class AuditConfiguration(
     @Value("\${no.nav.audit.enabled}") private val isAuditEnabled: Boolean,
@@ -12,7 +11,7 @@ class AuditConfiguration(
     @Value("\${no.nav.audit.product}") private val auditProduct: String,
     @Value("\${no.nav.abac.url}") private val abacEndpointUrl: String,
     @Value("\${no.nav.abac.system_user}") private val abacUsername: String,
-    @Value("\${no.nav.abac.system_user_password}") private val abacPassword: String,
+    @Value("\${no.nav.abac.system_user_password}") private val abacPassword: String
 ) {
 
     @Bean(name = ["isAuditEnabled"])
@@ -45,4 +44,3 @@ class AuditConfiguration(
         return abacPassword
     }
 }
-

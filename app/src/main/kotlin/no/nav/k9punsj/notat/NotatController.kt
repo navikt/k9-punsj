@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
-import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @SecurityScheme(
@@ -23,7 +23,7 @@ internal class NotatController {
         value = [
             ApiResponse(
                 responseCode = "201",
-                description = "Hvis notaten har blitt opprettet",
+                description = "Hvis notaten har blitt opprettet"
             ),
             ApiResponse(
                 responseCode = "500",
@@ -36,7 +36,7 @@ internal class NotatController {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun opprettNotat(
-        @RequestBody body: NyNotat,
+        @RequestBody body: NyNotat
     ) {
     }
 }

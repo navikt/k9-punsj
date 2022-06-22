@@ -6,21 +6,20 @@ import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
-import io.netty.handler.codec.http.HttpResponseStatus
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.UventetFeil
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.felles.dto.PeriodeDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -29,7 +28,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
-import java.util.UUID
 
 @Configuration
 @StandardProfil
@@ -37,7 +35,7 @@ class RestPunsjbolleService(
     @Value("\${no.nav.k9punsjbolle.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9punsjbolle.scope}") private val scope: String,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
-    private val personService: PersonService,
+    private val personService: PersonService
 ) : PunsjbolleService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -93,7 +91,7 @@ class RestPunsjbolleService(
 
         check(response.isSuccessful) {
             "Feil ved opprettEllerHentFagsaksnummer. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody"
-            if(response.statusCode == HttpStatus.CONFLICT.value()) {
+            if (response.statusCode == HttpStatus.CONFLICT.value()) {
                 throw IkkeStøttetJournalpost(responseBody)
             } else {
                 throw UventetFeil(responseBody)
@@ -147,22 +145,21 @@ class RestPunsjbolleService(
         else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
     }
 
-
     private suspend fun punsjbolleSaksnummerDto(
         søker: String,
         pleietrengende: String?,
         annenPart: String?,
         journalpostId: String?,
         periode: PeriodeDto?,
-        fagsakYtelseType: FagsakYtelseType,
+        fagsakYtelseType: FagsakYtelseType
     ): PunsjbolleSaksnummerDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
         val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
-            pleietrengende = if (pleietrengendePerson!= null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
-            annenPart = if (annenPartPerson!= null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
+            pleietrengende = if (pleietrengendePerson != null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
+            annenPart = if (annenPartPerson != null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
             periode = periode?.let {
                 require(it.fom != null || it.tom != null) { "Må sette enten fom eller tom" }
                 "${it.fom.iso8601()}/${it.tom.iso8601()}"
@@ -176,24 +173,24 @@ class RestPunsjbolleService(
         søker: String,
         pleietrengende: String?,
         annenPart: String?,
-        søknad: Søknad,
+        søknad: Søknad
     ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
         val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
         val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerFraSøknadDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
-            pleietrengende = if (pleietrengendePerson!= null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
-            annenPart = if (annenPartPerson!= null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
+            pleietrengende = if (pleietrengendePerson != null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
+            annenPart = if (annenPartPerson != null) PunsjbollePersonDto(annenPartPerson.norskIdent, annenPartPerson.aktørId) else null,
             søknad = søknad.somMap()
         )
     }
 
     private suspend fun String.post(
         requestBody: Any,
-        correlationId: CorrelationId,
+        correlationId: CorrelationId
     ): Triple<URI, Response, String> {
-        val url = URI("${baseUrl}/$this")
+        val url = URI("$baseUrl/$this")
 
         val (_, response, result) = "$url"
             .httpPost()
@@ -217,7 +214,6 @@ class RestPunsjbolleService(
         )
 
         return Triple(url, response, responseBody)
-
     }
 
     private companion object {
@@ -241,7 +237,7 @@ class RestPunsjbolleService(
 
         private data class PunsjbollePersonDto(
             val identitetsnummer: String,
-            val aktørId: String,
+            val aktørId: String
         )
 
         private data class PunsjbolleSaksnummerDto(
@@ -250,7 +246,7 @@ class RestPunsjbolleService(
             val annenPart: PunsjbollePersonDto?,
             val søknadstype: String,
             val journalpostId: String? = null,
-            val periode: String? = null,
+            val periode: String? = null
         ) {
             init {
                 require(journalpostId != null || periode != null) {
@@ -267,12 +263,12 @@ class RestPunsjbolleService(
             val søker: PunsjbollePersonDto,
             val pleietrengende: PunsjbollePersonDto?,
             val annenPart: PunsjbollePersonDto?,
-            val søknad: Map<String, *>,
+            val søknad: Map<String, *>
         )
 
         private data class RutingResponse(
             val destinasjon: String? = null,
-            val type: String? = null,
+            val type: String? = null
         )
 
         private val log = LoggerFactory.getLogger(RestPunsjbolleService::class.java)

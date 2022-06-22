@@ -79,7 +79,6 @@ object WebClientUtils {
         return body
     }
 
-
     suspend fun WebClient.RequestHeadersSpec<*>.awaitExchangeBlocking(): ClientResponse {
         return awaitExchange { it }
     }

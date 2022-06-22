@@ -1,7 +1,7 @@
 package no.nav.k9punsj.tilgangskontroll.token
 
 data class IdTokenLocal(
-    override val value: String = "",
+    override val value: String = ""
 
 ) : IIdToken {
     override val jwt: Nothing? = null

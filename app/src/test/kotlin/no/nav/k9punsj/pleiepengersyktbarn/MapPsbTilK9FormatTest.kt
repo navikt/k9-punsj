@@ -14,11 +14,11 @@ internal class MapPsbTilK9FormatTest {
         val periode =
             PeriodeDto(LocalDate.now(), LocalDate.now().plusMonths(1))
 
-        PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(requiredPeriode = periode,optionalPeriode = null)
+        PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(requiredPeriode = periode, optionalPeriode = null)
             .feil()
             .assertInneholderFeil()
 
-        PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(requiredPeriode = periode,optionalPeriode = periode)
+        PleiepengerSøknadVisningDtoUtils.søknadMedKomplettStruktur(requiredPeriode = periode, optionalPeriode = periode)
             .feil()
             .assertInneholderFeil()
     }

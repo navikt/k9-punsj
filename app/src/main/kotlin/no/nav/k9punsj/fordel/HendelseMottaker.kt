@@ -6,8 +6,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,7 +49,8 @@ class HendelseMottaker @Autowired constructor(
                 punsjJournalpost = punsjJournalpost,
                 aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 type = punsjEventType,
-                ytelse = fordelPunsjEventDto.ytelse)
+                ytelse = fordelPunsjEventDto.ytelse
+            )
         } else {
             if (PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                 val journalpostFraDb = journalpostService.hent(journalpostId)
@@ -62,13 +63,13 @@ class HendelseMottaker @Autowired constructor(
             } else {
                 log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")
             }
-
         }
     }
 
     private fun publiserJournalpostMetrikk(fordelPunsjEventDto: FordelPunsjEventDto) {
         meterRegistry.counter(
-            Metrikk.ANTALL_OPPRETTET_JOURNALPOST_COUNTER.navn, listOf(
+            Metrikk.ANTALL_OPPRETTET_JOURNALPOST_COUNTER.navn,
+            listOf(
                 Tag.of("ytelsestype", fordelPunsjEventDto.ytelse),
                 Tag.of("punsjInnsendingstype", fordelPunsjEventDto.type)
             )

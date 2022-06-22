@@ -18,7 +18,7 @@ import java.time.ZonedDateTime
 internal class MapOmsMATilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerMidlertidigAleneSøknadDto,
+    dto: OmsorgspengerMidlertidigAleneSøknadDto
 ) {
     private val søknad = Søknad()
     private val omsorgspengerMidlertidigAlene = OmsorgspengerMidlertidigAlene()
@@ -113,6 +113,5 @@ internal class MapOmsMATilK9Format(
 
         private val Validator = OmsorgspengerKroniskSyktBarn().validator
         private const val Versjon = "1.0.0"
-
     }
 }

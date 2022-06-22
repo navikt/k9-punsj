@@ -42,19 +42,24 @@ fun List<UtenlandsoppholdDtoV2>.leggTilUtenlandsoppholdV2(feil: MutableList<Feil
     val k9Utenlandsopphold = mutableMapOf<Periode, Utenlandsopphold.UtenlandsoppholdPeriodeInfo>()
     filter { it.periode.erSatt() }.forEach { utenlandsopphold ->
         val oppholdet: LocalDateSegment<String> = LocalDateSegment(utenlandsopphold.periode!!.fom, utenlandsopphold.periode.tom, INGEN_ÅRSAK)
-        val innleggelsesperioder = LocalDateTimeline(utenlandsopphold.innleggelsesperioder.map {
-            LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak ?: INGEN_ÅRSAK)
-        })
+        val innleggelsesperioder = LocalDateTimeline(
+            utenlandsopphold.innleggelsesperioder.map {
+                LocalDateSegment(it.periode!!.fom, it.periode.tom, it.årsak ?: INGEN_ÅRSAK)
+            }
+        )
 
         val utenlandsoppholdet = LocalDateTimeline(listOf(oppholdet))
-        val listeMedAllePerioder = utenlandsoppholdet.combine(innleggelsesperioder,
+        val listeMedAllePerioder = utenlandsoppholdet.combine(
+            innleggelsesperioder,
             { interval, overlappenePeriode, innleggelsesperiode ->
                 slåSammen(
                     interval,
                     overlappenePeriode,
                     innleggelsesperiode
                 )
-            }, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            },
+            LocalDateTimeline.JoinStyle.CROSS_JOIN
+        )
 
         val intervaller = listeMedAllePerioder.localDateIntervals
 
@@ -74,7 +79,7 @@ fun List<UtenlandsoppholdDtoV2>.leggTilUtenlandsoppholdV2(feil: MutableList<Feil
         }
     }
     if (k9Utenlandsopphold.isNotEmpty()) {
-       return Utenlandsopphold().medPerioder(k9Utenlandsopphold)
+        return Utenlandsopphold().medPerioder(k9Utenlandsopphold)
     }
     return null
 }

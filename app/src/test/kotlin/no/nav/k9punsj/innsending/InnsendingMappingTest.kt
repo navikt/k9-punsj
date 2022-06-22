@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.journalpost.KopierJournalpostInfo
-import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
-import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnSøknadDto
+import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
@@ -54,7 +54,6 @@ internal class InnsendingMappingTest {
         )
     }
 
-
     @Test
     fun `mappe pleiepenger sykt barn endringssøknad med ignorert opptjening`() {
         mapTilK9FormatOgAssert<PleiepengerSyktBarnSøknadDto>(
@@ -65,7 +64,7 @@ internal class InnsendingMappingTest {
 
     private inline fun <reified T> mapTilK9FormatOgAssert(søknad: MutableMap<String, Any?>, ytelse: Ytelse.Type) {
         val dto: T = objectMapper().convertValue(søknad)
-        val k9Format = when(dto) {
+        val k9Format = when (dto) {
             is OmsorgspengerKroniskSyktBarnSøknadDto -> {
                 MapOmsKSBTilK9Format(
                     søknadId = dto.soeknadId,

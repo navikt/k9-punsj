@@ -12,9 +12,10 @@ import kotlin.coroutines.coroutineContext
 
 @Component
 internal class EregClient(
-    @Value("\${EREG_BASE_URL}") private val baseUrl: URI) {
+    @Value("\${EREG_BASE_URL}") private val baseUrl: URI
+) {
 
-    internal suspend fun hentOrganisasjonsnavn(organisasjonsummer: String) : String? {
+    internal suspend fun hentOrganisasjonsnavn(organisasjonsummer: String): String? {
         val url = "$baseUrl/organisasjon/$organisasjonsummer/noekkelinfo"
 
         val (_, response, result) = url.httpGet()

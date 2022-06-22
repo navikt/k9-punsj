@@ -9,9 +9,9 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenResponse
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.integrasjoner.punsjbollen.RestPunsjbolleService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,7 +54,6 @@ internal class RestPunsjbolleServiceTest {
         )
     }
 
-
     @BeforeAll
     fun beforeAll() {
         wiremockServer = WireMockBuilder()
@@ -68,23 +67,24 @@ internal class RestPunsjbolleServiceTest {
             baseUrl = URI(wiremockServer.baseUrl()),
             scope = "k9-punsjbolle",
             accessTokenClient = mockk<AccessTokenClient>().also {
-                coEvery { it.getAccessToken(any()) }.returns(AccessTokenResponse(
-                    accessToken = "foo",
-                    expiresIn = 1000L,
-                    tokenType = "Bearer"
-                ))
+                coEvery { it.getAccessToken(any()) }.returns(
+                    AccessTokenResponse(
+                        accessToken = "foo",
+                        expiresIn = 1000L,
+                        tokenType = "Bearer"
+                    )
+                )
             },
             personService = mockk<PersonService>().also {
                 coEvery { it.finnEllerOpprettPersonVedNorskIdent(any()) }.returns(
                     Person(
-                    personId = "1234",
-                    aktørId = "5678",
-                    norskIdent = "9101112"
-                )
+                        personId = "1234",
+                        aktørId = "5678",
+                        norskIdent = "9101112"
+                    )
                 )
             }
         )
-
     }
 
     @AfterAll
@@ -97,7 +97,6 @@ internal class RestPunsjbolleServiceTest {
         private const val TilInfotrygd = "ForventetInfotrygdRuting"
         private const val IkkeStøttet = "ForventetIkkeStøttet"
         private const val UventetResponse = "ForventetUventetResponse"
-
 
         private fun WireMockServer.stubTilK9Sak() = stubPunsjbolleRuting(
             httpStatus = 200,
@@ -136,10 +135,11 @@ internal class RestPunsjbolleServiceTest {
                     .withHeader("Accept", WireMock.equalTo("application/json"))
                     .withHeader("Authorization", WireMock.equalTo("Bearer foo"))
                     .withRequestBody(WireMock.containing(forventetRuting))
-                    .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", contentType)
-                        .withBody(responseBody)
-                        .withStatus(httpStatus)
+                    .willReturn(
+                        WireMock.aResponse()
+                            .withHeader("Content-Type", contentType)
+                            .withBody(responseBody)
+                            .withStatus(httpStatus)
                     )
             )
             return this

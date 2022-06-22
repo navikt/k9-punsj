@@ -4,10 +4,9 @@ data class SøknadFeil(
     val søknadIdDto: String,
     val feil: List<SøknadFeilDto>
 ) {
-        data class SøknadFeilDto(
-                val felt: String?,
-                val feilkode: String?,
-                val feilmelding: String?,
-        )
+    data class SøknadFeilDto(
+        val felt: String?,
+        val feilkode: String?,
+        val feilmelding: String?
+    )
 }
-

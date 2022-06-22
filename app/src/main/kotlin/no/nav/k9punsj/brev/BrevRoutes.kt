@@ -1,14 +1,14 @@
 package no.nav.k9punsj.brev
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,8 +32,8 @@ internal class BrevRoutes(
     }
 
     internal object Urls {
-        internal const val BestillBrev = "/brev/bestill" //post
-        internal const val HentAktørId = "/brev/aktorId" //get
+        internal const val BestillBrev = "/brev/bestill" // post
+        internal const val HentAktørId = "/brev/aktorId" // get
     }
 
     @Bean
@@ -59,8 +59,9 @@ internal class BrevRoutes(
                 val sendtBrev = try {
                     brevService.bestillBrev(
                         dokumentbestillingDto = dokumentbestillingDto,
-                        saksbehandler = saksbehandler)
-                } catch(e: Exception) {
+                        saksbehandler = saksbehandler
+                    )
+                } catch (e: Exception) {
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()

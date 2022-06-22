@@ -9,7 +9,8 @@ data class Barn(
     val fødselsdato: LocalDate,
     val fornavn: String,
     val mellomnavn: String? = null,
-    val etternavn: String) {
+    val etternavn: String
+) {
     val sammensattNavn = when (mellomnavn) {
         null -> "$fornavn $etternavn"
         else -> "$fornavn $mellomnavn $etternavn"

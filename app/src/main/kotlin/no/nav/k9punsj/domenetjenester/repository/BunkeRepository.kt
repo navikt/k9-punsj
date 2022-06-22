@@ -3,8 +3,8 @@ package no.nav.k9punsj.domenetjenester.repository
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.felles.dto.BunkeEntitet
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.BunkeEntitet
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
@@ -22,7 +22,8 @@ class BunkeRepository(private val dataSource: DataSource) {
                 val resultat = tx.run(
                     queryOf(
                         "select bunke_id from $BUNKE_TABLE where id_mappe = :id_mappe and ytelse_type = :ytelse_type",
-                        mapOf("id_mappe" to UUID.fromString(mappeId),
+                        mapOf(
+                            "id_mappe" to UUID.fromString(mappeId),
                             "ytelse_type" to type.kode
                         )
                     )
@@ -40,9 +41,12 @@ class BunkeRepository(private val dataSource: DataSource) {
                         """
                     insert into $BUNKE_TABLE as k (bunke_id, id_mappe, ytelse_type)
                     values (:bunke_id, :id_mappe, :ytelse_type)
-                 """, mapOf("bunke_id" to bunkeId,
+                 """,
+                        mapOf(
+                            "bunke_id" to bunkeId,
                             "id_mappe" to UUID.fromString(mappeId),
-                            "ytelse_type" to type.kode)
+                            "ytelse_type" to type.kode
+                        )
                     ).asUpdate
                 )
                 return@transaction bunkeId.toString()
@@ -57,8 +61,11 @@ class BunkeRepository(private val dataSource: DataSource) {
                     queryOf(
                         """
                                 select bunke_id, id_mappe, ytelse_type from $BUNKE_TABLE where id_mappe = :mappeId
-                             """, mapOf("mappeId" to UUID.fromString(mappeId)
-                        )).map { row ->
+                             """,
+                        mapOf(
+                            "mappeId" to UUID.fromString(mappeId)
+                        )
+                    ).map { row ->
                         BunkeEntitet(row.string("bunke_id"), FagsakYtelseType.fromKode(row.string("ytelse_type")))
                     }.asList
                 )

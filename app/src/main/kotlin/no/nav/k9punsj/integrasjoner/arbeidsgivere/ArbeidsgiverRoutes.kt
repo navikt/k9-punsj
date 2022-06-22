@@ -1,9 +1,9 @@
 package no.nav.k9punsj.integrasjoner.arbeidsgivere
 
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,11 +31,13 @@ internal class ArbeidsgiverRoutes(
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivere(
-                            identitetsnummer = request.identitetsnummer(),
-                            fom = request.fom(),
-                            tom = request.tom()
-                        ))
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivere(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom()
+                            )
+                        )
                 } else {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -53,11 +55,13 @@ internal class ArbeidsgiverRoutes(
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(arbeidsgiverService.hentArbeidsgivereMedId(
-                            identitetsnummer = request.identitetsnummer(),
-                            fom = request.fom(),
-                            tom = request.tom()
-                        ))
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivereMedId(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom()
+                            )
+                        )
                 } else {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -94,16 +98,20 @@ internal class ArbeidsgiverRoutes(
         private fun ServerRequest.identitetsnummer(): String {
             return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {
                 "Mangler identitetsnummer"
-            }.also { require(it.matches("\\d{11}".toRegex())) {
-                "Ugyldig identitetsnummer"
-            }}
+            }.also {
+                require(it.matches("\\d{11}".toRegex())) {
+                    "Ugyldig identitetsnummer"
+                }
+            }
         }
 
         private fun ServerRequest.organisasjonsnummer() =
             requireNotNull(queryParamOrNull("organisasjonsnummer")) {
                 "Mangler organisasjonsnummer"
-            }.also { require(it.matches("\\d{9}".toRegex())) {
-                "Ugyldig organisasjonsnummer"
-            }}
+            }.also {
+                require(it.matches("\\d{9}".toRegex())) {
+                    "Ugyldig organisasjonsnummer"
+                }
+            }
     }
 }

@@ -28,7 +28,7 @@ fun ArbeidAktivitetDto.mapOpptjeningAktivitet(feil: MutableList<Feil>): Opptjeni
     return k9OpptjeningAktivitet
 }
 
- fun ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende(feil: MutableList<Feil>): SelvstendigNæringsdrivende? {
+fun ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelvstendigNæringsdrivende(feil: MutableList<Feil>): SelvstendigNæringsdrivende? {
     val noeSatt = organisasjonsnummer.erSatt() || virksomhetNavn.erSatt() || info?.periode.erSatt()
     if (!noeSatt) return null
 
@@ -78,7 +78,7 @@ fun ArbeidAktivitetDto.mapOpptjeningAktivitet(feil: MutableList<Feil>): Opptjeni
     return k9SelvstendigNæringsdrivende
 }
 
- fun ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser(feil: MutableList<Feil>): Frilanser {
+fun ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser(feil: MutableList<Feil>): Frilanser {
     val k9Frilanser = Frilanser()
     if (startdato.erSatt()) mapEllerLeggTilFeil(feil, "ytelse.opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
         k9Frilanser.medStartDato(it)
@@ -89,7 +89,7 @@ fun ArbeidAktivitetDto.mapOpptjeningAktivitet(feil: MutableList<Feil>): Opptjeni
     return k9Frilanser
 }
 
- fun List<ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker(feil: MutableList<Feil>) =
+fun List<ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker(feil: MutableList<Feil>) =
     mapIndexedNotNull { index, arbeidstaker ->
         val k9Arbeidstaker = no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker()
         if (arbeidstaker.norskIdent.erSatt()) {
@@ -110,7 +110,7 @@ fun ArbeidAktivitetDto.mapOpptjeningAktivitet(feil: MutableList<Feil>): Opptjeni
         }
     }
 
- fun ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
+fun ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
     type: String,
     feil: MutableList<Feil>
 ): ArbeidstidInfo? {

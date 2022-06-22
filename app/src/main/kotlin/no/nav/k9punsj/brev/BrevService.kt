@@ -8,5 +8,5 @@ interface BrevService {
     suspend fun bestillBrev(
         dokumentbestillingDto: DokumentbestillingDto,
         saksbehandler: String
-    ) : Dokumentbestilling
+    ): Dokumentbestilling
 }

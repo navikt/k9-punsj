@@ -14,11 +14,12 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface InnsendingClient {
-    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>) : Pair<String, String> {
+    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
         val søknadMap = søknad.somMap()
         val behovssekvensId = ulid.nextULID()
 
-        logger.info("Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",
+        logger.info(
+            "Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",
             keyValue("soknad_id", søknadId),
             keyValue("correlation_id", correlationId),
             keyValue("behovssekvens_id", behovssekvensId)
@@ -26,12 +27,14 @@ interface InnsendingClient {
         return Behovssekvens(
             id = behovssekvensId,
             correlationId = correlationId,
-            behov = arrayOf(Behov(
-                navn = PunsjetSøknadBehovNavn,
-                input = tilleggsOpplysninger
-                    .plus(PunsjetSøknadSøknadKey to søknadMap)
-                    .plus(VersjonKey to PunsjetSøknadVersjon)
-            ))
+            behov = arrayOf(
+                Behov(
+                    navn = PunsjetSøknadBehovNavn,
+                    input = tilleggsOpplysninger
+                        .plus(PunsjetSøknadSøknadKey to søknadMap)
+                        .plus(VersjonKey to PunsjetSøknadVersjon)
+                )
+            )
         ).keyValue
     }
 
@@ -39,10 +42,11 @@ interface InnsendingClient {
         send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 
-    fun mapKopierJournalpost(info: KopierJournalpostInfo) : Pair<String, String> {
+    fun mapKopierJournalpost(info: KopierJournalpostInfo): Pair<String, String> {
         val behovssekvensId = ulid.nextULID()
         val correlationId = UUID.randomUUID().toString()
-        logger.info("Sender journalpost til kopiering.",
+        logger.info(
+            "Sender journalpost til kopiering.",
             keyValue("journalpost_id", info.journalpostId),
             keyValue("correlation_id", correlationId),
             keyValue("behovssekvens_id", behovssekvensId)
@@ -50,18 +54,20 @@ interface InnsendingClient {
         return Behovssekvens(
             id = behovssekvensId,
             correlationId = correlationId,
-            behov = arrayOf(Behov(
-                navn = KopierPunsjbarJournalpostBehovNavn,
-                input = mapOf(
-                    VersjonKey to KopierPunsjbarJournalpostVersjon,
-                    "journalpostId" to info.journalpostId,
-                    "fra" to info.fra,
-                    "til" to info.til,
-                    "pleietrengende" to info.pleietrengende,
-                    "annenPart" to info.annenPart,
-                    "søknadstype" to info.ytelse.somSøknadstype()
+            behov = arrayOf(
+                Behov(
+                    navn = KopierPunsjbarJournalpostBehovNavn,
+                    input = mapOf(
+                        VersjonKey to KopierPunsjbarJournalpostVersjon,
+                        "journalpostId" to info.journalpostId,
+                        "fra" to info.fra,
+                        "til" to info.til,
+                        "pleietrengende" to info.pleietrengende,
+                        "annenPart" to info.annenPart,
+                        "søknadstype" to info.ytelse.somSøknadstype()
+                    )
                 )
-            ))
+            )
         ).keyValue
     }
 
@@ -89,6 +95,6 @@ interface InnsendingClient {
             else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
         }
 
-        internal fun Søknad.somMap() : Map<String, *> = objectMapper.convertValue(this)
+        internal fun Søknad.somMap(): Map<String, *> = objectMapper.convertValue(this)
     }
 }

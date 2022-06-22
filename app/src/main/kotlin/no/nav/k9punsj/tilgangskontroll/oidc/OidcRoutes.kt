@@ -2,9 +2,9 @@ package no.nav.k9punsj.tilgangskontroll.oidc
 
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -14,7 +14,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import kotlin.coroutines.coroutineContext
-
 
 @Configuration
 internal class OidcRoutes(
@@ -38,16 +37,16 @@ internal class OidcRoutes(
             var navHeader = "Ikke funnet"
             try {
                 navHeader = cachedAccessTokenClient.getAccessToken(scope)
-                        .asAuthoriationHeader()
+                    .asAuthoriationHeader()
             } catch (e: IllegalStateException) {
                 logger.warn("", e)
             }
             RequestContext(coroutineContext, request) {
                 val clientHeader = request.headers().header("Authorization")
                 ServerResponse
-                        .ok()
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .bodyValueAndAwait(clientHeader[0] + "\n" + navHeader)
+                    .ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .bodyValueAndAwait(clientHeader[0] + "\n" + navHeader)
             }
         }
     }

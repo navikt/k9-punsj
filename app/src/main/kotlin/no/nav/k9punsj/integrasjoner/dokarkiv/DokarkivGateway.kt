@@ -11,17 +11,17 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.FeilIAksjonslogg
-import no.nav.k9punsj.hentAuthentication
-import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
-import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
-import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
+import no.nav.k9punsj.hentAuthentication
+import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -46,14 +46,14 @@ import kotlin.coroutines.coroutineContext
 class DokarkivGateway(
     @Value("\${no.nav.dokarkiv.base_url}") private val baseUrl: URI,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
-    @Value("#{'\${no.nav.dokarkiv.scope}'.split(',')}") private val dokarkivScope: Set<String>,
+    @Value("#{'\${no.nav.dokarkiv.scope}'.split(',')}") private val dokarkivScope: Set<String>
 ) {
 
     internal suspend fun oppdaterJournalpostData(
         dataFraSaf: JSONObject?,
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String,
+        enhetKode: String
     ): Int {
         val ferdigstillJournalpost =
             dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
@@ -164,7 +164,7 @@ class DokarkivGateway(
         .build()
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
-    private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/${this}"
+    private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
     private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
 
     //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
@@ -179,7 +179,7 @@ class DokarkivGateway(
     private fun håndterFeil(
         it: FuelError,
         request: Request,
-        response: Response,
+        response: Response
     ) {
         val feil = it.response.body().asString("text/plain")
         logger.error(
@@ -200,7 +200,7 @@ class DokarkivGateway(
 
     private fun JSONObject.mapFerdigstillJournalpost(
         journalpostId: JournalpostId,
-        identitetsnummer: Identitetsnummer,
+        identitetsnummer: Identitetsnummer
     ) =
         getJSONObject("journalpost")
             .let { journalpost ->
@@ -283,7 +283,6 @@ data class JournalPostRequest(
     override fun toString(): String {
         return "JournalPostRequest(eksternReferanseId='$eksternReferanseId', tittel='$tittel', brevkode='$brevkode', tema='$tema', kanal=$kanal, journalposttype=$journalposttype, fagsystem=$fagsystem, sakstype=$sakstype, saksnummer='$saksnummer', brukerIdent='***', avsenderNavn='***', json=$json)"
     }
-
 
     private companion object {
         private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)

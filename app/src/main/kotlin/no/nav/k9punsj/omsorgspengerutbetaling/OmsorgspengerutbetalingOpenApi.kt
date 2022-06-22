@@ -12,8 +12,8 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
-import org.springframework.web.bind.annotation.*
 import no.nav.k9punsj.openapi.OasFeil
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Omsorgspengerutbetaling søknad", description = "Håndtering av søknader av typen omsorgspengerutbetaling")
@@ -29,11 +29,13 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Henter mappen til en person som inneholder alle søknader",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerutbetalingSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerutbetalingSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
@@ -54,16 +56,18 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "201",
                 description = "Opprettet en mappe, bunke og en tom søknad. Jobb videre mot søknadIden for å oppdatere søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerutbetalingSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerutbetalingSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun NySøknad(
-        @RequestBody søknad: IdentOgJournalpost,
+        @RequestBody søknad: IdentOgJournalpost
     ) {
     }
 
@@ -76,11 +80,13 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Søknaden",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SvarOmsUtDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SvarOmsUtDto::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "404",
@@ -89,7 +95,7 @@ internal class OmsorgspengerutbetalingOpenApi {
         ]
     )
     fun HenteSøknad(
-        @PathVariable("soeknad_id") søknadId: String,
+        @PathVariable("soeknad_id") søknadId: String
     ) {
     }
 
@@ -107,16 +113,18 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Innhold på søknader er oppdatert og søknadene er klare for innsending.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OmsorgspengerutbetalingSøknadDto::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OmsorgspengerutbetalingSøknadDto::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun OppdatereSøknad(
-        @RequestBody søknad: OmsorgspengerutbetalingSøknadDto,
+        @RequestBody søknad: OmsorgspengerutbetalingSøknadDto
     ) {
     }
 
@@ -134,42 +142,50 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "202",
                 description = "Søknaden er lukket for endring og sendt til behandling.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = no.nav.k9.søknad.Søknad::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = no.nav.k9.søknad.Søknad::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Innsending feilet grunnet mangler i søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SøknadFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SøknadFeil::class
+                        )
                     )
-                )]
+                ]
             ), ApiResponse(
                 responseCode = "409",
                 description = "En eller flere journalposter har blitt sendt inn fra før",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "500",
                 description = "Hvis det feiler uventet på server",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun SendSøknad(
-        @RequestBody søknad: SendSøknad,
+        @RequestBody søknad: SendSøknad
     ) {
     }
 
@@ -187,34 +203,40 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "202",
                 description = "Søknaden er valider ok.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = no.nav.k9.søknad.Søknad::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = no.nav.k9.søknad.Søknad::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Innsending feilet grunnet mangler i søknaden.",
-                content = [Content(
-                    schema = Schema(
-                        implementation = SøknadFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = SøknadFeil::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "500",
                 description = "Hvis det feiler uventet på server",
-                content = [Content(
-                    schema = Schema(
-                        implementation = OasFeil::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = OasFeil::class
+                        )
                     )
-                )]
+                ]
             )
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: SendSøknad,
+        @RequestBody søknad: SendSøknad
     ) {
     }
 
@@ -233,11 +255,13 @@ internal class OmsorgspengerutbetalingOpenApi {
             ApiResponse(
                 responseCode = "200",
                 description = "Henter arbeidsforholdIder som ligger i k9-sak",
-                content = [Content(
-                    schema = Schema(
-                        implementation = ArbeidsgiverMedArbeidsforholdId::class
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = ArbeidsgiverMedArbeidsforholdId::class
+                        )
                     )
-                )]
+                ]
             ),
             ApiResponse(
                 responseCode = "404",

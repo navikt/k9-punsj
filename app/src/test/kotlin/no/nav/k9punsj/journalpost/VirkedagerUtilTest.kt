@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 
 internal class VirkedagerUtilTest {
 
-
     @Test
     fun `skal gi 2 dager ekstra på papirsøknad`() {
         val papirsøknad = PunsjInnsendingType.PAPIRSØKNAD

@@ -2,10 +2,9 @@ package no.nav.k9punsj.utils
 
 import java.time.LocalDateTime
 
-class Cache <T>(val cacheSize : Int = 1000){
+class Cache<T>(val cacheSize: Int = 1000) {
     private val map =
-        object : LinkedHashMap<String, CacheObject<T>>(
-        ) {
+        object : LinkedHashMap<String, CacheObject<T>>() {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, CacheObject<T>>): Boolean {
                 return size > cacheSize
             }
@@ -25,5 +24,4 @@ class Cache <T>(val cacheSize : Int = 1000){
         }
         return cacheObject
     }
-
 }

@@ -4,8 +4,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.ExceptionResponse
 import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import org.assertj.core.api.Assertions.assertThat
@@ -22,10 +22,12 @@ import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("test")
-@ContextConfiguration(classes = [
-    JournalpostRepository::class,
-    TestBeans::class
-])
+@ContextConfiguration(
+    classes = [
+        JournalpostRepository::class,
+        TestBeans::class
+    ]
+)
 @Disabled("Not implemented")
 internal class OverførDagerApiTest {
     @Autowired
@@ -34,7 +36,7 @@ internal class OverførDagerApiTest {
     private val client = TestSetup.client
 
     @Test
-    fun `Gyldig skjema om overføring gir 202`() : Unit = runBlocking {
+    fun `Gyldig skjema om overføring gir 202`(): Unit = runBlocking {
         @Language("json")
         val req =
             """
@@ -85,7 +87,7 @@ internal class OverførDagerApiTest {
     }
 
     @Test
-    fun `Uhåndtert exception gir 500 response`() : Unit = runBlocking {
+    fun `Uhåndtert exception gir 500 response`(): Unit = runBlocking {
         val fellesIdNummer = "23098025855"
 
         @Language("json")

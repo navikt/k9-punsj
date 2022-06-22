@@ -5,15 +5,13 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværÅrsak
 import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
-import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
-import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -39,7 +37,7 @@ data class OmsorgspengerutbetalingSøknadDto(
         val fraværÅrsak: FraværÅrsak?,
         val søknadÅrsak: SøknadÅrsak?,
         val faktiskTidPrDag: String?,
-        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
 
     data class BarnDto(
@@ -52,7 +50,7 @@ data class OmsorgspengerutbetalingSøknadDto(
 data class SvarOmsUtDto(
     val søker: String,
     val fagsakTypeKode: String,
-    val søknader: List<OmsorgspengerutbetalingSøknadDto>?,
+    val søknader: List<OmsorgspengerutbetalingSøknadDto>?
 )
 
 internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {

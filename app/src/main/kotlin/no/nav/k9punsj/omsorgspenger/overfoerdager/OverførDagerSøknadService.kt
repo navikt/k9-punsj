@@ -7,48 +7,48 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.Topics
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
-//@Service
+// @Service
 // Ikke i bruk
 class OverførDagerSøknadService @Autowired constructor(
     private val hendelseProducer: HendelseProducer,
     private val journalpostService: JournalpostService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
-){
+) {
     private companion object {
         const val rapidTopic = "k9-rapid-v2"
 
         private val log: Logger = LoggerFactory.getLogger(OverførDagerSøknadService::class.java)
     }
 
-    //TODO(OJR) lagre i databasen? + oppdatering av journalpost? + abac
+    // TODO(OJR) lagre i databasen? + oppdatering av journalpost? + abac
     internal suspend fun sendSøknad(søknad: OverføreOmsorgsdagerBehov, dedupKey: String) {
         val (id, overføring) = Behovssekvens(
-                id = dedupKey,
-                correlationId = UUID.randomUUID().toString(),
-                behov = arrayOf(søknad)
+            id = dedupKey,
+            correlationId = UUID.randomUUID().toString(),
+            behov = arrayOf(søknad)
         ).keyValue
 
         hendelseProducer.send(topicName = rapidTopic, key = id, data = overføring)
 
         for (jornalpostId in søknad.journalpostIder) {
             val jpost = journalpostService.hent(jornalpostId)
-            val data = objectMapper().writeValueAsString(PunsjEventDto(
+            val data = objectMapper().writeValueAsString(
+                PunsjEventDto(
                     jpost.uuid.toString(),
                     jornalpostId,
                     jpost.aktørId,
                     LocalDateTime.now(),
                     aksjonspunktKoderMedStatusListe = mutableMapOf(AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode)
-            ))
+                )
+            )
 
             hendelseProducer.send(
                 topicName = k9losAksjonspunkthendelseTopic,

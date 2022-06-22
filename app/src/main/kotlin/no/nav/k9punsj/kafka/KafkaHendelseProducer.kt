@@ -15,7 +15,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback
 @IkkeTestProfil
 class KafkaHendelseProducer(
     @Qualifier(ON_PREM) private val kafkaTemplate: KafkaTemplate<String, String>
-): HendelseProducer {
+) : HendelseProducer {
     override fun send(topicName: String, data: String, key: String) {
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate.send(topicName, key, data)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
@@ -40,7 +40,7 @@ class KafkaHendelseProducer(
             }
 
             override fun onFailure(ex: Throwable) {
-                //TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
+                // TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
                 logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
                 throw KafkaException("Kunne ikke sende sende til topic: $topicName")
             }

@@ -7,7 +7,6 @@ import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
-import no.nav.k9punsj.korrigeringinntektsmelding.MapOmsTilK9Format
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -15,7 +14,7 @@ import java.time.ZonedDateTime
 internal class MapOmsKSBTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerKroniskSyktBarnSøknadDto,
+    dto: OmsorgspengerKroniskSyktBarnSøknadDto
 ) {
     private val søknad = Søknad()
     private val omsorgspengerKroniskSyktBarn = OmsorgspengerKroniskSyktBarn()
