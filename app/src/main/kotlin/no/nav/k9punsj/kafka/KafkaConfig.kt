@@ -33,7 +33,8 @@ class KafkaConfig(
     @Value("\${systembruker.username}") private val username: String,
     @Value("\${systembruker.password}") private val password: String,
     @Value("\${javax.net.ssl.trustStore}") private val trustStorePath: String,
-    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String
+    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String,
+    @Value("\${kafka.override_truststore_password:}") private val overrideTruststorePassword: String?
 ) {
 
     @Bean
@@ -58,6 +59,10 @@ class KafkaConfig(
     fun aivenKafkaBaseProperties(): Map<String, Any> {
         val env = System.getenv()
 
+        val truststorePasswordKey: String = if (overrideTruststorePassword.isNullOrEmpty())
+            AIVEN_KAFKA_CREDSTORE_PASSWORD
+        else AIVEN_KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD
+
         return mapOf(
             CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to env.getValue(AIVEN_KAFKA_BOKERS),
             CommonClientConfigs.CLIENT_ID_CONFIG to "k9-punsj-${InetAddress.getLocalHost().hostName}",
@@ -67,7 +72,7 @@ class KafkaConfig(
             SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
             SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_TRUSTSTORE_PATH),
             SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_KEYSTORE_PATH),
-            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD),
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(truststorePasswordKey),
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD)
         )
     }
@@ -144,6 +149,7 @@ class KafkaConfig(
         private const val AIVEN_KAFKA_TRUSTSTORE_PATH = "KAFKA_TRUSTSTORE_PATH"
         private const val AIVEN_KAFKA_KEYSTORE_PATH = "KAFKA_KEYSTORE_PATH"
         private const val AIVEN_KAFKA_CREDSTORE_PASSWORD = "KAFKA_CREDSTORE_PASSWORD"
+        private const val AIVEN_KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD = "KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD"
 
         private fun Map<String, Any>.medProducerConfig() = toMutableMap().also {
             it[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
