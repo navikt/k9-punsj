@@ -1,4 +1,4 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.util
 
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter

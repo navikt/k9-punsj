@@ -1,9 +1,8 @@
-package no.nav.k9punsj.domenetjenester.mappers
+package no.nav.k9punsj.brev
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.brev.MapDokumentTilK9Formidling
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import org.assertj.core.api.Assertions.assertThat
