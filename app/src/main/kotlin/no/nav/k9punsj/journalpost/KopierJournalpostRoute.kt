@@ -103,7 +103,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             val ytelseType = journalpost?.ytelse?.let {
-                journalpost.utledeFagsakYtelseType(fagsakYtelseType = FagsakYtelseType.valueOf(it))
+                journalpost.utledeFagsakYtelseType(fagsakYtelseType = FagsakYtelseType.fraKode(it))
             } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
 
             // Om det kopieres til samme person gjør vi kun rutingsjekk uten journalpostId
