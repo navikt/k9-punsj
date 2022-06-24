@@ -101,6 +101,7 @@ no.nav:
       topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
     k9_los:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+    override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
 
 server:
   port: ${PORT:8080}
