@@ -37,9 +37,9 @@ class LokalK9SakService : K9SakService {
 
     override suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?> = Pair(
         first = setOf(
-            Fagsak(saksnummer = "ABC123", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN),
-            Fagsak(saksnummer = "DEF456", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
-            Fagsak(saksnummer = "GHI789", no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS)
+            Fagsak(saksnummer = "ABC123", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN, null),
+            Fagsak(saksnummer = "DEF456", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, null),
+            Fagsak(saksnummer = "GHI789", no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS, null)
         ),
         second = null
     )
