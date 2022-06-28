@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
+import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
@@ -168,28 +169,34 @@ class K9SakServiceImpl(
         )
     }
 
-    internal fun String.fagsaker() = JSONArray(this)
-        .asSequence()
-        .map { it as JSONObject }
-        .map {
-            val saksnummer = it.getString("saksnummer")
-            val sakstypeKode = it.getJSONObject("sakstype").getString("kode")
-            val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
-            Fagsak(
-                saksnummer = saksnummer,
-                sakstype = fagsakYtelseType
-            )
-        }.toSet()
+    private companion object {
+        fun String.fagsaker() = JSONArray(this)
+            .asSequence()
+            .map { it as JSONObject }
+            .map {
+                val saksnummer = it.getString("saksnummer")
+                val sakstypeKode = it.getJSONObject("sakstype").getString("kode")
+                val pleietrengende = it.getStringOrNull("pleietrengendeAktørId")
+                val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
+                Fagsak(
+                    saksnummer = saksnummer,
+                    sakstype = fagsakYtelseType,
+                    pleietrengendeAktørId = pleietrengende
+                )
+            }.toSet()
 
-    data class MatchDto(
-        val ytelseType: FagsakYtelseType,
-        val bruker: String,
-        val pleietrengende: String
-    )
+        fun JSONObject.getStringOrNull(key: String) = get(key).takeIf { it is TextNode }?.toString()
 
-    data class MatchMedPeriodeDto(
-        val ytelseType: FagsakYtelseType,
-        val bruker: String,
-        val periode: PeriodeDto
-    )
+        data class MatchDto(
+            val ytelseType: FagsakYtelseType,
+            val bruker: String,
+            val pleietrengende: String
+        )
+
+        data class MatchMedPeriodeDto(
+            val ytelseType: FagsakYtelseType,
+            val bruker: String,
+            val periode: PeriodeDto
+        )
+    }
 }
