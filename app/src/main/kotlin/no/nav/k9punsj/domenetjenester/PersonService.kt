@@ -24,6 +24,16 @@ class PersonService(
         return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
     }
 
+    suspend fun finnEllerOpprettPersonVedAktørId(aktørId: String): Person {
+        personRepository.hentPersonVedAktørId(aktørId)?.let { return it }
+
+        val pdlResponse = pdlService.identifikatorMedAktørId(aktørId)
+        val norskIdent = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
+            ?: throw IllegalStateException("Fant ikke identitetsnummer i PDL")
+
+        return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
+    }
+
     suspend fun finnPerson(personId: String): Person {
         return personRepository.hentPersonVedPersonId(personId)!!
     }

@@ -185,7 +185,7 @@ class K9SakServiceImpl(
                 )
             }.toSet()
 
-        fun JSONObject.getStringOrNull(key: String) = get(key).takeIf { it is TextNode }?.toString()
+        fun JSONObject.getStringOrNull(key: String) = if(this.has(key)) this.getString(key) else null
 
         data class MatchDto(
             val ytelseType: FagsakYtelseType,

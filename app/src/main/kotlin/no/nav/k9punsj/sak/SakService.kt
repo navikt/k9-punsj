@@ -1,57 +1,39 @@
 package no.nav.k9punsj.sak
 
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.sak.dto.SakInfoDto
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.json
 
 @Service
 internal class SakService(
-    private val k9SakService: K9SakService
+    private val k9SakService: K9SakService,
+    private val personService: PersonService
 ) {
 
     private companion object {
         private val logger = LoggerFactory.getLogger(SakService::class.java)
     }
 
-    suspend fun hentSaker(søkerIdent: String): ServerResponse {
-        return kotlin.runCatching {
-            logger.info("Henter fagsaker fra k9...")
-            val (fagsaker: Set<Fagsak>?, feil: String?) = k9SakService.hentFagsaker(søkerIdent)
-            if (!feil.isNullOrBlank()) throw IllegalStateException(feil)
-            else fagsaker!!.map {
+    suspend fun hentSaker(søkerIdent: String): List<SakInfoDto> {
+        logger.info("Henter fagsaker fra k9...")
+        val (fagsaker: Set<Fagsak>?, feil: String?) = k9SakService.hentFagsaker(søkerIdent)
+
+        if (!feil.isNullOrBlank()) {
+            throw IllegalStateException(feil)
+        } else {
+            return fagsaker!!.map {
+                val personIdent = it.pleietrengendeAktorId?.let { aktørId ->
+                    personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                }
                 SakInfoDto(
                     fagsakId = it.saksnummer,
                     sakstype = it.sakstype.kode,
-                    pleietrengendeAktorid = it.pleietrengendeAktorId
+                    pleietrengendeIdent = personIdent
                 )
             }
-        }.fold(
-            onSuccess = {
-                logger.info("Saker hentet")
-                ServerResponse
-                    .status(HttpStatus.OK)
-                    .json()
-                    .bodyValueAndAwait(it)
-            },
-            onFailure = {
-                logger.error("Feilet med å hente saker.", it)
-                ServerResponse
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json()
-                    .bodyValueAndAwait(OasFeil(it.message))
-            }
-        )
+        }
     }
-
-    data class SakInfoDto(
-        val fagsakId: String,
-        val sakstype: String,
-        val pleietrengendeAktorid: String?
-    )
 }
