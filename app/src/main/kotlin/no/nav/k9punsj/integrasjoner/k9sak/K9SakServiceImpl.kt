@@ -181,7 +181,7 @@ class K9SakServiceImpl(
                 Fagsak(
                     saksnummer = saksnummer,
                     sakstype = fagsakYtelseType,
-                    pleietrengendeAktørId = pleietrengende
+                    pleietrengendeAktorId = pleietrengende
                 )
             }.toSet()
 

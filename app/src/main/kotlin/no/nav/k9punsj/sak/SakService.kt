@@ -27,7 +27,8 @@ internal class SakService(
             else fagsaker!!.map {
                 SakInfoDto(
                     fagsakId = it.saksnummer,
-                    sakstype = it.sakstype.kode
+                    sakstype = it.sakstype.kode,
+                    pleietrengendeAktorid = it.pleietrengendeAktorId
                 )
             }
         }.fold(
@@ -50,6 +51,7 @@ internal class SakService(
 
     data class SakInfoDto(
         val fagsakId: String,
-        val sakstype: String
+        val sakstype: String,
+        val pleietrengendeAktorid: String?
     )
 }
