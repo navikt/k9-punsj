@@ -129,5 +129,3 @@ spec:
 
     - name: NOTAT_ENABLED
       value: "true"
-    - name: SAKER_ENABLED
-      value: "true"

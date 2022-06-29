@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.sak.dto.SakInfoDto
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
@@ -33,7 +34,7 @@ internal class SakerController {
                     Content(
                         array = ArraySchema(
                             schema = Schema(
-                                implementation = SakService.SakInfoDto::class
+                                implementation = SakInfoDto::class
                             )
                         )
                     )
