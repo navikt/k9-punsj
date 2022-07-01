@@ -37,6 +37,7 @@ internal class SoknadService(
         }
 
         val journalposter = safGateway.hentJournalposter(journalpostIdListe)
+        logger.info("DEBUG: Journalposter=$journalposter")
         val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
             .filter { it.journalposttype.equals(SafDtos.JournalpostType.U) }
             .map { it.journalpostId }
