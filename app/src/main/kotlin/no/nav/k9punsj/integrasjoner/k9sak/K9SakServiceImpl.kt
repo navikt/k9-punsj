@@ -1,6 +1,5 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
-import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
@@ -13,6 +12,7 @@ import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
@@ -52,9 +52,9 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> {
         val matchDto = MatchDto(
-            FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            søker,
-            barn
+            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            bruker = søker,
+            pleietrengende = barn
         )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
@@ -80,9 +80,9 @@ class K9SakServiceImpl(
         periodeDto: PeriodeDto
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         val matchDto = MatchMedPeriodeDto(
-            FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            søker,
-            periodeDto
+            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            bruker = søker,
+            periode = periodeDto
         )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
@@ -97,8 +97,8 @@ class K9SakServiceImpl(
             val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json)
             val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
                 ArbeidsgiverMedArbeidsforholdId(
-                    entry.key.identifikator,
-                    entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId }
+                    orgNummerEllerAktørID = entry.key.identifikator,
+                    arbeidsforholdId = entry.value.map { it.arbeidsforhold.eksternArbeidsforholdId }
                 )
             }
             Pair(map, null)
@@ -122,7 +122,7 @@ class K9SakServiceImpl(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to coroutineContext.hentCorrelationId()
+                NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()
 
         val (fagsaker: Set<Fagsak>?, feil: String?) = result.fold(
@@ -145,14 +145,12 @@ class K9SakServiceImpl(
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
         val (request, _, result) = "$baseUrl$url"
             .httpPost()
-            .body(
-                body
-            )
+            .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to UUID.randomUUID().toString()
+                NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()
 
         return result.fold(
@@ -170,6 +168,12 @@ class K9SakServiceImpl(
     }
 
     private companion object {
+        suspend fun hentCallId() = try {
+            coroutineContext.hentCallId()
+        } catch (e: Exception) {
+            UUID.randomUUID().toString()
+        }
+
         fun String.fagsaker() = JSONArray(this)
             .asSequence()
             .map { it as JSONObject }
