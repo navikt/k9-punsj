@@ -70,7 +70,7 @@ internal class SoknadServiceTest {
     )
 
     @Test
-    fun `feiler feilregistrert journalpost`() = runBlocking {
+    fun `Feilregistrert journalpost returnerar conflict fra innsending i soknadservice`() = runBlocking {
         coEvery { mockSafGateway.hentJournalposter(any())}.returns(listOf(feilregistrertJournalpost))
         val result = soknadService.sendSøknad(søknad = Søknad().medSøknadId("1"), journalpostIder = mutableSetOf("525115311"))
 
@@ -79,7 +79,7 @@ internal class SoknadServiceTest {
     }
 
     @Test
-    fun `Riktig innsending går igenom`() = runBlocking {
+    fun `Innsendt journalpost uten feil returnerer null`() = runBlocking {
         val riktigJournalpost = feilregistrertJournalpost.copy(journalstatus = SafDtos.Journalstatus.MOTTATT.toString())
         coEvery { mockSafGateway.hentJournalposter(any())}.returns(listOf(riktigJournalpost))
 
