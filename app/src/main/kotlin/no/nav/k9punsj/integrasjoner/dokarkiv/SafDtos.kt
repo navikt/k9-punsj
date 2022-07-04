@@ -42,21 +42,6 @@ internal object SafDtos {
         variables = null
     )
 
-    internal open class SakerQuery(søkerIdent: String) : GraphqlQuery(
-        query =
-        """
-          query {
-            saker(brukerId: {id: "$søkerIdent", type: FNR}) {
-                fagsakId
-                fagsaksystem
-                sakstype
-                tema
-            }
-          }
-        """.trimIndent(),
-        variables = null
-    )
-
     internal data class FerdigstillJournalpostQuery(val journalpostId: String) : GraphqlQuery(
         query = """ 
             query {

@@ -13,6 +13,7 @@ import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -47,18 +48,24 @@ internal class SoknadService(
 
         val journalposterMedStatusFeilregistrert = journalposter.filterNotNull()
             .filter { it.journalstatus != null }
-            .filter { it.journalstatus!!.equals(SafDtos.Journalstatus.FEILREGISTRERT) }
+            .filter { it.journalstatus!!.equals(SafDtos.Journalstatus.FEILREGISTRERT.toString()) }
             .map { it.journalpostId }
             .toSet()
         if (journalposterMedStatusFeilregistrert.isNotEmpty()) {
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
         }
 
+        val correlationId = try {
+            coroutineContext.hentCorrelationId()
+        } catch (e: Exception) {
+            UUID.randomUUID().toString()
+        }
+
         try {
             innsendingClient.sendSøknad(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
-                correlationId = coroutineContext.hentCorrelationId(),
+                correlationId = correlationId,
                 tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to punsjetAvSaksbehandler)
             )
         } catch (e: Exception) {
