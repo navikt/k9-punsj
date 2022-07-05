@@ -26,7 +26,7 @@ internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYt
     } else {
         val ytelse = when (this.ytelse) {
             null -> fagsakYtelseType
-            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> fagsakYtelseType
+            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
@@ -35,6 +35,6 @@ internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYt
             else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
         }
         logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, ytelse)
-        return ytelse
+        ytelse
     }
 }
