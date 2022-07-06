@@ -173,7 +173,10 @@ internal class MapPsbTilK9Format(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
-            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil(
+                feil = feil,
+                felt = "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag"
+            ) { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
                 k9Info.medTimerPleieAvBarnetPerDag(it)
             }
             k9Uttak[k9Periode] = k9Info
@@ -196,10 +199,12 @@ internal class MapPsbTilK9Format(
         }
         val k9LovbestemtFerie = mutableMapOf<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo>()
         lovbestemtFerie?.filter { it.erSatt() }?.forEach { periode ->
-            k9LovbestemtFerie[periode.somK9Periode()!!] = LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true)
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true)
         }
         lovbestemtFerieSomSkalSlettes?.filter { it.erSatt() }?.forEach { periode ->
-            k9LovbestemtFerie[periode.somK9Periode()!!] = LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(false)
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(false)
         }
         pleiepengerSyktBarn.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
@@ -278,6 +283,7 @@ internal class MapPsbTilK9Format(
         private val Validator = PleiepengerSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
 
-        private val DefaultUttak = Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
+        private val DefaultUttak =
+            Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
     }
 }

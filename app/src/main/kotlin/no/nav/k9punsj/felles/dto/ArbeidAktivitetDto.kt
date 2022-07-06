@@ -1,6 +1,7 @@
 package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.k9punsj.felles.DurationMapper.faktisktArbeidIkkeOver80
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -54,7 +55,10 @@ data class ArbeidAktivitetDto(
                 val periode: PeriodeDto?,
                 val faktiskArbeidTimerPerDag: String?,
                 val jobberNormaltTimerPerDag: String?,
-                val faktiskArbeidPerDag: TimerOgMinutter? = faktiskArbeidTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+                //val faktiskArbeidPerDag: TimerOgMinutter? = faktiskArbeidTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+                val faktiskArbeidPerDag: TimerOgMinutter? = faktisktArbeidIkkeOver80(
+                    faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag
+                ),
                 val jobberNormaltPerDag: TimerOgMinutter? = jobberNormaltTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
             )
         }

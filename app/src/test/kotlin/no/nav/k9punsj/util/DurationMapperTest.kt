@@ -1,7 +1,9 @@
 package no.nav.k9punsj.util
 
+import no.nav.k9punsj.felles.DurationMapper.faktisktArbeidIkkeOver80
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,5 +37,25 @@ internal class DurationMapperTest {
 
         val forventet = ((7 * 24) + 13).toLong() to 27
         assertEquals(forventet, duration.somTimerOgMinutter())
+    }
+
+    @Test
+    fun `avrunder alltid faktisktarbeidstid så man ikke går over 80 med en decimal`() {
+        val faktiskArbeidTimerPerDag = "6,88"
+        val jobberNormaltTimerPerDag = "8,6"
+
+        val forventet = TimerOgMinutter(timer = 6, minutter = 52)
+        val faktiskt = faktisktArbeidIkkeOver80(faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag)
+        assertEquals(forventet, faktiskt)
+    }
+
+    @Test
+    fun `avrunder ikke`() {
+        val faktiskArbeidTimerPerDag = "6,87"
+        val jobberNormaltTimerPerDag = "8,6"
+
+        val forventet = TimerOgMinutter(timer = 6, minutter = 52)
+        val faktiskt = faktisktArbeidIkkeOver80(faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag)
+        assertEquals(forventet, faktiskt)
     }
 }
