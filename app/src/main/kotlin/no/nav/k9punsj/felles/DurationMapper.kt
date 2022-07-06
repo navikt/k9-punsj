@@ -14,7 +14,9 @@ internal object DurationMapper {
 
         // Om man oppgir et heltal antall timer
         val heltall = toLongOrNull()
-        if (heltall != null) { return Duration.ofHours(heltall) }
+        if (heltall != null) {
+            return Duration.ofHours(heltall)
+        }
 
         // Om man oppgir et desimaltall med enten '.' eller ','  5.5 == 5 timer og 30 minutter
         val desimal = somDesimalOrNull()
@@ -40,7 +42,7 @@ internal object DurationMapper {
         return nøyaktig
             .minusSeconds(sekunder)
             .minusNanos(nøyaktig.toNanosPart().toLong())
-            //.let { if (sekunder >= 30) it.plusMinutes(1) else it }
+            .let { if (sekunder >= 30) it.plusMinutes(1) else it }
     }
 
     internal fun Duration.somTimerOgMinutter(): Pair<Long, Int> {
@@ -48,16 +50,22 @@ internal object DurationMapper {
         return avrundet.toHours() to avrundet.toMinutesPart()
     }
 
-    internal fun faktisktArbeidIkkeOver80(faktiskArbeidTimerPerDag: String?, jobberNormaltTimerPerDag: String?): TimerOgMinutter? {
+    /*
+        Korrigerer arbeidstid som havner på 80% fordi att saken får avslag om faktisk arbeidstid er øver 80% (80.1% gir avslag f.eks.)
+     */
+    internal fun korrigereArbeidstidRettOver80Prosent(
+        faktiskArbeidTimerPerDag: String?,
+        jobberNormaltTimerPerDag: String?
+    ): TimerOgMinutter? {
         if (!faktiskArbeidTimerPerDag.isNullOrEmpty() && !jobberNormaltTimerPerDag.isNullOrEmpty()) {
             val beregnetArbeidstidProsent = faktiskArbeidTimerPerDag.somDuration()?.multipliedBy(100)
                 ?.dividedBy(jobberNormaltTimerPerDag.somDuration())
-            val arbeidstid = if (beregnetArbeidstidProsent!!.equals(80)) {
+            val korrigertArbeidstid = if (beregnetArbeidstidProsent!! == 80L) {
                 faktiskArbeidTimerPerDag.somDuration()?.minusMinutes(1)
             } else {
                 faktiskArbeidTimerPerDag.somDuration()
             }
-            return arbeidstid?.somTimerOgMinutter().somTimerOgMinutterDto()
+            return korrigertArbeidstid?.somTimerOgMinutter().somTimerOgMinutterDto()
         }
         return null
     }
@@ -71,5 +79,6 @@ internal object DurationMapper {
         if (timer < 0 || minutter < 0 || minutter > 60) return null
         return timer to minutter
     }
+
     private val EnTimeInMillis = Duration.ofHours(1).toMillis()
 }
