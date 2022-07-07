@@ -172,7 +172,10 @@ internal class MapPlsfTilK9Format(
         this?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
-            mapEllerLeggTilFeil(feil, "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag") { uttak.timerPleieAvPleietrengendePerDag?.somDuration() }?.also {
+            mapEllerLeggTilFeil(
+                feil = feil,
+                felt = "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag"
+            ) { uttak.timerPleieAvPleietrengendePerDag?.somDuration() }?.also {
                 k9Info.medTimerPleieAvBarnetPerDag(it)
             }
             k9Uttak[k9Periode] = k9Info

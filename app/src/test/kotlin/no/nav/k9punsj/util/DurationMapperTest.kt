@@ -1,7 +1,9 @@
 package no.nav.k9punsj.util
 
+import no.nav.k9punsj.felles.DurationMapper.korrigereArbeidstidRettOver80Prosent
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
+import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,5 +37,31 @@ internal class DurationMapperTest {
 
         val forventet = ((7 * 24) + 13).toLong() to 27
         assertEquals(forventet, duration.somTimerOgMinutter())
+    }
+
+    @Test
+    fun `beregnet arbeidstid 80% avrunder faktisktArbeidstid ned 1min så man ikke går over 80 med en decimal`() {
+        val faktiskArbeidTimerPerDag = "6,88" // // 80% = 53min
+        val jobberNormaltTimerPerDag = "8,6"
+
+        val forventet = TimerOgMinutter(timer = 6, minutter = 52)
+        val faktiskt = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag)
+        assertEquals(forventet, faktiskt)
+    }
+
+    @Test
+    fun `avrunder ikke faktisktArbeidstid ned dersom beregnet arbeidstid er under eller over 80%`() {
+
+        val jobberNormaltTimerPerDag = "8,6"
+
+        val faktiskArbeidTimerPerDag1 = "6,87" // 79.884% = 52min
+        val forventet1 = TimerOgMinutter(timer = 6, minutter = 52)
+        val faktiskt1 = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag1, jobberNormaltTimerPerDag)
+        assertEquals(forventet1, faktiskt1)
+
+        val faktiskArbeidTimerPerDag2 = "6,97" // 81.047% = 58min
+        val forventet2 = TimerOgMinutter(timer = 6, minutter = 58)
+        val faktiskt2 = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag2, jobberNormaltTimerPerDag)
+        assertEquals(forventet2, faktiskt2)
     }
 }
