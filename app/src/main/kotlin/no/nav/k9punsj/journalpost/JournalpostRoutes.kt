@@ -5,6 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -49,6 +50,7 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
+    private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
@@ -75,6 +77,7 @@ internal class JournalpostRoutes(
 
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
+        internal const val HentJournalpostData = "/journalpost/info/{$JournalpostIdKey}"
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
     }
@@ -199,7 +202,7 @@ internal class JournalpostRoutes(
                 }
 
                 val correlationId = coroutineContext.hentCorrelationId()
-                val fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType)
+                val fagsakYtelseType = hentHvisJournalpostMedId.utledK9sakFagsakYtelseType(dto.fagsakYtelseType)
 
                 val punsjbolleRuting = punsjbolleService.ruting(
                     søker = dto.brukerIdent,
@@ -275,6 +278,32 @@ internal class JournalpostRoutes(
                 return@RequestContext ServerResponse
                     .badRequest()
                     .bodyValueAndAwait("Kan ikke endre på en journalpost som har blitt sendt fra punsj")
+            }
+        }
+
+        GET("/api${Urls.HentJournalpostData}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
+
+                journalpost?.aktørId?.let {aktørId ->
+                    val norskIdent = personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
+                        url = Urls.HentJournalpostData
+                    )?.let { return@RequestContext it }
+                }
+
+                journalpost?.let {
+                    return@RequestContext ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(it)
+                }
+
+                return@RequestContext ServerResponse
+                    .notFound()
+                    .buildAndAwait()
             }
         }
 
@@ -483,7 +512,7 @@ internal class JournalpostRoutes(
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
-    data class ResultatDto(
+    private data class ResultatDto(
         val status: String
     )
 }
