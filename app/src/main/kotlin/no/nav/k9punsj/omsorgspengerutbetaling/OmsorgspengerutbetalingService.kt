@@ -79,15 +79,12 @@ internal class OmsorgspengerutbetalingService(
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (opprettNySøknad.pleietrengendeIdent != null) {
-            punsjbolleService.opprettEllerHentFagsaksnummer(
-                søker = opprettNySøknad.norskIdent,
-                pleietrengende = opprettNySøknad.pleietrengendeIdent,
-                journalpostId = opprettNySøknad.journalpostId,
-                periode = null,
-                fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
-            )
-        }
+        punsjbolleService.opprettEllerHentFagsaksnummer(
+            søker = opprettNySøknad.norskIdent,
+            journalpostId = opprettNySøknad.journalpostId,
+            periode = null,
+            fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
+        )
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)

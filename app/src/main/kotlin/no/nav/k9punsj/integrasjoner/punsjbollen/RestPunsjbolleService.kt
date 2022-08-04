@@ -253,8 +253,10 @@ class RestPunsjbolleService(
                     "Må sette minst en av journalpostId og periode"
                 }
 
-                require(pleietrengende != null || annenPart != null) {
-                    "Må sette minst en av pleietrengende og annenPart"
+                if (FagsakYtelseType.OMSORGSPENGER.navn != søknadstype) {
+                    require(pleietrengende != null || annenPart != null) {
+                        "Må sette minst en av pleietrengende og annenPart"
+                    }
                 }
             }
         }
