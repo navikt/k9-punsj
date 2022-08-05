@@ -14,7 +14,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadV
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
-import no.nav.k9punsj.felles.k9format.leggTilUtenlandsoppholdV2
+import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilBosteder
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
@@ -49,7 +49,7 @@ internal class MapOmsUtTilK9Format(
                 omsorgspengerUtbetaling.medBosteder(this)
             }
 
-            dto.utenlandsopphold.leggTilUtenlandsoppholdV2(feil).apply {
+            dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
                 omsorgspengerUtbetaling.medUtenlandsopphold(this)
             }
 

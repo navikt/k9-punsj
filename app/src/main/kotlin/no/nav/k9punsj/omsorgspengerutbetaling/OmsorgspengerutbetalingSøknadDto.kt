@@ -25,7 +25,7 @@ data class OmsorgspengerutbetalingSøknadDto(
     val barn: List<BarnDto> = emptyList(),
     val journalposter: List<String>? = null,
     val bosteder: List<BostederDto>? = null,
-    val utenlandsopphold: List<UtenlandsoppholdDtoV2> = emptyList(),
+    val utenlandsopphold: List<UtenlandsoppholdDto> = emptyList(),
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
