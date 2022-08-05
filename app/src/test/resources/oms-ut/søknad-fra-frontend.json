@@ -66,6 +66,33 @@
       }
     ]
   },
+  "bosteder": [
+    {
+      "periode": {
+        "fom": "2018-12-30",
+        "tom": "2019-10-20"
+      },
+      "land": "RU"
+    }
+  ],
+  "utenlandsopphold": [
+    {
+      "periode": {
+        "fom": "2019-01-01",
+        "tom": "2019-01-31"
+      },
+      "land": "RU",
+      "innleggelsesperioder": [
+        {
+          "årsak": "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd",
+          "periode": {
+            "fom": "2019-01-08",
+            "tom": "2019-01-15"
+          }
+        }
+      ]
+    }
+  ],
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false,
   "metadata": {

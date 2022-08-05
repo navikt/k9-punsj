@@ -14,7 +14,9 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadV
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
+import no.nav.k9punsj.felles.k9format.leggTilUtenlandsoppholdV2
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
+import no.nav.k9punsj.felles.k9format.mapTilBosteder
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
@@ -42,6 +44,14 @@ internal class MapOmsUtTilK9Format(
             }
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.fravaersperioder?.leggTilFraværsperioder()
+
+            dto.bosteder?.mapTilBosteder()?.apply {
+                omsorgspengerUtbetaling.medBosteder(this)
+            }
+
+            dto.utenlandsopphold.leggTilUtenlandsoppholdV2(feil).apply {
+                omsorgspengerUtbetaling.medUtenlandsopphold(this)
+            }
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerUtbetaling)
