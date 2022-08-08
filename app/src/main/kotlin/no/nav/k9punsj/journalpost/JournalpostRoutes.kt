@@ -199,7 +199,7 @@ internal class JournalpostRoutes(
                 }
 
                 val correlationId = coroutineContext.hentCorrelationId()
-                val fagsakYtelseType = hentHvisJournalpostMedId.utledeFagsakYtelseType(dto.fagsakYtelseType)
+                val fagsakYtelseType = hentHvisJournalpostMedId.utledK9sakFagsakYtelseType(dto.fagsakYtelseType)
 
                 val punsjbolleRuting = punsjbolleService.ruting(
                     søker = dto.brukerIdent,
@@ -483,7 +483,7 @@ internal class JournalpostRoutes(
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
-    data class ResultatDto(
+    private data class ResultatDto(
         val status: String
     )
 }

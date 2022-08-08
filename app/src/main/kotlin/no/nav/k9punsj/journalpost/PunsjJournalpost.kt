@@ -19,20 +19,20 @@ data class PunsjJournalpost(
     val fordelStatusType: String? = null
 )
 
-internal fun PunsjJournalpost?.utledeFagsakYtelseType(fagsakYtelseType: FagsakYtelseType): FagsakYtelseType {
+internal fun PunsjJournalpost?.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType: FagsakYtelseType): FagsakYtelseType {
     return if (this == null) {
         logger.info("Journalpost er null. Defaulter til ${FagsakYtelseType.PLEIEPENGER_SYKT_BARN.navn}")
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
     } else {
         val ytelse = when (this.ytelse) {
-            null -> fagsakYtelseType
-            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
+            null -> k9sakFagsakYtelseType
+            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> k9sakFagsakYtelseType
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode -> FagsakYtelseType.OMSORGSPENGER_MA
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
-            else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $fagsakYtelseType")
+            else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $k9sakFagsakYtelseType")
         }
         logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, ytelse)
         ytelse
