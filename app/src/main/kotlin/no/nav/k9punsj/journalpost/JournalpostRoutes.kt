@@ -75,7 +75,6 @@ internal class JournalpostRoutes(
 
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
-        internal const val HentJournalpostData = "/journalpost/info/{$JournalpostIdKey}"
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
     }
