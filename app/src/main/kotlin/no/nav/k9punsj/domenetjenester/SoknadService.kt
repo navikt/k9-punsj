@@ -123,6 +123,6 @@ internal class SoknadService(
     companion object {
         private val logger = LoggerFactory.getLogger(SoknadService::class.java)
         private const val PunsjetAvSaksbehandler = "saksbehandler"
-        private const val Søknadtype = "Søknadtype"
+        private const val Søknadtype = "søknadtype"
     }
 }
