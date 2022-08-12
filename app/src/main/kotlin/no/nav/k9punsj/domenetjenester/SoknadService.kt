@@ -1,5 +1,6 @@
 package no.nav.k9punsj.domenetjenester
 
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -27,6 +28,7 @@ internal class SoknadService(
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
+        brevkode: Brevkode,
         journalpostIder: MutableSet<String>
     ): Pair<HttpStatus, String>? {
         val journalpostIdListe = journalpostIder.toList()
@@ -66,7 +68,10 @@ internal class SoknadService(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
                 correlationId = correlationId,
-                tilleggsOpplysninger = mapOf(PunsjetAvSaksbehandler to punsjetAvSaksbehandler)
+                tilleggsOpplysninger = mapOf(
+                    PunsjetAvSaksbehandler to punsjetAvSaksbehandler,
+                    Søknadtype to brevkode.kode
+                )
             )
         } catch (e: Exception) {
             logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
@@ -118,5 +123,6 @@ internal class SoknadService(
     companion object {
         private val logger = LoggerFactory.getLogger(SoknadService::class.java)
         private const val PunsjetAvSaksbehandler = "saksbehandler"
+        private const val Søknadtype = "Søknadtype"
     }
 }

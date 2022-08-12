@@ -2,6 +2,7 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -114,6 +115,7 @@ internal class KorrigeringInntektsmeldingService(
 
             soknadService.sendSøknad(
                 søknad = validertSøknad.first,
+                brevkode = Brevkode.FRAVÆRSKORRIGERING_IM_OMS,
                 journalpostIder = journalpostIder
             )?.let { feil ->
                 val (_, feilen) = feil
