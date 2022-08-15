@@ -2,6 +2,7 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -164,8 +165,9 @@ internal class OmsorgspengerutbetalingService(
             }
 
             val feil = soknadService.sendSøknad(
-                søknadK9Format,
-                journalpostIder
+                søknad = søknadK9Format,
+                brevkode = Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT, // TODO: Finn en måte å spesifisere hvilken brevkode det gjelder.
+                journalpostIder = journalpostIder
             )
 
             if (feil != null) {

@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -72,7 +73,11 @@ internal class SoknadServiceTest {
     @Test
     fun `Feilregistrert journalpost returnerar conflict fra innsending i soknadservice`() = runBlocking {
         coEvery { mockSafGateway.hentJournalposter(any())}.returns(listOf(feilregistrertJournalpost))
-        val result = soknadService.sendSøknad(søknad = Søknad().medSøknadId("1"), journalpostIder = mutableSetOf("525115311"))
+        val result = soknadService.sendSøknad(
+            søknad = Søknad().medSøknadId("1"),
+            brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD,
+            journalpostIder = mutableSetOf("525115311")
+        )
 
         Assertions.assertNotNull(result)
         Assertions.assertEquals(HttpStatus.CONFLICT, result!!.first)
@@ -83,7 +88,11 @@ internal class SoknadServiceTest {
         val riktigJournalpost = feilregistrertJournalpost.copy(journalstatus = SafDtos.Journalstatus.MOTTATT.toString())
         coEvery { mockSafGateway.hentJournalposter(any())}.returns(listOf(riktigJournalpost))
 
-        val result = soknadService.sendSøknad(søknad = Søknad().medSøknadId("1"), journalpostIder = mutableSetOf("525115311"))
+        val result = soknadService.sendSøknad(
+            søknad = Søknad().medSøknadId("1"),
+            brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD,
+            journalpostIder = mutableSetOf("525115311")
+        )
 
         Assertions.assertNull(result) // Forventet return om allt går bra er null
     }

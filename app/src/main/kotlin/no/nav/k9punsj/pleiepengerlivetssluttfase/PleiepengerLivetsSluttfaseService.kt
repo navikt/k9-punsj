@@ -2,6 +2,7 @@ package no.nav.k9punsj.pleiepengerlivetssluttfase
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -145,8 +146,9 @@ internal class PleiepengerLivetsSluttfaseService(
             }
 
             val feil = soknadService.sendSøknad(
-                søknadK9Format,
-                journalpostIder
+                søknad = søknadK9Format,
+                brevkode = Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
+                journalpostIder = journalpostIder
             )
             if (feil != null) {
                 val (httpStatus, feilen) = feil
