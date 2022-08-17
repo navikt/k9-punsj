@@ -31,7 +31,8 @@ internal class SakService(
                 SakInfoDto(
                     fagsakId = it.saksnummer,
                     sakstype = it.sakstype.kode,
-                    pleietrengendeIdent = personIdent
+                    pleietrengendeIdent = personIdent,
+                    gyldigPeriode = it.gyldigPeriode
                 )
             }
         }
