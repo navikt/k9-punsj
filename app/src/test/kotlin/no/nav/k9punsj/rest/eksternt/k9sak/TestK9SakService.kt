@@ -7,6 +7,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 @TestProfil
@@ -32,9 +33,24 @@ internal class TestK9SakService : K9SakService {
 
     override suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?> = Pair(
         first = setOf(
-            Fagsak(saksnummer = "ABC123", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN, null),
-            Fagsak(saksnummer = "DEF456", no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, null),
-            Fagsak(saksnummer = "GHI789", no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS, null)
+            Fagsak(
+                saksnummer = "ABC123",
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                null,
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+            ),
+            Fagsak(
+                saksnummer = "DEF456",
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+                null,
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+            ),
+            Fagsak(
+                saksnummer = "GHI789",
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
+                null,
+                gyldigPeriode = null
+            )
         ),
         second = null
     )

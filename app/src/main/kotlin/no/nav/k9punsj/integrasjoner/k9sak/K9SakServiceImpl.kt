@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
+import java.time.LocalDate
 import java.util.*
 import kotlin.coroutines.coroutineContext
 
@@ -33,7 +34,7 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -48,7 +49,7 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
         val matchDto = MatchDto(
             ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
@@ -76,7 +77,7 @@ class K9SakServiceImpl(
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
-        periodeDto: PeriodeDto
+        periodeDto: PeriodeDto,
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         val matchDto = MatchMedPeriodeDto(
             ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
@@ -181,25 +182,32 @@ class K9SakServiceImpl(
                 val sakstypeKode = it.getJSONObject("sakstype").getString("kode")
                 val pleietrengende = it.getStringOrNull("pleietrengendeAktørId")
                 val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
+                val gyldigPeriode: JSONObject? = it.optJSONObject("gyldigPeriode")
+                val periodeDto: PeriodeDto? = gyldigPeriode?.somPeriodeDto()
                 Fagsak(
                     saksnummer = saksnummer,
                     sakstype = fagsakYtelseType,
-                    pleietrengendeAktorId = pleietrengende
+                    pleietrengendeAktorId = pleietrengende,
+                    gyldigPeriode = periodeDto
                 )
             }.toSet()
 
-        fun JSONObject.getStringOrNull(key: String) = if(this.has(key)) this.getString(key) else null
+        fun JSONObject.getStringOrNull(key: String) = if (this.has(key)) this.getString(key) else null
+        private fun JSONObject.somPeriodeDto() = PeriodeDto(
+            fom = LocalDate.parse(getString("fom")),
+            tom = LocalDate.parse(getString("tom"))
+        )
 
         data class MatchDto(
             val ytelseType: FagsakYtelseType,
             val bruker: String,
-            val pleietrengende: String
+            val pleietrengende: String,
         )
 
         data class MatchMedPeriodeDto(
             val ytelseType: FagsakYtelseType,
             val bruker: String,
-            val periode: PeriodeDto
+            val periode: PeriodeDto,
         )
     }
 }
