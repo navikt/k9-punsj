@@ -87,4 +87,10 @@ internal class GosysService(
             .contentType(MediaType.APPLICATION_JSON)
             .buildAndAwait()
     }
+
+    suspend fun lukkOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
+        return oppgaveGateway.patchOppgave(
+            oppgaveId, PatchOppgaveRequest(status = OppgaveStatus.FERDIGSTILT)
+        )
+    }
 }

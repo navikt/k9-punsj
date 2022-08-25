@@ -1,4 +1,3 @@
- 
 package no.nav.k9punsj.integrasjoner.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
@@ -6,6 +5,9 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.GosysoppgaveIdKey
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.LukkGosysoppgave
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,7 +31,10 @@ internal class GosysRoutes(
 
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
+        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/"
         internal const val Gjelder = "/gosys/gjelder"
+
+        internal const val GosysoppgaveIdKey = "{gosysoppgaveId}"
     }
 
     @Bean
@@ -55,7 +60,34 @@ internal class GosysRoutes(
                 }
             }
         }
+
+        DELETE("/api${LukkGosysoppgave}/$GosysoppgaveIdKey", contentType(MediaType.APPLICATION_JSON)) { request ->
+            RequestContext(coroutineContext, request) {
+                val oppgaveId = request.oppgaveId()
+
+                return@RequestContext try {
+                    logger.info("Lukker gosysopgave med id=[{}]", oppgaveId)
+                    val (httpStatus, feil) = gosysService.lukkOppgave(oppgaveId = oppgaveId)
+
+                    if (feil != null) {
+                        ServerResponse
+                            .status(httpStatus)
+                            .json()
+                            .bodyValueAndAwait(OasFeil(feil))
+                    }
+
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .buildAndAwait()
+                } catch (case: IkkeTilgang) {
+                    ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
+                }
+            }
+        }
     }
+
+    private suspend fun ServerRequest.oppgaveId(): String = pathVariable("gosysoppgaveId")
 
     private suspend fun ServerRequest.mapOppgaveRequest() =
         body(BodyExtractors.toMono(GosysOpprettJournalføringsOppgaveRequest::class.java)).awaitFirst()

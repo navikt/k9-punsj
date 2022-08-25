@@ -34,3 +34,11 @@ internal data class OpprettOppgaveRequest(
         }
     }
 }
+
+internal data class PatchOppgaveRequest(
+    val status: OppgaveStatus
+)
+
+internal enum class OppgaveStatus {
+    OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT
+}
