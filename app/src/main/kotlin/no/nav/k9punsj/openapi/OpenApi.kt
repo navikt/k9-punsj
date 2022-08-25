@@ -95,6 +95,7 @@ data class OasJournalpostIder(
 
 data class OasJournalpostDto(
     val journalpostId: String,
+    val gosysoppgaveId: String? = null,
     val dokumenter: Set<OasDokumentInfo>?,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate?,
