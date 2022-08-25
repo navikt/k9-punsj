@@ -12,6 +12,7 @@
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
         <handelbars.version>4.3.0</handelbars.version>
+        <dusseldorf-ktor.version>3.2.1.0-e8f86c1</dusseldorf-ktor.version>
     </properties>
     <parent>
         <groupId>no.nav.k9</groupId>
@@ -89,6 +90,7 @@
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-reactor</artifactId>
         </dependency>
+
         <!-- Authentication -->
         <dependency>
             <groupId>no.nav.security</groupId>
@@ -103,6 +105,7 @@
             <artifactId>dusseldorf-test-support</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!-- Monitorering -->
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -120,6 +123,7 @@
             <groupId>com.papertrailapp</groupId>
             <artifactId>logback-syslog4j</artifactId>
         </dependency>
+
         <!-- Meldingsformater -->
         <dependency>
             <groupId>org.skyscreamer</groupId>
@@ -142,11 +146,13 @@
             <groupId>no.nav.k9.rapid</groupId>
             <artifactId>behov</artifactId>
         </dependency>
+
         <!-- Annet -->
         <dependency>
             <groupId>de.huxhorn.sulky</groupId>
             <artifactId>de.huxhorn.sulky.ulid</artifactId>
         </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>io.mockk</groupId>
@@ -163,6 +169,7 @@
             <artifactId>vault-jdbc</artifactId>
             <version>${vault-jdbc.version}</version>
         </dependency>
+
         <!-- Database -->
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -213,6 +220,18 @@
             <version>${handelbars.version}</version>
         </dependency>
         <!--PDF-->
+
+        <!-- Punsjbolle-deps -->
+        <dependency>
+            <groupId>no.nav.helse</groupId>
+            <artifactId>dusseldorf-ktor-health</artifactId>
+            <version>${dusseldorf-ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.helse</groupId>
+            <artifactId>dusseldorf-ktor-client</artifactId>
+            <version>${dusseldorf-ktor.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

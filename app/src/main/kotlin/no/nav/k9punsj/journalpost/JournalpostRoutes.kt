@@ -25,6 +25,7 @@ import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.ruting.RutingService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -54,7 +55,8 @@ internal class JournalpostRoutes(
     private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
     private val azureGraphService: IAzureGraphService,
-    private val innlogget: InnloggetUtils
+    private val innlogget: InnloggetUtils,
+    private val rutingService: RutingService
 ) {
 
     internal companion object {

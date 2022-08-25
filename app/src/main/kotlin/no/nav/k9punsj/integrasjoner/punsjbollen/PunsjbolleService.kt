@@ -25,6 +25,7 @@ interface PunsjbolleService {
         correlationId: String = UUID.randomUUID().toString()
     ): SaksnummerDto
 
+    @Deprecated("Erstattes med RutingService i Punsj ")
     suspend fun ruting(
         søker: String,
         pleietrengende: String? = null,
