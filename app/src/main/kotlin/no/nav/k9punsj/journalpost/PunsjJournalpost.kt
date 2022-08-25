@@ -14,6 +14,7 @@ data class PunsjJournalpost(
     val skalTilK9: Boolean? = null,
     val mottattDato: LocalDateTime? = null,
     val type: String? = null,
+    val gosysoppgaveId: String? = null,
     val ytelse: String? = null,
     val payload: String? = null,
     val fordelStatusType: String? = null

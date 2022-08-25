@@ -258,4 +258,29 @@ internal class PunsjJournalpostRepositoryTest {
         }
         assertThat(harFåttEx).isTrue()
     }
+
+    @Test
+    fun `Forventer at gosysoppgaveId blir persistert på journalpost`(): Unit = runBlocking {
+        val dummyAktørId = IdGenerator.nesteId()
+        val forventetGosysoppgaveId = IdGenerator.nesteId()
+        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+
+        val punsjJournalpost = PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.SAMTALEREFERAT.kode,
+                gosysoppgaveId = forventetGosysoppgaveId
+            )
+
+        journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
+
+        val journalpost = journalpostRepository.hent(punsjJournalpost.journalpostId)
+        assertThat(journalpost.aktørId!!).isEqualTo(dummyAktørId)
+        assertThat(journalpost.gosysoppgaveId!!).isEqualTo(forventetGosysoppgaveId)
+
+        val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
+        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(PunsjInnsendingType.SAMTALEREFERAT.kode)
+        assertThat(finnJournalposterPåPerson[0].gosysoppgaveId).isEqualTo(forventetGosysoppgaveId)
+    }
 }
