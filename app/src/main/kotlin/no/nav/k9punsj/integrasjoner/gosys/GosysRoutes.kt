@@ -31,8 +31,8 @@ internal class GosysRoutes(
 
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
-        internal const val GosysoppgaveIdKey = "{gosysoppgaveId}"
-        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/$GosysoppgaveIdKey"
+        internal const val GosysoppgaveIdKey = "gosysoppgaveId"
+        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/{$GosysoppgaveIdKey}"
 
         internal const val Gjelder = "/gosys/gjelder"
     }
