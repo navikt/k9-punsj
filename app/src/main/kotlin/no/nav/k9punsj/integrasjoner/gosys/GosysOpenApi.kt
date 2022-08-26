@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.GosysoppgaveIdKey
 import no.nav.k9punsj.openapi.OasFeil
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -104,7 +105,7 @@ internal class GosysOpenApi {
         description = "Lukker gosysoppgave",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun lukkGosysoppgave(@PathVariable gosysoppgaveId: String) {
+    fun lukkGosysoppgave(@PathVariable(GosysoppgaveIdKey) gosysoppgaveId: String) {
     }
 
     @GetMapping(GosysRoutes.Urls.Gjelder, produces = ["application/json"])
