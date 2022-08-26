@@ -87,7 +87,7 @@ internal class GosysRoutes(
         }
     }
 
-    private suspend fun ServerRequest.oppgaveId(): String = pathVariable("gosysoppgaveId")
+    private suspend fun ServerRequest.oppgaveId(): String = pathVariable(GosysoppgaveIdKey)
 
     private suspend fun ServerRequest.mapOppgaveRequest() =
         body(BodyExtractors.toMono(GosysOpprettJournalføringsOppgaveRequest::class.java)).awaitFirst()
