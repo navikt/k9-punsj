@@ -61,7 +61,7 @@ internal class GosysRoutes(
             }
         }
 
-        DELETE("/api${LukkGosysoppgave}", contentType(MediaType.APPLICATION_JSON)) { request ->
+        DELETE("/api$LukkGosysoppgave", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
