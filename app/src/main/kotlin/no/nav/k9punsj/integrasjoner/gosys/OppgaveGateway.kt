@@ -87,7 +87,7 @@ internal class OppgaveGateway(
                 throw it
             }
 
-        val (url, response, responseBody) = httpPatch(body, patchEksisterendeOppgaveUrl)
+        val (url, response, responseBody) = httpPatch(body, "$patchEksisterendeOppgaveUrl/$oppgaveId")
 
         val harFeil = !response.isSuccessful
         if (harFeil) {
