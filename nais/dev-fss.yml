@@ -57,7 +57,7 @@ spec:
     pool: nav-dev
   env:
     - name: SWAGGER_SERVER_BASE_URL
-      value: https://k9-punsj.dev.adeo.no
+      value: https://k9-punsj.dev.intern.nav.no
     - name: NAIS_STS_TOKEN_ENDPOINT
       value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
     - name: SAF_BASE_URL
