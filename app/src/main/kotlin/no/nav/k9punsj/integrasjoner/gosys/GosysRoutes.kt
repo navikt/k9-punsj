@@ -75,11 +75,14 @@ internal class GosysRoutes(
                             .json()
                             .bodyValueAndAwait(OasFeil(feil))
                     }
+                    else {
+                        ServerResponse
+                            .status(HttpStatus.OK)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .buildAndAwait()
+                    }
 
-                    ServerResponse
-                        .status(HttpStatus.OK)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .buildAndAwait()
+
                 } catch (case: IkkeTilgang) {
                     ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
                 }
