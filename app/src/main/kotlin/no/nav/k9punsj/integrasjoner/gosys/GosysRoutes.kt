@@ -31,10 +31,10 @@ internal class GosysRoutes(
 
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
-        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/"
-        internal const val Gjelder = "/gosys/gjelder"
-
         internal const val GosysoppgaveIdKey = "{gosysoppgaveId}"
+        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/$GosysoppgaveIdKey"
+
+        internal const val Gjelder = "/gosys/gjelder"
     }
 
     @Bean
@@ -61,7 +61,7 @@ internal class GosysRoutes(
             }
         }
 
-        DELETE("/api${LukkGosysoppgave}/$GosysoppgaveIdKey", contentType(MediaType.APPLICATION_JSON)) { request ->
+        DELETE("/api${LukkGosysoppgave}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
