@@ -63,11 +63,7 @@ internal class GosysOpenApi {
     fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
     }
 
-    @DeleteMapping(
-        GosysRoutes.Urls.LukkGosysoppgave,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
+    @DeleteMapping(GosysRoutes.Urls.LukkGosysoppgave, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
