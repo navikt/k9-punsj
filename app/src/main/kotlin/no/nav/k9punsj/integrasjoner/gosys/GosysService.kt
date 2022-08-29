@@ -90,7 +90,7 @@ internal class GosysService(
 
     suspend fun lukkOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
         return oppgaveGateway.patchOppgave(
-            oppgaveId, PatchOppgaveRequest(status = OppgaveStatus.FERDIGSTILT)
+            oppgaveId, PatchOppgaveRequest(id = oppgaveId.toInt(), status = OppgaveStatus.FERDIGSTILT)
         )
     }
 }

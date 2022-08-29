@@ -36,6 +36,7 @@ internal data class OpprettOppgaveRequest(
 }
 
 internal data class PatchOppgaveRequest(
+    val id: Int,
     val status: OppgaveStatus
 )
 
