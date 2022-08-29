@@ -141,11 +141,11 @@ internal class OppgaveGateway(
             .build()
 
         return okHttp.newCall(request).execute().use { response: okhttp3.Response ->
+            val responseBody = response.body
             when {
                 !response.isSuccessful -> {
-                    val responseBody = response.body
-                    when {
-                        responseBody == null || responseBody.string().isBlank() -> {
+                    when (responseBody) {
+                        null -> {
                             Triple(url, response, "{}")
                         }
                         else -> {
@@ -154,7 +154,7 @@ internal class OppgaveGateway(
                     }
                 }
                 else -> {
-                    Triple(url, response, response.body!!.string())
+                    Triple(url, response, responseBody!!.string())
                 }
             }
         }
