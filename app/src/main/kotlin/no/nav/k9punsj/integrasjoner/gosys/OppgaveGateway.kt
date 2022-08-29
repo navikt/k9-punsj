@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.gosys
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -50,6 +51,22 @@ internal class OppgaveGateway(
     private object Urls {
         const val oppgaveUrl = "/api/v1/oppgaver"
         const val patchEksisterendeOppgaveUrl = "/api/v1/oppgaver"
+    }
+
+    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+
+        val (url, response, responseBody) = httpGet("$oppgaveUrl/$oppgaveId")
+        val harFeil = !response.isSuccessful
+        val statusCode = response.statusCode
+        if (harFeil) {
+            logger.error("Feil ved henting av oppgave. Url=[$url], HttpStatus=[$statusCode], Response=$responseBody")
+        }
+
+        return Triple(
+            HttpStatus.valueOf(statusCode),
+            if (harFeil) "Feil ved henting av oppgave. Url=[$url], HttpStatus=[$statusCode], Response=$responseBody" else null,
+            if (!harFeil) objectMapper().readValue(responseBody, GetOppgaveResponse::class.java) else null
+        )
     }
 
     /**
@@ -110,6 +127,29 @@ internal class OppgaveGateway(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
+                NavHeaders.CallId to UUID.randomUUID().toString(),
+                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                ConsumerIdHeaderKey to ConsumerIdHeaderValue
+            ).awaitStringResponseResult()
+
+        val responseBody = result.fold(
+            { success -> success },
+            { error ->
+                when (error.response.body().isEmpty()) {
+                    true -> "{}"
+                    false -> String(error.response.body().toByteArray())
+                }
+            }
+        )
+        return Triple(url, response, responseBody)
+    }
+
+    private suspend fun httpGet(url: String): Triple<String, Response, String> {
+        val (_, response, result) = "$oppgaveBaseUrl$url"
+            .httpGet()
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
                 NavHeaders.CallId to UUID.randomUUID().toString(),
                 CorrelationIdHeader to coroutineContext.hentCorrelationId(),
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue

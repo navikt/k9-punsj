@@ -88,9 +88,20 @@ internal class GosysService(
             .buildAndAwait()
     }
 
+    internal suspend fun hentGosysoppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+        return oppgaveGateway.hentOppgave(oppgaveId)
+    }
+
     suspend fun lukkOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
+        val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
+        if (!httpStatus.is2xxSuccessful) return httpStatus to feil
+
         return oppgaveGateway.patchOppgave(
-            oppgaveId, PatchOppgaveRequest(id = oppgaveId.toInt(), status = OppgaveStatus.FERDIGSTILT)
+            oppgaveId, PatchOppgaveRequest(
+                id = oppgaveId.toInt(),
+                oppgave!!.versjon,
+                status = OppgaveStatus.FERDIGSTILT
+            )
         )
     }
 }
