@@ -87,8 +87,6 @@ internal class OppgaveGateway(
                 throw it
             }
 
-        logger.info("PATCH oppgave payload={}", body)
-
         val (url, response, responseBody) = httpPatch(body, "$patchEksisterendeOppgaveUrl/$oppgaveId")
 
         val harFeil = !response.isSuccessful
@@ -124,7 +122,7 @@ internal class OppgaveGateway(
     }
 
     private suspend fun httpPatch(body: String, url: String): Triple<String, Response, String> {
-        val (_, response, result) = "$oppgaveBaseUrl$url"
+        val requestBuilder = "$oppgaveBaseUrl$url"
             .httpPatch()
             .body(body)
             .header(
@@ -134,7 +132,11 @@ internal class OppgaveGateway(
                 NavHeaders.CallId to UUID.randomUUID().toString(),
                 CorrelationIdHeader to coroutineContext.hentCorrelationId(),
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue
-            ).awaitStringResponseResult()
+            )
+
+        logger.info("RequestBuilder: {}", requestBuilder.toString())
+
+        val (_, response, result) = requestBuilder.awaitStringResponseResult()
 
         val responseBody = result.fold(
             { success -> success },
