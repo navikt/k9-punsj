@@ -3,7 +3,6 @@ package no.nav.k9punsj.integrasjoner.gosys
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
-import com.github.kittinunf.fuel.httpPatch
 import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -12,6 +11,10 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,7 +32,7 @@ import kotlin.coroutines.coroutineContext
 @Service
 internal class OppgaveGateway(
     @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -40,6 +43,8 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
         private val scope: Set<String> = setOf("openid")
+
+        private val okHttp = OkHttpClient()
     }
 
     private object Urls {
@@ -90,10 +95,11 @@ internal class OppgaveGateway(
         val (url, response, responseBody) = httpPatch(body, "$patchEksisterendeOppgaveUrl/$oppgaveId")
 
         val harFeil = !response.isSuccessful
+        val responseCode = response.code
         if (harFeil) {
-            logger.error("Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody")
+            logger.error("Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$responseCode], Response=$responseBody")
         }
-        return HttpStatus.valueOf(response.statusCode) to if (harFeil) "Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody" else null
+        return HttpStatus.valueOf(responseCode) to if (harFeil) "Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$responseCode], Response=$responseBody" else null
     }
 
     private suspend fun httpPost(body: String, url: String): Triple<String, Response, String> {
@@ -121,32 +127,36 @@ internal class OppgaveGateway(
         return Triple(url, response, responseBody)
     }
 
-    private suspend fun httpPatch(body: String, url: String): Triple<String, Response, String> {
-        val requestBuilder = "$oppgaveBaseUrl$url"
-            .httpPatch()
-            .body(body)
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to UUID.randomUUID().toString(),
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue
-            )
+    private suspend fun httpPatch(body: String, url: String): Triple<String, okhttp3.Response, String> {
 
-        logger.info("RequestBuilder: {}", requestBuilder.toString())
+        val request = Request.Builder()
+            .url("$oppgaveBaseUrl$url")
+            .patch(body.toRequestBody("application/json".toMediaType()))
+            .header(HttpHeaders.ACCEPT, "application/json")
+            .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+            .header(HttpHeaders.CONTENT_TYPE, "application/json")
+            .header(NavHeaders.CallId, UUID.randomUUID().toString())
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .build()
 
-        val (_, response, result) = requestBuilder.awaitStringResponseResult()
-
-        val responseBody = result.fold(
-            { success -> success },
-            { error ->
-                when (error.response.body().isEmpty()) {
-                    true -> "{}"
-                    false -> String(error.response.body().toByteArray())
+        return okHttp.newCall(request).execute().use { response: okhttp3.Response ->
+            when {
+                !response.isSuccessful -> {
+                    val responseBody = response.body
+                    when {
+                        responseBody == null || responseBody.string().isBlank() -> {
+                            Triple(url, response, "{}")
+                        }
+                        else -> {
+                            Triple(url, response, String(responseBody.string().toByteArray()))
+                        }
+                    }
+                }
+                else -> {
+                    Triple(url, response, response.body!!.string())
                 }
             }
-        )
-        return Triple(url, response, responseBody)
+        }
     }
 }
