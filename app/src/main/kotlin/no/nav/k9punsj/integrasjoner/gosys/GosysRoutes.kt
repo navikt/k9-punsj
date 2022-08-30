@@ -16,13 +16,17 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class GosysRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    private val gosysService: GosysService
+    private val gosysService: GosysService,
 ) {
 
     private companion object {
@@ -65,26 +69,19 @@ internal class GosysRoutes(
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
-                return@RequestContext try {
-                    logger.info("Lukker gosysopgave med id=[{}]", oppgaveId)
-                    val (httpStatus, feil) = gosysService.lukkOppgave(oppgaveId = oppgaveId)
+                logger.info("Lukker gosysopgave med id=[{}]", oppgaveId)
+                val (httpStatus, feil) = gosysService.lukkOppgave(oppgaveId = oppgaveId)
 
-                    if (feil != null) {
-                        ServerResponse
-                            .status(httpStatus)
-                            .json()
-                            .bodyValueAndAwait(OasFeil(feil))
-                    }
-                    else {
-                        ServerResponse
-                            .status(HttpStatus.OK)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .buildAndAwait()
-                    }
-
-
-                } catch (case: IkkeTilgang) {
-                    ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
+                return@RequestContext if (feil != null) {
+                    ServerResponse
+                        .status(httpStatus)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(feil))
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .buildAndAwait()
                 }
             }
         }
@@ -98,6 +95,6 @@ internal class GosysRoutes(
     data class GosysOpprettJournalføringsOppgaveRequest(
         val norskIdent: String,
         val journalpostId: String,
-        val gjelder: Gjelder = Gjelder.Annet
+        val gjelder: Gjelder = Gjelder.Annet,
     )
 }

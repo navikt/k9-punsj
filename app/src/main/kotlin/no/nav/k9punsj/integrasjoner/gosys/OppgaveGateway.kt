@@ -18,9 +18,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitExchange
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
@@ -156,7 +155,8 @@ internal class OppgaveGateway(
     }
 
     private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
-        val responseEntity: ResponseEntity<String> = client
+        val responseEntity: ResponseEntity<String> = kotlin.runCatching {
+            client
                 .patch()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
@@ -166,8 +166,21 @@ internal class OppgaveGateway(
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(body))
-                .awaitExchange { response: ClientResponse -> response.toEntity<String>() }
+                .retrieve()
+                .toEntity<String>()
                 .awaitFirst()
+        }.fold(
+            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
+            onFailure = { throwable: Throwable ->
+                when(throwable) {
+                    is WebClientResponseException -> ResponseEntity
+                        .status(throwable.statusCode)
+                        .body(throwable.responseBodyAsString)
+
+                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                }
+            }
+        )
 
         return responseEntity.resolve(url)
     }
