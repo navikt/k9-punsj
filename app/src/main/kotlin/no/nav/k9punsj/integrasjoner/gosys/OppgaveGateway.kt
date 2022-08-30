@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
@@ -155,28 +156,32 @@ internal class OppgaveGateway(
     }
 
     private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
-        val responseEntity = client
-            .patch()
-            .uri(url)
-            .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
-            .header(NavHeaders.CallId, UUID.randomUUID().toString())
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
-            .retrieve()
-            .onStatus(
-                { status: HttpStatus -> status.isError },
-                { errorResponse: ClientResponse ->
-                    errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
-                        logger.error("Feilet med å endre gosysoppgave. Feil: {}", entity.toString())
+        val responseEntity: ResponseEntity<String> = try {
+            client
+                .patch()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .retrieve()
+                .onStatus(
+                    { status: HttpStatus -> status.isError },
+                    { errorResponse: ClientResponse ->
+                        errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
+                            logger.error("Feilet med å endre gosysoppgave. Feil: {}", entity.toString())
+                        }
+                        errorResponse.createException()
                     }
-                    errorResponse.createException()
-                }
-            )
-            .toEntity(String::class.java)
-            .awaitFirst()
+                )
+                .toEntity(String::class.java)
+                .awaitFirst()
+        } catch (e: WebClientResponseException) {
+            ResponseEntity.status(e.statusCode).body(e.responseBodyAsString)
+        }
 
         return responseEntity.resolve(url)
     }
