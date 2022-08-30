@@ -11,7 +11,8 @@ data class FordelPunsjEventDto(
     val aktørId: String? = null,
     val journalpostId: String,
     val type: String,
-    val ytelse: String
+    val ytelse: String,
+    val gosysoppgaveId: String? = null
 ) {
 
     internal companion object {

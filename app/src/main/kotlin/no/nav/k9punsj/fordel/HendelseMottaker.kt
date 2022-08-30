@@ -33,7 +33,9 @@ class HendelseMottaker @Autowired constructor(
             val aktørId = fordelPunsjEventDto.aktørId
             val punsjEventType = PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode
             val ytelse = FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode
+            val gosysoppgaveId = fordelPunsjEventDto.gosysoppgaveId
 
+            // TODO: Dersom SKRIV_TIL_OSS_SPØRMSÅL, SKRIV_TIL_OSS_SVAR, SAMTALEREFERAT
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
             val uuid = UUID.randomUUID()
@@ -42,7 +44,8 @@ class HendelseMottaker @Autowired constructor(
                 journalpostId = journalpostId,
                 aktørId = aktørId,
                 ytelse = ytelse,
-                type = punsjEventType
+                type = punsjEventType,
+                gosysoppgaveId = gosysoppgaveId
             )
             journalpostService.opprettJournalpost(punsjJournalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(

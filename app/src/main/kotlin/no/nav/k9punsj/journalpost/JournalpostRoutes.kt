@@ -155,6 +155,7 @@ internal class JournalpostRoutes(
                     // TODO: But why OpenApi DTOer her????
                     OasJournalpostDto(
                         journalpostId = it.journalpostId,
+                        gosysoppgaveId = it.gosysoppgaveId,
                         dokumenter = dok,
                         dato = it.mottattDato?.toLocalDate(),
                         klokkeslett = it.mottattDato?.toLocalTime(),
