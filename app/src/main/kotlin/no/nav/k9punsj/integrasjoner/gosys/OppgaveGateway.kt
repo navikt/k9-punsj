@@ -121,35 +121,61 @@ internal class OppgaveGateway(
     }
 
     private suspend fun httpPost(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
-        val responseEntity = client
-            .post()
-            .uri(url)
-            .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
-            .header(NavHeaders.CallId, UUID.randomUUID().toString())
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
-            .retrieve()
-            .toEntity(String::class.java)
-            .awaitFirst()
+        val responseEntity = kotlin.runCatching {
+            client
+                .post()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.fold(
+            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
+            onFailure = { throwable: Throwable ->
+                when (throwable) {
+                    is WebClientResponseException -> ResponseEntity
+                        .status(throwable.statusCode)
+                        .body(throwable.responseBodyAsString)
+
+                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                }
+            }
+        )
 
         return responseEntity.resolve(url)
     }
 
     private suspend fun httpGet(url: String): Triple<String, ResponseEntity<String>, String?> {
-        val responseEntity = client
-            .get()
-            .uri(url)
-            .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
-            .header(NavHeaders.CallId, UUID.randomUUID().toString())
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .accept(MediaType.APPLICATION_JSON)
-            .retrieve()
-            .toEntity(String::class.java)
-            .awaitFirst()
+        val responseEntity = kotlin.runCatching {
+            client
+                .get()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.fold(
+            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
+            onFailure = { throwable: Throwable ->
+                when (throwable) {
+                    is WebClientResponseException -> ResponseEntity
+                        .status(throwable.statusCode)
+                        .body(throwable.responseBodyAsString)
+
+                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                }
+            }
+        )
 
         return responseEntity.resolve(url)
     }
@@ -172,7 +198,7 @@ internal class OppgaveGateway(
         }.fold(
             onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
             onFailure = { throwable: Throwable ->
-                when(throwable) {
+                when (throwable) {
                     is WebClientResponseException -> ResponseEntity
                         .status(throwable.statusCode)
                         .body(throwable.responseBodyAsString)
