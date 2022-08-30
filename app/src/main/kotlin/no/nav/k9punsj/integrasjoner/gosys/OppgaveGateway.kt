@@ -118,7 +118,7 @@ internal class OppgaveGateway(
         return httpStatus to if (harFeil) "Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody" else null
     }
 
-    private suspend fun httpPost(body: String, url: String): Triple<String, ResponseEntity<String>, String> {
+    private suspend fun httpPost(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
         val responseEntity = client
             .post()
             .uri(url)
@@ -152,7 +152,7 @@ internal class OppgaveGateway(
         return responseEntity.resolve(url)
     }
 
-    private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String> {
+    private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
         val responseEntity = client
             .patch()
             .uri(url)
@@ -170,7 +170,7 @@ internal class OppgaveGateway(
         return responseEntity.resolve(url)
     }
 
-    private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String> = when {
+    private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
         !statusCode.is2xxSuccessful -> {
             when {
                 body.isNullOrBlank() -> {
@@ -182,7 +182,7 @@ internal class OppgaveGateway(
             }
         }
         else -> {
-            Triple(url, this, body!!)
+            Triple(url, this, body)
         }
     }
 }
