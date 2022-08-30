@@ -191,7 +191,7 @@ class K9SakServiceImpl(
     }
 
     override suspend fun inngårIUnntaksliste(
-        aktørIder: Set<AktørId>
+        aktørIder: Set<String>
     ): Boolean {
 
         // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
@@ -235,9 +235,9 @@ class K9SakServiceImpl(
     }
 
     private suspend fun finnesMatchendeFagsak(
-        søker: Identitetsnummer? = null,
-        pleietrengende: Identitetsnummer? = null,
-        annenPart: Identitetsnummer? = null,
+        søker: String? = null,
+        pleietrengende: String? = null,
+        annenPart: String? = null,
         @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
         fagsakYtelseType: FagsakYtelseType
     ): Boolean {
@@ -308,7 +308,7 @@ class K9SakServiceImpl(
             val periode: PeriodeDto,
         )
 
-        private fun Identitetsnummer?.jsonArray() = when (this) {
+        private fun String?.jsonArray() = when (this) {
             null -> "[]"
             else -> """["$this"]"""
         }

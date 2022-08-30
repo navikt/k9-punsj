@@ -36,15 +36,6 @@ data class CorrelationId private constructor(private val value: String) {
     }
 }
 
-internal data class K9Saksnummer private constructor(private val value: String) {
-    init { require(value.matches(Regex)) { "$value er et ugyldig K9 saksnummer" } }
-    override fun toString() = value
-    internal companion object {
-        private val Regex = "[A-Za-z0-9]{5,20}".toRegex()
-        internal fun String.somK9Saksnummer() = K9Saksnummer(this)
-    }
-}
-
 enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
     FORDEL("FORDEL", "Fordel"),
     SAKSBEHANDLER("SAKSBEHANDLER", "Saksbehandler");

@@ -204,16 +204,16 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
                 }
 
-                val aktørId = pdlService.aktørIdFor(dto.brukerIdent)?.let { setOf(it.somAktørId()) } ?: emptySet()
+                val aktørId = pdlService.aktørIdFor(dto.brukerIdent)?.let { setOf(it) } ?: emptySet()
 
                 val destinasjon = try {
                     rutingService.destinasjon(
-                        søker = dto.brukerIdent.somIdentitetsnummer(),
-                        pleietrengende = dto.pleietrengende?.somIdentitetsnummer(),
-                        annenPart = dto.annenPart?.somIdentitetsnummer(),
+                        søker = dto.brukerIdent,
+                        pleietrengende = dto.pleietrengende,
+                        annenPart = dto.annenPart,
                         fraOgMed = LocalDate.now(),
                         aktørIder = aktørId,
-                        journalpostIds = setOf(dto.journalpostId.somJournalpostId()),
+                        journalpostIds = setOf(dto.journalpostId),
                         fagsakYtelseType = dto.fagsakYtelseType
                     )
                 } catch (e: Exception) {

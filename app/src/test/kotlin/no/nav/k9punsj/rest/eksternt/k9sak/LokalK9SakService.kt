@@ -75,7 +75,7 @@ class LokalK9SakService : K9SakService {
         TODO("Not yet implemented")
     }
 
-    override suspend fun inngårIUnntaksliste(aktørIder: Set<AktørId>): Boolean {
+    override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
         TODO("Not yet implemented")
     }
 }

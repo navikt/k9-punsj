@@ -20,5 +20,5 @@ interface K9SakService {
     suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag
 
     @Deprecated("Skall ikke brukes, kun for infotrygd-ruting")
-    suspend fun inngårIUnntaksliste(aktørIder: Set<AktørId>): Boolean
+    suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean
 }

@@ -58,12 +58,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
         fagsakYtelseType: FagsakYtelseType,
-        aktørIder: Set<AktørId>
+        aktørIder: Set<String>
     ) = rutingService.destinasjon(
-        søker = dto.fra.somIdentitetsnummer(),
-        pleietrengende = dto.barn?.somIdentitetsnummer(),
-        annenPart = dto.annenPart?.somIdentitetsnummer(),
-        journalpostIds = setOf(journalpost.journalpostId.somJournalpostId()),
+        søker = dto.fra,
+        pleietrengende = dto.barn,
+        annenPart = dto.annenPart,
+        journalpostIds = setOf(journalpost.journalpostId),
         fagsakYtelseType = fagsakYtelseType,
         aktørIder = aktørIder,
         fraOgMed = LocalDate.now()
@@ -73,12 +73,12 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
         dto: KopierJournalpostDto,
         journalpost: JournalpostInfo,
         fagsakYtelseType: FagsakYtelseType,
-        aktørIder: Set<AktørId>
+        aktørIder: Set<String>
     ) = rutingService.destinasjon(
-        søker = dto.til.somIdentitetsnummer(),
-        pleietrengende = dto.barn?.somIdentitetsnummer(),
-        annenPart = dto.annenPart?.somIdentitetsnummer(),
-        journalpostIds = setOf(journalpost.journalpostId.somJournalpostId()),
+        søker = dto.til,
+        pleietrengende = dto.barn,
+        annenPart = dto.annenPart,
+        journalpostIds = setOf(journalpost.journalpostId),
         fagsakYtelseType = fagsakYtelseType,
         aktørIder = aktørIder,
         fraOgMed = LocalDate.now()
@@ -101,7 +101,7 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
             }
 
-            val aktørId = pdlService.aktørIdFor(dto.fra)?.let { setOf(it.somAktørId()) }?.toSet() ?: emptySet()
+            val aktørId = pdlService.aktørIdFor(dto.fra)?.let { setOf(it) }?.toSet() ?: emptySet()
 
             val k9FagsakYtelseType = journalpost?.ytelse?.let {
                 journalpost.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it))

@@ -10,7 +10,6 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.CorrelationId
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
@@ -152,7 +151,7 @@ class RestPunsjbolleService(
 
     private suspend fun String.post(
         requestBody: Any,
-        correlationId: CorrelationId
+        correlationId: String
     ): Triple<URI, Response, String> {
         val url = URI("$baseUrl/$this")
 

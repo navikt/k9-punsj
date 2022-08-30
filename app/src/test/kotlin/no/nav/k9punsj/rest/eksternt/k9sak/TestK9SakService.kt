@@ -1,13 +1,9 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9punsj.TestProfil
-import no.nav.k9punsj.felles.AktørId
-import no.nav.k9punsj.felles.CorrelationId.Companion.somCorrelationId
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -73,10 +69,14 @@ internal class TestK9SakService : K9SakService {
     }
 
     override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
-        TODO("Not yet implemented")
+        return RutingGrunnlag(
+            søker = false,
+            pleietrengende = false,
+            annenPart = false
+        )
     }
 
-    override suspend fun inngårIUnntaksliste(aktørIder: Set<AktørId>): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
+        return false
     }
 }

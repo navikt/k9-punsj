@@ -41,9 +41,9 @@ internal class InfotrygdClient(
 
     internal suspend fun harLøpendeSakSomInvolvererEnAv(
         fraOgMed: LocalDate,
-        søker: Identitetsnummer,
-        pleietrengende: Identitetsnummer?,
-        annenPart: Identitetsnummer?,
+        søker: String,
+        pleietrengende: String?,
+        annenPart: String?,
         fagsakYtelseType: FagsakYtelseType,
     ): RutingGrunnlag {
         if (harSakSomSøker(søker, fraOgMed, fagsakYtelseType)) {
@@ -60,7 +60,7 @@ internal class InfotrygdClient(
     }
 
     private suspend fun harSakSomSøker(
-        identitetsnummer: Identitetsnummer,
+        identitetsnummer: String,
         fraOgMed: LocalDate,
         fagsakYtelseType: FagsakYtelseType
     ): Boolean {
@@ -84,7 +84,7 @@ internal class InfotrygdClient(
     }
 
     private suspend fun harSakSomPleietrengende(
-        identitetsnummer: Identitetsnummer,
+        identitetsnummer: String,
         fraOgMed: LocalDate,
         fagsakYtelseType: FagsakYtelseType,
     ): Boolean {
@@ -172,7 +172,7 @@ internal class InfotrygdClient(
                 .map { it.inneholderAktuelle("vedtak", fagsakYtelseType) }
                 .any { it }
 
-        internal fun jsonPayloadFraFnrOgFom(identitetsnummer: Identitetsnummer, fraOgMed: LocalDate) =
+        internal fun jsonPayloadFraFnrOgFom(identitetsnummer: String, fraOgMed: LocalDate) =
             """
             {
               "fnr": ["$identitetsnummer"],

@@ -2,9 +2,7 @@ package no.nav.k9punsj.ruting
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import no.nav.k9punsj.felles.AktørId
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -31,13 +29,13 @@ internal class RutingService(
         .build()
 
     internal suspend fun destinasjon(
-        søker: Identitetsnummer,
+        søker: String,
         fraOgMed: LocalDate,
-        pleietrengende: Identitetsnummer? = null,
-        annenPart: Identitetsnummer? = null,
+        pleietrengende: String? = null,
+        annenPart: String? = null,
         fagsakYtelseType: FagsakYtelseType,
-        aktørIder: Set<AktørId>,
-        journalpostIds: Set<JournalpostId>,
+        aktørIder: Set<String>,
+        journalpostIds: Set<String>,
     ): Destinasjon {
 
         val input = DestinasjonInput(
@@ -124,13 +122,13 @@ internal class RutingService(
         private val logger = LoggerFactory.getLogger(RutingService::class.java)
 
         private data class DestinasjonInput(
-            val søker: Identitetsnummer,
+            val søker: String,
             val fraOgMed: LocalDate,
-            val pleietrengende: Identitetsnummer?,
-            val annenPart: Identitetsnummer?,
+            val pleietrengende: String?,
+            val annenPart: String?,
             val fagsakYtelseType: FagsakYtelseType,
-            val aktørIder: Set<AktørId>,
-            val journalpostIds: Set<JournalpostId>
+            val aktørIder: Set<String>,
+            val journalpostIds: Set<String>
         )
     }
 }
