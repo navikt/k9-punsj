@@ -143,7 +143,7 @@ internal class OppgaveGateway(
                         .status(throwable.statusCode)
                         .body(throwable.responseBodyAsString)
 
-                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                    else -> throw throwable
                 }
             }
         )
@@ -172,7 +172,7 @@ internal class OppgaveGateway(
                         .status(throwable.statusCode)
                         .body(throwable.responseBodyAsString)
 
-                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                    else -> throw throwable
                 }
             }
         )
@@ -203,7 +203,7 @@ internal class OppgaveGateway(
                         .status(throwable.statusCode)
                         .body(throwable.responseBodyAsString)
 
-                    else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+                    else -> throw throwable
                 }
             }
         )
