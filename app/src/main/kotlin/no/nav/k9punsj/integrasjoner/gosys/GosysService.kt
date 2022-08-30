@@ -89,6 +89,7 @@ internal class GosysService(
     }
 
     internal suspend fun hentGosysoppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+        logger.info("Henter eksisterende gosysoppgave med id=[{}]", oppgaveId)
         return oppgaveGateway.hentOppgave(oppgaveId)
     }
 
@@ -96,6 +97,7 @@ internal class GosysService(
         val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
         if (!httpStatus.is2xxSuccessful) return httpStatus to feil
 
+        logger.info("Lukker gosysoppgave med id=[{}]", oppgaveId)
         return oppgaveGateway.patchOppgave(
             oppgaveId, PatchOppgaveRequest(
                 id = oppgaveId.toInt(),
