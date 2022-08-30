@@ -59,14 +59,14 @@ internal class OppgaveGateway(
     suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
 
         val (url, response, responseBody) = httpGet("$oppgaveUrl/$oppgaveId")
-        val harFeil = !response.isSuccessful
+        val harFeil = !response.statusCode.is2xxSuccessful
         val statusCode = response.statusCode
         if (harFeil) {
             logger.error("Feil ved henting av oppgave. Url=[$url], HttpStatus=[$statusCode], Response=$responseBody")
         }
 
         return Triple(
-            HttpStatus.valueOf(statusCode),
+            response.statusCode,
             if (harFeil) "Feil ved henting av oppgave. Url=[$url], HttpStatus=[$statusCode], Response=$responseBody" else null,
             if (!harFeil) objectMapper().readValue(responseBody, GetOppgaveResponse::class.java) else null
         )
@@ -147,27 +147,36 @@ internal class OppgaveGateway(
         return Triple(url, response, responseBody)
     }
 
-    private suspend fun httpGet(url: String): Triple<String, Response, String> {
-        val (_, response, result) = "$oppgaveBaseUrl$url"
-            .httpGet()
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
-                NavHeaders.CallId to UUID.randomUUID().toString(),
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue
-            ).awaitStringResponseResult()
+    private suspend fun httpGet(url: String): Triple<String, ResponseEntity<String>, String?> {
+        val responseEntity = client
+            .get()
+            .uri(url)
+            .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+            .header(NavHeaders.CallId, UUID.randomUUID().toString())
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
 
-        val responseBody = result.fold(
-            { success -> success },
-            { error ->
-                when (error.response.body().isEmpty()) {
-                    true -> "{}"
-                    false -> String(error.response.body().toByteArray())
+        return responseEntity.resolve(url)
+    }
+
+    private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String> = when {
+        !statusCode.is2xxSuccessful -> {
+            when {
+                body.isNullOrBlank() -> {
+                    Triple(url, this, "{}")
+                }
+                else -> {
+                    Triple(url, this, body!!)
                 }
             }
-        )
-        return Triple(url, response, responseBody)
+        }
+        else -> {
+            Triple(url, this, body!!)
+        }
     }
 
     private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String> {
@@ -185,21 +194,6 @@ internal class OppgaveGateway(
             .toEntity(String::class.java)
             .awaitFirst()
 
-        val responseBody = responseEntity.body
-        return when {
-            !responseEntity.statusCode.is2xxSuccessful -> {
-                when {
-                    responseBody.isNullOrBlank() -> {
-                        Triple(url, responseEntity, "{}")
-                    }
-                    else -> {
-                        Triple(url, responseEntity, responseBody)
-                    }
-                }
-            }
-            else -> {
-                Triple(url, responseEntity, responseBody!!)
-            }
-        }
+        return responseEntity.resolve(url)
     }
 }

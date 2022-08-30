@@ -245,13 +245,6 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait())
 
-                val gosysoppgaveId = journalpost.gosysoppgaveId
-                if (!gosysoppgaveId.isNullOrBlank()) {
-                    val (httpStatus, feil) = gosysService.lukkOppgave(gosysoppgaveId)
-                    if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
-                        .status(httpStatus.value())
-                        .bodyValueAndAwait(feil!!)
-                }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 journalpostService.settTilFerdig(journalpostId)
