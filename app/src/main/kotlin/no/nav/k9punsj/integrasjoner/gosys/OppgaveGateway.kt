@@ -18,9 +18,11 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -164,6 +166,15 @@ internal class OppgaveGateway(
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(body))
             .retrieve()
+            .onStatus(
+                { status: HttpStatus -> status.isError },
+                { errorResponse: ClientResponse ->
+                    errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
+                        logger.error("Feilet med å endre gosysoppgave. Feil: {}", entity.toString())
+                    }
+                    errorResponse.createException()
+                }
+            )
             .toEntity(String::class.java)
             .awaitFirst()
 
