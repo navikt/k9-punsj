@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.NavHeaders
@@ -12,17 +13,17 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
@@ -37,6 +38,10 @@ internal class OppgaveGateway(
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+    private val client = WebClient
+        .builder()
+        .baseUrl(oppgaveBaseUrl.toString())
+        .build()
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(OppgaveGateway::class.java)
@@ -44,8 +49,6 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
         private val scope: Set<String> = setOf("openid")
-
-        private val okHttp = OkHttpClient()
     }
 
     private object Urls {
@@ -111,8 +114,8 @@ internal class OppgaveGateway(
 
         val (url, response, responseBody) = httpPatch(body, "$patchEksisterendeOppgaveUrl/$oppgaveId")
 
-        val harFeil = !response.isSuccessful
-        val responseCode = response.code
+        val harFeil = !response.statusCode.is2xxSuccessful
+        val responseCode = response.statusCode.value()
         if (harFeil) {
             logger.error("Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$responseCode], Response=$responseBody")
         }
@@ -167,35 +170,35 @@ internal class OppgaveGateway(
         return Triple(url, response, responseBody)
     }
 
-    private suspend fun httpPatch(body: String, url: String): Triple<String, okhttp3.Response, String> {
-
-        val request = Request.Builder()
-            .url("$oppgaveBaseUrl$url")
-            .patch(body.toRequestBody("application/json".toMediaType()))
-            .header(HttpHeaders.ACCEPT, "application/json")
+    private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String> {
+        val responseEntity = client
+            .patch()
+            .uri(url)
             .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
-            .header(HttpHeaders.CONTENT_TYPE, "application/json")
             .header(NavHeaders.CallId, UUID.randomUUID().toString())
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .build()
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(body))
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
 
-        return okHttp.newCall(request).execute().use { response: okhttp3.Response ->
-            val responseBody = response.body
-            when {
-                !response.isSuccessful -> {
-                    when (responseBody) {
-                        null -> {
-                            Triple(url, response, "{}")
-                        }
-                        else -> {
-                            Triple(url, response, String(responseBody.string().toByteArray()))
-                        }
+        val responseBody = responseEntity.body
+        return when {
+            !responseEntity.statusCode.is2xxSuccessful -> {
+                when {
+                    responseBody.isNullOrBlank() -> {
+                        Triple(url, responseEntity, "{}")
+                    }
+                    else -> {
+                        Triple(url, responseEntity, responseBody)
                     }
                 }
-                else -> {
-                    Triple(url, response, responseBody!!.string())
-                }
+            }
+            else -> {
+                Triple(url, responseEntity, responseBody!!)
             }
         }
     }

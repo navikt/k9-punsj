@@ -18,6 +18,7 @@ import no.nav.k9punsj.felles.SettPåVentDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasDokumentInfo
@@ -53,8 +54,9 @@ internal class JournalpostRoutes(
     private val pepClient: IPepClient,
     private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
+    private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
-    private val innlogget: InnloggetUtils
+    private val innlogget: InnloggetUtils,
 ) {
 
     internal companion object {
@@ -238,10 +240,18 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
 
-                journalpostService.hentHvisJournalpostMedId(journalpostId)
+                val journalpost: PunsjJournalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
                         .notFound()
-                        .buildAndAwait()
+                        .buildAndAwait())
+
+                val gosysoppgaveId = journalpost.gosysoppgaveId
+                if (!gosysoppgaveId.isNullOrBlank()) {
+                    val (httpStatus, feil) = gosysService.lukkOppgave(gosysoppgaveId)
+                    if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
+                        .status(httpStatus.value())
+                        .bodyValueAndAwait(feil!!)
+                }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 journalpostService.settTilFerdig(journalpostId)
@@ -429,7 +439,7 @@ internal class JournalpostRoutes(
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
-        aktørId: String?
+        aktørId: String?,
     ) {
         val journalpostFraBasen = journalpostService.hentHvisJournalpostMedId(journalpostId)
         if (journalpostFraBasen?.mottattDato != null || "KOPI" == journalpostFraBasen?.type) {
@@ -453,7 +463,7 @@ internal class JournalpostRoutes(
     private suspend fun lagreHvorJournalpostSkal(
         hentHvisPunsjJournalpostMedId: PunsjJournalpost?,
         dto: PunsjBolleDto,
-        skalTilK9: Boolean
+        skalTilK9: Boolean,
     ) {
         if (hentHvisPunsjJournalpostMedId != null) {
             journalpostService.lagre(hentHvisPunsjJournalpostMedId.copy(skalTilK9 = skalTilK9))
@@ -485,6 +495,6 @@ internal class JournalpostRoutes(
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
     private data class ResultatDto(
-        val status: String
+        val status: String,
     )
 }
