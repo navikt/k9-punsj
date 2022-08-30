@@ -9,19 +9,16 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.felles.AktørId
-import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.hentCallId
-import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentEllerOpprettSaksnummerUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.pleiepengerSyktBarnUnntakslisteUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.matchFagsakUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.pleiepengerSyktBarnUnntakslisteUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.ruting.RutingGrunnlag
@@ -35,7 +32,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Configuration

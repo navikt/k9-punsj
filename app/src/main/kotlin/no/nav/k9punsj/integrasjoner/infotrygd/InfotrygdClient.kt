@@ -1,19 +1,13 @@
 package no.nav.k9punsj.integrasjoner.infotrygd
 
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.http.ContentType
-import io.ktor.http.isSuccess
-import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpPost
-import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
-import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.JsonUtil.arrayOrEmptyArray
 import no.nav.k9punsj.felles.JsonUtil.objectOrEmptyObject
 import no.nav.k9punsj.felles.JsonUtil.stringOrNull
+import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient.Companion.Behandlingstema.Companion.relevanteBehandlingstemaer
 import no.nav.k9punsj.ruting.RutingGrunnlag
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
@@ -24,9 +18,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.LocalDate
+import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class InfotrygdClient(
@@ -35,9 +33,13 @@ internal class InfotrygdClient(
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
 
-    private val HentSakerUrl = URI("$baseUrl/saker")
-    private val HentVedtakForPleietrengende = URI("$baseUrl/vedtakForPleietrengende")
+    private val hentSakerUrl = URI("$baseUrl/saker")
+    private val hentVedtakForPleietrengende = URI("$baseUrl/vedtakForPleietrengende")
     private val cachedAzureAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+
+    private val client = WebClient
+        .builder()
+        .build()
 
     internal suspend fun harLøpendeSakSomInvolvererEnAv(
         fraOgMed: LocalDate,
@@ -65,20 +67,8 @@ internal class InfotrygdClient(
         fagsakYtelseType: FagsakYtelseType
     ): Boolean {
 
-        val url = URI("$HentSakerUrl")
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
-
-        val (httpStatusCode, response) = url.toString().httpPost {
-            it.header(HttpHeaders.AUTHORIZATION, cachedAzureAccessTokenClient.getAccessToken(infotrygdScopes).asAuthoriationHeader())
-            //it.header(CorrelationIdHeaderKey, "$correlationId") TODO: Legg på callId
-            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            it.accept(ContentType.Application.Json)
-            it.jsonBody(jsonPayload)
-        }.readTextOrThrow()
-
-        require(httpStatusCode.isSuccess()) {
-            "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
+        val response = hentSakFraInfotrygd(jsonPayload, hentSakerUrl)
 
         return JSONArray(response).inneholderAktuelleSakerEllerVedtak(fagsakYtelseType)
     }
@@ -89,28 +79,38 @@ internal class InfotrygdClient(
         fagsakYtelseType: FagsakYtelseType,
     ): Boolean {
 
-        val url = URI("$HentVedtakForPleietrengende")
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
-
-        val (httpStatusCode, response) = url.toString().httpPost {
-            it.header(HttpHeaders.AUTHORIZATION, cachedAzureAccessTokenClient.getAccessToken(infotrygdScopes).asAuthoriationHeader())
-            //it.header(CorrelationIdHeaderKey, "$correlationId") TODO: Legg på callId
-            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            it.accept(ContentType.Application.Json)
-            it.jsonBody(jsonPayload)
-        }.readTextOrThrow()
-
-        require(httpStatusCode.isSuccess()) {
-            "Feil fra Infotrygd. URL=[$HentVedtakForPleietrengende], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
+        val response = hentSakFraInfotrygd(jsonPayload, hentVedtakForPleietrengende)
 
         return JSONArray(response).inneholderAktuelleVedtak(fagsakYtelseType)
+    }
+
+    private suspend fun hentSakFraInfotrygd(payload: String, uri: URI): ResponseEntity<String>  {
+        val response = client
+            .post()
+            .uri(uri)
+            .header(
+                HttpHeaders.AUTHORIZATION,
+                cachedAzureAccessTokenClient.getAccessToken(infotrygdScopes).asAuthoriationHeader()
+            )
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header("callId", coroutineContext.hentCallId())
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        require(response.statusCode.is2xxSuccessful) {
+            "Feil fra Infotrygd. URL=[$hentVedtakForPleietrengende], HttpStatusCode=[${response.statusCode}], Response=[$response]"
+        }
+
+        return response
     }
 
     internal companion object {
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
-        private const val CorrelationIdHeaderKey = "Nav-Callid"
 
         private enum class Behandlingstema(val infotrygdVerdi: String) {
             PleiepengerSyktBarnGammelOrdning("PB"),

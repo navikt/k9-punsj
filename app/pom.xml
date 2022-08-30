@@ -12,7 +12,6 @@
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
         <handelbars.version>4.3.0</handelbars.version>
-        <dusseldorf-ktor.version>3.2.1.0-e8f86c1</dusseldorf-ktor.version>
     </properties>
     <parent>
         <groupId>no.nav.k9</groupId>
@@ -220,18 +219,6 @@
             <version>${handelbars.version}</version>
         </dependency>
         <!--PDF-->
-
-        <!-- Punsjbolle-deps -->
-        <dependency>
-            <groupId>no.nav.helse</groupId>
-            <artifactId>dusseldorf-ktor-health</artifactId>
-            <version>${dusseldorf-ktor.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.helse</groupId>
-            <artifactId>dusseldorf-ktor-client</artifactId>
-            <version>${dusseldorf-ktor.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
