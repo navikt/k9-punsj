@@ -135,18 +135,7 @@ internal class OppgaveGateway(
                 .retrieve()
                 .toEntity(String::class.java)
                 .awaitFirst()
-        }.fold(
-            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-            onFailure = { throwable: Throwable ->
-                when (throwable) {
-                    is WebClientResponseException -> ResponseEntity
-                        .status(throwable.statusCode)
-                        .body(throwable.responseBodyAsString)
-
-                    else -> throw throwable
-                }
-            }
-        )
+        }.håndterFeil()
 
         return responseEntity.resolve(url)
     }
@@ -164,18 +153,7 @@ internal class OppgaveGateway(
                 .retrieve()
                 .toEntity(String::class.java)
                 .awaitFirst()
-        }.fold(
-            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-            onFailure = { throwable: Throwable ->
-                when (throwable) {
-                    is WebClientResponseException -> ResponseEntity
-                        .status(throwable.statusCode)
-                        .body(throwable.responseBodyAsString)
-
-                    else -> throw throwable
-                }
-            }
-        )
+        }.håndterFeil()
 
         return responseEntity.resolve(url)
     }
@@ -195,21 +173,23 @@ internal class OppgaveGateway(
                 .retrieve()
                 .toEntity<String>()
                 .awaitFirst()
-        }.fold(
-            onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-            onFailure = { throwable: Throwable ->
-                when (throwable) {
-                    is WebClientResponseException -> ResponseEntity
-                        .status(throwable.statusCode)
-                        .body(throwable.responseBodyAsString)
-
-                    else -> throw throwable
-                }
-            }
-        )
+        }.håndterFeil()
 
         return responseEntity.resolve(url)
     }
+
+    private fun Result<ResponseEntity<String>>.håndterFeil() = fold(
+        onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
+        onFailure = { throwable: Throwable ->
+            when (throwable) {
+                is WebClientResponseException -> ResponseEntity
+                    .status(throwable.statusCode)
+                    .body(throwable.responseBodyAsString)
+
+                else -> throw throwable
+            }
+        }
+    )
 
     private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
         !statusCode.is2xxSuccessful -> {
