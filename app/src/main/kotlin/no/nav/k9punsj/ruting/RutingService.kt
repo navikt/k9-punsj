@@ -3,12 +3,12 @@ package no.nav.k9punsj.ruting
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.k9punsj.felles.AktørId
-import no.nav.k9punsj.felles.CorrelationId
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient
-import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.LopendeSakDto
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import java.time.Duration
@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 @Configuration
 internal class RutingService(
-    private val k9SakService: K9SakServiceImpl,
+    private val k9SakService: K9SakService,
     private val infotrygdClient: InfotrygdClient,
     private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>
 ) {
@@ -35,10 +35,9 @@ internal class RutingService(
         fraOgMed: LocalDate,
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
+        fagsakYtelseType: FagsakYtelseType,
         aktørIder: Set<AktørId>,
         journalpostIds: Set<JournalpostId>,
-        correlationId: CorrelationId
     ): Destinasjon {
 
         val input = DestinasjonInput(
@@ -46,16 +45,13 @@ internal class RutingService(
             fraOgMed = fraOgMed,
             pleietrengende = pleietrengende,
             annenPart = annenPart,
-            punsjbolleSøknadstype = punsjbolleSøknadstype,
+            fagsakYtelseType = fagsakYtelseType,
             aktørIder = aktørIder,
             journalpostIds = journalpostIds
         )
 
         return when (val cacheValue = cache.getIfPresent(input)) {
-            null -> slåOppDestinasjon(
-                input = input,
-                correlationId = correlationId
-            ).also { cache.put(input, it) }
+            null -> slåOppDestinasjon(input = input).also { cache.put(input, it) }
             else -> cacheValue.also {
                 logger.info("Rutes til ${it.name}, oppslaget finnes i cache.")
             }
@@ -63,20 +59,17 @@ internal class RutingService(
     }
 
     private suspend fun slåOppDestinasjon(
-        input: DestinasjonInput,
-        correlationId: CorrelationId
+        input: DestinasjonInput
     ): Destinasjon {
 
-        if (input.punsjbolleSøknadstype == PunsjbolleSøknadstype.PleiepengerLivetsSluttfase) {
-            if (k9SakService.inngårIUnntaksliste(
-                    aktørIder = input.aktørIder,
-                    punsjbolleSøknadstype = input.punsjbolleSøknadstype,
-                    correlationId = correlationId
-                )
-            ) {
+        /* PILS sjekkes mot unntaksliste i K9Sak, alla andre ytelser går til K9sak */
+        if (input.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE) {
+            if (k9SakService.inngårIUnntaksliste(aktørIder = input.aktørIder)) {
                 logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
                 return Destinasjon.Infotrygd
             }
+        } else {
+            return Destinasjon.K9Sak
         }
 
         val overstyresTilK9Sak = input.journalpostIds.intersect(overstyrTilK9SakJournalpostIds)
@@ -89,23 +82,18 @@ internal class RutingService(
             }
         }
 
-        val k9SakGrunnlag = k9SakService.harLopendeSakSomInvolvererEnAv(
+        val lopendeSakDto = LopendeSakDto(
             søker = input.søker,
             fraOgMed = input.fraOgMed,
             pleietrengende = input.pleietrengende,
             annenPart = input.annenPart,
-            punsjbolleSøknadstype = input.punsjbolleSøknadstype,
-            correlationId = correlationId
+            fagsakYtelseType = input.fagsakYtelseType
         )
+
+        val k9SakGrunnlag = k9SakService.harLopendeSakSomInvolvererEnAv(lopendeSakDto)
 
         if (k9SakGrunnlag.minstEnPart) {
             logger.info("Rutes til K9Sak ettersom minst en part er involvert i løpende sak. K9Sak=[$k9SakGrunnlag]")
-            return Destinasjon.K9Sak
-        }
-
-        // Endast PPN kan rutes til Infotrygd, allt annet går direkt till K9Sak
-        if (input.punsjbolleSøknadstype != PunsjbolleSøknadstype.PleiepengerLivetsSluttfase) {
-            logger.info("Søknadstype ${input.punsjbolleSøknadstype} rutes alltid til K9Sak")
             return Destinasjon.K9Sak
         }
 
@@ -114,8 +102,7 @@ internal class RutingService(
             fraOgMed = input.fraOgMed.minusYears(2),
             pleietrengende = input.pleietrengende,
             annenPart = input.annenPart,
-            punsjbolleSøknadstype = input.punsjbolleSøknadstype,
-            correlationId = correlationId
+            fagsakYtelseType = input.fagsakYtelseType
         )
 
         return when {
@@ -141,7 +128,7 @@ internal class RutingService(
             val fraOgMed: LocalDate,
             val pleietrengende: Identitetsnummer?,
             val annenPart: Identitetsnummer?,
-            val punsjbolleSøknadstype: PunsjbolleSøknadstype,
+            val fagsakYtelseType: FagsakYtelseType,
             val aktørIder: Set<AktørId>,
             val journalpostIds: Set<JournalpostId>
         )

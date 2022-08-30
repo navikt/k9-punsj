@@ -15,7 +15,6 @@ import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.NavHeaders
-import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
@@ -99,41 +98,6 @@ class RestPunsjbolleService(
         }
 
         return responseBody.deserialiser()
-    }
-
-    override suspend fun ruting(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        journalpostId: String?,
-        periode: PeriodeDto?,
-        fagsakYtelseType: FagsakYtelseType,
-        correlationId: String
-    ): PunsjbolleRuting {
-        val requestBody = punsjbolleSaksnummerDto(
-            søker = søker,
-            pleietrengende = pleietrengende,
-            annenPart = annenPart,
-            journalpostId = journalpostId,
-            periode = periode,
-            fagsakYtelseType = fagsakYtelseType
-        )
-
-        val (url, response, responseBody) = "ruting".post(
-            requestBody = requestBody,
-            correlationId = correlationId
-        )
-
-        val rutingResponse: RutingResponse = responseBody.deserialiser()
-
-        return when {
-            response.statusCode == 200 && rutingResponse.destinasjon == "K9Sak" -> PunsjbolleRuting.K9Sak
-            response.statusCode == 200 && rutingResponse.destinasjon == "Infotrygd" -> PunsjbolleRuting.Infotrygd
-            response.statusCode == 409 && rutingResponse.type == "punsjbolle://ikke-støttet-journalpost" -> PunsjbolleRuting.IkkeStøttet.also {
-                log.info("Ikke støttet journalpost ved ruting. Response=$responseBody")
-            }
-            else -> throw IllegalStateException("Feil ved ruting. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody")
-        }
     }
 
     private fun FagsakYtelseType.somSøknadstype() = when (this) {
@@ -266,11 +230,6 @@ class RestPunsjbolleService(
             val pleietrengende: PunsjbollePersonDto?,
             val annenPart: PunsjbollePersonDto?,
             val søknad: Map<String, *>
-        )
-
-        private data class RutingResponse(
-            val destinasjon: String? = null,
-            val type: String? = null
         )
 
         private val log = LoggerFactory.getLogger(RestPunsjbolleService::class.java)

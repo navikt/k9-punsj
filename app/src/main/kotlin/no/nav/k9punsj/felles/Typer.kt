@@ -1,8 +1,6 @@
 package no.nav.k9punsj.felles
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-
-internal data class AktørId private constructor(private val value: String) {
+data class AktørId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig aktørId" } }
     override fun toString() = value
     internal companion object {
@@ -11,7 +9,7 @@ internal data class AktørId private constructor(private val value: String) {
     }
 }
 
-internal data class JournalpostId private constructor(private val value: String) {
+data class JournalpostId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
     override fun toString() = value
     internal companion object {
@@ -20,7 +18,7 @@ internal data class JournalpostId private constructor(private val value: String)
     }
 }
 
-internal data class Identitetsnummer private constructor(private val value: String) {
+data class Identitetsnummer private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "Ugyldig identitetsnummer" } }
     override fun toString() = value
     internal companion object {
@@ -29,7 +27,7 @@ internal data class Identitetsnummer private constructor(private val value: Stri
     }
 }
 
-internal data class CorrelationId private constructor(private val value: String) {
+data class CorrelationId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig correlation id" } }
     override fun toString() = value
     internal companion object {
@@ -52,11 +50,9 @@ enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
     SAKSBEHANDLER("SAKSBEHANDLER", "Saksbehandler");
 }
 
-@Deprecated("Bytt til intern funksjonalitet i punsj")
-data class PunsjBolleDto(
+data class RutingDto(
     val brukerIdent: String,
-    // todo bytt navn til pleietrengende
-    val barnIdent: String?,
+    val pleietrengende: String?,
     val annenPart: String?,
     val journalpostId: String,
     val fagsakYtelseType: FagsakYtelseType

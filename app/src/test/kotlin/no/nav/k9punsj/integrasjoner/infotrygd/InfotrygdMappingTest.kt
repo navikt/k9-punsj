@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.infotrygd
 
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient.Companion.inneholderAktuelleSakerEllerVedtak
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient.Companion.inneholderAktuelleVedtak
 import org.intellij.lang.annotations.Language
@@ -12,26 +13,26 @@ internal class InfotrygdMappingTest {
 
     @Test
     fun `Vedtak og saker på søker`() {
-        assertFalse(JSONArray(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
+        assertFalse(JSONArray(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
     }
 
     @Test
     fun `Vedtak på barn`() {
-        assertTrue(JSONArray(VedtakBarnEksempelResponse).inneholderAktuelleVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
-        assertFalse(JSONArray(VedtakBarnEksempelResponse).inneholderAktuelleVedtak(PunsjbolleSøknadstype.OmsorgspengerKroniskSyktBarn))
+        assertTrue(JSONArray(VedtakBarnEksempelResponse).inneholderAktuelleVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
+        assertFalse(JSONArray(VedtakBarnEksempelResponse).inneholderAktuelleVedtak(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN))
 
     }
 
     @Test
     fun `Vedtak på barn under annet tema og behandlignstema`() {
-        assertFalse(vedtakBarnMinimalResponse(behandlingstema = null, tema = null).inneholderAktuelleVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
-        assertFalse(vedtakBarnMinimalResponse(behandlingstema = "Feil", tema = "BS").inneholderAktuelleVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
+        assertFalse(vedtakBarnMinimalResponse(behandlingstema = null, tema = null).inneholderAktuelleVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
+        assertFalse(vedtakBarnMinimalResponse(behandlingstema = "Feil", tema = "BS").inneholderAktuelleVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
     }
 
     @Test
     fun `Vedtak og saker på søker under annet tema og behandlingstema`() {
-        assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "PP", temaSak = null, temaVedtak = null).inneholderAktuelleSakerEllerVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
-        assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS2", temaVedtak = "BS2").inneholderAktuelleSakerEllerVedtak(PunsjbolleSøknadstype.PleiepengerSyktBarn))
+        assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "PP", temaSak = null, temaVedtak = null).inneholderAktuelleSakerEllerVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
+        assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS2", temaVedtak = "BS2").inneholderAktuelleSakerEllerVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
     }
 
     private companion object {

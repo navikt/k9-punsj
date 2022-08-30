@@ -3,7 +3,6 @@ package no.nav.k9punsj.rest.eksternt.punsjbollen
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.LokalProfil
-import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
@@ -31,7 +30,7 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         søknad: Søknad,
         correlationId: String
     ) = SaksnummerDto("SAK1")
-
+/*
     override suspend fun ruting(
         søker: String,
         pleietrengende: String?,
@@ -45,4 +44,6 @@ internal class LokalPunsjbolleService : PunsjbolleService {
         "463687943" -> PunsjbolleRuting.Infotrygd
         else -> PunsjbolleRuting.K9Sak
     }
+
+ */
 }

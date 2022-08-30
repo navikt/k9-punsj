@@ -1,11 +1,18 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9punsj.TestProfil
+import no.nav.k9punsj.felles.AktørId
+import no.nav.k9punsj.felles.CorrelationId.Companion.somCorrelationId
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.LopendeSakDto
+import no.nav.k9punsj.ruting.RutingGrunnlag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -54,4 +61,22 @@ internal class TestK9SakService : K9SakService {
         ),
         second = null
     )
+
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
+        opprettNytt: Boolean
+    ): Pair<String?, String?> {
+        return when(opprettNytt) {
+            true -> Pair("NEW123", null)
+            false -> Pair("OLD123", null)
+        }
+    }
+
+    override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun inngårIUnntaksliste(aktørIder: Set<AktørId>): Boolean {
+        TODO("Not yet implemented")
+    }
 }

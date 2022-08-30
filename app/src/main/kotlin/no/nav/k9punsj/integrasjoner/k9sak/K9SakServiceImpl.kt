@@ -10,18 +10,19 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.AktørId
-import no.nav.k9punsj.felles.CorrelationId
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentEllerOpprettSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.pleiepengerSyktBarnUnntakslisteUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.matchFagsakUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.ruting.RutingGrunnlag
 import org.intellij.lang.annotations.Language
@@ -48,11 +49,13 @@ class K9SakServiceImpl(
     private val log = LoggerFactory.getLogger("K9SakService")
 
     internal object Urls {
-        internal const val hentPerioder = "/behandling/soknad/perioder"
-        internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
-        internal const val sokFagsaker = "/fagsak/sok"
+        internal const val hentPerioderUrl = "/behandling/soknad/perioder"
+        internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
+        internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val matchFagsakUrl = "/api/fagsak/match"
         internal const val pleiepengerSyktBarnUnntakslisteUrl ="/api/fordel/psb-infotrygd/finnes"
+        internal const val hentEllerOpprettSaksnummerUrl = "/api/fordel/fagsak/opprett"
+        internal const val hentSaksnummerUrl = "/api/fagsak/siste"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -69,7 +72,7 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (json, feil) = httpPost(body, hentPerioder)
+        val (json, feil) = httpPost(body, hentPerioderUrl)
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
@@ -97,7 +100,7 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (json, feil) = httpPost(body, hentIntektsmelidnger)
+        val (json, feil) = httpPost(body, hentIntektsmeldingerUrl)
 
         return try {
             if (json == null) {
@@ -124,7 +127,7 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        val (json, feil) = httpPost(body, "$baseUrl$sokFagsaker")
+        val (json, feil) = httpPost(body, "$baseUrl$sokFagsakerUrl")
 
         return if(!json.isNullOrEmpty()) {
             Pair(json.fagsaker(), null)
@@ -133,27 +136,43 @@ class K9SakServiceImpl(
         }
     }
 
-    internal suspend fun harLopendeSakSomInvolvererEnAv(
-        søker: Identitetsnummer,
-        pleietrengende: Identitetsnummer?,
-        annenPart: Identitetsnummer?,
-        fraOgMed: LocalDate,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
-        correlationId: CorrelationId
-    ): RutingGrunnlag {
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
+        opprettNytt: Boolean
+    ): Pair<String?, String?> {
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(k9SaksnummerGrunnlag) }.getOrNull()
+            ?: return Pair(null, "Feilet serialisering")
+
+        val (json, feil) = when(opprettNytt) {
+            true -> httpPost(body, hentEllerOpprettSaksnummerUrl)
+            false -> httpPost(body, hentSaksnummerUrl)
+        }
+
+        return try {
+            if (json == null) {
+                return Pair(null, feil!!)
+            }
+            val saksnummer = objectMapper().readValue<String>(json)
+            Pair(saksnummer, null)
+        } catch (e: Exception) {
+            Pair(null, "Feilet deserialisering $e")
+        }
+    }
+
+    override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
         if (finnesMatchendeFagsak(
-                søker = søker,
-                fraOgMed = fraOgMed,
-                punsjbolleSøknadstype = punsjbolleSøknadstype
+                søker = lopendeSakDto.søker,
+                fraOgMed = lopendeSakDto.fraOgMed,
+                fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
             )
         ) {
             return RutingGrunnlag(søker = true)
         }
-        if (pleietrengende?.let {
+        if (lopendeSakDto.pleietrengende?.let {
                 finnesMatchendeFagsak(
                     pleietrengende = it,
-                    fraOgMed = fraOgMed,
-                    punsjbolleSøknadstype = punsjbolleSøknadstype
+                    fraOgMed = lopendeSakDto.fraOgMed,
+                    fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
                 )
             } == true) {
             return RutingGrunnlag(søker = false, pleietrengende = true)
@@ -161,20 +180,18 @@ class K9SakServiceImpl(
         return RutingGrunnlag(
             søker = false,
             pleietrengende = false,
-            annenPart = annenPart?.let {
+            annenPart = lopendeSakDto.annenPart?.let {
                 finnesMatchendeFagsak(
                     søker = it,
-                    fraOgMed = fraOgMed,
-                    punsjbolleSøknadstype = punsjbolleSøknadstype
+                    fraOgMed = lopendeSakDto.fraOgMed,
+                    fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
                 )
             } ?: false
         )
     }
 
-    internal suspend fun inngårIUnntaksliste(
-        aktørIder: Set<AktørId>,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
-        correlationId: CorrelationId
+    override suspend fun inngårIUnntaksliste(
+        aktørIder: Set<AktørId>
     ): Boolean {
 
         // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
@@ -222,7 +239,7 @@ class K9SakServiceImpl(
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
         @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype
+        fagsakYtelseType: FagsakYtelseType
     ): Boolean {
 
         // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
@@ -230,7 +247,7 @@ class K9SakServiceImpl(
         val dto = """
         {
             "ytelseType": {
-                "kode": "${punsjbolleSøknadstype.k9YtelseType}",
+                "kode": "${fagsakYtelseType.kode}",
                 "kodeverk": "FAGSAK_YTELSE"
             },
             "periode": {},

@@ -2,7 +2,7 @@ package no.nav.k9punsj.integrasjoner.infotrygd
 
 import no.nav.k9.kodeverk.dokument.Brevkode
 
-internal enum class PunsjbolleSøknadstype(
+enum class PunsjbolleSøknadstype(
     internal val k9YtelseType: String,
     internal val brevkode: Brevkode,
     internal val journalpostType: String) {

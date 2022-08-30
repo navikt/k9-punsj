@@ -9,7 +9,7 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.felles.CorrelationId
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.JsonUtil.arrayOrEmptyArray
 import no.nav.k9punsj.felles.JsonUtil.objectOrEmptyObject
@@ -21,7 +21,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -45,27 +44,25 @@ internal class InfotrygdClient(
         søker: Identitetsnummer,
         pleietrengende: Identitetsnummer?,
         annenPart: Identitetsnummer?,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
-        correlationId: CorrelationId,
+        fagsakYtelseType: FagsakYtelseType,
     ): RutingGrunnlag {
-        if (harSakSomSøker(søker, fraOgMed, punsjbolleSøknadstype, correlationId)) {
+        if (harSakSomSøker(søker, fraOgMed, fagsakYtelseType)) {
             return RutingGrunnlag(søker = true)
         }
-        if (pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, punsjbolleSøknadstype, correlationId) } == true) {
+        if (pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, fagsakYtelseType) } == true) {
             return RutingGrunnlag(søker = false, pleietrengende = true)
         }
         return RutingGrunnlag(
             søker = false,
             pleietrengende = false,
-            annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, punsjbolleSøknadstype, correlationId) } ?: false
+            annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, fagsakYtelseType) } ?: false
         )
     }
 
     private suspend fun harSakSomSøker(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType
     ): Boolean {
 
         val url = URI("$HentSakerUrl")
@@ -73,7 +70,7 @@ internal class InfotrygdClient(
 
         val (httpStatusCode, response) = url.toString().httpPost {
             it.header(HttpHeaders.AUTHORIZATION, cachedAzureAccessTokenClient.getAccessToken(infotrygdScopes).asAuthoriationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
+            //it.header(CorrelationIdHeaderKey, "$correlationId") TODO: Legg på callId
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
             it.jsonBody(jsonPayload)
@@ -83,14 +80,13 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(punsjbolleSøknadstype)
+        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(fagsakYtelseType)
     }
 
     private suspend fun harSakSomPleietrengende(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
-        punsjbolleSøknadstype: PunsjbolleSøknadstype,
-        correlationId: CorrelationId
+        fagsakYtelseType: FagsakYtelseType,
     ): Boolean {
 
         val url = URI("$HentVedtakForPleietrengende")
@@ -98,7 +94,7 @@ internal class InfotrygdClient(
 
         val (httpStatusCode, response) = url.toString().httpPost {
             it.header(HttpHeaders.AUTHORIZATION, cachedAzureAccessTokenClient.getAccessToken(infotrygdScopes).asAuthoriationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
+            //it.header(CorrelationIdHeaderKey, "$correlationId") TODO: Legg på callId
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
             it.jsonBody(jsonPayload)
@@ -108,7 +104,7 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentVedtakForPleietrengende], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response).inneholderAktuelleVedtak(punsjbolleSøknadstype)
+        return JSONArray(response).inneholderAktuelleVedtak(fagsakYtelseType)
     }
 
     internal companion object {
@@ -123,16 +119,14 @@ internal class InfotrygdClient(
             Omsorgspenger("OM");
 
             companion object {
-                fun PunsjbolleSøknadstype.relevanteBehandlingstemaer() = when (this) {
-                    PunsjbolleSøknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnGammelOrdning)
-                    PunsjbolleSøknadstype.OmsorgspengerUtbetaling_Korrigering -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.OmsorgspengerUtbetaling_Arbeidstaker -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.OmsorgspengerAleneOmsorg -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.Omsorgspenger -> listOf(Omsorgspenger)
-                    PunsjbolleSøknadstype.PleiepengerLivetsSluttfase -> listOf(PleiepengerILivetsSluttfase)
+                fun FagsakYtelseType.relevanteBehandlingstemaer() = when (this) {
+                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> listOf(PleiepengerSyktBarnGammelOrdning)
+                    FagsakYtelseType.OMSORGSPENGER -> listOf(Omsorgspenger)
+                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN -> listOf(Omsorgspenger)
+                    FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN -> listOf(Omsorgspenger)
+                    FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE -> listOf(Omsorgspenger)
+                    FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE -> listOf(PleiepengerILivetsSluttfase)
+                    else -> listOf(Omsorgspenger)
                 }.map { it.infotrygdVerdi }
             }
         }
@@ -151,13 +145,13 @@ internal class InfotrygdClient(
             HenlagtEllerBortfalt("HB")
         }
 
-        private fun JSONObject.inneholderAktuelle(key: String, punsjbolleSøknadstype: PunsjbolleSøknadstype) =
+        private fun JSONObject.inneholderAktuelle(key: String, fagsakYtelseType: FagsakYtelseType) =
             arrayOrEmptyArray(key)
                 .asSequence()
                 .map { it as JSONObject }
                 .filter { Tema.relevanteTemaer.contains(it.objectOrEmptyObject("tema").stringOrNull("kode")) }
                 .filter {
-                    punsjbolleSøknadstype.relevanteBehandlingstemaer()
+                    fagsakYtelseType.relevanteBehandlingstemaer()
                         .contains(it.objectOrEmptyObject("behandlingstema").stringOrNull("kode"))
                 }
                 // Om den er henlagt/bortfalt og ikke har noen opphørsdato er det aldri gjort noen utbetalinger
@@ -168,14 +162,14 @@ internal class InfotrygdClient(
                 .toList()
                 .isNotEmpty()
 
-        internal fun JSONArray.inneholderAktuelleSakerEllerVedtak(punsjbolleSøknadstype: PunsjbolleSøknadstype) =
+        internal fun JSONArray.inneholderAktuelleSakerEllerVedtak(fagsakYtelseType: FagsakYtelseType) =
             map { it as JSONObject }
-                .map { it.inneholderAktuelle("saker", punsjbolleSøknadstype) || it.inneholderAktuelle("vedtak", punsjbolleSøknadstype) }
+                .map { it.inneholderAktuelle("saker", fagsakYtelseType) || it.inneholderAktuelle("vedtak", fagsakYtelseType) }
                 .any { it }
 
-        internal fun JSONArray.inneholderAktuelleVedtak(punsjbolleSøknadstype: PunsjbolleSøknadstype) =
+        internal fun JSONArray.inneholderAktuelleVedtak(fagsakYtelseType: FagsakYtelseType) =
             map { it as JSONObject }
-                .map { it.inneholderAktuelle("vedtak", punsjbolleSøknadstype) }
+                .map { it.inneholderAktuelle("vedtak", fagsakYtelseType) }
                 .any { it }
 
         internal fun jsonPayloadFraFnrOgFom(identitetsnummer: Identitetsnummer, fraOgMed: LocalDate) =
