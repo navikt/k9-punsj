@@ -97,10 +97,13 @@ internal class GosysService(
         val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
         if (!httpStatus.is2xxSuccessful) return httpStatus to feil
 
+        if (oppgave!!.status == OppgaveStatus.FERDIGSTILT)
+            return HttpStatus.ALREADY_REPORTED to "Gosysoppgave med id=[$oppgaveId] er allerede ${OppgaveStatus.FERDIGSTILT.name}"
+
         return oppgaveGateway.patchOppgave(
             oppgaveId, PatchOppgaveRequest(
                 id = oppgaveId.toInt(),
-                oppgave!!.versjon,
+                oppgave.versjon,
                 status = OppgaveStatus.FERDIGSTILT
             )
         )
