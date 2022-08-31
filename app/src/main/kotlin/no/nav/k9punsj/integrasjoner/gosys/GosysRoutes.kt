@@ -65,7 +65,7 @@ internal class GosysRoutes(
             }
         }
 
-        DELETE("/api$LukkGosysoppgave") { request ->
+        PATCH("/api$LukkGosysoppgave") { request ->
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
