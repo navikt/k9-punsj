@@ -1,14 +1,12 @@
 package no.nav.k9punsj.integrasjoner.gosys
 
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.isSuccessful
-import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
-import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.opprettOppgaveUrl
+import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
+import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,18 +14,31 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
+/**
+ * @see <a href="https://oppgave.dev.intern.nav.no/"> Se swagger definisjon for mer info</a>
+ */
 @Service
 internal class OppgaveGateway(
     @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
+    private val client = WebClient
+        .builder()
+        .baseUrl(oppgaveBaseUrl.toString())
+        .build()
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(OppgaveGateway::class.java)
@@ -38,9 +49,31 @@ internal class OppgaveGateway(
     }
 
     private object Urls {
-        const val opprettOppgaveUrl = "/api/v1/oppgaver"
+        const val oppgaveUrl = "/api/v1/oppgaver"
+        const val patchEksisterendeOppgaveUrl = "/api/v1/oppgaver"
     }
 
+    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+
+        val (url, response, responseBody) = httpGet("$oppgaveUrl/$oppgaveId")
+        val harFeil = !response.statusCode.is2xxSuccessful
+        val httpStatus = response.statusCode
+        if (harFeil) {
+            logger.error("Feil ved henting av oppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody")
+        }
+
+        return Triple(
+            httpStatus,
+            if (harFeil) "Feil ved henting av oppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody" else null,
+            if (!harFeil) objectMapper().readValue(responseBody, GetOppgaveResponse::class.java) else null
+        )
+    }
+
+    /**
+     * Oppretter en ny oppgave.
+     *
+     * @see <a href="Oppretter en ny oppgave">Oppretter en ny oppgave</a>
+     */
     suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
         val opprettOppgaveRequest = OpprettOppgaveRequest(
             aktoerId = aktørid,
@@ -54,37 +87,123 @@ internal class OppgaveGateway(
                 throw it
             }
 
-        val (url, response, responseBody) = httpPost(body, opprettOppgaveUrl)
+        val (url, response, responseBody) = httpPost(body, oppgaveUrl)
 
-        val harFeil = !response.isSuccessful
+        val httpStatus = response.statusCode
+        val harFeil = !httpStatus.is2xxSuccessful
         if (harFeil) {
-            logger.error("Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody")
+            logger.error("Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody")
         }
-        return HttpStatus.valueOf(response.statusCode) to if (harFeil) "Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody" else null
+        return httpStatus to if (harFeil) "Feil ved opprettOppgaveGosysoppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody" else null
     }
 
-    private suspend fun httpPost(body: String, url: String): Triple<String, Response, String> {
-        val (_, response, result) = "$oppgaveBaseUrl$url"
-            .httpPost()
-            .body(body)
-            .header(
-                HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader(),
-                HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to UUID.randomUUID().toString(),
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
-                ConsumerIdHeaderKey to ConsumerIdHeaderValue
-            ).awaitStringResponseResult()
+    /**
+     * Endrer eksisterende oppgave.
+     *
+     * Denne operasjonen endrer kun på verdier som er gitt. Felter som ikke er med vil ikke bli berørt.
+     * @see <a href="https://oppgave.dev.intern.nav.no/#/Oppgave/patchOppgave">Endre eksisterende oppgave</a>
+     */
+    suspend fun patchOppgave(oppgaveId: String, patchOppgaveRequest: PatchOppgaveRequest): Pair<HttpStatus, String?> {
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(patchOppgaveRequest) }
+            .getOrElse {
+                logger.error(it.message)
+                throw it
+            }
 
-        val responseBody = result.fold(
-            { success -> success },
-            { error ->
-                when (error.response.body().isEmpty()) {
-                    true -> "{}"
-                    false -> String(error.response.body().toByteArray())
+        val (url, response, responseBody) = httpPatch(body, "$patchEksisterendeOppgaveUrl/$oppgaveId")
+
+        val httpStatus = response.statusCode
+        val harFeil = !httpStatus.is2xxSuccessful
+        if (harFeil) {
+            logger.error("Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody")
+        }
+        return httpStatus to if (harFeil) "Feil ved endring av gosysoppgave. Url=[$url], HttpStatus=[$httpStatus], Response=$responseBody" else null
+    }
+
+    private suspend fun httpPost(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
+        val responseEntity = kotlin.runCatching {
+            client
+                .post()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+
+        return responseEntity.resolve(url)
+    }
+
+    private suspend fun httpGet(url: String): Triple<String, ResponseEntity<String>, String?> {
+        val responseEntity = kotlin.runCatching {
+            client
+                .get()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+
+        return responseEntity.resolve(url)
+    }
+
+    private suspend fun httpPatch(body: String, url: String): Triple<String, ResponseEntity<String>, String?> {
+        val responseEntity: ResponseEntity<String> = kotlin.runCatching {
+            client
+                .patch()
+                .uri(url)
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .retrieve()
+                .toEntity<String>()
+                .awaitFirst()
+        }.håndterFeil()
+
+        return responseEntity.resolve(url)
+    }
+
+    private fun Result<ResponseEntity<String>>.håndterFeil() = fold(
+        onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
+        onFailure = { throwable: Throwable ->
+            when (throwable) {
+                is WebClientResponseException -> ResponseEntity
+                    .status(throwable.statusCode)
+                    .body(throwable.responseBodyAsString)
+
+                else -> throw throwable
+            }
+        }
+    )
+
+    private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
+        !statusCode.is2xxSuccessful -> {
+            when {
+                body.isNullOrBlank() -> {
+                    Triple(url, this, "{}")
+                }
+                else -> {
+                    Triple(url, this, body!!)
                 }
             }
-        )
-        return Triple(url, response, responseBody)
+        }
+        else -> {
+            Triple(url, this, body)
+        }
     }
 }
