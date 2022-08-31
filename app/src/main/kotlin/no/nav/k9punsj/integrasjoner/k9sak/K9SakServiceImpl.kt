@@ -124,7 +124,7 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        val (json, feil) = httpPost(body, "$baseUrl$sokFagsakerUrl")
+        val (json, feil) = httpPost(body, sokFagsakerUrl)
 
         return if(!json.isNullOrEmpty()) {
             Pair(json.fagsaker(), null)
