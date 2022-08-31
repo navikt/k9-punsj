@@ -30,6 +30,7 @@ class LokalBeans {
     private fun runMigrationLocal(configuration: DbConfiguration): MigrateResult? {
         val hikariDataSource = HikariDataSource(configuration.hikariConfig())
         val load = Flyway.configure()
+            .cleanDisabled(false)
             .locations("migreringer/")
             .dataSource(hikariDataSource)
             .load()
