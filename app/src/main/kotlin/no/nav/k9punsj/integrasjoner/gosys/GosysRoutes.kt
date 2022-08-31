@@ -1,4 +1,3 @@
- 
 package no.nav.k9punsj.integrasjoner.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
@@ -6,6 +5,9 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.FerdigstillGosysoppgave
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.GosysoppgaveIdKey
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,13 +16,17 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class GosysRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    private val gosysService: GosysService
+    private val gosysService: GosysService,
 ) {
 
     private companion object {
@@ -29,6 +35,9 @@ internal class GosysRoutes(
 
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
+        internal const val GosysoppgaveIdKey = "gosysoppgave_id"
+        internal const val FerdigstillGosysoppgave = "/gosys/oppgave/ferdigstill/{$GosysoppgaveIdKey}"
+
         internal const val Gjelder = "/gosys/gjelder"
     }
 
@@ -55,7 +64,30 @@ internal class GosysRoutes(
                 }
             }
         }
+
+        PATCH("/api$FerdigstillGosysoppgave") { request ->
+            RequestContext(coroutineContext, request) {
+                val oppgaveId = request.oppgaveId()
+
+                logger.info("Ferdigstiller gosysopgave med id=[{}]", oppgaveId)
+                val (httpStatus, feil) = gosysService.ferdigstillOppgave(oppgaveId = oppgaveId)
+
+                return@RequestContext if (feil != null) {
+                    ServerResponse
+                        .status(httpStatus)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(feil))
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .buildAndAwait()
+                }
+            }
+        }
     }
+
+    private suspend fun ServerRequest.oppgaveId(): String = pathVariable(GosysoppgaveIdKey)
 
     private suspend fun ServerRequest.mapOppgaveRequest() =
         body(BodyExtractors.toMono(GosysOpprettJournalføringsOppgaveRequest::class.java)).awaitFirst()
@@ -63,6 +95,6 @@ internal class GosysRoutes(
     data class GosysOpprettJournalføringsOppgaveRequest(
         val norskIdent: String,
         val journalpostId: String,
-        val gjelder: Gjelder = Gjelder.Annet
+        val gjelder: Gjelder = Gjelder.Annet,
     )
 }
