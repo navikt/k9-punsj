@@ -93,11 +93,10 @@ internal class GosysService(
         return oppgaveGateway.hentOppgave(oppgaveId)
     }
 
-    suspend fun lukkOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
+    suspend fun ferdigstillOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
         val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
         if (!httpStatus.is2xxSuccessful) return httpStatus to feil
 
-        logger.info("Lukker gosysoppgave med id=[{}]", oppgaveId)
         return oppgaveGateway.patchOppgave(
             oppgaveId, PatchOppgaveRequest(
                 id = oppgaveId.toInt(),

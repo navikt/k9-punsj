@@ -5,8 +5,8 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.FerdigstillGosysoppgave
 import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.GosysoppgaveIdKey
-import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.LukkGosysoppgave
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.Logger
@@ -36,7 +36,7 @@ internal class GosysRoutes(
     internal object Urls {
         internal const val OpprettJournalføringsoppgave = "/gosys/opprettJournalforingsoppgave/"
         internal const val GosysoppgaveIdKey = "gosysoppgave_id"
-        internal const val LukkGosysoppgave = "/gosys/oppgave/lukk/{$GosysoppgaveIdKey}"
+        internal const val FerdigstillGosysoppgave = "/gosys/oppgave/ferdigstill/{$GosysoppgaveIdKey}"
 
         internal const val Gjelder = "/gosys/gjelder"
     }
@@ -65,12 +65,12 @@ internal class GosysRoutes(
             }
         }
 
-        PATCH("/api$LukkGosysoppgave") { request ->
+        PATCH("/api$FerdigstillGosysoppgave") { request ->
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
-                logger.info("Lukker gosysopgave med id=[{}]", oppgaveId)
-                val (httpStatus, feil) = gosysService.lukkOppgave(oppgaveId = oppgaveId)
+                logger.info("Ferdigstiller gosysopgave med id=[{}]", oppgaveId)
+                val (httpStatus, feil) = gosysService.ferdigstillOppgave(oppgaveId = oppgaveId)
 
                 return@RequestContext if (feil != null) {
                     ServerResponse
