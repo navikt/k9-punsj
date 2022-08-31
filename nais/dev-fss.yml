@@ -108,6 +108,10 @@ spec:
       value: https://dokarkiv-q1.dev.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+    - name: K9_INFOTRYGD_BASE_URL
+      value: https://k9-infotrygd.dev.intern.nav.no
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-infotrygd/.default
     - name: NOTAT_ENABLED
       value: "true"
 
