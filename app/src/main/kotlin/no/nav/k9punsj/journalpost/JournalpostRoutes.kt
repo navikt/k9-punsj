@@ -251,6 +251,7 @@ internal class JournalpostRoutes(
 
                 val gosysoppgaveId = journalpost.gosysoppgaveId
                 if (!gosysoppgaveId.isNullOrBlank()) {
+                    logger.info("Ferdigstiller gosysoppgave med id=[{}]", gosysoppgaveId)
                     val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
                     if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
                         .status(httpStatus.value())
