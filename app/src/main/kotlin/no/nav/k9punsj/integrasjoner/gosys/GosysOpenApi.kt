@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.integrasjoner.gosys.GosysRoutes.Urls.GosysoppgaveIdKey
 import no.nav.k9punsj.openapi.OasFeil
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -64,12 +64,12 @@ internal class GosysOpenApi {
     fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
     }
 
-    @DeleteMapping(GosysRoutes.Urls.FerdigstillGosysoppgave, produces = ["application/json"])
+    @PatchMapping(GosysRoutes.Urls.FerdigstillGosysoppgave, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Oppgave lukket."
+                description = "Oppgave ferdigstilt."
             ),
             ApiResponse(
                 responseCode = "401",
@@ -101,11 +101,11 @@ internal class GosysOpenApi {
         ]
     )
     @Operation(
-        summary = "Lukker gosysoppgave",
-        description = "Lukker gosysoppgave",
+        summary = "Ferdigstiller gosysoppgave",
+        description = "Ferdigstiller gosysoppgave",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun lukkGosysoppgave(@PathVariable(GosysoppgaveIdKey) gosysoppgaveId: String) {
+    fun ferdigstillGosysoppgave(@PathVariable(GosysoppgaveIdKey) gosysoppgaveId: String) {
     }
 
     @GetMapping(GosysRoutes.Urls.Gjelder, produces = ["application/json"])
