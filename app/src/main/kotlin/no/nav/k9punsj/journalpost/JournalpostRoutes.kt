@@ -38,10 +38,14 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.status
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.json
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -245,6 +249,13 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait())
 
+                val gosysoppgaveId = journalpost.gosysoppgaveId
+                if (!gosysoppgaveId.isNullOrBlank()) {
+                    val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
+                    if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
+                        .status(httpStatus.value())
+                        .bodyValueAndAwait(feil!!)
+                }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 journalpostService.settTilFerdig(journalpostId)
