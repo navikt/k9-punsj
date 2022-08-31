@@ -63,8 +63,8 @@ no.nav:
   gosys:
     base_url: ${GOSYS_BASE_URL}
   infotrygd:
-    base_url: ${INFOTRYGD_BASE_URL}
-    scope: ${INFOTRYGD_SCOPE}
+    base_url: ${K9_INFOTRYGD_BASE_URL}
+    scope: ${K9_INFOTRYGD_SCOPE}
   security:
     sts:
       client:
