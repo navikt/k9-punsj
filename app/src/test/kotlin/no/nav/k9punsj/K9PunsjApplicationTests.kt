@@ -107,6 +107,7 @@ class K9PunsjApplicationTests {
             "journalpostStatus": "MOTTATT",
             "kanOpprettesJournalføringsoppgave": true,
             "kanKopieres": true,
+            "gosysoppgaveId": null
         }
             """.trimIndent(),
             body,

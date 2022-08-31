@@ -90,8 +90,9 @@ internal class JournalpostRoutes(
         GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
+                    val journalpostId = request.journalpostId()
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
-                        journalpostId = request.journalpostId()
+                        journalpostId = journalpostId
                     ) ?: throw IkkeFunnet()
 
                     val norskIdent = if (journalpostInfo.norskIdent == null && journalpostInfo.aktørId != null) {
@@ -101,16 +102,19 @@ internal class JournalpostRoutes(
                         journalpostInfo.norskIdent
                     }
 
-                    val punsjInnsendingType = journalpostService.hentPunsjInnsendingType(request.journalpostId())
+                    val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
+
+                    val punsjInnsendingType = journalpostService.hentPunsjInnsendingType(journalpostId)
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
                         dokumenter = journalpostInfo.dokumenter,
-                        venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                        venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = journalpostId),
                         punsjInnsendingType = punsjInnsendingType,
-                        kanSendeInn = journalpostService.kanSendeInn(listOf(request.journalpostId())),
+                        kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId)),
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
+                        gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus
                     )
@@ -149,7 +153,7 @@ internal class JournalpostRoutes(
                         .filter { it?.journalpostId != null }
                         .groupBy { it?.journalpostId }
 
-                val dto = finnJournalposterPåPerson.map { it ->
+                val dto = finnJournalposterPåPerson.map { it: PunsjJournalpost ->
                     val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
                         ?.map { OasDokumentInfo(it.dokumentId) }?.toSet()
 
