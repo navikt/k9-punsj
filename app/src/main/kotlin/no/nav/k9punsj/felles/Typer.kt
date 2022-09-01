@@ -46,7 +46,7 @@ data class RutingDto(
     val pleietrengende: String?,
     val annenPart: String?,
     val journalpostId: String,
-    val fagsakYtelseType: FagsakYtelseType
+    val fagsakYtelseType: String
 )
 
 data class IdentOgJournalpost(

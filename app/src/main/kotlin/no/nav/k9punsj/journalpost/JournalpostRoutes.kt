@@ -5,6 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -206,6 +207,7 @@ internal class JournalpostRoutes(
                 }
 
                 val aktørId = pdlService.aktørIdFor(dto.brukerIdent)?.let { setOf(it) } ?: emptySet()
+                val fagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseType)
 
                 val destinasjon = try {
                     rutingService.destinasjon(
@@ -215,7 +217,7 @@ internal class JournalpostRoutes(
                         fraOgMed = LocalDate.now(),
                         aktørIder = aktørId,
                         journalpostIds = setOf(dto.journalpostId),
-                        fagsakYtelseType = dto.fagsakYtelseType
+                        fagsakYtelseType = fagsakYtelseType
                     )
                 } catch (e: Exception) {
                     return@RequestContext ServerResponse
