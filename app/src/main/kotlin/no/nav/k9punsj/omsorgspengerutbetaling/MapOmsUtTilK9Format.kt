@@ -4,11 +4,14 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
+import no.nav.k9.søknad.felles.fravær.FraværÅrsak
+import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer
+import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetalingSøknadValidator
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -106,11 +109,12 @@ internal class MapOmsUtTilK9Format(
 
     private fun List<OmsorgspengerutbetalingSøknadDto.FraværPeriode>.leggTilFraværsperioder() {
         val fraværPerioder = mapIndexed { index, fraværsPeriode ->
-            val periode = fraværsPeriode.periode.somK9Periode()
-            val timerBorte = fraværsPeriode.tidPrDag?.somDuration()
-            val fraværÅrsak = fraværsPeriode.fraværÅrsak
-            val søknadÅrsak = fraværsPeriode.søknadÅrsak
-            val aktivitetFravær = listOf(fraværsPeriode.aktivitetsFravær)
+            val periode: Periode? = fraværsPeriode.periode.somK9Periode()
+            val timerBorte: Duration? = fraværsPeriode.tidPrDag?.somDuration()
+            val normalArbeidstid: Duration? = fraværsPeriode.normalArbeidstid?.somDuration()
+            val fraværÅrsak: FraværÅrsak? = fraværsPeriode.fraværÅrsak
+            val søknadÅrsak: SøknadÅrsak? = fraværsPeriode.søknadÅrsak
+            val aktivitetFravær: List<AktivitetFravær> = listOf(fraværsPeriode.aktivitetsFravær)
             if (AktivitetFravær.ARBEIDSTAKER == fraværsPeriode.aktivitetsFravær && fraværsPeriode.organisasjonsnummer.isNullOrEmpty()) {
                 feil.add(
                     Feil(
@@ -123,7 +127,20 @@ internal class MapOmsUtTilK9Format(
 
             val organisasjonsnummer = Organisasjonsnummer.of(fraværsPeriode.organisasjonsnummer)
 
-            FraværPeriode(periode, timerBorte, fraværÅrsak, søknadÅrsak, aktivitetFravær, organisasjonsnummer, null)
+            val fraværsPeriode = FraværPeriode()
+                .medPeriode(periode)
+                .medFraværÅrsak(fraværÅrsak)
+                .medSøknadsårsak(søknadÅrsak)
+                .medAktivitetFravær(aktivitetFravær)
+                .medArbeidsgiverOrgNr(organisasjonsnummer)
+
+            if (timerBorte != null && timerBorte.isZero) {
+                fraværsPeriode.medNulling()
+            } else {
+                fraværsPeriode
+                    .medFravær(timerBorte)
+                    .medNormalarbeidstid(normalArbeidstid)
+            }
         }
         omsorgspengerUtbetaling.medFraværsperioder(fraværPerioder)
     }
@@ -146,7 +163,7 @@ internal class MapOmsUtTilK9Format(
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsUtTilK9Format::class.java)
         private val Validator = OmsorgspengerUtbetalingSøknadValidator()
-        private const val Versjon = "1.0.0"
+        private const val Versjon = "1.1.0" // støtte for normalArbeidstid.
 
         private fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
             val lista: MutableList<PeriodeDto> = mutableListOf()

@@ -25,7 +25,8 @@
         "fom": "2018-12-26",
         "tom": "2018-12-31"
       },
-      "faktiskTidPrDag": "7,5"
+      "faktiskTidPrDag": "4",
+      "normalArbeidstidPrDag": "7,5"
     }],
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
