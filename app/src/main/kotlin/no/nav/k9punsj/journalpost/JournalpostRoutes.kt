@@ -247,6 +247,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.LukkJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
 
                 val journalpost: PunsjJournalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -263,7 +264,14 @@ internal class JournalpostRoutes(
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-                journalpostService.settTilFerdig(journalpostId)
+                val (status, body) = journalpostService.settTilFerdig(
+                    journalpostId = journalpostId,
+                    ferstillJournalpost = true,
+                    enhet = enhet
+                )
+                if (!status.is2xxSuccessful) {
+                    return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
+                }
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
@@ -301,6 +309,7 @@ internal class JournalpostRoutes(
         GET("/api${Urls.LukkJournalpostDebugg}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
 
                 journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -310,7 +319,15 @@ internal class JournalpostRoutes(
                 val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
                 if (kanSendeInn) {
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-                    journalpostService.settTilFerdig(journalpostId)
+                    val (status, body) = journalpostService.settTilFerdig(
+                        journalpostId = journalpostId,
+                        ferstillJournalpost = true,
+                        enhet = enhet
+                    )
+                    if (!status.is2xxSuccessful) {
+                        return@RequestContext ServerResponse.status(status)
+                            .bodyValueAndAwait(body!!)
+                    }
                     logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
                     return@RequestContext ServerResponse
@@ -407,7 +424,13 @@ internal class JournalpostRoutes(
                     ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 )
 
-                journalpostService.settTilFerdig(journalpostId)
+                val (status, body) = journalpostService.settTilFerdig(
+                    journalpostId = journalpostId,
+                    ferstillJournalpost = false
+                )
+                if (!status.is2xxSuccessful) {
+                    return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
+                }
 
                 val enhetsKode = enhet.trimIndent().substring(0, 4)
                 val bareTall = Pattern.matches("^[0-9]*$", enhetsKode)

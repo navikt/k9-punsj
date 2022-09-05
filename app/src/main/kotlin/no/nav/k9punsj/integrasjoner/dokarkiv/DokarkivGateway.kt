@@ -22,6 +22,7 @@ import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
+import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -80,30 +81,13 @@ class DokarkivGateway(
         }
 
         ferdigstillJournalpost.kanFerdigstilles()
-        val pair = "journalfoerendeEnhet" to enhetKode
-        val body = emptyMap<String, String>().plus(pair)
+        val responseFerdigstiltJournalpost = ferdigstillJournalpost(journalpostId, enhetKode)
 
-        val fromValue = BodyInserters.fromValue(body)
-
-        logger.info("Boddy$fromValue")
-        val awaitFirst = client
-            .patch()
-            .uri { it.pathSegment("rest", "journalpostapi", "v1", "journalpost", journalpostId, "ferdigstill").build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(fromValue)
-            .retrieve()
-            .toEntity(String::class.java)
-            .awaitFirst()
-
-        if (awaitFirst.statusCode.value() != 200) {
-            logger.error("Feiler med" + awaitFirst.body)
+        if (responseFerdigstiltJournalpost.statusCode.value() != 200) {
+            logger.error("Feiler med" + responseFerdigstiltJournalpost.body)
         }
 
-        return awaitFirst.statusCode.value()
+        return responseFerdigstiltJournalpost.statusCode.value()
     }
 
     internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
@@ -142,6 +126,28 @@ class DokarkivGateway(
         throw IllegalStateException("Feilet med å opprette journalpost")
     }
 
+    internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {
+        val body = BodyInserters.fromValue("""{"journalfoerendeEnhet": "$enhet"}""".trimIndent())
+
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(scopes = dokarkivScope, onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+
+        return kotlin.runCatching {
+            client
+                .patch()
+                .uri(URI(journalpostId.ferdigstillJournalpostUrl()))
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+    }
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(DokarkivGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -166,8 +172,8 @@ class DokarkivGateway(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
     private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
+    private fun String.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this/ferdigstill"
 
-    //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
         true -> getString(key)
         false -> null

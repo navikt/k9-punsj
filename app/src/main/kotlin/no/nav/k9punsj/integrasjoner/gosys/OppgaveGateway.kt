@@ -8,6 +8,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
@@ -177,19 +177,6 @@ internal class OppgaveGateway(
 
         return responseEntity.resolve(url)
     }
-
-    private fun Result<ResponseEntity<String>>.håndterFeil() = fold(
-        onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-        onFailure = { throwable: Throwable ->
-            when (throwable) {
-                is WebClientResponseException -> ResponseEntity
-                    .status(throwable.statusCode)
-                    .body(throwable.responseBodyAsString)
-
-                else -> throw throwable
-            }
-        }
-    )
 
     private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
         !statusCode.is2xxSuccessful -> {

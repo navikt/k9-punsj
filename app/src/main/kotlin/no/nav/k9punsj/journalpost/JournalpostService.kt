@@ -20,6 +20,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -172,8 +173,18 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun settTilFerdig(journalpostId: String) {
+    internal suspend fun settTilFerdig(journalpostId: String, ferstillJournalpost: Boolean = false, enhet: String? = null): Pair<HttpStatus, String?> {
+        if (ferstillJournalpost) {
+            require(!enhet.isNullOrBlank()) { "enhet kan ikke være null, dersom journalpost skal ferdigstilles." }
+            logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
+            val ferdigstillJournalpostRespons = dokarkivGateway.ferdigstillJournalpost(journalpostId, enhet)
+            if (!ferdigstillJournalpostRespons.statusCode.is2xxSuccessful) {
+                return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
+            }
+            return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
+        }
         journalpostRepository.ferdig(journalpostId)
+        return HttpStatus.OK to "OK"
     }
 
     internal suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
