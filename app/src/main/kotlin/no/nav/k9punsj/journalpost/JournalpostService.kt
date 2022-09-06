@@ -21,7 +21,9 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 @Service
@@ -256,7 +258,8 @@ data class JournalpostInfoDto(
     val erSaksbehandler: Boolean? = null,
     val journalpostStatus: String,
     val kanOpprettesJournalføringsoppgave: Boolean,
-    val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående // Brukes av frontend
+    val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående, // Brukes av frontend,
+    val gosysoppgaveId: String?
 )
 
 data class VentDto(

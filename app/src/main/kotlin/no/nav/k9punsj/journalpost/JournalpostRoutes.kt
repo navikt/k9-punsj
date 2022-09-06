@@ -38,10 +38,14 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.status
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.json
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -86,8 +90,9 @@ internal class JournalpostRoutes(
         GET("/api${Urls.JournalpostInfo}") { request ->
             RequestContext(coroutineContext, request) {
                 try {
+                    val journalpostId = request.journalpostId()
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
-                        journalpostId = request.journalpostId()
+                        journalpostId = journalpostId
                     ) ?: throw IkkeFunnet()
 
                     val norskIdent = if (journalpostInfo.norskIdent == null && journalpostInfo.aktørId != null) {
@@ -97,16 +102,19 @@ internal class JournalpostRoutes(
                         journalpostInfo.norskIdent
                     }
 
-                    val punsjInnsendingType = journalpostService.hentPunsjInnsendingType(request.journalpostId())
+                    val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
+
+                    val punsjInnsendingType = journalpostService.hentPunsjInnsendingType(journalpostId)
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
                         dokumenter = journalpostInfo.dokumenter,
-                        venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = request.journalpostId()),
+                        venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = journalpostId),
                         punsjInnsendingType = punsjInnsendingType,
-                        kanSendeInn = journalpostService.kanSendeInn(listOf(request.journalpostId())),
+                        kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId)),
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
+                        gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus
                     )
@@ -145,7 +153,7 @@ internal class JournalpostRoutes(
                         .filter { it?.journalpostId != null }
                         .groupBy { it?.journalpostId }
 
-                val dto = finnJournalposterPåPerson.map { it ->
+                val dto = finnJournalposterPåPerson.map { it: PunsjJournalpost ->
                     val dok = journalpostMap[it.journalpostId]?.flatMap { post -> post!!.dokumenter }
                         ?.map { OasDokumentInfo(it.dokumentId) }?.toSet()
 
@@ -245,6 +253,14 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait())
 
+                val gosysoppgaveId = journalpost.gosysoppgaveId
+                if (!gosysoppgaveId.isNullOrBlank()) {
+                    logger.info("Ferdigstiller gosysoppgave med id=[{}]", gosysoppgaveId)
+                    val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
+                    if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
+                        .status(httpStatus.value())
+                        .bodyValueAndAwait(feil!!)
+                }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 journalpostService.settTilFerdig(journalpostId)
