@@ -13,6 +13,7 @@ import no.nav.k9punsj.ruting.RutingGrunnlag
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONArray
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
@@ -105,10 +106,12 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$hentVedtakForPleietrengende], HttpStatusCode=[${response.statusCode}], Response=[$response]"
         }
 
+        log.info("DEBUG: Svar fra infotrygd = [${response.body.toString()}]")
         return response
     }
 
     internal companion object {
+        private val log = LoggerFactory.getLogger(InfotrygdClient::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
 

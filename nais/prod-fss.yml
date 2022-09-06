@@ -118,6 +118,10 @@ spec:
       value: https://dokarkiv.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: K9_INFOTRYGD_BASE_URL
+      value: https://k9-infotrygd.intern.nav.no
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-infotrygd/.default
 
       # Integrasjoner (Kafka)
       # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los

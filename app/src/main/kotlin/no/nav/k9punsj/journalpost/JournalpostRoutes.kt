@@ -24,6 +24,7 @@ import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.ruting.Destinasjon
 import no.nav.k9punsj.ruting.RutingService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
@@ -193,12 +194,12 @@ internal class JournalpostRoutes(
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
-                    val punsjbolleRuting = when (hentHvisJournalpostMedId.skalTilK9) {
-                        true -> RutingService.Destinasjon.K9Sak
-                        false -> RutingService.Destinasjon.Infotrygd
+                    val ruting = when (hentHvisJournalpostMedId.skalTilK9) {
+                        true -> Destinasjon.K9Sak
+                        false -> Destinasjon.Infotrygd
                     }
 
-                    val skalTilK9Sak = (punsjbolleRuting == RutingService.Destinasjon.K9Sak)
+                    val skalTilK9Sak = (ruting == Destinasjon.K9Sak)
 
                     return@RequestContext ServerResponse
                         .ok()
@@ -225,13 +226,14 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait("Feil vid ruting-kall: ${e.localizedMessage}")
                 }
 
+                val skalTilK9Sak = (destinasjon == Destinasjon.K9Sak)
+
                 lagreHvorJournalpostSkal(
                     hentHvisPunsjJournalpostMedId = hentHvisJournalpostMedId,
                     dto = dto,
-                    skalTilK9 = (destinasjon == RutingService.Destinasjon.K9Sak)
+                    skalTilK9 = skalTilK9Sak
                 )
 
-                val skalTilK9Sak = (destinasjon == RutingService.Destinasjon.K9Sak)
                 return@RequestContext ServerResponse
                     .ok()
                     .json()

@@ -1,11 +1,9 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9punsj.LokalProfil
-import no.nav.k9punsj.felles.AktørId
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.integrasjoner.infotrygd.PunsjbolleSøknadstype
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService

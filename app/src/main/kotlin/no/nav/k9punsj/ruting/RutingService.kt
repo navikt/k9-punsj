@@ -113,11 +113,6 @@ internal class RutingService(
         }
     }
 
-    internal enum class Destinasjon {
-        K9Sak,
-        Infotrygd
-    }
-
     private companion object {
         private val logger = LoggerFactory.getLogger(RutingService::class.java)
 
