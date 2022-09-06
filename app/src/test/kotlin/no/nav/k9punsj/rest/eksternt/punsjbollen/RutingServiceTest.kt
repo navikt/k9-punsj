@@ -8,6 +8,7 @@ import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.LopendeSakDto
+import no.nav.k9punsj.ruting.Destinasjon
 import no.nav.k9punsj.ruting.RutingGrunnlag
 import no.nav.k9punsj.ruting.RutingService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,7 +70,7 @@ internal class RutingServiceTest {
             )
         }
 
-        assertEquals(RutingService.Destinasjon.K9Sak, result)
+        assertEquals(Destinasjon.K9Sak, result)
     }
 
     @Test
@@ -86,7 +87,7 @@ internal class RutingServiceTest {
             )
         }
 
-        assertEquals(RutingService.Destinasjon.K9Sak, result)
+        assertEquals(Destinasjon.K9Sak, result)
     }
 
     @Test
@@ -104,6 +105,6 @@ internal class RutingServiceTest {
             )
         }
 
-        assertEquals(RutingService.Destinasjon.K9Sak, result)
+        assertEquals(Destinasjon.K9Sak, result)
     }
 }
