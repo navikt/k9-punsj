@@ -33,6 +33,7 @@ import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -61,6 +62,7 @@ internal class JournalpostRoutes(
     private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
+    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
 ) {
 
     internal companion object {
@@ -253,14 +255,16 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait())
 
-                val gosysoppgaveId = journalpost.gosysoppgaveId
-                if (!gosysoppgaveId.isNullOrBlank()) {
-                    val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
-                    if (!httpStatus.is2xxSuccessful) {
-                        logger.error("Feilet med å ferdigstille gosysoppgave. Grunn: {}", feil)
-                        return@RequestContext ServerResponse
-                            .status(httpStatus.value())
-                            .bodyValueAndAwait(feil!!)
+                if (ferdigstillGosysoppgaveEnabled) {
+                    val gosysoppgaveId = journalpost.gosysoppgaveId
+                    if (!gosysoppgaveId.isNullOrBlank()) {
+                        val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
+                        if (!httpStatus.is2xxSuccessful) {
+                            logger.error("Feilet med å ferdigstille gosysoppgave. Grunn: {}", feil)
+                            return@RequestContext ServerResponse
+                                .status(httpStatus.value())
+                                .bodyValueAndAwait(feil!!)
+                        }
                     }
                 }
 
