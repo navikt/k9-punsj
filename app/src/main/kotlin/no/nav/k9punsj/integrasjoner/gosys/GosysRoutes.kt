@@ -69,7 +69,6 @@ internal class GosysRoutes(
             RequestContext(coroutineContext, request) {
                 val oppgaveId = request.oppgaveId()
 
-                logger.info("Ferdigstiller gosysopgave med id=[{}]", oppgaveId)
                 val (httpStatus, feil) = gosysService.ferdigstillOppgave(oppgaveId = oppgaveId)
 
                 return@RequestContext if (feil != null) {
