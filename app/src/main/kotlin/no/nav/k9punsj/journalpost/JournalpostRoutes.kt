@@ -256,11 +256,13 @@ internal class JournalpostRoutes(
 
                 val gosysoppgaveId = journalpost.gosysoppgaveId
                 if (!gosysoppgaveId.isNullOrBlank()) {
-                    logger.info("Ferdigstiller gosysoppgave med id=[{}]", gosysoppgaveId)
                     val (httpStatus, feil) = gosysService.ferdigstillOppgave(gosysoppgaveId)
-                    if (!httpStatus.is2xxSuccessful) return@RequestContext ServerResponse
-                        .status(httpStatus.value())
-                        .bodyValueAndAwait(feil!!)
+                    if (!httpStatus.is2xxSuccessful) {
+                        logger.error("Feilet med å ferdigstille gosysoppgave. Grunn: {}", feil)
+                        return@RequestContext ServerResponse
+                            .status(httpStatus.value())
+                            .bodyValueAndAwait(feil!!)
+                    }
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)

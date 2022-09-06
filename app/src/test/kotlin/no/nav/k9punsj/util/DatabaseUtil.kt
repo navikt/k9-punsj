@@ -5,20 +5,24 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
-import no.nav.k9punsj.configuration.loadFlyway
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
+import org.flywaydb.core.Flyway
 import javax.sql.DataSource
 
 class DatabaseUtil {
     companion object {
         internal val embeddedPostgres = EmbeddedPostgres.start()
         internal val dataSource: DataSource = embeddedPostgres.postgresDatabase.also { dataSource ->
-            val flyway = loadFlyway(dataSource)
+            val flyway = Flyway.configure()
+                .cleanDisabled(false)
+                .locations("migreringer/")
+                .dataSource(dataSource)
+                .load()!!
             flyway.clean()
             flyway.migrate()
         }
