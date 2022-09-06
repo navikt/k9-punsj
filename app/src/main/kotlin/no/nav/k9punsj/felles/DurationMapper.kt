@@ -4,6 +4,8 @@ import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.Duration
 import kotlin.math.roundToLong
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 internal object DurationMapper {
     internal fun String?.somDuration(): Duration? {
@@ -52,22 +54,26 @@ internal object DurationMapper {
 
     /*
         Korrigerer arbeidstid som havner på 80% fordi att saken får avslag om faktisk arbeidstid er øver 80% (80.1% gir avslag f.eks.)
+        >=81% blir ikke korrigert.
      */
     internal fun korrigereArbeidstidRettOver80Prosent(
         faktiskArbeidTimerPerDag: String?,
         jobberNormaltTimerPerDag: String?
     ): TimerOgMinutter? {
         if (!faktiskArbeidTimerPerDag.isNullOrEmpty() && !jobberNormaltTimerPerDag.isNullOrEmpty()) {
-            val beregnetArbeidstidProsent = faktiskArbeidTimerPerDag.somDuration()?.multipliedBy(100)
-                ?.dividedBy(jobberNormaltTimerPerDag.somDuration())
-            val korrigertArbeidstid = if (beregnetArbeidstidProsent!! == 80L) {
+            val faktiskt = faktiskArbeidTimerPerDag.somDuration()!!.toMillis()
+            val normalt = jobberNormaltTimerPerDag.somDuration()!!.toMillis()
+            val beregnetArbeidstidProsent = faktiskt.times(100).div(normalt)
+
+            val korrigertArbeidstid = if (beregnetArbeidstidProsent == 80L) {
                 faktiskArbeidTimerPerDag.somDuration()?.minusMinutes(1)
             } else {
                 faktiskArbeidTimerPerDag.somDuration()
             }
             return korrigertArbeidstid?.somTimerOgMinutter().somTimerOgMinutterDto()
+        } else {
+            return null
         }
-        return null
     }
 
     private fun String.somDesimalOrNull() = replace(",", ".").toDoubleOrNull()

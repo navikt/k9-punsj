@@ -6,6 +6,8 @@ import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Duration
@@ -63,5 +65,19 @@ internal class DurationMapperTest {
         val forventet2 = TimerOgMinutter(timer = 6, minutter = 58)
         val faktiskt2 = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag2, jobberNormaltTimerPerDag)
         assertEquals(forventet2, faktiskt2)
+    }
+
+    @Test
+    fun `korrigering80ProsentArbeidstid håndterer null-verdier`() {
+        val faktiskArbeidTimerPerDag = "6,88" // // 80% = 53min
+        val jobberNormaltTimerPerDag = "8,6"
+
+        val ikkeNull = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag)
+        val nullNormalt = korrigereArbeidstidRettOver80Prosent(faktiskArbeidTimerPerDag, null)
+        val nullFaktiskt = korrigereArbeidstidRettOver80Prosent(null, jobberNormaltTimerPerDag)
+
+        assertNotNull(ikkeNull)
+        assertNull(nullNormalt)
+        assertNull(nullFaktiskt)
     }
 }
