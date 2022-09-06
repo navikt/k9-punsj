@@ -94,11 +94,15 @@ internal class GosysService(
     }
 
     suspend fun ferdigstillOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
+        logger.info("Ferdigstiller gosysoppgave med id=[{}]", oppgaveId)
         val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
         if (!httpStatus.is2xxSuccessful) return httpStatus to feil
 
-        if (oppgave!!.status == OppgaveStatus.FERDIGSTILT)
-            return HttpStatus.ALREADY_REPORTED to "Gosysoppgave med id=[$oppgaveId] er allerede ${OppgaveStatus.FERDIGSTILT.name}"
+        val allerdeFerdigstiltMelding = "Gosysoppgave med id=[$oppgaveId] er allerede ${OppgaveStatus.FERDIGSTILT.name}"
+        if (oppgave!!.status == OppgaveStatus.FERDIGSTILT) {
+            logger.info(allerdeFerdigstiltMelding)
+            return HttpStatus.ALREADY_REPORTED to allerdeFerdigstiltMelding
+        }
 
         return oppgaveGateway.patchOppgave(
             oppgaveId, PatchOppgaveRequest(
