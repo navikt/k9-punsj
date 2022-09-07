@@ -177,8 +177,10 @@ class JournalpostService(
         if (ferstillJournalpost) {
             require(!enhet.isNullOrBlank()) { "enhet kan ikke være null, dersom journalpost skal ferdigstilles." }
             logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
+            logger.info("Enhet = [{}]", enhet) // TODO: Fjern før prodsetting
             val ferdigstillJournalpostRespons = dokarkivGateway.ferdigstillJournalpost(journalpostId, enhet)
             if (!ferdigstillJournalpostRespons.statusCode.is2xxSuccessful) {
+                logger.error("Feilet med å ferdigstille journalpost med id=[{}]", journalpostId)
                 return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
             }
             return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
