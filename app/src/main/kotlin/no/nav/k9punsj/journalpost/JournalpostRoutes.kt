@@ -438,7 +438,7 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
                 }
 
-                val enhetsKode = enhet.trimIndent().substring(0, 4)
+                val enhetsKode = enhet.trimIndent()
                 val bareTall = Pattern.matches("^[0-9]*$", enhetsKode)
                 if (!bareTall) {
                     throw IllegalStateException("Klarte ikke hente riktig enhetkode")
