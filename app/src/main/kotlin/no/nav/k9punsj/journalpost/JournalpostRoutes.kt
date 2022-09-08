@@ -249,7 +249,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.LukkJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
-                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
                 val journalpost: PunsjJournalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -315,7 +315,7 @@ internal class JournalpostRoutes(
         GET("/api${Urls.LukkJournalpostDebugg}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
-                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
                 journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -416,7 +416,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.JournalførPåGenerellSak}") { request ->
             RequestContext(coroutineContext, request) {
                 val identOgJournalpost = request.identOgJournalpost()
-                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
                 val journalpostId = identOgJournalpost.journalpostId
 
                 journalpostService.hentHvisJournalpostMedId(journalpostId)
