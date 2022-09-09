@@ -185,7 +185,7 @@ class JournalpostService(
         journalpostId: String,
         ferdigstillJournalpost: Boolean = false,
         enhet: String? = null,
-        sakRelasjon: Sak?,
+        sakRelasjon: Sak? = null,
     ): Pair<HttpStatus, String?> {
         if (ferdigstillJournalpost) {
             require(!enhet.isNullOrBlank()) { "Enhet kan ikke være null, dersom journalpost skal ferdigstilles." }
