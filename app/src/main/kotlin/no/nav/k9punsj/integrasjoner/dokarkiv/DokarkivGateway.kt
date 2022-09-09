@@ -22,6 +22,7 @@ import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
+import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
@@ -124,6 +125,41 @@ class DokarkivGateway(
         }
 
         throw IllegalStateException("Feilet med å opprette journalpost")
+    }
+
+    internal suspend fun oppdaterJournalpost(journalpostId: String, oppdaterJournalpostRequest: OppdaterJournalpostRequest): String {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(oppdaterJournalpostRequest) }
+            .getOrElse {
+                logger.error(it.message)
+                throw it
+            }
+
+        val response = kotlin.runCatching {
+            client
+                .put()
+                .uri(URI.create(journalpostId.oppdaterJournalpostUrl()))
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+
+        if (response.statusCode == HttpStatus.OK && response.body != null) {
+            return response.body!!
+        }
+
+        throw IllegalStateException("Feilet med å opdatere journalpost")
     }
 
     internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {
@@ -229,6 +265,10 @@ class DokarkivGateway(
 
 data class JournalPostResponse(val journalpostId: String)
 
+data class OppdaterJournalpostRequest(
+    val sak: Sak? = null
+)
+
 data class JournalPostRequest(
     internal val eksternReferanseId: String,
     internal val tittel: String,
@@ -296,11 +336,27 @@ data class JournalPostRequest(
     }
 }
 
-private data class Sak(
-    val fagsakId: String,
-    val fagsakSystem: FagsakSystem = FagsakSystem.K9,
-    val sakstype: SaksType
-)
+data class Sak(
+    val sakstype: SaksType,
+    val fagsakId: String? = null,
+    val fagsaksystem: FagsakSystem? = null,
+) {
+    init {
+        when (sakstype) {
+            SaksType.FAGSAK -> {
+                require(fagsaksystem != null && !fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.FAGSAK}, så må fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.GENERELL_SAK -> {
+                require(fagsaksystem == null && fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.GENERELL_SAK}, så kan ikke fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.ARKIVSAK -> throw UnsupportedOperationException("ARKIVSAK skal kun brukes etter avtale.")
+        }
+    }
+}
 
 enum class Tema { OMS }
 enum class JournalpostType { NOTAT }

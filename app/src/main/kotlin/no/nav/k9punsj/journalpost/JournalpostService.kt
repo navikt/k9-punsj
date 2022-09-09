@@ -16,8 +16,10 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.Dokument
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
+import no.nav.k9punsj.integrasjoner.dokarkiv.OppdaterJournalpostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -32,7 +34,7 @@ class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
     private val dokarkivGateway: DokarkivGateway,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
 
     private companion object {
@@ -53,7 +55,10 @@ class JournalpostService(
         } else {
             val parsedJournalpost = safJournalpost.parseJournalpost()
             if (!parsedJournalpost.harTilgang) {
-                val maskertJournalpost = safJournalpost.copy(avsenderMottaker = SafDtos.AvsenderMottaker(null, null), bruker = SafDtos.Bruker(null, null))
+                val maskertJournalpost = safJournalpost.copy(
+                    avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
+                    bruker = SafDtos.Bruker(null, null)
+                )
                 logger.warn("Saksbehandler har ikke tilgang. Journalpost: [$maskertJournalpost]")
                 throw IkkeTilgang("Saksbehandler har ikke tilgang.")
             } else {
@@ -125,7 +130,7 @@ class JournalpostService(
     internal suspend fun journalførMotGenerellSak(
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String
+        enhetKode: String,
     ): Int {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
@@ -141,9 +146,9 @@ class JournalpostService(
         } else {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
         } ?: parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_OPPRETTET }?.dato
-            ?: logger.warn(
-                "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedSafJournalpost.relevanteDatoer.map { it.datotype.name }}"
-            ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
+        ?: logger.warn(
+            "Fant ikke relevant dato ved utleding av mottatt dato. Bruker dagens dato. RelevanteDatoer=${parsedSafJournalpost.relevanteDatoer.map { it.datotype.name }}"
+        ).let { LocalDateTime.now(ZoneId.of("Europe/Oslo")) }
     }
 
     internal suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
@@ -167,23 +172,49 @@ class JournalpostService(
         return journalpostRepository.kanSendeInn(journalpostId)
     }
 
-    internal suspend fun lagre(punsjJournalpost: PunsjJournalpost, kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL) {
+    internal suspend fun lagre(
+        punsjJournalpost: PunsjJournalpost,
+        kilde: PunsjJournalpostKildeType = PunsjJournalpostKildeType.FORDEL,
+    ) {
         journalpostRepository.lagre(punsjJournalpost, kilde) {
             punsjJournalpost
         }
     }
 
-    internal suspend fun settTilFerdig(journalpostId: String, ferstillJournalpost: Boolean = false, enhet: String? = null): Pair<HttpStatus, String?> {
-        if (ferstillJournalpost) {
-            require(!enhet.isNullOrBlank()) { "enhet kan ikke være null, dersom journalpost skal ferdigstilles." }
-            logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
+    internal suspend fun settTilFerdig(
+        journalpostId: String,
+        ferdigstillJournalpost: Boolean = false,
+        enhet: String? = null,
+        sakRelasjon: Sak?,
+    ): Pair<HttpStatus, String?> {
+        if (ferdigstillJournalpost) {
+            require(!enhet.isNullOrBlank()) { "Enhet kan ikke være null, dersom journalpost skal ferdigstilles." }
+            require(sakRelasjon != null) { "Sakrelasjon kan ikke være null dersom journalpost skal ferdigstilles." }
             logger.info("Enhet = [{}]", enhet) // TODO: Fjern før prodsetting
-            val ferdigstillJournalpostRespons = dokarkivGateway.ferdigstillJournalpost(journalpostId, enhet)
-            if (!ferdigstillJournalpostRespons.statusCode.is2xxSuccessful) {
-                logger.error("Feilet med å ferdigstille journalpost med id=[{}]", journalpostId)
+            logger.info("Sakrelasjon = [{}]", sakRelasjon) // TODO: Fjern før prodsetting
+
+            val parseJournalpost = hentSafJournalPost(journalpostId)!!.parseJournalpost()
+            if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
+                logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
+
+                if (parseJournalpost.sak == null) {
+                    logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sakRelasjon]")
+                    dokarkivGateway.oppdaterJournalpost(
+                        journalpostId = journalpostId,
+                        oppdaterJournalpostRequest = OppdaterJournalpostRequest(sak = sakRelasjon)
+                    )
+                }
+
+                val ferdigstillJournalpostRespons = dokarkivGateway.ferdigstillJournalpost(journalpostId, enhet)
+                if (!ferdigstillJournalpostRespons.statusCode.is2xxSuccessful) {
+                    logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
+                    return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
+                }
+
                 return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
+            } else {
+                logger.info("Journalpost er allerede ferdigstilt.")
             }
-            return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
         }
         journalpostRepository.ferdig(journalpostId)
         return HttpStatus.OK to "OK"
@@ -226,6 +257,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
         tema = enumValueOfOrNull<SafDtos.Tema>(tema),
         journalstatus = enumValueOfOrNull<SafDtos.Journalstatus>(journalstatus),
         arkivDokumenter = arkivDokumenter,
+        sak = sak,
         harTilgang = arkivDokumenter.none { it ->
             it.dokumentvarianter!!.any {
                 !it.saksbehandlerHarTilgang
@@ -241,11 +273,12 @@ private data class ParsedSafJournalpost(
     val brukerType: SafDtos.BrukerType?,
     val avsenderType: SafDtos.AvsenderType?,
     val tema: SafDtos.Tema?,
+    val sak: SafDtos.Sak?,
     val journalstatus: SafDtos.Journalstatus?,
     val arkivDokumenter: List<SafDtos.Dokument>,
     val harTilgang: Boolean,
     val avsenderMottakertype: SafDtos.AvsenderMottakertype?,
-    val relevanteDatoer: List<SafDtos.RelevantDato>
+    val relevanteDatoer: List<SafDtos.RelevantDato>,
 )
 
 internal data class JournalpostInfo(
@@ -256,7 +289,7 @@ internal data class JournalpostInfo(
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
     val kanOpprettesJournalføringsoppgave: Boolean,
-    val journalpostStatus: String
+    val journalpostStatus: String,
 )
 
 data class JournalpostInfoDto(
@@ -272,17 +305,17 @@ data class JournalpostInfoDto(
     val journalpostStatus: String,
     val kanOpprettesJournalføringsoppgave: Boolean,
     val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående, // Brukes av frontend,
-    val gosysoppgaveId: String?
+    val gosysoppgaveId: String?,
 )
 
 data class VentDto(
     val venteÅrsak: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil: LocalDate
+    val venterTil: LocalDate,
 )
 
 data class DokumentInfo(
-    val dokumentId: String
+    val dokumentId: String,
 )
 
 inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =

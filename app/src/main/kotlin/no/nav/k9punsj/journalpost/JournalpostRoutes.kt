@@ -11,6 +11,7 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.PunsjbolleRuting
@@ -249,6 +250,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.LukkJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
+                val lukkJournalpostRequest = request.lukkJournalpostRequest()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
                 val journalpost: PunsjJournalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
@@ -270,10 +272,12 @@ internal class JournalpostRoutes(
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
+
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
-                    ferstillJournalpost = true,
-                    enhet = enhet
+                    ferdigstillJournalpost = true,
+                    enhet = enhet,
+                    sakRelasjon = lukkJournalpostRequest.sak
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
@@ -327,8 +331,9 @@ internal class JournalpostRoutes(
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                     val (status, body) = journalpostService.settTilFerdig(
                         journalpostId = journalpostId,
-                        ferstillJournalpost = true,
-                        enhet = enhet
+                        ferdigstillJournalpost = true,
+                        enhet = enhet,
+                        sakRelasjon = null
                     )
                     if (!status.is2xxSuccessful) {
                         return@RequestContext ServerResponse.status(status)
@@ -432,7 +437,8 @@ internal class JournalpostRoutes(
 
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
-                    ferstillJournalpost = false
+                    ferdigstillJournalpost = false,
+                    sakRelasjon = null
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
@@ -522,6 +528,7 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.søknadId() = body(BodyExtractors.toMono(SettPåVentDto::class.java)).awaitFirst()
+    private suspend fun ServerRequest.lukkJournalpostRequest() = body(BodyExtractors.toMono(LukkJournalpostDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.punsjbolleDto() =
         body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()

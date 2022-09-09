@@ -5,7 +5,9 @@ import java.time.LocalDateTime
 internal object SafDtos {
     internal open class GraphqlQuery(val query: String, val variables: Any? = null)
     internal data class JournalpostQuery(val journalpostId: String) : GraphqlQuery(
-        query = """ 
+        query =
+        //language=graphql
+        """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
                 journalpostId
@@ -19,6 +21,12 @@ internal object SafDtos {
                 bruker {
                   type
                   id
+                }
+                sak {
+                  fagsakId
+                  fagsaksystem
+                  sakstype
+                  tema
                 }
                 dokumenter {
                   dokumentInfoId
@@ -94,12 +102,25 @@ internal object SafDtos {
 
     internal enum class Journalstatus {
         MOTTATT,
+        JOURNALFOERT,
+        FERDIGSTILT,
         FEILREGISTRERT
+    }
+
+    internal enum class Sakstype {
+        GENERELL_SAK, FAGSAK
     }
 
     internal data class Bruker(
         val id: String?,
         val type: String?
+    )
+
+    internal data class Sak(
+        val sakstype: Sakstype?,
+        val fagsakId: String?,
+        val fagsaksystem: String?,
+        val tema: Tema?
     )
 
     internal data class Avsender(
@@ -129,6 +150,7 @@ internal object SafDtos {
         val journalposttype: String,
         val journalstatus: String?,
         val bruker: Bruker?,
+        val sak: Sak?,
         val avsender: Avsender?,
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,

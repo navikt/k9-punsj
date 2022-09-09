@@ -1,6 +1,7 @@
 package no.nav.k9punsj.felles
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
 
 internal data class JournalpostId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
@@ -46,6 +47,10 @@ data class SøkUferdigJournalposter(
 
 data class SettPåVentDto(
     val soeknadId: String?
+)
+
+data class LukkJournalpostDto(
+    val sak: Sak
 )
 
 data class IdentDto(
