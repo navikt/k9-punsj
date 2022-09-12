@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -18,7 +19,7 @@ internal class JournalpostServiceTest {
     @MockK
     private lateinit var safGateway: SafGateway
 
-    @MockK
+    @MockK(relaxUnitFun = true)
     private lateinit var journalpostRepository: JournalpostRepository
 
     @MockK
@@ -36,6 +37,7 @@ internal class JournalpostServiceTest {
             journalpostId = "123",
             ferdigstillJournalpost = false
         )
+        coVerify(exactly = 1) { journalpostRepository.ferdig(any()) }
         assertThat(status.is2xxSuccessful)
     }
 
