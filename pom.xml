@@ -28,7 +28,7 @@
         <k9-rapid.version>1.20220824120614-3be8319</k9-rapid.version>
         <k9-sak.version>3.3.11</k9-sak.version>
         <k9-formidling.version>0.0.20</k9-formidling.version>
-        <k9-format.version>6.1.2</k9-format.version>
+        <k9-format.version>6.1.5</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <mockk.version>1.12.4</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
