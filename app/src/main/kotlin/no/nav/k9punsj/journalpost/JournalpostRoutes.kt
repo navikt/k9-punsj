@@ -277,7 +277,7 @@ internal class JournalpostRoutes(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = true,
                     enhet = enhet,
-                    sakRelasjon = lukkJournalpostRequest.sak
+                    sak = lukkJournalpostRequest.sak
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
@@ -333,7 +333,7 @@ internal class JournalpostRoutes(
                         journalpostId = journalpostId,
                         ferdigstillJournalpost = true,
                         enhet = enhet,
-                        sakRelasjon = null
+                        sak = null
                     )
                     if (!status.is2xxSuccessful) {
                         return@RequestContext ServerResponse.status(status)
@@ -438,7 +438,7 @@ internal class JournalpostRoutes(
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = false,
-                    sakRelasjon = null
+                    sak = null
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)

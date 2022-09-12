@@ -75,7 +75,7 @@ internal class GosysService(
             erSendtInn = false,
             ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
         )
-        journalpostService.settTilFerdig(oppgaveRequest.journalpostId, sakRelasjon = null)
+        journalpostService.settTilFerdig(oppgaveRequest.journalpostId, sak = null)
 
         logger.info(
             "Journalpost sendes til Gosys",
