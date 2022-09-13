@@ -196,6 +196,7 @@ class JournalpostService(
             val parseJournalpost = hentSafJournalPost(journalpostId)!!.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
+                logger.info("parseJournalpost: {}", parseJournalpost) // TODO: Fjern før prodsetting
 
                 if (parseJournalpost.sak == null) {
                     logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sak]")
