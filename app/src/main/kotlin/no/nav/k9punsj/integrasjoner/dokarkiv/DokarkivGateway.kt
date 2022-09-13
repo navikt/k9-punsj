@@ -268,7 +268,8 @@ class DokarkivGateway(
 data class JournalPostResponse(val journalpostId: String)
 
 data class OppdaterJournalpostRequest(
-    val sak: Sak? = null
+    val sak: Sak? = null,
+    val tema: String = "OMS"
 )
 
 data class JournalPostRequest(
