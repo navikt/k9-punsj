@@ -157,6 +157,8 @@ class DokarkivGateway(
 
         if (response.statusCode == HttpStatus.OK && response.body != null) {
             return response.body!!
+        } else {
+            logger.error("Feilet med å opdatere journalpost. Grunn {}", response)
         }
 
         throw IllegalStateException("Feilet med å opdatere journalpost")
