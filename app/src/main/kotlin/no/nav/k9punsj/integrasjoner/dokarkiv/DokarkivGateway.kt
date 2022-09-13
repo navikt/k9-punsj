@@ -51,15 +51,22 @@ class DokarkivGateway(
     @Value("#{'\${no.nav.dokarkiv.scope}'.split(',')}") private val dokarkivScope: Set<String>
 ) {
 
-    internal suspend fun oppdaterJournalpostData(
+    internal suspend fun oppdaterJournalpostDataOgFerdigstill(
         dataFraSaf: JSONObject?,
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String
-    ): Int {
+        enhetKode: String,
+        sak: Sak
+    ): Pair<HttpStatus, String> {
         val ferdigstillJournalpost =
-            dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
-        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadGenerellSak()
+            dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)?.copy(
+                sak = FerdigstillJournalpost.Sak(
+                    sakstype = sak.sakstype.name,
+                    fagsakId = sak.fagsakId,
+                    fagsaksystem = sak.fagsaksystem?.name
+                )
+            )
+        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadMedSak()
 
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -88,7 +95,7 @@ class DokarkivGateway(
             logger.error("Feiler med" + responseFerdigstiltJournalpost.body)
         }
 
-        return responseFerdigstiltJournalpost.statusCode.value()
+        return responseFerdigstiltJournalpost.statusCode to (responseFerdigstiltJournalpost.body ?: "Feilet med å ferdigstille journalpost")
     }
 
     internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
@@ -248,19 +255,32 @@ class DokarkivGateway(
     ) =
         getJSONObject("journalpost")
             .let { journalpost ->
+                val avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn")
+                val journalpostStatus = journalpost.getString("journalstatus").somJournalpostStatus()
+                val journalpostType = journalpost.getString("journalposttype").somJournalpostType()
+                val tittel = journalpost.stringOrNull("tittel")
+                val dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
+                    FerdigstillJournalpost.Dokument(
+                        dokumentId = it.getString("dokumentInfoId"),
+                        tittel = it.stringOrNull("tittel")
+                    )
+                }.toSet()
+                val bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+                val sak = FerdigstillJournalpost.Sak(
+                    sakstype = journalpost.optJSONObject("sak").stringOrNull("sakstype"),
+                    fagsaksystem = journalpost.optJSONObject("sak").stringOrNull("fagsaksystem"),
+                    fagsakId = journalpost.optJSONObject("sak").stringOrNull("fagsakId")
+                )
+
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
-                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
-                    status = journalpost.getString("journalstatus").somJournalpostStatus(),
-                    type = journalpost.getString("journalposttype").somJournalpostType(),
-                    tittel = journalpost.stringOrNull("tittel"),
-                    dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
-                        FerdigstillJournalpost.Dokument(
-                            dokumentId = it.getString("dokumentInfoId"),
-                            tittel = it.stringOrNull("tittel")
-                        )
-                    }.toSet(),
-                    bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+                    avsendernavn = avsendernavn,
+                    status = journalpostStatus,
+                    type = journalpostType,
+                    tittel = tittel,
+                    dokumenter = dokumenter,
+                    bruker = bruker,
+                    sak = sak
                 )
             }
 }

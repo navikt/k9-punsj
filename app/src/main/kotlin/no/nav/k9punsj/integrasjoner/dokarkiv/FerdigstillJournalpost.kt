@@ -16,15 +16,18 @@ internal data class FerdigstillJournalpost(
     private val avsendernavn: String? = null,
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
-    private val bruker: Bruker? = null
+    private val bruker: Bruker? = null,
+    private val sak: Sak? = null
 ) {
 
     private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
     private val kanFerdigstilles = !erFerdigstilt
 
-    internal fun oppdaterPayloadGenerellSak(): String {
+    internal fun oppdaterPayloadMedSak(): String {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
         val utfyllendeInformasjon = mutableListOf<String>()
+
+        val sak = JSONObject(sak)
 
         @Language("JSON")
         val json = """
@@ -34,9 +37,7 @@ internal data class FerdigstillJournalpost(
             "idType": "FNR",
             "id": "${bruker!!.identitetsnummer}"
           },
-          "sak": {
-            "sakstype": "GENERELL_SAK"
-          }
+          "sak": $sak
         }
         """.trimIndent().let { JSONObject(it) }
 
@@ -84,6 +85,12 @@ internal data class FerdigstillJournalpost(
     internal data class Dokument(
         internal val dokumentId: String,
         internal val tittel: String?
+    )
+
+    internal data class Sak(
+        internal val sakstype: String?,
+        internal val fagsaksystem: String?,
+        internal val fagsakId: String?
     )
 
     private companion object {

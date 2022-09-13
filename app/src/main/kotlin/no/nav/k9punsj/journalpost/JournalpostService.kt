@@ -16,10 +16,11 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.Dokument
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
-import no.nav.k9punsj.integrasjoner.dokarkiv.OppdaterJournalpostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
+import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
+import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -131,9 +132,15 @@ class JournalpostService(
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
         enhetKode: String,
-    ): Int {
+    ): Pair<HttpStatus, String> {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
-        return dokarkivGateway.oppdaterJournalpostData(hentDataFraSaf, journalpostId, identitetsnummer, enhetKode)
+        return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+            dataFraSaf = hentDataFraSaf,
+            journalpostId = journalpostId,
+            identitetsnummer = identitetsnummer,
+            enhetKode = enhetKode,
+            sak = Sak(sakstype = SaksType.GENERELL_SAK)
+        )
     }
 
     internal suspend fun opprettJournalpost(journalPostRequest: JournalPostRequest): JournalPostResponse {
@@ -186,33 +193,35 @@ class JournalpostService(
         ferdigstillJournalpost: Boolean = false,
         enhet: String? = null,
         sak: Sak? = null,
+        søkerIdentitetsnummer: Identitetsnummer? = null,
     ): Pair<HttpStatus, String?> {
         if (ferdigstillJournalpost) {
             require(!enhet.isNullOrBlank()) { "Enhet kan ikke være null dersom journalpost skal ferdigstilles." }
             require(sak != null) { "Sak kan ikke være null dersom journalpost skal ferdigstilles." }
+            require(søkerIdentitetsnummer != null) { "SøkerIdentitetsnummer kan ikke være null dersom journalpost skal ferdigstilles." }
             logger.info("Enhet = [{}]", enhet) // TODO: Fjern før prodsetting
             logger.info("Sakrelasjon = [{}]", sak) // TODO: Fjern før prodsetting
 
-            val parseJournalpost = hentSafJournalPost(journalpostId)!!.parseJournalpost()
+            val safJournalPost = hentSafJournalPost(journalpostId)!!
+            val parseJournalpost = safJournalPost.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
-                logger.info("parseJournalpost: {}", parseJournalpost) // TODO: Fjern før prodsetting
 
                 if (parseJournalpost.sak == null) {
                     logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sak]")
-                    dokarkivGateway.oppdaterJournalpost(
+                    val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+                        dataFraSaf = JSONObject(safJournalPost),
                         journalpostId = journalpostId,
-                        oppdaterJournalpostRequest = OppdaterJournalpostRequest(sak = sak)
+                        identitetsnummer = søkerIdentitetsnummer,
+                        enhetKode = enhet,
+                        sak = Sak(sakstype = sak.sakstype, fagsakId = sak.fagsakId, fagsaksystem = sak.fagsaksystem)
                     )
-                }
 
-                val ferdigstillJournalpostRespons = dokarkivGateway.ferdigstillJournalpost(journalpostId, enhet)
-                if (!ferdigstillJournalpostRespons.statusCode.is2xxSuccessful) {
-                    logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
-                    return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
+                    if (!status.is2xxSuccessful) {
+                        logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
+                        return status to body
+                    }
                 }
-
-                return ferdigstillJournalpostRespons.statusCode to ferdigstillJournalpostRespons.body
             } else {
                 logger.info("Journalpost er allerede ferdigstilt.")
             }

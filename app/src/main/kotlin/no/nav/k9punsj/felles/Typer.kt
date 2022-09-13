@@ -50,6 +50,7 @@ data class SettPåVentDto(
 )
 
 data class LukkJournalpostDto(
+    val norskIdent: String,
     val sak: Sak
 )
 

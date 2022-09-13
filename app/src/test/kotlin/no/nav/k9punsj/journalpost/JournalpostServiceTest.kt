@@ -6,8 +6,11 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
+import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -47,7 +50,8 @@ internal class JournalpostServiceTest {
             journalpostService.settTilFerdig(
                 journalpostId = "123",
                 ferdigstillJournalpost = true,
-                enhet = null
+                enhet = null,
+                søkerIdentitetsnummer = "11111111111".somIdentitetsnummer()
             )
         }
 
@@ -62,11 +66,28 @@ internal class JournalpostServiceTest {
                 journalpostId = "123",
                 ferdigstillJournalpost = true,
                 enhet = "9999",
-                sak = null
+                sak = null,
+                søkerIdentitetsnummer = "11111111111".somIdentitetsnummer()
             )
         }
 
         assertThat(forventetFeil.message)
             .isEqualTo("Sak kan ikke være null dersom journalpost skal ferdigstilles.")
+    }
+
+    @Test
+    internal fun `forvent feil dersom journalpost skal ferdigsilles, men søkerIdentitetsnummer mangler`(): Unit = runBlocking {
+        val forventetFeil = assertThrows<IllegalArgumentException> {
+            journalpostService.settTilFerdig(
+                journalpostId = "123",
+                ferdigstillJournalpost = true,
+                enhet = "9999",
+                sak = Sak(sakstype = SaksType.GENERELL_SAK),
+                søkerIdentitetsnummer = null
+            )
+        }
+
+        assertThat(forventetFeil.message)
+            .isEqualTo("SøkerIdentitetsnummer kan ikke være null dersom journalpost skal ferdigstilles.")
     }
 }

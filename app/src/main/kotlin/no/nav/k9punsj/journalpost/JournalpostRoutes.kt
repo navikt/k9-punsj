@@ -277,7 +277,8 @@ internal class JournalpostRoutes(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = true,
                     enhet = enhet,
-                    sak = lukkJournalpostRequest.sak
+                    sak = lukkJournalpostRequest.sak,
+                    søkerIdentitetsnummer = lukkJournalpostRequest.norskIdent.somIdentitetsnummer()
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
@@ -331,9 +332,10 @@ internal class JournalpostRoutes(
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                     val (status, body) = journalpostService.settTilFerdig(
                         journalpostId = journalpostId,
-                        ferdigstillJournalpost = true,
+                        ferdigstillJournalpost = false,
                         enhet = enhet,
-                        sak = null
+                        sak = null,
+                        søkerIdentitetsnummer = null
                     )
                     if (!status.is2xxSuccessful) {
                         return@RequestContext ServerResponse.status(status)
@@ -438,7 +440,8 @@ internal class JournalpostRoutes(
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = false,
-                    sak = null
+                    sak = null,
+                    søkerIdentitetsnummer = null
                 )
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
@@ -458,7 +461,9 @@ internal class JournalpostRoutes(
                     )
                 }.fold(
                     onSuccess = {
-                        ServerResponse.status(it).buildAndAwait()
+                        ServerResponse
+                            .status(it.first)
+                            .bodyValueAndAwait(it.second)
                     },
                     onFailure = {
                         ServerResponse
