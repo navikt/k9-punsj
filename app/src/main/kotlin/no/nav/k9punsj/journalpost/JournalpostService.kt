@@ -203,6 +203,7 @@ class JournalpostService(
             logger.info("Sakrelasjon = [{}]", sak) // TODO: Fjern før prodsetting
 
             val safJournalPost = hentSafJournalPost(journalpostId)!!
+
             val parseJournalpost = safJournalPost.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
@@ -210,7 +211,7 @@ class JournalpostService(
                 if (parseJournalpost.sak == null) {
                     logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sak]")
                     val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
-                        dataFraSaf = JSONObject(safJournalPost),
+                        dataFraSaf = JSONObject(mapOf("journalpost" to safJournalPost)),
                         journalpostId = journalpostId,
                         identitetsnummer = søkerIdentitetsnummer,
                         enhetKode = enhet,

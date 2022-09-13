@@ -51,7 +51,9 @@ internal object SafDtos {
     )
 
     internal data class FerdigstillJournalpostQuery(val journalpostId: String) : GraphqlQuery(
-        query = """ 
+        query =
+        //language=graphql
+        """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
                 journalposttype
