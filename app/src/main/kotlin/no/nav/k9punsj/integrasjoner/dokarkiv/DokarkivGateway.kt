@@ -232,13 +232,6 @@ class DokarkivGateway(
                     )
                 }.toSet()
                 val bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
-                val resolvedSak = journalpost.optJSONObject("sak")?.let {
-                    FerdigstillJournalpost.Sak(
-                        sakstype = stringOrNull("sakstype"),
-                        fagsaksystem = stringOrNull("fagsaksystem"),
-                        fagsakId = stringOrNull("fagsakId")
-                    )
-                } ?: sak
 
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
@@ -248,7 +241,7 @@ class DokarkivGateway(
                     tittel = tittel,
                     dokumenter = dokumenter,
                     bruker = bruker,
-                    sak = resolvedSak
+                    sak = sak
                 )
             }
 }
