@@ -1,7 +1,6 @@
 package no.nav.k9punsj.felles
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
 
 internal data class JournalpostId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
@@ -53,6 +52,32 @@ data class LukkJournalpostDto(
     val norskIdent: String,
     val sak: Sak
 )
+
+data class Sak(
+    val sakstype: SaksType,
+    val fagsakId: String? = null,
+    val fagsaksystem: FagsakSystem? = null,
+) {
+    init {
+        when (sakstype) {
+            SaksType.FAGSAK -> {
+                require(fagsaksystem != null && !fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.FAGSAK}, så må fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.GENERELL_SAK -> {
+                require(fagsaksystem == null && fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.GENERELL_SAK}, så kan ikke fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.ARKIVSAK -> throw UnsupportedOperationException("ARKIVSAK skal kun brukes etter avtale.")
+        }
+    }
+
+    enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+    enum class FagsakSystem { K9 }
+
+}
 
 data class IdentDto(
     val norskIdent: String

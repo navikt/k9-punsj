@@ -16,6 +16,7 @@ import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
@@ -312,28 +313,6 @@ data class JournalPostRequest(
     private companion object {
         private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)
         private fun JSONObject.base64() = this.toString().toByteArray().base64()
-    }
-}
-
-data class Sak(
-    val sakstype: SaksType,
-    val fagsakId: String? = null,
-    val fagsaksystem: FagsakSystem? = null,
-) {
-    init {
-        when (sakstype) {
-            SaksType.FAGSAK -> {
-                require(fagsaksystem != null && !fagsakId.isNullOrBlank()) {
-                    "Dersom sakstype er ${SaksType.FAGSAK}, så må fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
-                }
-            }
-            SaksType.GENERELL_SAK -> {
-                require(fagsaksystem == null && fagsakId.isNullOrBlank()) {
-                    "Dersom sakstype er ${SaksType.GENERELL_SAK}, så kan ikke fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
-                }
-            }
-            SaksType.ARKIVSAK -> throw UnsupportedOperationException("ARKIVSAK skal kun brukes etter avtale.")
-        }
     }
 }
 

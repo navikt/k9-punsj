@@ -9,6 +9,7 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
+import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -18,8 +19,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.integrasjoner.dokarkiv.Sak
-import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -139,7 +138,7 @@ class JournalpostService(
             journalpostId = journalpostId,
             identitetsnummer = identitetsnummer,
             enhetKode = enhetKode,
-            sak = Sak(sakstype = SaksType.GENERELL_SAK)
+            sak = Sak(sakstype = Sak.SaksType.GENERELL_SAK)
         )
     }
 
