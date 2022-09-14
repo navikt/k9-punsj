@@ -52,21 +52,23 @@ class DokarkivGateway(
 ) {
 
     internal suspend fun oppdaterJournalpostDataOgFerdigstill(
-        dataFraSaf: JSONObject?,
+        dataFraSaf: JSONObject,
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
         enhetKode: String,
         sak: Sak
     ): Pair<HttpStatus, String> {
         val ferdigstillJournalpost =
-            dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)?.copy(
+            dataFraSaf.mapFerdigstillJournalpost(
+                journalpostId = journalpostId.somJournalpostId(),
+                identitetsnummer = identitetsnummer,
                 sak = FerdigstillJournalpost.Sak(
                     sakstype = sak.sakstype.name,
                     fagsakId = sak.fagsakId,
                     fagsaksystem = sak.fagsaksystem?.name
                 )
             )
-        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadMedSak()
+        val oppdatertPayload = ferdigstillJournalpost.oppdaterPayloadMedSak()
 
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -251,7 +253,8 @@ class DokarkivGateway(
 
     private fun JSONObject.mapFerdigstillJournalpost(
         journalpostId: JournalpostId,
-        identitetsnummer: Identitetsnummer
+        identitetsnummer: Identitetsnummer,
+        sak: FerdigstillJournalpost.Sak
     ) =
         getJSONObject("journalpost")
             .let { journalpost ->
@@ -266,13 +269,13 @@ class DokarkivGateway(
                     )
                 }.toSet()
                 val bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
-                val sak = journalpost.optJSONObject("sak")?.let {
+                val resolvedSak = journalpost.optJSONObject("sak")?.let {
                     FerdigstillJournalpost.Sak(
                         sakstype = stringOrNull("sakstype"),
                         fagsaksystem = stringOrNull("fagsaksystem"),
                         fagsakId = stringOrNull("fagsakId")
                     )
-                }
+                } ?: sak
 
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
@@ -282,7 +285,7 @@ class DokarkivGateway(
                     tittel = tittel,
                     dokumenter = dokumenter,
                     bruker = bruker,
-                    sak = sak
+                    sak = resolvedSak
                 )
             }
 }

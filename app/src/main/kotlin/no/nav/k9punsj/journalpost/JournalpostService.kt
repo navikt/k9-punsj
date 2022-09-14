@@ -207,7 +207,7 @@ class JournalpostService(
             val parseJournalpost = safJournalPost.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
-
+                logger.info("Debug safJournalpost: {}", safJournalPost) // TODO: Fjern før prodsetting
                 if (parseJournalpost.sak == null) {
                     logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sak]")
                     val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
