@@ -39,6 +39,7 @@ internal object SafDtos {
                 avsenderMottaker {
                   id
                   type
+                  navn
                 }
                 tilleggsopplysninger {
                   nokkel
@@ -132,7 +133,8 @@ internal object SafDtos {
 
     internal data class AvsenderMottaker(
         val id: String?,
-        val type: String?
+        val type: String?,
+        val navn: String?
     )
 
     internal data class DokumentVariant(

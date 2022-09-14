@@ -62,7 +62,7 @@ internal class SoknadServiceTest {
             tema = SafDtos.Tema.OMS
         ),
         avsender = null,
-        avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null),
+        avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null, null),
         dokumenter = listOf(SafDtos.Dokument(
             dokumentInfoId = "549312456", brevkode = "K9_PUNSJ_NOTAT",
             dokumentvarianter = mutableListOf(

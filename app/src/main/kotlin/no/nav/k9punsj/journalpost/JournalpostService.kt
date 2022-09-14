@@ -57,7 +57,7 @@ class JournalpostService(
             val parsedJournalpost = safJournalpost.parseJournalpost()
             if (!parsedJournalpost.harTilgang) {
                 val maskertJournalpost = safJournalpost.copy(
-                    avsenderMottaker = SafDtos.AvsenderMottaker(null, null),
+                    avsenderMottaker = SafDtos.AvsenderMottaker(null, null, null),
                     bruker = SafDtos.Bruker(null, null)
                 )
                 logger.warn("Saksbehandler har ikke tilgang. Journalpost: [$maskertJournalpost]")
