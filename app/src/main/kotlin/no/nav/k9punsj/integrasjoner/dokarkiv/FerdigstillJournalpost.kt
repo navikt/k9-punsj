@@ -27,8 +27,6 @@ internal data class FerdigstillJournalpost(
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
         val utfyllendeInformasjon = mutableListOf<String>()
 
-        val sak = JSONObject(sak)
-
         @Language("JSON")
         val json = """
         {
@@ -36,10 +34,11 @@ internal data class FerdigstillJournalpost(
           "bruker": {
             "idType": "FNR",
             "id": "${bruker!!.identitetsnummer}"
-          },
-          "sak": $sak
+          }
         }
         """.trimIndent().let { JSONObject(it) }
+
+        json.put("sak", sak)
 
         // Mangler tittel på journalposten
         if (tittel.isNullOrBlank()) {
