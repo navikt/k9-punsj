@@ -199,17 +199,14 @@ class JournalpostService(
             require(!enhet.isNullOrBlank()) { "Enhet kan ikke være null dersom journalpost skal ferdigstilles." }
             require(sak != null) { "Sak kan ikke være null dersom journalpost skal ferdigstilles." }
             require(søkerIdentitetsnummer != null) { "SøkerIdentitetsnummer kan ikke være null dersom journalpost skal ferdigstilles." }
-            logger.info("Enhet = [{}]", enhet) // TODO: Fjern før prodsetting
-            logger.info("Sakrelasjon = [{}]", sak) // TODO: Fjern før prodsetting
 
             val safJournalPost = hentSafJournalPost(journalpostId)!!
 
             val parseJournalpost = safJournalPost.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
-                logger.info("Debug safJournalpost: {}", safJournalPost) // TODO: Fjern før prodsetting
                 if (parseJournalpost.sak == null) {
-                    logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost med sak = [$sak]")
+                    logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost ($journalpostId) med sak = [$sak]")
                     val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
                         dataFraSaf = JSONObject(mapOf("journalpost" to safJournalPost)),
                         journalpostId = journalpostId,
