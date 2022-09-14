@@ -17,7 +17,7 @@ internal data class FerdigstillJournalpost(
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
     private val bruker: Bruker? = null,
-    private val sak: Sak
+    private val sak: Sak,
 ) {
 
     private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
@@ -38,7 +38,11 @@ internal data class FerdigstillJournalpost(
         }
         """.trimIndent().let { JSONObject(it) }
 
-        json.put("sak", sak)
+        json.put("sak", JSONObject().also {
+            it.put("sakstype", sak.sakstype)
+            it.put("fagsakId", sak.fagsakId)
+            it.put("fagsaksystem", sak.fagsaksystem)
+        })
 
         // Mangler tittel på journalposten
         if (tittel.isNullOrBlank()) {
@@ -78,18 +82,18 @@ internal data class FerdigstillJournalpost(
     internal data class Bruker(
         internal val identitetsnummer: Identitetsnummer,
         internal val sak: Pair<Fagsystem, Saksnummer>? = null,
-        internal val navn: String? = null
+        internal val navn: String? = null,
     )
 
     internal data class Dokument(
         internal val dokumentId: String,
-        internal val tittel: String?
+        internal val tittel: String?,
     )
 
     internal data class Sak(
         internal val sakstype: String?,
         internal val fagsaksystem: String?,
-        internal val fagsakId: String?
+        internal val fagsakId: String?,
     )
 
     private companion object {
