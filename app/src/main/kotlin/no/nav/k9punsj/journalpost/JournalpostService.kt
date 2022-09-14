@@ -218,6 +218,8 @@ class JournalpostService(
                         logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
                         return status to body
                     }
+                } else {
+                    logger.info("Journalpost har allerede en saksrelasjon: {}", parseJournalpost.sak)
                 }
             } else {
                 logger.info("Journalpost er allerede ferdigstilt.")
