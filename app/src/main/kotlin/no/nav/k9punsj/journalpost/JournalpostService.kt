@@ -204,23 +204,20 @@ class JournalpostService(
             val parseJournalpost = safJournalPost.parseJournalpost()
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
-                if (parseJournalpost.sak == null) {
-                    logger.info("Journalpost har ingen sakrelasjon. Oppdaterer journalpost ($journalpostId) med sak = [$sak]")
-                    val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
-                        dataFraSaf = JSONObject(mapOf("journalpost" to safJournalPost)),
-                        journalpostId = journalpostId,
-                        identitetsnummer = søkerIdentitetsnummer,
-                        enhetKode = enhet,
-                        sak = Sak(sakstype = sak.sakstype, fagsakId = sak.fagsakId, fagsaksystem = sak.fagsaksystem)
-                    )
+                logger.info("Oppdaterer journalpost med ny sak=[{}], gammel sak=[{}]", sak, parseJournalpost.sak)
+                val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+                    dataFraSaf = JSONObject(mapOf("journalpost" to safJournalPost)),
+                    journalpostId = journalpostId,
+                    identitetsnummer = søkerIdentitetsnummer,
+                    enhetKode = enhet,
+                    sak = Sak(sakstype = sak.sakstype, fagsakId = sak.fagsakId, fagsaksystem = sak.fagsaksystem)
+                )
 
-                    if (!status.is2xxSuccessful) {
-                        logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
-                        return status to body
-                    }
-                } else {
-                    logger.info("Journalpost har allerede en saksrelasjon: {}", parseJournalpost.sak)
+                if (!status.is2xxSuccessful) {
+                    logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
+                    return status to body
                 }
+
             } else {
                 logger.info("Journalpost er allerede ferdigstilt.")
             }
