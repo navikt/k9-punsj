@@ -68,7 +68,9 @@ class DokarkivGateway(
                     fagsaksystem = sak.fagsaksystem?.name
                 )
             )
+        logger.info("ferdigstillJournalpost: {}", ferdigstillJournalpost)
         val oppdatertPayload = ferdigstillJournalpost.oppdaterPayloadMedSak()
+        logger.info("oppdatertPayload: {}", oppdatertPayload)
 
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
