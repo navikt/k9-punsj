@@ -12,6 +12,7 @@ internal object SafDtos {
               journalpost(journalpostId: "$journalpostId") {
                 journalpostId
                 tema
+                tittel
                 journalposttype
                 relevanteDatoer {
                   dato
@@ -58,6 +59,7 @@ internal object SafDtos {
             query {
               journalpost(journalpostId: "$journalpostId") {
                 journalposttype
+                tittel
                 journalstatus
                 dokumenter {
                   dokumentInfoId
