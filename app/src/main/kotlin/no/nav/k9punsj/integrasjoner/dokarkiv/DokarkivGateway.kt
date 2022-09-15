@@ -58,6 +58,7 @@ class DokarkivGateway(
         enhetKode: String,
         sak: Sak
     ): Pair<HttpStatus, String> {
+        logger.info("1. dataFraSAF: {}", dataFraSaf)
         val ferdigstillJournalpost =
             dataFraSaf.mapFerdigstillJournalpost(
                 journalpostId = journalpostId.somJournalpostId(),
@@ -68,8 +69,10 @@ class DokarkivGateway(
                     fagsaksystem = sak.fagsaksystem?.name
                 )
             )
+        logger.info("2. ferdigstillJournalpost: {}", ferdigstillJournalpost)
 
         val oppdatertPayload = ferdigstillJournalpost.oppdaterPayloadMedSak()
+        logger.info("3. oppdatertPayload: {}", oppdatertPayload)
 
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
