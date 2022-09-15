@@ -48,6 +48,8 @@ internal data class FerdigstillJournalpost(
         if (tittel.isNullOrBlank()) {
             utfyllendeInformasjon.add("tittel=[$ManglerTittel]")
             json.put("tittel", ManglerTittel)
+        } else {
+            json.put("tittel", tittel)
         }
         // Mangler tittel på et eller fler dokumenter
         dokumenter.filter { it.tittel.isNullOrBlank() }.takeIf { it.isNotEmpty() }?.also { dokumenterUtenTittel ->
