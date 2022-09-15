@@ -66,6 +66,7 @@ internal class SoknadServiceTest {
         avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null, null),
         dokumenter = listOf(SafDtos.Dokument(
             dokumentInfoId = "549312456", brevkode = "K9_PUNSJ_NOTAT",
+            tittel = "tittel på dokument",
             dokumentvarianter = mutableListOf(
                 SafDtos.DokumentVariant(variantformat = "ORIGINAL", saksbehandlerHarTilgang = true),
                 SafDtos.DokumentVariant(variantformat = "ARKIV", saksbehandlerHarTilgang = true)

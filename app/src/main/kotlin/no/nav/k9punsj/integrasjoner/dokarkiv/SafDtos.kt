@@ -148,6 +148,7 @@ internal object SafDtos {
     internal data class Dokument(
         val dokumentInfoId: String,
         val brevkode: String?,
+        val tittel: String?,
         val dokumentvarianter: MutableList<DokumentVariant>?
     )
 
