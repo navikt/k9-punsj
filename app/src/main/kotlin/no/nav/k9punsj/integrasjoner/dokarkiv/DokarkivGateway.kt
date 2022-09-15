@@ -66,7 +66,7 @@ class DokarkivGateway(
                 sak = FerdigstillJournalpost.Sak(
                     sakstype = sak.sakstype.name,
                     fagsakId = sak.fagsakId,
-                    fagsaksystem = sak.fagsaksystem?.name
+                    fagsaksystem = sak.fagsaksystem
                 )
             )
         logger.info("2. ferdigstillJournalpost: {}", ferdigstillJournalpost)

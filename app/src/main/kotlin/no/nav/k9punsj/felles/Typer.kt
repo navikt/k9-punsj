@@ -56,8 +56,8 @@ data class LukkJournalpostDto(
 data class Sak(
     val sakstype: SaksType,
     val fagsakId: String? = null,
-    val fagsaksystem: FagsakSystem? = null,
 ) {
+    val fagsaksystem = if (sakstype == SaksType.FAGSAK) FagsakSystem.K9.name else null
     init {
         when (sakstype) {
             SaksType.FAGSAK -> {

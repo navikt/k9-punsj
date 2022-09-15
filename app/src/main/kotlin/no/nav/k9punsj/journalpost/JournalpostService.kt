@@ -205,12 +205,13 @@ class JournalpostService(
             if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
                 logger.info("Oppdaterer journalpost med ny sak=[{}], gammel sak=[{}]", sak, parseJournalpost.sak)
+
                 val (status, body) = dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
                     dataFraSaf = JSONObject(mapOf("journalpost" to safJournalPost)),
                     journalpostId = journalpostId,
                     identitetsnummer = søkerIdentitetsnummer,
                     enhetKode = enhet,
-                    sak = Sak(sakstype = sak.sakstype, fagsakId = sak.fagsakId, fagsaksystem = sak.fagsaksystem)
+                    sak = sak
                 )
 
                 if (!status.is2xxSuccessful) {
