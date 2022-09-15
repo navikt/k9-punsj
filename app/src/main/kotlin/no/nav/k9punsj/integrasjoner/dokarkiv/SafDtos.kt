@@ -32,6 +32,7 @@ internal object SafDtos {
                 dokumenter {
                   dokumentInfoId
                   brevkode
+                  tittel
                   dokumentvarianter {
                     variantformat
                     saksbehandlerHarTilgang
@@ -153,6 +154,7 @@ internal object SafDtos {
     internal data class Journalpost(
         val journalpostId: String,
         val tema: String?,
+        val tittel: String?,
         val journalposttype: String,
         val journalstatus: String?,
         val bruker: Bruker?,

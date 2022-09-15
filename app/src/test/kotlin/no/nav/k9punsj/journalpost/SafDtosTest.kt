@@ -11,6 +11,7 @@ internal class SafDtosTest {
         val journalpost = SafDtos.Journalpost(
             journalpostId = "123456789",
             tema = "test",
+            tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
             bruker = null,
@@ -30,6 +31,7 @@ internal class SafDtosTest {
         val journalpost = SafDtos.Journalpost(
             journalpostId = "123456789",
             tema = "test",
+            tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
             bruker = null,
@@ -49,6 +51,7 @@ internal class SafDtosTest {
         val journalpost = SafDtos.Journalpost(
             journalpostId = "123456789",
             tema = "test",
+            tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
             bruker = null,

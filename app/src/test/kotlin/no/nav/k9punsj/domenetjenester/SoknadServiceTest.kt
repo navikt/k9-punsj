@@ -53,6 +53,7 @@ internal class SoknadServiceTest {
 
     private val feilregistrertJournalpost = SafDtos.Journalpost(
         journalpostId = "525115311",
+        tittel = "omsorgspengerutbetaling",
         tema = "OMS", journalposttype = "N", journalstatus = "FEILREGISTRERT",
         bruker = SafDtos.Bruker(id = "2351670926708", type = "AKTOERID"),
         sak = SafDtos.Sak(

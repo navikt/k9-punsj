@@ -264,6 +264,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
         journalstatus = enumValueOfOrNull<SafDtos.Journalstatus>(journalstatus),
         arkivDokumenter = arkivDokumenter,
         sak = sak,
+        tittel = tittel,
         harTilgang = arkivDokumenter.none { it ->
             it.dokumentvarianter!!.any {
                 !it.saksbehandlerHarTilgang
@@ -285,6 +286,7 @@ private data class ParsedSafJournalpost(
     val harTilgang: Boolean,
     val avsenderMottakertype: SafDtos.AvsenderMottakertype?,
     val relevanteDatoer: List<SafDtos.RelevantDato>,
+    val tittel: String?,
 )
 
 internal data class JournalpostInfo(
