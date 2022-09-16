@@ -65,7 +65,7 @@ class DokarkivGateway(
                 sak = FerdigstillJournalpost.Sak(
                     sakstype = sak.sakstype.name,
                     fagsakId = sak.fagsakId,
-                    fagsaksystem = sak.fagsaksystem
+                    fagsaksystem = sak.fagsaksystem?.name
                 )
             )
 
