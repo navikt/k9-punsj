@@ -4,7 +4,11 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.opptjening.Frilanser
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende
-import no.nav.k9.søknad.felles.type.*
+import no.nav.k9.søknad.felles.type.Landkode
+import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
+import no.nav.k9.søknad.felles.type.Organisasjonsnummer
+import no.nav.k9.søknad.felles.type.Periode
+import no.nav.k9.søknad.felles.type.VirksomhetType
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -51,6 +55,7 @@ fun ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelv
         info.erVarigEndring?.also { k9Info.medErVarigEndring(it) }
         info.endringDato?.also { k9Info.medEndringDato(it) }
         info.endringBegrunnelse?.blankAsNull()?.also { k9Info.medEndringBegrunnelse(it) }
+        info.erFiskerPåBladB?.also { k9Info.medErFiskerPåBladB(it) }
         // TODO: Denne utledningen virker rar, men flagget skal forhåpentligvis fjernes fra K9-Format.
         k9Info.medErNyoppstartet(k9Periode.fraOgMed.isAfter(LocalDate.now(Oslo).minusYears(4)))
         when (info.erVarigEndring) {

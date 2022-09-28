@@ -3,7 +3,11 @@ package no.nav.k9punsj.pleiepengersyktbarn
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
-import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
+import no.nav.k9punsj.felles.dto.ArbeidstidDto
+import no.nav.k9punsj.felles.dto.BostederDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
 import no.nav.k9punsj.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -89,6 +93,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
                 info = ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.SelvstendigNæringsdrivendePeriodeInfoDto(
                     periode = optionalPeriode,
                     virksomhetstyper = listOf(requiredTekst),
+                    erFiskerPåBladB = null,
                     registrertIUtlandet = null,
                     landkode = optionalTekst,
                     regnskapsførerNavn = optionalTekst,
