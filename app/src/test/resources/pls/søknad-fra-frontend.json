@@ -25,6 +25,7 @@
         "virksomhetstyper": [
           "Fiske"
         ],
+        "erFiskerPåBladB": true,
         "landkode": "",
         "regnskapsførerNavn": "Regskapsfører",
         "regnskapsførerTlf": "88888889",

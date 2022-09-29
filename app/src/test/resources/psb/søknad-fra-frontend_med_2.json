@@ -25,6 +25,7 @@
           "tom": "2019-10-20"
         },
         "virksomhetstyper": ["FISKE"],
+        "erFiskerPåBladB": true,
         "landkode": "",
         "regnskapsførerNavn": "Ole",
         "regnskapsførerTlf": "666",
@@ -81,6 +82,7 @@
               "tom": ""
             },
             "virksomhetstyper": [],
+            "erFiskerPåBladB": null,
             "landkode": "",
             "regnskapsførerNavn": "",
             "regnskapsførerTlf": "",
