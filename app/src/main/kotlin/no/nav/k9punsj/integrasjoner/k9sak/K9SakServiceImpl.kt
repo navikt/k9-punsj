@@ -48,7 +48,7 @@ class K9SakServiceImpl(
 
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
-        barn: String,
+        barn: String?,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
         val matchDto = MatchDto(
@@ -201,7 +201,7 @@ class K9SakServiceImpl(
         data class MatchDto(
             val ytelseType: FagsakYtelseType,
             val bruker: String,
-            val pleietrengende: String,
+            val pleietrengende: String? = null,
         )
 
         data class MatchMedPeriodeDto(

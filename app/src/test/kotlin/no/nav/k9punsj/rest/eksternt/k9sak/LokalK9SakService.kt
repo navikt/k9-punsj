@@ -16,7 +16,7 @@ import java.time.Month
 class LokalK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
-        barn: String,
+        barn: String?,
         fagsakYtelseType: FagsakYtelseType
     ) = when (søker.erFødtI(Month.MAY)) {
         true -> Pair(

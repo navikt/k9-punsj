@@ -3,9 +3,11 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
+import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsak
 import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsakMedPerioder
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
@@ -36,6 +38,7 @@ internal class OmsorgspengerutbetalingRoutes(
         const val SendEksisterendeSøknad = "/$søknadType/send" // post
         const val ValiderSøknad = "/$søknadType/valider" // post
         const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" // post
+        const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
     }
 
     @Bean
@@ -113,6 +116,18 @@ internal class OmsorgspengerutbetalingRoutes(
                 )?.let { return@RequestContext it }
 
                 omsorgspengerutbetalingService.hentArbeidsforholdIderFraK9Sak(matchfagsakMedPeriode)
+            }
+        }
+
+        POST("/api${Urls.HentInfoFraK9sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val matchfagsak = request.mapMatchFagsak()
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsak.brukerIdent),
+                    url = PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak
+                )?.let { return@RequestContext it }
+
+                omsorgspengerutbetalingService.hentInfoFraK9Sak(matchfagsak)
             }
         }
     }
