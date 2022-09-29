@@ -90,6 +90,7 @@ internal class MapOmsTilK9Format(
                         Duration.ZERO,
                         null,
                         null,
+                        null,
                         listOf(AktivitetFravær.ARBEIDSTAKER),
                         Organisasjonsnummer.of(dto.organisasjonsnummer),
                         dto.arbeidsforholdId
@@ -105,6 +106,7 @@ internal class MapOmsTilK9Format(
                     it.tidPrDag?.somDuration(),
                     null,
                     null,
+                    null,
                     listOf(AktivitetFravær.ARBEIDSTAKER),
                     Organisasjonsnummer.of(dto.organisasjonsnummer),
                     dto.arbeidsforholdId
@@ -117,6 +119,7 @@ internal class MapOmsTilK9Format(
                 FraværPeriode(
                     it.periode.somK9Periode(),
                     it.tidPrDag?.somDuration(),
+                    null,
                     null,
                     null,
                     listOf(AktivitetFravær.ARBEIDSTAKER),

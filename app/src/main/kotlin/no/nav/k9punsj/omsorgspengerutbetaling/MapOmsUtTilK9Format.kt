@@ -123,7 +123,7 @@ internal class MapOmsUtTilK9Format(
 
             val organisasjonsnummer = Organisasjonsnummer.of(fraværsPeriode.organisasjonsnummer)
 
-            FraværPeriode(periode, timerBorte, fraværÅrsak, søknadÅrsak, aktivitetFravær, organisasjonsnummer, null)
+            FraværPeriode(periode, timerBorte, null, fraværÅrsak, søknadÅrsak, aktivitetFravær, organisasjonsnummer, null)
         }
         omsorgspengerUtbetaling.medFraværsperioder(fraværPerioder)
     }
