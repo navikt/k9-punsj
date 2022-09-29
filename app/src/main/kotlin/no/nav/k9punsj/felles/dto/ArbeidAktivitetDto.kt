@@ -1,7 +1,6 @@
 package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.k9punsj.felles.DurationMapper.korrigereArbeidstidRettOver80Prosent
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -31,7 +30,8 @@ data class ArbeidAktivitetDto(
             val endringInntekt: BigDecimal?,
             @JsonFormat(pattern = "yyyy-MM-dd")
             val endringDato: LocalDate?,
-            val endringBegrunnelse: String?
+            val endringBegrunnelse: String?,
+            val erFiskerPåBladB: Boolean?
         )
     }
 
