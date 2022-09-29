@@ -108,7 +108,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent),
+                    norskIdentDto = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 

@@ -13,7 +13,9 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
+import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -42,7 +44,7 @@ internal class OmsorgspengerutbetalingService(
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService,
-    private val aksjonspunktService: AksjonspunktService
+    private val aksjonspunktService: AksjonspunktService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(OmsorgspengerutbetalingService::class.java)
@@ -265,6 +267,25 @@ internal class OmsorgspengerutbetalingService(
                 .ok()
                 .json()
                 .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
+        }
+    }
+
+    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): ServerResponse {
+        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
+            søker = matchfagsak.brukerIdent,
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
+        )
+
+        return if (perioder != null) {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(perioder)
+        } else {
+            ServerResponse
+                .ok()
+                .json()
+                .bodyValueAndAwait(listOf<PeriodeDto>())
         }
     }
 }
