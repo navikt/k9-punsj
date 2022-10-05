@@ -46,6 +46,7 @@
       "normalArbeidstidPrDag": "7,5"
     }
   ],
+  "erKorrigering": false,
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false
 }
