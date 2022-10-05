@@ -16,13 +16,16 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OmsorgspengerutbetalingRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
-    private val omsorgspengerutbetalingService: OmsorgspengerutbetalingService
+    private val omsorgspengerutbetalingService: OmsorgspengerutbetalingService,
 ) {
 
     private companion object {
@@ -127,10 +130,16 @@ internal class OmsorgspengerutbetalingRoutes(
                     url = PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
-                omsorgspengerutbetalingService.hentInfoFraK9Sak(matchfagsak)
+                val perioder = omsorgspengerutbetalingService.hentInfoFraK9Sak(matchfagsak)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(perioder)
             }
         }
     }
+
 
     private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
 

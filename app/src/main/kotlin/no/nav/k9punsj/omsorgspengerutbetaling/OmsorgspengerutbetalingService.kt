@@ -145,10 +145,15 @@ internal class OmsorgspengerutbetalingService(
                     .bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
+            val eksisterendePerioder = if (søknad.erKorrigering!!) {
+                hentInfoFraK9Sak(Matchfagsak(brukerIdent = søknadEntitet.søkerId))
+            } else listOf()
+
             val (søknadK9Format, feilListe) = MapOmsUtTilK9Format(
                 søknadId = søknad.soeknadId,
                 journalpostIder = journalpostIder,
-                dto = søknad
+                dto = søknad,
+                eksisterendePerioder = eksisterendePerioder
             ).søknadOgFeil()
 
             if (feilListe.isNotEmpty()) {
@@ -209,12 +214,16 @@ internal class OmsorgspengerutbetalingService(
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
+        val eksisterendePerioder = if (soknadTilValidering.erKorrigering!!) {
+            hentInfoFraK9Sak(Matchfagsak(brukerIdent = søknadEntitet.søkerId))
+        } else listOf()
 
         try {
             mapTilEksternFormat = MapOmsUtTilK9Format(
                 søknadId = soknadTilValidering.soeknadId,
                 journalpostIder = journalposterDto.journalposter,
-                dto = soknadTilValidering
+                dto = soknadTilValidering,
+                eksisterendePerioder = eksisterendePerioder
             ).søknadOgFeil()
         } catch (e: Exception) {
             return ServerResponse
@@ -270,22 +279,12 @@ internal class OmsorgspengerutbetalingService(
         }
     }
 
-    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): ServerResponse {
+    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
         val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
             søker = matchfagsak.brukerIdent,
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
         )
 
-        return if (perioder != null) {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(perioder)
-        } else {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(listOf<PeriodeDto>())
-        }
+        return perioder ?: listOf()
     }
 }

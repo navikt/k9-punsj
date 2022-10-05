@@ -36,6 +36,7 @@ data class OmsorgspengerutbetalingSøknadDto(
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
+    val erKorrigering: Boolean ? = null,
     val metadata: Map<*, *>? = null
 ) {
     data class FraværPeriode(

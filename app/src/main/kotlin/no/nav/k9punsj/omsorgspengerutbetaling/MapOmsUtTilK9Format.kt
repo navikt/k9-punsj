@@ -29,7 +29,8 @@ import java.time.ZonedDateTime
 internal class MapOmsUtTilK9Format(
     søknadId: String,
     journalpostIder: Set<String>,
-    dto: OmsorgspengerutbetalingSøknadDto
+    dto: OmsorgspengerutbetalingSøknadDto,
+    eksisterendePerioder: List<PeriodeDto>
 ) {
     private val søknad = Søknad()
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
@@ -58,7 +59,11 @@ internal class MapOmsUtTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerUtbetaling)
-            feil.addAll(Validator.valider(søknad))
+            if (eksisterendePerioder.isNotEmpty()) feil.addAll(
+                Validator.valider(
+                    søknad,
+                    eksisterendePerioder.map { it.somK9Periode() })
+            ) else feil.addAll(Validator.valider(søknad))
         }.onFailure { throwable ->
             logger.error("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
