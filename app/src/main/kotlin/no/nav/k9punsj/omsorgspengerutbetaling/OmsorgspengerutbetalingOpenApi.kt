@@ -244,7 +244,7 @@ internal class OmsorgspengerutbetalingOpenApi {
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: SendSøknad
+        @RequestBody søknad: OmsorgspengerutbetalingSøknadDto
     ) {
     }
 
