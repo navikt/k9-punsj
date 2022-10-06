@@ -59,11 +59,17 @@ internal class MapOmsUtTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerUtbetaling)
-            if (eksisterendePerioder.isNotEmpty()) feil.addAll(
-                Validator.valider(
-                    søknad,
-                    eksisterendePerioder.map { it.somK9Periode() })
-            ) else feil.addAll(Validator.valider(søknad))
+            if (eksisterendePerioder.isNotEmpty()) {
+                logger.info("Validerer søknad mot eksisterende perioder.")
+                feil.addAll(
+                    Validator.valider(
+                        søknad,
+                        eksisterendePerioder.map { it.somK9Periode() })
+                )
+            } else {
+                logger.info("Validerer søknad.")
+                feil.addAll(Validator.valider(søknad))
+            }
         }.onFailure { throwable ->
             logger.error("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
