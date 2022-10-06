@@ -147,7 +147,7 @@ internal class OmsorgspengerutbetalingService(
 
             val eksisterendePerioder = if (søknad.erKorrigering!!) {
                 logger.info("Korrigering av søknad. Henter eksisterende perioder...")
-                hentInfoFraK9Sak(Matchfagsak(brukerIdent = søknadEntitet.søkerId))
+                hentInfoFraK9Sak(Matchfagsak(brukerIdent = sendSøknad.norskIdent))
             } else listOf()
 
             val (søknadK9Format, feilListe) = MapOmsUtTilK9Format(
@@ -217,7 +217,7 @@ internal class OmsorgspengerutbetalingService(
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
         val eksisterendePerioder = if (soknadTilValidering.erKorrigering!!) {
             logger.info("Korrigering av søknad. Henter eksisterende perioder...")
-            hentInfoFraK9Sak(Matchfagsak(brukerIdent = søknadEntitet.søkerId))
+            hentInfoFraK9Sak(Matchfagsak(brukerIdent = soknadTilValidering.soekerId!!))
         } else listOf()
 
         try {
