@@ -8,6 +8,8 @@ import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import com.openhtmltopdf.slf4j.Slf4jLogger
+import com.openhtmltopdf.util.XRLog
 import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -42,6 +44,11 @@ abstract class PDFGenerator<in T> {
     protected val ZONE_ID = ZoneId.of("Europe/Oslo")
     protected val DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZONE_ID)
     protected val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZONE_ID)
+
+    init {
+        XRLog.setLoggingEnabled(true)
+        XRLog.setLoggerImpl(Slf4jLogger())
+    }
 
     abstract fun T.tilMap(): Map<String, Any?>
 
