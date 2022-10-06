@@ -35,6 +35,7 @@ abstract class PDFGenerator<in T> {
     private val REGULAR_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Regular.ttf").inputStream.readAllBytes()
     private val BOLD_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Bold.ttf").inputStream.readAllBytes()
     private val ITALIC_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Italic.ttf").inputStream.readAllBytes()
+    private val sRGBColorSpace = ClassPathResource("$ROOT/sRGB.icc").inputStream.readAllBytes()
     protected val handlebars = configureHandlebars()
     private val søknadsTemplate: Template = handlebars.compile(templateNavn)
 
@@ -54,6 +55,8 @@ abstract class PDFGenerator<in T> {
         PdfRendererBuilder()
             .useFastMode()
             .usePdfUaAccessbility(true)
+            .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_U)
+            .useColorProfile(sRGBColorSpace)
             .withHtmlContent(html, "")
             .medFonter()
             .toStream(outputStream)
@@ -61,8 +64,14 @@ abstract class PDFGenerator<in T> {
             .createPDF()
 
         outputStream.use {
-            it.toByteArray()
+            val pdf = it.toByteArray()
+            valider(pdf)
+            pdf
         }
+    }
+
+    private fun valider(pdf: ByteArray) {
+        PdfaValidator().validatePdf(pdf)
     }
 
     protected fun loadPng(name: String): String {
