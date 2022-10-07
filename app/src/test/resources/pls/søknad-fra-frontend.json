@@ -103,6 +103,12 @@
       "land": "RU"
     }
   ],
+  "lovbestemtFerie": [
+    {
+      "fom": "2021-04-14",
+      "tom": "2021-04-25"
+    }
+  ],
   "utenlandsopphold": [
     {
       "periode": {
