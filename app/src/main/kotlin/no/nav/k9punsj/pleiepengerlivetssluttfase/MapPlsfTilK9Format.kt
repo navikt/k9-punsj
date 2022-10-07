@@ -11,6 +11,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.pls.v1.PleiepengerLivetsSluttfaseSøknadValidator
 import no.nav.k9.søknad.ytelse.pls.v1.Pleietrengende
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -48,6 +49,7 @@ internal class MapPlsfTilK9Format(
             dto.soekerId?.leggTilSøker()
             dto.soeknadsperiode?.leggTilSøknadsperiode()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.leggTilLovestemtFerie()
             dto.pleietrengende?.leggTilPleietrengende()
             dto.bosteder?.mapTilBosteder()?.apply {
                 pleipengerLivetsSluttfase.medBosteder(this)
@@ -139,6 +141,22 @@ internal class MapPlsfTilK9Format(
         if (k9Utenlandsopphold.isNotEmpty()) {
             pleipengerLivetsSluttfase.medUtenlandsopphold(Utenlandsopphold().medPerioder(k9Utenlandsopphold))
         }
+    }
+
+    private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilLovestemtFerie() {
+        if (lovbestemtFerie.isNullOrEmpty() && lovbestemtFerieSomSkalSlettes.isNullOrEmpty()) {
+            return
+        }
+        val k9LovbestemtFerie = mutableMapOf<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo>()
+        lovbestemtFerie?.filter { it.erSatt() }?.forEach { periode ->
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true)
+        }
+        lovbestemtFerieSomSkalSlettes?.filter { it.erSatt() }?.forEach { periode ->
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(false)
+        }
+        pleipengerLivetsSluttfase.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilBegrunnelseForInnsending() {
