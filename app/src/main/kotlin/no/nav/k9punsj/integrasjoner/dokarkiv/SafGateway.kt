@@ -12,6 +12,7 @@ import no.nav.k9punsj.felles.FeilIAksjonslogg
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.NotatUnderArbeidFeil
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
@@ -145,11 +146,11 @@ class SafGateway(
         }
 
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
-        /*if (journalpost?.journalposttype == "N" &&
+        if (journalpost?.journalposttype == "N" &&
             journalpost.journalstatus?.equals("UNDER_ARBEID") == true
         ) throw NotatUnderArbeidFeil().also {
             logger.warn("Ikke støttet journalpost: Type NOTAT med status UNDER_ARBEID")
-        }*/
+        }
 
         return journalpost
     }
