@@ -202,7 +202,7 @@ class JournalpostService(
             val safJournalPost = hentSafJournalPost(journalpostId)!!
 
             val parseJournalpost = safJournalPost.parseJournalpost()
-            if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT) {
+            if (parseJournalpost.journalstatus != SafDtos.Journalstatus.FERDIGSTILT || parseJournalpost.journalstatus != SafDtos.Journalstatus.JOURNALFOERT) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
                 logger.info("Oppdaterer journalpost med ny sak=[{}], gammel sak=[{}]", sak, parseJournalpost.sak)
 
