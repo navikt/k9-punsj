@@ -202,8 +202,7 @@ class JournalpostService(
             val safJournalPost = hentSafJournalPost(journalpostId)!!
 
             val parseJournalpost = safJournalPost.parseJournalpost()
-            val journalstatus = parseJournalpost.journalstatus
-            if (journalstatus != SafDtos.Journalstatus.FERDIGSTILT && journalstatus != SafDtos.Journalstatus.JOURNALFOERT) {
+            if (parseJournalpost.ikkeErFerdigBehandlet()) {
                 logger.info("Ferdigstiller journalpost med id=[{}]", journalpostId)
                 logger.info("Oppdaterer journalpost med ny sak=[{}], gammel sak=[{}]", sak, parseJournalpost.sak)
 
@@ -289,7 +288,14 @@ private data class ParsedSafJournalpost(
     val avsenderMottakertype: SafDtos.AvsenderMottakertype?,
     val relevanteDatoer: List<SafDtos.RelevantDato>,
     val tittel: String?,
-)
+) {
+    fun ikkeErFerdigBehandlet(): Boolean {
+        return !listOf(
+            SafDtos.Journalstatus.JOURNALFOERT,
+            SafDtos.Journalstatus.FERDIGSTILT)
+            .contains(journalstatus)
+    }
+}
 
 internal data class JournalpostInfo(
     val journalpostId: String,
