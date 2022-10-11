@@ -182,7 +182,7 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
-    private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill"
+    private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
     private fun String.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this/ferdigstill"
 
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
