@@ -35,7 +35,7 @@ import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -155,7 +155,7 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
+    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
             onBehalfOf = coroutineContext.hentAuthentication().accessToken
@@ -178,8 +178,7 @@ class SafGateway(
                 it.safData()
             },
             failure = {
-                håndterFeil(it, request, response)
-                null
+                throw håndterFeil(it, request, response)
             }
         )
     }
@@ -217,22 +216,20 @@ class SafGateway(
     internal fun håndterFeil(
         it: FuelError,
         request: Request,
-        response: Response
-    ) {
+        response: Response,
+    ): Throwable {
         val feil = it.response.body().asString("text/plain")
         logger.error(
             "Error response = '$feil' fra '${request.url}'"
         )
         logger.error(it.toString())
-        when (response.statusCode) {
-            400 -> throw FeilIAksjonslogg(feil)
-            401 -> throw UgyldigToken(feil)
-            403 -> throw IkkeTilgang(feil)
-            404 -> throw IkkeFunnet()
-            500 -> throw UventetFeil(feil)
-            else -> {
-                throw IllegalStateException("${response.statusCode} -> " + feil)
-            }
+        return when (response.statusCode) {
+            400 -> FeilIAksjonslogg(feil)
+            401 -> UgyldigToken(feil)
+            403 -> IkkeTilgang(feil)
+            404 -> IkkeFunnet()
+            500 -> UventetFeil(feil)
+            else -> IllegalStateException("${response.statusCode} -> " + feil)
         }
     }
 

@@ -75,7 +75,11 @@ internal class GosysService(
             erSendtInn = false,
             ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
         )
-        journalpostService.settTilFerdig(oppgaveRequest.journalpostId)
+        journalpostService.settTilFerdig(
+            oppgaveRequest.journalpostId,
+            sak = null,
+            søkerIdentitetsnummer = null
+        )
 
         logger.info(
             "Journalpost sendes til Gosys",
@@ -107,7 +111,7 @@ internal class GosysService(
         return oppgaveGateway.patchOppgave(
             oppgaveId, PatchOppgaveRequest(
                 id = oppgaveId.toInt(),
-                oppgave.versjon,
+                oppgave!!.versjon,
                 status = OppgaveStatus.FERDIGSTILT
             )
         )
