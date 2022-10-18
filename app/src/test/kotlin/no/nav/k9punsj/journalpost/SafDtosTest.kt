@@ -9,16 +9,18 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost() {
         val journalpost = SafDtos.Journalpost(
-            "123456789",
-            "test",
-            "test",
-            "test",
-            null,
-            null,
-            null,
-            emptyList(),
-            emptyList(),
-            listOf(SafDtos.Tilleggsopplysning("k9.kilde", "DIGITAL"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD"))
+            journalpostId = "123456789",
+            tema = "test",
+            tittel = "omsorgspengerutbetaling",
+            journalposttype = "test",
+            journalstatus = "test",
+            bruker = null,
+            sak = null,
+            avsender = null,
+            avsenderMottaker = null,
+            dokumenter = emptyList(),
+            relevanteDatoer = emptyList(),
+            tilleggsopplysninger = listOf(SafDtos.Tilleggsopplysning("k9.kilde", "DIGITAL"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD"))
         )
 
         Assertions.assertThat(journalpost.erIkkeStøttetDigitalJournalpost).isFalse
@@ -27,16 +29,18 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost_true() {
         val journalpost = SafDtos.Journalpost(
-            "123456789",
-            "test",
-            "test",
-            "test",
-            null,
-            null,
-            null,
-            emptyList(),
-            emptyList(),
-            listOf(SafDtos.Tilleggsopplysning("k9.kilde", "DIGITAL"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD_TEST"))
+            journalpostId = "123456789",
+            tema = "test",
+            tittel = "omsorgspengerutbetaling",
+            journalposttype = "test",
+            journalstatus = "test",
+            bruker = null,
+            sak = null,
+            avsender = null,
+            avsenderMottaker = null,
+            dokumenter = emptyList(),
+            relevanteDatoer = emptyList(),
+            tilleggsopplysninger = listOf(SafDtos.Tilleggsopplysning("k9.kilde", "DIGITAL"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD_TEST"))
         )
 
         Assertions.assertThat(journalpost.erIkkeStøttetDigitalJournalpost).isTrue
@@ -45,16 +49,18 @@ internal class SafDtosTest {
     @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost_ikke_digital() {
         val journalpost = SafDtos.Journalpost(
-            "123456789",
-            "test",
-            "test",
-            "test",
-            null,
-            null,
-            null,
-            emptyList(),
-            emptyList(),
-            listOf(SafDtos.Tilleggsopplysning("k9.kilde", "SKANNING"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD"))
+            journalpostId = "123456789",
+            tema = "test",
+            tittel = "omsorgspengerutbetaling",
+            journalposttype = "test",
+            journalstatus = "test",
+            bruker = null,
+            sak = null,
+            avsender = null,
+            avsenderMottaker = null,
+            dokumenter = emptyList(),
+            relevanteDatoer = emptyList(),
+            tilleggsopplysninger = listOf(SafDtos.Tilleggsopplysning("k9.kilde", "SKANNING"), SafDtos.Tilleggsopplysning("k9.type", "SØKNAD"))
         )
 
         Assertions.assertThat(journalpost.erIkkeStøttetDigitalJournalpost).isFalse

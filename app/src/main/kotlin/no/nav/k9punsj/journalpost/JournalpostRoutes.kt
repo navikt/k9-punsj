@@ -11,6 +11,7 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.PunsjbolleRuting
@@ -249,6 +250,8 @@ internal class JournalpostRoutes(
         POST("/api${Urls.LukkJournalpost}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
+                val lukkJournalpostRequest = request.lukkJournalpostRequest()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
                 val journalpost: PunsjJournalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -269,7 +272,17 @@ internal class JournalpostRoutes(
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-                journalpostService.settTilFerdig(journalpostId)
+
+                val (status, body) = journalpostService.settTilFerdig(
+                    journalpostId = journalpostId,
+                    ferdigstillJournalpost = true,
+                    enhet = enhet,
+                    sak = lukkJournalpostRequest.sak,
+                    søkerIdentitetsnummer = lukkJournalpostRequest.norskIdent.somIdentitetsnummer()
+                )
+                if (!status.is2xxSuccessful) {
+                    return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
+                }
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
@@ -307,6 +320,7 @@ internal class JournalpostRoutes(
         GET("/api${Urls.LukkJournalpostDebugg}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
                 journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -316,7 +330,17 @@ internal class JournalpostRoutes(
                 val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
                 if (kanSendeInn) {
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-                    journalpostService.settTilFerdig(journalpostId)
+                    val (status, body) = journalpostService.settTilFerdig(
+                        journalpostId = journalpostId,
+                        ferdigstillJournalpost = false,
+                        enhet = enhet,
+                        sak = null,
+                        søkerIdentitetsnummer = null
+                    )
+                    if (!status.is2xxSuccessful) {
+                        return@RequestContext ServerResponse.status(status)
+                            .bodyValueAndAwait(body!!)
+                    }
                     logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
                     return@RequestContext ServerResponse
@@ -399,7 +423,7 @@ internal class JournalpostRoutes(
         POST("/api${Urls.JournalførPåGenerellSak}") { request ->
             RequestContext(coroutineContext, request) {
                 val identOgJournalpost = request.identOgJournalpost()
-                val enhet = azureGraphService.hentEnhetForInnloggetBruker()
+                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
                 val journalpostId = identOgJournalpost.journalpostId
 
                 journalpostService.hentHvisJournalpostMedId(journalpostId)
@@ -413,9 +437,17 @@ internal class JournalpostRoutes(
                     ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 )
 
-                journalpostService.settTilFerdig(journalpostId)
+                val (status, body) = journalpostService.settTilFerdig(
+                    journalpostId = journalpostId,
+                    ferdigstillJournalpost = false,
+                    sak = null,
+                    søkerIdentitetsnummer = null
+                )
+                if (!status.is2xxSuccessful) {
+                    return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
+                }
 
-                val enhetsKode = enhet.trimIndent().substring(0, 4)
+                val enhetsKode = enhet.trimIndent()
                 val bareTall = Pattern.matches("^[0-9]*$", enhetsKode)
                 if (!bareTall) {
                     throw IllegalStateException("Klarte ikke hente riktig enhetkode")
@@ -429,7 +461,9 @@ internal class JournalpostRoutes(
                     )
                 }.fold(
                     onSuccess = {
-                        ServerResponse.status(it).buildAndAwait()
+                        ServerResponse
+                            .status(it.first)
+                            .bodyValueAndAwait(it.second)
                     },
                     onFailure = {
                         ServerResponse
@@ -499,6 +533,7 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.søknadId() = body(BodyExtractors.toMono(SettPåVentDto::class.java)).awaitFirst()
+    private suspend fun ServerRequest.lukkJournalpostRequest() = body(BodyExtractors.toMono(LukkJournalpostDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.punsjbolleDto() =
         body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()

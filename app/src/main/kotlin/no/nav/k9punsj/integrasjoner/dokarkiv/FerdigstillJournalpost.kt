@@ -16,13 +16,14 @@ internal data class FerdigstillJournalpost(
     private val avsendernavn: String? = null,
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
-    private val bruker: Bruker? = null
+    private val bruker: Bruker? = null,
+    private val sak: Sak,
 ) {
 
     private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
     private val kanFerdigstilles = !erFerdigstilt
 
-    internal fun oppdaterPayloadGenerellSak(): String {
+    internal fun oppdaterPayloadMedSak(): String {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
         val utfyllendeInformasjon = mutableListOf<String>()
 
@@ -33,17 +34,22 @@ internal data class FerdigstillJournalpost(
           "bruker": {
             "idType": "FNR",
             "id": "${bruker!!.identitetsnummer}"
-          },
-          "sak": {
-            "sakstype": "GENERELL_SAK"
           }
         }
         """.trimIndent().let { JSONObject(it) }
+
+        json.put("sak", JSONObject().also {
+            it.put("sakstype", sak.sakstype)
+            it.put("fagsakId", sak.fagsakId)
+            it.put("fagsaksystem", sak.fagsaksystem)
+        })
 
         // Mangler tittel på journalposten
         if (tittel.isNullOrBlank()) {
             utfyllendeInformasjon.add("tittel=[$ManglerTittel]")
             json.put("tittel", ManglerTittel)
+        } else {
+            json.put("tittel", tittel)
         }
         // Mangler tittel på et eller fler dokumenter
         dokumenter.filter { it.tittel.isNullOrBlank() }.takeIf { it.isNotEmpty() }?.also { dokumenterUtenTittel ->
@@ -78,12 +84,18 @@ internal data class FerdigstillJournalpost(
     internal data class Bruker(
         internal val identitetsnummer: Identitetsnummer,
         internal val sak: Pair<Fagsystem, Saksnummer>? = null,
-        internal val navn: String? = null
+        internal val navn: String? = null,
     )
 
     internal data class Dokument(
         internal val dokumentId: String,
-        internal val tittel: String?
+        internal val tittel: String?,
+    )
+
+    internal data class Sak(
+        internal val sakstype: String?,
+        internal val fagsaksystem: String?,
+        internal val fagsakId: String?,
     )
 
     private companion object {

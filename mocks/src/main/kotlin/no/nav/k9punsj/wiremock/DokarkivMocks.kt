@@ -52,4 +52,29 @@ fun WireMockServer.stubJournalføringAvNotat(
     )
     return this
 }
+fun WireMockServer.stubFerdigstillJournalpost(
+    responsStatus: Int = 200
+) : WireMockServer{
+    WireMock.stubFor(
+        WireMock.patch(
+            WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost/.*/ferdigstill"))
+            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
+            .withHeader("Nav-Callid", WireMock.matching(".*"))
+            .withHeader("Authorization", WireMock.matching(".*"))
+            .withRequestBody(WireMock.matchingJsonPath("$.journalfoerendeEnhet", WireMock.equalTo("Hjemmekontor")))
+            .willReturn(
+                WireMock.aResponse()
+                    .withStatus(responsStatus)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        //language=json
+                        """
+                        {
+                          "journalpostId": "201"
+                        }
+                    """.trimIndent())
+            )
+    )
+    return this
+}
 

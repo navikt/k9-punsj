@@ -10,13 +10,19 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasIdentDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasJournalpostInfo
 import no.nav.k9punsj.openapi.OasPunsjBolleDto
 import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasSøknadId
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @SecurityScheme(
@@ -122,11 +128,12 @@ internal class JournalpostOpenApi {
         ]
     )
     @Operation(
-        summary = "Hente informasjon om en journalpost",
+        summary = "Lukker oppgave i LOS og ferdigstiller gosysoppgave og journalpost",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun LukkJournalpost(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
+        @RequestBody lukkJournalpostDto: LukkJournalpostDto
     ) {
     }
 

@@ -16,12 +16,14 @@ import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
+import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -49,15 +51,25 @@ class DokarkivGateway(
     @Value("#{'\${no.nav.dokarkiv.scope}'.split(',')}") private val dokarkivScope: Set<String>
 ) {
 
-    internal suspend fun oppdaterJournalpostData(
-        dataFraSaf: JSONObject?,
+    internal suspend fun oppdaterJournalpostDataOgFerdigstill(
+        dataFraSaf: JSONObject,
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
-        enhetKode: String
-    ): Int {
+        enhetKode: String,
+        sak: Sak
+    ): Pair<HttpStatus, String> {
         val ferdigstillJournalpost =
-            dataFraSaf?.mapFerdigstillJournalpost(journalpostId.somJournalpostId(), identitetsnummer)
-        val oppdatertPayload = ferdigstillJournalpost!!.oppdaterPayloadGenerellSak()
+            dataFraSaf.mapFerdigstillJournalpost(
+                journalpostId = journalpostId.somJournalpostId(),
+                identitetsnummer = identitetsnummer,
+                sak = FerdigstillJournalpost.Sak(
+                    sakstype = sak.sakstype.name,
+                    fagsakId = sak.fagsakId,
+                    fagsaksystem = sak.fagsaksystem?.name
+                )
+            )
+
+        val oppdatertPayload = ferdigstillJournalpost.oppdaterPayloadMedSak()
 
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -80,30 +92,13 @@ class DokarkivGateway(
         }
 
         ferdigstillJournalpost.kanFerdigstilles()
-        val pair = "journalfoerendeEnhet" to enhetKode
-        val body = emptyMap<String, String>().plus(pair)
+        val responseFerdigstiltJournalpost = ferdigstillJournalpost(journalpostId, enhetKode)
 
-        val fromValue = BodyInserters.fromValue(body)
-
-        logger.info("Boddy$fromValue")
-        val awaitFirst = client
-            .patch()
-            .uri { it.pathSegment("rest", "journalpostapi", "v1", "journalpost", journalpostId, "ferdigstill").build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(fromValue)
-            .retrieve()
-            .toEntity(String::class.java)
-            .awaitFirst()
-
-        if (awaitFirst.statusCode.value() != 200) {
-            logger.error("Feiler med" + awaitFirst.body)
+        if (responseFerdigstiltJournalpost.statusCode.value() != 200) {
+            logger.error("Feiler med" + responseFerdigstiltJournalpost.body)
         }
 
-        return awaitFirst.statusCode.value()
+        return responseFerdigstiltJournalpost.statusCode to (responseFerdigstiltJournalpost.body ?: "Feilet med å ferdigstille journalpost")
     }
 
     internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
@@ -142,6 +137,28 @@ class DokarkivGateway(
         throw IllegalStateException("Feilet med å opprette journalpost")
     }
 
+    internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {
+        val body = BodyInserters.fromValue("""{"journalfoerendeEnhet": "$enhet"}""".trimIndent())
+
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(scopes = dokarkivScope, onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+
+        return kotlin.runCatching {
+            client
+                .patch()
+                .uri(URI(journalpostId.ferdigstillJournalpostUrl()))
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+    }
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(DokarkivGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -166,8 +183,8 @@ class DokarkivGateway(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
     private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
+    private fun String.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this/ferdigstill"
 
-    //    private fun JournalpostId.ferdigstillJournalpostUrl() = "rest/journalpostapi/v1/journalpost/${this}/ferdigstill"
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
         true -> getString(key)
         false -> null
@@ -200,23 +217,32 @@ class DokarkivGateway(
 
     private fun JSONObject.mapFerdigstillJournalpost(
         journalpostId: JournalpostId,
-        identitetsnummer: Identitetsnummer
+        identitetsnummer: Identitetsnummer,
+        sak: FerdigstillJournalpost.Sak
     ) =
         getJSONObject("journalpost")
             .let { journalpost ->
+                val avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn")
+                val journalpostStatus = journalpost.getString("journalstatus").somJournalpostStatus()
+                val journalpostType = journalpost.getString("journalposttype").somJournalpostType()
+                val tittel = journalpost.stringOrNull("tittel")
+                val dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
+                    FerdigstillJournalpost.Dokument(
+                        dokumentId = it.getString("dokumentInfoId"),
+                        tittel = it.stringOrNull("tittel")
+                    )
+                }.toSet()
+                val bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
-                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
-                    status = journalpost.getString("journalstatus").somJournalpostStatus(),
-                    type = journalpost.getString("journalposttype").somJournalpostType(),
-                    tittel = journalpost.stringOrNull("tittel"),
-                    dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
-                        FerdigstillJournalpost.Dokument(
-                            dokumentId = it.getString("dokumentInfoId"),
-                            tittel = it.stringOrNull("tittel")
-                        )
-                    }.toSet(),
-                    bruker = FerdigstillJournalpost.Bruker(identitetsnummer)
+                    avsendernavn = avsendernavn,
+                    status = journalpostStatus,
+                    type = journalpostType,
+                    tittel = tittel,
+                    dokumenter = dokumenter,
+                    bruker = bruker,
+                    sak = sak
                 )
             }
 }
@@ -289,12 +315,6 @@ data class JournalPostRequest(
         private fun JSONObject.base64() = this.toString().toByteArray().base64()
     }
 }
-
-private data class Sak(
-    val fagsakId: String,
-    val fagsakSystem: FagsakSystem = FagsakSystem.K9,
-    val sakstype: SaksType
-)
 
 enum class Tema { OMS }
 enum class JournalpostType { NOTAT }

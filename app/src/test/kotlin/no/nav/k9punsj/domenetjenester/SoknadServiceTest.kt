@@ -22,7 +22,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -53,12 +53,20 @@ internal class SoknadServiceTest {
 
     private val feilregistrertJournalpost = SafDtos.Journalpost(
         journalpostId = "525115311",
+        tittel = "omsorgspengerutbetaling",
         tema = "OMS", journalposttype = "N", journalstatus = "FEILREGISTRERT",
         bruker = SafDtos.Bruker(id = "2351670926708", type = "AKTOERID"),
+        sak = SafDtos.Sak(
+            sakstype = SafDtos.Sakstype.FAGSAK,
+            fagsakId = "AB123",
+            fagsaksystem = "k9",
+            tema = SafDtos.Tema.OMS
+        ),
         avsender = null,
-        avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null),
+        avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null, null),
         dokumenter = listOf(SafDtos.Dokument(
             dokumentInfoId = "549312456", brevkode = "K9_PUNSJ_NOTAT",
+            tittel = "tittel på dokument",
             dokumentvarianter = mutableListOf(
                 SafDtos.DokumentVariant(variantformat = "ORIGINAL", saksbehandlerHarTilgang = true),
                 SafDtos.DokumentVariant(variantformat = "ARKIV", saksbehandlerHarTilgang = true)
