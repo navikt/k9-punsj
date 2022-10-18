@@ -12,7 +12,7 @@
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
         <verapdf.version>1.22.2</verapdf.version>
-        <handelbars.version>4.3.0</handelbars.version>
+        <handelbars.version>4.3.1</handelbars.version>
     </properties>
     <parent>
         <groupId>no.nav.k9</groupId>
