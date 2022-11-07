@@ -18,6 +18,6 @@ spec:
     - team: k9saksbehandling
       application: k9-punsj
       access: write
-    - team: omsorgspenger
+    - team: k9saksbehandling
       application: k9-los-api
       access: read
