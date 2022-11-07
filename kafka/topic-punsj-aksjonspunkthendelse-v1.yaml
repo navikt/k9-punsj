@@ -1,23 +1,23 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: punsjbar-journalpost
+  name: punsj-aksjonspunkthendelse-v1
   namespace: k9saksbehandling
   labels:
     team: k9saksbehandling
 spec:
   pool: {{pool}}
-  config:  # optional; all fields are optional too; defaults shown
-    cleanupPolicy: delete  # delete, compact
+  config:
+    cleanupPolicy: delete
     minimumInSyncReplicas: 1
-    partitions: 6
+    partitions: 3
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 672  # -1 means unlimited
+    retentionHours: 720  # 30d
   acl:
     - team: k9saksbehandling
       application: k9-punsj
-      access: read
-    - team: omsorgspenger
-      application: k9-punsjbolle
       access: write
+    - team: omsorgspenger
+      application: k9-los-api
+      access: read
