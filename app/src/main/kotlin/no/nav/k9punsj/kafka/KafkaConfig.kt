@@ -72,7 +72,7 @@ class KafkaConfig(
             SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
             SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_TRUSTSTORE_PATH),
             SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to env.getValue(AIVEN_KAFKA_KEYSTORE_PATH),
-            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to truststorePasswordKey,
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(truststorePasswordKey),
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to env.getValue(AIVEN_KAFKA_CREDSTORE_PASSWORD)
         )
     }
