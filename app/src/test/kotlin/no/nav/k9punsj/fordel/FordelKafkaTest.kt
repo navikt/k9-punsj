@@ -21,6 +21,7 @@ import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions
@@ -62,7 +63,7 @@ import java.util.UUID
 internal class FordelKafkaTest {
 
     @MockBean
-    private lateinit var hendelseProducer: HendelseProducer
+    private lateinit var hendelseProducer: HendelseProducerOnprem
 
     @MockBean
     private lateinit var safGateway: SafGateway

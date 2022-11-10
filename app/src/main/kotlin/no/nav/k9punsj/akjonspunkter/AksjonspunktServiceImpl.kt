@@ -9,6 +9,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.Logger
@@ -20,7 +21,7 @@ import java.util.UUID
 
 @Service
 internal class AksjonspunktServiceImpl(
-    private val hendelseProducer: HendelseProducer,
+    private val hendelseProducer: HendelseProducerOnprem,
     private val journalpostService: JournalpostService,
     private val aksjonspunktRepository: AksjonspunktRepository,
     private val søknadsService: SoknadService,
