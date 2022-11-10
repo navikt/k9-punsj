@@ -119,13 +119,13 @@ spec:
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
-      # Integrasjoner (Kafka)
-      # topic (p:k9-punsj -> c:k9-los-api) for å lage oppgaver i k9-los
-    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
-      value: "privat-k9-dokumenthendelse"
-      # topic (p:k9-punsj -> c:k9-formidling) for å opprette en dokumentbestilling
-    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
-      value: "privat-k9punsj-aksjonspunkthendelse-v1"
-
     - name: NOTAT_ENABLED
       value: "true"
+
+      # Integrasjoner (Kafka)
+    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
+      value: "privat-k9-dokumenthendelse"
+    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
+      value: "privat-k9punsj-aksjonspunkthendelse-v1"
+    - name: MOTTAK_JOURNALPOST_FRA_FORDEL
+      value: "privat-k9-fordel-journalforing-v1"

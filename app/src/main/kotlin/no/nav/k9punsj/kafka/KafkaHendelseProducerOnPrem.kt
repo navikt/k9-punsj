@@ -1,7 +1,7 @@
 package no.nav.k9punsj.kafka
 
 import no.nav.k9punsj.IkkeTestProfil
-import no.nav.k9punsj.kafka.KafkaConfig.Companion.AIVEN
+import no.nav.k9punsj.kafka.KafkaConfig.Companion.ON_PREM
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -13,9 +13,9 @@ import org.springframework.util.concurrent.ListenableFutureCallback
 
 @Component
 @IkkeTestProfil
-class KafkaHendelseProducer(
-    @Qualifier(AIVEN) private val kafkaTemplate: KafkaTemplate<String, String>
-) : HendelseProducer {
+class KafkaHendelseProducerOnPrem(
+    @Qualifier(ON_PREM) private val kafkaTemplate: KafkaTemplate<String, String>
+) : HendelseProducerOnprem {
     override fun send(topicName: String, data: String, key: String) {
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate.send(topicName, key, data)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
@@ -48,6 +48,6 @@ class KafkaHendelseProducer(
     }
 
     private companion object {
-        private val logger: Logger = LoggerFactory.getLogger(KafkaHendelseProducer::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(KafkaHendelseProducerOnPrem::class.java)
     }
 }
