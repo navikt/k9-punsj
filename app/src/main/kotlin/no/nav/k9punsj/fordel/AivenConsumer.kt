@@ -21,7 +21,7 @@ class AivenConsumer(
         containerFactory = KafkaConfig.AIVEN_CONTAINER_FACTORY
     )
     @Throws(IOException::class)
-    fun consumeAivenPunsjbarJournalpost(message: String) {
+    fun consumePunsjbarJournalpost(message: String) {
         runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(PUNSJBAR_JOURNALPOST_TOPIC)) }
     }
 
@@ -32,7 +32,7 @@ class AivenConsumer(
         containerFactory = KafkaConfig.AIVEN_CONTAINER_FACTORY
     )
     @Throws(IOException::class)
-    fun consumeOnPremPunsjbarJournalpost(message: String) {
+    fun consumeFordelJournalforing(message: String) {
         runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(FORDEL_JOURNALFORING_TOPIC)) }
     }
 
