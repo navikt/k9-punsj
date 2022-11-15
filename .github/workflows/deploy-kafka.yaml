@@ -1,4 +1,4 @@
-name: Deploy kafka
+name: Deploy kafka topics
 
 on:
   push:
@@ -9,27 +9,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-dev:
-    name: Deploy to dev
+  deploy-topics:
+    strategy:
+      matrix:
+        topic: [punsjbar-journalpost, punsj-aksjonspunkthendelse-v1]
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+
+      - name: Deploy topics to dev
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: kafka/kafkarator.yaml
+          RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
           VARS: kafka/dev.json
 
-  deploy-prod:
-    name: Deploy to prod
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+      - name: Deploy topics to prod
+        if: github.ref == 'refs/heads/master'
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/kafkarator.yaml
+          RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
           VARS: kafka/prod.json
