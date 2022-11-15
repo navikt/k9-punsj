@@ -11,9 +11,9 @@ spec:
     cleanupPolicy: delete
     minimumInSyncReplicas: 1
     partitions: 3
-    replication: 3  # see min/max requirements
-    retentionBytes: -1  # -1 means unlimited
-    retentionHours: 720  # 30d
+    replication: 2
+    retentionBytes: -1
+    retentionHours: 720
   acl:
     - team: k9saksbehandling
       application: k9-punsj
