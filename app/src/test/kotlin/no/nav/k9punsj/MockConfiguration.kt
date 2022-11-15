@@ -58,7 +58,9 @@ internal object MockConfiguration {
             "AAREG_BASE_URL" to wireMockServer.getAaregBaseUrl(),
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
+            "SEND_BREVBESTILLING_TIL_K9_FORMIDLING_AIVEN" to "privat-k9-dokumenthendelse",
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
+            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS_AIVEN" to "privat-k9punsj-aksjonspunkthendelse-v1",
             "NOTAT_ENABLED" to "true"
         )
     }

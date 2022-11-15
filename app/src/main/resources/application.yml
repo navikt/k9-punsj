@@ -99,8 +99,10 @@ no.nav:
   kafka:
     k9_formidling:
       topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
+      topic_aiven: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING_AIVEN}
     k9_los:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+      topic_aiven: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS_AIVEN}
     override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
 
 server:
