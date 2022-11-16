@@ -106,7 +106,7 @@ internal fun Mappe.tilOlpVisning(norskIdent: String): SvarOlpDto {
                 )
             }
         }
-    return SvarOlpDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
+    return SvarOlpDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOlpvisning(): OpplaeringspengerSøknadDto {
