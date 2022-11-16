@@ -54,7 +54,7 @@ internal class OpplaeringspengerSoknadOpenApi {
                 content = [
                     Content(
                         schema = Schema(
-                            implementation = SvarPsbDto::class
+                            implementation = SvarOlpDto::class
                         )
                     )
                 ]
