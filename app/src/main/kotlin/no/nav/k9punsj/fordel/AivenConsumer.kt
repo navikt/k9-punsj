@@ -38,6 +38,6 @@ class AivenConsumer(
 
     private companion object {
         private const val PUNSJBOLLE_AIVEN_TOPIC = "k9saksbehandling.punsjbar-journalpost"
-        private const val FORDEL_TOPIC = "k9saksbehandling.k9-fordel-journalforing-v1"
+        private const val FORDEL_TOPIC = "k9saksbehandling.fordel-journalforing"
     }
 }
