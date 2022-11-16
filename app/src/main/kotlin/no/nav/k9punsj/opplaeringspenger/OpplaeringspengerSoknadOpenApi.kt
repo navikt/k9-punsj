@@ -105,7 +105,7 @@ internal class OpplaeringspengerSoknadOpenApi {
         produces = ["application/json"]
     )
     @Operation(
-        summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.",
+        summary = "Sende inn søknad til behandling i saksbehandlingssystemet.",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
@@ -254,7 +254,7 @@ internal class OpplaeringspengerSoknadOpenApi {
         value = [
             ApiResponse(
                 responseCode = "200",
-                description = "Henter siste pleiepengersøknad fra k9-sak og gjør den tilgjengelig for visning",
+                description = "Henter siste opplæringspenger fra k9-sak og gjør den tilgjengelig for visning",
                 content = [
                     Content(
                         schema = Schema(
