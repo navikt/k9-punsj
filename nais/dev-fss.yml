@@ -63,7 +63,7 @@ spec:
     - name: SAF_BASE_URL
       value: https://saf-q1.dev.intern.nav.no
     - name: SAF_HENTE_JOURNALPOST_SCOPES
-      value: api://dev-fss.teamdokumenthandtering.saf/.default
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.nais.preprod.local/graphql
     - name: PDL_SCOPE
@@ -71,7 +71,7 @@ spec:
     - name: GOSYS_BASE_URL
       value: https://oppgave.nais.preprod.local
     - name: SAF_HENTE_DOKUMENT_SCOPES
-      value: api://dev-fss.teamdokumenthandtering.saf/.default
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
     - name: KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: DEFAULTDS_USERNAME
