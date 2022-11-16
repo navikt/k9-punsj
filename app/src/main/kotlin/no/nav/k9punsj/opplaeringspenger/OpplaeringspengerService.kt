@@ -54,7 +54,7 @@ internal class OpplaeringspengerService(
         if (person != null) {
             val svarDto = mappeService.hentMappe(
                 person = person
-            ).tilPsbVisning(norskIdent)
+            ).tilOlpVisning(norskIdent)
             return ServerResponse
                 .ok()
                 .json()
@@ -63,7 +63,7 @@ internal class OpplaeringspengerService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarPsbDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf()))
+            .bodyValueAndAwait(SvarOlpDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {

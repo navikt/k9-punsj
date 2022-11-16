@@ -11,7 +11,6 @@ import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
-import no.nav.k9punsj.felles.k9format.leggTilUtenlandsoppholdV2
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
 import no.nav.k9punsj.utils.StringUtils.erSatt
@@ -38,8 +37,8 @@ internal class MapOlpTilK9Format(
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.barn?.leggTilBarn()
             dto.soeknadsperiode?.leggTilSøknadsperiode()
-            if (dto.utenlandsoppholdV2.isNotEmpty()) {
-                dto.utenlandsoppholdV2.leggTilUtenlandsoppholdV2(feil).apply {
+            if (dto.utenlandsopphold.isNotEmpty()) {
+                dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             } else {

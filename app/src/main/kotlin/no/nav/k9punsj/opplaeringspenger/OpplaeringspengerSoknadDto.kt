@@ -23,22 +23,18 @@ data class OpplaeringspengerSøknadDto(
     val klokkeslett: LocalTime? = null,
     val barn: BarnDto? = null,
     val soeknadsperiode: List<PeriodeDto>? = null,
+    val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
+    val soknadsinfo: DataBruktTilUtledningDto? = null,
+    val bosteder: List<BostederDto>? = null,
+    val utenlandsopphold: List<UtenlandsoppholdDto> = emptyList(),
+    val lovbestemtFerie: List<PeriodeDto>? = null,
     val arbeidstid: ArbeidstidDto? = null,
-    val beredskap: List<BeredskapDto>? = null,
-    val nattevaak: List<NattevåkDto>? = null,
-    val tilsynsordning: TilsynsordningDto? = null,
     val uttak: List<UttakDto>? = null,
     val omsorg: OmsorgDto? = null,
-    val bosteder: List<BostederDto>? = null,
-    val lovbestemtFerie: List<PeriodeDto>? = null,
-    val lovbestemtFerieSomSkalSlettes: List<PeriodeDto>? = null,
-    val soknadsinfo: DataBruktTilUtledningDto? = null,
-    val utenlandsopphold: List<UtenlandsoppholdDto>? = null,
-    val utenlandsoppholdV2: List<UtenlandsoppholdDtoV2> = emptyList(),
+    val kurs: Kurs? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
     val metadata: Map<*, *>? = null
 ) {
@@ -54,27 +50,6 @@ data class OpplaeringspengerSøknadDto(
         val harMedsoeker: Boolean? = null
     )
 
-    data class BeredskapDto(
-        val periode: PeriodeDto?,
-        val tilleggsinformasjon: String?
-
-    )
-
-    data class NattevåkDto(
-        val periode: PeriodeDto?,
-        val tilleggsinformasjon: String?
-    )
-
-    data class TilsynsordningDto(
-        val perioder: List<TilsynsordningInfoDto>?
-    )
-
-    data class TilsynsordningInfoDto(
-        val periode: PeriodeDto?,
-        val timer: Int,
-        val minutter: Int
-    )
-
     data class UttakDto(
         val periode: PeriodeDto?,
         val timerPleieAvBarnetPerDag: String?,
@@ -85,6 +60,23 @@ data class OpplaeringspengerSøknadDto(
         val relasjonTilBarnet: String?,
         val samtykketOmsorgForBarnet: Boolean?,
         val beskrivelseAvOmsorgsrollen: String?
+    )
+
+    data class Kurs(
+        val kursHolder: KursHolder?,
+        val formaal: String?,
+        val kursperioder: List<KursPeriodeMedReisetid>?
+    )
+
+    data class KursPeriodeMedReisetid(
+        val periode: PeriodeDto?,
+        val avreise: LocalDate?,
+        val hjemkomst: LocalDate?
+    )
+
+    data class KursHolder(
+        val holder: String?,
+        val institusjonsUuid: String?
     )
 }
 
