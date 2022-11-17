@@ -86,10 +86,10 @@ fun ArbeidAktivitetDto.SelvstendigNæringsdrivendeDto.mapOpptjeningAktivitetSelv
 fun ArbeidAktivitetDto.FrilanserDto.mapOpptjeningAktivitetFrilanser(feil: MutableList<Feil>): Frilanser {
     val k9Frilanser = Frilanser()
     if (startdato.erSatt()) mapEllerLeggTilFeil(feil, "ytelse.opptjening.frilanser.startDato") { LocalDate.parse(startdato) }?.also {
-        k9Frilanser.medStartDato(it)
+        k9Frilanser.medStartdato(it)
     }
     if (sluttdato.erSatt()) mapEllerLeggTilFeil(feil, "ytelse.opptjening.frilanser.sluttDato") { LocalDate.parse(sluttdato) }?.also {
-        k9Frilanser.medSluttDato(it)
+        k9Frilanser.medSluttdato(it)
     }
     return k9Frilanser
 }
