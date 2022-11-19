@@ -62,6 +62,7 @@ no.nav:
     scope: ${K9PUNSJBOLLE_SCOPE}
   gosys:
     base_url: ${GOSYS_BASE_URL}
+    scope: ${GOSYS_BASE_SCOPE}
   security:
     sts:
       client:

@@ -37,8 +37,8 @@ spec:
     - https://k9-punsj.dev.adeo.no
     - https://k9-punsj.dev.intern.nav.no
   replicas:
-    min: 2
-    max: 4
+    min: 1
+    max: 1
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
@@ -56,24 +56,6 @@ spec:
   kafka:
     pool: nav-dev
   env:
-    - name: SWAGGER_SERVER_BASE_URL
-      value: https://k9-punsj.dev.intern.nav.no
-    - name: NAIS_STS_TOKEN_ENDPOINT
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
-    - name: SAF_BASE_URL
-      value: https://saf-q1.dev.intern.nav.no
-    - name: SAF_HENTE_JOURNALPOST_SCOPES
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
-    - name: PDL_BASE_URL
-      value: https://pdl-api.nais.preprod.local/graphql
-    - name: PDL_SCOPE
-      value: api://dev-fss.pdl.pdl-api/.default
-    - name: GOSYS_BASE_URL
-      value: https://oppgave.nais.preprod.local
-    - name: SAF_HENTE_DOKUMENT_SCOPES
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
-    - name: KAFKA_BOOTSTRAP_SERVERS
-      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: DEFAULTDS_USERNAME
       value: k9-punsj
     - name: DEFAULTDS_PASSWORD
@@ -82,43 +64,79 @@ spec:
       value: postgresql/preprod-fss/
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-punsj
+    - name: SWAGGER_SERVER_BASE_URL
+      value: https://k9-punsj.dev.intern.nav.no
+    - name: KAFKA_BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+
+    # SAF:
+    - name: SAF_BASE_URL
+      value: https://saf-q1.dev.intern.nav.no
+    - name: SAF_HENTE_JOURNALPOST_SCOPES
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+    - name: SAF_HENTE_DOKUMENT_SCOPES
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+
+    # Gosys / Oppgave:
+    - name: GOSYS_BASE_URL
+      value: https://oppgave-q1.intern.dev.adeo.no
+    - name: GOSYS_SCOPE
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
+
+    # PDL:
+    - name: PDL_BASE_URL
+      value: https://pdl-api.dev.intern.nav.no/graphql
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
+
+    # Sikkerhet:
+    - name: NAIS_STS_TOKEN_ENDPOINT
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.teamabac/application/authorize
+    - name: APP_NAISSTS_aud
+      value: "srvk9sak"
+    - name: APP_NAISSTS_discovery_url
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
+
+    # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
       value: "k9"
     - name: AUDITLOGGER_PRODUCT
       value: "k9-punsj"
+
+    # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
       value: https://k9-sak.nais.preprod.local/k9/sak/api
     - name: K9PUNSJBOLLE_BASE_URL
       value: https://k9-punsjbolle.dev.intern.nav.no/api
     - name : K9PUNSJBOLLE_SCOPE
       value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
-    - name: APP_NAISSTS_aud
-      value: "srvk9sak"
-    - name: APP_NAISSTS_discovery_url
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
     - name: AAREG_BASE_URL
       value: https://modapp-q1.adeo.no/aareg-services/api/v1
     - name: EREG_BASE_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1
+    - name: GOSYS_BASE_URL
+      value: https://oppgave-q1.dev.intern.nav.no
     - name: DOKARKIV_BASE_URL
       value: https://dokarkiv-q1.dev.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
-    - name: NOTAT_ENABLED
-      value: "true"
-    - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
-      value: "true"
 
-      # Integrasjoner (Kafka)
+    # Integrasjoner (Kafka)
     - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
       value: "privat-k9-dokumenthendelse"
     - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
       value: "privat-k9punsj-aksjonspunkthendelse-v1"
 
-      # Kafka AIVEN
+    # Kafka AIVEN
     - name: K9_RAPID_TOPIC
       value: "omsorgspenger.k9-rapid-v2"
+
+    # Feature toggles
+    - name: NOTAT_ENABLED
+      value: "true"
+    - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
+      value: "true"
