@@ -16,29 +16,29 @@ class AivenConsumer(
 ) {
 
     @KafkaListener(
-        topics = [PUNSJBAR_JOURNALPOST_TOPIC],
+        topics = [PUNSJBOLLE_AIVEN_TOPIC],
         groupId = "k9-punsj-1",
         properties = ["auto.offset.reset:earliest"],
         containerFactory = KafkaConfig.AIVEN_CONTAINER_FACTORY
     )
     @Throws(IOException::class)
-    fun consumePunsjbarJournalpost(message: String) {
-        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(PUNSJBAR_JOURNALPOST_TOPIC)) }
+    fun consumeAivenPunsjbarJournalpost(message: String) {
+        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(PUNSJBOLLE_AIVEN_TOPIC)) }
     }
 
     @KafkaListener(
-        topics = [FORDEL_JOURNALFORING_TOPIC],
-        groupId = "k9-punsj-3",
+        topics = [FORDEL_TOPIC],
+        groupId = "k9-punsj-1",
         properties = ["auto.offset.reset:earliest"],
         containerFactory = KafkaConfig.AIVEN_CONTAINER_FACTORY
     )
     @Throws(IOException::class)
-    fun consumeFordelJournalforing(message: String) {
-        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(FORDEL_JOURNALFORING_TOPIC)) }
+    fun consumeAivenFordelJournalpost(message: String) {
+        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(FORDEL_TOPIC)) }
     }
 
     private companion object {
-        private const val PUNSJBAR_JOURNALPOST_TOPIC = "k9saksbehandling.punsjbar-journalpost"
-        private const val FORDEL_JOURNALFORING_TOPIC = "k9saksbehandling.fordel-journalforing-v1"
+        private const val PUNSJBOLLE_AIVEN_TOPIC = "k9saksbehandling.punsjbar-journalpost"
+        private const val FORDEL_TOPIC = "k9saksbehandling.fordel-journalforing"
     }
 }
