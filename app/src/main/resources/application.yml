@@ -101,10 +101,8 @@ no.nav:
       topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
     k9_los:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
-      topic_aiven: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS_AIVEN}
-    k9_fordel:
-      topic: ${MOTTAK_JOURNALPOST_FRA_FORDEL}
-      topic_aiven: ${MOTTAK_JOURNALPOST_FRA_FORDEL_AIVEN}
+    k9_rapid:
+      topic: ${K9_RAPID_TOPIC}
     override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
 
 server:

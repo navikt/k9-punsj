@@ -38,11 +38,9 @@ internal class SjekkOmUtløptJobbTest {
 
         val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
             aksjonspunktRepository = aksjonspunktRepository,
-            hendelseProducer = hendelseProducer,
             hendelseProducerOnprem = hendelseProducerOnprem,
             journalpostRepository = journalpostRepository,
             k9losAksjonspunkthendelseTopic = "test",
-            k9losAksjonspunkthendelseTopicAiven = "aiven"
         )
 
         val dummyAktørId = "1000000000000"

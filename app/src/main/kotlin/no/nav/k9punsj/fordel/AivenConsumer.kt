@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.fordel.FordelPunsjEventDto.Companion.somFordelPunsjEventDto
 import no.nav.k9punsj.kafka.KafkaConfig
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import java.io.IOException

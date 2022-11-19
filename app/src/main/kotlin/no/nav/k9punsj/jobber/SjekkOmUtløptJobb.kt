@@ -22,11 +22,9 @@ import java.util.UUID
 @Service
 class SjekkOmUtløptJobb @Autowired constructor(
     val aksjonspunktRepository: AksjonspunktRepository,
-    val hendelseProducer: HendelseProducer,
     val hendelseProducerOnprem: HendelseProducerOnprem,
     val journalpostRepository: JournalpostRepository,
-    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
-    @Value("\${no.nav.kafka.k9_los.topic_aiven}") private val k9losAksjonspunkthendelseTopicAiven: String
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
 ) {
 
     private val logger = LoggerFactory.getLogger(SjekkOmUtløptJobb::class.java)
@@ -76,11 +74,6 @@ class SjekkOmUtløptJobb @Autowired constructor(
         )
         hendelseProducerOnprem.send(
             topicName = k9losAksjonspunkthendelseTopic,
-            data = punsjEventJson,
-            key = punsjJournalpost.uuid.toString()
-        )
-        hendelseProducer.send(
-            topicName = k9losAksjonspunkthendelseTopicAiven,
             data = punsjEventJson,
             key = punsjJournalpost.uuid.toString()
         )

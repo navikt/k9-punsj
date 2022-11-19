@@ -14,6 +14,7 @@ import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.objectMapper
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
@@ -43,7 +44,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 internal class BrevServiceImplTest {
 
     @MockBean
-    private lateinit var hendelseProducer: HendelseProducer
+    private lateinit var hendelseProducer: HendelseProducerOnprem
 
     @MockBean
     private lateinit var journalpostService: JournalpostService
