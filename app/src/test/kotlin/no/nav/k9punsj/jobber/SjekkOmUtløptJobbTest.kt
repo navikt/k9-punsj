@@ -8,6 +8,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
 import org.assertj.core.api.Assertions.assertThat
@@ -26,17 +27,30 @@ internal class SjekkOmUtløptJobbTest {
     @MockBean
     lateinit var hendelseProducer: HendelseProducer
 
+    @MockBean
+    lateinit var hendelseProducerOnprem: HendelseProducerOnprem
+
     @Test
     fun `Skal finne alle aksjonspunkter som har utløpt og sende oppgaver på disse`(): Unit = runBlocking {
         // Arrange
         val aksjonspunktRepository = getAksjonspunktRepo()
         val journalpostRepository = getJournalpostRepo()
 
-        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository, "test")
+        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
+            aksjonspunktRepository = aksjonspunktRepository,
+            hendelseProducerOnprem = hendelseProducerOnprem,
+            journalpostRepository = journalpostRepository,
+            k9losAksjonspunkthendelseTopic = "test",
+        )
 
         val dummyAktørId = "1000000000000"
 
-        val punsjJournalpost = PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = "466988237", aktørId = dummyAktørId)
+        val punsjJournalpost = PunsjJournalpost(
+            uuid = UUID.randomUUID(),
+            journalpostId = "466988237",
+            aktørId = dummyAktørId
+        )
+
         journalpostRepository.lagre(punsjJournalpost) {
             punsjJournalpost
         }

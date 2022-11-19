@@ -62,7 +62,10 @@ import java.util.UUID
 internal class AksjonspunktServiceImplTest {
 
     @MockBean
-    private lateinit var hendelseProducer: HendelseProducerOnprem
+    private lateinit var hendelseProducer: HendelseProducer
+
+    @MockBean
+    private lateinit var hendelseProducerOnprem: HendelseProducerOnprem
 
     @MockBean
     private lateinit var safGateway: SafGateway
@@ -124,6 +127,7 @@ internal class AksjonspunktServiceImplTest {
         assertThat(hentAlleAksjonspunkter).hasSize(1)
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
+        Mockito.doNothing().`when`(hendelseProducerOnprem).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId, "21707da8-a13b-4927-8776-c53399727b29")
 
         val value = valueCaptor.value
@@ -165,6 +169,7 @@ internal class AksjonspunktServiceImplTest {
         søknadRepository.opprettSøknad(SøknadEntitet(søknadId, bunkeId, person.personId))
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
+        Mockito.doNothing().`when`(hendelseProducerOnprem).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))
         aksjonspunktService.settPåVentOgSendTilLos(melding.journalpostId, søknadId)
 
         val value = valueCaptor.value
