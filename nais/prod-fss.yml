@@ -130,6 +130,7 @@ spec:
     - name: MOTTAK_JOURNALPOST_FRA_FORDEL
       value: "privat-k9-fordel-journalforing-v1"
 
+      # Kafka AIVEN
     - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS_AIVEN
       value: "k9saksbehandling.punsj-aksjonspunkthendelse-v1"
     - name: MOTTAK_JOURNALPOST_FRA_FORDEL_AIVEN
