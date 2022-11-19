@@ -9,7 +9,6 @@ import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +21,7 @@ import java.util.UUID
 @Service
 class SjekkOmUtløptJobb @Autowired constructor(
     val aksjonspunktRepository: AksjonspunktRepository,
-    val hendelseProducerOnprem: HendelseProducerOnprem,
+    val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
 ) {
@@ -72,7 +71,7 @@ class SjekkOmUtløptJobb @Autowired constructor(
                 )
             )
         )
-        hendelseProducerOnprem.send(
+        hendelseProducer.send(
             topicName = k9losAksjonspunkthendelseTopic,
             data = punsjEventJson,
             key = punsjJournalpost.uuid.toString()
