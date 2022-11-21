@@ -143,15 +143,11 @@ internal class KorrigeringInntektsmeldingService(
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
-        try {
-            mapTilEksternFormat = MapOmsTilK9Format(
-                søknadId = soknadTilValidering.soeknadId,
-                journalpostIder = journalposterDto.journalposter,
-                dto = soknadTilValidering
-            ).søknadOgFeil()
-        } catch (e: Exception) {
-            throw UventetFeil(e.localizedMessage)
-        }
+        mapTilEksternFormat = MapOmsTilK9Format(
+            søknadId = soknadTilValidering.soeknadId,
+            journalpostIder = journalposterDto.journalposter,
+            dto = soknadTilValidering
+        ).søknadOgFeil()
 
         val (søknad, feilListe) = mapTilEksternFormat
         val feil = if (feilListe.isNotEmpty()) {

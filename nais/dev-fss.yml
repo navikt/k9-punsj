@@ -93,7 +93,7 @@ spec:
     - name: NAIS_STS_TOKEN_ENDPOINT
       value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.teamabac/application/authorize
+      value: http://abac-k9.k9saksbehandling/application/authorize
     - name: APP_NAISSTS_aud
       value: "srvk9sak"
     - name: APP_NAISSTS_discovery_url
