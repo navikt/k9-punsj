@@ -210,9 +210,7 @@ internal class PleiepengerSyktBarnService(
             .bodyValueAndAwait(søknadEntitet.tilPsbvisning())
     }
 
-    internal suspend fun validerSøknad(
-        soknadTilValidering: PleiepengerSyktBarnSøknadDto
-    ): ServerResponse {
+    internal suspend fun validerSøknad(soknadTilValidering: PleiepengerSyktBarnSøknadDto): ServerResponse {
         val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
