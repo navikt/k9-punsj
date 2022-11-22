@@ -12,6 +12,7 @@ import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -132,7 +133,15 @@ internal class KorrigeringInntektsmeldingRoutes(
                     )?.let { return@RequestContext it }
                 }
 
-                val (validertSøknad, søknadFeil) = korrigeringInntektsmeldingService.validerSøknad(søknad)
+                val (validertSøknad, søknadFeil) = try {
+                    korrigeringInntektsmeldingService.validerSøknad(søknad)
+                } catch(e: Exception) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(e.localizedMessage)
+                }
+
                 if (søknadFeil.feil.isNotEmpty()) {
                     return@RequestContext ServerResponse
                         .badRequest()

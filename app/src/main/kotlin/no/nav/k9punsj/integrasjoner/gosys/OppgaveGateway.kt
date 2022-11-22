@@ -31,7 +31,8 @@ import kotlin.coroutines.coroutineContext
 @Service
 internal class OppgaveGateway(
     @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Value("\${no.nav.gosys.scope}") private val oppgaveScope: String,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -45,7 +46,6 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
-        private val scope: Set<String> = setOf("openid")
     }
 
     private object Urls {
@@ -125,7 +125,7 @@ internal class OppgaveGateway(
             client
                 .post()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -145,7 +145,7 @@ internal class OppgaveGateway(
             client
                 .get()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -163,7 +163,7 @@ internal class OppgaveGateway(
             client
                 .patch()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
