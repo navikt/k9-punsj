@@ -80,7 +80,7 @@ spec:
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
       value: https://oppgave.nais.adeo.no
-    - name: GOSYS_SCOPE
+    - name: GOSYS_BASE_SCOPE
       value: api://prod-fss.oppgavehandtering.oppgave/.default
 
     # PDL:
