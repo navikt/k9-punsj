@@ -93,7 +93,7 @@ spec:
     - name: NAIS_STS_TOKEN_ENDPOINT
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/token
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.teamabac/application/authorize
+      value: http://abac-k9.k9saksbehandling/application/authorize
     - name: APP_NAISSTS_aud
       value: "srvk9sak"
     - name: APP_NAISSTS_discovery_url
@@ -124,14 +124,12 @@ spec:
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
     # Integrasjoner (Kafka)
-    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
-      value: "privat-k9-dokumenthendelse"
-
-    # Kafka AIVEN
     - name: K9_RAPID_TOPIC
       value: "omsorgspenger.k9-rapid-v2"
     - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
       value: "k9saksbehandling.punsj-aksjonspunkthendelse-v1"
+    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
+      value: "k9saksbehandling.k9-dokumenthendelse-v1"
 
     # Feature toggles
     - name: NOTAT_ENABLED
