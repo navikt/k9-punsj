@@ -16,7 +16,7 @@ import java.util.UUID
 
 @Service
 internal class BrevServiceImpl(
-    val hendelseProducer: HendelseProducerOnprem,
+    val hendelseProducer: HendelseProducer,
     val personService: PersonService,
     val journalpostService: JournalpostService,
     @Value("\${no.nav.kafka.k9_formidling.topic}") private val brevBestillingTopic: String
