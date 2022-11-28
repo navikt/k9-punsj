@@ -47,7 +47,6 @@ internal class K9PunsjApplicationWithMocks {
                 val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
                     .httpGet()
                     .timeout(200)
-                    .timeout(200)
                     .awaitStringResponseResult()
                 response.statusCode == 200
             }
