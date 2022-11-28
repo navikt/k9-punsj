@@ -2,7 +2,6 @@ package no.nav.k9punsj.kafka
 
 import no.nav.k9punsj.IkkeLokalProfil
 import no.nav.k9punsj.IkkeTestProfil
-import no.nav.k9punsj.StandardProfil
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
