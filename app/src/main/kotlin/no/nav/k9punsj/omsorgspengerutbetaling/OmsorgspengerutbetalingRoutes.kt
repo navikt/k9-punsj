@@ -103,7 +103,7 @@ internal class OmsorgspengerutbetalingRoutes(
                     innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
                         norskIdent = norskIdent,
                         url = Urls.ValiderSøknad
-                    )?.let { return@let it }
+                    )?.let { return@RequestContext it }
                 }
 
                 omsorgspengerutbetalingService.validerSøknad(søknad)

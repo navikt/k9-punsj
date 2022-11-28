@@ -9,6 +9,7 @@ import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -92,12 +93,12 @@ internal class GosysService(
             .buildAndAwait()
     }
 
-    internal suspend fun hentGosysoppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+    internal suspend fun hentGosysoppgave(oppgaveId: String): Triple<HttpStatusCode, String?, GetOppgaveResponse?> {
         logger.info("Henter eksisterende gosysoppgave med id=[{}]", oppgaveId)
         return oppgaveGateway.hentOppgave(oppgaveId)
     }
 
-    suspend fun ferdigstillOppgave(oppgaveId: String): Pair<HttpStatus, String?> {
+    suspend fun ferdigstillOppgave(oppgaveId: String): Pair<HttpStatusCode, String?> {
         logger.info("Ferdigstiller gosysoppgave med id=[{}]", oppgaveId)
         val (httpStatus, feil, oppgave) = hentGosysoppgave(oppgaveId)
         if (!httpStatus.is2xxSuccessful) return httpStatus to feil

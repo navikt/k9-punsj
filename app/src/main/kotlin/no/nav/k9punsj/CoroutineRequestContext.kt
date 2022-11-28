@@ -97,7 +97,7 @@ private fun Routes(
         serverRequest.attributes()[RequestIdKey] = requestId
         serverRequest.attributes()[CorrelationIdKey] = correlationId
         serverRequest.attributes()[CallIdKey] = callId
-        logger.info("-> ${serverRequest.methodName()} ${serverRequest.path()}", e(serverRequest.contextMap()))
+        logger.info("-> ${serverRequest.method()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
     filter { serverRequest, requestedOperation ->
@@ -107,7 +107,7 @@ private fun Routes(
             issuerNames = issuerNames!!,
             isAccepted = isAccepted!!
         ) ?: requestedOperation(serverRequest)
-        logger.info("<- HTTP ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
+        logger.info("<- HTTP ${serverResponse.statusCode()}", e(serverRequest.contextMap()))
         serverResponse
     }
     onError<IkkeFunnet> { _, _ ->

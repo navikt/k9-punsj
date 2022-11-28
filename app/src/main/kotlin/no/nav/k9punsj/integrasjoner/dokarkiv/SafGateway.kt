@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
@@ -196,9 +197,9 @@ class SafGateway(
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
+            .awaitExchange { Pair(it.statusCode(), it.awaitEntity<DataBuffer>()) }
 
-        return when (statusCode) {
+        return when (statusCode.value()) {
             200 -> {
                 Dokument(
                     contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),

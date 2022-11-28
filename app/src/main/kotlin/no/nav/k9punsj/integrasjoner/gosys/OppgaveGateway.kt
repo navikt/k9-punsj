@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -53,7 +54,7 @@ internal class OppgaveGateway(
         const val patchEksisterendeOppgaveUrl = "/api/v1/oppgaver"
     }
 
-    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatusCode, String?, GetOppgaveResponse?> {
 
         val (url, response, responseBody) = httpGet("$oppgaveUrl/$oppgaveId")
         val harFeil = !response.statusCode.is2xxSuccessful
@@ -74,7 +75,7 @@ internal class OppgaveGateway(
      *
      * @see <a href="Oppretter en ny oppgave">Oppretter en ny oppgave</a>
      */
-    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
+    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatusCode, String?> {
         val opprettOppgaveRequest = OpprettOppgaveRequest(
             aktoerId = aktørid,
             journalpostId = joarnalpostId,
@@ -103,7 +104,7 @@ internal class OppgaveGateway(
      * Denne operasjonen endrer kun på verdier som er gitt. Felter som ikke er med vil ikke bli berørt.
      * @see <a href="https://oppgave.dev.intern.nav.no/#/Oppgave/patchOppgave">Endre eksisterende oppgave</a>
      */
-    suspend fun patchOppgave(oppgaveId: String, patchOppgaveRequest: PatchOppgaveRequest): Pair<HttpStatus, String?> {
+    suspend fun patchOppgave(oppgaveId: String, patchOppgaveRequest: PatchOppgaveRequest): Pair<HttpStatusCode, String?> {
         val body = kotlin.runCatching { objectMapper().writeValueAsString(patchOppgaveRequest) }
             .getOrElse {
                 logger.error(it.message)

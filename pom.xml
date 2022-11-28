@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
+        <version>3.0.0</version>
         <relativePath/>
     </parent>
     <groupId>no.nav.k9</groupId>
@@ -122,7 +122,7 @@
             <!-- Meldingsformater -->
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jakarta</artifactId>
                 <version>${k9-format.version}</version>
             </dependency>
             <dependency>
