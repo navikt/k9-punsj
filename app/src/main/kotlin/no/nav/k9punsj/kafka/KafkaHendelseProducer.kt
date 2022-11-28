@@ -1,5 +1,6 @@
 package no.nav.k9punsj.kafka
 
+import no.nav.k9punsj.IkkeTestProfil
 import no.nav.k9punsj.kafka.KafkaConfig.Companion.AIVEN
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,6 +12,7 @@ import org.springframework.util.concurrent.ListenableFuture
 import org.springframework.util.concurrent.ListenableFutureCallback
 
 @Component
+@IkkeTestProfil
 class KafkaHendelseProducer(
     @Qualifier(AIVEN) private val kafkaTemplate: KafkaTemplate<String, String>
 ) : HendelseProducer {
