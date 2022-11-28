@@ -6,16 +6,27 @@ import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
+import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger
 import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kursholder
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
+import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
+import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
+import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
+import java.util.UUID
 
 internal class MapOlpTilK9Format(
     søknadId: String,
@@ -36,6 +47,7 @@ internal class MapOlpTilK9Format(
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.barn?.leggTilBarn()
+            dto.leggTilLovestemtFerie()
             dto.soeknadsperiode?.leggTilSøknadsperiode()
             if (dto.utenlandsopphold.isNotEmpty()) {
                 dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
@@ -49,7 +61,14 @@ internal class MapOlpTilK9Format(
             dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
                 opplaeringspenger.medArbeidstid(this)
             }
+            dto.trekkKravPerioder.leggTilTrekkKravPerioder()
+            if (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+                dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                    opplaeringspenger.medOpptjeningAktivitet(this)
+                }
+            }
             dto.leggTilBegrunnelseForInnsending()
+            dto.kurs?.leggTilKurs()
 
             // Fullfører søknad & validerer
             søknad.medYtelse(opplaeringspenger)
@@ -72,6 +91,20 @@ internal class MapOlpTilK9Format(
 
     private fun String.leggTilVersjon() {
         søknad.medVersjon(this)
+    }
+
+
+    private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
+        val kursHolder = Kursholder(this.kursHolder?.holder, UUID.fromString(this.kursHolder?.institusjonsUuid))
+        val kursPerioder = this.kursperioder?.map {
+            KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst)
+        }?.toMutableList()
+        val kurs = Kurs(kursHolder, this.formaal, kursPerioder)
+        opplaeringspenger.medKurs(kurs)
+    }
+
+    private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
+        opplaeringspenger.addAllTrekkKravPerioder(this.somK9Perioder())
     }
 
     private fun OpplaeringspengerSøknadDto.leggTilMottattDatoOgKlokkeslett() {
@@ -124,6 +157,28 @@ internal class MapOlpTilK9Format(
             )
         }
     }
+
+    private fun OpplaeringspengerSøknadDto.leggTilLovestemtFerie() {
+        if (lovbestemtFerie.isNullOrEmpty()) {
+            return
+        }
+        val k9LovbestemtFerie = mutableMapOf<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo>()
+        lovbestemtFerie?.filter { it.erSatt() }?.forEach { periode ->
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true)
+        }
+        opplaeringspenger.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
+    }
+
+    private fun erOpptjeningSatt(
+        dto: OpplaeringspengerSøknadDto,
+        opptjeningAktivitet: ArbeidAktivitetDto?
+    ) = dto.opptjeningAktivitet != null &&
+        (
+            !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                opptjeningAktivitet?.frilanser != null ||
+                opptjeningAktivitet?.selvstendigNaeringsdrivende != null
+            )
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOlpTilK9Format::class.java)
