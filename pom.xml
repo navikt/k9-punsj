@@ -19,6 +19,7 @@
         <revision>1.0.0</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
+        <java.version>17</java.version>
         <kotlin.version>1.7.22</kotlin.version>
         <springdoc.version>1.6.13</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
@@ -208,6 +209,14 @@
                             <version>${kotlin.version}</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
