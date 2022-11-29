@@ -19,7 +19,6 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
-import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.utils.PeriodeUtils.erSatt
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
