@@ -3,7 +3,7 @@ package no.nav.k9punsj.fordel
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.fordel.FordelPunsjEventDto.Companion.somFordelPunsjEventDto
-import no.nav.k9punsj.kafka.KafkaConfig
+import no.nav.k9punsj.configuration.KafkaConfig
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import java.io.IOException
