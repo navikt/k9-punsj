@@ -52,7 +52,7 @@ spec:
               "valueDeserializerType": "STRING"
             },
             {
-              "name": "punsj-aksjonspunkthendelse-v1",
+              "name": "k9saksbehandling.punsj-aksjonspunkthendelse-v1",
               "location": "AIVEN",
               "keyDeserializerType": "STRING",
               "valueDeserializerType": "STRING"
