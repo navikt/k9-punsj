@@ -42,6 +42,14 @@ class LesFraFilUtil {
             }
         }
 
+        private fun lesFraFilOlp(filnavn: String): String {
+            try {
+                return Files.readString(Path.of("src/test/resources/olp/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
         private fun lesFraOmsMappeFil(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/oms/$filnavn"))
@@ -184,6 +192,13 @@ class LesFraFilUtil {
          */
         fun søknadFraFrontendOmsAO(): SøknadJson {
             return objectMapper().readValue(lesFraFilOmsAo("søknad-fra-frontend.json"))
+        }
+
+        /*
+         *  Opplæringspenger
+         */
+        fun søknadFraFrontendOlpFull(): SøknadJson {
+            return objectMapper().readValue(lesFraFilOlp("soknad-fra-frontend-olp.json"))
         }
     }
 }
