@@ -1,0 +1,61 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: k9-kafka-manager
+  namespace: k9saksbehandling
+  labels:
+    team: k9saksbehandling
+spec:
+  image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2022.06.28_10.32-8669b1a0d98c
+  port: 8080
+  webproxy: true
+  ingresses:
+    - https://k9-kafka-manager.dev.intern.nav.no
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 20
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 20
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 75
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1024Mi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: 0bc9661c-975c-4adb-86d1-a97172490662 # 0000-GA-k9-drift
+  kafka:
+    pool: nav-dev
+  env:
+    - name: APP_CONFIG_JSON
+      value: >
+        {
+          "topics": [
+            {
+              "name": "k9saksbehandling.punsjbar-journalpost",
+              "location": "AIVEN",
+              "keyDeserializerType": "STRING",
+              "valueDeserializerType": "STRING"
+            },
+            {
+              "name": "punsj-aksjonspunkthendelse-v1",
+              "location": "AIVEN",
+              "keyDeserializerType": "STRING",
+              "valueDeserializerType": "STRING"
+            }
+          ]
+        }

@@ -1,0 +1,2 @@
+pool: nav-dev
+enablekafkamanager: true

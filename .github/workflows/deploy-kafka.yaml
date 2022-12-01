@@ -24,7 +24,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
-          VARS: kafka/dev.json
+          VARS: kafka/dev-vars.yaml
 
       - name: Deploy topics to prod
         if: github.ref == 'refs/heads/master'
@@ -33,4 +33,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
-          VARS: kafka/prod.json
+          VARS: kafka/prod-vars.yaml

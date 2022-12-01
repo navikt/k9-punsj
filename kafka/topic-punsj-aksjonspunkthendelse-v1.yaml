@@ -21,3 +21,8 @@ spec:
     - team: k9saksbehandling
       application: k9-los-api
       access: read
+    {{#if enablekafkamanager}}
+    - team: k9saksbehandling
+      application: k9-kafka-manager
+      access: readwrite
+    {{/if}}
