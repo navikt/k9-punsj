@@ -34,10 +34,10 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
       claims:
         groups:
-          - id: 0bc9661c-975c-4adb-86d1-a97172490662 # 0000-GA-k9-drift
+          - id: 4919ded1-4999-4c63-94f2-408b259dbe33 # k9saksbehandling
   kafka:
     pool: nav-dev
   env:
