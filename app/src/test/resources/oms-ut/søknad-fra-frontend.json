@@ -25,7 +25,8 @@
         "fom": "2018-12-26",
         "tom": "2018-12-31"
       },
-      "faktiskTidPrDag": "7,5"
+      "faktiskTidPrDag": "4",
+      "normalArbeidstidPrDag": "7,5"
     }],
   "opptjeningAktivitet": {
     "selvstendigNaeringsdrivende": {
@@ -42,6 +43,7 @@
           "Dagmamma i eget hjem/familiebarnehage",
           "Annen næringsvirksomhet"
         ],
+        "erFiskerPåBladB": true,
         "landkode": "",
         "regnskapsførerNavn": "Regskapsfører",
         "regnskapsførerTlf": "88888889",
@@ -84,6 +86,7 @@
       "land": "RU"
     }
   ],
+  "erKorrigering": false,
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false,
   "metadata": {

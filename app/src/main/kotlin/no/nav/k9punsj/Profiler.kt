@@ -10,8 +10,3 @@ annotation class IkkeTestProfil
 
 @Profile("!local")
 annotation class IkkeLokalProfil
-
-@Profile("test | local")
-annotation class IkkeKlarForProduksjon(
-    @Suppress("UNUSED_PARAMETER") val begrunnelse: String
-)

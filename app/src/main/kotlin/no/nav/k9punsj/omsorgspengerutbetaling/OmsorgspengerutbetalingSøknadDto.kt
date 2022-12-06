@@ -8,8 +8,14 @@ import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
+import no.nav.k9punsj.felles.dto.BostederDto
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
@@ -30,6 +36,7 @@ data class OmsorgspengerutbetalingSøknadDto(
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
+    val erKorrigering: Boolean ? = null,
     val metadata: Map<*, *>? = null
 ) {
     data class FraværPeriode(
@@ -39,7 +46,9 @@ data class OmsorgspengerutbetalingSøknadDto(
         val fraværÅrsak: FraværÅrsak?,
         val søknadÅrsak: SøknadÅrsak?,
         val faktiskTidPrDag: String?,
-        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
+        val tidPrDag: TimerOgMinutter? = faktiskTidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
+        val normalArbeidstidPrDag: String?,
+        val normalArbeidstid: TimerOgMinutter? = normalArbeidstidPrDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
 
     data class BarnDto(

@@ -5,11 +5,14 @@ import java.time.LocalDateTime
 internal object SafDtos {
     internal open class GraphqlQuery(val query: String, val variables: Any? = null)
     internal data class JournalpostQuery(val journalpostId: String) : GraphqlQuery(
-        query = """ 
+        query =
+        //language=graphql
+        """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
                 journalpostId
                 tema
+                tittel
                 journalposttype
                 relevanteDatoer {
                   dato
@@ -20,9 +23,16 @@ internal object SafDtos {
                   type
                   id
                 }
+                sak {
+                  fagsakId
+                  fagsaksystem
+                  sakstype
+                  tema
+                }
                 dokumenter {
                   dokumentInfoId
                   brevkode
+                  tittel
                   dokumentvarianter {
                     variantformat
                     saksbehandlerHarTilgang
@@ -31,6 +41,7 @@ internal object SafDtos {
                 avsenderMottaker {
                   id
                   type
+                  navn
                 }
                 tilleggsopplysninger {
                   nokkel
@@ -43,10 +54,13 @@ internal object SafDtos {
     )
 
     internal data class FerdigstillJournalpostQuery(val journalpostId: String) : GraphqlQuery(
-        query = """ 
+        query =
+        //language=graphql
+        """ 
             query {
               journalpost(journalpostId: "$journalpostId") {
                 journalposttype
+                tittel
                 journalstatus
                 dokumenter {
                   dokumentInfoId
@@ -94,12 +108,25 @@ internal object SafDtos {
 
     internal enum class Journalstatus {
         MOTTATT,
+        JOURNALFOERT,
+        FERDIGSTILT,
         FEILREGISTRERT
+    }
+
+    internal enum class Sakstype {
+        GENERELL_SAK, FAGSAK
     }
 
     internal data class Bruker(
         val id: String?,
         val type: String?
+    )
+
+    internal data class Sak(
+        val sakstype: Sakstype?,
+        val fagsakId: String?,
+        val fagsaksystem: String?,
+        val tema: Tema?
     )
 
     internal data class Avsender(
@@ -109,7 +136,8 @@ internal object SafDtos {
 
     internal data class AvsenderMottaker(
         val id: String?,
-        val type: String?
+        val type: String?,
+        val navn: String?
     )
 
     internal data class DokumentVariant(
@@ -120,15 +148,18 @@ internal object SafDtos {
     internal data class Dokument(
         val dokumentInfoId: String,
         val brevkode: String?,
+        val tittel: String?,
         val dokumentvarianter: MutableList<DokumentVariant>?
     )
 
     internal data class Journalpost(
         val journalpostId: String,
         val tema: String?,
+        val tittel: String?,
         val journalposttype: String,
         val journalstatus: String?,
         val bruker: Bruker?,
+        val sak: Sak?,
         val avsender: Avsender?,
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,

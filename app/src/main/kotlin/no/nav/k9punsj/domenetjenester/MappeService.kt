@@ -14,6 +14,7 @@ import no.nav.k9punsj.omsorgspengerkronisksyktbarn.OmsorgspengerKroniskSyktBarnS
 import no.nav.k9punsj.omsorgspengermidlertidigalene.NyOmsMASøknad
 import no.nav.k9punsj.omsorgspengermidlertidigalene.OmsorgspengerMidlertidigAleneSøknadDto
 import no.nav.k9punsj.omsorgspengerutbetaling.OmsorgspengerutbetalingSøknadDto
+import no.nav.k9punsj.opplaeringspenger.OpplaeringspengerSøknadDto
 import no.nav.k9punsj.pleiepengerlivetssluttfase.PleiepengerLivetsSluttfaseSøknadDto
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.springframework.stereotype.Service
@@ -32,6 +33,29 @@ internal class MappeService(
 
     suspend fun hentMappe(person: Person): Mappe {
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
+    }
+
+    suspend fun førsteInnsendingOlp(nySøknad: OpprettNySøknad): SøknadEntitet {
+        val norskIdent = nySøknad.norskIdent
+        val barnIdent = nySøknad.barnIdent
+        val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+
+        val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OPPLÆRINGSPENGER)
+        val søknadfelles = felles(nySøknad.journalpostId)
+        val opplaeringspengerSøknadDto =
+            OpplaeringspengerSøknadDto(
+                soeknadId = søknadfelles.søknadsId.toString(),
+                soekerId = norskIdent,
+                barn = OpplaeringspengerSøknadDto.BarnDto(barnIdent, null),
+                journalposter = listOf(nySøknad.journalpostId),
+                mottattDato = søknadfelles.mottattDato?.toLocalDate(),
+                klokkeslett = søknadfelles.klokkeslett,
+                harInfoSomIkkeKanPunsjes = false,
+                harMedisinskeOpplysninger = false
+            )
+
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, opplaeringspengerSøknadDto)
     }
 
     suspend fun førsteInnsendingPsb(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -215,6 +239,28 @@ internal class MappeService(
 
     private suspend fun hentTidligsteMottattDatoFraJournalposter(journalpostIdDto: String): LocalDateTime? {
         return journalpostService.hentHvisJournalpostMedId(journalpostIdDto)?.mottattDato
+    }
+
+    suspend fun utfyllendeInnsendingOlp(
+        opplaeringspengerSøknadDto: OpplaeringspengerSøknadDto,
+        saksbehandler: String
+    ): Pair<SøknadEntitet, OpplaeringspengerSøknadDto>? {
+        val hentSøknad = soknadService.hentSøknad(opplaeringspengerSøknadDto.soeknadId)!!
+        return if (hentSøknad.sendtInn.not()) {
+            val journalposter = leggTilJournalpost(opplaeringspengerSøknadDto.journalposter, hentSøknad.journalposter)
+            val søknadJson = objectMapper().convertValue<JsonB>(opplaeringspengerSøknadDto)
+            val oppdatertSøknad =
+                hentSøknad.copy(søknad = søknadJson, journalposter = journalposter, endret_av = saksbehandler)
+            soknadService.oppdaterSøknad(oppdatertSøknad)
+
+            val nySøknad = opplaeringspengerSøknadDto.copy(
+                journalposter = journalposter.values.toList()
+                    .filterIsInstance<String>()
+            )
+            Pair(oppdatertSøknad, nySøknad)
+        } else {
+            null
+        }
     }
 
     suspend fun utfyllendeInnsendingPsb(

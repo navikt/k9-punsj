@@ -8,6 +8,7 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
@@ -31,7 +31,8 @@ import kotlin.coroutines.coroutineContext
 @Service
 internal class OppgaveGateway(
     @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Value("\${no.nav.gosys.scope}") private val oppgaveScope: String,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -45,7 +46,6 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
-        private val scope: Set<String> = setOf("openid")
     }
 
     private object Urls {
@@ -125,7 +125,7 @@ internal class OppgaveGateway(
             client
                 .post()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -145,7 +145,7 @@ internal class OppgaveGateway(
             client
                 .get()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -163,7 +163,7 @@ internal class OppgaveGateway(
             client
                 .patch()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -177,19 +177,6 @@ internal class OppgaveGateway(
 
         return responseEntity.resolve(url)
     }
-
-    private fun Result<ResponseEntity<String>>.håndterFeil() = fold(
-        onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-        onFailure = { throwable: Throwable ->
-            when (throwable) {
-                is WebClientResponseException -> ResponseEntity
-                    .status(throwable.statusCode)
-                    .body(throwable.responseBodyAsString)
-
-                else -> throw throwable
-            }
-        }
-    )
 
     private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
         !statusCode.is2xxSuccessful -> {

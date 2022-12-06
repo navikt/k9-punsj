@@ -7,13 +7,13 @@ metadata:
     team: k9saksbehandling
 spec:
   pool: {{pool}}
-  config:  # optional; all fields are optional too; defaults shown
-    cleanupPolicy: delete  # delete, compact
+  config:
+    cleanupPolicy: delete
     minimumInSyncReplicas: 1
     partitions: 6
-    replication: 3  # see min/max requirements
-    retentionBytes: -1  # -1 means unlimited
-    retentionHours: 672  # -1 means unlimited
+    replication: 3
+    retentionBytes: -1
+    retentionHours: 672
   acl:
     - team: k9saksbehandling
       application: k9-punsj
@@ -21,3 +21,8 @@ spec:
     - team: omsorgspenger
       application: k9-punsjbolle
       access: write
+    {{#if enablekafkamanager}}
+    - team: k9saksbehandling
+      application: k9-kafka-manager
+      access: readwrite
+    {{/if}}

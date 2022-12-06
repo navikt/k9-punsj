@@ -6,8 +6,16 @@ import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
+import no.nav.k9punsj.felles.dto.ArbeidstidDto
+import no.nav.k9punsj.felles.dto.BostederDto
+import no.nav.k9punsj.felles.dto.Mappe
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.PleietrengendeDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
+import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.objectMapper
 import java.time.LocalDate
@@ -27,6 +35,8 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val uttak: List<UttakDto>? = null,
     val opptjeningAktivitet: ArbeidAktivitetDto? = null,
     val bosteder: List<BostederDto>? = null,
+    val lovbestemtFerie: List<PeriodeDto>? = null,
+    val lovbestemtFerieSomSkalSlettes: List<PeriodeDto>? = null,
     val utenlandsopphold: List<UtenlandsoppholdDto>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,

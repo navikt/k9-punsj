@@ -64,9 +64,9 @@ internal class MapPsbTilK9Format(
                 }
             }
             dto.omsorg?.leggTilOmsorg()
-            // Enn så lenge støtter vi kun å legge til opptjeningaktivitet eller ignorere
-            // Sletting implementeres ved behov
-            if (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+            // Sletter oppgitt opptjening dersom søknadsperiode eller arbeidstid er satt OG oppgitt opptjening ikkje er satt
+            // Ignorerer oppgitt opptjening dersom ingen søknadsperiode eller arbeidstid er satt
+            if (!dto.soeknadsperiode.isNullOrEmpty() || dto.arbeidstid != null || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
                 dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
                     pleiepengerSyktBarn.medOpptjeningAktivitet(this)
                 }

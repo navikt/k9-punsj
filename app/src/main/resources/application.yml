@@ -17,11 +17,6 @@ management:
         include: info, health, prometheus
       base-path: /internal/actuator
 
-kafka:
-  bootstrap:
-    server: ${KAFKA_BOOTSTRAP_SERVERS}
-  clientId: k9-punsj
-
 systembruker:
   username: ${SYSTEMBRUKER_USERNAME}
   password: ${SYSTEMBRUKER_PASSWORD}
@@ -62,6 +57,7 @@ no.nav:
     scope: ${K9PUNSJBOLLE_SCOPE}
   gosys:
     base_url: ${GOSYS_BASE_URL}
+    scope: ${GOSYS_BASE_SCOPE}
   security:
     sts:
       client:
@@ -101,6 +97,8 @@ no.nav:
       topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
     k9_los:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+    k9_rapid:
+      topic: ${K9_RAPID_TOPIC}
     override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
 
 server:

@@ -38,6 +38,7 @@ internal object MockConfiguration {
             "DOKARKIV_SCOPE" to "dokarkiv/.default",
             "K9SAK_BASE_URL" to wireMockServer.getK9sakBaseUrl(),
             "GOSYS_BASE_URL" to wireMockServer.getGosysBaseUrl(),
+            "GOSYS_BASE_SCOPE" to "gosys/.default",
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",

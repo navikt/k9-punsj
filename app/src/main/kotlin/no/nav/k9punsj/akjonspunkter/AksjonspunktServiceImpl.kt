@@ -25,8 +25,7 @@ internal class AksjonspunktServiceImpl(
     private val aksjonspunktRepository: AksjonspunktRepository,
     private val søknadsService: SoknadService,
     private val personService: PersonService,
-    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
-
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
 ) : AksjonspunktService {
 
     private companion object {

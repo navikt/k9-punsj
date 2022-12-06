@@ -6,7 +6,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 
 interface K9SakService {
 
-    suspend fun hentPerioderSomFinnesIK9(søker: String, barn: String, fagsakYtelseType: FagsakYtelseType): Pair<List<PeriodeDto>?, String?>
+    suspend fun hentPerioderSomFinnesIK9(søker: String, barn: String? = null, fagsakYtelseType: FagsakYtelseType): Pair<List<PeriodeDto>?, String?>
 
     suspend fun hentArbeidsforholdIdFraInntektsmeldinger(søker: String, fagsakYtelseType: FagsakYtelseType, periodeDto: PeriodeDto): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?>
 

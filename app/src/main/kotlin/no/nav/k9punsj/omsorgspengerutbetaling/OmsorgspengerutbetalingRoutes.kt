@@ -3,9 +3,11 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
+import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsak
 import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsakMedPerioder
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
@@ -14,13 +16,16 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OmsorgspengerutbetalingRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils,
-    private val omsorgspengerutbetalingService: OmsorgspengerutbetalingService
+    private val omsorgspengerutbetalingService: OmsorgspengerutbetalingService,
 ) {
 
     private companion object {
@@ -36,6 +41,7 @@ internal class OmsorgspengerutbetalingRoutes(
         const val SendEksisterendeSøknad = "/$søknadType/send" // post
         const val ValiderSøknad = "/$søknadType/valider" // post
         const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" // post
+        const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
     }
 
     @Bean
@@ -115,7 +121,25 @@ internal class OmsorgspengerutbetalingRoutes(
                 omsorgspengerutbetalingService.hentArbeidsforholdIderFraK9Sak(matchfagsakMedPeriode)
             }
         }
+
+        POST("/api${Urls.HentInfoFraK9sak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val matchfagsak = request.mapMatchFagsak()
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsak.brukerIdent),
+                    url = PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak
+                )?.let { return@RequestContext it }
+
+                val perioder = omsorgspengerutbetalingService.hentInfoFraK9Sak(matchfagsak)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(perioder)
+            }
+        }
     }
+
 
     private fun ServerRequest.søknadId(): String = pathVariable(SøknadIdKey)
 

@@ -13,7 +13,9 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
+import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -42,7 +44,7 @@ internal class OmsorgspengerutbetalingService(
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService,
-    private val aksjonspunktService: AksjonspunktService
+    private val aksjonspunktService: AksjonspunktService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(OmsorgspengerutbetalingService::class.java)
@@ -143,10 +145,16 @@ internal class OmsorgspengerutbetalingService(
                     .bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
+            val eksisterendePerioder = if (søknad.erKorrigering!!) {
+                logger.info("Korrigering av søknad. Henter eksisterende perioder...")
+                hentInfoFraK9Sak(Matchfagsak(brukerIdent = sendSøknad.norskIdent))
+            } else listOf()
+
             val (søknadK9Format, feilListe) = MapOmsUtTilK9Format(
                 søknadId = søknad.soeknadId,
                 journalpostIder = journalpostIder,
-                dto = søknad
+                dto = søknad,
+                eksisterendePerioder = eksisterendePerioder
             ).søknadOgFeil()
 
             if (feilListe.isNotEmpty()) {
@@ -207,12 +215,17 @@ internal class OmsorgspengerutbetalingService(
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
+        val eksisterendePerioder = if (soknadTilValidering.erKorrigering!!) {
+            logger.info("Korrigering av søknad. Henter eksisterende perioder...")
+            hentInfoFraK9Sak(Matchfagsak(brukerIdent = soknadTilValidering.soekerId!!))
+        } else listOf()
 
         try {
             mapTilEksternFormat = MapOmsUtTilK9Format(
                 søknadId = soknadTilValidering.soeknadId,
                 journalpostIder = journalposterDto.journalposter,
-                dto = soknadTilValidering
+                dto = soknadTilValidering,
+                eksisterendePerioder = eksisterendePerioder
             ).søknadOgFeil()
         } catch (e: Exception) {
             return ServerResponse
@@ -266,5 +279,14 @@ internal class OmsorgspengerutbetalingService(
                 .json()
                 .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
         }
+    }
+
+    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
+        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
+            søker = matchfagsak.brukerIdent,
+            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
+        )
+
+        return perioder ?: listOf()
     }
 }

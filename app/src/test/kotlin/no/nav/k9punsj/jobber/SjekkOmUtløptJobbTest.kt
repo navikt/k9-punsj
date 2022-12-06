@@ -32,11 +32,21 @@ internal class SjekkOmUtløptJobbTest {
         val aksjonspunktRepository = getAksjonspunktRepo()
         val journalpostRepository = getJournalpostRepo()
 
-        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(aksjonspunktRepository, hendelseProducer, journalpostRepository, "test")
+        val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
+            aksjonspunktRepository = aksjonspunktRepository,
+            hendelseProducer = hendelseProducer,
+            journalpostRepository = journalpostRepository,
+            k9losAksjonspunkthendelseTopic = "test",
+        )
 
         val dummyAktørId = "1000000000000"
 
-        val punsjJournalpost = PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = "466988237", aktørId = dummyAktørId)
+        val punsjJournalpost = PunsjJournalpost(
+            uuid = UUID.randomUUID(),
+            journalpostId = "466988237",
+            aktørId = dummyAktørId
+        )
+
         journalpostRepository.lagre(punsjJournalpost) {
             punsjJournalpost
         }

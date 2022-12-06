@@ -19,6 +19,7 @@
       "faktiskTidPrDag": null
     }
   ],
+  "erKorrigering": false,
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false
 }

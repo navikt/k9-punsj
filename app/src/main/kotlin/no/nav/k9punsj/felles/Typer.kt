@@ -48,6 +48,37 @@ data class SettPåVentDto(
     val soeknadId: String?
 )
 
+data class LukkJournalpostDto(
+    val norskIdent: String,
+    val sak: Sak
+)
+
+data class Sak(
+    val sakstype: SaksType,
+    val fagsakId: String? = null,
+) {
+    val fagsaksystem = if (sakstype == SaksType.FAGSAK) FagsakSystem.K9 else null
+    init {
+        when (sakstype) {
+            SaksType.FAGSAK -> {
+                require(fagsaksystem != null && !fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.FAGSAK}, så må fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.GENERELL_SAK -> {
+                require(fagsaksystem == null && fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.GENERELL_SAK}, så kan ikke fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.ARKIVSAK -> throw UnsupportedOperationException("ARKIVSAK skal kun brukes etter avtale.")
+        }
+    }
+
+    enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+    enum class FagsakSystem { K9 }
+
+}
+
 data class IdentDto(
     val norskIdent: String
 )

@@ -1,7 +1,7 @@
 package no.nav.k9punsj.kafka
 
 import no.nav.k9punsj.IkkeTestProfil
-import no.nav.k9punsj.kafka.KafkaConfig.Companion.ON_PREM
+import no.nav.k9punsj.configuration.KafkaConfig.Companion.AIVEN
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -14,7 +14,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback
 @Component
 @IkkeTestProfil
 class KafkaHendelseProducer(
-    @Qualifier(ON_PREM) private val kafkaTemplate: KafkaTemplate<String, String>
+    @Qualifier(AIVEN) private val kafkaTemplate: KafkaTemplate<String, String>
 ) : HendelseProducer {
     override fun send(topicName: String, data: String, key: String) {
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate.send(topicName, key, data)
@@ -26,7 +26,7 @@ class KafkaHendelseProducer(
             override fun onFailure(ex: Throwable) {
                 // TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
                 logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
-                throw KafkaException("Kunne ikke sende sende til topic: $topicName")
+                throw IllegalStateException("Kunne ikke sende sende til topic: $topicName")
             }
         })
     }
@@ -42,7 +42,7 @@ class KafkaHendelseProducer(
             override fun onFailure(ex: Throwable) {
                 // TODO: Feiler p.t. ikke innsending slik at feilen ikke blir synlig for saksbehandler
                 logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : ${ex.message}")
-                throw KafkaException("Kunne ikke sende sende til topic: $topicName")
+                throw IllegalStateException("Kunne ikke sende sende til topic: $topicName")
             }
         })
     }
