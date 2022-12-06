@@ -19,18 +19,19 @@
         <revision>1.0.0</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <kotlin.version>1.7.21</kotlin.version>
+        <java.version>17</java.version>
+        <kotlin.version>1.7.22</kotlin.version>
         <springdoc.version>1.6.13</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
         <token-support.version>2.1.7</token-support.version>
         <dusseldorf-ktor.version>3.2.1.3-2e5bea9</dusseldorf-ktor.version>
-        <k9-rapid.version>1.20221117062635-380517f</k9-rapid.version>
-        <k9-sak.version>3.3.22</k9-sak.version>
+        <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
+        <k9-sak.version>3.3.24</k9-sak.version>
         <k9-formidling.version>0.0.25</k9-formidling.version>
         <k9-format.version>8.0.0</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
-        <mockk.version>1.13.2</mockk.version>
+        <mockk.version>1.13.3</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
@@ -208,6 +209,14 @@
                             <version>${kotlin.version}</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

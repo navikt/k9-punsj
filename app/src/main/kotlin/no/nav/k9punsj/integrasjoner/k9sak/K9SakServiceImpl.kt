@@ -34,7 +34,8 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -114,13 +115,12 @@ class K9SakServiceImpl(
               "searchString": "$søker"
             }
         """.trimIndent()
-
         val (request, _, result) = "$baseUrl$sokFagsaker"
             .httpPost()
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()
@@ -148,7 +148,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()

@@ -7,9 +7,7 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.objectMapper
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.UUID

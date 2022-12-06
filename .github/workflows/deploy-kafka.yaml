@@ -3,7 +3,9 @@ name: Deploy kafka topics
 on:
   push:
     paths:
-      - 'kafka/**'
+      - 'kafka/topics/**'
+      - 'kafka/dev-vars.yaml'
+      - 'kafka/prod-vars.yaml'
     branches:
       - master
   workflow_dispatch:
@@ -23,8 +25,8 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
-          VARS: kafka/dev.json
+          RESOURCE: kafka/topics/${{ matrix.topic }}.yaml
+          VARS: kafka/dev-vars.yaml
 
       - name: Deploy topics to prod
         if: github.ref == 'refs/heads/master'
@@ -32,5 +34,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: kafka/topic-${{ matrix.topic }}.yaml
-          VARS: kafka/prod.json
+          RESOURCE: kafka/topics/${{ matrix.topic }}.yaml
+          VARS: kafka/prod-vars.yaml
