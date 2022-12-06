@@ -17,11 +17,6 @@ management:
         include: info, health, prometheus
       base-path: /internal/actuator
 
-kafka:
-  bootstrap:
-    server: ${KAFKA_BOOTSTRAP_SERVERS}
-  clientId: k9-punsj
-
 systembruker:
   username: ${SYSTEMBRUKER_USERNAME}
   password: ${SYSTEMBRUKER_PASSWORD}
