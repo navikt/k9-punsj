@@ -1,7 +1,7 @@
 package no.nav.k9punsj.innsending
 
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.kafka.KafkaConfig.Companion.AIVEN
+import no.nav.k9punsj.configuration.KafkaConfig.Companion.AIVEN
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
