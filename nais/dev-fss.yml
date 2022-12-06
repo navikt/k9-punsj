@@ -108,6 +108,8 @@ spec:
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
       value: https://k9-sak.nais.preprod.local/k9/sak/api
+    - name: K9SAK_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: K9PUNSJBOLLE_BASE_URL
       value: https://k9-punsjbolle.dev.intern.nav.no/api
     - name : K9PUNSJBOLLE_SCOPE
@@ -130,7 +132,5 @@ spec:
       value: "k9saksbehandling.k9-dokumenthendelse-v1"
 
     # Feature toggles
-    - name: NOTAT_ENABLED
-      value: "true"
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "true"
