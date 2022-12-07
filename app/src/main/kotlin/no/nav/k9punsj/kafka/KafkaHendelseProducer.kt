@@ -20,7 +20,8 @@ class KafkaHendelseProducer(
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate.send(topicName, key, data)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
-                logger.info("Melding sendt på Kafka-topic: $topicName")
+                val recordmetadata = result?.recordMetadata
+                logger.info("Melding sendt OK på Topic=[$topicName], Key=[$key], Offset=[${recordmetadata?.offset()}, Partition=[${recordmetadata?.partition()}]")
             }
 
             override fun onFailure(ex: Throwable) {
@@ -35,7 +36,8 @@ class KafkaHendelseProducer(
         val future: ListenableFuture<SendResult<String?, String?>> = kafkaTemplate.send(topicName, key, data)
         future.addCallback(object : ListenableFutureCallback<SendResult<String?, String?>?> {
             override fun onSuccess(result: SendResult<String?, String?>?) {
-                logger.info("Melding sendt på Kafka-topic: $topicName")
+                val recordmetadata = result?.recordMetadata
+                logger.info("Melding sendt OK på Topic=[$topicName], Key=[$key], Offset=[${recordmetadata?.offset()}, Partition=[${recordmetadata?.partition()}]")
                 onSuccess.invoke()
             }
 
