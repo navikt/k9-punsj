@@ -7,6 +7,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.objectMapper
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -17,7 +18,7 @@ import kotlin.coroutines.coroutineContext
 @Component
 internal class AaregClient(
     @Value("\${AAREG_BASE_URL}") private val baseUrl: URI,
-    @Qualifier("sts") accessTokenClient: AccessTokenClient
+    @Qualifier("sts") accessTokenClient: AccessTokenClient,
 ) {
     private val scopes: Set<String> = setOf("openid")
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -47,8 +48,17 @@ internal class AaregClient(
 
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
-                .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
-                .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
+                .filter { arbeidsforhold ->
+                    logger.info("Arbeidsforhold -> {}", arbeidsforhold)
+                    val any = arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER }
+                    logger.info("Any ORGANISASJONSNUMMER -> {}", any)
+                    any
+                }
+                .filter {
+                    val harArbeidsforholdIPerioden = it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom)
+                    logger.info("harArbeidsforholdIPerioden -> {}", harArbeidsforholdIPerioden)
+                    harArbeidsforholdIPerioden
+                }
                 .map {
                     OrganisasjonArbeidsforhold(
                         organisasjonsnummer = it.arbeidssted.identer.first().ident,
@@ -60,13 +70,18 @@ internal class AaregClient(
     }
 
     private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, slutt: LocalDate): Boolean {
-        return startdato.erLLikEllerEtter(start) && (sluttdato == null || sluttdato.erLikEllerFør(slutt))
+
+        val erLikEllerEtter = startdato.erLikEllerEtter(start)
+        val erLikEllerFør = sluttdato == null || sluttdato.erLikEllerFør(slutt)
+        logger.info("erLikEllerEtter={} && erLikEllerFør={}", erLikEllerEtter, erLikEllerFør)
+        return erLikEllerEtter && erLikEllerFør
     }
 
+    private fun LocalDate.erLikEllerEtter(dato: LocalDate) = isEqual(dato) || isAfter(dato)
     private fun LocalDate.erLikEllerFør(dato: LocalDate) = isEqual(dato) || isBefore(dato)
-    private fun LocalDate.erLLikEllerEtter(dato: LocalDate) = isEqual(dato) || isAfter(dato)
 
     companion object {
+        private val logger = LoggerFactory.getLogger(AaregClient::class.java)
 
         enum class AaregIdentType { ORGANISASJONSNUMMER, AKTORID, FOLKEREGISTERIDENT }
 
@@ -81,7 +96,7 @@ internal class AaregClient(
 
         data class AaregAnsettelsesperiode(
             val startdato: LocalDate,
-            val sluttdato: LocalDate? = null
+            val sluttdato: LocalDate? = null,
         )
 
         data class AaregArbeidsforhold(
