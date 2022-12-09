@@ -48,17 +48,8 @@ internal class AaregClient(
 
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
-                .filter { arbeidsforhold ->
-                    logger.info("Arbeidsforhold -> {}", arbeidsforhold)
-                    val any = arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER }
-                    logger.info("Any ORGANISASJONSNUMMER -> {}", any)
-                    any
-                }
-                .filter {
-                    val harArbeidsforholdIPerioden = it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom)
-                    logger.info("harArbeidsforholdIPerioden -> {}", harArbeidsforholdIPerioden)
-                    harArbeidsforholdIPerioden
-                }
+                .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
+                .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
                 .map {
                     OrganisasjonArbeidsforhold(
                         organisasjonsnummer = it.arbeidssted.identer.first().ident,
@@ -70,11 +61,7 @@ internal class AaregClient(
     }
 
     private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, slutt: LocalDate): Boolean {
-
-        val erLikEllerEtter = startdato.erLikEllerFør(slutt)
-        val erLikEllerFør = sluttdato == null || sluttdato.erLikEllerEtter(start)
-        logger.info("erLikEllerEtter={} && erLikEllerFør={}", erLikEllerEtter, erLikEllerFør)
-        return erLikEllerEtter && erLikEllerFør
+        return startdato.erLikEllerFør(slutt) && (sluttdato == null || sluttdato.erLikEllerEtter(start))
     }
 
     private fun LocalDate.erLikEllerEtter(dato: LocalDate) = isEqual(dato) || isAfter(dato)
