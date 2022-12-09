@@ -116,6 +116,8 @@ spec:
       value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
     - name: AAREG_BASE_URL
       value: https://aareg-services-q1.dev.intern.nav.no/api/v2
+    - name: AAREG_SCOPE
+      value: api://dev-fss.arbeidsforhold.aareg-services-nais-q1/.default
     - name: EREG_BASE_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1
     - name: DOKARKIV_BASE_URL

@@ -17,7 +17,6 @@ private fun WireMockServer.stubHentArbeidsforhold(
     WireMock.stubFor(
         WireMock.get(WireMock.urlPathMatching(".*$path/arbeidstaker/arbeidsforhold.*"))
             .withHeader("Authorization", WireMock.matching("Bearer ey.*"))
-            .withHeader("Nav-Consumer-Token", WireMock.matching("Bearer ey.*"))
             .withHeader("Nav-Call-Id", AnythingPattern())
             .withHeader("Accept", WireMock.equalTo("application/json"))
             .withHeader("Nav-Personident", identitetsnummer)

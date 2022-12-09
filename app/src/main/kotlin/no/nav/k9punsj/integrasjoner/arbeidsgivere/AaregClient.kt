@@ -18,9 +18,9 @@ import kotlin.coroutines.coroutineContext
 @Component
 internal class AaregClient(
     @Value("\${AAREG_BASE_URL}") private val baseUrl: URI,
-    @Qualifier("sts") accessTokenClient: AccessTokenClient,
+    @Value("\${AAREG_SCOPE}") private val scope: String,
+    @Qualifier("azure") accessTokenClient: AccessTokenClient,
 ) {
-    private val scopes: Set<String> = setOf("openid")
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentArbeidsforhold(
@@ -28,13 +28,12 @@ internal class AaregClient(
         fom: LocalDate,
         tom: LocalDate,
     ): Arbeidsforhold {
-        val authorizationHeader = cachedAccessTokenClient.getAccessToken(scopes).asAuthoriationHeader()
+        val authorizationHeader = cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader()
         val url =
             """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=false"""
 
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
-            .header("Nav-Consumer-Token", authorizationHeader)
             .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
             .header("Nav-Personident", identitetsnummer)
             .header("Accept", "application/json")
