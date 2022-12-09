@@ -71,8 +71,8 @@ internal class AaregClient(
 
     private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, slutt: LocalDate): Boolean {
 
-        val erLikEllerEtter = startdato.erLikEllerEtter(start)
-        val erLikEllerFør = sluttdato == null || sluttdato.erLikEllerFør(slutt)
+        val erLikEllerEtter = startdato.erLikEllerFør(slutt)
+        val erLikEllerFør = sluttdato == null || sluttdato.erLikEllerEtter(start)
         logger.info("erLikEllerEtter={} && erLikEllerFør={}", erLikEllerEtter, erLikEllerFør)
         return erLikEllerEtter && erLikEllerFør
     }
