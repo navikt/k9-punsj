@@ -119,7 +119,7 @@ spec:
     - name: AAREG_SCOPE
       value: api://dev-fss.arbeidsforhold.aareg-services-nais-q1/.default
     - name: EREG_BASE_URL
-      value: https://modapp-q1.adeo.no/ereg/api/v1
+      value: https://ereg-services-q1.dev.intern.nav.no/api/v1
     - name: DOKARKIV_BASE_URL
       value: https://dokarkiv-q1.dev.intern.nav.no
     - name: DOKARKIV_SCOPE
