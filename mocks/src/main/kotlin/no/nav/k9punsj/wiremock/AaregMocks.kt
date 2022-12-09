@@ -59,7 +59,7 @@ private val DefaultResponse = """
         },
         "ansettelsesperiode": {
           "startdato": "$fom",
-          "sluttdato": "$tom"
+          "sluttdato": null
         }
     },
     {

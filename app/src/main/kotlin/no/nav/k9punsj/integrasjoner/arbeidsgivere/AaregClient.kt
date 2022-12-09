@@ -59,8 +59,8 @@ internal class AaregClient(
         )
     }
 
-    private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, sluttdato: LocalDate): Boolean {
-        return startdato.erLLikEllerEtter(start) && sluttdato.erLikEllerFør(sluttdato)
+    private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, slutt: LocalDate): Boolean {
+        return startdato.erLLikEllerEtter(start) && (sluttdato == null || sluttdato.erLikEllerFør(slutt))
     }
 
     private fun LocalDate.erLikEllerFør(dato: LocalDate) = isEqual(dato) || isBefore(dato)
@@ -81,7 +81,7 @@ internal class AaregClient(
 
         data class AaregAnsettelsesperiode(
             val startdato: LocalDate,
-            val sluttdato: LocalDate
+            val sluttdato: LocalDate? = null
         )
 
         data class AaregArbeidsforhold(
