@@ -25,15 +25,11 @@ internal class AaregClient(
     internal suspend fun hentArbeidsforhold(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
     ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(scopes).asAuthoriationHeader()
-        val url = "$baseUrl/arbeidstaker/arbeidsforhold?" +
-            "ansettelsesperiodeFom=$fom&" +
-            "ansettelsesperiodeTom=$tom&" +
-            "regelverk=A_ORDNINGEN&" +
-            "sporingsinformasjon=false&" +
-            "historikk=false"
+        val url =
+            """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=false"""
 
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
@@ -51,25 +47,47 @@ internal class AaregClient(
 
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
-                .filterNot { it.arbeidsgiver.organisasjonsnummer.isNullOrBlank() }
+                .filterNot { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.none { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
+                .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
                 .map {
                     OrganisasjonArbeidsforhold(
-                        organisasjonsnummer = it.arbeidsgiver.organisasjonsnummer!!,
-                        arbeidsforholdId = it.arbeidsforholdId
+                        organisasjonsnummer = it.arbeidssted.identer.first().ident,
+                        arbeidsforholdId = it.id
                     )
                 }
                 .toSet()
         )
     }
 
+    private fun AaregAnsettelsesperiode.harArbeidsforholdIPerioden(start: LocalDate, sluttdato: LocalDate): Boolean {
+        return startdato.erLLikEllerEtter(start) && sluttdato.erLikEllerFør(sluttdato)
+    }
+
+    private fun LocalDate.erLikEllerFør(dato: LocalDate) = isEqual(dato) || isBefore(dato)
+    private fun LocalDate.erLLikEllerEtter(dato: LocalDate) = isEqual(dato) || isAfter(dato)
+
     companion object {
-        data class AaregArbeidgiver(
-            val organisasjonsnummer: String?
+
+        enum class AaregIdentType { ORGANISASJONSNUMMER, AKTORID, FOLKEREGISTERIDENT }
+
+        data class AaregIdent(
+            val ident: String,
+            val type: AaregIdentType,
+        )
+
+        data class AaregArbeidssted(
+            val identer: List<AaregIdent>,
+        )
+
+        data class AaregAnsettelsesperiode(
+            val startdato: LocalDate,
+            val sluttdato: LocalDate
         )
 
         data class AaregArbeidsforhold(
-            val arbeidsforholdId: String?,
-            val arbeidsgiver: AaregArbeidgiver
+            val id: String?,
+            val arbeidssted: AaregArbeidssted,
+            val ansettelsesperiode: AaregAnsettelsesperiode,
         )
 
         inline fun <reified T> String.deserialiser() = kotlin.runCatching {
