@@ -47,7 +47,7 @@ internal class AaregClient(
 
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
-                .filterNot { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.none { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
+                .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
                 .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
                 .map {
                     OrganisasjonArbeidsforhold(
