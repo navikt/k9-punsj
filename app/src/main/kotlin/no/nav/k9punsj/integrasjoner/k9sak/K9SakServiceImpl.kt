@@ -35,7 +35,7 @@ import kotlin.coroutines.coroutineContext
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
-    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -120,7 +120,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()
@@ -148,7 +148,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 NavHeaders.CallId to hentCallId()
             ).awaitStringResponseResult()
