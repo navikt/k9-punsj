@@ -144,7 +144,7 @@ internal class MapPlsfTilK9Format(
     }
 
     private fun PleiepengerLivetsSluttfaseSøknadDto.leggTilLovestemtFerie() {
-        if (lovbestemtFerie.isNullOrEmpty()) {
+        if (lovbestemtFerie.isNullOrEmpty() && lovbestemtFerieSomSkalSlettes.isNullOrEmpty()) {
             return
         }
         val k9LovbestemtFerie = mutableMapOf<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo>()

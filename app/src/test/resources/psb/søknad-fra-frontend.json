@@ -157,6 +157,12 @@
       "tom": "2019-06-20"
     }
   ],
+  "lovbestemtFerieSomSkalSlettes": [
+    {
+      "fom": "2019-06-21",
+      "tom": "2019-10-20"
+    }
+  ],
   "utenlandsopphold": [
     {
       "periode": {
@@ -175,23 +181,6 @@
       "årsak": null
     }
   ],
-  "kurs":{
-    "kursHolder":{
-      "holder":"Nav",
-      "institusjonsUuid": null
-    },
-    "formaal":"test",
-    "kursperioder":[
-      {
-        "periode":{
-          "fom":"2022-12-14",
-          "tom":"2023-01-14"
-        },
-        "avreise":"2022-12-14",
-        "hjemkomst":"2023-01-14"
-      }
-    ]
-  },
   "soknadsinfo": {
     "samtidigHjemme": true,
     "harMedsoeker": true
