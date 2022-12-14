@@ -36,6 +36,49 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
               },
               "journalposter": [
                 "12345678"
+              ],
+              "uttak":[
+                  {
+                     "periode":{
+                        "fom":"2022-12-14",
+                        "tom":"2022-12-21"
+                     },
+                     "timerPleieAvBarnetPerDag": "7.5"
+                  }
+               ],
+              "kurs":{
+                  "kursHolder":{
+                     "holder":"Nav"
+                  },
+                  "formaal":"test",
+                  "kursperioder":[
+                     {
+                        "periode":{
+                           "fom":"2022-12-14",
+                           "tom":"2022-12-30"
+                        },
+                        "avreise":"2022-12-14",
+                        "hjemkomst":"2022-12-30"
+                     }
+                  ]
+               },
+                 "utenlandsopphold": [
+                {
+                  "periode": {
+                    "fom": "2018-12-30",
+                    "tom": "2019-01-08"
+                  },
+                  "land": "RU",
+                  "årsak": "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd"
+                },
+                {
+                  "periode": {
+                    "fom": "2019-01-08",
+                    "tom": "2019-01-31"
+                  },
+                  "land": "RU",
+                  "årsak": null
+                }
               ]
             }
             """
@@ -47,6 +90,7 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
         manipuler(søknad)
         return objectMapper().convertValue(søknad)
     }
+
     private fun OpplaeringspengerSøknadDto.mapTilK9Format(
         perioderSomFinnesIK9: List<PeriodeDto> = emptyList()
     ) =
@@ -153,17 +197,17 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
             samtidigHjemme = null,
             harMedsoeker = null
         ),
-        utenlandsopphold = listOf(
-            UtenlandsoppholdDto(
-                periode = optionalPeriode,
-                land = optionalTekst,
-                årsak = optionalTekst
-            )
-        ),
         harInfoSomIkkeKanPunsjes = true,
         harMedisinskeOpplysninger = true,
         trekkKravPerioder = setOf(requiredPeriode),
-        begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test")
+        begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test"),
+        kurs = OpplaeringspengerSøknadDto.Kurs(
+            kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "Nav", institusjonsUuid = null),
+            formaal = "Nav",
+            kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
+                periode = requiredPeriode, avreise = requiredPeriode.fom, hjemkomst = requiredPeriode.tom
+            ))
+        )
     )
 
     init {

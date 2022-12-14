@@ -198,7 +198,7 @@ class LesFraFilUtil {
          *  Opplæringspenger
          */
         fun søknadFraFrontendOlpFull(): SøknadJson {
-            return objectMapper().readValue(lesFraFilOlp("soknad-fra-frontend-olp.json"))
+            return objectMapper().readValue(lesFraFilOlp("søknad-fra-frontend.json"))
         }
     }
 }

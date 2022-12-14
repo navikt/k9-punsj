@@ -4,6 +4,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Periode
@@ -13,17 +14,24 @@ import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kursholder
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie
+import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
+import no.nav.k9punsj.felles.k9format.MappingUtils
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
+import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -68,6 +76,7 @@ internal class MapOlpTilK9Format(
             }
             dto.leggTilBegrunnelseForInnsending()
             dto.kurs?.leggTilKurs()
+            dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
 
             // Fullfører søknad & validerer
             søknad.medYtelse(opplaeringspenger)
@@ -94,7 +103,8 @@ internal class MapOlpTilK9Format(
 
 
     private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
-        val kursHolder = Kursholder(this.kursHolder?.holder, UUID.fromString(this.kursHolder?.institusjonsUuid))
+        val institusjonsUuid = this.kursHolder?.institusjonsUuid?.let { UUID.fromString(it) }
+        val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
         val kursPerioder = this.kursperioder?.map {
             KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst)
         }?.toMutableList()
@@ -169,6 +179,32 @@ internal class MapOlpTilK9Format(
         opplaeringspenger.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
 
+    private fun List<OpplaeringspengerSøknadDto.UttakDto>?.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
+        val k9Uttak = mutableMapOf<Periode, Uttak.UttakPeriodeInfo>()
+
+        this?.filter { it.periode.erSatt() }?.forEach { uttak ->
+            val k9Periode = uttak.periode!!.somK9Periode()!!
+            val k9Info = Uttak.UttakPeriodeInfo()
+            MappingUtils.mapEllerLeggTilFeil(
+                feil = feil,
+                felt = "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag"
+            ) { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
+                k9Info.medTimerPleieAvBarnetPerDag(it)
+            }
+            k9Uttak[k9Periode] = k9Info
+        }
+
+        if (k9Uttak.isEmpty() && søknadsperiode != null) {
+            søknadsperiode.forEach { periode ->
+                periode.somK9Periode()?.let { k9Uttak[it] = MapOlpTilK9Format.DefaultUttak }
+            }
+        }
+
+        if (k9Uttak.isNotEmpty()) {
+            opplaeringspenger.medUttak(Uttak().medPerioder(k9Uttak))
+        }
+    }
+
     private fun erOpptjeningSatt(
         dto: OpplaeringspengerSøknadDto,
         opptjeningAktivitet: ArbeidAktivitetDto?
@@ -184,5 +220,8 @@ internal class MapOlpTilK9Format(
 
         private val Validator = OpplæringspengerSøknadValidator()
         private const val Versjon = "1.0.0"
+
+        private val DefaultUttak =
+            Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
     }
 }

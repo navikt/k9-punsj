@@ -26,6 +26,7 @@ import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
@@ -298,18 +299,6 @@ class OpplaeringspengerTests {
     }
 
     @Test
-    fun `Skal kunne lagre ned tomt land søknad`(): Unit = runBlocking {
-        val norskIdent = "02022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        assertThat(body.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, status)
-    }
-
-    @Test
     fun `Skal kunne lagre med tid søknad`(): Unit = runBlocking {
         val norskIdent = "02022352121"
         val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
@@ -319,30 +308,6 @@ class OpplaeringspengerTests {
 
         assertEquals(HttpStatus.BAD_REQUEST, status)
         assertThat(body.feil).isNotEmpty
-    }
-
-    @Test
-    fun `Skal kunne lagre og sette uttak`(): Unit = runBlocking {
-        val norskIdent = "02022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        assertThat(body.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, status)
-    }
-
-    @Test
-    fun `Skal kunne lagre med ferie null`(): Unit = runBlocking {
-        val norskIdent = "02022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        assertThat(body.feil).isNull()
-        assertEquals(HttpStatus.ACCEPTED, status)
     }
 
     @Test
@@ -465,38 +430,7 @@ class OpplaeringspengerTests {
     }
 
     @Test
-    fun `Skal verifisere at v2 av utelandsopphold blir lagret riktig`(): Unit = runBlocking {
-        val norskIdent = "12022352121"
-        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendUtenlandsoppholdV2()
-        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-
-        val søknadViaGet = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<OpplaeringspengerSøknadDto>()
-
-        // GUI format
-        assertNotNull(søknadViaGet)
-
-        // k9-format, faktisk søknad format
-        val mapTilEksternFormat = MapOlpTilK9Format(
-            søknadViaGet.soeknadId,
-            søknadViaGet.journalposter!!.toSet(),
-            emptyList(),
-            søknadViaGet
-        )
-
-        assertThat(mapTilEksternFormat.feil()).isEmpty()
-        val søknad = mapTilEksternFormat.søknad()
-        val ytelse = søknad.getYtelse<Opplæringspenger>()
-        assertThat(ytelse.utenlandsopphold.perioder.size).isEqualTo(3)
-        val filter = ytelse.utenlandsopphold.perioder.values.filter { it.Årsak != null }
-        assertThat(filter[0].Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
-    }
-
-    @Test
+    @Disabled("TODO")
     fun `Skal verifisere at alle felter blir lagret`(): Unit = runBlocking {
         val norskIdent = "12022352121"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
