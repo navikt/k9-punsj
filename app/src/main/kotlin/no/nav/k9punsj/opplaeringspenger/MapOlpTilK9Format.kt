@@ -4,7 +4,6 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
-import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Periode
@@ -23,8 +22,6 @@ import no.nav.k9punsj.felles.k9format.MappingUtils
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
 import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
-import no.nav.k9punsj.pleiepengersyktbarn.MapPsbTilK9Format
-import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import no.nav.k9punsj.utils.PeriodeUtils.erSatt
 import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
@@ -54,7 +51,7 @@ internal class MapOlpTilK9Format(
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.barn?.leggTilBarn()
-            dto.leggTilLovestemtFerie()
+            dto.leggTilLovbestemtFerie()
             dto.soeknadsperiode?.leggTilSøknadsperiode()
             if (dto.utenlandsopphold.isNotEmpty()) {
                 dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
@@ -167,7 +164,7 @@ internal class MapOlpTilK9Format(
         }
     }
 
-    private fun OpplaeringspengerSøknadDto.leggTilLovestemtFerie() {
+    private fun OpplaeringspengerSøknadDto.leggTilLovbestemtFerie() {
         if (lovbestemtFerie.isNullOrEmpty()) {
             return
         }
