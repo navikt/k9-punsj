@@ -77,7 +77,7 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: https://oppgave-q1.intern.dev.adeo.no
+      value: http://oppgavehandtering.oppgave-q1
     - name: GOSYS_BASE_SCOPE
       value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
 
