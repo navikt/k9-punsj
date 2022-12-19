@@ -37,15 +37,6 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
               "journalposter": [
                 "12345678"
               ],
-              "uttak":[
-                  {
-                     "periode":{
-                        "fom":"2022-12-14",
-                        "tom":"2022-12-21"
-                     },
-                     "timerPleieAvBarnetPerDag": "7.5"
-                  }
-               ],
               "kurs":{
                   "kursHolder":{
                      "holder":"Nav"
@@ -61,25 +52,7 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
                         "hjemkomst":"2022-12-30"
                      }
                   ]
-               },
-                 "utenlandsopphold": [
-                {
-                  "periode": {
-                    "fom": "2018-12-30",
-                    "tom": "2019-01-08"
-                  },
-                  "land": "RU",
-                  "årsak": "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd"
-                },
-                {
-                  "periode": {
-                    "fom": "2019-01-08",
-                    "tom": "2019-01-31"
-                  },
-                  "land": "RU",
-                  "årsak": null
-                }
-              ]
+               }
             }
             """
         val søknad: MutableMap<String, Any?> = objectMapper().readValue(json)
