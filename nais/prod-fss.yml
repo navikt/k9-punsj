@@ -16,10 +16,6 @@ spec:
     inbound:
       rules:
         - application: k9-punsj-oidc-auth-proxy
-    outbound:
-      rules:
-        - application: oppgave
-          namespace: oppgavehandtering
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
