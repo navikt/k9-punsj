@@ -81,7 +81,7 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: http://oppgavehandtering.oppgave-q1
+      value: http://oppgave-q1.oppgavehandtering
     - name: GOSYS_BASE_SCOPE
       value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
 
