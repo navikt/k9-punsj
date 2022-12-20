@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
@@ -546,7 +547,7 @@ class OpplaeringspengerTests {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId()
-    ): Triple<String, HttpStatus, OasSoknadsfeil> {
+    ): Triple<String, HttpStatusCode, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
