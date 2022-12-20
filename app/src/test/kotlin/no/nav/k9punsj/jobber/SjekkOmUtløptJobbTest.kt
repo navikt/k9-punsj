@@ -8,7 +8,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
 import org.assertj.core.api.Assertions.assertThat
@@ -27,9 +26,6 @@ internal class SjekkOmUtløptJobbTest {
     @MockBean
     lateinit var hendelseProducer: HendelseProducer
 
-    @MockBean
-    lateinit var hendelseProducerOnprem: HendelseProducerOnprem
-
     @Test
     fun `Skal finne alle aksjonspunkter som har utløpt og sende oppgaver på disse`(): Unit = runBlocking {
         // Arrange
@@ -38,7 +34,7 @@ internal class SjekkOmUtløptJobbTest {
 
         val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
             aksjonspunktRepository = aksjonspunktRepository,
-            hendelseProducerOnprem = hendelseProducerOnprem,
+            hendelseProducer = hendelseProducer,
             journalpostRepository = journalpostRepository,
             k9losAksjonspunkthendelseTopic = "test",
         )

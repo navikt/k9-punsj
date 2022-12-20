@@ -1,11 +1,10 @@
-package no.nav.k9punsj.kafka
+package no.nav.k9punsj.configuration
 
 import no.nav.k9punsj.IkkeLokalProfil
 import no.nav.k9punsj.IkkeTestProfil
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -28,30 +27,8 @@ import java.time.Duration
 @Configuration
 @IkkeTestProfil
 class KafkaConfig(
-    @Value("\${kafka.bootstrap.server}") private val bootstrapServers: String,
-    @Value("\${kafka.clientId}") private val clientId: String,
-    @Value("\${systembruker.username}") private val username: String,
-    @Value("\${systembruker.password}") private val password: String,
-    @Value("\${javax.net.ssl.trustStore}") private val trustStorePath: String,
-    @Value("\${javax.net.ssl.trustStorePassword}") private val trustStorePassword: String,
     @Value("\${kafka.override_truststore_password:}") private val overrideTruststorePassword: String?
 ) {
-
-    @Bean
-    @Qualifier(ON_PREM)
-    fun onPremKafkaBaseProperties(): Map<String, Any> {
-        requireNotBlank(username) { "Mangler username" }
-        requireNotBlank(password) { "Mangler password" }
-        return mapOf(
-            CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to requireNotBlank(bootstrapServers) { "Mangler bootstrapServers" },
-            CommonClientConfigs.CLIENT_ID_CONFIG to requireNotBlank(clientId) { "Mangler clientId" },
-            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
-            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to requireNotBlank(trustStorePath) { "Mangler trustStorePath" },
-            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to requireNotBlank(trustStorePassword) { "Mangler trustStorePassword" },
-            SaslConfigs.SASL_MECHANISM to "PLAIN",
-            SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"${username}\" password=\"${password}\";"
-        )
-    }
 
     @Bean
     @Qualifier(AIVEN)
@@ -92,24 +69,11 @@ class KafkaConfig(
         KafkaTemplate(DefaultKafkaProducerFactory(baseProperties.medProducerConfig()))
 
     @Bean
-    @Qualifier(ON_PREM)
-    fun onPremKafkaConsumerFactory(
-        @Qualifier(ON_PREM) baseProperties: Map<String, Any>
-    ) = kafkaConsumerFactory(baseProperties)
-
-    @Bean
     @Qualifier(AIVEN)
     @IkkeLokalProfil
     fun aivenKafkaConsumerFactory(
         @Qualifier(AIVEN) baseProperties: Map<String, Any>
     ) = kafkaConsumerFactory(baseProperties)
-
-    @Bean(ON_PREM_CONTAINER_FACTORY)
-    @Qualifier(ON_PREM)
-    fun onPremKafkaListenerContainerFactory(
-        @Qualifier(ON_PREM) consumerFactory: ConsumerFactory<String, String>
-    ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
-        kafkaListenerContainerFactory(consumerFactory)
 
     @Bean(AIVEN_CONTAINER_FACTORY)
     @Qualifier(AIVEN)
@@ -118,12 +82,6 @@ class KafkaConfig(
         @Qualifier(AIVEN) consumerFactory: ConsumerFactory<String, String>
     ): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> =
         kafkaListenerContainerFactory(consumerFactory)
-
-    @Bean
-    @Qualifier(ON_PREM)
-    fun onPremKafkaTemplate(
-        @Qualifier(ON_PREM) baseProperties: Map<String, Any>
-    ): KafkaTemplate<String, String> = kafkaTemplate(baseProperties)
 
     @Bean
     @Qualifier(AIVEN)
@@ -136,14 +94,9 @@ class KafkaConfig(
 
         internal const val AIVEN = "aiven"
         internal const val AIVEN_CONTAINER_FACTORY = "aivenKafkaListenerContainerFactory"
-        internal const val ON_PREM = "onPrem"
-        internal const val ON_PREM_CONTAINER_FACTORY = "onPremKafkaListenerContainerFactory"
 
         private const val RETRY_INTERVAL = 1000L
 
-        private fun requireNotBlank(verdi: String, feilmelding: () -> String) = verdi.also {
-            require(it.isNotBlank()) { feilmelding() }
-        }
 
         private const val AIVEN_KAFKA_BOKERS = "KAFKA_BROKERS"
         private const val AIVEN_KAFKA_TRUSTSTORE_PATH = "KAFKA_TRUSTSTORE_PATH"

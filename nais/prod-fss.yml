@@ -66,8 +66,6 @@ spec:
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.nais.adeo.no
-    - name: KAFKA_BOOTSTRAP_SERVERS
-      value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 
     # SAF:
     - name: SAF_BASE_URL
@@ -79,7 +77,7 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: https://oppgave.nais.adeo.no
+      value: http://oppgave.oppgavehandtering
     - name: GOSYS_BASE_SCOPE
       value: api://prod-fss.oppgavehandtering.oppgave/.default
 
@@ -110,29 +108,31 @@ spec:
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
       value: https://k9-sak.nais.adeo.no/k9/sak/api
+    - name: K9SAK_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-sak/.default
     - name: K9PUNSJBOLLE_BASE_URL
       value: https://k9-punsjbolle.intern.nav.no/api
     - name: K9PUNSJBOLLE_SCOPE
       value: api://prod-gcp.omsorgspenger.k9-punsjbolle/.default
     - name: AAREG_BASE_URL
-      value: https://modapp.adeo.no/aareg-services/api/v1
+      value: https://aareg-services.intern.nav.no/api/v2
+    - name: AAREG_SCOPE
+      value: api://prod-fss.arbeidsforhold.aareg-services-nais/.default
     - name: EREG_BASE_URL
-      value: https://modapp.adeo.no/ereg/api/v1
+      value: https://ereg-services.intern.nav.no/api/v1
     - name: DOKARKIV_BASE_URL
       value: https://dokarkiv.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
     # Integrasjoner (Kafka)
-    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
-      value: "privat-k9punsj-aksjonspunkthendelse-v1"
-
-    # Kafka AIVEN
     - name: K9_RAPID_TOPIC
       value: "omsorgspenger.k9-rapid-v2"
+    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
+      value: "k9saksbehandling.punsj-aksjonspunkthendelse-v1"
     - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
       value: "k9saksbehandling.k9-dokumenthendelse-v1"
 
     # Feature toggles
-    - name: NOTAT_ENABLED
-      value: "true"
+    - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
+      value: "false"

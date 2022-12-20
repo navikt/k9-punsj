@@ -1,7 +1,6 @@
 package no.nav.k9punsj
 
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.kafka.HendelseProducerOnprem
 import no.nav.k9punsj.util.DatabaseUtil
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -19,15 +18,6 @@ class TestBeans {
 
     @Bean
     fun testHendelseProducer() = object : HendelseProducer {
-        override fun send(topicName: String, data: String, key: String) {
-        }
-        override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {
-            onSuccess.invoke()
-        }
-    }
-
-    @Bean
-    fun testHendelseProducerOnprem() = object: HendelseProducerOnprem {
         override fun send(topicName: String, data: String, key: String) {
         }
         override fun sendMedOnSuccess(topicName: String, data: String, key: String, onSuccess: () -> Unit) {

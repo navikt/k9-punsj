@@ -34,6 +34,7 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
+    @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) : K9SakService {
 
@@ -114,7 +115,6 @@ class K9SakServiceImpl(
               "searchString": "$søker"
             }
         """.trimIndent()
-
         val (request, _, result) = "$baseUrl$sokFagsaker"
             .httpPost()
             .body(body)

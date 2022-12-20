@@ -1,7 +1,7 @@
 package no.nav.k9punsj.kafka
 
 import no.nav.k9punsj.IkkeTestProfil
-import no.nav.k9punsj.kafka.KafkaConfig.Companion.AIVEN
+import no.nav.k9punsj.configuration.KafkaConfig.Companion.AIVEN
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -16,10 +16,13 @@ class KafkaHendelseProducer(
     override fun send(topicName: String, data: String, key: String) {
         kafkaTemplate.send(topicName, key, data).also {
             when(it.isDone) {
-                true -> logger.info("Melding sendt på Kafka-topic: ${it.get().recordMetadata.topic()}")
+                true -> {
+                    val recordmetadata = it.get().recordMetadata
+                    logger.info("Melding sendt OK på Topic=[$topicName], Key=[$key], Offset=[${recordmetadata?.offset()}, Partition=[${recordmetadata?.partition()}]")
+                }
                 false -> {
                     logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : $topicName")
-                    throw KafkaException("Kunne ikke sende sende til topic: $topicName")
+                    throw IllegalStateException("Kunne ikke sende sende til topic: $topicName")
                 }
             }
         }

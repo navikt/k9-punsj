@@ -11,6 +11,7 @@ on:
       - 'LICENSE'
       - 'CODEOWNERS'
       - 'docs/**'
+      - 'kafka/**'
   workflow_dispatch:
 
 env:

@@ -8,19 +8,32 @@ internal class AaregClientTest {
 
     @Test
     internal fun sjekk_at_deserialiser_takler_navArbeidsforholdId() {
+        //language=json
         val json = """[{
                         "arbeidstaker": {
                             "type": "Person",
                             "offentligIdent": "12",
                             "aktoerId": "123"
                         },    
-                        "arbeidsgiver": {
+                        "arbeidssted": {
                             "type": "Organisasjon",
-                            "organisasjonsnummer": "1234"
+                            "identer": [
+                                {
+                                  "ident": "1234",
+                                  "type": "ORGANISASJONSNUMMER"
+                                }
+                            ]
+                        },
+                        "ansettelsesperiode": {
+                          "startdato": "2022-01-01",
+                          "sluttdato": "2022-12-31"
                         }
-                        }]
+                    }]
                     """
         val arbeidsforholdList = json.deserialiser<List<AaregClient.Companion.AaregArbeidsforhold>>()
-        Assertions.assertThat(arbeidsforholdList[0].arbeidsgiver.organisasjonsnummer).isEqualTo("1234")
+        val aaregIdent: AaregClient.Companion.AaregIdent = arbeidsforholdList[0].arbeidssted.identer
+            .first { it.type == AaregClient.Companion.AaregIdentType.ORGANISASJONSNUMMER }
+
+        Assertions.assertThat(aaregIdent.ident).isEqualTo("1234")
     }
 }
