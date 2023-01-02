@@ -180,6 +180,14 @@
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+            <!-- Setter til versjon uten CVEer (pr. 20/12/22) -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.33</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
