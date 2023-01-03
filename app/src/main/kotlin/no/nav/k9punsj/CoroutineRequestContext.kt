@@ -65,14 +65,22 @@ internal typealias CorrelationId = String
 internal fun K9SakRoutes(
     authenticationHandler: AuthenticationHandler,
     routes: CoRouterFunctionDsl.() -> Unit
-) = Routes(authenticationHandler, routes, setOf("naissts")) { jwtToken ->
+) = Routes(
+    authenticationHandler,
+    routes,
+    setOf("naissts")
+) { jwtToken ->
     jwtToken.containsClaim("sub", "srvk9sak")
 }
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
     routes: CoRouterFunctionDsl.() -> Unit
-) = Routes(authenticationHandler, routes, setOf("azurev2")) { true }
+) = Routes(
+    authenticationHandler,
+    routes,
+    setOf("azurev2")
+) { true }
 
 internal fun PublicRoutes(
     routes: CoRouterFunctionDsl.() -> Unit
@@ -85,19 +93,14 @@ private fun Routes(
     isAccepted: ((jwtToken: JwtToken) -> Boolean)?
 ) = coRouter {
     before { serverRequest ->
-        val requestId = serverRequest
-            .headers()
-            .header(RequestIdHeader)
-            .firstOrNull() ?: UUID.randomUUID().toString()
         val callId = serverRequest
             .headers()
             .header(CallIdKey)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        val correlationId = callId
-        serverRequest.attributes()[RequestIdKey] = requestId
-        serverRequest.attributes()[CorrelationIdKey] = correlationId
+        serverRequest.attributes()[RequestIdKey] = serverRequest.headers().header(RequestIdHeader).firstOrNull() ?: UUID.randomUUID().toString()
+        serverRequest.attributes()[CorrelationIdKey] = callId
         serverRequest.attributes()[CallIdKey] = callId
-        logger.info("-> HTTP ${serverRequest.methodName()} ${serverRequest.path()}", e(serverRequest.contextMap()))
+        logger.info("-> HTTP ${serverRequest.method().name()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
     filter { serverRequest, requestedOperation ->
@@ -107,7 +110,7 @@ private fun Routes(
             issuerNames = issuerNames!!,
             isAccepted = isAccepted!!
         ) ?: requestedOperation(serverRequest)
-        logger.info("<- HTTP ${serverRequest.methodName()} ${serverRequest.path()} ${serverResponse.rawStatusCode()}", e(serverRequest.contextMap()))
+        logger.info("<- HTTP ${serverRequest.method().name()} ${serverRequest.path()} ${serverResponse.statusCode().value()}", e(serverRequest.contextMap()))
         serverResponse
     }
     onError<IkkeFunnet> { _, _ ->

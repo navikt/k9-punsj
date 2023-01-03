@@ -8,7 +8,7 @@
         <HikariCP.version>5.0.1</HikariCP.version>
         <kotliquery.version>1.9.0</kotliquery.version>
         <embedded-postgres.version>2.0.2</embedded-postgres.version>
-        <gson.version>2.9.1</gson.version>
+        <gson.version>2.10</gson.version>
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
         <verapdf.version>1.22.2</verapdf.version>
@@ -69,6 +69,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!-- kotlin -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -127,11 +128,18 @@
             <groupId>com.papertrailapp</groupId>
             <artifactId>logback-syslog4j</artifactId>
         </dependency>
+
         <!-- Meldingsformater -->
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -149,11 +157,13 @@
             <groupId>no.nav.k9.rapid</groupId>
             <artifactId>behov</artifactId>
         </dependency>
+
         <!-- Annet -->
         <dependency>
             <groupId>de.huxhorn.sulky</groupId>
             <artifactId>de.huxhorn.sulky.ulid</artifactId>
         </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>io.mockk</groupId>
@@ -163,7 +173,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-standalone</artifactId>
+            <artifactId>wiremock</artifactId>
             <version>${wiremock.version}</version>
         </dependency>
         <dependency>
@@ -176,6 +186,7 @@
             <artifactId>vault-jdbc</artifactId>
             <version>${vault-jdbc.version}</version>
         </dependency>
+
         <!-- Database -->
         <dependency>
             <groupId>com.zaxxer</groupId>

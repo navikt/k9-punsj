@@ -20,11 +20,11 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.7.22</kotlin.version>
+        <kotlin.version>1.8.0</kotlin.version>
         <springdoc.version>1.6.14</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
-        <token-support.version>2.1.7</token-support.version>
+        <token-support.version>3.0.2</token-support.version>
         <dusseldorf-ktor.version>3.2.2.1-4942135</dusseldorf-ktor.version>
         <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
         <k9-sak.version>3.3.26</k9-sak.version>
@@ -35,6 +35,7 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
+        <orgjson.version>20220924</orgjson.version>
         <wiremock.version>3.0.0-beta-2</wiremock.version> <!-- Beta for Jetty 11 support -->
     </properties>
 
@@ -46,6 +47,24 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--
+            Stygg workaround for å kjøre tester med servlet-api versjon 6 inntil
+            Jetty 12 kommer med støtte for servlet-api 6.
+            Begge avhengighetene kan fjernes når det skjer for spring boot injecter siste versjon.
+            -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>5.0.0</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet.</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
+                <scope>test</scope>
+            </dependency>
+
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>punsj-mocks</artifactId>
@@ -56,6 +75,8 @@
                 <artifactId>springdoc-openapi-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
+
+            <!-- Kontrakt -->
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>kontrakt</artifactId>
@@ -72,14 +93,25 @@
                 <version>${kotlinx-coroutines.version}</version>
             </dependency>
             <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-jakarta</artifactId>
+                <version>${k9-format.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.rapid</groupId>
+                <artifactId>overfore-omsorgsdager</artifactId>
+                <version>${k9-rapid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.rapid</groupId>
+                <artifactId>behov</artifactId>
+                <version>${k9-rapid.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-coroutines-reactor</artifactId>
                 <version>${kotlinx-coroutines.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20220924</version>
             </dependency>
 
             <!-- Authentication -->
@@ -121,23 +153,6 @@
                 </exclusions>
             </dependency>
 
-            <!-- Meldingsformater -->
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-jakarta</artifactId>
-                <version>${k9-format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.rapid</groupId>
-                <artifactId>overfore-omsorgsdager</artifactId>
-                <version>${k9-rapid.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.rapid</groupId>
-                <artifactId>behov</artifactId>
-                <version>${k9-rapid.version}</version>
-            </dependency>
-
             <!-- Testing & Mocks -->
             <dependency>
                 <groupId>io.mockk</groupId>
@@ -147,10 +162,9 @@
             </dependency>
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
-                <artifactId>wiremock-standalone</artifactId>
+                <artifactId>wiremock</artifactId>
                 <version>${wiremock.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>io.zonky.test.postgres</groupId>
                 <artifactId>embedded-postgres-binaries-bom</artifactId>
@@ -180,14 +194,11 @@
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-            <!-- Setter til versjon uten CVEer (pr. 20/12/22) -->
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.33</version>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${orgjson.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
