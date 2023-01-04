@@ -27,7 +27,7 @@
         <token-support.version>3.0.2</token-support.version>
         <dusseldorf-ktor.version>3.2.2.1-4942135</dusseldorf-ktor.version>
         <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
-        <k9-sak.version>3.3.26</k9-sak.version>
+        <k9-sak.version>3.3.29</k9-sak.version>
         <k9-formidling.version>0.0.25</k9-formidling.version>
         <k9-format.version>8.0.0</k9-format.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
