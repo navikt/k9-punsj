@@ -154,8 +154,8 @@ class RestPunsjbolleService(
         fagsakYtelseType: FagsakYtelseType
     ): PunsjbolleSaksnummerDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
-        val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
-        val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
+        val pleietrengendePerson = if (!pleietrengende.isNullOrEmpty()) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
+        val annenPartPerson = if (!annenPart.isNullOrEmpty()) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = if (pleietrengendePerson != null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
@@ -176,8 +176,8 @@ class RestPunsjbolleService(
         søknad: Søknad
     ): PunsjbolleSaksnummerFraSøknadDto {
         val søkerPerson = personService.finnEllerOpprettPersonVedNorskIdent(søker)
-        val pleietrengendePerson = if (pleietrengende != null) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
-        val annenPartPerson = if (annenPart != null) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
+        val pleietrengendePerson = if (!pleietrengende.isNullOrEmpty()) personService.finnEllerOpprettPersonVedNorskIdent(pleietrengende) else null
+        val annenPartPerson = if (!annenPart.isNullOrEmpty()) personService.finnEllerOpprettPersonVedNorskIdent(annenPart) else null
         return PunsjbolleSaksnummerFraSøknadDto(
             søker = PunsjbollePersonDto(søkerPerson.norskIdent, søkerPerson.aktørId),
             pleietrengende = if (pleietrengendePerson != null) PunsjbollePersonDto(pleietrengendePerson.norskIdent, pleietrengendePerson.aktørId) else null,
