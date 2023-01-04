@@ -64,13 +64,14 @@ data class OpplaeringspengerSøknadDto(
 
     data class Kurs(
         val kursHolder: KursHolder?,
-        val formaal: String?,
         val kursperioder: List<KursPeriodeMedReisetid>?
     )
 
     data class KursPeriodeMedReisetid(
         val periode: PeriodeDto?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         val avreise: LocalDate?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         val hjemkomst: LocalDate?
     )
 
