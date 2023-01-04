@@ -59,7 +59,7 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>jakarta.servlet.</groupId>
+                <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
                 <version>6.0.0</version>
                 <scope>test</scope>
@@ -96,11 +96,6 @@
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-jakarta</artifactId>
                 <version>${k9-format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.rapid</groupId>
-                <artifactId>overfore-omsorgsdager</artifactId>
-                <version>${k9-rapid.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.rapid</groupId>

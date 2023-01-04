@@ -151,10 +151,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.rapid</groupId>
-            <artifactId>overfore-omsorgsdager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.rapid</groupId>
             <artifactId>behov</artifactId>
         </dependency>
 
