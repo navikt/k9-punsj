@@ -176,7 +176,6 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
         begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test"),
         kurs = OpplaeringspengerSøknadDto.Kurs(
             kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "Nav", institusjonsUuid = null),
-            formaal = "Nav",
             kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
                 periode = requiredPeriode, avreise = requiredPeriode.fom, hjemkomst = requiredPeriode.tom
             ))

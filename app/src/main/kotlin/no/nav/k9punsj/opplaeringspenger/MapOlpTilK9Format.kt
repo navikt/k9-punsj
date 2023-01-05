@@ -100,12 +100,19 @@ internal class MapOlpTilK9Format(
 
 
     private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
-        val institusjonsUuid = this.kursHolder?.institusjonsUuid?.let { UUID.fromString(it) }
+        val institusjonsUuid = this.kursHolder?.institusjonsUuid?.let {
+            try {
+                UUID.fromString(it)
+            } catch (e: IllegalStateException) {
+                feil.add(Feil("søknad", "institusjonsUuid", "institusjonsUuid er ikke en gyldig UUID"))
+                return
+            }
+        }
         val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
         val kursPerioder = this.kursperioder?.map {
             KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst)
-        }?.toMutableList()
-        val kurs = Kurs(kursHolder, this.formaal, kursPerioder)
+        }?.toList()
+        val kurs = Kurs(kursHolder, kursPerioder)
         opplaeringspenger.medKurs(kurs)
     }
 
