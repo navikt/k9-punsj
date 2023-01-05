@@ -58,3 +58,16 @@ jobs:
           CLUSTER: dev-fss
           RESOURCE: nais/dev-fss.yml
 
+      - name: Snyk image scan
+        uses: snyk/actions/docker@master
+        continue-on-error: true # Don't want to fail the run
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.IMAGE }}
+          args: --file=app/Dockerfile
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
