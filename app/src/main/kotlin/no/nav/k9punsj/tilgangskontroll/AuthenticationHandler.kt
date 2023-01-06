@@ -37,6 +37,14 @@ internal class AuthenticationHandler(
         logger.info("Konfigurerte issuers = ${multiIssuerProperties.issuer}")
     }
 
+    /**
+     * Utility function for handling authenticated requests in a Spring WebFlux application.
+     * @property ServerRequest http request
+     * @property issuerNames a set of issuerNames.
+     * @property isAccepted a lambda function that determines whether a given JwtToken is acceptable,
+     * @property requestedOperation and another lambda function that represents
+     * the operation to be performed on the request if the token is acceptable.
+     */
     internal suspend fun authenticatedRequest(
         serverRequest: ServerRequest,
         issuerNames: Set<String>,
@@ -55,11 +63,11 @@ internal class AuthenticationHandler(
         } catch (cause: Throwable) {
             logger.warn("Feil ved validering av token", cause)
             null
-        }
-        return when(jwtToken) {
-            null -> ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
-            isAccepted -> requestedOperation(serverRequest)
-            else -> ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
+        } ?: return ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
+
+        return when (isAccepted(jwtToken)) {
+            true -> requestedOperation(serverRequest)
+            false -> ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
         }
     }
 }

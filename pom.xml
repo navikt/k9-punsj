@@ -24,7 +24,7 @@
         <springdoc.version>1.6.14</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
-        <token-support.version>3.0.2</token-support.version>
+        <token-support.version>2.1.7</token-support.version>
         <dusseldorf-ktor.version>3.2.2.1-4942135</dusseldorf-ktor.version>
         <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
         <k9-sak.version>3.3.29</k9-sak.version>
@@ -47,36 +47,23 @@
 
     <dependencyManagement>
         <dependencies>
-            <!--
-            Stygg workaround for å kjøre tester med servlet-api versjon 6 inntil
-            Jetty 12 kommer med støtte for servlet-api 6.
-            Begge avhengighetene kan fjernes når det skjer for spring boot injecter siste versjon.
-            -->
-            <dependency>
-                <groupId>jakarta.servlet</groupId>
-                <artifactId>jakarta.servlet-api</artifactId>
-                <version>5.0.0</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.servlet</groupId>
-                <artifactId>jakarta.servlet-api</artifactId>
-                <version>6.0.0</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>punsj-mocks</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-reactor</artifactId>
+                <version>${kotlinx-coroutines.version}</version>
+            </dependency>
 
             <!-- Kontrakt -->
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>punsj-mocks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>kontrakt</artifactId>
@@ -88,11 +75,6 @@
                 <version>${k9-formidling.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-core</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-jakarta</artifactId>
                 <version>${k9-format.version}</version>
@@ -101,12 +83,6 @@
                 <groupId>no.nav.k9.rapid</groupId>
                 <artifactId>behov</artifactId>
                 <version>${k9-rapid.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-reactor</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
             </dependency>
 
             <!-- Authentication -->
@@ -126,11 +102,6 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logback.logstash.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-slf4j</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.papertrailapp</groupId>
@@ -183,11 +154,6 @@
                 <groupId>de.huxhorn.sulky</groupId>
                 <artifactId>de.huxhorn.sulky.ulid</artifactId>
                 <version>${de.huxhorn.sulky.ulid.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>${gson.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
