@@ -14,17 +14,11 @@ class KafkaHendelseProducer(
     @Qualifier(AIVEN) private val kafkaTemplate: KafkaTemplate<String, String>
 ) : HendelseProducer {
     override fun send(topicName: String, data: String, key: String) {
-        kafkaTemplate.send(topicName, key, data).also {
-            when(it.isDone) {
-                true -> {
-                    val recordmetadata = it.get().recordMetadata
-                    logger.info("Melding sendt OK på Topic=[$topicName], Key=[$key], Offset=[${recordmetadata?.offset()}, Partition=[${recordmetadata?.partition()}]")
-                }
-                false -> {
-                    logger.warn("Kunne ikke legge søknad på Kafka-topic $topicName : $topicName")
-                    throw IllegalStateException("Kunne ikke sende sende til topic: $topicName")
-                }
-            }
+        kafkaTemplate.send(topicName, key, data).exceptionally {
+            throw IllegalStateException("Kunne ikke sende sende til topic: $topicName")
+        }.thenAccept {
+            val metadata = it.recordMetadata
+            logger.info("Melding sendt OK på Topic=[$topicName], Key=[$key], Offset=[${metadata.offset()}, Partition=[${metadata.partition()}]")
         }
     }
 
