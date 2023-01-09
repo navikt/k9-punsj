@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.6</version>
+        <version>3.0.1</version>
         <relativePath/>
     </parent>
     <groupId>no.nav.k9</groupId>
@@ -25,7 +25,7 @@
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
         <token-support.version>2.1.7</token-support.version>
-        <dusseldorf-ktor.version>3.2.2.1-4942135</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>3.2.2.2-d9c7672</dusseldorf-ktor.version>
         <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
         <k9-sak.version>3.3.29</k9-sak.version>
         <k9-formidling.version>0.0.25</k9-formidling.version>
@@ -35,6 +35,8 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
+        <orgjson.version>20220924</orgjson.version>
+        <wiremock.version>3.0.0-beta-2</wiremock.version> <!-- Beta for Jetty 11 support -->
     </properties>
 
     <modules>
@@ -46,14 +48,21 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>punsj-mocks</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-reactor</artifactId>
+                <version>${kotlinx-coroutines.version}</version>
+            </dependency>
+
+            <!-- Kontrakt -->
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>punsj-mocks</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
@@ -66,19 +75,14 @@
                 <version>${k9-formidling.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-core</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-jakarta</artifactId>
+                <version>${k9-format.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-reactor</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20220924</version>
+                <groupId>no.nav.k9.rapid</groupId>
+                <artifactId>behov</artifactId>
+                <version>${k9-rapid.version}</version>
             </dependency>
 
             <!-- Authentication -->
@@ -100,11 +104,6 @@
                 <version>${logback.logstash.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-slf4j</artifactId>
-                <version>${kotlinx-coroutines.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.papertrailapp</groupId>
                 <artifactId>logback-syslog4j</artifactId>
                 <version>${logback-syslog4j.version}</version>
@@ -120,29 +119,17 @@
                 </exclusions>
             </dependency>
 
-            <!-- Meldingsformater -->
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
-                <version>${k9-format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.rapid</groupId>
-                <artifactId>overfore-omsorgsdager</artifactId>
-                <version>${k9-rapid.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.rapid</groupId>
-                <artifactId>behov</artifactId>
-                <version>${k9-rapid.version}</version>
-            </dependency>
-
-            <!-- Testing -->
+            <!-- Testing & Mocks -->
             <dependency>
                 <groupId>io.mockk</groupId>
                 <artifactId>mockk-jvm</artifactId>
                 <version>${mockk.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.zonky.test.postgres</groupId>
@@ -169,18 +156,10 @@
                 <version>${de.huxhorn.sulky.ulid.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>${gson.version}</version>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${orgjson.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-            <!-- Setter til versjon uten CVEer (pr. 20/12/22) -->
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.33</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 

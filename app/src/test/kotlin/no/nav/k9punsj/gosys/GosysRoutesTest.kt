@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
@@ -60,7 +61,7 @@ internal class GosysRoutesTest {
         assertEquals(HttpStatus.OK, statusCode)
     }
 
-    private fun String.get(): Pair<HttpStatus, String?> = this.let { path ->
+    private fun String.get(): Pair<HttpStatusCode, String?> = this.let { path ->
         runBlocking {
             client.get()
                 .uri { it.path(path).build() }
@@ -68,7 +69,7 @@ internal class GosysRoutesTest {
         }
     }
 
-    private fun String.post(body: String): Pair<HttpStatus, String?> = this.let { path ->
+    private fun String.post(body: String): Pair<HttpStatusCode, String?> = this.let { path ->
         runBlocking {
             client.post()
                 .uri { it.path(path).build() }

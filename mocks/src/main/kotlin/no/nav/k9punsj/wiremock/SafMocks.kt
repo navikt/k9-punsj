@@ -4,8 +4,8 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
-import com.google.common.net.HttpHeaders.CONTENT_DISPOSITION
 import org.intellij.lang.annotations.Language
+import wiremock.com.google.common.net.HttpHeaders.CONTENT_DISPOSITION
 
 typealias JournalpostId = String
 

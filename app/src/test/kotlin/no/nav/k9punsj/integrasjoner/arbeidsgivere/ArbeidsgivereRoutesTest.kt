@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
@@ -67,7 +68,7 @@ internal class ArbeidsgivereRoutesTest {
 
     private fun getArbeidsgivere(
         identitetsnummer: String
-    ): Pair<HttpStatus, String?> = runBlocking {
+    ): Pair<HttpStatusCode, String?> = runBlocking {
         client.get()
             .uri { it.path("/api/arbeidsgivere").build() }
             .accept(MediaType.APPLICATION_JSON)
@@ -76,7 +77,7 @@ internal class ArbeidsgivereRoutesTest {
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
     }
 
-    private fun getArbeidsgiverNavn(organisasjonsnummer: String): Pair<HttpStatus, String?> = runBlocking {
+    private fun getArbeidsgiverNavn(organisasjonsnummer: String): Pair<HttpStatusCode, String?> = runBlocking {
         client.get()
             .uri { it.path("/api/arbeidsgiver").queryParam("organisasjonsnummer", organisasjonsnummer).build() }
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }

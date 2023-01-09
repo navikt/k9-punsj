@@ -1,5 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll
 
+import jakarta.validation.Valid
 import no.nav.security.token.support.core.configuration.IssuerProperties
 import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration
 import no.nav.security.token.support.core.http.HttpRequest
@@ -16,7 +17,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
-import javax.validation.Valid
 
 @Service
 internal class AuthenticationHandler(
@@ -37,6 +37,14 @@ internal class AuthenticationHandler(
         logger.info("Konfigurerte issuers = ${multiIssuerProperties.issuer}")
     }
 
+    /**
+     * Utility function for handling authenticated requests in a Spring WebFlux application.
+     * @property ServerRequest http request
+     * @property issuerNames a set of issuerNames.
+     * @property isAccepted a lambda function that determines whether a given JwtToken is acceptable,
+     * @property requestedOperation and another lambda function that represents
+     * the operation to be performed on the request if the token is acceptable.
+     */
     internal suspend fun authenticatedRequest(
         serverRequest: ServerRequest,
         issuerNames: Set<String>,
@@ -44,23 +52,22 @@ internal class AuthenticationHandler(
         requestedOperation: suspend (serverRequest: ServerRequest) -> ServerResponse
     ): ServerResponse {
         val jwtToken = try {
-            jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).issuers.intersect(issuerNames).firstOrNull()?.let {
-                jwtTokenValidationHandler.getValidatedTokens(ServerHttpRequest(serverRequest)).getJwtToken(it)
-            }
+            val request = ServerHttpRequest(serverRequest)
+            jwtTokenValidationHandler.getValidatedTokens(request)
+                .issuers
+                .intersect(issuerNames)
+                .firstOrNull()
+                ?.let {
+                    jwtTokenValidationHandler.getValidatedTokens(request).getJwtToken(it)
+                }
         } catch (cause: Throwable) {
             logger.warn("Feil ved validering av token", cause)
             null
-        }
-        return when {
-            jwtToken == null -> {
-                ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
-            }
-            isAccepted(jwtToken) -> {
-                requestedOperation(serverRequest)
-            }
-            else -> {
-                ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
-            }
+        } ?: return ServerResponse.status(HttpStatus.UNAUTHORIZED).buildAndAwait()
+
+        return when (isAccepted(jwtToken)) {
+            true -> requestedOperation(serverRequest)
+            false -> ServerResponse.status(HttpStatus.FORBIDDEN).buildAndAwait()
         }
     }
 }

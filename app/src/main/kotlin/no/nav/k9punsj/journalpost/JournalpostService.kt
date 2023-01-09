@@ -23,6 +23,7 @@ import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -131,7 +132,7 @@ class JournalpostService(
         journalpostId: String,
         identitetsnummer: Identitetsnummer,
         enhetKode: String,
-    ): Pair<HttpStatus, String> {
+    ): Pair<HttpStatusCode, String> {
         val hentDataFraSaf = safGateway.hentDataFraSaf(journalpostId)
         return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = hentDataFraSaf,
@@ -193,7 +194,7 @@ class JournalpostService(
         enhet: String? = null,
         sak: Sak? = null,
         søkerIdentitetsnummer: Identitetsnummer? = null,
-    ): Pair<HttpStatus, String?> {
+    ): Pair<HttpStatusCode, String?> {
         if (ferdigstillJournalpost) {
             require(!enhet.isNullOrBlank()) { "Enhet kan ikke være null dersom journalpost skal ferdigstilles." }
             require(sak != null) { "Sak kan ikke være null dersom journalpost skal ferdigstilles." }

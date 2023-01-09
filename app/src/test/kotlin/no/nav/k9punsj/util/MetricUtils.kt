@@ -14,7 +14,7 @@ class MetricUtils {
             forventetVerdi: Double,
             vararg tags: MetrikkTag
         ) {
-            val metricResponse: MetricsEndpoint.MetricResponse = metricsEndpoint.metric(metric.navn, listOf())
+            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
             Assertions.assertThat(getCount(metricResponse)).isEqualTo(forventetVerdi)
             if (tags.isNotEmpty()) {
                 val tagsResponse = tags(metricResponse)
@@ -28,7 +28,7 @@ class MetricUtils {
             forventetVerdi: Double,
             vararg tags: MetrikkTag
         ) {
-            val metricResponse: MetricsEndpoint.MetricResponse = metricsEndpoint.metric(metric.navn, listOf())
+            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
             Assertions.assertThat(getGuageValue(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }
@@ -44,25 +44,25 @@ class MetricUtils {
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }
 
-        fun getCount(response: MetricsEndpoint.MetricResponse): Double? {
+        fun getCount(response: MetricsEndpoint.MetricDescriptor): Double? {
             return response.measurements.stream()
                 .filter { it.statistic == Statistic.COUNT }
                 .findAny().map { it.value }.orElse(null)
         }
 
-        fun getGuageValue(response: MetricsEndpoint.MetricResponse): Double? {
+        fun getGuageValue(response: MetricsEndpoint.MetricDescriptor): Double? {
             return response.measurements.stream()
                 .filter { it.statistic == Statistic.VALUE }
                 .findAny().map { it.value }.orElse(null)
         }
 
-        private fun getBucketValue(response: MetricsEndpoint.MetricResponse): Double? {
+        private fun getBucketValue(response: MetricsEndpoint.MetricDescriptor): Double? {
             return response.measurements.stream()
                 .filter { it.statistic == Statistic.TOTAL }
                 .findAny().map { it.value }.orElse(null)
         }
 
-        private fun tags(response: MetricsEndpoint.MetricResponse): List<MetrikkTag> {
+        private fun tags(response: MetricsEndpoint.MetricDescriptor): List<MetrikkTag> {
             return response.availableTags.map {
                 MetrikkTag(it.tag, it.values)
             }
