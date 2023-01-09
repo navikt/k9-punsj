@@ -72,7 +72,9 @@ data class OpplaeringspengerSøknadDto(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val avreise: LocalDate?,
         @JsonFormat(pattern = "yyyy-MM-dd")
-        val hjemkomst: LocalDate?
+        val hjemkomst: LocalDate?,
+        val begrunnelseReisetidTil: String?,
+        val begrunnelseReisetidHjem: String?
     )
 
     data class KursHolder(

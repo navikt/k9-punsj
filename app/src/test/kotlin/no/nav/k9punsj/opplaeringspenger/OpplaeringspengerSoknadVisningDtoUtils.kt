@@ -51,7 +51,9 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
                         "avreise":"2022-12-14",
                         "hjemkomst":"2022-12-30"
                      }
-                  ]
+                  ],
+                  "begrunnelseReisetidTil": "borte bra",
+                  "begrunnelseReisetidHjem": "hjemme best"
                }
             }
             """
@@ -177,7 +179,11 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
         kurs = OpplaeringspengerSøknadDto.Kurs(
             kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "Nav", institusjonsUuid = null),
             kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
-                periode = requiredPeriode, avreise = requiredPeriode.fom, hjemkomst = requiredPeriode.tom
+                periode = requiredPeriode,
+                avreise = requiredPeriode.fom,
+                hjemkomst = requiredPeriode.tom,
+                begrunnelseReisetidTil = "borte bra",
+                begrunnelseReisetidHjem = "hjemme best"
             ))
         )
     )
