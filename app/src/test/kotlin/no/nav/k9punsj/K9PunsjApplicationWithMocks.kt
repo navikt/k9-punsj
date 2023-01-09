@@ -11,13 +11,9 @@ import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import java.net.URI
 import java.util.UUID
 
-@Configuration
-@Profile("test")
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
         internal fun startup(
