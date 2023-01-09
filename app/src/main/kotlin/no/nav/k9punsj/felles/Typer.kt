@@ -1,6 +1,7 @@
 package no.nav.k9punsj.felles
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.PeriodeDto
 
 internal data class JournalpostId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
@@ -31,7 +32,8 @@ data class PunsjBolleDto(
     val barnIdent: String?,
     val annenPart: String?,
     val journalpostId: String,
-    val fagsakYtelseType: FagsakYtelseType
+    val fagsakYtelseType: FagsakYtelseType,
+    val periode: PeriodeDto? = null // Støtte for periode for o overstyre utleding som sker m.h.a journalpost-metadata.
 )
 
 data class IdentOgJournalpost(

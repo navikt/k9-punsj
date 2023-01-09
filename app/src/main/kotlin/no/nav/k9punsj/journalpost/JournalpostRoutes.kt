@@ -220,7 +220,7 @@ internal class JournalpostRoutes(
                     pleietrengende = dto.barnIdent,
                     annenPart = dto.annenPart,
                     journalpostId = dto.journalpostId,
-                    periode = null, // Utledes fra journalposten i Punsjbollen
+                    periode = dto.periode, // Utledes fra journalposten i Punsjbollen OM periode ikke finnes.
                     fagsakYtelseType = fagsakYtelseType,
                     correlationId = correlationId
                 )
