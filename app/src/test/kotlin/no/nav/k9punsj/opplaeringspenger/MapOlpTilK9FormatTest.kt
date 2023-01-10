@@ -24,10 +24,43 @@ internal class MapOlpTilK9FormatTest {
     }
 
     @Test
-    fun `Søknad med flere kursperioder men utan søknad utleder søknadsperiode`() {
+    fun `Kurs med flere kursperioder utleder søknadsperiode fra første o siste dato i perioderna`() {
+        val periode1 = KursPeriode(
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 1, 6)
+        )
+        val periode2 = KursPeriode(
+            LocalDate.of(2023, 1, 7),
+            LocalDate.of(2023, 1, 14)
+        )
+        val periode3 = KursPeriode(
+            LocalDate.of(2023, 1, 15),
+            LocalDate.of(2023, 1, 29)
+        )
 
+        val kurs = OpplaeringspengerSøknadDto.Kurs(
+            kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "test", institusjonsUuid = null),
+            kursperioder = listOf(periode3, periode1, periode2)
+        )
 
+        val søknadsperiode = kurs.utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer()
+
+        assert(søknadsperiode != null)
+        assert(søknadsperiode!!.fom == LocalDate.of(2023, 1, 1))
+        assert(søknadsperiode!!.tom == LocalDate.of(2023, 1, 29))
     }
+
+    private fun KursPeriode(fom: LocalDate, tom: LocalDate) = OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
+            periode = PeriodeDto(
+                fom = fom,
+                tom = tom
+            ),
+            avreise = fom,
+            hjemkomst = tom,
+            begrunnelseReisetidHjem = "test",
+            begrunnelseReisetidTil = "test",
+        )
+
 
     private fun OpplaeringspengerSøknadDto.feil() = MapOlpTilK9Format(
         dto = this,
