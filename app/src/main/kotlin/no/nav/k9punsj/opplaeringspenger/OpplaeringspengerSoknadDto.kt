@@ -2,7 +2,6 @@ package no.nav.k9punsj.opplaeringspenger
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.FagsakYtelseType
@@ -35,7 +34,7 @@ data class OpplaeringspengerSøknadDto(
     val kurs: Kurs? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
+    val begrunnelseForInnsending: BegrunnelseForInnsendingDto? = null,
     val metadata: Map<*, *>? = null
 ) {
 
@@ -53,7 +52,8 @@ data class OpplaeringspengerSøknadDto(
     data class UttakDto(
         val periode: PeriodeDto?,
         val timerPleieAvBarnetPerDag: String?,
-        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
+        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()
+            ?.somTimerOgMinutterDto()
     )
 
     data class OmsorgDto(
@@ -65,6 +65,23 @@ data class OpplaeringspengerSøknadDto(
     data class Kurs(
         val kursHolder: KursHolder?,
         val kursperioder: List<KursPeriodeMedReisetid>?
+    ) {
+        fun utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer(): PeriodeDto? {
+            return kursperioder?.let {
+                val fom = kursperioder?.map { kursPeriodeMedReisetid ->
+                    kursPeriodeMedReisetid.avreise
+                }?.sortedByDescending { it }?.first()
+                val tom = kursperioder?.map { kursPeriodeMedReisetid ->
+                    kursPeriodeMedReisetid.hjemkomst
+                }?.sortedByDescending { it }?.first()
+
+                PeriodeDto(fom = fom, tom = tom)
+            }
+        }
+    }
+
+    data class BegrunnelseForInnsendingDto(
+        val tekst: String
     )
 
     data class KursPeriodeMedReisetid(

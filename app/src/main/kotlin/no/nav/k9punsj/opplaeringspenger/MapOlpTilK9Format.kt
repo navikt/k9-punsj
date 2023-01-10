@@ -4,6 +4,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.felles.type.Periode
@@ -52,7 +53,7 @@ internal class MapOlpTilK9Format(
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.barn?.leggTilBarn()
             dto.leggTilLovbestemtFerie()
-            dto.soeknadsperiode?.leggTilSøknadsperiode()
+            dto.leggTilSøknadsperiode()
             if (dto.utenlandsopphold.isNotEmpty()) {
                 dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
                     opplaeringspenger.medUtenlandsopphold(this)
@@ -73,7 +74,7 @@ internal class MapOlpTilK9Format(
             }
             dto.leggTilBegrunnelseForInnsending()
             dto.kurs?.leggTilKurs()
-            dto.uttak.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
+            dto.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
 
             // Fullfører søknad & validerer
             søknad.medYtelse(opplaeringspenger)
@@ -133,9 +134,14 @@ internal class MapOlpTilK9Format(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
-    private fun List<PeriodeDto>.leggTilSøknadsperiode() {
-        if (this.isNotEmpty()) {
-            opplaeringspenger.medSøknadsperiode(this.somK9Perioder())
+    private fun OpplaeringspengerSøknadDto.leggTilSøknadsperiode() {
+        if (!this.soeknadsperiode.isNullOrEmpty()) {
+            opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
+        } else {
+            // Utleder søknadsperiode fra kursperioder
+            this.kurs?.utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer()?.let { kursPeriode ->
+                opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
+            }
         }
     }
 
@@ -156,7 +162,9 @@ internal class MapOlpTilK9Format(
 
     private fun OpplaeringspengerSøknadDto.leggTilBegrunnelseForInnsending() {
         if (begrunnelseForInnsending != null) {
-            søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
+            søknad.medBegrunnelseForInnsending(
+                BegrunnelseForInnsending().medBegrunnelseForInnsending(begrunnelseForInnsending.tekst)
+            )
         }
     }
 
@@ -183,10 +191,10 @@ internal class MapOlpTilK9Format(
         opplaeringspenger.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
 
-    private fun List<OpplaeringspengerSøknadDto.UttakDto>?.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
+    private fun OpplaeringspengerSøknadDto.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
         val k9Uttak = mutableMapOf<Periode, Uttak.UttakPeriodeInfo>()
 
-        this?.filter { it.periode.erSatt() }?.forEach { uttak ->
+        this.uttak?.filter { it.periode.erSatt() }?.forEach { uttak ->
             val k9Periode = uttak.periode!!.somK9Periode()!!
             val k9Info = Uttak.UttakPeriodeInfo()
             MappingUtils.mapEllerLeggTilFeil(
@@ -200,7 +208,13 @@ internal class MapOlpTilK9Format(
 
         if (k9Uttak.isEmpty() && søknadsperiode != null) {
             søknadsperiode.forEach { periode ->
-                periode.somK9Periode()?.let { k9Uttak[it] = MapOlpTilK9Format.DefaultUttak }
+                periode.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
+            }
+        }
+
+        if(k9Uttak.isEmpty() && this.kurs != null) {
+            this.kurs.kursperioder?.forEach { kursPeriode ->
+                kursPeriode.periode?.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
             }
         }
 
