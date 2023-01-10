@@ -139,7 +139,7 @@ internal class MapOlpTilK9Format(
             opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
         } else {
             // Utleder søknadsperiode fra kursperioder
-            this.kurs?.utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer()?.let { kursPeriode ->
+            this.kurs?.utledsSoeknadsPeriodeFraKursperioder()?.let { kursPeriode ->
                 opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
             }
         }

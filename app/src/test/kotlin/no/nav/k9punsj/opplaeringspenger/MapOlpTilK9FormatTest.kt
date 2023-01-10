@@ -28,14 +28,14 @@ internal class MapOlpTilK9FormatTest {
     fun `Kurs med flere kursperioder utleder søknadsperiode fra første o siste dato i perioderna`() {
         val periode1 = KursPeriode(
             LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 1, 6)
+            LocalDate.of(2023, 1, 5)
         )
         val periode2 = KursPeriode(
-            LocalDate.of(2023, 1, 7),
-            LocalDate.of(2023, 1, 14)
+            LocalDate.of(2023, 1, 8),
+            LocalDate.of(2023, 1, 10)
         )
         val periode3 = KursPeriode(
-            LocalDate.of(2023, 1, 15),
+            LocalDate.of(2023, 1, 20),
             LocalDate.of(2023, 1, 29)
         )
 
@@ -44,7 +44,7 @@ internal class MapOlpTilK9FormatTest {
             kursperioder = listOf(periode3, periode1, periode2)
         )
 
-        val søknadsperiode = kurs.utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer()
+        val søknadsperiode = kurs.utledsSoeknadsPeriodeFraKursperioder()
 
         assert(søknadsperiode != null)
         assert(søknadsperiode!!.fom == LocalDate.of(2023, 1, 1))
@@ -74,8 +74,8 @@ internal class MapOlpTilK9FormatTest {
                 "kursperioder": [
                   {
                     "periode": { "fom": "2023-01-01", "tom": "2023-01-31" },
-                    "avreise": "2023-01-01",
-                    "hjemkomst": "2023-01-31"
+                    "avreise": "2022-12-31",
+                    "hjemkomst": "2023-02-01"
                   }
                 ]
               },
@@ -110,8 +110,8 @@ internal class MapOlpTilK9FormatTest {
                 fom = fom,
                 tom = tom
             ),
-            avreise = fom,
-            hjemkomst = tom,
+            avreise = fom.minusDays(1),
+            hjemkomst = tom.plusDays(1),
             begrunnelseReisetidHjem = "test",
             begrunnelseReisetidTil = "test",
         )

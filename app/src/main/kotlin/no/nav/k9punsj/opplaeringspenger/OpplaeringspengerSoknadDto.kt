@@ -66,10 +66,10 @@ data class OpplaeringspengerSøknadDto(
         val kursHolder: KursHolder?,
         val kursperioder: List<KursPeriodeMedReisetid>?
     ) {
-        fun utledsSoeknadsPeriodeFraAvreiseOgHjemkomstDatoer(): PeriodeDto? {
+        fun utledsSoeknadsPeriodeFraKursperioder(): PeriodeDto? {
             return kursperioder?.let {
-                val fom = kursperioder.sortedBy { it.avreise }.first().avreise
-                val tom = kursperioder.sortedBy { it.hjemkomst }.last().hjemkomst
+                val fom = kursperioder.sortedBy { it.avreise }.first().periode?.fom
+                val tom = kursperioder.sortedBy { it.hjemkomst }.last().periode?.tom
                 PeriodeDto(fom = fom, tom = tom)
             }
         }
