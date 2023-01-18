@@ -22,7 +22,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

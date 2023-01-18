@@ -8,7 +8,7 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 

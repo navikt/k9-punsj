@@ -16,7 +16,7 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject

@@ -7,14 +7,13 @@ import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity

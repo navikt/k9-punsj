@@ -14,7 +14,7 @@ import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

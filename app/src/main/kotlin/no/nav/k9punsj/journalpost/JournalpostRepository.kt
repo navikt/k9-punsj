@@ -6,7 +6,7 @@ import kotliquery.using
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource

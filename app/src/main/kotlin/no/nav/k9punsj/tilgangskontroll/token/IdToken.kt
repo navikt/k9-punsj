@@ -1,6 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll.token
 
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.nio.charset.Charset
 import java.util.Base64
 

@@ -2,7 +2,7 @@ package no.nav.k9punsj.opplaeringspenger
 
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
