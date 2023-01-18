@@ -13,5 +13,6 @@ enum class Metrikk(val navn: String) {
     ANTALL_FERDIG_BEHANDLEDE_JOURNALPOSTER("antall_ferdig_behandlede_journalposter_guage"),
     ANTALL_UFERDIGE_BEHANDLEDE_JOURNALPOSTER("antall_uferdige_behandlede_journalposter_guage"),
     ANTALL_OPPRETTET_JOURNALPOST_COUNTER("antall_opprettet_journalpost_counter"),
-    ANTALL_JOURNALPOSTTYPER("antall_journalposttyper_guage");
+    ANTALL_JOURNALPOSTTYPER("antall_journalposttyper_guage"),
+    PUNSJ_ENDRET_ARBEIDSPERIODE("antall_endret_arbeidsperiode");
 }
