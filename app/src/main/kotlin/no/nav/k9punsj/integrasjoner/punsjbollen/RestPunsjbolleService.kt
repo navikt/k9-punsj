@@ -142,6 +142,7 @@ class RestPunsjbolleService(
         FagsakYtelseType.OMSORGSPENGER_KS -> "OmsorgspengerKroniskSyktBarn"
         FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE -> "PleiepengerLivetsSluttfase"
         FagsakYtelseType.OMSORGSPENGER_MA -> "OmsorgspengerMidlertidigAlene"
+        FagsakYtelseType.OPPLÆRINGSPENGER -> "Opplæringspenger"
         else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
     }
 

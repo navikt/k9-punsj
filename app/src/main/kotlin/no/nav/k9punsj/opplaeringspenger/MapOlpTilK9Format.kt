@@ -59,7 +59,7 @@ internal class MapOlpTilK9Format(
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             } else {
-                dto.utenlandsopphold?.leggTilUtenlandsopphold(feil)?.apply {
+                dto.utenlandsopphold.leggTilUtenlandsopphold(feil)?.apply {
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             }
