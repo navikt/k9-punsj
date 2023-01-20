@@ -18,7 +18,8 @@
         "fom": "2021-11-08",
         "tom": "2021-11-13"
       },
-      "faktiskTidPrDag": "0"
+      "faktiskTidPrDag": "0",
+      "normalArbeidstidPrDag": "7,5"
     },
     {
       "aktivitetsFravær": "FRILANSER",
@@ -29,7 +30,8 @@
         "fom": "2021-11-14",
         "tom": "2021-11-14"
       },
-      "faktiskTidPrDag": "0"
+      "faktiskTidPrDag": "0",
+      "normalArbeidstidPrDag": "7,5"
     },
     {
       "aktivitetsFravær": "SELVSTENDIG_VIRKSOMHET",
@@ -40,9 +42,11 @@
         "fom": "2021-11-16",
         "tom": "2021-11-17"
       },
-      "faktiskTidPrDag": "0"
+      "faktiskTidPrDag": "0",
+      "normalArbeidstidPrDag": "7,5"
     }
   ],
+  "erKorrigering": false,
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false
 }

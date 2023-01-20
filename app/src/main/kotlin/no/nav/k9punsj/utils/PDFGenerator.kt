@@ -8,6 +8,8 @@ import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
+import com.openhtmltopdf.slf4j.Slf4jLogger
+import com.openhtmltopdf.util.XRLog
 import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -35,12 +37,18 @@ abstract class PDFGenerator<in T> {
     private val REGULAR_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Regular.ttf").inputStream.readAllBytes()
     private val BOLD_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Bold.ttf").inputStream.readAllBytes()
     private val ITALIC_FONT = ClassPathResource("$ROOT/fonts/SourceSansPro-Italic.ttf").inputStream.readAllBytes()
+    private val sRGBColorSpace = ClassPathResource("$ROOT/sRGB.icc").inputStream.readAllBytes()
     protected val handlebars = configureHandlebars()
     private val søknadsTemplate: Template = handlebars.compile(templateNavn)
 
     protected val ZONE_ID = ZoneId.of("Europe/Oslo")
     protected val DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZONE_ID)
     protected val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZONE_ID)
+
+    init {
+        XRLog.setLoggingEnabled(true)
+        XRLog.setLoggerImpl(Slf4jLogger())
+    }
 
     abstract fun T.tilMap(): Map<String, Any?>
 
@@ -54,6 +62,8 @@ abstract class PDFGenerator<in T> {
         PdfRendererBuilder()
             .useFastMode()
             .usePdfUaAccessbility(true)
+            .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_U)
+            .useColorProfile(sRGBColorSpace)
             .withHtmlContent(html, "")
             .medFonter()
             .toStream(outputStream)
@@ -61,8 +71,14 @@ abstract class PDFGenerator<in T> {
             .createPDF()
 
         outputStream.use {
-            it.toByteArray()
+            val pdf = it.toByteArray()
+            valider(pdf)
+            pdf
         }
+    }
+
+    private fun valider(pdf: ByteArray) {
+        PdfaValidator().validatePdf(pdf)
     }
 
     protected fun loadPng(name: String): String {

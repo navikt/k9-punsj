@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
@@ -35,7 +36,7 @@ import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -155,7 +156,7 @@ class SafGateway(
         return journalpost
     }
 
-    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject? {
+    internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
             onBehalfOf = coroutineContext.hentAuthentication().accessToken
@@ -178,8 +179,7 @@ class SafGateway(
                 it.safData()
             },
             failure = {
-                håndterFeil(it, request, response)
-                null
+                throw håndterFeil(it, request, response)
             }
         )
     }
@@ -197,9 +197,9 @@ class SafGateway(
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
+            .awaitExchange { Pair(it.statusCode(), it.awaitEntity<DataBuffer>()) }
 
-        return when (statusCode) {
+        return when (statusCode.value()) {
             200 -> {
                 Dokument(
                     contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),
@@ -217,22 +217,20 @@ class SafGateway(
     internal fun håndterFeil(
         it: FuelError,
         request: Request,
-        response: Response
-    ) {
+        response: Response,
+    ): Throwable {
         val feil = it.response.body().asString("text/plain")
         logger.error(
             "Error response = '$feil' fra '${request.url}'"
         )
         logger.error(it.toString())
-        when (response.statusCode) {
-            400 -> throw FeilIAksjonslogg(feil)
-            401 -> throw UgyldigToken(feil)
-            403 -> throw IkkeTilgang(feil)
-            404 -> throw IkkeFunnet()
-            500 -> throw UventetFeil(feil)
-            else -> {
-                throw IllegalStateException("${response.statusCode} -> " + feil)
-            }
+        return when (response.statusCode) {
+            400 -> FeilIAksjonslogg(feil)
+            401 -> UgyldigToken(feil)
+            403 -> IkkeTilgang(feil)
+            404 -> IkkeFunnet()
+            500 -> UventetFeil(feil)
+            else -> IllegalStateException("${response.statusCode} -> " + feil)
         }
     }
 

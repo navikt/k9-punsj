@@ -78,7 +78,7 @@ internal class SøknadRepositoryTest {
             sendtInn = false
         )
 
-        val søknad = søknadRepository.opprettSøknad(søknadEntitet)
-        assertThat(søknad.søknad).isNotNull
+        val nySøknad = søknadRepository.opprettSøknad(søknadEntitet)
+        assertThat(nySøknad.søknad).isNotNull
     }
 }

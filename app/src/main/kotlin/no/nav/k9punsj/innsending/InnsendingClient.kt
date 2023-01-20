@@ -92,6 +92,7 @@ interface InnsendingClient {
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> "PleiepengerSyktBarn"
             FagsakYtelseType.OMSORGSPENGER -> "Omsorgspenger"
             FagsakYtelseType.OMSORGSPENGER_KS -> "OmsorgspengerKroniskSyktBarn"
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE -> "PleiepengerLivetsSluttfase"
             else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
         }
 

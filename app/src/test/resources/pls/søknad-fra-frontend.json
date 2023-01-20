@@ -25,6 +25,7 @@
         "virksomhetstyper": [
           "Fiske"
         ],
+        "erFiskerPåBladB": true,
         "landkode": "",
         "regnskapsførerNavn": "Regskapsfører",
         "regnskapsførerTlf": "88888889",
@@ -100,6 +101,12 @@
         "tom": "2019-10-20"
       },
       "land": "RU"
+    }
+  ],
+  "lovbestemtFerie": [
+    {
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
     }
   ],
   "utenlandsopphold": [

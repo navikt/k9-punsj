@@ -10,10 +10,18 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
+import no.nav.k9punsj.felles.dto.Matchfagsak
+import no.nav.k9punsj.felles.dto.PerioderDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.openapi.OasFeil
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @Tag(name = "Omsorgspengerutbetaling søknad", description = "Håndtering av søknader av typen omsorgspengerutbetaling")
@@ -236,7 +244,7 @@ internal class OmsorgspengerutbetalingOpenApi {
         ]
     )
     fun ValiderSøknad(
-        @RequestBody søknad: SendSøknad
+        @RequestBody søknad: OmsorgspengerutbetalingSøknadDto
     ) {
     }
 
@@ -269,6 +277,38 @@ internal class OmsorgspengerutbetalingOpenApi {
             )
         ]
     )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: MatchFagsakMedPeriode) {
+    fun hentArbeidsforholdIder(@RequestBody matchFagsak: MatchFagsakMedPeriode) {
+    }
+
+    @PostMapping(
+        OmsorgspengerutbetalingRoutes.Urls.HentInfoFraK9sak,
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Henter perioder som ligger i k9-sak",
+        description = "Henter perioder som ligger i k9-sak",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Henter siste omsorgspengerutbetaling fra k9-sak og gjør den tilgjengelig for visning",
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = PerioderDto::class
+                        )
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Fant ingen gjeldene søknad"
+            )
+        ]
+    )
+    fun HentInfoFraK9sak(@RequestBody matchFagsak: Matchfagsak) {
     }
 }

@@ -125,9 +125,14 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
                 return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
             }
 
-            val støttedeYtelseTyper = setOf(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
-            if (!støttedeYtelseTyper.contains(fagsakYtelseType)) {
-                return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
+            val støttedeYtelseTyperForKopiering = listOf(
+                FagsakYtelseType.OMSORGSPENGER_KS,
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+            )
+
+            if (!støttedeYtelseTyperForKopiering.contains(ytelseType)) {
+                return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${ytelseType.navn} for relaterte journalposter")
             }
 
             innsendingClient.sendKopierJournalpost(

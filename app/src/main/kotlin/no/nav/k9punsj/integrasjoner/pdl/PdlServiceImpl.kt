@@ -166,7 +166,7 @@ class PdlServiceImpl(
             .awaitFirst()
 
         if (response.statusCode != HttpStatus.OK) {
-            throw IllegalStateException("Uventet HTTP ${response.statusCodeValue} fra PDL. ResponseBody=${response.body}")
+            throw IllegalStateException("Uventet HTTP ${response.statusCode} fra PDL. ResponseBody=${response.body}")
         }
         return requireNotNull(response.body) {
             "Uventet response fra PDL. Har ingen response body."

@@ -17,7 +17,7 @@ import java.time.LocalDate
 internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
-        barn: String,
+        barn: String?,
         fagsakYtelseType: FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
 

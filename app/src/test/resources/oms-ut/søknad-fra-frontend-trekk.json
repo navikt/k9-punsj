@@ -18,7 +18,8 @@
         "fom": "2021-11-08",
         "tom": "2021-11-13"
       },
-      "faktiskTidPrDag": "0"
+      "faktiskTidPrDag": "0",
+      "normalArbeidstidPrDag": "7,5"
     },
     {
       "aktivitetsFravær": "FRILANSER",
@@ -27,9 +28,10 @@
       "søknadÅrsak": "NYOPPSTARTET_HOS_ARBEIDSGIVER",
       "periode": {
         "fom": "2021-11-14",
-        "tom": "2021-11-18"
+        "tom": "2021-11-14"
       },
-      "faktiskTidPrDag": null
+      "faktiskTidPrDag": null,
+      "normalArbeidstidPrDag": null
     },
     {
       "aktivitetsFravær": "SELVSTENDIG_VIRKSOMHET",
@@ -40,9 +42,11 @@
         "fom": "2021-11-19",
         "tom": "2021-11-20"
       },
-      "faktiskTidPrDag": "3.5"
+      "faktiskTidPrDag": "3.5",
+      "normalArbeidstidPrDag": "7,5"
     }
   ],
+  "erKorrigering": false,
   "harInfoSomIkkeKanPunsjes": true,
   "harMedisinskeOpplysninger": false
 }

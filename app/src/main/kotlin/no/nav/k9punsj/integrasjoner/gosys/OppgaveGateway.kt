@@ -8,18 +8,19 @@ import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
 import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
@@ -31,7 +32,8 @@ import kotlin.coroutines.coroutineContext
 @Service
 internal class OppgaveGateway(
     @Value("\${no.nav.gosys.base_url}") private val oppgaveBaseUrl: URI,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Value("\${no.nav.gosys.scope}") private val oppgaveScope: String,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
 ) {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -45,7 +47,6 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
-        private val scope: Set<String> = setOf("openid")
     }
 
     private object Urls {
@@ -53,7 +54,7 @@ internal class OppgaveGateway(
         const val patchEksisterendeOppgaveUrl = "/api/v1/oppgaver"
     }
 
-    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatus, String?, GetOppgaveResponse?> {
+    suspend fun hentOppgave(oppgaveId: String): Triple<HttpStatusCode, String?, GetOppgaveResponse?> {
 
         val (url, response, responseBody) = httpGet("$oppgaveUrl/$oppgaveId")
         val harFeil = !response.statusCode.is2xxSuccessful
@@ -74,7 +75,7 @@ internal class OppgaveGateway(
      *
      * @see <a href="Oppretter en ny oppgave">Oppretter en ny oppgave</a>
      */
-    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatus, String?> {
+    suspend fun opprettOppgave(aktørid: String, joarnalpostId: String, gjelder: Gjelder): Pair<HttpStatusCode, String?> {
         val opprettOppgaveRequest = OpprettOppgaveRequest(
             aktoerId = aktørid,
             journalpostId = joarnalpostId,
@@ -103,7 +104,7 @@ internal class OppgaveGateway(
      * Denne operasjonen endrer kun på verdier som er gitt. Felter som ikke er med vil ikke bli berørt.
      * @see <a href="https://oppgave.dev.intern.nav.no/#/Oppgave/patchOppgave">Endre eksisterende oppgave</a>
      */
-    suspend fun patchOppgave(oppgaveId: String, patchOppgaveRequest: PatchOppgaveRequest): Pair<HttpStatus, String?> {
+    suspend fun patchOppgave(oppgaveId: String, patchOppgaveRequest: PatchOppgaveRequest): Pair<HttpStatusCode, String?> {
         val body = kotlin.runCatching { objectMapper().writeValueAsString(patchOppgaveRequest) }
             .getOrElse {
                 logger.error(it.message)
@@ -125,7 +126,7 @@ internal class OppgaveGateway(
             client
                 .post()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -145,7 +146,7 @@ internal class OppgaveGateway(
             client
                 .get()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -163,7 +164,7 @@ internal class OppgaveGateway(
             client
                 .patch()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(scope).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -177,19 +178,6 @@ internal class OppgaveGateway(
 
         return responseEntity.resolve(url)
     }
-
-    private fun Result<ResponseEntity<String>>.håndterFeil() = fold(
-        onSuccess = { responseEntity: ResponseEntity<String> -> responseEntity },
-        onFailure = { throwable: Throwable ->
-            when (throwable) {
-                is WebClientResponseException -> ResponseEntity
-                    .status(throwable.statusCode)
-                    .body(throwable.responseBodyAsString)
-
-                else -> throw throwable
-            }
-        }
-    )
 
     private fun ResponseEntity<String>.resolve(url: String): Triple<String, ResponseEntity<String>, String?> = when {
         !statusCode.is2xxSuccessful -> {

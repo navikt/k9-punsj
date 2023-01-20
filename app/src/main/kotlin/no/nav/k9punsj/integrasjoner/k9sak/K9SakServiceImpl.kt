@@ -39,6 +39,7 @@ import kotlin.coroutines.coroutineContext
 @StandardProfil
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
+    @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) : K9SakService {
 
@@ -57,7 +58,7 @@ class K9SakServiceImpl(
 
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
-        barn: String,
+        barn: String?,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
         val matchDto = MatchDto(
@@ -296,7 +297,7 @@ class K9SakServiceImpl(
         private data class MatchDto(
             val ytelseType: FagsakYtelseType,
             val bruker: String,
-            val pleietrengende: String,
+            val pleietrengende: String? = null,
         )
 
         private data class MatchMedPeriodeDto(

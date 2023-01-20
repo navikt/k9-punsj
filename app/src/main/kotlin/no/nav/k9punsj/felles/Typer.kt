@@ -1,5 +1,8 @@
 package no.nav.k9punsj.felles
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.felles.dto.PeriodeDto
+
 data class AktørId private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "$value er en ugyldig aktørId" } }
     override fun toString() = value
@@ -46,7 +49,8 @@ data class RutingDto(
     val pleietrengende: String?,
     val annenPart: String?,
     val journalpostId: String,
-    val fagsakYtelseType: String
+    val fagsakYtelseType: FagsakYtelseType,
+    val periode: PeriodeDto? = null // Støtte for periode for o overstyre utleding som sker m.h.a journalpost-metadata.
 )
 
 data class IdentOgJournalpost(
@@ -62,6 +66,37 @@ data class SøkUferdigJournalposter(
 data class SettPåVentDto(
     val soeknadId: String?
 )
+
+data class LukkJournalpostDto(
+    val norskIdent: String,
+    val sak: Sak
+)
+
+data class Sak(
+    val sakstype: SaksType,
+    val fagsakId: String? = null,
+) {
+    val fagsaksystem = if (sakstype == SaksType.FAGSAK) FagsakSystem.K9 else null
+    init {
+        when (sakstype) {
+            SaksType.FAGSAK -> {
+                require(fagsaksystem != null && !fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.FAGSAK}, så må fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.GENERELL_SAK -> {
+                require(fagsaksystem == null && fagsakId.isNullOrBlank()) {
+                    "Dersom sakstype er ${SaksType.GENERELL_SAK}, så kan ikke fagsaksystem og fagsakId være satt. fagsaksystem=[$fagsaksystem], fagsakId=[$fagsakId]"
+                }
+            }
+            SaksType.ARKIVSAK -> throw UnsupportedOperationException("ARKIVSAK skal kun brukes etter avtale.")
+        }
+    }
+
+    enum class SaksType { FAGSAK, GENERELL_SAK, ARKIVSAK }
+    enum class FagsakSystem { K9 }
+
+}
 
 data class IdentDto(
     val norskIdent: String
