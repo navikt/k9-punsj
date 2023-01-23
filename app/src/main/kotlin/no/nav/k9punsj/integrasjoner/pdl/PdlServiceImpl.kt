@@ -9,7 +9,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.IkkeTestProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

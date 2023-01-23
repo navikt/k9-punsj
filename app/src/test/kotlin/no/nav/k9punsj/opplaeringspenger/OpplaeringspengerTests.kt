@@ -8,11 +8,10 @@ import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger
 import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.dusseldorfConfigured
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
@@ -35,7 +34,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.awaitExchange
 import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
@@ -191,7 +189,7 @@ class OpplaeringspengerTests {
             .body(BodyInserters.fromValue(søknadFraFrontend))
             .awaitStatusWithBody<String>()
 
-        val oppdatertSoeknadDto = objectMapper().dusseldorfConfigured().readValue(oppdatertJson, OpplaeringspengerSøknadDto::class.java)
+        val oppdatertSoeknadDto = objectMapper().readValue(oppdatertJson, OpplaeringspengerSøknadDto::class.java)
 
         assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)

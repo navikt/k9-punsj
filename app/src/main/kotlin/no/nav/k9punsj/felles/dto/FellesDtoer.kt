@@ -2,7 +2,7 @@ package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
 
 data class PerioderDto(

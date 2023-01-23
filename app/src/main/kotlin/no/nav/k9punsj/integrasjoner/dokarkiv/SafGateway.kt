@@ -17,7 +17,7 @@ import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies

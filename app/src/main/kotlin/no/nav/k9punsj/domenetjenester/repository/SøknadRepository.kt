@@ -6,7 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource

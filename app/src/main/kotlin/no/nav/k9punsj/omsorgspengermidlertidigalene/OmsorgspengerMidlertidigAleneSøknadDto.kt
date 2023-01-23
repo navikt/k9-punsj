@@ -7,7 +7,7 @@ import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 

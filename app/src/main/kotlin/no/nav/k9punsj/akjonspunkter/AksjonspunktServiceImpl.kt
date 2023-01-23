@@ -9,7 +9,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.journalpost.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

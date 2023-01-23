@@ -19,7 +19,7 @@ import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -142,6 +142,7 @@ class RestPunsjbolleService(
         FagsakYtelseType.OMSORGSPENGER_KS -> "OmsorgspengerKroniskSyktBarn"
         FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE -> "PleiepengerLivetsSluttfase"
         FagsakYtelseType.OMSORGSPENGER_MA -> "OmsorgspengerMidlertidigAlene"
+        FagsakYtelseType.OPPLÆRINGSPENGER -> "Opplæringspenger"
         else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
     }
 

@@ -29,6 +29,7 @@ class K9PunsjApplication {
             .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .modulesToInstall(JavaTimeModule())
             .featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .deserializerByType(ULID.Value::class.java, UlidDeserializer())
     }
 

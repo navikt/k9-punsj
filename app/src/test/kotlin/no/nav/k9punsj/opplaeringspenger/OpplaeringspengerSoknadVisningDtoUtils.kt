@@ -2,13 +2,11 @@ package no.nav.k9punsj.opplaeringspenger
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.ArbeidstidDto
 import no.nav.k9punsj.felles.dto.BostederDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalTime
@@ -175,7 +173,7 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
         harInfoSomIkkeKanPunsjes = true,
         harMedisinskeOpplysninger = true,
         trekkKravPerioder = setOf(requiredPeriode),
-        begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test"),
+        begrunnelseForInnsending = OpplaeringspengerSøknadDto.BegrunnelseForInnsendingDto("fordi dette er ett test"),
         kurs = OpplaeringspengerSøknadDto.Kurs(
             kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "Nav", institusjonsUuid = null),
             kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
