@@ -284,10 +284,18 @@ internal class OmsorgspengerutbetalingService(
     }
 
     internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
-        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
-            søker = matchfagsak.brukerIdent,
-            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
-        )
+        val (perioder, _) = if(matchfagsak.periode == null) {
+            k9SakService.hentPerioderSomFinnesIK9(
+                søker = matchfagsak.brukerIdent,
+                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
+            )
+        } else {
+            k9SakService.hentPerioderSomFinnesIK9ForPeriode(
+                søker = matchfagsak.brukerIdent,
+                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+                periode = matchfagsak.periode
+            )
+        }
 
         return perioder ?: listOf()
     }
