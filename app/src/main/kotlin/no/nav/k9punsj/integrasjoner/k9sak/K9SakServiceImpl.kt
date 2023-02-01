@@ -16,6 +16,7 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSaksnummer
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
@@ -78,6 +79,10 @@ class K9SakServiceImpl(
         }
     }
 
+    /*
+     * 1. Slår opp saksnummer basert på ytelsetype, periode & søkers aktørId.
+     * 2. Henter perioder for saksnummer.
+     */
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String?,
@@ -98,7 +103,7 @@ class K9SakServiceImpl(
         saksnummerFeil?.let { Pair(null, saksnummerFeil) }
         val saksnummer = saksnummerJson ?: return Pair(null, "Fant ikke saksnummer")
 
-        val (json, feil) = httpPost(saksnummer, hentPerioder)
+        val (json, feil) = httpPost(saksnummer, hentPerioderForSaksnummer)
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
