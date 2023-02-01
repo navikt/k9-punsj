@@ -37,7 +37,8 @@ data class SendSøknad(
 
 data class Matchfagsak(
     val brukerIdent: String,
-    val barnIdent: String? = null
+    val barnIdent: String? = null,
+    val periode: PeriodeDto? = null
 )
 
 data class MatchFagsakMedPeriode(

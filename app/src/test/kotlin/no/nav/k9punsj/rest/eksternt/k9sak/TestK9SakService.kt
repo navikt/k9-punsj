@@ -18,6 +18,15 @@ internal class TestK9SakService : K9SakService {
         fagsakYtelseType: FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
 
+    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
+        søker: String,
+        barn: String?,
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto
+    ): Pair<List<PeriodeDto>?, String?> {
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
+    }
+
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
         fagsakYtelseType: FagsakYtelseType,
