@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.k9sak
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 
 interface K9SakService {
 
@@ -26,4 +27,11 @@ interface K9SakService {
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?>
 
     suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
+
+    suspend fun hentSisteSaksnummerForPeriode(
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto?,
+        søker: String,
+        pleietrengende: String?
+    ): Pair<SaksnummerDto?, String?>
 }
