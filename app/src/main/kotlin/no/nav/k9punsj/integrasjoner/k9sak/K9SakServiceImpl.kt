@@ -105,6 +105,7 @@ class K9SakServiceImpl(
         val (saksnummerJson, saksnummerFeil) = httpPost(saksnummerBody, finnFagsak)
         saksnummerFeil?.let { Pair(null, saksnummerFeil) }
         val saksnummer = saksnummerJson ?: return Pair(null, "Fant ikke saksnummer")
+        log.info("Fant saksnummer: payload = [$saksnummer]")
 
         val (json, feil) = httpPost(saksnummer, hentPerioderForSaksnummer)
         return try {
