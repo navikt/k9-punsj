@@ -9,6 +9,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -38,6 +39,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    private val personService: PersonService
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -89,14 +91,15 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
         periode: PeriodeDto
     ): Pair<List<PeriodeDto>?, String?> {
-        val matchMedPeriodeDto = MatchMedPeriodeDto(
+        val søkerAktørId = personService.finnAktørId(søker)
+        val finnFagsakDto = FinnFagsakDto(
             ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            bruker = søker,
-            pleietrengende = barn,
+            aktørId = søkerAktørId,
+            pleietrengendeAktørId = barn,
             periode = periode
         )
 
-        val saksnummerBody = kotlin.runCatching { objectMapper().writeValueAsString(matchMedPeriodeDto) }.getOrNull()
+        val saksnummerBody = kotlin.runCatching { objectMapper().writeValueAsString(finnFagsakDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
         val (saksnummerJson, saksnummerFeil) = httpPost(saksnummerBody, finnFagsak)
@@ -246,10 +249,10 @@ class K9SakServiceImpl(
             val pleietrengende: String? = null,
         )
 
-        data class MatchMedPeriodeDto(
+        data class FinnFagsakDto(
             val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: String? = null,
+            val aktørId: String,
+            val pleietrengendeAktørId: String? = null,
             val periode: PeriodeDto
         )
 
