@@ -107,7 +107,7 @@ class K9SakServiceImpl(
         val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
             ?: return Pair(null, "Fant ikke saksnummer")
 
-        val (json, feil) = httpPost(saksnummerJson, "/behandling/soknad/perioder/saksnummer?saksnummer=$saksnummer")
+        val (json, feil) = httpPost(saksnummerJson, "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}")
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
