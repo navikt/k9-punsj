@@ -19,6 +19,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelid
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSaksnummer
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
+import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -50,7 +51,6 @@ class K9SakServiceImpl(
         internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
-        internal const val hentPerioderForSaksnummer = "/behandling/soknad/perioder/saksnummer"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -104,10 +104,11 @@ class K9SakServiceImpl(
 
         val (saksnummerJson, saksnummerFeil) = httpPost(saksnummerBody, finnFagsak)
         saksnummerFeil?.let { Pair(null, saksnummerFeil) }
-        val saksnummer = saksnummerJson ?: return Pair(null, "Fant ikke saksnummer")
-        log.info("Fant saksnummer: payload = [$saksnummer]")
 
-        val (json, feil) = httpPost(saksnummer, hentPerioderForSaksnummer)
+        val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
+            ?: return Pair(null, "Fant ikke saksnummer")
+
+        val (json, feil) = httpPost(saksnummerJson, "/behandling/soknad/perioder/saksnummer?saksnummer=$saksnummer")
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
