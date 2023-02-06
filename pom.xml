@@ -21,7 +21,7 @@
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
         <kotlin.version>1.8.0</kotlin.version>
-        <springdoc.version>1.6.14</springdoc.version>
+        <springdoc.version>2.0.2</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
         <token-support.version>2.1.7</token-support.version>
@@ -49,7 +49,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-webflux-ui</artifactId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
             <dependency>
