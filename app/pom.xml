@@ -81,6 +81,10 @@
             <artifactId>token-validation-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-spring</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.helse</groupId>
             <artifactId>dusseldorf-oauth2-client</artifactId>
         </dependency>

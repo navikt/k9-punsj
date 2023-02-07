@@ -24,7 +24,7 @@
         <springdoc.version>2.0.2</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.2</logback.logstash.version>
-        <token-support.version>2.1.7</token-support.version>
+        <token-support.version>3.0.2</token-support.version>
         <dusseldorf-ktor.version>3.2.2.2-3189f02</dusseldorf-ktor.version>
         <k9-rapid.version>1.20221124140732-e07f6f7</k9-rapid.version>
         <k9-sak.version>3.3.33</k9-sak.version>
@@ -89,6 +89,11 @@
             <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-core</artifactId>
+                <version>${token-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.security</groupId>
+                <artifactId>token-validation-spring</artifactId>
                 <version>${token-support.version}</version>
             </dependency>
             <dependency>
