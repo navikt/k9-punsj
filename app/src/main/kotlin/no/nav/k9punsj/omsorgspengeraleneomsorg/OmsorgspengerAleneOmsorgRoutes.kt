@@ -1,112 +1,125 @@
 package no.nav.k9punsj.omsorgspengeraleneomsorg
 
-import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
-import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
-import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
-import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
-import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import io.swagger.v3.oas.annotations.Operation
+import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
+import no.nav.k9punsj.felles.dto.SendK9SoknadDto
+import no.nav.k9punsj.felles.dto.SendSøknad
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.ServerRequest
-import kotlin.coroutines.coroutineContext
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import java.net.URI
 
-@Configuration
+@RestController
+@ProtectedWithClaims(issuer = "azuread")
+@RequestMapping("omsorgspenger-alene-om-omsorgen-soknad")
 internal class OmsorgspengerAleneOmsorgRoutes(
-    private val authenticationHandler: AuthenticationHandler,
-    private val innlogget: InnloggetUtils,
     private val omsorgspengerAleneOmsorgService: OmsorgspengerAleneOmsorgService
 ) {
 
-    private companion object {
-        private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgRoutes::class.java)
-        private const val søknadType = "omsorgspenger-alene-om-omsorgen-soknad"
-        private const val søknadIdKey = "soeknad_id"
+    @GetMapping(
+        name = "/mappe",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Operation(summary = "Hent søknader i mappe")
+    fun henteMappe(
+        @RequestHeader(value = "X-Nav-NorskIdent", required = true) ident: String
+    ): ResponseEntity<SvarOmsAODto> {
+        return runBlocking { omsorgspengerAleneOmsorgService.henteMappe(ident) }
+            .let { ResponseEntity.ok(it) }
     }
 
-    internal object Urls {
-        internal const val HenteMappe = "/$søknadType/mappe" // get
-        internal const val HenteSøknad = "/$søknadType/mappe/{$søknadIdKey}" // get
-        internal const val NySøknad = "/$søknadType" // post
-        internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
-        internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
-        internal const val ValiderSøknad = "/$søknadType/valider" // post
+    @GetMapping(
+        name = "/mappe",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        params = ["soeknad_id"]
+    )
+    @Operation(summary = "Hent søknad")
+    fun henteSoknad(
+        @RequestParam("soeknad_id") soknadId: String
+    ): ResponseEntity<OmsorgspengerAleneOmsorgSøknadDto> {
+        return runBlocking { omsorgspengerAleneOmsorgService.henteSøknad(soknadId) }
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.notFound().build()
     }
 
-    @Bean
-    fun omsorgspengerAleneOmsorgSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
-                val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
-                    url = Urls.HenteMappe
-                )?.let { return@RequestContext it }
+    @PostMapping("/", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Opprett ny søknad")
+    fun nySøknad(
+        @RequestHeader("X-Nav-NorskIdent") ident: String,
+        @RequestBody opprettNySoeknad: OpprettNySøknad
+    ): ResponseEntity<OmsorgspengerAleneOmsorgSøknadDto> {
+        val (søknadId, søknadDto) = runBlocking { omsorgspengerAleneOmsorgService.nySøknad(opprettNySoeknad) }
+        return ResponseEntity
+            .created(URI.create("mappe/$søknadId"))
+            .body(søknadDto)
+    }
 
-                omsorgspengerAleneOmsorgService.henteMappe(norskIdent)
-            }
-        }
+    @PutMapping(
+        "/oppdater",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    @Operation(summary = "Oppdater eksisterende søknad")
+    fun oppdaterSøknad(
+        @RequestBody soeknadDto: OmsorgspengerAleneOmsorgSøknadDto
+    ): ResponseEntity<OmsorgspengerAleneOmsorgSøknadDto> {
+        return runBlocking { omsorgspengerAleneOmsorgService.oppdaterEksisterendeSøknad(soeknadDto) }
+            ?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.badRequest().build()
+    }
 
-        GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
-                val søknadId = request.søknadId()
-                omsorgspengerAleneOmsorgService.henteSøknad(søknadId)
-            }
-        }
-
-        POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
-                val nySøknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = nySøknad.norskIdent,
-                    url = Urls.NySøknad
-                )?.let { return@RequestContext it }
-
-                omsorgspengerAleneOmsorgService.nySøknad(request, nySøknad)
-            }
-        }
-
-        PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
-                val søknad = request.omsorgspengerAleneOmsorgSøknad()
-                omsorgspengerAleneOmsorgService.oppdaterEksisterendeSøknad(søknad)
-            }
-        }
-
-        POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
-                val sendSøknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = sendSøknad.norskIdent,
-                    url = Urls.SendEksisterendeSøknad
-                )?.let { return@RequestContext it }
-
-                omsorgspengerAleneOmsorgService.sendEksisterendeSøknad(sendSøknad)
-            }
-        }
-
-        POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
-                val soknadTilValidering = request.omsorgspengerAleneOmsorgSøknad()
-                soknadTilValidering.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                        norskIdent = norskIdent,
-                        url = Urls.ValiderSøknad
-                    )?.let { return@RequestContext it }
+    @PostMapping("/send", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun sendSøknad(
+        @RequestBody soeknadDto: SendSøknad
+    ): ResponseEntity<SendK9SoknadDto> {
+        return runBlocking {
+            try {
+                omsorgspengerAleneOmsorgService.sendEksisterendeSøknad(soeknadDto)?.let { (feil, soeknad) ->
+                    if (feil != null) {
+                        ResponseEntity.badRequest().body(feil)
+                    } else {
+                        ResponseEntity.ok(soeknad)
+                    }
                 }
-
-                omsorgspengerAleneOmsorgService.validerSøknad(soknadTilValidering)
+            } catch (e: Exception) {
+                ResponseEntity.internalServerError()
             }
+            ResponseEntity.notFound().build()
         }
     }
 
-    private fun ServerRequest.søknadId(): String = pathVariable(søknadIdKey)
-
-    private suspend fun ServerRequest.omsorgspengerAleneOmsorgSøknad() =
-        body(BodyExtractors.toMono(OmsorgspengerAleneOmsorgSøknadDto::class.java)).awaitFirst()
+    @PostMapping(
+        "/valider",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun validerSøknad(
+        @RequestBody soeknadDto: OmsorgspengerAleneOmsorgSøknadDto
+    ): ResponseEntity<SendK9SoknadDto> {
+        return runBlocking {
+            try {
+                omsorgspengerAleneOmsorgService.validerSøknad(soeknadDto)?.let { (feil, soeknad) ->
+                    if (feil != null) {
+                        ResponseEntity.badRequest().body(feil)
+                    } else {
+                        ResponseEntity.ok(soeknad)
+                    }
+                }
+            } catch (e: Exception) {
+                ResponseEntity.internalServerError()
+            }
+            ResponseEntity.notFound().build()
+        }
+    }
 }

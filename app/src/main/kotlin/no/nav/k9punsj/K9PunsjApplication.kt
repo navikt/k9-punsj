@@ -7,6 +7,7 @@ import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.configuration.DbConfiguration
 import no.nav.k9punsj.configuration.hikariConfig
 import no.nav.k9punsj.utils.UlidDeserializer
+import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
@@ -20,6 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import javax.sql.DataSource
 
 @EnableScheduling
+@EnableJwtTokenValidation
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class, FlywayAutoConfiguration::class])
 class K9PunsjApplication {
 
