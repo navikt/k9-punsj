@@ -208,7 +208,7 @@ internal class JournalpostRoutes(
                     punsjJournalpost = punsjJournalpost,
                     aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                     type = punsjJournalpost.type,
-                    ytelse = dto.fagsakYtelseType.navn
+                    ytelse = dto.fagsakYtelseType.kode
                 )
 
                 ServerResponse.noContent().buildAndAwait()
