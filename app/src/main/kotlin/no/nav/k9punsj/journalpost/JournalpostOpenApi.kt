@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasIdentDto
@@ -328,6 +327,6 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun håndterMottak(
-        @RequestBody body: JournalpostMottakDto
+        @RequestBody body: JournalpostRoutes.JournalpostMottaksHaandteringDto
     ) {}
 }

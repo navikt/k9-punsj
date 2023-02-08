@@ -199,7 +199,7 @@ internal class JournalpostRoutes(
                     norskIdent = norskIdent,
                     url = Urls.Mottak
                 )?.let { return@RequestContext it }
-                val dto = request.body(BodyExtractors.toMono(JournalpostMottak::class.java)).awaitFirst()
+                val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
 
                 journalpostService.settFagsakYtelseType(dto.fagsakYtelseType, dto.journalpostId)
                 val punsjJournalpost = journalpostService.hent(dto.journalpostId)
@@ -575,7 +575,7 @@ internal class JournalpostRoutes(
         val status: String,
     )
 
-    internal data class JournalpostMottak(
+    internal data class JournalpostMottaksHaandteringDto(
         val brukerIdent: String,
         val barnIdent: String?,
         val annenPart: String?,
