@@ -327,6 +327,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun håndterMottak(
+        @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
         @RequestBody body: JournalpostRoutes.JournalpostMottaksHaandteringDto
     ) {}
 }
