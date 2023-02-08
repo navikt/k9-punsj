@@ -7,6 +7,7 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -200,15 +201,16 @@ internal class JournalpostRoutes(
                     url = Urls.Mottak
                 )?.let { return@RequestContext it }
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
+                val punsjFagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseTypeKode)
 
-                journalpostService.settFagsakYtelseType(dto.fagsakYtelseType, dto.journalpostId)
+                journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
                 val punsjJournalpost = journalpostService.hent(dto.journalpostId)
 
                 aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                     punsjJournalpost = punsjJournalpost,
                     aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                     type = punsjJournalpost.type,
-                    ytelse = dto.fagsakYtelseType.kode
+                    ytelse = dto.fagsakYtelseTypeKode
                 )
 
                 ServerResponse.noContent().buildAndAwait()
@@ -580,7 +582,7 @@ internal class JournalpostRoutes(
         val barnIdent: String?,
         val annenPart: String?,
         val journalpostId: String,
-        val fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        val fagsakYtelseTypeKode: String,
         val periode: PeriodeDto?,
         val saksnummer: String?
     )
