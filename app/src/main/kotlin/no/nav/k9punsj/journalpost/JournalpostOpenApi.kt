@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasIdentDto
@@ -308,4 +309,25 @@ internal class JournalpostOpenApi {
         @RequestBody body: IdentOgJournalpost
     ) {
     }
+
+    @PostMapping(JournalpostRoutes.Urls.Mottak)
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "204",
+                description = "Journalposten er oppdatert med ny data & akjsonspunkt sendt til k9-los"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Uventet feil"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Oppdaterer journalpost med ny data & sender aksjonspunkt med oppdatering til k9-los.",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun håndterMottak(
+        @RequestBody body: JournalpostMottakDto
+    ) {}
 }

@@ -2,7 +2,6 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
@@ -576,12 +575,13 @@ internal class JournalpostRoutes(
         val status: String,
     )
 
-    private data class JournalpostMottak(
+    internal data class JournalpostMottak(
         val brukerIdent: String,
         val barnIdent: String?,
         val annenPart: String?,
         val journalpostId: String,
         val fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
         val periode: PeriodeDto?,
+        val saksnummer: String?
     )
 }
