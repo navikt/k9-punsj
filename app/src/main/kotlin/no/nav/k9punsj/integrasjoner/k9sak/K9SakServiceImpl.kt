@@ -9,6 +9,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -16,8 +17,8 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSaksnummer
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
+import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -38,6 +39,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    private val personService: PersonService
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -48,7 +50,6 @@ class K9SakServiceImpl(
         internal const val hentIntektsmelidnger = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
-        internal const val hentPerioderForSaksnummer = "/behandling/soknad/perioder/saksnummer"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -89,21 +90,24 @@ class K9SakServiceImpl(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
         periode: PeriodeDto
     ): Pair<List<PeriodeDto>?, String?> {
-        val matchMedPeriodeDto = MatchMedPeriodeDto(
+        val søkerAktørId = personService.finnAktørId(søker)
+        val finnFagsakDto = FinnFagsakDto(
             ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            bruker = søker,
-            pleietrengende = barn,
+            aktørId = søkerAktørId,
+            pleietrengendeAktørId = barn,
             periode = periode
         )
 
-        val saksnummerBody = kotlin.runCatching { objectMapper().writeValueAsString(matchMedPeriodeDto) }.getOrNull()
+        val saksnummerBody = kotlin.runCatching { objectMapper().writeValueAsString(finnFagsakDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
         val (saksnummerJson, saksnummerFeil) = httpPost(saksnummerBody, finnFagsak)
         saksnummerFeil?.let { Pair(null, saksnummerFeil) }
-        val saksnummer = saksnummerJson ?: return Pair(null, "Fant ikke saksnummer")
 
-        val (json, feil) = httpPost(saksnummer, hentPerioderForSaksnummer)
+        val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
+            ?: return Pair(null, "Fant ikke saksnummer")
+
+        val (json, feil) = httpPost(saksnummerJson, "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}")
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
@@ -246,10 +250,10 @@ class K9SakServiceImpl(
             val pleietrengende: String? = null,
         )
 
-        data class MatchMedPeriodeDto(
+        data class FinnFagsakDto(
             val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: String? = null,
+            val aktørId: String,
+            val pleietrengendeAktørId: String? = null,
             val periode: PeriodeDto
         )
 
