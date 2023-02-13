@@ -4,7 +4,10 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -16,6 +19,7 @@ import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.SettPåVentDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -81,6 +85,7 @@ internal class JournalpostRoutes(
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
+        internal const val Mottak = "/journalpost/mottak"
 
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -185,6 +190,30 @@ internal class JournalpostRoutes(
                 aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
 
                 ServerResponse.ok().buildAndAwait()
+            }
+        }
+
+        POST("/api${Urls.Mottak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = Urls.Mottak
+                )?.let { return@RequestContext it }
+                val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
+                val punsjFagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseTypeKode)
+
+                journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
+                val punsjJournalpost = journalpostService.hent(dto.journalpostId)
+
+                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                    punsjJournalpost = punsjJournalpost,
+                    aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                    type = punsjJournalpost.type,
+                    ytelse = dto.fagsakYtelseTypeKode
+                )
+
+                ServerResponse.noContent().buildAndAwait()
             }
         }
 
@@ -546,5 +575,15 @@ internal class JournalpostRoutes(
 
     private data class ResultatDto(
         val status: String,
+    )
+
+    internal data class JournalpostMottaksHaandteringDto(
+        val brukerIdent: String,
+        val barnIdent: String?,
+        val annenPart: String?,
+        val journalpostId: String,
+        val fagsakYtelseTypeKode: String,
+        val periode: PeriodeDto?,
+        val saksnummer: String?
     )
 }
