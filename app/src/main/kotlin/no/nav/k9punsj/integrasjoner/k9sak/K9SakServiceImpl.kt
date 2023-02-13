@@ -19,7 +19,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmelidnger
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioder
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
-import no.nav.k9punsj.integrasjoner.punsjbollen.SaksnummerDto
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -296,6 +295,7 @@ class K9SakServiceImpl(
             val bruker: String,
             val pleietrengende: String? = null,
             val periode: PeriodeDto?
+        )
 
         data class FinnFagsakDto(
             val ytelseType: FagsakYtelseType,
