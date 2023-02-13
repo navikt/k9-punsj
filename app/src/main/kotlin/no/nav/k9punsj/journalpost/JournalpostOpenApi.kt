@@ -317,6 +317,10 @@ internal class JournalpostOpenApi {
                 description = "Journalposten er oppdatert med ny data & akjsonspunkt sendt til k9-los"
             ),
             ApiResponse(
+                responseCode = "403",
+                description = "Saksbehandler har ikke tilgang"
+            ),
+            ApiResponse(
                 responseCode = "500",
                 description = "Uventet feil"
             )
