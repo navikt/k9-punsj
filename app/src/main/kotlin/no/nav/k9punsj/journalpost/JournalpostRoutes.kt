@@ -30,7 +30,6 @@ import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
-import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -70,7 +69,7 @@ internal class JournalpostRoutes(
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
 ) {
 
-    internal companion object {
+    private companion object {
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -238,7 +237,7 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                        .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
                 }
 
                 val correlationId = coroutineContext.hentCorrelationId()
@@ -272,7 +271,7 @@ internal class JournalpostRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                    .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
             }
         }
 
@@ -573,9 +572,8 @@ internal class JournalpostRoutes(
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
-    private data class ResultatDto(
-        val status: String,
-    )
+    private data class ResultatDto(val status: String)
+    internal data class SkalTilInfotrygdSvar(val k9sak: Boolean)
 
     internal data class JournalpostMottaksHaandteringDto(
         val brukerIdent: String,
