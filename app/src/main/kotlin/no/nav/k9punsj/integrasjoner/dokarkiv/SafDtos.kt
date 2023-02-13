@@ -86,7 +86,7 @@ internal object SafDtos {
     }
 
     internal enum class Tema {
-        OMS, SYK
+        OMS
     }
 
     enum class JournalpostType {
