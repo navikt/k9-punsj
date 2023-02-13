@@ -30,7 +30,10 @@ internal class PdlRoutes(
     fun PdlRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.HentIdent}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.hentSøknad().norskIdent
+                val norskIdent = request.body(
+                    BodyExtractors.toMono(HentPerson::class.java)
+                ).awaitFirst().norskIdent
+
                 try {
                     val pdlResponse = pdlService.identifikator(
                         fnummer = norskIdent
@@ -57,5 +60,4 @@ internal class PdlRoutes(
         }
     }
 
-    private suspend fun ServerRequest.hentSøknad() = body(BodyExtractors.toMono(HentPerson::class.java)).awaitFirst()
 }

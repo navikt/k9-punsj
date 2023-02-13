@@ -9,13 +9,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.LukkJournalpostDto
-import no.nav.k9punsj.openapi.OasIdentDto
+import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
-import no.nav.k9punsj.openapi.OasJournalpostInfo
-import no.nav.k9punsj.openapi.OasPunsjBolleDto
-import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasSøknadId
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -58,7 +56,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentJournalposter(
-        @RequestBody body: OasIdentDto
+        @RequestBody body: IdentDto
     ) {
     }
 
@@ -71,7 +69,7 @@ internal class JournalpostOpenApi {
                 content = [
                     Content(
                         schema = Schema(
-                            implementation = OasJournalpostInfo::class
+                            implementation = JournalpostInfoDto::class
                         )
                     )
                 ]
@@ -146,7 +144,7 @@ internal class JournalpostOpenApi {
                 content = [
                     Content(
                         schema = Schema(
-                            implementation = OasSkalTilInfotrygdSvar::class
+                            implementation = JournalpostRoutes.SkalTilInfotrygdSvar::class
                         )
                     )
                 ]
@@ -167,7 +165,7 @@ internal class JournalpostOpenApi {
     )
     fun SkalTilK9Sak(
         @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: OasPunsjBolleDto
+        @RequestBody body: PunsjBolleDto
     ) {
     }
 
@@ -308,4 +306,30 @@ internal class JournalpostOpenApi {
         @RequestBody body: IdentOgJournalpost
     ) {
     }
+
+    @PostMapping(JournalpostRoutes.Urls.Mottak)
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "204",
+                description = "Journalposten er oppdatert med ny data & akjsonspunkt sendt til k9-los"
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "Saksbehandler har ikke tilgang"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Uventet feil"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Oppdaterer journalpost med ny data & sender aksjonspunkt med oppdatering til k9-los.",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun håndterMottak(
+        @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
+        @RequestBody body: JournalpostRoutes.JournalpostMottaksHaandteringDto
+    ) {}
 }

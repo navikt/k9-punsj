@@ -4,7 +4,10 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -16,6 +19,7 @@ import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.PunsjbolleRuting
 import no.nav.k9punsj.felles.SettPåVentDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
@@ -26,7 +30,6 @@ import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
-import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -66,7 +69,7 @@ internal class JournalpostRoutes(
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
 ) {
 
-    internal companion object {
+    private companion object {
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -81,6 +84,7 @@ internal class JournalpostRoutes(
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
+        internal const val Mottak = "/journalpost/mottak"
 
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -188,6 +192,30 @@ internal class JournalpostRoutes(
             }
         }
 
+        POST("/api${Urls.Mottak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = Urls.Mottak
+                )?.let { return@RequestContext it }
+                val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
+                val punsjFagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseTypeKode)
+
+                journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
+                val punsjJournalpost = journalpostService.hent(dto.journalpostId)
+
+                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                    punsjJournalpost = punsjJournalpost,
+                    aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                    type = punsjJournalpost.type,
+                    ytelse = dto.fagsakYtelseTypeKode
+                )
+
+                ServerResponse.noContent().buildAndAwait()
+            }
+        }
+
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.punsjbolleDto()
@@ -209,7 +237,7 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                        .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
                 }
 
                 val correlationId = coroutineContext.hentCorrelationId()
@@ -243,7 +271,7 @@ internal class JournalpostRoutes(
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                    .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
             }
         }
 
@@ -544,7 +572,16 @@ internal class JournalpostRoutes(
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
-    private data class ResultatDto(
-        val status: String,
+    private data class ResultatDto(val status: String)
+    internal data class SkalTilInfotrygdSvar(val k9sak: Boolean)
+
+    internal data class JournalpostMottaksHaandteringDto(
+        val brukerIdent: String,
+        val barnIdent: String?,
+        val annenPart: String?,
+        val journalpostId: String,
+        val fagsakYtelseTypeKode: String,
+        val periode: PeriodeDto?,
+        val saksnummer: String?
     )
 }

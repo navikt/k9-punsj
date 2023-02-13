@@ -26,9 +26,6 @@ import java.time.LocalTime
 internal class OpenApi {
 
     @Bean
-    internal fun modelConverter(): ModelConverter = DurationMockConverter()
-
-    @Bean
     internal fun openApi(
         @Value("\${no.nav.navn}") navn: String,
         @Value("\${no.nav.beskrivelse}") beskrivelse: String,
@@ -55,12 +52,6 @@ internal class OpenApi {
         )
 }
 
-// Disse klassene er nødvendige for å eksponere søknadsformatet, så lenge applikasjonen benytter userialisert json internt
-
-data class OasIdentDto(
-    val norskIdent: String
-)
-
 data class OasFeil(
     val feil: String?
 )
@@ -84,11 +75,6 @@ data class OasDokumentInfo(
     val dokument_id: String
 )
 
-data class OasJournalpostInfo(
-    val dokumenter: Set<OasDokumentInfo>,
-    val venter: OasVentDto?
-)
-
 data class OasJournalpostIder(
     val poster: List<OasJournalpostDto>
 )
@@ -103,56 +89,3 @@ data class OasJournalpostDto(
     val klokkeslett: LocalTime?,
     val punsjInnsendingType: PunsjInnsendingType?
 )
-
-data class OasVentDto(
-    val venteÅrsak: String,
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    val venterTil: LocalDate
-)
-
-data class OasPunsjBolleDto(
-    val brukerIdent: String,
-    val barnIdent: String,
-    val journalpostId: String
-)
-
-data class OasSkalTilInfotrygdSvar(
-    val k9sak: Boolean
-)
-
-data class OasHentPerson(
-    val norskIdent: String
-)
-
-data class OasPdlResponse(
-    val person: PdlPersonDto
-)
-
-/*
-Denne konvertereren brukes kun fordi OpenAPI
-ikke har implementert java.time.Duration - noe som førte til at api-dokumentasjon ble ubrukelig.
-https://github.com/swagger-api/swagger-core/issues/1445
-https://github.com/swagger-api/swagger-core/issues/2784
- */
-private class DurationMockConverter : ModelConverter {
-    override fun resolve(
-        type: AnnotatedType,
-        context: ModelConverterContext,
-        chain: Iterator<ModelConverter>
-    ): Schema<*>? {
-        if (type.isSchemaProperty) {
-            val _type = Json.mapper().constructType(type.type)
-            if (_type != null) {
-                val cls = _type.rawClass
-                if (Duration::class.java.isAssignableFrom(cls)) {
-                    return ObjectSchema().example("PT7H25M")
-                }
-            }
-        }
-        return if (chain.hasNext()) {
-            chain.next().resolve(type, context, chain)
-        } else {
-            null
-        }
-    }
-}
