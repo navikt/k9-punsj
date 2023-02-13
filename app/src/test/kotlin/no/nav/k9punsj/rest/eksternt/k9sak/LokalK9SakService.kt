@@ -4,6 +4,7 @@ import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.util.MockUtil.erFødtI
@@ -67,4 +68,13 @@ class LokalK9SakService : K9SakService {
         ),
         second = null
     )
+
+    override suspend fun hentSisteSaksnummerForPeriode(
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto?,
+        søker: String,
+        pleietrengende: String?
+    ): Pair<SaksnummerDto?, String?> {
+        TODO("Not yet implemented")
+    }
 }

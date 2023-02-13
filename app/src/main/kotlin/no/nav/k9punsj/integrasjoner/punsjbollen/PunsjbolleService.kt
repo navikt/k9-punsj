@@ -17,14 +17,6 @@ interface PunsjbolleService {
         correlationId: String = UUID.randomUUID().toString()
     ): SaksnummerDto
 
-    suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String? = null,
-        annenPart: String? = null,
-        søknad: Søknad,
-        correlationId: String = UUID.randomUUID().toString()
-    ): SaksnummerDto
-
     suspend fun ruting(
         søker: String,
         pleietrengende: String? = null,
