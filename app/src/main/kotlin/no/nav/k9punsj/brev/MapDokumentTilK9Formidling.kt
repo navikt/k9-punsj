@@ -9,7 +9,7 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.brev.dto.BrevDataDto
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(

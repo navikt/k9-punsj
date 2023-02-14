@@ -11,6 +11,7 @@ import no.nav.k9punsj.wiremock.getAaregBaseUrl
 import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
 import no.nav.k9punsj.wiremock.getEregBaseUrl
 import no.nav.k9punsj.wiremock.getGosysBaseUrl
+import no.nav.k9punsj.wiremock.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl
 import no.nav.k9punsj.wiremock.getK9PunsjbolleBaseUrl
 import no.nav.k9punsj.wiremock.getK9sakBaseUrl
 import no.nav.k9punsj.wiremock.getPdlBaseUrl

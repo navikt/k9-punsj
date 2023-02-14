@@ -12,18 +12,16 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
 
@@ -68,43 +66,13 @@ class RestPunsjbolleService(
         return responseBody.deserialiser()
     }
 
-    override suspend fun opprettEllerHentFagsaksnummer(
-        søker: String,
-        pleietrengende: String?,
-        annenPart: String?,
-        søknad: Søknad,
-        correlationId: String
-    ): SaksnummerDto {
-        val requestBody = punsjbolleSaksnummerFraSøknadDto(
-            søker = søker,
-            pleietrengende = pleietrengende,
-            annenPart = annenPart,
-            søknad = søknad
-        )
-
-        val (url, response, responseBody) = "saksnummer-fra-soknad".post(
-            requestBody = requestBody,
-            correlationId = correlationId
-        )
-
-        check(response.isSuccessful) {
-            "Feil ved opprettEllerHentFagsaksnummer. Url=[$url], HttpStatus=[${response.statusCode}], Response=$responseBody"
-            if (response.statusCode == HttpStatus.CONFLICT.value()) {
-                throw IkkeStøttetJournalpost(responseBody)
-            } else {
-                throw UventetFeil(responseBody)
-            }
-        }
-
-        return responseBody.deserialiser()
-    }
-
     private fun FagsakYtelseType.somSøknadstype() = when (this) {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> "PleiepengerSyktBarn"
         FagsakYtelseType.OMSORGSPENGER -> "Omsorgspenger"
         FagsakYtelseType.OMSORGSPENGER_KS -> "OmsorgspengerKroniskSyktBarn"
         FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE -> "PleiepengerLivetsSluttfase"
         FagsakYtelseType.OMSORGSPENGER_MA -> "OmsorgspengerMidlertidigAlene"
+        FagsakYtelseType.OPPLÆRINGSPENGER -> "Opplæringspenger"
         else -> throw IllegalArgumentException("Støtter ikke ytelse ${this.navn}")
     }
 

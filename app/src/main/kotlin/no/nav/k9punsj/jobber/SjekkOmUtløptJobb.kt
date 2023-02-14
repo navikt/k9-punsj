@@ -9,7 +9,7 @@ import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

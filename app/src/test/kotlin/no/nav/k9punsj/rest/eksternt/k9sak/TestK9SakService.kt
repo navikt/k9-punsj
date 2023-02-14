@@ -4,6 +4,7 @@ import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -20,6 +21,15 @@ internal class TestK9SakService : K9SakService {
         barn: String?,
         fagsakYtelseType: FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
+
+    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
+        søker: String,
+        barn: String?,
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto
+    ): Pair<List<PeriodeDto>?, String?> {
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
+    }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
@@ -78,5 +88,14 @@ internal class TestK9SakService : K9SakService {
 
     override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
         return false
+    }
+
+    override suspend fun hentSisteSaksnummerForPeriode(
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto?,
+        søker: String,
+        pleietrengende: String?
+    ): Pair<SaksnummerDto?, String?> {
+        TODO("Not yet implemented")
     }
 }

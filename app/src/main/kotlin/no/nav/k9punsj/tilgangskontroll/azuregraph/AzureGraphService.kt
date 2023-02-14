@@ -7,7 +7,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.hentAuthentication
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.token.ITokenService
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject

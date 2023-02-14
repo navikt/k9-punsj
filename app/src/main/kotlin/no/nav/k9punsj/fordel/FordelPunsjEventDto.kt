@@ -3,7 +3,7 @@ package no.nav.k9punsj.fordel
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

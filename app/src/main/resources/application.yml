@@ -32,7 +32,7 @@ springdoc:
     path: /internal/api-docs
   swagger-ui:
     path: /internal/swagger
-  version: 1.0
+  enable-kotlin: true
 
 no.nav:
   navn: '@project.artifactId@'

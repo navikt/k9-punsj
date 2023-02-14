@@ -126,13 +126,13 @@ internal fun CoRouterFunctionDsl.kopierJournalpostRoute(
             }
 
             val støttedeYtelseTyperForKopiering = listOf(
-                FagsakYtelseType.OMSORGSPENGER_KS,
+                FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
                 FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+                FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
             )
 
-            if (!støttedeYtelseTyperForKopiering.contains(ytelseType)) {
-                return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${ytelseType.navn} for relaterte journalposter")
+            if (!støttedeYtelseTyperForKopiering.contains(fagsakYtelseType)) {
+                return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
             }
 
             innsendingClient.sendKopierJournalpost(

@@ -12,7 +12,7 @@ import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.DatabaseUtil
