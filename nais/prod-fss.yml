@@ -65,7 +65,7 @@ spec:
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
-      value: https://k9-punsj.nais.adeo.no
+      value: https://k9-punsj.intern.nav.no
 
     # SAF:
     - name: SAF_BASE_URL
