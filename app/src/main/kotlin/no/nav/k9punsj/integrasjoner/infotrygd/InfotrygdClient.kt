@@ -31,7 +31,7 @@ import kotlin.coroutines.coroutineContext
 internal class InfotrygdClient(
     @Value("\${no.nav.infotrygd.base_url}") baseUrl: URI,
     @Value("\${no.nav.infotrygd.scope}") private val infotrygdScopes: Set<String>,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient
 ) : ReactiveHealthIndicator {
 
     private val hentSakerUrl = URI("$baseUrl/saker")
@@ -49,6 +49,7 @@ internal class InfotrygdClient(
         annenPart: String?,
         fagsakYtelseType: FagsakYtelseType,
     ): RutingGrunnlag {
+        log.info("DEBUG: Kaller infotrygd med fraOgMed: [$fraOgMed] & fagsakYtelseType: [$fagsakYtelseType]")
         if (harSakSomSøker(søker, fraOgMed, fagsakYtelseType)) {
             return RutingGrunnlag(søker = true)
         }
@@ -67,7 +68,6 @@ internal class InfotrygdClient(
         fraOgMed: LocalDate,
         fagsakYtelseType: FagsakYtelseType
     ): Boolean {
-
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
         val response = hentSakFraInfotrygd(jsonPayload, hentSakerUrl)
 
@@ -79,7 +79,6 @@ internal class InfotrygdClient(
         fraOgMed: LocalDate,
         fagsakYtelseType: FagsakYtelseType,
     ): Boolean {
-
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
         val response = hentSakFraInfotrygd(jsonPayload, hentVedtakForPleietrengende)
 

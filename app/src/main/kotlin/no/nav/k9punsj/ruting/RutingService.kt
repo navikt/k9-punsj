@@ -59,7 +59,8 @@ internal class RutingService(
     private suspend fun slåOppDestinasjon(
         input: DestinasjonInput
     ): Destinasjon {
-
+        logger.info("DEBUG Ruting.slåOppDestinasjon " +
+            "ytelse:[${input.fagsakYtelseType}] fraOgMed:[${input.fraOgMed}] journalpostId:[${input.journalpostIds}]")
         /* PILS sjekkes mot unntaksliste i K9Sak, alla andre ytelser går til K9sak */
         if (input.fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE) {
             if (k9SakService.inngårIUnntaksliste(aktørIder = input.aktørIder)) {
