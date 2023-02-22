@@ -83,7 +83,7 @@ internal class OmsorgspengerMidlertidigAleneService(
         // oppretter sak i k9-sak hvis det ikke finnes fra før
         if(nyOmsMASøknad.annenPart != null) {
             val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
+                søknadstype = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
                 annenPart = nyOmsMASøknad.annenPart,
                 søker = nyOmsMASøknad.norskIdent,
                 pleietrengende = null,
