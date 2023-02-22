@@ -44,7 +44,7 @@ import kotlin.coroutines.coroutineContext
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
-    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
     private val personService: PersonService
 ) : K9SakService {
 
