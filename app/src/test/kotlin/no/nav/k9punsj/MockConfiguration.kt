@@ -66,7 +66,6 @@ internal object MockConfiguration {
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
-            "NOTAT_ENABLED" to "true",
             "K9_INFOTRYGD_BASE_URL" to wireMockServer.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
             "K9_INFOTRYGD_SCOPE" to "infotrygd/.default",
         )
