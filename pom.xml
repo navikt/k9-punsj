@@ -23,7 +23,7 @@
         <kotlin.version>1.8.10</kotlin.version>
         <springdoc.version>2.0.2</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
-        <logback.logstash.version>7.2</logback.logstash.version>
+        <logback.logstash.version>7.3</logback.logstash.version>
         <token-support.version>3.0.3</token-support.version>
         <dusseldorf-ktor.version>3.2.2.3-b1ecf04</dusseldorf-ktor.version>
         <k9-rapid.version>1.20230206064237-4df4393</k9-rapid.version>
@@ -32,9 +32,9 @@
         <orgjson.version>20220924</orgjson.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>3.3.33</k9-sak.version>
+        <k9-sak.version>3.3.35</k9-sak.version>
         <k9-formidling.version>0.0.26</k9-formidling.version>
-        <k9-format.version>8.0.5</k9-format.version>
+        <k9-format.version>8.0.6</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
