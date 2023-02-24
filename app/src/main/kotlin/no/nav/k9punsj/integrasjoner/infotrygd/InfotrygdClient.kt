@@ -4,9 +4,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.JsonUtil.arrayOrEmptyArray
-import no.nav.k9punsj.felles.JsonUtil.objectOrEmptyObject
-import no.nav.k9punsj.felles.JsonUtil.stringOrNull
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.infotrygd.InfotrygdClient.Companion.Behandlingstema.Companion.relevanteBehandlingstemaer
 import no.nav.k9punsj.ruting.RutingGrunnlag
@@ -85,7 +82,7 @@ internal class InfotrygdClient(
         return JSONArray(response).inneholderAktuelleVedtak(fagsakYtelseType)
     }
 
-    private suspend fun hentSakFraInfotrygd(payload: String, uri: URI): ResponseEntity<String>  {
+    private suspend fun hentSakFraInfotrygd(payload: String, uri: URI): ResponseEntity<String> {
         val response = client
             .post()
             .uri(uri)
@@ -166,7 +163,12 @@ internal class InfotrygdClient(
 
         internal fun JSONArray.inneholderAktuelleSakerEllerVedtak(fagsakYtelseType: FagsakYtelseType) =
             map { it as JSONObject }
-                .map { it.inneholderAktuelle("saker", fagsakYtelseType) || it.inneholderAktuelle("vedtak", fagsakYtelseType) }
+                .map {
+                    it.inneholderAktuelle("saker", fagsakYtelseType) || it.inneholderAktuelle(
+                        "vedtak",
+                        fagsakYtelseType
+                    )
+                }
                 .any { it }
 
         internal fun JSONArray.inneholderAktuelleVedtak(fagsakYtelseType: FagsakYtelseType) =
@@ -181,6 +183,21 @@ internal class InfotrygdClient(
               "fom": "$fraOgMed"
             }
            """.trimIndent()
+
+        fun JSONObject.arrayOrEmptyArray(key: String): JSONArray = when (has(key) && get(key) is JSONArray) {
+            true -> getJSONArray(key)
+            false -> JSONArray()
+        }
+
+        fun JSONObject.objectOrEmptyObject(key: String): JSONObject = when (has(key) && get(key) is JSONObject) {
+            true -> getJSONObject(key)
+            false -> JSONObject()
+        }
+
+        fun JSONObject.stringOrNull(key: String) = when (has(key) && get(key) is String) {
+            true -> getString(key)
+            else -> null
+        }
     }
 
     override fun health() = Mono.just(
