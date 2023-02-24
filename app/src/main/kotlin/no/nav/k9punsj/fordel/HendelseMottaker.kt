@@ -7,7 +7,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.journalpost.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

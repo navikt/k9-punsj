@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat

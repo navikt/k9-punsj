@@ -10,7 +10,6 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
@@ -296,7 +295,7 @@ class K9SakServiceImpl(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
-                NavHeaders.CallId to hentCallId()
+                "callId" to hentCallId()
             ).awaitStringResponseResult()
 
         return result.fold(

@@ -8,19 +8,21 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.journalpost.dto.IdentDto
+import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import no.nav.k9punsj.journalpost.dto.ResultatDto
 import no.nav.k9punsj.journalpost.dto.RutingDto
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
@@ -208,6 +210,8 @@ internal class JournalpostRoutes(
 
                 journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
                 val punsjJournalpost = journalpostService.hent(dto.journalpostId)
+
+
 
                 aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                     punsjJournalpost = punsjJournalpost,
