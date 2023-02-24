@@ -4,18 +4,34 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
+import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger
 import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kursholder
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie
+import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
+import no.nav.k9punsj.felles.k9format.MappingUtils
 import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
+import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
 import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
+import no.nav.k9punsj.utils.PeriodeUtils.erSatt
+import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Perioder
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.ZonedDateTime
+import java.util.UUID
 
 internal class MapOlpTilK9Format(
     søknadId: String,
@@ -36,20 +52,29 @@ internal class MapOlpTilK9Format(
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
             dto.barn?.leggTilBarn()
-            dto.soeknadsperiode?.leggTilSøknadsperiode()
+            dto.leggTilLovbestemtFerie()
+            dto.leggTilSøknadsperiode()
             if (dto.utenlandsopphold.isNotEmpty()) {
                 dto.utenlandsopphold.leggTilUtenlandsopphold(feil).apply {
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             } else {
-                dto.utenlandsopphold?.leggTilUtenlandsopphold(feil)?.apply {
+                dto.utenlandsopphold.leggTilUtenlandsopphold(feil)?.apply {
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             }
             dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
                 opplaeringspenger.medArbeidstid(this)
             }
+            dto.trekkKravPerioder.leggTilTrekkKravPerioder()
+            if (!dto.soeknadsperiode.isNullOrEmpty() || erOpptjeningSatt(dto, dto.opptjeningAktivitet)) {
+                dto.opptjeningAktivitet?.mapOpptjeningAktivitet(feil)?.apply {
+                    opplaeringspenger.medOpptjeningAktivitet(this)
+                }
+            }
             dto.leggTilBegrunnelseForInnsending()
+            dto.kurs?.leggTilKurs()
+            dto.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
 
             // Fullfører søknad & validerer
             søknad.medYtelse(opplaeringspenger)
@@ -74,6 +99,28 @@ internal class MapOlpTilK9Format(
         søknad.medVersjon(this)
     }
 
+
+    private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
+        val institusjonsUuid = this.kursHolder?.institusjonsUuid?.let {
+            try {
+                UUID.fromString(it)
+            } catch (e: IllegalStateException) {
+                feil.add(Feil("søknad", "institusjonsUuid", "institusjonsUuid er ikke en gyldig UUID"))
+                return
+            }
+        }
+        val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
+        val kursPerioder = this.kursperioder?.map {
+            KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst, it.begrunnelseReisetidTil, it.begrunnelseReisetidHjem)
+        }?.toList()
+        val kurs = Kurs(kursHolder, kursPerioder)
+        opplaeringspenger.medKurs(kurs)
+    }
+
+    private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
+        opplaeringspenger.addAllTrekkKravPerioder(this.somK9Perioder())
+    }
+
     private fun OpplaeringspengerSøknadDto.leggTilMottattDatoOgKlokkeslett() {
         if (mottattDato == null) {
             feil.add(Feil("søknad", "mottattDato", "Mottatt dato mangler"))
@@ -87,9 +134,14 @@ internal class MapOlpTilK9Format(
         søknad.medMottattDato(ZonedDateTime.of(mottattDato, klokkeslett, Oslo))
     }
 
-    private fun List<PeriodeDto>.leggTilSøknadsperiode() {
-        if (this.isNotEmpty()) {
-            opplaeringspenger.medSøknadsperiode(this.somK9Perioder())
+    private fun OpplaeringspengerSøknadDto.leggTilSøknadsperiode() {
+        if (!this.soeknadsperiode.isNullOrEmpty()) {
+            opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
+        } else {
+            // Utleder søknadsperiode fra kursperioder
+            this.kurs?.utledsSoeknadsPeriodeFraKursperioder()?.let { kursPeriode ->
+                opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
+            }
         }
     }
 
@@ -110,7 +162,9 @@ internal class MapOlpTilK9Format(
 
     private fun OpplaeringspengerSøknadDto.leggTilBegrunnelseForInnsending() {
         if (begrunnelseForInnsending != null) {
-            søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
+            søknad.medBegrunnelseForInnsending(
+                BegrunnelseForInnsending().medBegrunnelseForInnsending(begrunnelseForInnsending.tekst)
+            )
         }
     }
 
@@ -125,10 +179,67 @@ internal class MapOlpTilK9Format(
         }
     }
 
+    private fun OpplaeringspengerSøknadDto.leggTilLovbestemtFerie() {
+        if (lovbestemtFerie.isNullOrEmpty()) {
+            return
+        }
+        val k9LovbestemtFerie = mutableMapOf<Periode, LovbestemtFerie.LovbestemtFeriePeriodeInfo>()
+        lovbestemtFerie?.filter { it.erSatt() }?.forEach { periode ->
+            k9LovbestemtFerie[periode.somK9Periode()!!] =
+                LovbestemtFerie.LovbestemtFeriePeriodeInfo().medSkalHaFerie(true)
+        }
+        opplaeringspenger.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
+    }
+
+    private fun OpplaeringspengerSøknadDto.leggTilUttak(søknadsperiode: List<PeriodeDto>?) {
+        val k9Uttak = mutableMapOf<Periode, Uttak.UttakPeriodeInfo>()
+
+        this.uttak?.filter { it.periode.erSatt() }?.forEach { uttak ->
+            val k9Periode = uttak.periode!!.somK9Periode()!!
+            val k9Info = Uttak.UttakPeriodeInfo()
+            MappingUtils.mapEllerLeggTilFeil(
+                feil = feil,
+                felt = "ytelse.uttak.perioder.${k9Periode.jsonPath()}.timerPleieAvBarnetPerDag"
+            ) { uttak.pleieAvBarnetPerDag?.somDuration() }?.also {
+                k9Info.medTimerPleieAvBarnetPerDag(it)
+            }
+            k9Uttak[k9Periode] = k9Info
+        }
+
+        if (k9Uttak.isEmpty() && søknadsperiode != null) {
+            søknadsperiode.forEach { periode ->
+                periode.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
+            }
+        }
+
+        if(k9Uttak.isEmpty() && this.kurs != null) {
+            this.kurs.kursperioder?.forEach { kursPeriode ->
+                kursPeriode.periode?.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
+            }
+        }
+
+        if (k9Uttak.isNotEmpty()) {
+            opplaeringspenger.medUttak(Uttak().medPerioder(k9Uttak))
+        }
+    }
+
+    private fun erOpptjeningSatt(
+        dto: OpplaeringspengerSøknadDto,
+        opptjeningAktivitet: ArbeidAktivitetDto?
+    ) = dto.opptjeningAktivitet != null &&
+        (
+            !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                opptjeningAktivitet?.frilanser != null ||
+                opptjeningAktivitet?.selvstendigNaeringsdrivende != null
+            )
+
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOlpTilK9Format::class.java)
 
         private val Validator = OpplæringspengerSøknadValidator()
         private const val Versjon = "1.0.0"
+
+        private val DefaultUttak =
+            Uttak.UttakPeriodeInfo().medTimerPleieAvBarnetPerDag(Duration.ofHours(7).plusMinutes(30))
     }
 }

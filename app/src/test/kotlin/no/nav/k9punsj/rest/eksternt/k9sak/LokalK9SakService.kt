@@ -4,8 +4,12 @@ import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.LopendeSakDto
+import no.nav.k9punsj.ruting.RutingGrunnlag
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -27,6 +31,15 @@ class LokalK9SakService : K9SakService {
             null
         )
         false -> Pair(emptyList(), null)
+    }
+
+    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
+        søker: String,
+        barn: String?,
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto
+    ): Pair<List<PeriodeDto>?, String?> {
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
@@ -58,4 +71,28 @@ class LokalK9SakService : K9SakService {
         ),
         second = null
     )
+
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
+        opprettNytt: Boolean
+    ): Pair<String?, String?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hentSisteSaksnummerForPeriode(
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto?,
+        søker: String,
+        pleietrengende: String?
+    ): Pair<SaksnummerDto?, String?> {
+        TODO("Not yet implemented")
+    }
 }

@@ -1,6 +1,6 @@
 package no.nav.k9punsj.integrasjoner.gosys
 
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 
 // https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstema
 enum class Behandlingstema(

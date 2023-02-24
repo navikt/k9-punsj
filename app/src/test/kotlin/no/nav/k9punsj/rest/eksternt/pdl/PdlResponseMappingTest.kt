@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
 import no.nav.k9punsj.integrasjoner.pdl.mapBarnFraRelasjoner
 import no.nav.k9punsj.integrasjoner.pdl.mapPersonopplysninger
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

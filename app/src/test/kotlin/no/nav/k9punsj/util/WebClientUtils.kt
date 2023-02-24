@@ -3,6 +3,7 @@ package no.nav.k9punsj.util
 import org.junit.jupiter.api.Assertions
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ReactiveHttpOutputMessage
 import org.springframework.web.reactive.function.BodyInserter
 import org.springframework.web.reactive.function.client.ClientResponse
@@ -14,7 +15,7 @@ object WebClientUtils {
     suspend inline fun <reified ResponseType> WebClient.getAndAssert(
         norskIdent: String? = null,
         authorizationHeader: String,
-        assertStatus: HttpStatus,
+        assertStatus: HttpStatusCode,
         vararg pathSegment: String
     ): ResponseType {
         val spec = get()
@@ -30,7 +31,7 @@ object WebClientUtils {
 
     suspend inline fun <reified RequestType> WebClient.postAndAssert(
         authorizationHeader: String,
-        assertStatus: HttpStatus,
+        assertStatus: HttpStatusCode,
         requestBody: BodyInserter<RequestType, ReactiveHttpOutputMessage>,
         vararg pathSegment: String
     ): ClientResponse {
@@ -45,11 +46,11 @@ object WebClientUtils {
 
     suspend inline fun <reified RequestType, reified ResponsType> WebClient.postAndAssertAwaitWithStatusAndBody(
         authorizationHeader: String,
-        assertStatus: HttpStatus,
+        assertStatus: HttpStatusCode,
         requestBody: BodyInserter<RequestType, ReactiveHttpOutputMessage>,
         vararg pathSegment: String
     ): ResponsType {
-        val (status: HttpStatus, body: ResponsType) = post()
+        val (status: HttpStatusCode, body: ResponsType) = post()
             .uri { it.pathSegment(*pathSegment).build() }
             .header(HttpHeaders.AUTHORIZATION, authorizationHeader)
             .body(requestBody)
@@ -83,7 +84,7 @@ object WebClientUtils {
         return awaitExchange { it }
     }
 
-    suspend inline fun <reified T> WebClient.RequestHeadersSpec<*>.awaitStatusWithBody(): Pair<HttpStatus, T> {
+    suspend inline fun <reified T> WebClient.RequestHeadersSpec<*>.awaitStatusWithBody(): Pair<HttpStatusCode, T> {
         return awaitExchange { Pair(it.statusCode(), it.awaitBody()) }
     }
 
@@ -91,7 +92,7 @@ object WebClientUtils {
         return awaitExchange { it.awaitBody() }
     }
 
-    suspend fun WebClient.RequestHeadersSpec<*>.awaitStatuscode(): HttpStatus {
+    suspend fun WebClient.RequestHeadersSpec<*>.awaitStatuscode(): HttpStatusCode {
         return awaitExchange { it.statusCode() }
     }
 }

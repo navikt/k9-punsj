@@ -4,7 +4,10 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -12,21 +15,20 @@ import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.LukkJournalpostDto
-import no.nav.k9punsj.felles.PunsjBolleDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
-import no.nav.k9punsj.felles.PunsjbolleRuting
+import no.nav.k9punsj.felles.RutingDto
 import no.nav.k9punsj.felles.SettPåVentDto
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
-import no.nav.k9punsj.openapi.OasSkalTilInfotrygdSvar
+import no.nav.k9punsj.ruting.Destinasjon
+import no.nav.k9punsj.ruting.RutingService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -46,6 +48,7 @@ import org.springframework.web.reactive.function.server.ServerResponse.status
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
@@ -58,15 +61,15 @@ internal class JournalpostRoutes(
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
-    private val punsjbolleService: PunsjbolleService,
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
+    private val rutingService: RutingService,
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
 ) {
 
-    internal companion object {
+    private companion object {
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
@@ -81,6 +84,7 @@ internal class JournalpostRoutes(
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
+        internal const val Mottak = "/journalpost/mottak"
 
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
@@ -188,9 +192,33 @@ internal class JournalpostRoutes(
             }
         }
 
+        POST("/api${Urls.Mottak}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = Urls.Mottak
+                )?.let { return@RequestContext it }
+                val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
+                val punsjFagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseTypeKode)
+
+                journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
+                val punsjJournalpost = journalpostService.hent(dto.journalpostId)
+
+                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                    punsjJournalpost = punsjJournalpost,
+                    aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
+                    type = punsjJournalpost.type,
+                    ytelse = dto.fagsakYtelseTypeKode
+                )
+
+                ServerResponse.noContent().buildAndAwait()
+            }
+        }
+
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
-                val dto = request.punsjbolleDto()
+                val dto = request.rutingDto()
 
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
@@ -200,50 +228,50 @@ internal class JournalpostRoutes(
 
                 val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
-                    val punsjbolleRuting = when (hentHvisJournalpostMedId.skalTilK9) {
-                        true -> PunsjbolleRuting.K9Sak
-                        false -> PunsjbolleRuting.Infotrygd
+                    val ruting = when (hentHvisJournalpostMedId.skalTilK9) {
+                        true -> Destinasjon.K9Sak
+                        false -> Destinasjon.Infotrygd
                     }
-                    val skalTilK9Sak = (punsjbolleRuting == PunsjbolleRuting.K9Sak)
+
+                    val skalTilK9Sak = (ruting == Destinasjon.K9Sak)
 
                     return@RequestContext ServerResponse
                         .ok()
                         .json()
-                        .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                        .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
                 }
 
-                val correlationId = coroutineContext.hentCorrelationId()
-                val fagsakYtelseType = hentHvisJournalpostMedId.utledK9sakFagsakYtelseType(dto.fagsakYtelseType)
+                val aktørId = pdlService.aktørIdFor(dto.brukerIdent)?.let { setOf(it) } ?: emptySet()
+                val fagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseType.kode)
 
-                val punsjbolleRuting = punsjbolleService.ruting(
-                    søker = dto.brukerIdent,
-                    pleietrengende = dto.barnIdent,
-                    annenPart = dto.annenPart,
-                    journalpostId = dto.journalpostId,
-                    periode = null, // Utledes fra journalposten i Punsjbollen
-                    fagsakYtelseType = fagsakYtelseType,
-                    correlationId = correlationId
+                val destinasjon = try {
+                    rutingService.destinasjon(
+                        søker = dto.brukerIdent,
+                        pleietrengende = dto.pleietrengende,
+                        annenPart = dto.annenPart,
+                        fraOgMed = LocalDate.now(),
+                        aktørIder = aktørId,
+                        journalpostIds = setOf(dto.journalpostId),
+                        fagsakYtelseType = fagsakYtelseType
+                    )
+                } catch (e: Exception) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .bodyValueAndAwait("Feil vid ruting-kall: ${e.localizedMessage}")
+                }
+
+                val skalTilK9Sak = (destinasjon == Destinasjon.K9Sak)
+
+                lagreHvorJournalpostSkal(
+                    hentHvisPunsjJournalpostMedId = hentHvisJournalpostMedId,
+                    dto = dto,
+                    skalTilK9 = skalTilK9Sak
                 )
 
-                if (punsjbolleRuting == PunsjbolleRuting.K9Sak || punsjbolleRuting == PunsjbolleRuting.Infotrygd) {
-                    // Lagrer ikke om ruting == IkkeStøttet.
-                    // Kan være at det f.eks. er tastet feil fnr på barn, da ønsker vi ikke å lagre at den ikke skal til K9
-                    lagreHvorJournalpostSkal(
-                        hentHvisPunsjJournalpostMedId = hentHvisJournalpostMedId,
-                        dto = dto,
-                        skalTilK9 = punsjbolleRuting == PunsjbolleRuting.K9Sak
-                    )
-                }
-
-                if (punsjbolleRuting == PunsjbolleRuting.IkkeStøttet) {
-                    return@RequestContext serverResponseConflict()
-                }
-
-                val skalTilK9Sak = (punsjbolleRuting == PunsjbolleRuting.K9Sak)
                 return@RequestContext ServerResponse
                     .ok()
                     .json()
-                    .bodyValueAndAwait(OasSkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                    .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
             }
         }
 
@@ -479,9 +507,10 @@ internal class JournalpostRoutes(
 
         kopierJournalpostRoute(
             pepClient = pepClient,
-            punsjbolleService = punsjbolleService,
             journalpostService = journalpostService,
-            innsendingClient = innsendingClient
+            innsendingClient = innsendingClient,
+            rutingService = rutingService,
+            pdlService = pdlService
         )
     }
 
@@ -511,7 +540,7 @@ internal class JournalpostRoutes(
 
     private suspend fun lagreHvorJournalpostSkal(
         hentHvisPunsjJournalpostMedId: PunsjJournalpost?,
-        dto: PunsjBolleDto,
+        dto: RutingDto,
         skalTilK9: Boolean,
     ) {
         if (hentHvisPunsjJournalpostMedId != null) {
@@ -535,8 +564,8 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.søknadId() = body(BodyExtractors.toMono(SettPåVentDto::class.java)).awaitFirst()
     private suspend fun ServerRequest.lukkJournalpostRequest() = body(BodyExtractors.toMono(LukkJournalpostDto::class.java)).awaitFirst()
 
-    private suspend fun ServerRequest.punsjbolleDto() =
-        body(BodyExtractors.toMono(PunsjBolleDto::class.java)).awaitFirst()
+    private suspend fun ServerRequest.rutingDto() =
+        body(BodyExtractors.toMono(RutingDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.identOgJournalpost() =
         body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
@@ -544,7 +573,16 @@ internal class JournalpostRoutes(
     private suspend fun serverResponseConflict() =
         status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
 
-    private data class ResultatDto(
-        val status: String,
+    private data class ResultatDto(val status: String)
+    internal data class SkalTilInfotrygdSvar(val k9sak: Boolean)
+
+    internal data class JournalpostMottaksHaandteringDto(
+        val brukerIdent: String,
+        val barnIdent: String?,
+        val annenPart: String?,
+        val journalpostId: String,
+        val fagsakYtelseTypeKode: String,
+        val periode: PeriodeDto?,
+        val saksnummer: String?
     )
 }

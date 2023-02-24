@@ -42,7 +42,7 @@ internal class DurationMapperTest {
     }
 
     @Test
-    fun `beregnet arbeidstid 80% avrunder faktisktArbeidstid ned 1min så man ikke går over 80 med en decimal`() {
+    fun `beregnet arbeidstid 80 prosent avrunder faktisktArbeidstid ned 1min så man ikke går over 80 med en decimal`() {
         val faktiskArbeidTimerPerDag = "6,88" // // 80% = 53min
         val jobberNormaltTimerPerDag = "8,6"
 
@@ -52,7 +52,7 @@ internal class DurationMapperTest {
     }
 
     @Test
-    fun `avrunder ikke faktisktArbeidstid ned dersom beregnet arbeidstid er under eller over 80%`() {
+    fun `avrunder ikke faktisktArbeidstid ned dersom beregnet arbeidstid er under eller over 80 prosent`() {
 
         val jobberNormaltTimerPerDag = "8,6"
 

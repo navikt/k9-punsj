@@ -4,8 +4,12 @@ import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.LopendeSakDto
+import no.nav.k9punsj.ruting.RutingGrunnlag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -17,6 +21,15 @@ internal class TestK9SakService : K9SakService {
         barn: String?,
         fagsakYtelseType: FagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
+
+    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
+        søker: String,
+        barn: String?,
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto
+    ): Pair<List<PeriodeDto>?, String?> {
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
+    }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
@@ -54,4 +67,35 @@ internal class TestK9SakService : K9SakService {
         ),
         second = null
     )
+
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
+        opprettNytt: Boolean
+    ): Pair<String?, String?> {
+        return when(opprettNytt) {
+            true -> Pair("NEW123", null)
+            false -> Pair("OLD123", null)
+        }
+    }
+
+    override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
+        return RutingGrunnlag(
+            søker = false,
+            pleietrengende = false,
+            annenPart = false
+        )
+    }
+
+    override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
+        return false
+    }
+
+    override suspend fun hentSisteSaksnummerForPeriode(
+        fagsakYtelseType: FagsakYtelseType,
+        periode: PeriodeDto?,
+        søker: String,
+        pleietrengende: String?
+    ): Pair<SaksnummerDto?, String?> {
+        TODO("Not yet implemented")
+    }
 }

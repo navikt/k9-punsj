@@ -9,7 +9,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.IkkeTestProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -166,7 +166,7 @@ class PdlServiceImpl(
             .awaitFirst()
 
         if (response.statusCode != HttpStatus.OK) {
-            throw IllegalStateException("Uventet HTTP ${response.statusCodeValue} fra PDL. ResponseBody=${response.body}")
+            throw IllegalStateException("Uventet HTTP ${response.statusCode} fra PDL. ResponseBody=${response.body}")
         }
         return requireNotNull(response.body) {
             "Uventet response fra PDL. Har ingen response body."

@@ -1,7 +1,7 @@
 package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -37,6 +37,14 @@ class LesFraFilUtil {
         private fun lesFraFilOmsAo(filnavn: String): String {
             try {
                 return Files.readString(Path.of("src/test/resources/omp-ao/$filnavn"))
+            } catch (e: IOException) {
+                throw IllegalStateException(e)
+            }
+        }
+
+        private fun lesFraFilOlp(filnavn: String): String {
+            try {
+                return Files.readString(Path.of("src/test/resources/olp/$filnavn"))
             } catch (e: IOException) {
                 throw IllegalStateException(e)
             }
@@ -184,6 +192,13 @@ class LesFraFilUtil {
          */
         fun søknadFraFrontendOmsAO(): SøknadJson {
             return objectMapper().readValue(lesFraFilOmsAo("søknad-fra-frontend.json"))
+        }
+
+        /*
+         *  Opplæringspenger
+         */
+        fun søknadFraFrontendOlpFull(): SøknadJson {
+            return objectMapper().readValue(lesFraFilOlp("søknad-fra-frontend.json"))
         }
     }
 }

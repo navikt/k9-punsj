@@ -17,7 +17,7 @@ import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -196,9 +196,9 @@ class SafGateway(
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .awaitExchange { Pair(it.rawStatusCode(), it.awaitEntity<DataBuffer>()) }
+            .awaitExchange { Pair(it.statusCode(), it.awaitEntity<DataBuffer>()) }
 
-        return when (statusCode) {
+        return when (statusCode.value()) {
             200 -> {
                 Dokument(
                     contentType = entity.headers.contentType ?: throw IllegalStateException("Content-Type ikke satt"),

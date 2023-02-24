@@ -2,14 +2,13 @@ package no.nav.k9punsj.opplaeringspenger
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -35,7 +34,7 @@ data class OpplaeringspengerSøknadDto(
     val kurs: Kurs? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
+    val begrunnelseForInnsending: BegrunnelseForInnsendingDto? = null,
     val metadata: Map<*, *>? = null
 ) {
 
@@ -53,7 +52,8 @@ data class OpplaeringspengerSøknadDto(
     data class UttakDto(
         val periode: PeriodeDto?,
         val timerPleieAvBarnetPerDag: String?,
-        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
+        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()
+            ?.somTimerOgMinutterDto()
     )
 
     data class OmsorgDto(
@@ -64,14 +64,29 @@ data class OpplaeringspengerSøknadDto(
 
     data class Kurs(
         val kursHolder: KursHolder?,
-        val formaal: String?,
         val kursperioder: List<KursPeriodeMedReisetid>?
+    ) {
+        fun utledsSoeknadsPeriodeFraKursperioder(): PeriodeDto? {
+            return kursperioder?.let {
+                val fom = kursperioder.sortedBy { it.avreise }.first().periode?.fom
+                val tom = kursperioder.sortedBy { it.hjemkomst }.last().periode?.tom
+                PeriodeDto(fom = fom, tom = tom)
+            }
+        }
+    }
+
+    data class BegrunnelseForInnsendingDto(
+        val tekst: String
     )
 
     data class KursPeriodeMedReisetid(
         val periode: PeriodeDto?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         val avreise: LocalDate?,
-        val hjemkomst: LocalDate?
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val hjemkomst: LocalDate?,
+        val begrunnelseReisetidTil: String?,
+        val begrunnelseReisetidHjem: String?
     )
 
     data class KursHolder(

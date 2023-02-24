@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.felles.SøkUferdigJournalposter
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.k9SakToken
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,6 +1,7 @@
 package no.nav.k9punsj.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.validation.Validation.buildDefaultValidatorFactory
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
@@ -8,7 +9,7 @@ import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.brev.dto.BrevDataDto
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class MapDokumentTilK9Formidling(
@@ -30,7 +31,9 @@ internal class MapDokumentTilK9Formidling(
             dto.dokumentMal.leggTilDokumentMal()
             dto.dokumentdata.leggTilDokumentData()
             bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9PUNSJ
-            feil.addAll(validator.validate(bestilling).map { Feil(it.propertyPath.toString(), "kode", it.message) })
+            feil.addAll(validator.validate(bestilling).map {
+                Feil(it.propertyPath.toString(), "kode", it.message) }
+            )
         }.onFailure { throwable ->
             logger.error("Uventet mappingfeil", throwable)
             feil.add(Feil("dokumentbestilling", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
@@ -81,6 +84,6 @@ internal class MapDokumentTilK9Formidling(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapDokumentTilK9Formidling::class.java)
-        private val validator = javax.validation.Validation.buildDefaultValidatorFactory().validator
+        private val validator = buildDefaultValidatorFactory().validator
     }
 }

@@ -2,7 +2,7 @@ package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
 
 data class PerioderDto(
@@ -37,7 +37,8 @@ data class SendSøknad(
 
 data class Matchfagsak(
     val brukerIdent: String,
-    val barnIdent: String? = null
+    val barnIdent: String? = null,
+    val periode: PeriodeDto? = null
 )
 
 data class MatchFagsakMedPeriode(

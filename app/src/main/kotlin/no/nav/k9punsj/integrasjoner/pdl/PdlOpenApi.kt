@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.openapi.OasHentPerson
-import no.nav.k9punsj.openapi.OasPdlResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -25,7 +23,7 @@ internal class PdlOpenApi {
                 content = [
                     Content(
                         schema = Schema(
-                            implementation = OasPdlResponse::class
+                            implementation = PdlResponseDto::class
                         )
                     )
                 ]
@@ -50,6 +48,6 @@ internal class PdlOpenApi {
         description = "Henter aktørid fra fnummer",
         security = [SecurityRequirement(name = "BearerAuth")]
     )
-    fun Hentident(@RequestBody body: OasHentPerson) {
+    fun Hentident(@RequestBody body: HentPerson) {
     }
 }

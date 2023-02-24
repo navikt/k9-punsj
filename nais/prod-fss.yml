@@ -11,6 +11,7 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: true
       tenant: nav.no
   accessPolicy:
     inbound:
@@ -65,7 +66,7 @@ spec:
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
-      value: https://k9-punsj.nais.adeo.no
+      value: https://k9-punsj.intern.nav.no
 
     # SAF:
     - name: SAF_BASE_URL
@@ -77,7 +78,7 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: https://oppgave.nais.adeo.no
+      value: http://oppgave.oppgavehandtering
     - name: GOSYS_BASE_SCOPE
       value: api://prod-fss.oppgavehandtering.oppgave/.default
 
@@ -115,13 +116,19 @@ spec:
     - name: K9PUNSJBOLLE_SCOPE
       value: api://prod-gcp.omsorgspenger.k9-punsjbolle/.default
     - name: AAREG_BASE_URL
-      value: https://modapp.adeo.no/aareg-services/api/v1
+      value: https://aareg-services.intern.nav.no/api/v2
+    - name: AAREG_SCOPE
+      value: api://prod-fss.arbeidsforhold.aareg-services-nais/.default
     - name: EREG_BASE_URL
-      value: https://modapp.adeo.no/ereg/api/v1
+      value: https://ereg-services.intern.nav.no/api/v1
     - name: DOKARKIV_BASE_URL
       value: https://dokarkiv.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: K9_INFOTRYGD_BASE_URL
+      value: https://k9-infotrygd.intern.nav.no
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
 
     # Integrasjoner (Kafka)
     - name: K9_RAPID_TOPIC

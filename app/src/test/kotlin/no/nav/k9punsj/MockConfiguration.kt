@@ -7,7 +7,14 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
 import no.nav.k9punsj.util.DatabaseUtil
-import no.nav.k9punsj.wiremock.*
+import no.nav.k9punsj.wiremock.getAaregBaseUrl
+import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
+import no.nav.k9punsj.wiremock.getEregBaseUrl
+import no.nav.k9punsj.wiremock.getGosysBaseUrl
+import no.nav.k9punsj.wiremock.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl
+import no.nav.k9punsj.wiremock.getK9sakBaseUrl
+import no.nav.k9punsj.wiremock.getPdlBaseUrl
+import no.nav.k9punsj.wiremock.getSafBaseUrl
 import java.net.URI
 
 internal object MockConfiguration {
@@ -52,15 +59,15 @@ internal object MockConfiguration {
             "ABAC_PDP_ENDPOINT_URL" to "",
             "AUDITLOGGER_VENDOR" to "",
             "AUDITLOGGER_PRODUCT" to "",
-            "K9PUNSJBOLLE_BASE_URL" to wireMockServer.getK9PunsjbolleBaseUrl(),
-            "K9PUNSJBOLLE_SCOPE" to "k9-punsjbolle-id/.default",
             "APP_NAISSTS_aud" to "srvk9sak",
             "APP_NAISSTS_discovery_url" to wireMockServer.getNaisStsWellKnownUrl(),
             "AAREG_BASE_URL" to wireMockServer.getAaregBaseUrl(),
+            "AAREG_SCOPE" to "aareg-services-nais/.default",
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
-            "NOTAT_ENABLED" to "true"
+            "K9_INFOTRYGD_BASE_URL" to wireMockServer.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
+            "K9_INFOTRYGD_SCOPE" to "infotrygd/.default",
         )
     }
 }

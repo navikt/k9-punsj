@@ -20,7 +20,6 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
@@ -39,7 +38,6 @@ internal class OmsorgspengerutbetalingService(
     private val objectMapper: ObjectMapper,
     private val personService: PersonService,
     private val mappeService: MappeService,
-    private val punsjbolleService: PunsjbolleService,
     private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
@@ -82,12 +80,14 @@ internal class OmsorgspengerutbetalingService(
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
+        /*
         punsjbolleService.opprettEllerHentFagsaksnummer(
             søker = opprettNySøknad.norskIdent,
             journalpostId = opprettNySøknad.journalpostId,
             periode = null,
             fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
         )
+         */
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
@@ -282,10 +282,18 @@ internal class OmsorgspengerutbetalingService(
     }
 
     internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
-        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
-            søker = matchfagsak.brukerIdent,
-            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
-        )
+        val (perioder, _) = if(matchfagsak.periode == null) {
+            k9SakService.hentPerioderSomFinnesIK9(
+                søker = matchfagsak.brukerIdent,
+                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
+            )
+        } else {
+            k9SakService.hentPerioderSomFinnesIK9ForPeriode(
+                søker = matchfagsak.brukerIdent,
+                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+                periode = matchfagsak.periode
+            )
+        }
 
         return perioder ?: listOf()
     }

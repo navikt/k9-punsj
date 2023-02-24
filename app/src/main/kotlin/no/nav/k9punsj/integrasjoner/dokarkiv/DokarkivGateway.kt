@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -57,7 +58,7 @@ class DokarkivGateway(
         identitetsnummer: Identitetsnummer,
         enhetKode: String,
         sak: Sak
-    ): Pair<HttpStatus, String> {
+    ): Pair<HttpStatusCode, String> {
         val ferdigstillJournalpost =
             dataFraSaf.mapFerdigstillJournalpost(
                 journalpostId = journalpostId.somJournalpostId(),
@@ -119,7 +120,7 @@ class DokarkivGateway(
             .bodyValue(journalpostRequest.dokarkivPayload())
             .retrieve()
             .onStatus(
-                { status: HttpStatus -> status.isError },
+                { status: HttpStatusCode -> status.isError },
                 { errorResponse: ClientResponse ->
                     errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
                         logger.error("Feilet med å opprette journalpost. Feil: {}", entity.toString())

@@ -8,7 +8,7 @@ import no.nav.k9punsj.felles.dto.ArbeidstidDto
 import no.nav.k9punsj.felles.dto.BostederDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.UtenlandsoppholdDto
-import no.nav.k9punsj.objectMapper
+import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalTime

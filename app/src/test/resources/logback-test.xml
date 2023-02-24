@@ -8,7 +8,6 @@
 
     <logger name="io.netty" level="INFO"/>
     <logger name="no.nav" level="INFO"/>
-    <logger name="org.apache.kafka.clients.NetworkClient" level="ERROR"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
