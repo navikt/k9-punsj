@@ -11,8 +11,10 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
-import no.nav.k9punsj.felles.LukkJournalpostDto
-import no.nav.k9punsj.felles.RutingDto
+import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
+import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
+import no.nav.k9punsj.journalpost.dto.RutingDto
+import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
 import org.springframework.web.bind.annotation.GetMapping
@@ -144,7 +146,7 @@ internal class JournalpostOpenApi {
                 content = [
                     Content(
                         schema = Schema(
-                            implementation = JournalpostRoutes.SkalTilInfotrygdSvar::class
+                            implementation = SkalTilInfotrygdSvar::class
                         )
                     )
                 ]
@@ -330,6 +332,6 @@ internal class JournalpostOpenApi {
     )
     fun håndterMottak(
         @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: JournalpostRoutes.JournalpostMottaksHaandteringDto
+        @RequestBody body: JournalpostMottaksHaandteringDto
     ) {}
 }

@@ -14,15 +14,17 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.felles.LukkJournalpostDto
 import no.nav.k9punsj.felles.PunsjJournalpostKildeType
-import no.nav.k9punsj.felles.RutingDto
-import no.nav.k9punsj.felles.SettPåVentDto
-import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
+import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
+import no.nav.k9punsj.journalpost.dto.ResultatDto
+import no.nav.k9punsj.journalpost.dto.RutingDto
+import no.nav.k9punsj.journalpost.dto.SettPåVentDto
+import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
@@ -44,7 +46,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.ServerResponse.status
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
@@ -137,7 +138,10 @@ internal class JournalpostRoutes(
                         .json()
                         .bodyValueAndAwait(journalpostInfoDto)
                 } catch (cause: IkkeStøttetJournalpost) {
-                    return@RequestContext serverResponseConflict()
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.CONFLICT)
+                        .json()
+                        .bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
                 } catch (case: IkkeTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -404,7 +408,10 @@ internal class JournalpostRoutes(
                             .json()
                             .bodyValueAndAwait(journalpost.payload)
                     } catch (cause: IkkeStøttetJournalpost) {
-                        return@RequestContext serverResponseConflict()
+                        return@RequestContext ServerResponse
+                            .status(HttpStatus.CONFLICT)
+                            .json()
+                            .bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
                     } catch (case: IkkeTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
@@ -570,19 +577,4 @@ internal class JournalpostRoutes(
     private suspend fun ServerRequest.identOgJournalpost() =
         body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
 
-    private suspend fun serverResponseConflict() =
-        status(HttpStatus.CONFLICT).json().bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
-
-    private data class ResultatDto(val status: String)
-    internal data class SkalTilInfotrygdSvar(val k9sak: Boolean)
-
-    internal data class JournalpostMottaksHaandteringDto(
-        val brukerIdent: String,
-        val barnIdent: String?,
-        val annenPart: String?,
-        val journalpostId: String,
-        val fagsakYtelseTypeKode: String,
-        val periode: PeriodeDto?,
-        val saksnummer: String?
-    )
 }
