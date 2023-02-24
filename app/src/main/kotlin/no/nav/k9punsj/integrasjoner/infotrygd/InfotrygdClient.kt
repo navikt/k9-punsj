@@ -46,7 +46,7 @@ internal class InfotrygdClient(
         annenPart: String?,
         fagsakYtelseType: FagsakYtelseType,
     ): RutingGrunnlag {
-        log.info("DEBUG: Kaller infotrygd med fraOgMed: [$fraOgMed] & fagsakYtelseType: [$fagsakYtelseType]")
+        log.info("DEBUG: Kaller infotrygd med fraOgMed: [$fraOgMed] & fagsakYtelseType: [$fagsakYtelseType]") // TODO: Fjernes
         if (harSakSomSøker(søker, fraOgMed, fagsakYtelseType)) {
             return RutingGrunnlag(søker = true)
         }
@@ -102,7 +102,6 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$hentVedtakForPleietrengende], HttpStatusCode=[${response.statusCode}], Response=[$response]"
         }
 
-        log.info("DEBUG: Svar fra infotrygd = [${response.body.toString()}]")
         return response
     }
 
