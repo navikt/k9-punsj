@@ -4,8 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import no.nav.k9punsj.utils.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID

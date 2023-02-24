@@ -1,7 +1,7 @@
 package no.nav.k9punsj.akjonspunkter
 
-import no.nav.k9punsj.journalpost.PunsjJournalpost
-import no.nav.k9punsj.journalpost.VentDto
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.VentDto
 
 interface AksjonspunktService {
 

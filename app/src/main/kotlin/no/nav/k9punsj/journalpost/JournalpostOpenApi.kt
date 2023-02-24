@@ -9,8 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.journalpost.dto.IdentDto
+import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.RutingDto
