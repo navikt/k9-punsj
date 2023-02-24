@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.LukkJournalpostDto
-import no.nav.k9punsj.felles.PunsjBolleDto
+import no.nav.k9punsj.felles.RutingDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
 import org.springframework.web.bind.annotation.GetMapping
@@ -165,7 +165,7 @@ internal class JournalpostOpenApi {
     )
     fun SkalTilK9Sak(
         @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: PunsjBolleDto
+        @RequestBody body: RutingDto
     ) {
     }
 
