@@ -29,7 +29,7 @@
         <k9-rapid.version>1.20230206064237-4df4393</k9-rapid.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <orgjson.version>20220924</orgjson.version>
+        <orgjson.version>20230227</orgjson.version>
 
         <!-- Kontrakt -->
         <k9-sak.version>3.3.35</k9-sak.version>
