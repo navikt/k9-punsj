@@ -76,15 +76,15 @@ class LokalK9SakService : K9SakService {
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
         opprettNytt: Boolean
     ): Pair<String?, String?> {
-        TODO("Not yet implemented")
+        return Pair("ABC123", null)
     }
 
     override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
-        TODO("Not yet implemented")
+        return RutingGrunnlag(null, null, null)
     }
 
     override suspend fun inngårIUnntaksliste(aktørIder: Set<String>): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override suspend fun hentSisteSaksnummerForPeriode(
@@ -93,6 +93,6 @@ class LokalK9SakService : K9SakService {
         søker: String,
         pleietrengende: String?
     ): Pair<SaksnummerDto?, String?> {
-        TODO("Not yet implemented")
+        return Pair(SaksnummerDto("ABC123"), null)
     }
 }
