@@ -34,13 +34,10 @@ class PdlServiceImpl(
 ) : ReactiveHealthIndicator, PdlService {
 
     private val cachedAzureAccessTokenClient = CachedAccessTokenClient(azureAccessTokenClient)
-    private val AzureScopes = setOf(scope)
+    private val azureScopes = setOf(scope)
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(PdlServiceImpl::class.java)
-        private const val TemaHeaderValue = "OMS"
-        private const val TemaHeader = "Tema"
-        private const val CorrelationIdHeader = "Nav-Callid"
 
         private fun getStringFromResource(path: String) =
             PdlServiceImpl::class.java.getResourceAsStream(path)!!.bufferedReader().use { it.readText() }
@@ -52,7 +49,7 @@ class PdlServiceImpl(
 
     init {
         logger.info("PdlBaseUrl=$baseUrl")
-        logger.info("PdlScopes=${AzureScopes.joinToString()}")
+        logger.info("PdlScopes=${azureScopes.joinToString()}")
     }
 
     private val client = WebClient
@@ -156,8 +153,8 @@ class PdlServiceImpl(
         val response = client
             .post()
             .uri { it.build() }
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(TemaHeader, TemaHeaderValue)
+            .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
+            .header("Tema", "OMS")
             .header(HttpHeaders.AUTHORIZATION, getAuthorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(queryRequest)
@@ -198,21 +195,21 @@ class PdlServiceImpl(
     )
 
     private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
-        scopes = AzureScopes,
+        scopes = azureScopes,
         onBehalfOf = coroutineContext.hentAuthentication().accessToken
     ).asAuthoriationHeader()
 
     private fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
-        scopes = AzureScopes
+        scopes = azureScopes
     ).asAuthoriationHeader()
 
     override fun health() = Mono.just(
         azureAccessTokenClient.helsesjekk(
             operasjon = "pdl-integrasjon",
-            scopes = AzureScopes,
+            scopes = azureScopes,
             initialHealth = azureAccessTokenClient.helsesjekk(
                 operasjon = "pdl-integrasjon",
-                scopes = AzureScopes
+                scopes = azureScopes
             )
         )
     )

@@ -10,6 +10,7 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -17,8 +18,8 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
+import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
@@ -41,7 +42,6 @@ internal class OpplaeringspengerService(
     private val objectMapper: ObjectMapper,
     private val soknadService: SoknadService,
     private val k9SakService: K9SakService,
-    private val punsjbolleService: PunsjbolleService,
     private val aksjonspunktService: AksjonspunktService
 ) {
 
@@ -186,12 +186,17 @@ internal class OpplaeringspengerService(
     internal suspend fun nySøknad(request: ServerRequest, søknad: OpprettNySøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (søknad.barnIdent != null) {
-            punsjbolleService.opprettEllerHentFagsaksnummer(
+            val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+                søknadstype = FagsakYtelseType.OPPLÆRINGSPENGER,
+                annenPart = null,
                 søker = søknad.norskIdent,
                 pleietrengende = søknad.barnIdent,
-                journalpostId = søknad.journalpostId,
-                periode = null,
-                fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER
+                periode = Periode.ÅpenPeriode
+            )
+
+            k9SakService.hentEllerOpprettSaksnummer(
+                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
+                opprettNytt = true
             )
         }
 

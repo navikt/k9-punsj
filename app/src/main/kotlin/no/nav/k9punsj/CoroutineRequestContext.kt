@@ -6,7 +6,6 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
 import no.nav.k9punsj.felles.IkkeFunnet
-import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
@@ -20,18 +19,15 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.coRouter
-import org.springframework.web.reactive.function.server.json
 import java.net.URI
 import java.util.*
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
 private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::class.java)
-private const val RequestIdHeader = "X-Request-ID"
-private const val RequestIdKey = "request_id"
-private const val CorrelationIdKey = "correlation_id"
-private const val CallIdKey = "callId"
-private const val AuthenticationKey = "authentication"
+private const val REQUEST_ID_KEY = "request_id"
+private const val CORRELATION_ID_KEY = "correlation_id"
+private const val CALL_ID_KEY = "callId"
 
 private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
     companion object Key : CoroutineContext.Key<CoroutineRequestContext>
@@ -43,24 +39,22 @@ private fun CoroutineContext.requestContext() =
 
 internal fun CoroutineContext.hentAttributt(key: String): Any? = requestContext().attributter.getOrDefault(key, null)
 private fun CoroutineContext.settCorrelationId(correlationId: String) =
-    requestContext().attributter.put(CorrelationIdKey, correlationId)
+    requestContext().attributter.put(CORRELATION_ID_KEY, correlationId)
 
 private fun CoroutineContext.settCallId(callId: String) =
-    requestContext().attributter.put(CallIdKey, callId)
+    requestContext().attributter.put(CALL_ID_KEY, callId)
 
 internal fun CoroutineContext.hentCallId(): String =
-    hentAttributt(CallIdKey) as? String ?: throw IllegalStateException("$CallIdKey ikke satt")
+    hentAttributt(CALL_ID_KEY) as? String ?: throw IllegalStateException("$CALL_ID_KEY ikke satt")
 
-internal fun CoroutineContext.hentCorrelationId(): CorrelationId =
-    hentAttributt(CorrelationIdKey) as? CorrelationId ?: throw IllegalStateException("$CorrelationIdKey ikke satt")
+internal fun CoroutineContext.hentCorrelationId(): String =
+    hentAttributt(CORRELATION_ID_KEY) as? String ?: throw IllegalStateException("$CORRELATION_ID_KEY ikke satt")
 
 private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
-    requestContext().attributter.put(AuthenticationKey, Authentication(authorizationHeader))
+    requestContext().attributter.put("authentication", Authentication(authorizationHeader))
 
 internal fun CoroutineContext.hentAuthentication(): Authentication =
-    hentAttributt(AuthenticationKey) as? Authentication ?: throw IllegalStateException("$AuthenticationKey ikke satt")
-
-internal typealias CorrelationId = String
+    hentAttributt("authentication") as? Authentication ?: throw IllegalStateException("Authentication ikke satt")
 
 internal fun K9SakRoutes(
     authenticationHandler: AuthenticationHandler,
@@ -95,11 +89,11 @@ private fun Routes(
     before { serverRequest ->
         val callId = serverRequest
             .headers()
-            .header(CallIdKey)
+            .header(CALL_ID_KEY)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        serverRequest.attributes()[RequestIdKey] = serverRequest.headers().header(RequestIdHeader).firstOrNull() ?: UUID.randomUUID().toString()
-        serverRequest.attributes()[CorrelationIdKey] = callId
-        serverRequest.attributes()[CallIdKey] = callId
+        serverRequest.attributes()[REQUEST_ID_KEY] = serverRequest.headers().header("X-Request-ID").firstOrNull() ?: UUID.randomUUID().toString()
+        serverRequest.attributes()[CORRELATION_ID_KEY] = callId
+        serverRequest.attributes()[CALL_ID_KEY] = callId
         logger.info("-> HTTP ${serverRequest.method().name()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
@@ -118,14 +112,8 @@ private fun Routes(
             .notFound()
             .buildAndAwait()
     }
-    onError<SøknadFinnsIkke> { error, _ ->
-        ServerResponse
-            .badRequest()
-            .json()
-            .bodyValueAndAwait("Søknad finns ikke, error: ${error.message}")
-    }
     onError<Throwable> { error, serverRequest ->
-        val exceptionId = serverRequest.headers().header(CallIdKey).firstOrNull() ?: UUID.randomUUID().toString()
+        val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
         logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
@@ -170,13 +158,13 @@ internal suspend fun <T> RequestContext(
     }
 }
 
-private fun ServerRequest.requestId() = attribute(RequestIdKey).get() as String
-private fun ServerRequest.correlationId() = attribute(CorrelationIdKey).get() as String
-private fun ServerRequest.callId() = attribute(CallIdKey).get() as String
+private fun ServerRequest.requestId() = attribute(REQUEST_ID_KEY).get() as String
+private fun ServerRequest.correlationId() = attribute(CORRELATION_ID_KEY).get() as String
+private fun ServerRequest.callId() = attribute(CALL_ID_KEY).get() as String
 private fun ServerRequest.contextMap() = pathVariables().toMutableMap().apply {
-    put(RequestIdKey, requestId())
-    put(CorrelationIdKey, correlationId())
-    put(CallIdKey, callId())
+    put(REQUEST_ID_KEY, requestId())
+    put(CORRELATION_ID_KEY, correlationId())
+    put(CALL_ID_KEY, callId())
 }
 
 data class Authentication(

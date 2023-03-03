@@ -13,7 +13,7 @@ import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.journalpost.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll

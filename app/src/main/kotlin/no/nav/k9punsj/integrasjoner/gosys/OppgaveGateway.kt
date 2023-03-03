@@ -3,7 +3,6 @@ package no.nav.k9punsj.integrasjoner.gosys
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
@@ -46,6 +45,7 @@ internal class OppgaveGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "X-Correlation-ID"
+        private const val CallIdHeaderKey = "Nav-Call-Id"
     }
 
     private object Urls {
@@ -126,7 +126,7 @@ internal class OppgaveGateway(
                 .post()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
-                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
@@ -146,7 +146,7 @@ internal class OppgaveGateway(
                 .get()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
-                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
@@ -164,7 +164,7 @@ internal class OppgaveGateway(
                 .patch()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
-                .header(NavHeaders.CallId, UUID.randomUUID().toString())
+                .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
