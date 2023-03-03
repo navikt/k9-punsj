@@ -60,7 +60,6 @@ private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
 internal fun CoroutineContext.hentAuthentication(): Authentication =
     hentAttributt(AuthenticationKey) as? Authentication ?: throw IllegalStateException("$AuthenticationKey ikke satt")
 
-@Deprecated("Erstatt med felles/Typer/CorrelationId")
 internal typealias CorrelationId = String
 
 internal fun K9SakRoutes(

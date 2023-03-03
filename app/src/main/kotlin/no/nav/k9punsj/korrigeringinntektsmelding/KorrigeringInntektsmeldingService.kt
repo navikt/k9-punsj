@@ -10,7 +10,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.SøknadFinnsIkke
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.felles.ValideringsFeil
@@ -21,8 +20,8 @@ import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.punsjbollen.PunsjbolleService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import org.slf4j.Logger
@@ -34,6 +33,7 @@ internal class KorrigeringInntektsmeldingService(
     private val objectMapper: ObjectMapper,
     private val personService: PersonService,
     private val mappeService: MappeService,
+    private val punsjbolleService: PunsjbolleService,
     private val journalpostService: JournalpostService,
     private val azureGraphService: IAzureGraphService,
     private val soknadService: SoknadService,
@@ -63,17 +63,12 @@ internal class KorrigeringInntektsmeldingService(
     internal suspend fun nySøknad(opprettNySøknad: OpprettNySøknad): KorrigeringInntektsmeldingDto {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (opprettNySøknad.pleietrengendeIdent != null) {
-            val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.OMSORGSPENGER,
-                annenPart = null,
+            punsjbolleService.opprettEllerHentFagsaksnummer(
                 søker = opprettNySøknad.norskIdent,
                 pleietrengende = opprettNySøknad.pleietrengendeIdent,
-                periode = Periode.ÅpenPeriode
-            )
-
-            k9SakService.hentEllerOpprettSaksnummer(
-                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
-                opprettNytt = true
+                journalpostId = opprettNySøknad.journalpostId,
+                periode = null,
+                fagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER
             )
         }
 
