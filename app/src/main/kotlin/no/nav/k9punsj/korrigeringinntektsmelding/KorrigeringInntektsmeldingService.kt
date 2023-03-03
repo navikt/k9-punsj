@@ -11,6 +11,9 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Periode
+import no.nav.k9punsj.felles.SøknadFinnsIkke
+import no.nav.k9punsj.felles.UventetFeil
+import no.nav.k9punsj.felles.ValideringsFeil
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
@@ -21,20 +24,10 @@ import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.omsorgspengerutbetaling.SvarOmsUtDto
-import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtVisning
-import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtvisning
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
-import org.springframework.web.reactive.function.server.json
 
 @Service
 internal class KorrigeringInntektsmeldingService(
@@ -50,38 +43,24 @@ internal class KorrigeringInntektsmeldingService(
 
     private val logger: Logger = LoggerFactory.getLogger(KorrigeringInntektsmeldingService::class.java)
 
-    internal suspend fun henteMappe(norskIdent: String): ServerResponse {
+    internal suspend fun henteMappe(norskIdent: String): SvarOmsDto {
         val person = personService.finnPersonVedNorskIdent(norskIdent = norskIdent)
         if (person != null) {
             val svarDto = mappeService.hentMappe(person = person)
-                .tilOmsUtVisning(norskIdent)
-            return ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(svarDto)
+                .tilOmsVisning(norskIdent)
+            return svarDto
         }
-        return ServerResponse
-            .ok()
-            .json()
-            .bodyValueAndAwait(SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
+        return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
     }
 
-    internal suspend fun henteSøknad(søknadId: String): ServerResponse {
+    internal suspend fun henteSøknad(søknadId: String): KorrigeringInntektsmeldingDto {
         val søknad = mappeService.hentSøknad(søknadId)
 
-        return if (søknad == null) {
-            ServerResponse
-                .notFound()
-                .buildAndAwait()
-        } else {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(søknad.tilOmsUtvisning())
-        }
+        return søknad?.tilOmsvisning()
+            ?: throw SøknadFinnsIkke(søknadId)
     }
 
-    internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
+    internal suspend fun nySøknad(opprettNySøknad: OpprettNySøknad): KorrigeringInntektsmeldingDto {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
         if (opprettNySøknad.pleietrengendeIdent != null) {
             val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
@@ -104,19 +83,16 @@ internal class KorrigeringInntektsmeldingService(
         val søknadEntitet = mappeService.førsteInnsendingKorrigeringIm(
             nySøknad = opprettNySøknad
         )
-        return ServerResponse
-            .created(request.søknadLocationUri(søknadEntitet.søknadId))
-            .json()
-            .bodyValueAndAwait(søknadEntitet.tilOmsUtvisning())
+        return søknadEntitet.tilOmsvisning()
     }
 
-    internal suspend fun oppdaterEksisterendeSøknad(søknad: KorrigeringInntektsmeldingDto): ServerResponse {
+    internal suspend fun oppdaterEksisterendeSøknad(søknad: KorrigeringInntektsmeldingDto): KorrigeringInntektsmeldingDto {
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
 
         val søknadEntitet = mappeService.utfyllendeInnsendingOms(
             korrigeringInntektsmeldingDto = søknad,
             saksbehandler = saksbehandler
-        ) ?: return ServerResponse.badRequest().buildAndAwait()
+        ) ?: throw SøknadFinnsIkke(søknad.soeknadId)
 
         val (entitet, _) = søknadEntitet
         val søker = personService.finnPerson(personId = entitet.søkerId)
@@ -124,15 +100,12 @@ internal class KorrigeringInntektsmeldingService(
             journalposter = hentUtJournalposter(entitet),
             aktørId = søker.aktørId
         )
-        return ServerResponse
-            .ok()
-            .json()
-            .bodyValueAndAwait(søknad)
+        return søknad
     }
 
-    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
+    internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): Pair<Søknad, SøknadFeil> {
         val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
-            ?: return ServerResponse.badRequest().buildAndAwait()
+            ?: throw SøknadFinnsIkke(sendSøknad.soeknadId)
 
         try {
             val søknad: KorrigeringInntektsmeldingDto = objectMapper.convertValue(søknadEntitet.søknad!!)
@@ -140,42 +113,18 @@ internal class KorrigeringInntektsmeldingService(
             val journalpostIder = journalpostService.kanSendesInn(søknadEntitet)
             if (journalpostIder.isEmpty()) {
                 logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
-                return ServerResponse.badRequest().bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+                throw ValideringsFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
-            val (søknadK9Format, feilListe) = MapOmsTilK9Format(
-                søknadId = søknad.soeknadId,
-                journalpostIder = journalpostIder,
-                dto = søknad
-            ).søknadOgFeil()
+            val validertSøknad = validerSøknad(søknad)
 
-            if (feilListe.isNotEmpty()) {
-                val feil = feilListe.map { feil ->
-                    SøknadFeil.SøknadFeilDto(
-                        feil.felt,
-                        feil.feilkode,
-                        feil.feilmelding
-                    )
-                }.toList()
-
-                return ServerResponse
-                    .status(HttpStatus.BAD_REQUEST)
-                    .json()
-                    .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
-            }
-
-            val feil = soknadService.sendSøknad(
-                søknad = søknadK9Format,
+            soknadService.sendSøknad(
+                søknad = validertSøknad.first,
                 brevkode = Brevkode.FRAVÆRSKORRIGERING_IM_OMS,
                 journalpostIder = journalpostIder
-            )
-
-            if (feil != null) {
-                val (httpStatus, feilen) = feil
-                return ServerResponse
-                    .status(httpStatus)
-                    .json()
-                    .bodyValueAndAwait(feilen)
+            )?.let { feil ->
+                val (_, feilen) = feil
+                throw ValideringsFeil(feilen)
             }
 
             val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
@@ -185,65 +134,40 @@ internal class KorrigeringInntektsmeldingService(
                 ansvarligSaksbehandler = ansvarligSaksbehandler
             )
 
-            return ServerResponse
-                .accepted()
-                .json()
-                .bodyValueAndAwait(søknadK9Format)
+            return validertSøknad
         } catch (e: Exception) {
-            return ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(e.localizedMessage)
+            throw UventetFeil(e.localizedMessage)
         }
     }
 
-    internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): ServerResponse {
+    internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): Pair<Søknad, SøknadFeil> {
         val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
-            ?: return ServerResponse
-                .badRequest()
-                .buildAndAwait()
+            ?: throw SøknadFinnsIkke(soknadTilValidering.soeknadId)
 
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
 
-        try {
-            mapTilEksternFormat = MapOmsTilK9Format(
-                søknadId = soknadTilValidering.soeknadId,
-                journalpostIder = journalposterDto.journalposter,
-                dto = soknadTilValidering
-            ).søknadOgFeil()
-        } catch (e: Exception) {
-            return ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(e.localizedMessage)
-        }
+        mapTilEksternFormat = MapOmsTilK9Format(
+            søknadId = soknadTilValidering.soeknadId,
+            journalpostIder = journalposterDto.journalposter,
+            dto = soknadTilValidering
+        ).søknadOgFeil()
 
         val (søknad, feilListe) = mapTilEksternFormat
-
-        if (feilListe.isNotEmpty()) {
-            val feil = feilListe.map { feil ->
-                SøknadFeil.SøknadFeilDto(
-                    feil.felt,
-                    feil.feilkode,
-                    feil.feilmelding
-                )
+        val feil = if (feilListe.isNotEmpty()) {
+            feilListe.map { feil ->
+                SøknadFeil.SøknadFeilDto(feil.felt, feil.feilkode, feil.feilmelding)
             }.toList()
-
-            return ServerResponse
-                .status(HttpStatus.BAD_REQUEST)
-                .json()
-                .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
+        } else {
+            emptyList()
         }
+        val søknadFeil = SøknadFeil(soknadTilValidering.soeknadId, feil)
 
-        return ServerResponse
-            .status(HttpStatus.ACCEPTED)
-            .json()
-            .bodyValueAndAwait(søknad)
+        return Pair(søknad, søknadFeil)
     }
 
-    internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): ServerResponse {
+    internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): List<ArbeidsgiverMedArbeidsforholdId> {
         val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
             søker = matchFagsakMedPeriode.brukerIdent,
             fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
@@ -251,20 +175,11 @@ internal class KorrigeringInntektsmeldingService(
         )
 
         return if (arbeidsgiverMedArbeidsforholdId != null) {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(arbeidsgiverMedArbeidsforholdId)
+            arbeidsgiverMedArbeidsforholdId
         } else if (feil != null) {
-            ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(feil)
+            throw UventetFeil(feil)
         } else {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(listOf<ArbeidsgiverMedArbeidsforholdId>())
+            emptyList()
         }
     }
 }
