@@ -1,11 +1,14 @@
 package no.nav.k9punsj.journalpost
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.PunsjJournalpostKildeType
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -16,19 +19,16 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.dto.DokumentInfo
-import no.nav.k9punsj.journalpost.dto.JournalpostInfo
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 @Service
 class JournalpostService(
@@ -298,5 +298,42 @@ private data class ParsedSafJournalpost(
     }
 }
 
-private inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
+internal data class JournalpostInfo(
+    val journalpostId: String,
+    val norskIdent: String?,
+    val aktørId: String?,
+    val dokumenter: List<DokumentInfo>,
+    val mottattDato: LocalDateTime,
+    val erInngående: Boolean,
+    val kanOpprettesJournalføringsoppgave: Boolean,
+    val journalpostStatus: String,
+)
+
+data class JournalpostInfoDto(
+    val journalpostId: String,
+    val norskIdent: String?,
+    val dokumenter: List<DokumentInfo>,
+    val venter: VentDto?,
+    val punsjInnsendingType: PunsjInnsendingType?,
+    @JsonIgnore
+    val erInngående: Boolean,
+    val kanSendeInn: Boolean,
+    val erSaksbehandler: Boolean? = null,
+    val journalpostStatus: String,
+    val kanOpprettesJournalføringsoppgave: Boolean,
+    val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående, // Brukes av frontend,
+    val gosysoppgaveId: String?,
+)
+
+data class VentDto(
+    val venteÅrsak: String,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val venterTil: LocalDate,
+)
+
+data class DokumentInfo(
+    val dokumentId: String,
+)
+
+inline fun <reified T : Enum<T>> enumValueOfOrNull(name: String?) =
     enumValues<T>().find { it.name.equals(name, ignoreCase = true) }

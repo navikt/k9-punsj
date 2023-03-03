@@ -3,7 +3,7 @@ package no.nav.k9punsj.jobber
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator

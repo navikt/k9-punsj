@@ -4,8 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
 import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.journalpost.dto.JournalpostIderDto
-import no.nav.k9punsj.journalpost.dto.SøkUferdigJournalposter
+import no.nav.k9punsj.felles.SøkUferdigJournalposter
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -72,4 +71,8 @@ internal class JournalpostInfoRoutes(
     private suspend fun ServerRequest.søkUferdigJournalposter() =
         body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
+    data class JournalpostIderDto(
+        val journalpostIder: List<JournalpostIdDto>,
+        val journalpostIderBarn: List<JournalpostIdDto> = emptyList()
+    )
 }

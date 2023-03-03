@@ -85,11 +85,6 @@
             <artifactId>dusseldorf-oauth2-client</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.helse</groupId>
-            <artifactId>dusseldorf-test-support</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <!-- Monitorering -->
         <dependency>

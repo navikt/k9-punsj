@@ -2,7 +2,7 @@ package no.nav.k9punsj.akjonspunkter
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

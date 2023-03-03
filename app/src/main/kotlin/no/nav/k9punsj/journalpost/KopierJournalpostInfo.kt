@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost.dto
+package no.nav.k9punsj.journalpost
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 

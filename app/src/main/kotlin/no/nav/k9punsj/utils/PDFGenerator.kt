@@ -1,4 +1,4 @@
-package no.nav.k9punsj.notat
+package no.nav.k9punsj.utils
 
 import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Handlebars
