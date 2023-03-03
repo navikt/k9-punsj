@@ -1,6 +1,5 @@
 package no.nav.k9punsj.notat
 
-import no.nav.k9punsj.utils.PDFGenerator
 import org.springframework.stereotype.Service
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime

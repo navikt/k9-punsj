@@ -121,7 +121,7 @@ internal class KopierJournalpostRouteTest {
         val kopierJournalpostDto = KopierJournalpostDto(
             fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
-            barn = "123",
+            barn = "05032435485",
             annenPart = null
         )
 

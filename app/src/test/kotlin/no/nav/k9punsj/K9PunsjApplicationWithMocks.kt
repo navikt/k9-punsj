@@ -5,7 +5,7 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.journalpost.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner

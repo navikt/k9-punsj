@@ -1,4 +1,4 @@
-package no.nav.k9punsj.journalpost
+package no.nav.k9punsj.journalpost.dto
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import org.slf4j.LoggerFactory

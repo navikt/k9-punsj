@@ -125,6 +125,10 @@ spec:
       value: https://dokarkiv.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: K9_INFOTRYGD_BASE_URL
+      value: https://k9-infotrygd.intern.nav.no
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
 
     # Integrasjoner (Kafka)
     - name: K9_RAPID_TOPIC
