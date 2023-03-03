@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <relativePath/>
     </parent>
     <groupId>no.nav.k9</groupId>
@@ -34,7 +34,7 @@
         <!-- Kontrakt -->
         <k9-sak.version>3.3.35</k9-sak.version>
         <k9-formidling.version>0.0.26</k9-formidling.version>
-        <k9-format.version>8.0.6</k9-format.version>
+        <k9-format.version>8.0.7</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
