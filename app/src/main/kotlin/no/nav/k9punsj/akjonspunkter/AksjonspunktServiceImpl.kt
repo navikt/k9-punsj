@@ -6,8 +6,8 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.journalpost.PunsjJournalpost
-import no.nav.k9punsj.journalpost.VentDto
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto

@@ -7,14 +7,13 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.CorrelationId
-import no.nav.k9punsj.journalpost.KopierJournalpostInfo
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.*
 
 interface InnsendingClient {
-    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
+    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
         val søknadMap = søknad.somMap()
         val behovssekvensId = ulid.nextULID()
 
@@ -38,7 +37,7 @@ interface InnsendingClient {
         ).keyValue
     }
 
-    fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: CorrelationId, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
+    fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
         send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 

@@ -17,7 +17,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.journalpost.PunsjJournalpost
+import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil

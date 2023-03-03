@@ -1,4 +1,4 @@
-package no.nav.k9punsj.utils
+package no.nav.k9punsj.notat
 
 import org.verapdf.core.EncryptedPdfException
 import org.verapdf.core.ModelParsingException
