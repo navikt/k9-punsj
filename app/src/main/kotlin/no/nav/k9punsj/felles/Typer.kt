@@ -18,6 +18,20 @@ data class Identitetsnummer private constructor(private val value: String) {
     }
 }
 
+data class CorrelationId private constructor(private val value: String) {
+    init { require(value.matches(Regex)) { "$value er en ugyldig correlation id" } }
+    override fun toString() = value
+    internal companion object {
+        private val Regex = "[a-zA-Z0-9_.\\-æøåÆØÅ]{5,200}".toRegex()
+        internal fun String.somCorrelationId() = CorrelationId(this)
+    }
+}
+
+enum class PunsjJournalpostKildeType(val kode: String, val navn: String) {
+    FORDEL("FORDEL", "Fordel"),
+    SAKSBEHANDLER("SAKSBEHANDLER", "Saksbehandler");
+}
+
 data class IdentOgJournalpost(
     val norskIdent: String,
     val journalpostId: String
@@ -48,3 +62,7 @@ data class Sak(
     enum class FagsakSystem { K9 }
 
 }
+
+data class IdentDto(
+    val norskIdent: String
+)

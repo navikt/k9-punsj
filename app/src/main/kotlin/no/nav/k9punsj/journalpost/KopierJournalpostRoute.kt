@@ -10,9 +10,6 @@ import no.nav.k9punsj.journalpost.KopierJournalpost.ikkeTilgang
 import no.nav.k9punsj.journalpost.KopierJournalpost.kanIkkeKopieres
 import no.nav.k9punsj.journalpost.KopierJournalpost.kopierJournalpostDto
 import no.nav.k9punsj.journalpost.KopierJournalpost.sendtTilKopiering
-import no.nav.k9punsj.journalpost.dto.JournalpostInfo
-import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
-import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.ruting.Destinasjon
 import no.nav.k9punsj.ruting.RutingService
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient

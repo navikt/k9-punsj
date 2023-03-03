@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.configuration.AuditConfiguration
+import no.nav.k9punsj.felles.NavHeaders
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.audit.Auditdata
@@ -165,7 +166,7 @@ class PepClient(
                 .post()
                 .uri(url)
                 .header(HttpHeaders.CONTENT_TYPE, XACML_CONTENT_TYPE)
-                .header("Nav-Call-Id", UUID.randomUUID().toString())
+                .header(NavHeaders.CallId, UUID.randomUUID().toString())
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(xacmlJson)
                 .retrieve()

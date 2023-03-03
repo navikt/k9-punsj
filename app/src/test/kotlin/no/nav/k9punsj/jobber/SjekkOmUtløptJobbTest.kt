@@ -6,7 +6,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktEntitet
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.journalpost.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
 import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo

@@ -25,9 +25,11 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
 private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::class.java)
-private const val REQUEST_ID_KEY = "request_id"
-private const val CORRELATION_ID_KEY = "correlation_id"
-private const val CALL_ID_KEY = "callId"
+private const val RequestIdHeader = "X-Request-ID"
+private const val RequestIdKey = "request_id"
+private const val CorrelationIdKey = "correlation_id"
+private const val CallIdKey = "callId"
+private const val AuthenticationKey = "authentication"
 
 private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
     companion object Key : CoroutineContext.Key<CoroutineRequestContext>
@@ -39,22 +41,25 @@ private fun CoroutineContext.requestContext() =
 
 internal fun CoroutineContext.hentAttributt(key: String): Any? = requestContext().attributter.getOrDefault(key, null)
 private fun CoroutineContext.settCorrelationId(correlationId: String) =
-    requestContext().attributter.put(CORRELATION_ID_KEY, correlationId)
+    requestContext().attributter.put(CorrelationIdKey, correlationId)
 
 private fun CoroutineContext.settCallId(callId: String) =
-    requestContext().attributter.put(CALL_ID_KEY, callId)
+    requestContext().attributter.put(CallIdKey, callId)
 
 internal fun CoroutineContext.hentCallId(): String =
-    hentAttributt(CALL_ID_KEY) as? String ?: throw IllegalStateException("$CALL_ID_KEY ikke satt")
+    hentAttributt(CallIdKey) as? String ?: throw IllegalStateException("$CallIdKey ikke satt")
 
-internal fun CoroutineContext.hentCorrelationId(): String =
-    hentAttributt(CORRELATION_ID_KEY) as? String ?: throw IllegalStateException("$CORRELATION_ID_KEY ikke satt")
+internal fun CoroutineContext.hentCorrelationId(): CorrelationId =
+    hentAttributt(CorrelationIdKey) as? CorrelationId ?: throw IllegalStateException("$CorrelationIdKey ikke satt")
 
 private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
-    requestContext().attributter.put("authentication", Authentication(authorizationHeader))
+    requestContext().attributter.put(AuthenticationKey, Authentication(authorizationHeader))
 
 internal fun CoroutineContext.hentAuthentication(): Authentication =
-    hentAttributt("authentication") as? Authentication ?: throw IllegalStateException("Authentication ikke satt")
+    hentAttributt(AuthenticationKey) as? Authentication ?: throw IllegalStateException("$AuthenticationKey ikke satt")
+
+@Deprecated("Erstatt med felles/Typer/CorrelationId")
+internal typealias CorrelationId = String
 
 internal fun K9SakRoutes(
     authenticationHandler: AuthenticationHandler,
@@ -89,11 +94,11 @@ private fun Routes(
     before { serverRequest ->
         val callId = serverRequest
             .headers()
-            .header(CALL_ID_KEY)
+            .header(CallIdKey)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        serverRequest.attributes()[REQUEST_ID_KEY] = serverRequest.headers().header("X-Request-ID").firstOrNull() ?: UUID.randomUUID().toString()
-        serverRequest.attributes()[CORRELATION_ID_KEY] = callId
-        serverRequest.attributes()[CALL_ID_KEY] = callId
+        serverRequest.attributes()[RequestIdKey] = serverRequest.headers().header(RequestIdHeader).firstOrNull() ?: UUID.randomUUID().toString()
+        serverRequest.attributes()[CorrelationIdKey] = callId
+        serverRequest.attributes()[CallIdKey] = callId
         logger.info("-> HTTP ${serverRequest.method().name()} ${serverRequest.path()}", e(serverRequest.contextMap()))
         serverRequest
     }
@@ -113,7 +118,7 @@ private fun Routes(
             .buildAndAwait()
     }
     onError<Throwable> { error, serverRequest ->
-        val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
+        val exceptionId = serverRequest.headers().header(CallIdKey).firstOrNull() ?: UUID.randomUUID().toString()
         logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
@@ -158,13 +163,13 @@ internal suspend fun <T> RequestContext(
     }
 }
 
-private fun ServerRequest.requestId() = attribute(REQUEST_ID_KEY).get() as String
-private fun ServerRequest.correlationId() = attribute(CORRELATION_ID_KEY).get() as String
-private fun ServerRequest.callId() = attribute(CALL_ID_KEY).get() as String
+private fun ServerRequest.requestId() = attribute(RequestIdKey).get() as String
+private fun ServerRequest.correlationId() = attribute(CorrelationIdKey).get() as String
+private fun ServerRequest.callId() = attribute(CallIdKey).get() as String
 private fun ServerRequest.contextMap() = pathVariables().toMutableMap().apply {
-    put(REQUEST_ID_KEY, requestId())
-    put(CORRELATION_ID_KEY, correlationId())
-    put(CALL_ID_KEY, callId())
+    put(RequestIdKey, requestId())
+    put(CorrelationIdKey, correlationId())
+    put(CallIdKey, callId())
 }
 
 data class Authentication(
