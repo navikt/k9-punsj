@@ -41,6 +41,9 @@
         <mockk.version>1.13.4</mockk.version>
         <wiremock.version>3.0.0-beta-4</wiremock.version> <!-- Beta for Jetty 11 support -->
         <jsonassert.version>1.5.1</jsonassert.version>
+
+        <sonar.organization>navikt</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <modules>
