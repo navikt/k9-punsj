@@ -110,10 +110,6 @@ spec:
       value: https://k9-sak.nais.preprod.local/k9/sak/api
     - name: K9SAK_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-sak/.default
-    - name: K9PUNSJBOLLE_BASE_URL
-      value: https://k9-punsjbolle.intern.dev.nav.no/api
-    - name : K9PUNSJBOLLE_SCOPE
-      value: api://dev-gcp.omsorgspenger.k9-punsjbolle/.default
     - name: AAREG_BASE_URL
       value: https://aareg-services-q1.dev.intern.nav.no/api/v2
     - name: AAREG_SCOPE
@@ -124,10 +120,6 @@ spec:
       value: https://dokarkiv-q1.dev.intern.nav.no
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
-    - name: K9_INFOTRYGD_BASE_URL
-      value: https://k9-infotrygd.dev.intern.nav.no
-    - name: K9_INFOTRYGD_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
 
     # Integrasjoner (Kafka)
     - name: K9_RAPID_TOPIC
