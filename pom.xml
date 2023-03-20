@@ -21,7 +21,7 @@
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
         <kotlin.version>1.8.10</kotlin.version>
-        <springdoc.version>2.0.3</springdoc.version>
+        <springdoc.version>2.0.4</springdoc.version>
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.3</logback.logstash.version>
         <token-support.version>3.0.3</token-support.version>
@@ -33,8 +33,8 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>3.4.3</k9-sak.version>
-        <k9-formidling.version>0.0.27</k9-formidling.version>
-        <k9-format.version>8.0.7</k9-format.version>
+        <k9-formidling.version>0.0.29</k9-formidling.version>
+        <k9-format.version>8.0.8</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
@@ -218,7 +218,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
