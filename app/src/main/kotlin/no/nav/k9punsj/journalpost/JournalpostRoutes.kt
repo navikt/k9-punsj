@@ -20,6 +20,8 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
@@ -27,6 +29,7 @@ import no.nav.k9punsj.journalpost.dto.ResultatDto
 import no.nav.k9punsj.journalpost.dto.RutingDto
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
 import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
+import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
@@ -234,7 +237,7 @@ internal class JournalpostRoutes(
                     url = Urls.SkalTilK9sak
                 )?.let { return@RequestContext it }
 
-                val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
+                /*
                 if (hentHvisJournalpostMedId?.skalTilK9 != null) {
                     val ruting = when (hentHvisJournalpostMedId.skalTilK9) {
                         true -> Destinasjon.K9Sak
@@ -267,8 +270,11 @@ internal class JournalpostRoutes(
                         .badRequest()
                         .bodyValueAndAwait("Feil vid ruting-kall: ${e.localizedMessage}")
                 }
+                */
 
-                val skalTilK9Sak = (destinasjon == Destinasjon.K9Sak)
+                val hentHvisJournalpostMedId = journalpostService.hentHvisJournalpostMedId(dto.journalpostId)
+
+                val skalTilK9Sak = true // Pr. 20.3.23 skal alt rutes til k9sak.
 
                 lagreHvorJournalpostSkal(
                     hentHvisPunsjJournalpostMedId = hentHvisJournalpostMedId,
@@ -516,13 +522,63 @@ internal class JournalpostRoutes(
             }
         }
 
-        kopierJournalpostRoute(
-            pepClient = pepClient,
-            journalpostService = journalpostService,
-            innsendingClient = innsendingClient,
-            rutingService = rutingService,
-            pdlService = pdlService
-        )
+        POST("/api${Urls.KopierJournalpost}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.pathVariable("journalpost_id")
+                val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
+                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+
+                val identListe = mutableListOf(dto.fra, dto.til)
+                dto.barn?.let { identListe.add(it) }
+                dto.annenPart?.let { identListe.add(it) }
+
+                if (!pepClient.sendeInnTilgang(identListe, Urls.KopierJournalpost)) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
+                }
+
+                val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
+                if (safJournalpost != null && safJournalpost.journalposttype == "U") {
+                    return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
+                }
+
+                val k9FagsakYtelseType = journalpost?.ytelse?.let {
+                    journalpost.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it))
+                } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
+
+
+                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
+
+                if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
+                    return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
+                }
+
+                val støttedeYtelseTyperForKopiering = listOf(
+                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
+                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                    FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+                )
+
+                if (!støttedeYtelseTyperForKopiering.contains(fagsakYtelseType)) {
+                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
+                }
+
+                innsendingClient.sendKopierJournalpost(
+                    KopierJournalpostInfo(
+                        journalpostId = journalpostId,
+                        fra = dto.fra,
+                        til = dto.til,
+                        pleietrengende = dto.barn,
+                        ytelse = k9FagsakYtelseType
+                    )
+                )
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.ACCEPTED)
+                    .bodyValueAndAwait("Journalposten vil bli kopiert.")
+            }
+        }
     }
 
     private suspend fun utvidJournalpostMedMottattDato(
@@ -566,6 +622,11 @@ internal class JournalpostRoutes(
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
+
+    private suspend fun kanIkkeKopieres(feil: String) = ServerResponse
+        .status(HttpStatus.CONFLICT)
+        .bodyValueAndAwait(feil)
+        .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)

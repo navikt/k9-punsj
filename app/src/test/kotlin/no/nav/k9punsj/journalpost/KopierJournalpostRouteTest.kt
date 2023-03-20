@@ -19,6 +19,7 @@ import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
