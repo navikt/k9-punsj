@@ -180,7 +180,13 @@ class K9SakServiceImpl(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
         opprettNytt: Boolean
     ): Pair<String?, String?> {
-        val body = kotlin.runCatching { objectMapper().writeValueAsString(k9SaksnummerGrunnlag) }.getOrNull()
+
+        val payloadMedAktørId = k9SaksnummerGrunnlag.copy(
+            søker = personService.finnAktørId(k9SaksnummerGrunnlag.søker),
+            pleietrengende = k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
+            annenPart = k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) }
+        )
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
         val (json, feil) = when(opprettNytt) {
