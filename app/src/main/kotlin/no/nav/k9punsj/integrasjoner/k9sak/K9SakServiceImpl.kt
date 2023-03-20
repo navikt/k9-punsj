@@ -23,7 +23,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.matchFagsakUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.pleiepengerSyktBarnUnntakslisteUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
-import no.nav.k9punsj.ruting.RutingGrunnlag
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -202,56 +201,6 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
         }
-    }
-
-    override suspend fun harLopendeSakSomInvolvererEnAv(lopendeSakDto: LopendeSakDto): RutingGrunnlag {
-        if (finnesMatchendeFagsak(
-                søker = lopendeSakDto.søker,
-                fraOgMed = lopendeSakDto.fraOgMed,
-                fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
-            )
-        ) {
-            return RutingGrunnlag(søker = true)
-        }
-        if (lopendeSakDto.pleietrengende?.let {
-                finnesMatchendeFagsak(
-                    pleietrengende = it,
-                    fraOgMed = lopendeSakDto.fraOgMed,
-                    fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
-                )
-            } == true) {
-            return RutingGrunnlag(søker = false, pleietrengende = true)
-        }
-        return RutingGrunnlag(
-            søker = false,
-            pleietrengende = false,
-            annenPart = lopendeSakDto.annenPart?.let {
-                finnesMatchendeFagsak(
-                    søker = it,
-                    fraOgMed = lopendeSakDto.fraOgMed,
-                    fagsakYtelseType = FagsakYtelseType.fraKode(lopendeSakDto.fagsakYtelseType.kode)
-                )
-            } ?: false
-        )
-    }
-
-    override suspend fun inngårIUnntaksliste(
-        aktørIder: Set<String>
-    ): Boolean {
-
-        // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
-        // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
-        val dto = JSONObject().also {
-            it.put("aktører", JSONArray(aktørIder.map { aktørId -> "$aktørId" }))
-        }.toString()
-
-        val (resultat, feil) = httpPost(pleiepengerSyktBarnUnntakslisteUrl, dto)
-
-        if(!feil.isNullOrEmpty()) {
-            return false
-        }
-
-        return (resultat == "true")
     }
 
     override suspend fun hentSisteSaksnummerForPeriode(

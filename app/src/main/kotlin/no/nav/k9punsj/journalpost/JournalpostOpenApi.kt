@@ -14,8 +14,6 @@ import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
-import no.nav.k9punsj.journalpost.dto.RutingDto
-import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
 import org.springframework.web.bind.annotation.GetMapping
@@ -135,40 +133,6 @@ internal class JournalpostOpenApi {
     fun LukkJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
         @RequestBody lukkJournalpostDto: LukkJournalpostDto
-    ) {
-    }
-
-    @PostMapping(JournalpostRoutes.Urls.SkalTilK9sak, produces = ["application/json"])
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "True når den skal til k9sak, false hvis den skal til infotrygd",
-                content = [
-                    Content(
-                        schema = Schema(
-                            implementation = SkalTilInfotrygdSvar::class
-                        )
-                    )
-                ]
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "Ikke tilgang til journalposten"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Journalpost eksisterer ikke"
-            )
-        ]
-    )
-    @Operation(
-        summary = "Sjekker om jornalposten må behandles av infotrygd",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    fun SkalTilK9Sak(
-        @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: RutingDto
     ) {
     }
 
