@@ -15,10 +15,8 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentEllerOpprettSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.utils.objectMapper
@@ -51,8 +49,6 @@ class K9SakServiceImpl(
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
-        internal const val hentEllerOpprettSaksnummerUrl = "/fordel/fagsak/opprett"
-        internal const val hentSaksnummerUrl = "/fagsak/siste"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
     }
@@ -180,18 +176,19 @@ class K9SakServiceImpl(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
         opprettNytt: Boolean
     ): Pair<String?, String?> {
-
-        val payloadMedAktørId = k9SaksnummerGrunnlag.copy(
-            søker = personService.finnAktørId(k9SaksnummerGrunnlag.søker),
-            pleietrengende = k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
-            annenPart = k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) }
+        val payloadMedAktørId = FinnEllerOpprettSak(
+            ytelseType = FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode),
+            aktørId = personService.finnAktørId(k9SaksnummerGrunnlag.søker),
+            periode = k9SaksnummerGrunnlag.periode,
+            pleietrengendeAktørId = k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
+            relatertPersonAktørId = k9SaksnummerGrunnlag.annenPart?.let {personService.finnAktørId(it) }
         )
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
         val (json, feil) = when(opprettNytt) {
-            true -> httpPost(body, hentEllerOpprettSaksnummerUrl)
-            false -> httpPost(body, hentSaksnummerUrl)
+            true -> httpPost(body, "/fordel/fagsak/opprett")
+            false -> httpPost(body, "/fagsak/siste")
         }
 
         return try {
@@ -312,6 +309,14 @@ class K9SakServiceImpl(
             val aktørId: String,
             val pleietrengendeAktørId: String? = null,
             val periode: PeriodeDto
+        )
+
+        data class FinnEllerOpprettSak(
+            val ytelseType: FagsakYtelseType,
+            val aktørId: String,
+            val periode: no.nav.k9punsj.felles.Periode,
+            val pleietrengendeAktørId: String?,
+            val relatertPersonAktørId: String?
         )
 
         data class MatchArbeidsforholdDto(

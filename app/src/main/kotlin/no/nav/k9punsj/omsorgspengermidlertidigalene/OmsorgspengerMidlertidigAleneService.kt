@@ -90,10 +90,17 @@ internal class OmsorgspengerMidlertidigAleneService(
                 periode = Periode.ÅpenPeriode
             )
 
-            k9SakService.hentEllerOpprettSaksnummer(
+            val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
                 k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
                 opprettNytt = true
             )
+
+            if(feil != null) {
+                return ServerResponse
+                    .badRequest()
+                    .json()
+                    .bodyValueAndAwait(feil)
+            }
         }
 
 

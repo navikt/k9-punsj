@@ -90,10 +90,17 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 periode = Periode.ÅpenPeriode
             )
 
-            k9SakService.hentEllerOpprettSaksnummer(
+            val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
                 k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
                 opprettNytt = true
             )
+
+            if(feil != null) {
+                return ServerResponse
+                    .badRequest()
+                    .json()
+                    .bodyValueAndAwait(feil)
+            }
         }
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
