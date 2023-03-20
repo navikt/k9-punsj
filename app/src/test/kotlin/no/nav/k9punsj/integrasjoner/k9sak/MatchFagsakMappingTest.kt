@@ -1,6 +1,7 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Companion.inneholderMatchendeFagsak
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -18,5 +19,12 @@ internal class MatchFagsakMappingTest {
         private const val IngenFagsaker = "[]"
         private const val HarFagsaker = """[{"status": "bar"},{"status":"bar2"}]"""
         private const val KunOpprettetFagsaker = """[{"status":"OPPR"}]"""
+
+        fun String.inneholderMatchendeFagsak() = JSONArray(this)
+            .asSequence()
+            .map { it as JSONObject }
+            .filterNot { it.getString("status") == "OPPR" }
+            .toSet()
+            .isNotEmpty()
     }
 }
