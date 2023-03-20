@@ -19,8 +19,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentEllerOpprett
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentSaksnummerUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.matchFagsakUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.pleiepengerSyktBarnUnntakslisteUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.utils.objectMapper
@@ -53,8 +51,6 @@ class K9SakServiceImpl(
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
-        internal const val matchFagsakUrl = "/fagsak/match"
-        internal const val pleiepengerSyktBarnUnntakslisteUrl ="/fordel/psb-infotrygd/finnes"
         internal const val hentEllerOpprettSaksnummerUrl = "/fordel/fagsak/opprett"
         internal const val hentSaksnummerUrl = "/fagsak/siste"
         internal const val sokFagsaker = "/fagsak/sok"
@@ -261,37 +257,6 @@ class K9SakServiceImpl(
         )
     }
 
-    private suspend fun finnesMatchendeFagsak(
-        søker: String? = null,
-        pleietrengende: String? = null,
-        annenPart: String? = null,
-        @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
-        fagsakYtelseType: FagsakYtelseType
-    ): Boolean {
-
-        // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
-        @Language("JSON")
-        val dto = """
-        {
-            "ytelseType": {
-                "kode": "${fagsakYtelseType.kode}",
-                "kodeverk": "FAGSAK_YTELSE"
-            },
-            "periode": {},
-            "bruker": ${søker?.let { """"$it"""" }},
-            "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
-            "relatertPersonIdenter": ${annenPart.jsonArray()}
-        }
-        """.trimIndent()
-
-        val (json, feil) = httpPost(dto, matchFagsakUrl)
-
-        if(json.isNullOrEmpty()) return false
-            .also { log.error("Inget svar fra K9sak vid søk på matchende fagsak, feil: $feil") }
-
-        return json.inneholderMatchendeFagsak()
-    }
-
     internal companion object {
         private suspend fun hentCallId() = try {
             coroutineContext.hentCallId()
@@ -336,13 +301,6 @@ class K9SakServiceImpl(
             val periode: PeriodeDto?
         )
 
-        data class MatchMedPeriodeDto(
-            val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: String? = null,
-            val periode: PeriodeDto?
-        )
-
         data class FinnFagsakDto(
             val ytelseType: FagsakYtelseType,
             val aktørId: String,
@@ -355,17 +313,5 @@ class K9SakServiceImpl(
             val bruker: String,
             val periode: PeriodeDto,
         )
-
-        private fun String?.jsonArray() = when (this) {
-            null -> "[]"
-            else -> """["$this"]"""
-        }
-
-        fun String.inneholderMatchendeFagsak() = JSONArray(this)
-            .asSequence()
-            .map { it as JSONObject }
-            .filterNot { it.getString("status") == "OPPR" }
-            .toSet()
-            .isNotEmpty()
     }
 }
