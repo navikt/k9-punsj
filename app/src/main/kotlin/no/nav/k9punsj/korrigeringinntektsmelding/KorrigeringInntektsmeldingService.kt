@@ -3,6 +3,7 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -10,7 +11,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
@@ -83,26 +83,23 @@ internal class KorrigeringInntektsmeldingService(
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (opprettNySøknad.pleietrengendeIdent != null) {
-            val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.OMSORGSPENGER,
-                annenPart = null,
-                søker = opprettNySøknad.norskIdent,
-                pleietrengende = opprettNySøknad.pleietrengendeIdent,
-                periode = Periode.ÅpenPeriode
-            )
+        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+            søknadstype = FagsakYtelseType.OMSORGSPENGER,
+            annenPart = opprettNySøknad.annenPart,
+            søker = opprettNySøknad.norskIdent,
+            pleietrengende = opprettNySøknad.pleietrengendeIdent,
+            journalpostId = opprettNySøknad.journalpostId
+        )
 
-            val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
-                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
-                opprettNytt = false
-            )
+        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
+            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
+        )
 
-            if(feil != null) {
-                return ServerResponse
-                    .badRequest()
-                    .json()
-                    .bodyValueAndAwait(feil)
-            }
+        if (feil != null) {
+            return ServerResponse
+                .badRequest()
+                .json()
+                .bodyValueAndAwait(feil)
         }
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
@@ -147,7 +144,8 @@ internal class KorrigeringInntektsmeldingService(
             val journalpostIder = journalpostService.kanSendesInn(søknadEntitet)
             if (journalpostIder.isEmpty()) {
                 logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
-                return ServerResponse.badRequest().bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+                return ServerResponse.badRequest()
+                    .bodyValueAndAwait("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
             }
 
             val (søknadK9Format, feilListe) = MapOmsTilK9Format(

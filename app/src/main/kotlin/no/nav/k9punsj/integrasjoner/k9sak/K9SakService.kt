@@ -28,7 +28,7 @@ interface K9SakService {
 
     suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
 
-    suspend fun hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag, opprettNytt: Boolean): Pair<String?, String?>
+    suspend fun hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag): Pair<String?, String?>
 
     suspend fun hentSisteSaksnummerForPeriode(
         fagsakYtelseType: FagsakYtelseType,

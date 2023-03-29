@@ -67,13 +67,9 @@ internal class TestK9SakService : K9SakService {
     )
 
     override suspend fun hentEllerOpprettSaksnummer(
-        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
-        opprettNytt: Boolean
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
     ): Pair<String?, String?> {
-        return when(opprettNytt) {
-            true -> Pair("NEW123", null)
-            false -> Pair("OLD123", null)
-        }
+            return Pair("ABC123", null)
     }
 
     override suspend fun hentSisteSaksnummerForPeriode(

@@ -17,7 +17,8 @@ data class PunsjJournalpost(
     val gosysoppgaveId: String? = null,
     val ytelse: String? = null,
     val payload: String? = null,
-    val fordelStatusType: String? = null
+    val fordelStatusType: String? = null,
+    val behandlingsAar: Int? = null
 )
 
 internal fun PunsjJournalpost?.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType: FagsakYtelseType): FagsakYtelseType {

@@ -51,8 +51,6 @@ data class OpprettNySøknad(
     val journalpostId: String,
     val pleietrengendeIdent: String?,
     val annenPart: String?,
-    // TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
-    val barnIdent: String?
 )
 
 data class PleietrengendeDto(
@@ -75,7 +73,6 @@ data class UtenlandsoppholdDtoV2(
     val periode: PeriodeDto? = null,
     val land: String? = null,
     val innleggelsesperioder: List<InnleggelsesperiodeDto> = emptyList()
-
 ) {
     data class InnleggelsesperiodeDto(
         val årsak: String?,

@@ -169,11 +169,10 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         pleietrengende: String
     ): OpprettNySøknad {
         return OpprettNySøknad(
-            personnummer,
-            journalpostId,
-            pleietrengende,
-            null,
-            null
+            norskIdent = personnummer,
+            journalpostId = journalpostId,
+            pleietrengendeIdent = pleietrengende,
+            annenPart = null
         )
     }
 
