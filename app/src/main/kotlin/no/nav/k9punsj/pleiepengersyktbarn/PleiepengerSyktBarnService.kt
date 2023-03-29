@@ -10,7 +10,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -183,31 +182,35 @@ internal class PleiepengerSyktBarnService(
         }
     }
 
-    internal suspend fun nySøknad(request: ServerRequest, søknad: OpprettNySøknad): ServerResponse {
+    internal suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
-        if (søknad.barnIdent != null) {
-            val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                annenPart = null,
-                søker = søknad.norskIdent,
-                pleietrengende = søknad.barnIdent,
-                periode = Periode.ÅpenPeriode
-            )
+        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+            søknadstype = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            annenPart = nySøknad.annenPart,
+            søker = nySøknad.norskIdent,
+            pleietrengende = nySøknad.pleietrengendeIdent,
+            journalpostId = nySøknad.journalpostId
+        )
 
-            k9SakService.hentEllerOpprettSaksnummer(
-                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
-                opprettNytt = true
-            )
+        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
+            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
+        )
+
+        if (feil != null) {
+            return ServerResponse
+                .badRequest()
+                .json()
+                .bodyValueAndAwait(feil)
         }
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-            søknad.journalpostId
+            ytelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            journalpostId = nySøknad.journalpostId
         )
 
         val søknadEntitet = mappeService.førsteInnsendingPsb(
-            nySøknad = søknad
+            nySøknad = nySøknad
         )
         return ServerResponse
             .created(request.søknadLocationUri(søknadEntitet.søknadId))

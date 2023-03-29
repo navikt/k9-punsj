@@ -1,5 +1,6 @@
 package no.nav.k9punsj.felles.dto
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.utils.objectMapper
@@ -49,10 +50,8 @@ data class MatchFagsakMedPeriode(
 data class OpprettNySøknad(
     val norskIdent: String,
     val journalpostId: String,
-    val pleietrengendeIdent: String?,
+    @JsonAlias("barnIdent") val pleietrengendeIdent: String?,
     val annenPart: String?,
-    // TODO endre til å bare bruke pleietrengendeIdent, men støtter både barnIdent og pleietrengendeIdent
-    val barnIdent: String?
 )
 
 data class PleietrengendeDto(
@@ -75,7 +74,6 @@ data class UtenlandsoppholdDtoV2(
     val periode: PeriodeDto? = null,
     val land: String? = null,
     val innleggelsesperioder: List<InnleggelsesperiodeDto> = emptyList()
-
 ) {
     data class InnleggelsesperiodeDto(
         val årsak: String?,

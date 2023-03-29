@@ -10,7 +10,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
@@ -81,21 +80,24 @@ internal class OmsorgspengerMidlertidigAleneService(
 
     internal suspend fun nySøknad(request: ServerRequest, nyOmsMASøknad: NyOmsMASøknad): ServerResponse {
         // oppretter sak i k9-sak hvis det ikke finnes fra før
-        if(nyOmsMASøknad.annenPart != null) {
-            val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
-                annenPart = nyOmsMASøknad.annenPart,
-                søker = nyOmsMASøknad.norskIdent,
-                pleietrengende = null,
-                periode = Periode.ÅpenPeriode
-            )
+        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+            søknadstype = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
+            annenPart = nyOmsMASøknad.annenPart,
+            søker = nyOmsMASøknad.norskIdent,
+            pleietrengende = null,
+            journalpostId = nyOmsMASøknad.journalpostId
+        )
 
-            k9SakService.hentEllerOpprettSaksnummer(
-                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
-                opprettNytt = true
-            )
+        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
+            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
+        )
+
+        if (feil != null) {
+            return ServerResponse
+                .badRequest()
+                .json()
+                .bodyValueAndAwait(feil)
         }
-
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(

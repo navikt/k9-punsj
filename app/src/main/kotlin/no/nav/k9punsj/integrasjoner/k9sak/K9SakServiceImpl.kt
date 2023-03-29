@@ -7,6 +7,8 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
+import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
+import no.nav.k9.sak.kontrakt.mottak.FinnSak
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -15,12 +17,11 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentEllerOpprettSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -41,7 +42,8 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
-    private val personService: PersonService
+    private val personService: PersonService,
+    private val journalpostService: JournalpostService
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -51,8 +53,6 @@ class K9SakServiceImpl(
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
-        internal const val hentEllerOpprettSaksnummerUrl = "/fordel/fagsak/opprett"
-        internal const val hentSaksnummerUrl = "/fagsak/siste"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
     }
@@ -169,35 +169,41 @@ class K9SakServiceImpl(
 
         val (json, feil) = httpPost(body, sokFagsakerUrl)
 
-        return if(!json.isNullOrEmpty()) {
+        return if (!json.isNullOrEmpty()) {
             Pair(json.fagsaker(), null)
         } else {
             Pair(null, feil)
         }
     }
 
+    /*
+    * 1. Utleder periode fra PunsjJournalpost.behandlingsAar eller bruker nåvarande år som periode.
+    * 2. Slår opp saksnummer basert på ytelsetype, periode & inkluderte aktørIder.
+     */
     override suspend fun hentEllerOpprettSaksnummer(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
-        opprettNytt: Boolean
     ): Pair<String?, String?> {
-        val body = kotlin.runCatching { objectMapper().writeValueAsString(k9SaksnummerGrunnlag) }.getOrNull()
+        val periode = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId).let {
+            Periode(
+                LocalDate.of(it, 1, 12),
+                LocalDate.of(it, 12, 31)
+            )
+        }
+
+        val payloadMedAktørId = FinnEllerOpprettSak(
+            FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
+            personService.finnAktørId(k9SaksnummerGrunnlag.søker),
+            k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
+            k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
+            periode,
+        )
+
+        val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (json, feil) = when(opprettNytt) {
-            true -> httpPost(body, hentEllerOpprettSaksnummerUrl)
-            false -> httpPost(body, hentSaksnummerUrl)
-        }
-
-        return try {
-            if (json == null) {
-                return Pair(null, feil!!)
-            }
-            val saksnummer = objectMapper().readValue<String>(json)
-            Pair(saksnummer, null)
-        } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
-        }
+        return httpPost(body, "/fordel/fagsak/opprett")
     }
+
 
     override suspend fun hentSisteSaksnummerForPeriode(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
@@ -229,7 +235,6 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
         }
-
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {

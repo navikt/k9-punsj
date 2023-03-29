@@ -51,6 +51,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
@@ -74,6 +75,7 @@ internal class JournalpostRoutes(
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
+        private data class BehandlingsAarDto(val behandlingsAar: Int)
     }
 
     internal object Urls {
@@ -82,6 +84,7 @@ internal class JournalpostRoutes(
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
         internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
+        internal const val SettBehandlingsAar = "/journalpost/settBehandlingsAar/{$JournalpostIdKey}"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
@@ -219,6 +222,26 @@ internal class JournalpostRoutes(
                 )
 
                 ServerResponse.noContent().buildAndAwait()
+            }
+        }
+
+        POST("/api${Urls.SettBehandlingsAar}") { request ->
+            RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = Urls.SettBehandlingsAar
+                )?.let { return@RequestContext it }
+
+                val journalpostId = request.journalpostId()
+                val behandlingsAar = request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
+
+                journalpostService.lagreBehandlingsAar(
+                    journalpostId = journalpostId,
+                    behandlingsAar = behandlingsAar
+                )
+
+                return@RequestContext ServerResponse.noContent().buildAndAwait()
             }
         }
 

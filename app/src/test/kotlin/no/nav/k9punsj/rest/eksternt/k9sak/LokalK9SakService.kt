@@ -71,8 +71,7 @@ class LokalK9SakService : K9SakService {
     )
 
     override suspend fun hentEllerOpprettSaksnummer(
-        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
-        opprettNytt: Boolean
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
     ): Pair<String?, String?> {
         return Pair("ABC123", null)
     }

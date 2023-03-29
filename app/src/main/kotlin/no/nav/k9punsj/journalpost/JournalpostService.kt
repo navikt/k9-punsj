@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
@@ -47,6 +48,20 @@ class JournalpostService(
 
     internal suspend fun hentSafJournalPost(journalpostId: String): SafDtos.Journalpost? =
         safGateway.hentJournalpostInfo(journalpostId)
+
+    internal suspend fun hentBehandlingsAar(journalpostId: String): Int =
+        journalpostRepository.hent(journalpostId).behandlingsAar ?: LocalDate.now().year
+
+    internal suspend fun lagreBehandlingsAar(journalpostId: String, behandlingsAar: Int) {
+        val journalpost = journalpostRepository.hentHvis(journalpostId)
+        if (journalpost != null) {
+            val medBehandlingsAar = journalpost.copy(behandlingsAar = behandlingsAar)
+            journalpostRepository.lagre(medBehandlingsAar) {
+                medBehandlingsAar
+            }
+        }
+    }
+
 
     internal suspend fun hentJournalpostInfo(journalpostId: String): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)

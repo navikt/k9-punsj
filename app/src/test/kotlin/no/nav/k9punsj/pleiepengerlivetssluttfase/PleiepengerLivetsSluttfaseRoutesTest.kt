@@ -147,7 +147,6 @@ class PleiepengerLivetsSluttfaseRoutesTest {
             personnummer,
             journalpostId,
             pleietrengende,
-            null,
             null
         )
     }

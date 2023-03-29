@@ -10,7 +10,6 @@ import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Periode
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -186,13 +185,19 @@ internal class PleiepengerLivetsSluttfaseService(
                 annenPart = null,
                 søker = opprettNySøknad.norskIdent,
                 pleietrengende = opprettNySøknad.pleietrengendeIdent,
-                periode = Periode.ÅpenPeriode
+                journalpostId = opprettNySøknad.journalpostId
             )
 
-            k9SakService.hentEllerOpprettSaksnummer(
-                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag,
-                opprettNytt = true
+            val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
+                k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
             )
+
+            if(feil != null) {
+                return ServerResponse
+                    .badRequest()
+                    .json()
+                    .bodyValueAndAwait(feil)
+            }
         }
 
         // setter riktig type der man jobber på en ukjent i utgangspunktet
