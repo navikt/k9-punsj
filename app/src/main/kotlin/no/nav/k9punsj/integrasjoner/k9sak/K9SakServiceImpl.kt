@@ -183,7 +183,7 @@ class K9SakServiceImpl(
     override suspend fun hentEllerOpprettSaksnummer(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
     ): Pair<String?, String?> {
-        val periode = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId)?.let {
+        val periode = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId).let {
             Periode(
                 LocalDate.of(it, 1, 12),
                 LocalDate.of(it, 12, 31)
@@ -191,7 +191,7 @@ class K9SakServiceImpl(
         }
 
         val payloadMedAktørId = FinnEllerOpprettSak(
-            FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).toString(),
+            FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
             personService.finnAktørId(k9SaksnummerGrunnlag.søker),
             k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
             k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
