@@ -112,7 +112,10 @@ class K9SakServiceImpl(
         val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
             ?: return Pair(null, "Fant ikke saksnummer")
 
-        val (json, feil) = httpPost(saksnummerJson, "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}")
+        val (json, feil) = httpPost(
+            saksnummerJson,
+            "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}"
+        )
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
@@ -183,12 +186,11 @@ class K9SakServiceImpl(
     override suspend fun hentEllerOpprettSaksnummer(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
     ): Pair<String?, String?> {
-        val periode = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId).let {
-            Periode(
-                LocalDate.of(it, 1, 12),
-                LocalDate.of(it, 12, 31)
-            )
-        }
+        val aar = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId)
+        val periode = Periode(
+            LocalDate.of(aar, 1, 12),
+            LocalDate.of(aar, 12, 31)
+        )
 
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
@@ -205,7 +207,6 @@ class K9SakServiceImpl(
 
         return httpPost(body, "/fordel/fagsak/opprett")
     }
-
 
     override suspend fun hentSisteSaksnummerForPeriode(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
