@@ -234,7 +234,11 @@ internal class JournalpostRoutes(
                 )?.let { return@RequestContext it }
 
                 val journalpostId = request.journalpostId()
-                val behandlingsAar = request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
+                val behandlingsAar = try {
+                    request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
+                } catch (e: Exception) {
+                    null
+                } ?: LocalDate.now().year
 
                 journalpostService.lagreBehandlingsAar(
                     journalpostId = journalpostId,

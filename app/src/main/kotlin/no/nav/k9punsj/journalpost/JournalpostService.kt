@@ -53,10 +53,6 @@ class JournalpostService(
         journalpostRepository.hent(journalpostId).behandlingsAar ?: LocalDate.now().year
 
     internal suspend fun lagreBehandlingsAar(journalpostId: String, behandlingsAar: Int) {
-        if(behandlingsAar < 2000 || behandlingsAar > LocalDate.now().year) {
-            logger.info("Ugyldig behandlingsår: $behandlingsAar")
-            return
-        }
         val journalpost = journalpostRepository.hentHvis(journalpostId)
         if (journalpost != null) {
             val medBehandlingsAar = journalpost.copy(behandlingsAar = behandlingsAar)
