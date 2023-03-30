@@ -23,6 +23,7 @@ internal class NotatRoutesTest {
         val søkerIdent = "66666666666" // no.nav.k9punsj.rest.eksternt.pdl.TestPdlService.harBarn
         val body = client.postAndAssertAwaitWithStatusAndBody<NyNotat, JournalPostResponse>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(
                 NyNotat(

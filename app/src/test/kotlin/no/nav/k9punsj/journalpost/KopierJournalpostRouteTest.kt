@@ -171,9 +171,9 @@ internal class KopierJournalpostRouteTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<String, String>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = journalpost.aktørId,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(payload),
-            navNorskIdentHeader = journalpost.aktørId,
             api,
             journalpostUri,
             "settBehandlingsAar",
@@ -207,9 +207,9 @@ internal class KopierJournalpostRouteTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<BehandlingsAarDto, String>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = journalpost.aktørId,
             assertStatus = HttpStatus.OK,
             requestBody = BodyInserters.fromValue(payload),
-            navNorskIdentHeader = journalpost.aktørId,
             api,
             journalpostUri,
             "settBehandlingsAar",

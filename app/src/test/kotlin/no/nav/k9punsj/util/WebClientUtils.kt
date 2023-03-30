@@ -46,9 +46,9 @@ object WebClientUtils {
 
     suspend inline fun <reified RequestType, reified ResponsType> WebClient.postAndAssertAwaitWithStatusAndBody(
         authorizationHeader: String,
+        navNorskIdentHeader: String? = null,
         assertStatus: HttpStatusCode,
         requestBody: BodyInserter<RequestType, ReactiveHttpOutputMessage>,
-        navNorskIdentHeader: String? = null,
         vararg pathSegment: String
     ): ResponsType {
         val spec = post()

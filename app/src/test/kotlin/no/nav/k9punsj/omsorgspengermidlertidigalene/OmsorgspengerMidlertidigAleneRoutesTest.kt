@@ -73,6 +73,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
 
         val response: OmsorgspengerMidlertidigAleneSøknadDto = client.postAndAssertAwaitWithStatusAndBody<NyOmsMASøknad, OmsorgspengerMidlertidigAleneSøknadDto>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.CREATED,
             requestBody = BodyInserters.fromValue(opprettNySøknad),
             api,
@@ -98,6 +99,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
             api,
@@ -314,6 +316,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest {
         // sender en søknad
         val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, Søknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
             api,

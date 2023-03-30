@@ -10,7 +10,10 @@ import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.*
+import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.util.LesFraFilUtil
+import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
@@ -27,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -254,6 +257,7 @@ class OmsorgspengerutbetalingRoutesTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(soeknad),
             api,
@@ -274,6 +278,7 @@ class OmsorgspengerutbetalingRoutesTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.BAD_REQUEST,
             requestBody = BodyInserters.fromValue(soeknad),
             api,
@@ -308,6 +313,7 @@ class OmsorgspengerutbetalingRoutesTest {
         val oppdatertSoeknadDto =
             client.postAndAssertAwaitWithStatusAndBody<MatchFagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
                 authorizationHeader = saksbehandlerAuthorizationHeader,
+                navNorskIdentHeader = null,
                 assertStatus = HttpStatus.OK,
                 requestBody = BodyInserters.fromValue(dtoSpørring),
                 api,
@@ -395,6 +401,7 @@ class OmsorgspengerutbetalingRoutesTest {
         // sender en søknad
         val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
             api,
