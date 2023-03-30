@@ -48,12 +48,19 @@ object WebClientUtils {
         authorizationHeader: String,
         assertStatus: HttpStatusCode,
         requestBody: BodyInserter<RequestType, ReactiveHttpOutputMessage>,
+        navNorskIdentHeader: String? = null,
         vararg pathSegment: String
     ): ResponsType {
-        val (status: HttpStatusCode, body: ResponsType) = post()
+        val spec = post()
             .uri { it.pathSegment(*pathSegment).build() }
             .header(HttpHeaders.AUTHORIZATION, authorizationHeader)
             .body(requestBody)
+
+        spec.apply {
+            navNorskIdentHeader?.let { header("X-Nav-NorskIdent", it) }
+        }
+
+        val (status: HttpStatusCode, body: ResponsType) = spec
             .awaitStatusWithBody<ResponsType>()
         Assertions.assertEquals(assertStatus, status)
         return body

@@ -14,6 +14,7 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
     companion object {
         private val map = values().associateBy { v -> v.kode }
         fun fromKode(kode: String): FagsakYtelseType {
+
             val type = map[kode]
             if (type != null) {
                 return type
