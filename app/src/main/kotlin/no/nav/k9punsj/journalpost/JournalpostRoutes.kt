@@ -17,6 +17,7 @@ import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
+import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
@@ -75,7 +76,6 @@ internal class JournalpostRoutes(
         private const val JournalpostIdKey = "journalpost_id"
         private const val DokumentIdKey = "dokument_id"
         private val logger: Logger = LoggerFactory.getLogger(JournalpostRoutes::class.java)
-        private data class BehandlingsAarDto(val behandlingsAar: Int)
     }
 
     internal object Urls {
@@ -237,15 +237,19 @@ internal class JournalpostRoutes(
                 val behandlingsAar = try {
                     request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
                 } catch (e: Exception) {
-                    null
-                } ?: LocalDate.now().year
+                    val nåVærendeÅr = LocalDate.now().year
+                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
+                    nåVærendeÅr
+                }
 
                 journalpostService.lagreBehandlingsAar(
                     journalpostId = journalpostId,
                     behandlingsAar = behandlingsAar
                 )
 
-                return@RequestContext ServerResponse.noContent().buildAndAwait()
+                return@RequestContext ServerResponse.ok()
+                    .json()
+                    .bodyValueAndAwait(BehandlingsAarDto(behandlingsAar = behandlingsAar))
             }
         }
 

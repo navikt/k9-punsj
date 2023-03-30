@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 @Service
 class JournalpostService(
@@ -49,12 +49,16 @@ class JournalpostService(
     internal suspend fun hentSafJournalPost(journalpostId: String): SafDtos.Journalpost? =
         safGateway.hentJournalpostInfo(journalpostId)
 
-    internal suspend fun hentBehandlingsAar(journalpostId: String): Int =
-        journalpostRepository.hent(journalpostId).behandlingsAar ?: LocalDate.now().year
+    internal suspend fun hentBehandlingsAar(journalpostId: String): Int {
+        val behandlingsAar = journalpostRepository.hent(journalpostId).behandlingsAar
+        logger.info("Hentet behandlingsår ($behandlingsAar) for journalpost: $journalpostId")
+        return behandlingsAar ?: LocalDate.now().year
+    }
 
     internal suspend fun lagreBehandlingsAar(journalpostId: String, behandlingsAar: Int) {
         val journalpost = journalpostRepository.hentHvis(journalpostId)
         if (journalpost != null) {
+            logger.info("Oppdaterer behandlingsår ($behandlingsAar) for journalpost: $journalpostId")
             val medBehandlingsAar = journalpost.copy(behandlingsAar = behandlingsAar)
             journalpostRepository.lagre(medBehandlingsAar) {
                 medBehandlingsAar

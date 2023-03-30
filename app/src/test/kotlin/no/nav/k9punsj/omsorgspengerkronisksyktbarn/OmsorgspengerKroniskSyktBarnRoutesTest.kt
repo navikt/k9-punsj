@@ -285,6 +285,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
         val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.BAD_REQUEST,
             requestBody = BodyInserters.fromValue(soeknad),
             api,
@@ -372,6 +373,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         // sender en søknad
         val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
             assertStatus = HttpStatus.ACCEPTED,
             requestBody = BodyInserters.fromValue(sendSøknad),
             api,
