@@ -160,9 +160,13 @@ internal class AksjonspunktServiceImpl(
         val journalpost = journalpostService.hent(journalpostId)
         val søknad = if (søknadId != null) søknadsService.hentSøknad(søknadId = søknadId)?.søknad else null
         val barnIdent = if (søknad != null) {
-            val vising: PleiepengerSyktBarnSøknadDto = objectMapper().convertValue(søknad)
-            val norskIdent = vising.barn?.norskIdent
-            norskIdent
+            val vising: PleiepengerSyktBarnSøknadDto? = try {
+                objectMapper().convertValue(søknad)
+            } catch (e: Exception) {
+                log.info("settPåVentOgSendTilLos: ikke barn i søknad for journalpostId=$journalpostId")
+                null
+            }
+            vising?.barn?.norskIdent
         } else null
 
         val eksternId = journalpost.uuid
