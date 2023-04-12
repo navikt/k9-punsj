@@ -9,10 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <sonar.skip>true</sonar.skip>
-    </properties>
-
     <artifactId>punsj-mocks</artifactId>
 
     <dependencies>

@@ -446,6 +446,9 @@ internal class JournalpostRoutes(
             }
         }
 
+        /*
+        * Brukes for å journalføre inntektsmelding uten søknad som generell sak
+         */
         POST("/api${Urls.JournalførPåGenerellSak}") { request ->
             RequestContext(coroutineContext, request) {
                 val identOgJournalpost = request.identOgJournalpost()
