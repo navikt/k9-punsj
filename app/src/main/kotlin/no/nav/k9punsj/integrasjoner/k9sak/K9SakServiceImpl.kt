@@ -8,7 +8,6 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
-import no.nav.k9.sak.kontrakt.mottak.FinnSak
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -199,8 +198,6 @@ class K9SakServiceImpl(
             k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
             periode,
         )
-
-        log.info("DEBUG: FinnEllerOpprettSak: ${payloadMedAktørId}")
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
