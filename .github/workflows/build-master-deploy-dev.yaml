@@ -61,7 +61,7 @@ jobs:
       - name: Maven Dependency Tree Dependency Submission
         uses: advanced-security/maven-dependency-submission-action@v3.0.0
         with:
-          settings-file: ./.github/.m2/settings.xml
+          settings-file: ./.m2/settings.xml
           ignore-maven-wrapper: true
         env:
           GITHUB_USERNAME: x-access-token
