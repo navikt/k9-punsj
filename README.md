@@ -61,7 +61,7 @@ Husk å være logget inn på [dev](https://k9-punsj.dev.intern.nav.no/) først, 
 for å hente token som kan brukes i swagger.
 
 ### Kafka manager for lesing av meldinger i dev
-Finns tilgjenglig på [k9-kafka-manager](https://k9-kafka-manager.dev.intern.nav.no/index.html), tilgang for alle i team k9saksbehandling. (Logge in med nav.no-mail)
+Finns tilgjenglig på [k9-kafka-manager](https://k9-kafka-manager.intern.dev.nav.no/index.html), tilgang for alle i team k9saksbehandling. (Logge in med nav.no-mail)
 
 ---
 ## Henvendelser
