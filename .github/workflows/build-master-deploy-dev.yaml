@@ -58,16 +58,12 @@ jobs:
           CLUSTER: dev-fss
           RESOURCE: nais/dev-fss.yml
 
-      - name: Run Trivy vulnerability scanner on docker image
-        uses: aquasecurity/trivy-action@master
+      - name: Maven Dependency Tree Dependency Submission
+        uses: advanced-security/maven-dependency-submission-action@v3.0.0
         with:
-          image-ref: ${{ env.IMAGE }}
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
+          settings-file: ./.github/.m2/settings.xml
+          ignore-maven-wrapper: true
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}

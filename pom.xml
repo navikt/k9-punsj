@@ -25,21 +25,21 @@
         <kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
         <logback.logstash.version>7.3</logback.logstash.version>
         <token-support.version>3.0.3</token-support.version>
-        <dusseldorf-ktor.version>3.2.2.4-98ccf55</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>3.2.2.4-f09ec97</dusseldorf-ktor.version>
         <k9-rapid.version>1.20230206064237-4df4393</k9-rapid.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <orgjson.version>20230227</orgjson.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>3.4.3</k9-sak.version>
-        <k9-formidling.version>0.0.29</k9-formidling.version>
+        <k9-sak.version>3.4.5</k9-sak.version>
+        <k9-formidling.version>0.0.30</k9-formidling.version>
         <k9-format.version>8.0.8</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.4</mockk.version>
-        <wiremock.version>3.0.0-beta-5</wiremock.version> <!-- Beta for Jetty 11 support -->
+        <wiremock.version>3.0.0-beta-7</wiremock.version> <!-- Beta for Jetty 11 support -->
         <jsonassert.version>1.5.1</jsonassert.version>
     </properties>
 
@@ -211,31 +211,5 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <formats>
-                                <format>XML</format>
-                            </formats>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>
