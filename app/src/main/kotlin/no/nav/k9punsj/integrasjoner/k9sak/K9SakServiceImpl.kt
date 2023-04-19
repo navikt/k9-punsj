@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -198,6 +198,8 @@ class K9SakServiceImpl(
             k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
             periode,
         )
+
+        log.info("DEBUG: $payloadMedAktørId") // TOOD: Fjern denne før prodsetting
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
