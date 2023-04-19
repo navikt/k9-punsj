@@ -199,8 +199,6 @@ class K9SakServiceImpl(
             periode,
         )
 
-        log.info("DEBUG: $payloadMedAktørId") // TOOD: Fjern denne før prodsetting
-
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
