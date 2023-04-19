@@ -59,7 +59,7 @@ jobs:
           RESOURCE: nais/dev-fss.yml
 
       - name: Maven Dependency Tree Dependency Submission
-        uses: advanced-security/maven-dependency-submission-action@v3.0.0
+        uses: advanced-security/maven-dependency-submission-action@v3.0.1
         with:
           settings-file: ./.m2/settings.xml
           ignore-maven-wrapper: true
