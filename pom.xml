@@ -39,7 +39,7 @@
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.5</mockk.version>
-        <wiremock.version>3.0.0-beta-7</wiremock.version> <!-- Beta for Jetty 11 support -->
+        <wiremock.version>3.0.0-beta-8</wiremock.version> <!-- Beta for Jetty 11 support -->
         <jsonassert.version>1.5.1</jsonassert.version>
     </properties>
 
