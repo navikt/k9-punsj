@@ -32,7 +32,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
-import java.time.LocalDate
 
 @Service
 internal class OmsorgspengerutbetalingService(
