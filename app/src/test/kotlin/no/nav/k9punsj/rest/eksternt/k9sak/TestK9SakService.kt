@@ -35,17 +35,6 @@ internal class TestK9SakService : K9SakService {
                 null
             )
         }
-        if (søker == "2023" && fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER) {
-            return Pair(
-                listOf(
-                    PeriodeDto(
-                        fom = LocalDate.of(2023, 1, 1),
-                        tom = LocalDate.of(2023, 12, 31)
-                    )
-                ),
-                null
-            )
-        }
         return Pair(emptyList(), null)
     }
 
