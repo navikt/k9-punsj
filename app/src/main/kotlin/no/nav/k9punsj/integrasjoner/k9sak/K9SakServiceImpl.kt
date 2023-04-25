@@ -95,10 +95,11 @@ class K9SakServiceImpl(
         periode: PeriodeDto
     ): Pair<List<PeriodeDto>?, String?> {
         val søkerAktørId = personService.finnAktørId(søker)
+        val barnAktørId = barn?.let { personService.finnAktørId(barn) }
         val finnFagsakDto = FinnFagsakDto(
             ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
             aktørId = søkerAktørId,
-            pleietrengendeAktørId = barn,
+            pleietrengendeAktørId = barnAktørId,
             periode = periode
         )
 
