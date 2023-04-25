@@ -157,6 +157,10 @@ class LesFraFilUtil {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend.json"))
         }
 
+        fun søknadFraFrontendOmsUtKorrigering(): SøknadJson {
+            return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-korrigering.json"))
+        }
+
         fun søknadFraFrontendOmsUtFeil(): SøknadJson {
             return objectMapper().readValue(lesFraOmsUtMappeFil("søknad-fra-frontend-feil.json"))
         }

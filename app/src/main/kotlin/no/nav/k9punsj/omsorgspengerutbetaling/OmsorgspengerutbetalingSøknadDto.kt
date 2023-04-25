@@ -63,7 +63,7 @@ data class OmsorgspengerutbetalingSøknadDto(
      * nytt saksnr hvert år
      */
     fun periodeForHeleAretMedFravaer(): PeriodeDto? {
-        return if(fravaersperioder.isNullOrEmpty() || fravaersperioder.first().periode.fom != null) {
+        return if(fravaersperioder.isNullOrEmpty() || fravaersperioder.first().periode.fom == null) {
             null
         } else {
             val aar = fravaersperioder.first().periode.fom!!.year

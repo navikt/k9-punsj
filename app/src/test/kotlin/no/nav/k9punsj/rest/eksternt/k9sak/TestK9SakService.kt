@@ -18,7 +18,36 @@ internal class TestK9SakService : K9SakService {
         søker: String,
         barn: String?,
         fagsakYtelseType: FagsakYtelseType
-    ): Pair<List<PeriodeDto>?, String?> = Pair(emptyList(), null)
+    ): Pair<List<PeriodeDto>?, String?> {
+        // OmsorgspengerutbetalingRoutesTest.Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år
+        if (søker == "03011939596" && fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER) {
+            return Pair(
+                listOf(
+                    PeriodeDto(
+                        fom = LocalDate.of(2022, 12, 1),
+                        tom = LocalDate.of(2022, 12, 5)
+                    ),
+                    PeriodeDto(
+                        fom = LocalDate.of(2022, 12, 10),
+                        tom = LocalDate.of(2022, 12, 15)
+                    )
+                ),
+                null
+            )
+        }
+        if (søker == "2023" && fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER) {
+            return Pair(
+                listOf(
+                    PeriodeDto(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 12, 31)
+                    )
+                ),
+                null
+            )
+        }
+        return Pair(emptyList(), null)
+    }
 
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
@@ -69,7 +98,7 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentEllerOpprettSaksnummer(
         k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
     ): Pair<String?, String?> {
-            return Pair("ABC123", null)
+        return Pair("ABC123", null)
     }
 
     override suspend fun hentSisteSaksnummerForPeriode(
