@@ -19,7 +19,6 @@ import java.net.URI
 @Service
 internal class SakClient(
     @Value("\${no.nav.sak.base_url}") private val baseUrl: URI,
-    @Value("\${no.nav.sak.scope}") private val sakScope: String,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) {
 
