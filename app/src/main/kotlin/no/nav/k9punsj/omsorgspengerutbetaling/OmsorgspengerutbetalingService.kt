@@ -214,7 +214,7 @@ internal class OmsorgspengerutbetalingService(
             hentInfoFraK9Sak(
                 Matchfagsak(
                     brukerIdent = soknadTilValidering.soekerId!!,
-                    periode = fravaersPeriode
+                    periode = fravaersPeriode // Er periode null henter vi fraværsperioder fra i år.
                 )
             )
         } else listOf()
