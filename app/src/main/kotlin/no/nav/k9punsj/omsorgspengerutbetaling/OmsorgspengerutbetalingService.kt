@@ -206,8 +206,16 @@ internal class OmsorgspengerutbetalingService(
 
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
         val eksisterendePerioder = if (soknadTilValidering.erKorrigering!!) {
-            logger.info("Korrigering av søknad. Henter eksisterende perioder...")
-            hentInfoFraK9Sak(Matchfagsak(brukerIdent = soknadTilValidering.soekerId!!))
+            val fravaersPeriode = soknadTilValidering.fravaersperioder?.let { fravaersPerioder ->
+                soknadTilValidering.periodeForHeleAretMedFravaer()
+            }
+            logger.info("Korrigering av søknad. Henter eksisterende perioder for soknadsperiode: [$fravaersPeriode]")
+            hentInfoFraK9Sak(
+                Matchfagsak(
+                    brukerIdent = soknadTilValidering.soekerId!!,
+                    periode = fravaersPeriode // Er periode null henter vi fraværsperioder fra i år.
+                )
+            )
         } else listOf()
 
         try {
@@ -272,7 +280,7 @@ internal class OmsorgspengerutbetalingService(
     }
 
     internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
-        val (perioder, _) = if(matchfagsak.periode == null) {
+        val (perioder, _) = if (matchfagsak.periode == null) {
             k9SakService.hentPerioderSomFinnesIK9(
                 søker = matchfagsak.brukerIdent,
                 fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER

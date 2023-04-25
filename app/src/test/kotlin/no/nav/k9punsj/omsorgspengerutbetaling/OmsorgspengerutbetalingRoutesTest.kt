@@ -269,6 +269,29 @@ class OmsorgspengerutbetalingRoutesTest {
     }
 
     @Test
+    fun `Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år`() = runBlocking {
+        // 03011939596 på OMS har två perioder i k9sak fra december 2022.
+        // OmsUtKorrigering fjerner første perioden i 2022.
+        val norskIdent = "03011939596"
+        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtKorrigering()
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
+
+        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api,
+            søknadTypeUri,
+            "valider"
+        )
+
+        assertThat(body.feil).isNull()
+    }
+
+    @Test
     fun `skal få feil hvis mottattDato ikke er fylt ut`(): Unit = runBlocking {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtFeil()

@@ -56,6 +56,23 @@ data class OmsorgspengerutbetalingSøknadDto(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val foedselsdato: LocalDate?
     )
+
+    /*
+     * Plukker ut første fraværsperiode og skaper ny Periode for det året.
+     * Dette for å kunne hente ut eksisterende perioder for tidigare år på omsorgspenger saksnummer som får
+     * nytt saksnr hvert år
+     */
+    fun periodeForHeleAretMedFravaer(): PeriodeDto? {
+        return if(fravaersperioder.isNullOrEmpty() || fravaersperioder.first().periode.fom == null) {
+            null
+        } else {
+            val aar = fravaersperioder.first().periode.fom!!.year
+            PeriodeDto(
+                fom = LocalDate.of(aar, 1, 1),
+                tom = LocalDate.of(aar, 12, 31)
+            )
+        }
+    }
 }
 
 data class SvarOmsUtDto(
