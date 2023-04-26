@@ -157,10 +157,12 @@ internal class MapOmsTilK9Format(
         private val Validator = OmsorgspengerUtbetalingSøknadValidator()
         private const val Versjon = "1.0.0"
 
-        private fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
+        internal fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
             val lista: MutableList<PeriodeDto> = mutableListOf()
-            for (i in 0 until Duration.between(fom?.atStartOfDay(), tom?.plusDays(1)?.atStartOfDay()).toDays()) {
-                lista.add(PeriodeDto(fom?.plusDays(i), fom?.plusDays(i)))
+            if (fom != null && tom != null) {
+                for (i in 0 until Duration.between(fom.atStartOfDay(), tom.plusDays(1)?.atStartOfDay()).toDays()) {
+                    lista.add(PeriodeDto(fom.plusDays(i), fom.plusDays(i)))
+                }
             }
             return lista
         }
