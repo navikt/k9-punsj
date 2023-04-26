@@ -32,7 +32,7 @@
         <orgjson.version>20230227</orgjson.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>3.4.6</k9-sak.version>
+        <k9-sak.version>3.4.7</k9-sak.version>
         <k9-formidling.version>0.0.30</k9-formidling.version>
         <k9-format.version>8.0.8</k9-format.version>
 
