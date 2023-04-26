@@ -8,6 +8,8 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSoeknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -83,5 +85,9 @@ class LokalK9SakService : K9SakService {
         pleietrengende: String?
     ): Pair<SaksnummerDto?, String?> {
         return Pair(SaksnummerDto("ABC123"), null)
+    }
+
+    override suspend fun sendInnSoeknad(soeknad: PunsjetSoeknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+        TODO("Not yet implemented")
     }
 }
