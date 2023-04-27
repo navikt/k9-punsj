@@ -80,7 +80,9 @@ internal class MapDokumentTilK9Formidling(
     private fun BrevDataDto.leggTilDokumentData() {
         kotlin.runCatching {
             DokumentdataParametreK9()
-            .apply { fritekstbrev = FritekstbrevinnholdDto().apply {
+            .apply {
+                fritekst = this@leggTilDokumentData.fritekst
+                fritekstbrev = FritekstbrevinnholdDto().apply {
                     overskrift = this@leggTilDokumentData.fritekstbrev.overskrift
                     brødtekst = this@leggTilDokumentData.fritekstbrev.brødtekst
                 }
