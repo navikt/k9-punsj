@@ -3,6 +3,7 @@ package no.nav.k9punsj.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.validation.Validation.buildDefaultValidatorFactory
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.*
 import no.nav.k9.søknad.felles.Feil
@@ -29,7 +30,7 @@ internal class MapDokumentTilK9Formidling(
             dto.mottaker.leggTilMottaker()
             dto.fagsakYtelseType.leggTilFagsakTyelse()
             dto.dokumentMal.leggTilDokumentMal()
-            dto.dokumentdata.leggTilDokumentData()
+            dto.dokumentdata?.leggTilDokumentData()
             bestilling.avsenderApplikasjon = AvsenderApplikasjon.K9PUNSJ
             feil.addAll(validator.validate(bestilling).map {
                 Feil(it.propertyPath.toString(), "kode", it.message) }
@@ -76,8 +77,15 @@ internal class MapDokumentTilK9Formidling(
             .onFailure { feil.add(Feil("DokumentMalType", "DokumentMalType", it.message)) }
     }
 
-    private fun BrevDataDto?.leggTilDokumentData() {
-        kotlin.runCatching { objectMapper().readValue<DokumentdataParametreK9>(objectMapper().writeValueAsString(this)) }
+    private fun BrevDataDto.leggTilDokumentData() {
+        kotlin.runCatching {
+            DokumentdataParametreK9()
+            .apply { fritekstbrev = FritekstbrevinnholdDto().apply {
+                    overskrift = this@leggTilDokumentData.fritekstbrev.overskrift
+                    brødtekst = this@leggTilDokumentData.fritekstbrev.brødtekst
+                }
+            }
+        }
             .onSuccess { bestilling.dokumentdata = it }
             .onFailure { feil.add(Feil("DokumentData", "DokumentData", it.message)) }
     }
