@@ -36,7 +36,7 @@ internal class MapDokumentTilK9Formidling(
                 Feil(it.propertyPath.toString(), "kode", it.message) }
             )
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("dokumentbestilling", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }

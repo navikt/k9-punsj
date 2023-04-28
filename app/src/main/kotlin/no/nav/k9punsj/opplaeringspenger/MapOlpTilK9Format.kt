@@ -80,7 +80,7 @@ internal class MapOlpTilK9Format(
             søknad.medYtelse(opplaeringspenger)
             feil.addAll(Validator.valider(søknad, perioderSomFinnesIK9.somK9Perioder()))
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }

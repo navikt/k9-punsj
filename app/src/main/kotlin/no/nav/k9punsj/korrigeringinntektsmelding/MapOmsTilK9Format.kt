@@ -42,7 +42,7 @@ internal class MapOmsTilK9Format(
             søknad.medYtelse(omsorgspengerUtbetaling)
             feil.addAll(Validator.valider(søknad))
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }

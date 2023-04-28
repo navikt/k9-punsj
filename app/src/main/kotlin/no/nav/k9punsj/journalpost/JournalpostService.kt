@@ -189,11 +189,6 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
-    internal suspend fun hentPunsjInnsendingType(journalpostId: String): PunsjInnsendingType? {
-        return hentHvisJournalpostMedId(journalpostId)?.type
-            .let { if (it != null) PunsjInnsendingType.fraKode(it) else null }
-    }
-
     internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
         return journalpostRepository.kanSendeInn(journalpostId)
     }
