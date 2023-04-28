@@ -71,7 +71,7 @@ internal class MapOmsUtTilK9Format(
                 feil.addAll(Validator.valider(søknad))
             }
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }
