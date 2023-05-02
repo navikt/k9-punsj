@@ -12,6 +12,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -21,7 +22,7 @@ import kotlin.coroutines.coroutineContext
 internal class SoknadService(
     private val journalpostService: JournalpostService,
     private val søknadRepository: SøknadRepository,
-    private val innsendingClient: InnsendingClient,
+    @Qualifier("Rest") private val innsendingClient: InnsendingClient,
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway
 ) {

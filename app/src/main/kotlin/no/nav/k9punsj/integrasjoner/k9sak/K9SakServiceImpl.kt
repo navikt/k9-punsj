@@ -22,7 +22,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
-import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSoeknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.utils.objectMapper
@@ -243,7 +243,7 @@ class K9SakServiceImpl(
         }
     }
 
-    override suspend fun sendInnSoeknad(soeknad: PunsjetSoeknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+    override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
         val forsendelseMottattTidspunkt = soeknad.mottatt.withZoneSameInstant(Oslo).toLocalDateTime()
 
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31

@@ -20,8 +20,13 @@ internal data class FerdigstillJournalpost(
     private val sak: Sak,
 ) {
 
-    private val erFerdigstilt = status.erFerdigstilt || status.erJournalført
-    private val kanFerdigstilles = !erFerdigstilt
+    private val mangler = mutableListOf<Mangler>().also { alleMangler ->
+        if (bruker == null) { alleMangler.add(Mangler.Bruker) }
+        if (avsendernavn.isNullOrBlank() && bruker?.navn.isNullOrBlank() && !type.erNotat) { alleMangler.add(Mangler.Avsendernavn) }
+    }.toList()
+
+    internal val erFerdigstilt = status.erFerdigstilt || status.erJournalført
+    internal val kanFerdigstilles = !erFerdigstilt
 
     internal fun oppdaterPayloadMedSak(): String {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
@@ -77,8 +82,20 @@ internal data class FerdigstillJournalpost(
         }
     }
 
+    private fun mangler() : List<Mangler> {
+        check(!erFerdigstilt) { "Journalpost $journalpostId er allerede ferdigstilt." }
+        return mangler
+    }
+
+    internal fun manglerAvsendernavn() = mangler().contains(Mangler.Avsendernavn)
+
     internal fun kanFerdigstilles() {
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
+    }
+
+    internal fun ferdigstillPayload() : String {
+        check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
+        return FerdigstillPayload
     }
 
     internal data class Bruker(
@@ -98,8 +115,14 @@ internal data class FerdigstillJournalpost(
         internal val fagsakId: String?,
     )
 
+    internal enum class Mangler {
+        Bruker,
+        Avsendernavn
+    }
+
     private companion object {
         private val logger = LoggerFactory.getLogger(FerdigstillJournalpost::class.java)
         private const val ManglerTittel = "Mangler tittel"
+        private const val FerdigstillPayload = """{"journalfoerendeEnhet": "9999"}"""
     }
 }

@@ -1,16 +1,19 @@
 package no.nav.k9punsj.integrasjoner.k9sak.dto
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.Periode
+import no.nav.k9punsj.felles.Periode.Companion.ÅpenPeriode
+import no.nav.k9punsj.felles.Søknadstype
 import java.time.ZonedDateTime
 
-data class PunsjetSoeknad(
+data class PunsjetSøknad(
     internal val versjon: String,
     internal val søknadId: String,
     internal val saksnummer: String?,
-    internal val søknadstype: Soeknadstype,
+    internal val søknadstype: Søknadstype,
     internal val søker: Identitetsnummer,
     internal val pleietrengende: Identitetsnummer?,
     internal val annenPart: Identitetsnummer?,

@@ -10,10 +10,13 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 @Component
 @StandardProfil
+@Qualifier("Kafka")
+@Primary
 class KafkaInnsendingClient(
     @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>,
     @Value("\${no.nav.kafka.k9_rapid.topic}") private val k9rapidTopic: String

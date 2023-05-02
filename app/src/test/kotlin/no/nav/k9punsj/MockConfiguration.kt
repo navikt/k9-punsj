@@ -15,6 +15,7 @@ import no.nav.k9punsj.wiremock.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl
 import no.nav.k9punsj.wiremock.getK9sakBaseUrl
 import no.nav.k9punsj.wiremock.getPdlBaseUrl
 import no.nav.k9punsj.wiremock.getSafBaseUrl
+import no.nav.k9punsj.wiremock.getSakBaseUrl
 import java.net.URI
 
 internal object MockConfiguration {
@@ -68,6 +69,7 @@ internal object MockConfiguration {
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
             "K9_INFOTRYGD_BASE_URL" to wireMockServer.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
             "K9_INFOTRYGD_SCOPE" to "infotrygd/.default",
+            "SAK_BASE_URL" to wireMockServer.getSakBaseUrl(),
         )
     }
 }

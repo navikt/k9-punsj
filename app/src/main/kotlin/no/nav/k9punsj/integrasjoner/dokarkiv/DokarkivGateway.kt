@@ -21,10 +21,12 @@ import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.innsending.dto.NyJournalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.intellij.lang.annotations.Language
+import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -138,6 +140,35 @@ class DokarkivGateway(
         throw IllegalStateException("Feilet med å opprette journalpost")
     }
 
+    internal suspend fun opprettJournalpost(
+        correlationId: String,
+        nyJournalpost: NyJournalpost
+    ): JournalpostId {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val response = client
+            .post()
+            .uri(URI.create("$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"))
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(nyJournalpost.dokarkivPayload())
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        require(response.statusCode.is2xxSuccessful)
+        val responseBody = response.body ?: throw IllegalStateException("Response body er null")
+
+        return JSONObject(responseBody).getString("journalpostId").somJournalpostId()
+    }
+
     internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {
         val body = BodyInserters.fromValue("""{"journalfoerendeEnhet": "$enhet"}""".trimIndent())
 
@@ -158,6 +189,34 @@ class DokarkivGateway(
                 .toEntity(String::class.java)
                 .awaitFirst()
         }.håndterFeil()
+    }
+
+    internal suspend fun oppdaterJournalpostForFerdigstilling(
+        correlationId: String,
+        ferdigstillJournalpost: FerdigstillJournalpost
+    ) {
+        val url = ferdigstillJournalpost.journalpostId.toString().oppdaterJournalpostUrl()
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(scopes = dokarkivScope, onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+
+        val body = BodyInserters.fromValue(ferdigstillJournalpost.oppdaterPayloadMedSak())
+
+        val response = client
+            .put()
+            .uri(URI.create(url))
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        check(response.statusCode.is2xxSuccessful) {
+            "Feil ved oppdatering av journalpost. HttpStatus=[${response.statusCode.value()}, Response=[${response.body}], Url=[$url]"
+        }
     }
 
     private companion object {

@@ -8,7 +8,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSoeknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -101,7 +101,7 @@ internal class TestK9SakService : K9SakService {
         TODO("Not yet implemented")
     }
 
-    override suspend fun sendInnSoeknad(soeknad: PunsjetSoeknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+    override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
         TODO("Not yet implemented")
     }
 }
