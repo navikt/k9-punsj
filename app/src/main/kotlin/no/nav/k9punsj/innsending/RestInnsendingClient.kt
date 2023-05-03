@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
+import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.innsending.dto.NyJournalpost
 import no.nav.k9punsj.innsending.dto.somPunsjetSøknad
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 @Component
+@StandardProfil
 @Qualifier("Rest")
 class RestInnsendingClient(
     private val k9SakService: K9SakService,
