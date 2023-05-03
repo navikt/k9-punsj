@@ -30,9 +30,10 @@
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <orgjson.version>20230227</orgjson.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>3.4.6</k9-sak.version>
+        <k9-sak.version>3.4.7</k9-sak.version>
         <k9-formidling.version>0.0.30</k9-formidling.version>
         <k9-format.version>8.0.8</k9-format.version>
 
@@ -60,6 +61,11 @@
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-coroutines-reactor</artifactId>
                 <version>${kotlinx-coroutines.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
 
             <!-- Kontrakt -->

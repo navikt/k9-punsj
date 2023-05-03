@@ -71,7 +71,7 @@ internal class MapOmsUtTilK9Format(
                 feil.addAll(Validator.valider(søknad))
             }
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }
@@ -175,13 +175,5 @@ internal class MapOmsUtTilK9Format(
         private val logger = LoggerFactory.getLogger(MapOmsUtTilK9Format::class.java)
         private val Validator = OmsorgspengerUtbetalingSøknadValidator()
         private const val Versjon = "1.1.0" // støtte for normalArbeidstid.
-
-        private fun PeriodeDto.somEnkeltDager(): List<PeriodeDto> {
-            val lista: MutableList<PeriodeDto> = mutableListOf()
-            for (i in 0 until Duration.between(fom?.atStartOfDay(), tom?.plusDays(1)?.atStartOfDay()).toDays()) {
-                lista.add(PeriodeDto(fom?.plusDays(i), fom?.plusDays(i)))
-            }
-            return lista
-        }
     }
 }

@@ -34,7 +34,7 @@ internal class MapOmsKSBTilK9Format(
             søknad.medYtelse(omsorgspengerKroniskSyktBarn)
             feil.addAll(Validator.valider(søknad.getYtelse())) // TODO: 20/01/2022 Validerer ingenting...
         }.onFailure { throwable ->
-            logger.error("Uventet mappingfeil", throwable)
+            logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
         }
     }

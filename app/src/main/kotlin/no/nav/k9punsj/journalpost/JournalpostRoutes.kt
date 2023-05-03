@@ -114,8 +114,8 @@ internal class JournalpostRoutes(
                     }
 
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
+                    val punsjInnsendingType = punsjJournalpost?.type?.let { PunsjInnsendingType.fraKode(it) }
 
-                    val punsjInnsendingType = journalpostService.hentPunsjInnsendingType(journalpostId)
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
