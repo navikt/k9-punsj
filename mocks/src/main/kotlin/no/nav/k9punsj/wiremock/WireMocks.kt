@@ -17,6 +17,7 @@ fun initWireMock(
     .build()
     .stubSaksbehandlerAccessToken()
     .stubNavHeader()
+    .stubSafPunsjbolleHentFerdigstillJournalpostOk()
     .stubSafHenteDokumentOk()
     .stubSafHenteDokumentOkForside()
     .stubSafHenteDokumentOkDelingAvOmsorgsdager()

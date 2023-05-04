@@ -201,7 +201,7 @@ class SafGateway(
     private suspend fun String.hentDataForFerdigstillingAvJournalpost(correlationId: String): JSONObject {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
-            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            //onBehalfOf = coroutineContext.hentAuthentication().accessToken
         )
 
         val (request, response, result) = GraphQlUrl

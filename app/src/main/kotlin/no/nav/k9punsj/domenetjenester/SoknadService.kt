@@ -74,7 +74,7 @@ internal class SoknadService(
                 )
             )
         } catch (e: Exception) {
-            logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
+            logger.error("Feil vid innsending av søknad for journalpostIder: ${journalpostIder.joinToString(", ")}")
             return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
         }
 

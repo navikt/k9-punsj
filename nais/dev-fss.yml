@@ -136,3 +136,5 @@ spec:
     # Feature toggles
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "true"
+    - name: REST_INNSENDING_ENABLED
+      value: "true"

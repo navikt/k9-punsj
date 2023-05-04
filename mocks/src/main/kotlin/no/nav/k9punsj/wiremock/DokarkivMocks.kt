@@ -77,4 +77,3 @@ fun WireMockServer.stubFerdigstillJournalpost(
     )
     return this
 }
-

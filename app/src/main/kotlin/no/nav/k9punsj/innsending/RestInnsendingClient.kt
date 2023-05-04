@@ -18,15 +18,18 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
 @StandardProfil
 @Qualifier("Rest")
+@ConditionalOnProperty("innsending.rest.enabled", havingValue = "true", matchIfMissing = false)
 class RestInnsendingClient(
     private val k9SakService: K9SakService,
     private val safGateway: SafGateway,
@@ -37,42 +40,44 @@ class RestInnsendingClient(
     override fun send(pair: Pair<String, String>) {
         // Mappe om json til object
         val json = objectMapper().readTree(pair.second)
-        val søknadJson = json[SøknadKey] as ObjectNode
-        val søknadsType = json[SøknadstypeKey].asText()
+        val correlationId = json["@correlationId"].asText()
+        val punsjetSøknadJson = json["@behov"]["PunsjetSøknad"]
+        val søknadJson = punsjetSøknadJson["søknad"] as ObjectNode
+        val søknadsType = punsjetSøknadJson["søknadtype"].asText()
         val brevkode = Brevkode.fraKode(søknadsType)
-        val correlationId = søknadJson.get(CorrelationId).asText()
+
+        var k9Saksnummer = punsjetSøknadJson["saksnummer"]?.asText()
 
         val søknad = søknadJson.somPunsjetSøknad(
-            versjon = json[VersjonKey].asText(),
-            saksbehandler = json[SaksbehandlerKey].saksbehandler(),
+            versjon = punsjetSøknadJson["versjon"].asText(),
+            saksbehandler = punsjetSøknadJson["saksbehandler"].saksbehandler(),
             brevkode = brevkode,
-            saksnummer = when (json[SaksnummerKey].isMissingOrNull()) {
-                true -> null
-                false -> json[SaksnummerKey].asText()
-            }
+            saksnummer = k9Saksnummer
         )
 
         // Hent k9saksnummer
-        val k9Saksnummer = runBlocking {
-            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = FagsakYtelseType.fromKode(søknadsType),
-                søker = søknad.søker.toString(),
-                pleietrengende = søknad.pleietrengende.toString(),
-                annenPart = søknad.annenPart.toString(),
-                journalpostId = søknad.journalpostIder.first().toString()
-            )
-            k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
-        }.first
+        if(k9Saksnummer.isNullOrEmpty()) {
+            k9Saksnummer = runBlocking {
+                val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+                    søknadstype = FagsakYtelseType.fromKode(søknadsType),
+                    søker = søknad.søker.toString(),
+                    pleietrengende = søknad.pleietrengende.toString(),
+                    annenPart = søknad.annenPart.toString(),
+                    journalpostId = søknad.journalpostIder.first().toString()
+                )
+                k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
+            }.first
+        }
 
         requireNotNull(k9Saksnummer) { "K9Saksnummer er null" }
 
         // Ferdigstill journalposter
         val bruker = runBlocking {
+            val søkerNavn = pdlService.hentPersonopplysninger(setOf(søknad.søker.toString()))
+            require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
             FerdigstillJournalpost.Bruker(
                 identitetsnummer = søknad.søker,
-                navn = søknad.søker.let {
-                    pdlService.hentPersonopplysninger(setOf(søknad.søker.toString())).first().navn()
-                },
+                navn = søkerNavn.first().navn(),
                 sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
             )
         }
@@ -134,7 +139,18 @@ class RestInnsendingClient(
         logger.info("Opprettet JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
+        val søknadGrunnlag = SendPunsjetSoeknadTilK9SakGrunnlag(
+            saksnummer = k9Saksnummer,
+            journalpostId = journalpostId,
+            referanse = correlationId
+        )
 
+        runBlocking {
+            k9SakService.sendInnSoeknad(
+                soeknad = søknad,
+                grunnlag = søknadGrunnlag
+            )
+        }
     }
 
     private fun JsonNode.saksbehandler() = when (isMissingOrNull()) {
@@ -154,14 +170,6 @@ class RestInnsendingClient(
         val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
         val FARGE_REGEX = "#[a-fA-F0-9]{6}".toRegex()
         const val DEFAULT_FARGE = "#C1B5D0"
-        const val behovNavn = "PunsjetSøknad"
-        const val VersjonKey = "@behov.$behovNavn.versjon"
-        const val SaksnummerKey = "@behov.$behovNavn.saksnummer"
-        const val SøknadstypeKey = "@behov.$behovNavn.søknadtype"
-        const val SaksbehandlerKey = "@behov.$behovNavn.saksbehandler"
-        const val SøknadKey = "@behov.$behovNavn.søknad"
-        const val SøknadIdKey = "$SøknadKey.søknadId"
-        const val CorrelationId = "@correlationId"
-        private fun JsonNode.hentString() = asText().replace("\"","")
+        private fun JsonNode.hentString() = asText().replace("\"", "")
     }
 }
