@@ -46,6 +46,7 @@ class RestInnsendingClient(
         val søknadsType = punsjetSøknadJson["søknadtype"].asText()
         val brevkode = Brevkode.fraKode(søknadsType)
 
+        // TODO: Settes denne før innsending ?
         var k9Saksnummer = punsjetSøknadJson["saksnummer"]?.asText()
 
         val søknad = søknadJson.somPunsjetSøknad(
@@ -99,7 +100,7 @@ class RestInnsendingClient(
 
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
 
-        require(manglerAvsendernavn.isNullOrEmpty()) {
+        require(manglerAvsendernavn.isEmpty()) {
             "Mangler avsendernavn på journalposter=[${manglerAvsendernavn.map { it.journalpostId }}]"
         }
 
