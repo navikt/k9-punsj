@@ -140,6 +140,7 @@ class DokarkivGateway(
         throw IllegalStateException("Feilet med å opprette journalpost")
     }
 
+    @Deprecated("Erstattes av opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse")
     internal suspend fun opprettJournalpost(
         correlationId: String,
         nyJournalpost: NyJournalpost

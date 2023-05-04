@@ -186,27 +186,24 @@ class SafGateway(
         )
     }
 
+    @Deprecated("Erstattes av hentDataFraSaf")
     internal suspend fun hentFerdigstillJournalpost(
         correlationId: String,
         journalpostId: JournalpostId
     ): FerdigstillJournalpost {
 
-        val request = hentFerdigstillJournalpostQuery(
+        val requestQuery = hentFerdigstillJournalpostQuery(
             journalpostId = journalpostId.toString()
         )
 
-        return request.hentDataForFerdigstillingAvJournalpost(correlationId).mapFerdigstillJournalpost(journalpostId)
-    }
-
-    private suspend fun String.hentDataForFerdigstillingAvJournalpost(correlationId: String): JSONObject {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
-            //onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            onBehalfOf = coroutineContext.hentAuthentication().accessToken
         )
 
         val (request, response, result) = GraphQlUrl
             .httpPost()
-            .body(this)
+            .body(requestQuery)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.CONTENT_TYPE to "application/json",
@@ -222,7 +219,7 @@ class SafGateway(
             failure = {
                 throw håndterFeil(it, request, response)
             }
-        )
+        ).mapFerdigstillJournalpost(journalpostId)
     }
 
     internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? {
