@@ -101,7 +101,8 @@ class DokarkivGateway(
             logger.error("Feiler med" + responseFerdigstiltJournalpost.body)
         }
 
-        return responseFerdigstiltJournalpost.statusCode to (responseFerdigstiltJournalpost.body ?: "Feilet med å ferdigstille journalpost")
+        return responseFerdigstiltJournalpost.statusCode to (responseFerdigstiltJournalpost.body
+            ?: "Feilet med å ferdigstille journalpost")
     }
 
     internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
@@ -138,36 +139,6 @@ class DokarkivGateway(
         }
 
         throw IllegalStateException("Feilet med å opprette journalpost")
-    }
-
-    @Deprecated("Erstattes av opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse")
-    internal suspend fun opprettJournalpost(
-        correlationId: String,
-        nyJournalpost: NyJournalpost
-    ): JournalpostId {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val response = client
-            .post()
-            .uri(URI.create("$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"))
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(nyJournalpost.dokarkivPayload())
-            .retrieve()
-            .toEntity(String::class.java)
-            .awaitFirst()
-
-        require(response.statusCode.is2xxSuccessful)
-        val responseBody = response.body ?: throw IllegalStateException("Response body er null")
-
-        return JSONObject(responseBody).getString("journalpostId").somJournalpostId()
     }
 
     internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {

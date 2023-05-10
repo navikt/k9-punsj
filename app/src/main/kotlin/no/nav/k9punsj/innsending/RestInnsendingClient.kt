@@ -8,18 +8,27 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.innsending.dto.NyJournalpost
 import no.nav.k9punsj.innsending.dto.somPunsjetSøknad
 import no.nav.k9punsj.innsending.journalforjson.HtmlGenerator
 import no.nav.k9punsj.innsending.journalforjson.PdfGenerator
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
+import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
 import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
+import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
+import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
+import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
+import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -58,7 +67,7 @@ class RestInnsendingClient(
         )
 
         // Hent k9saksnummer
-        if(k9Saksnummer.isNullOrEmpty()) {
+        if (k9Saksnummer.isNullOrEmpty()) {
             k9Saksnummer = runBlocking {
                 val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
@@ -122,18 +131,23 @@ class RestInnsendingClient(
         )
 
         val journalpostId = runBlocking {
-            val nyJournalpost = NyJournalpost(
-                correlationId = correlationId,
+            val nyJournalpostRequest = JournalPostRequest(
+                eksternReferanseId = correlationId,
                 tittel = "PunsjetSøknad",
                 brevkode = brevkode.kode,
-                fagsystem = Fagsystem.K9SAK.kode,
+                tema = Tema.OMS,
+                kanal = Kanal.INGEN_DISTRIBUSJON,
+                journalposttype = JournalpostType.NOTAT,
+                dokumentkategori = DokumentKategori.IS,
+                fagsystem = FagsakSystem.K9,
+                sakstype = SaksType.FAGSAK,
                 saksnummer = k9Saksnummer,
-                identitetsnummer = bruker.identitetsnummer,
-                avsenderNavn = bruker.navn!!,
+                brukerIdent = søknad.søker.toString(),
+                avsenderNavn = søknad.saksbehandler,
                 pdf = pdf,
-                json = søknadJson
+                json = JSONObject(søknadJson)
             )
-            dokarkivGateway.opprettJournalpost(correlationId, nyJournalpost)
+            dokarkivGateway.opprettJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
         }
         logger.info("Opprettet JournalpostId=[$journalpostId]")
 
