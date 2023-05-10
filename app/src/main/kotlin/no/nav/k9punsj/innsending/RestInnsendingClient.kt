@@ -45,7 +45,7 @@ class RestInnsendingClient(
     private val dokarkivGateway: DokarkivGateway
 ) : InnsendingClient {
 
-    override fun send(pair: Pair<String, String>) {
+    override suspend fun send(pair: Pair<String, String>) {
         // Mappe om json til object
         val json = objectMapper().readTree(pair.second)
         val correlationId = json["@correlationId"].asText()
@@ -93,17 +93,17 @@ class RestInnsendingClient(
             )
         }
 
-        val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
-            runBlocking {
+        val ferdigstillJournalposter = runBlocking {
+            søknad.journalpostIder.map { journalpostId ->
                 safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
-            }
-        }.filterNot { ferdigstillJournalpost ->
-            ferdigstillJournalpost.erFerdigstilt.also {
-                if (it) {
-                    logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
+            }.filterNot { ferdigstillJournalpost ->
+                ferdigstillJournalpost.erFerdigstilt.also {
+                    if (it) {
+                        logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
+                    }
                 }
-            }
-        }.map { it.copy(bruker = bruker) }
+            }.map { it.copy(bruker = bruker) }
+        }
 
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
 

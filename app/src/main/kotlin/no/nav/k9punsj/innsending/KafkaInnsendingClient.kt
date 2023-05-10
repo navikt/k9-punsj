@@ -33,7 +33,7 @@ class KafkaInnsendingClient(
         StringSerializer()
     )
 
-    override fun send(pair: Pair<String, String>) {
+    override suspend fun send(pair: Pair<String, String>) {
         val (key, value) = pair
         kotlin.runCatching {
             kafkaProducer.send(ProducerRecord(k9rapidTopic, key, value)).get()

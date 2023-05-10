@@ -23,7 +23,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -154,7 +153,7 @@ class PdlServiceImpl(
         val response = client
             .post()
             .uri { it.build() }
-            .header("Nav-Call-Id", UUID.randomUUID().toString())
+            .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
             .header("Tema", "OMS")
             .header(HttpHeaders.AUTHORIZATION, getAuthorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
