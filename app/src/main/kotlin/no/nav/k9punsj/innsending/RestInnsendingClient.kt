@@ -86,10 +86,7 @@ class RestInnsendingClient(
 
         val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
             runBlocking {
-                safGateway.hentFerdigstillJournalpost(
-                    correlationId = correlationId,
-                    journalpostId = journalpostId
-                )
+                safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
             }
         }.filterNot { ferdigstillJournalpost ->
             ferdigstillJournalpost.erFerdigstilt.also {
