@@ -38,7 +38,7 @@ interface InnsendingClient {
         ).keyValue
     }
 
-    fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) = runBlocking {
+    suspend fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
         send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 
