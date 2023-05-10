@@ -42,7 +42,7 @@ class RestInnsendingClient(
         val correlationId = json["@correlationId"].asText()
         val punsjetSøknadJson = json["@behov"]["PunsjetSøknad"]
         val søknadJson = punsjetSøknadJson["søknad"] as ObjectNode
-        val fagsakYtelseType = søknadJson["ytelse"]["type"].asText()
+        val fagsakYtelseType = FagsakYtelseType.fraNavn(søknadJson["ytelse"]["type"].asText())
 
         val søknadsType = punsjetSøknadJson["søknadtype"].asText()
         val brevkode = Brevkode.fraKode(søknadsType)
@@ -61,7 +61,7 @@ class RestInnsendingClient(
         if(k9Saksnummer.isNullOrEmpty()) {
             k9Saksnummer = runBlocking {
                 val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                    søknadstype = FagsakYtelseType.fromKode(fagsakYtelseType),
+                    søknadstype = fagsakYtelseType,
                     søker = søknad.søker.toString(),
                     pleietrengende = søknad.pleietrengende.toString(),
                     annenPart = søknad.annenPart.toString(),

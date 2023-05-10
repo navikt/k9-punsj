@@ -22,5 +22,9 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
                 return UKJENT
             }
         }
+
+        fun fraNavn(navn: String): FagsakYtelseType {
+            return values().firstOrNull { it.name == navn } ?: UDEFINERT
+        }
     }
 }
