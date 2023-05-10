@@ -3,11 +3,7 @@ package no.nav.k9punsj.innsending.journalforjson
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9punsj.felles.Identitetsnummer
-import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.Søknadstype
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
@@ -97,4 +93,6 @@ internal object JournalførJsonMelding {
             .renameLand()
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
+
+    private fun JsonNode.isMissingOrNull() = isMissingNode || isNull
 }

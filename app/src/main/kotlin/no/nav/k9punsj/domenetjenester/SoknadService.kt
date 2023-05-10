@@ -26,6 +26,10 @@ internal class SoknadService(
     private val safGateway: SafGateway
 ) {
 
+    init {
+        logger.info("SøknadService init: innsendingClient = ${innsendingClient.toString()}")
+    }
+
     internal suspend fun sendSøknad(
         søknad: Søknad,
         brevkode: Brevkode,

@@ -55,10 +55,6 @@ spec:
   webproxy: true
   kafka:
     pool: nav-dev
-  # Rapids-and-rivers skriver til secureLog
-  # Fjernes når RnR er ute igen
-  secureLogs:
-    enabled: true
   env:
     - name: DEFAULTDS_USERNAME
       value: k9-punsj
@@ -140,5 +136,5 @@ spec:
     # Feature toggles
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "true"
-    - name: REST_INNSENDING_ENABLED
+    - name: INNSENDING_REST_ENABLED
       value: "true"

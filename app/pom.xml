@@ -42,12 +42,6 @@
             <artifactId>eksterne-kontrakter</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.k9.rapid</groupId>
-            <artifactId>river</artifactId>
-            <version>1.20230316100804-072b34b</version>
-        </dependency>
-
         <!-- spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import io.ktor.util.*
 
 import org.intellij.lang.annotations.Language
 import java.time.Duration
@@ -190,6 +189,25 @@ internal object HtmlGenerator {
         // Alle andre ting anser vi som data
         else {
             return asText().isNotBlank()
+        }
+    }
+
+    private fun String.escapeHTML(): String {
+        val text = this@escapeHTML
+        if (text.isEmpty()) return text
+
+        return buildString(length) {
+            for (idx in 0 until text.length) {
+                val ch = text[idx]
+                when (ch) {
+                    '\'' -> append("&#x27;")
+                    '\"' -> append("&quot;")
+                    '&' -> append("&amp;")
+                    '<' -> append("&lt;")
+                    '>' -> append("&gt;")
+                    else -> append(ch)
+                }
+            }
         }
     }
 

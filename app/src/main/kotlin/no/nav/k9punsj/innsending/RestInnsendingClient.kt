@@ -3,7 +3,6 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
@@ -166,6 +165,10 @@ class RestInnsendingClient(
             logger.warn("Ugyldig farge=[${hentString()} satt i meldingen, defaulter til farge=[$it]")
         }
     }
+
+    private fun JsonNode.isMissingOrNull() = isMissingNode || isNull
+
+    override fun toString(): String = "RestInnsendingClient"
 
     private companion object {
         val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
