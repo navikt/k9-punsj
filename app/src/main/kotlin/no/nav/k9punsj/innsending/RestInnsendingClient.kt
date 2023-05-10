@@ -68,42 +68,36 @@ class RestInnsendingClient(
 
         // Hent k9saksnummer
         if (k9Saksnummer.isNullOrEmpty()) {
-            k9Saksnummer = runBlocking {
-                val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
-                    søker = søknad.søker.toString(),
-                    pleietrengende = søknad.pleietrengende.toString(),
-                    annenPart = søknad.annenPart.toString(),
-                    journalpostId = søknad.journalpostIder.first().toString()
-                )
-                k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
-            }.first
+            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+                søknadstype = fagsakYtelseType,
+                søker = søknad.søker.toString(),
+                pleietrengende = søknad.pleietrengende.toString(),
+                annenPart = søknad.annenPart.toString(),
+                journalpostId = søknad.journalpostIder.first().toString()
+            )
+            k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first
         }
 
         requireNotNull(k9Saksnummer) { "K9Saksnummer er null" }
 
         // Ferdigstill journalposter
-        val bruker = runBlocking {
-            val søkerNavn = pdlService.hentPersonopplysninger(setOf(søknad.søker.toString()))
-            require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
-            FerdigstillJournalpost.Bruker(
-                identitetsnummer = søknad.søker,
-                navn = søkerNavn.first().navn(),
-                sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
-            )
-        }
+        val søkerNavn = pdlService.hentPersonopplysninger(setOf(søknad.søker.toString()))
+        require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
+        val bruker = FerdigstillJournalpost.Bruker(
+            identitetsnummer = søknad.søker,
+            navn = søkerNavn.first().navn(),
+            sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
+        )
 
-        val ferdigstillJournalposter = runBlocking {
-            søknad.journalpostIder.map { journalpostId ->
-                safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
-            }.filterNot { ferdigstillJournalpost ->
-                ferdigstillJournalpost.erFerdigstilt.also {
-                    if (it) {
-                        logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
-                    }
+        val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
+            safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
+        }.filterNot { ferdigstillJournalpost ->
+            ferdigstillJournalpost.erFerdigstilt.also {
+                if (it) {
+                    logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
                 }
-            }.map { it.copy(bruker = bruker) }
-        }
+            }
+        }.map { it.copy(bruker = bruker) }
 
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
 
@@ -114,11 +108,9 @@ class RestInnsendingClient(
         // Alle journalposter klare til oppdatering & ferdigstilling
         check(ferdigstillJournalposter.all { it.kanFerdigstilles })
 
-        runBlocking {
-            ferdigstillJournalposter.forEach { ferdigstillJournalpost ->
-                dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
-                dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
-            }
+        ferdigstillJournalposter.forEach { ferdigstillJournalpost ->
+            dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
+            dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
         }
 
         // Journalfør o ferdigstill søknadjson
@@ -130,25 +122,24 @@ class RestInnsendingClient(
             )
         )
 
-        val journalpostId = runBlocking {
-            val nyJournalpostRequest = JournalPostRequest(
-                eksternReferanseId = correlationId,
-                tittel = "PunsjetSøknad",
-                brevkode = brevkode.kode,
-                tema = Tema.OMS,
-                kanal = Kanal.INGEN_DISTRIBUSJON,
-                journalposttype = JournalpostType.NOTAT,
-                dokumentkategori = DokumentKategori.IS,
-                fagsystem = FagsakSystem.K9,
-                sakstype = SaksType.FAGSAK,
-                saksnummer = k9Saksnummer,
-                brukerIdent = søknad.søker.toString(),
-                avsenderNavn = søknad.saksbehandler,
-                pdf = pdf,
-                json = JSONObject(søknadJson)
-            )
-            dokarkivGateway.opprettJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
-        }
+        val nyJournalpostRequest = JournalPostRequest(
+            eksternReferanseId = correlationId,
+            tittel = "PunsjetSøknad",
+            brevkode = brevkode.kode,
+            tema = Tema.OMS,
+            kanal = Kanal.INGEN_DISTRIBUSJON,
+            journalposttype = JournalpostType.NOTAT,
+            dokumentkategori = DokumentKategori.IS,
+            fagsystem = FagsakSystem.K9,
+            sakstype = SaksType.FAGSAK,
+            saksnummer = k9Saksnummer,
+            brukerIdent = søknad.søker.toString(),
+            avsenderNavn = søknad.saksbehandler,
+            pdf = pdf,
+            json = JSONObject(søknadJson)
+        )
+
+        val journalpostId = dokarkivGateway.opprettJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
         logger.info("Opprettet JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
@@ -158,12 +149,10 @@ class RestInnsendingClient(
             referanse = correlationId
         )
 
-        runBlocking {
-            k9SakService.sendInnSoeknad(
-                soeknad = søknad,
-                grunnlag = søknadGrunnlag
-            )
-        }
+        k9SakService.sendInnSoeknad(
+            soeknad = søknad,
+            grunnlag = søknadGrunnlag
+        )
     }
 
     private fun JsonNode.saksbehandler() = when (isMissingOrNull()) {

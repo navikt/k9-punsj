@@ -1,6 +1,5 @@
 package no.nav.k9punsj.domenetjenester
 
-import kotlinx.coroutines.runBlocking
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
@@ -15,6 +14,7 @@ import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import kotlin.coroutines.coroutineContext
 
 @Service
 internal class SoknadService(
@@ -61,20 +61,18 @@ internal class SoknadService(
         }
 
         try {
-            runBlocking {
-                innsendingClient.sendSøknad(
-                    søknadId = søknad.søknadId.id,
-                    søknad = søknad,
-                    correlationId = coroutineContext.hentCorrelationId(),
-                    tilleggsOpplysninger = mapOf(
-                        PunsjetAvSaksbehandler to punsjetAvSaksbehandler,
-                        Søknadtype to brevkode.kode
-                    )
+            innsendingClient.sendSøknad(
+                søknadId = søknad.søknadId.id,
+                søknad = søknad,
+                correlationId = coroutineContext.hentCorrelationId(),
+                tilleggsOpplysninger = mapOf(
+                    PunsjetAvSaksbehandler to punsjetAvSaksbehandler,
+                    Søknadtype to brevkode.kode
                 )
-            }
+            )
         } catch (e: Exception) {
             logger.error("Feil vid innsending av søknad for journalpostIder: ${journalpostIder.joinToString(", ")}")
-            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
+            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, "Fail")
         }
 
         leggerVedPayload(søknad, journalpostIder)
