@@ -7,7 +7,7 @@
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <HikariCP.version>5.0.1</HikariCP.version>
         <kotliquery.version>1.9.0</kotliquery.version>
-        <embedded-postgres.version>2.0.3</embedded-postgres.version>
+        <embedded-postgres.version>2.0.4</embedded-postgres.version>
         <gson.version>2.10.1</gson.version>
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
