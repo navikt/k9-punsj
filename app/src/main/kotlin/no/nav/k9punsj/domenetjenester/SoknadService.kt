@@ -14,6 +14,7 @@ import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -64,7 +65,7 @@ internal class SoknadService(
             innsendingClient.sendSøknad(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
-                correlationId = coroutineContext.hentCorrelationId(),
+                correlationId = UUID.randomUUID().toString(), // TODO: Erstattes med f.eks. LogFilter
                 tilleggsOpplysninger = mapOf(
                     PunsjetAvSaksbehandler to punsjetAvSaksbehandler,
                     Søknadtype to brevkode.kode
@@ -72,7 +73,7 @@ internal class SoknadService(
             )
         } catch (e: Exception) {
             logger.error("Feil vid innsending av søknad for journalpostIder: ${journalpostIder.joinToString(", ")}")
-            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, "Fail")
+            return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
         }
 
         leggerVedPayload(søknad, journalpostIder)
