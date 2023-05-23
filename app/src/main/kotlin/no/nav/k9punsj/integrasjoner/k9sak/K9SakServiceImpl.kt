@@ -197,6 +197,8 @@ class K9SakServiceImpl(
             LocalDate.of(aar, 12, 31)
         )
 
+        log.info("DEBUG: k9saksnummergrunnlag: $k9SaksnummerGrunnlag")
+
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
             personService.finnAktørId(k9SaksnummerGrunnlag.søker),
@@ -204,6 +206,8 @@ class K9SakServiceImpl(
             k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
             periode,
         )
+
+        log.info("DEBUG: payloadMedAktørId: $payloadMedAktørId")
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
