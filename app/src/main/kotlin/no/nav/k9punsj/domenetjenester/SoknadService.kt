@@ -4,7 +4,6 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
-import kotlin.coroutines.coroutineContext
 
 @Service
 internal class SoknadService(

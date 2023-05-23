@@ -66,6 +66,8 @@ class RestInnsendingClient(
             saksnummer = k9Saksnummer
         )
 
+        logger.info("DEBUG: Søknad: $søknad")
+
         // Hent k9saksnummer
         if (k9Saksnummer.isNullOrEmpty()) {
             val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
@@ -76,6 +78,7 @@ class RestInnsendingClient(
                 journalpostId = søknad.journalpostIder.first().toString()
             )
             k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first
+            logger.info("DEBUG: Fant saksnr fra k9: $k9Saksnummer")
         }
 
         requireNotNull(k9Saksnummer) { "K9Saksnummer er null" }
@@ -89,6 +92,7 @@ class RestInnsendingClient(
             sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
         )
 
+            logger.info("DEBUG: Fannt navn på søker")
         val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
             safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
         }.filterNot { ferdigstillJournalpost ->
@@ -112,6 +116,8 @@ class RestInnsendingClient(
             dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
             dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
         }
+
+        logger.info("DEBUG: Ferdigstillt alle journalposter")
 
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
