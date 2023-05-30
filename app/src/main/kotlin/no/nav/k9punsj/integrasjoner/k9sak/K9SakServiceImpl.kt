@@ -197,11 +197,13 @@ class K9SakServiceImpl(
             LocalDate.of(aar, 12, 31)
         )
 
+        log.info("DEBUG: HentK9SaksnummerGrunnlag: $k9SaksnummerGrunnlag")
+
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
-            personService.finnAktørId(k9SaksnummerGrunnlag.søker),
-            k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
-            k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
+            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId,
+            k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId },
+            k9SaksnummerGrunnlag.annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId },
             periode,
         )
 
