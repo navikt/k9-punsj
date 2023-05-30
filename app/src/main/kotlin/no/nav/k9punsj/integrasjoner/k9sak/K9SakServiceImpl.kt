@@ -198,12 +198,19 @@ class K9SakServiceImpl(
         )
 
         log.info("DEBUG: HentK9SaksnummerGrunnlag: $k9SaksnummerGrunnlag")
+        val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
+        val pleietrengendeAktørId = if(k9SaksnummerGrunnlag.pleietrengende != null) {
+            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+        } else null
+        val annenpartAktørId = if(k9SaksnummerGrunnlag.annenPart != null) {
+            k9SaksnummerGrunnlag.annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId }
+        } else null
 
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
-            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId,
-            k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId },
-            k9SaksnummerGrunnlag.annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId },
+            søkerAktørId,
+            pleietrengendeAktørId,
+            annenpartAktørId,
             periode,
         )
 
