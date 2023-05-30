@@ -199,11 +199,11 @@ class K9SakServiceImpl(
 
         log.info("DEBUG: HentK9SaksnummerGrunnlag: $k9SaksnummerGrunnlag")
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
-        val pleietrengendeAktørId = if(k9SaksnummerGrunnlag.pleietrengende != null) {
+        val pleietrengendeAktørId = if(!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
             personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
         } else null
-        val annenpartAktørId = if(k9SaksnummerGrunnlag.annenPart != null) {
-            k9SaksnummerGrunnlag.annenPart?.let { personService.finnEllerOpprettPersonVedNorskIdent(it).aktørId }
+        val annenpartAktørId = if(!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
         } else null
 
         val payloadMedAktørId = FinnEllerOpprettSak(
