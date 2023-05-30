@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Omsorgspenger midlertidig alene søknad", description = "Håndtering av søknader av typen Omsorgspenger midlertidig alene")
-internal class OmsorgspengeKidlertidigAleneOpenApi {
+internal class OmsorgspengerMidlertidigAleneOpenApi {
     @GetMapping(OmsorgspengerMidlertidigAleneRoutes.Urls.HenteMappe, produces = ["application/json"])
     @Operation(
         summary = "Henter data på person for Omsorgspenger midlertidig alene",
