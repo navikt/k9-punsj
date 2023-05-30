@@ -214,8 +214,6 @@ class K9SakServiceImpl(
             periode,
         )
 
-        log.info("DEBUG: payloadMedAktørId: $payloadMedAktørId")
-
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
