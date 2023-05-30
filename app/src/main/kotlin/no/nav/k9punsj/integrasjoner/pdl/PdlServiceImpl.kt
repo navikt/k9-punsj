@@ -59,7 +59,7 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikator(fnummer: String): PdlResponse? {
-        logger.info("DEBUG: fnummer = $fnummer")
+        logger.info("DEBUG: fnummer = $fnummer å length = ${fnummer.length}")
         val req = QueryRequest(
             query = HENT_IDENT,
             variables = mapOf(
