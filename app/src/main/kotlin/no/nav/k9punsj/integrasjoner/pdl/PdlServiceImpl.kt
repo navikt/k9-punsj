@@ -59,7 +59,6 @@ class PdlServiceImpl(
 
     @Throws(IkkeTilgang::class)
     override suspend fun identifikator(fnummer: String): PdlResponse? {
-        logger.info("DEBUG: fnummer = $fnummer å length = ${fnummer.length}")
         val req = QueryRequest(
             query = HENT_IDENT,
             variables = mapOf(
@@ -68,10 +67,8 @@ class PdlServiceImpl(
                 "grupper" to listOf("AKTORID")
             )
         )
-        logger.info("DEBUG: kaller Pdl med query: $req")
         val response = requestPdl(req)
         val (data, errors) = objectMapper().readValue<IdentPdl>(response)
-        logger.info("DEBUG: response fra Pdl data: $data, errors: $errors")
         if (errors != null) {
             logger.warn(objectMapper().writeValueAsString(errors))
         }

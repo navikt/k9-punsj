@@ -85,7 +85,6 @@ class RestInnsendingClient(
             k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
                 SaksnummerDto(it).saksnummer // Svar fra k9sak er på formatet: "saksnummer": "123456"
             }
-            logger.info("DEBUG: Fant saksnr fra k9: $k9Saksnummer")
         }
 
         requireNotNull(k9Saksnummer) { "K9Saksnummer er null" }
