@@ -2,14 +2,13 @@ package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import kotlinx.coroutines.runBlocking
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.innsending.dto.NyJournalpost
+import no.nav.k9punsj.felles.Søknadstype
 import no.nav.k9punsj.innsending.dto.somPunsjetSøknad
 import no.nav.k9punsj.innsending.journalforjson.HtmlGenerator
 import no.nav.k9punsj.innsending.journalforjson.PdfGenerator
@@ -51,13 +50,18 @@ class RestInnsendingClient(
         val correlationId = json["@correlationId"].asText()
         val punsjetSøknadJson = json["@behov"]["PunsjetSøknad"]
         val søknadJson = punsjetSøknadJson["søknad"] as ObjectNode
-        val fagsakYtelseType = FagsakYtelseType.fraNavn(søknadJson["ytelse"]["type"].asText())
-
+        val fagsakYtelseTypeKode = Søknadstype.fraK9FormatYtelsetype(søknadJson["ytelse"]["type"].asText()).k9YtelseType
         val søknadsType = punsjetSøknadJson["søknadtype"].asText()
-        val brevkode = Brevkode.fraKode(søknadsType)
+        var k9Saksnummer = punsjetSøknadJson["saksnummer"]?.asText() // TODO: Settes denne før innsending ?
 
-        // TODO: Settes denne før innsending ?
-        var k9Saksnummer = punsjetSøknadJson["saksnummer"]?.asText()
+        // Workaround for f.eks. OMP_UT som ikke er en gyldig ytelsetype i K9
+        val fagsakYtelseType = FagsakYtelseType.fromKode(fagsakYtelseTypeKode)
+
+        require(fagsakYtelseType != FagsakYtelseType.UDEFINERT) {
+            throw IllegalStateException("FagsakYtelseType er udefinert")
+        }
+
+        val brevkode = Brevkode.fraKode(søknadsType)
 
         val søknad = søknadJson.somPunsjetSøknad(
             versjon = punsjetSøknadJson["versjon"].asText(),
