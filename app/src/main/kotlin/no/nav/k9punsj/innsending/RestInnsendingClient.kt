@@ -120,7 +120,9 @@ class RestInnsendingClient(
         }
 
         // Alle journalposter klare til oppdatering & ferdigstilling
-        check(ferdigstillJournalposter.all { it.kanFerdigstilles })
+        check(ferdigstillJournalposter.all { it.kanFerdigstilles }).also {
+            logger.info("Journalposter klare for ferdigstilling: ${ferdigstillJournalposter.map { it.journalpostId }}")
+        }
 
         ferdigstillJournalposter.forEach { ferdigstillJournalpost ->
             dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
