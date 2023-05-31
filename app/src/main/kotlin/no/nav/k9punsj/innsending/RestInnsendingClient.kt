@@ -111,7 +111,14 @@ class RestInnsendingClient(
                     logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
                 }
             }
-        }.map { it.copy(bruker = bruker) }
+        }.map { it.copy(
+            bruker = bruker,
+            sak = FerdigstillJournalpost.Sak(
+                sakstype = "FAGSAK",
+                fagsaksystem = "K9",
+                fagsakId = k9Saksnummer
+            )
+        ) }
 
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
 
