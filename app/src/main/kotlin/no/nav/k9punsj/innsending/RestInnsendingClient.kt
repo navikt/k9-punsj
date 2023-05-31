@@ -98,7 +98,8 @@ class RestInnsendingClient(
             sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
         )
 
-            logger.info("DEBUG: Fannt navn på søker")
+        logger.info("DEBUG: Fannt navn på søker")
+
         val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
             safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
         }.filterNot { ferdigstillJournalpost ->
@@ -144,7 +145,7 @@ class RestInnsendingClient(
             dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
-            saksnummer = k9Saksnummer,
+            saksnummer = k9Saksnummer!!,
             brukerIdent = søknad.søker.toString(),
             avsenderNavn = søknad.saksbehandler,
             pdf = pdf,
@@ -156,7 +157,7 @@ class RestInnsendingClient(
 
         // Send in søknad til k9sak
         val søknadGrunnlag = SendPunsjetSoeknadTilK9SakGrunnlag(
-            saksnummer = k9Saksnummer,
+            saksnummer = k9Saksnummer!!,
             journalpostId = journalpostId,
             referanse = correlationId
         )
