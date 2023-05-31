@@ -9,6 +9,7 @@ import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Søknadstype
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.innsending.dto.somPunsjetSøknad
 import no.nav.k9punsj.innsending.journalforjson.HtmlGenerator
 import no.nav.k9punsj.innsending.journalforjson.PdfGenerator
@@ -81,7 +82,9 @@ class RestInnsendingClient(
                 annenPart = søknad.annenPart.toString(),
                 journalpostId = søknad.journalpostIder.first().toString()
             )
-            k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first
+            k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
+                SaksnummerDto(it).saksnummer // Svar fra k9sak er på formatet: "saksnummer": "123456"
+            }
             logger.info("DEBUG: Fant saksnr fra k9: $k9Saksnummer")
         }
 
