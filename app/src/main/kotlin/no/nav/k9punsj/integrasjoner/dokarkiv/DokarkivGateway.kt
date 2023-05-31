@@ -169,7 +169,10 @@ class DokarkivGateway(
     ) {
         val url = ferdigstillJournalpost.journalpostId.toString().oppdaterJournalpostUrl()
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(scopes = dokarkivScope, onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
 
         val body = BodyInserters.fromValue(ferdigstillJournalpost.oppdaterPayloadMedSak())
 

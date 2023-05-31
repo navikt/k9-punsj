@@ -2,6 +2,7 @@ package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
@@ -26,6 +27,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
+import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
@@ -83,7 +85,8 @@ class RestInnsendingClient(
                 journalpostId = søknad.journalpostIder.first().toString()
             )
             k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
-                k9Saksnummer = objectMapper().readValue(it, SaksnummerDto::class.java).saksnummer
+                k9Saksnummer = objectMapper().readValue<SaksnummerDto>(it).saksnummer
+
             }
         }
 
