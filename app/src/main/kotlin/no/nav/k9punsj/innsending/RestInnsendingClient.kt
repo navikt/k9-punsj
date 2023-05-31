@@ -83,7 +83,7 @@ class RestInnsendingClient(
                 journalpostId = søknad.journalpostIder.first().toString()
             )
             k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
-                k9Saksnummer = SaksnummerDto(it).saksnummer // Svar fra k9sak er på formatet: "saksnummer": "123456"
+                k9Saksnummer = objectMapper().readValue(it, SaksnummerDto::class.java).saksnummer
             }
         }
 
