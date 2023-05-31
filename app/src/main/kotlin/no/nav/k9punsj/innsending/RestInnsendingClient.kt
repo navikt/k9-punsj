@@ -82,8 +82,8 @@ class RestInnsendingClient(
                 annenPart = søknad.annenPart.toString(),
                 journalpostId = søknad.journalpostIder.first().toString()
             )
-            k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
-                SaksnummerDto(it).saksnummer // Svar fra k9sak er på formatet: "saksnummer": "123456"
+            k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
+                k9Saksnummer = SaksnummerDto(it).saksnummer // Svar fra k9sak er på formatet: "saksnummer": "123456"
             }
         }
 
