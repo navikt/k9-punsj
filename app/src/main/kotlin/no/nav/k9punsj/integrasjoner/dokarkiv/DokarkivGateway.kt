@@ -176,8 +176,6 @@ class DokarkivGateway(
 
         val body = BodyInserters.fromValue(ferdigstillJournalpost.oppdaterPayloadMedSak())
 
-        logger.info("DEBUG: Skall oppdatere journalpost=[ $ferdigstillJournalpost ] body=[ $body ]")
-
         val response = client
             .put()
             .uri(URI.create(url))

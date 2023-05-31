@@ -73,8 +73,6 @@ class RestInnsendingClient(
             saksnummer = k9Saksnummer
         )
 
-        logger.info("DEBUG: Søknad: $søknad")
-
         // Hent k9saksnummer
         if (k9Saksnummer.isNullOrEmpty()) {
             val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
@@ -100,8 +98,6 @@ class RestInnsendingClient(
             navn = søkerNavn.first().navn(),
             sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
         )
-
-        logger.info("DEBUG: Fannt navn på søker")
 
         val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
             safGateway.hentFerdigstillJournalpost(journalpostId = journalpostId)
@@ -135,8 +131,6 @@ class RestInnsendingClient(
             dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
             dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
         }
-
-        logger.info("DEBUG: Ferdigstillt alle journalposter")
 
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(

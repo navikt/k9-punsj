@@ -59,7 +59,7 @@ internal class SoknadService(
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
         }
 
-        //try {
+        try {
             innsendingClient.sendSøknad(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
@@ -69,10 +69,10 @@ internal class SoknadService(
                     Søknadtype to brevkode.kode
                 )
             )
-        /*} catch (e: Exception) {
+        } catch (e: Exception) {
             logger.error("Feil vid innsending av søknad for journalpostIder: ${journalpostIder.joinToString(", ")}")
             return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
-        }*/
+        }
 
         leggerVedPayload(søknad, journalpostIder)
         journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)

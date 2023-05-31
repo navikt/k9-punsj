@@ -197,7 +197,6 @@ class K9SakServiceImpl(
             LocalDate.of(aar, 12, 31)
         )
 
-        log.info("DEBUG: HentK9SaksnummerGrunnlag: $k9SaksnummerGrunnlag")
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
         val pleietrengendeAktørId = if(!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
             personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
