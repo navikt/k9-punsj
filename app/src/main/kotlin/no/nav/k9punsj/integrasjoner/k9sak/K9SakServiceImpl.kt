@@ -56,7 +56,7 @@ class K9SakServiceImpl(
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
-        internal const val sendInnSøknadUrl = "fordel/journalposter"
+        internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
     }
