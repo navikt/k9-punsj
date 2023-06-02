@@ -71,7 +71,7 @@ interface InnsendingClient {
         ).keyValue
     }
 
-    fun sendKopierJournalpost(info: KopierJournalpostInfo) = runBlocking { send(mapKopierJournalpost(info))  }
+    suspend fun sendKopierJournalpost(info: KopierJournalpostInfo) = send(mapKopierJournalpost(info))
 
     suspend fun send(pair: Pair<String, String>)
 

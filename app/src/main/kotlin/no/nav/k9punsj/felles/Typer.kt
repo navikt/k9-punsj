@@ -53,18 +53,17 @@ data class Sak(
 
 enum class Søknadstype(
     internal val k9YtelseType: String,
-    internal val brevkode: Brevkode,
-    internal val journalpostType: String) {
-    PleiepengerSyktBarn("PSB", Brevkode.PLEIEPENGER_BARN_SOKNAD, "PleiepengerSyktBarn"),
-    PleiepengerLivetsSluttfase("PPN", Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE, "PleiepengerLivetsSluttfase"),
-    Omsorgspenger("OMP", Brevkode.SØKNAD_UTBETALING_OMS, "UtbetaleOmsorgspenger"),
-    OmsorgspengerUtbetaling_Arbeidstaker("OMP", Brevkode.SØKNAD_UTBETALING_OMS_AT, "UtbetaleOmsorgspenger"),
-    OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker("OMP", Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT, "UtbetaleOmsorgspenger"),
-    OmsorgspengerUtbetaling_Korrigering("OMP", Brevkode.FRAVÆRSKORRIGERING_IM_OMS, "UtbetaleOmsorgspenger"),
-    OmsorgspengerKroniskSyktBarn("OMP_KS", Brevkode.SØKNAD_OMS_UTVIDETRETT_KS, "KroniskSyktBarn"),
-    OmsorgspengerAleneOmsorg("OMP_AO", Brevkode.SØKNAD_OMS_UTVIDETRETT_AO, "AleneOmsorg"),
-    Opplæringspenger("OLP", Brevkode.OPPLÆRINGSPENGER_SOKNAD, "Opplæringspenger"),
-    OmsorgspengerMidlertidigAlene("OMP_MA", Brevkode.SØKNAD_OMS_UTVIDETRETT_MA, "MidlertidigAlene");
+    internal val brevkode: Brevkode) {
+    PleiepengerSyktBarn("PSB", Brevkode.PLEIEPENGER_BARN_SOKNAD),
+    PleiepengerLivetsSluttfase("PPN", Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE),
+    Omsorgspenger("OMP", Brevkode.SØKNAD_UTBETALING_OMS),
+    OmsorgspengerUtbetaling_Arbeidstaker("OMP", Brevkode.SØKNAD_UTBETALING_OMS_AT),
+    OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker("OMP", Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT),
+    OmsorgspengerUtbetaling_Korrigering("OMP", Brevkode.FRAVÆRSKORRIGERING_IM_OMS),
+    OmsorgspengerKroniskSyktBarn("OMP_KS", Brevkode.SØKNAD_OMS_UTVIDETRETT_KS),
+    OmsorgspengerAleneOmsorg("OMP_AO", Brevkode.SØKNAD_OMS_UTVIDETRETT_AO),
+    Opplæringspenger("OLP", Brevkode.OPPLÆRINGSPENGER_SOKNAD),
+    OmsorgspengerMidlertidigAlene("OMP_MA", Brevkode.SØKNAD_OMS_UTVIDETRETT_MA);
 
     internal companion object {
         internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {

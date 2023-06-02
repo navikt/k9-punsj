@@ -273,7 +273,10 @@ class K9SakServiceImpl(
         """.trimIndent()
 
         val (_, feil) = httpPost(body, sendInnSøknadUrl)
-        require(feil.isNullOrEmpty()) // TODO: Håndter feil
+        require(feil.isNullOrEmpty()) {
+            log.error("Feil ved sending av søknad til k9-sak: $feil")
+            throw IllegalStateException("Feil ved sending av søknad til k9-sak: $feil")
+        }
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
