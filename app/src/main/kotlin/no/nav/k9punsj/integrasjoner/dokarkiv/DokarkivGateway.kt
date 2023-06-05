@@ -17,6 +17,7 @@ import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Sak
+import no.nav.k9punsj.felles.Saksnummer
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
@@ -53,6 +54,8 @@ class DokarkivGateway(
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
     @Value("#{'\${no.nav.dokarkiv.scope}'.split(',')}") private val dokarkivScope: Set<String>
 ) {
+    private fun knyttTilAnnenSakUrl(journalpostId: JournalpostId) =
+        "$baseUrl/rest/journalpostapi/v1/journalpost/$journalpostId/knyttTilAnnenSak"
 
     internal suspend fun oppdaterJournalpostDataOgFerdigstill(
         dataFraSaf: JSONObject,
@@ -192,6 +195,54 @@ class DokarkivGateway(
         check(response.statusCode.is2xxSuccessful) {
             "Feil ved oppdatering av journalpost. HttpStatus=[${response.statusCode.value()}, Response=[${response.body}], Url=[$url]"
         }
+    }
+
+    internal suspend fun knyttTilAnnenSak(
+        journalpostId: JournalpostId,
+        identitetsnummer: Identitetsnummer,
+        saksnummer: Saksnummer
+    ): JournalpostId {
+        @Language("JSON")
+        val dto = """
+        {
+            "sakstype": "FAGSAK",
+            "fagsaksystem": "${FagsakSystem.K9}",
+            "fagsakId": "$saksnummer",
+            "journalfoerendeEnhet": "9999",
+            "tema": "${Tema.OMS}",
+            "bruker": {
+                "idType": "FNR",
+                "id": "$identitetsnummer"
+            }
+        }
+        """.trimIndent()
+        val body = BodyInserters.fromValue(dto)
+
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        val url = knyttTilAnnenSakUrl(journalpostId = journalpostId)
+        val response = client
+            .put()
+            .uri(URI.create(url))
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        check(response.statusCode.is2xxSuccessful) {
+            "Feil ved kopiering av journalpost. HttpStatus=[${response.statusCode.value()}, Response=[${response.body}], Url=[$url]"
+        }
+
+        return JSONObject(response).get("nyJournalpostId").toString().somJournalpostId()
     }
 
     private companion object {

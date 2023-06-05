@@ -3,12 +3,17 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.Saksnummer
+import no.nav.k9punsj.felles.Saksnummer.Companion.somSaksnummer
 import no.nav.k9punsj.felles.Søknadstype
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.innsending.dto.somPunsjetSøknad
@@ -18,6 +23,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
 import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
 import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
@@ -27,7 +33,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
-import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
@@ -35,6 +40,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import java.time.ZonedDateTime
 
 @Component
 @StandardProfil
@@ -48,8 +54,15 @@ class RestInnsendingClient(
 ) : InnsendingClient {
 
     override suspend fun send(pair: Pair<String, String>) {
-        // Mappe om json til object
         val json = objectMapper().readTree(pair.second)
+        // Unntakshåndtering for å kopiere journalpost, 2 ulike typer av "rapids"-behov.
+        // KopierJournalpost skall ikke sendes in til K9Sak.
+        if (!json["@behov"]["KopierPunsjbarJournalpost"].isMissingOrNull()) {
+            kopierJournalpost(json)
+            return
+        }
+
+        // Mappe om json til object
         val correlationId = json["@correlationId"].asText()
         val punsjetSøknadJson = json["@behov"]["PunsjetSøknad"]
         val søknadJson = punsjetSøknadJson["søknad"] as ObjectNode
@@ -96,7 +109,7 @@ class RestInnsendingClient(
         val bruker = FerdigstillJournalpost.Bruker(
             identitetsnummer = søknad.søker,
             navn = søkerNavn.first().navn(),
-            sak = Fagsystem.K9SAK to Saksnummer(k9Saksnummer)
+            sak = Fagsystem.K9SAK to no.nav.k9.sak.typer.Saksnummer(k9Saksnummer)
         )
 
         val ferdigstillJournalposter = søknad.journalpostIder.map { journalpostId ->
@@ -107,14 +120,16 @@ class RestInnsendingClient(
                     logger.info("JournalpostId=[${ferdigstillJournalpost.journalpostId}] er allerede ferdigstilt.")
                 }
             }
-        }.map { it.copy(
-            bruker = bruker,
-            sak = FerdigstillJournalpost.Sak(
-                sakstype = "FAGSAK",
-                fagsaksystem = "K9",
-                fagsakId = k9Saksnummer
+        }.map {
+            it.copy(
+                bruker = bruker,
+                sak = FerdigstillJournalpost.Sak(
+                    sakstype = "FAGSAK",
+                    fagsaksystem = "K9",
+                    fagsakId = k9Saksnummer
+                )
             )
-        ) }
+        }
 
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
 
@@ -174,6 +189,57 @@ class RestInnsendingClient(
         )
     }
 
+    private suspend fun kopierJournalpost(packet: JsonNode): JournalpostId {
+        val opprettet =
+            packet["@behovOpprettet"].takeIf { !it.isMissingOrNull() }?.asText() ?: packet["@opprettet"].asText()
+        val aktueltBehov = packet["@behov"].asText()
+        val kopierJournalpost = KopierJournalpostPacket(
+            versjon = packet[aktueltBehov.versjon()].asText(),
+            journalpostId = packet[aktueltBehov.journalpostId()].asText().somJournalpostId(),
+            fraIdentitetsnummer = packet[aktueltBehov.fraIdentitetsnummer()].asText().somIdentitetsnummer(),
+            fraSaksnummer = packet[aktueltBehov.fraSaksnummer()].asText().somSaksnummer(),
+            tilIdentitetsnummer = packet[aktueltBehov.tilIdentitetsnummer()].asText().somIdentitetsnummer(),
+            tilSaksnummer = packet[aktueltBehov.tilSaksnummer()].asText().somSaksnummer(),
+            fagsystem = Fagsystem.valueOf(packet[aktueltBehov.fagsystem()].asText())
+        )
+
+        // Håndterer om journalposten allerede er kopiert.
+        val alleredeKopiertJournalpostId = safGateway.hentOriginaleJournalpostIder(
+            fagsystem = kopierJournalpost.fagsystem.toString(),
+            saksnummer = kopierJournalpost.tilSaksnummer.toString(),
+            fraOgMed = ZonedDateTime.parse(opprettet).minusWeeks(1).toLocalDate()
+        ).filterKeys { it != kopierJournalpost.journalpostId }
+            .filterValues { it.contains(kopierJournalpost.journalpostId) }
+            .keys
+            .firstOrNull()
+
+        if (alleredeKopiertJournalpostId != null) {
+            logger.info("Journalpost allerede kopiert. JournalpostId=[$alleredeKopiertJournalpostId]")
+            throw IllegalStateException("Allerede kopiert journalpost. JournalpostId=[$alleredeKopiertJournalpostId]")
+        }
+
+        // Henter type og status på journalposten for å avgjøre hva vi gjør videre.
+        val typeOgStatus = safGateway.hentTypeOgStatus(
+            journalpostId = kopierJournalpost.journalpostId
+        )
+
+        if (!typeOgStatus.kanKopieresNå()) {
+            check(typeOgStatus.kanKopieresEtterFerdigstilling()) {
+                "Journalpost kan ikke kopieres. Type=[${typeOgStatus.first}], Status=[${typeOgStatus.second}]"
+            }
+            dokarkivGateway.ferdigstillJournalpost(
+                journalpostId = kopierJournalpost.journalpostId.toString(),
+                enhet = "9999"
+            )
+        }
+
+        return dokarkivGateway.knyttTilAnnenSak(
+            journalpostId = kopierJournalpost.journalpostId,
+            saksnummer = kopierJournalpost.tilSaksnummer,
+            identitetsnummer = kopierJournalpost.tilIdentitetsnummer,
+        ).also { logger.info("Journalpost kopiert. JournalpostId=[$it]") }
+    }
+
     private fun JsonNode.saksbehandler() = when (isMissingOrNull()) {
         true -> "n/a"
         false -> asText()
@@ -195,6 +261,30 @@ class RestInnsendingClient(
         val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
         val FARGE_REGEX = "#[a-fA-F0-9]{6}".toRegex()
         const val DEFAULT_FARGE = "#C1B5D0"
-        private fun JsonNode.hentString() = asText().replace("\"", "")
+        fun JsonNode.hentString() = asText().replace("\"", "")
+
+        fun String.fraIdentitetsnummer() = "@behov.$this.fra.identitetsnummer"
+        fun String.fraSaksnummer() = "@behov.$this.fra.saksnummer"
+        fun String.tilIdentitetsnummer() = "@behov.$this.til.identitetsnummer"
+        fun String.tilSaksnummer() = "@behov.$this.til.saksnummer"
+        fun String.journalpostId() = "@behov.$this.journalpostId"
+        fun String.fagsystem() = "@behov.$this.fagsystem"
+        fun String.versjon() = "@behov.$this.versjon"
+
+        data class KopierJournalpostPacket(
+            val versjon: String,
+            val journalpostId: JournalpostId,
+            val fraIdentitetsnummer: Identitetsnummer,
+            val fraSaksnummer: Saksnummer,
+            val tilIdentitetsnummer: Identitetsnummer,
+            val tilSaksnummer: Saksnummer,
+            val fagsystem: Fagsystem
+        )
+
+        fun Pair<JoarkTyper.JournalpostType, JoarkTyper.JournalpostStatus>.kanKopieresNå() =
+            (first.erNotat && second.erFerdigstilt) || (first.erInngående && second.erJournalført)
+
+        fun Pair<JoarkTyper.JournalpostType, JoarkTyper.JournalpostStatus>.kanKopieresEtterFerdigstilling() =
+            !kanKopieresNå() && (first.erNotat || first.erInngående)
     }
 }
