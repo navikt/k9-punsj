@@ -3,7 +3,6 @@ package no.nav.k9punsj.innsending
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9punsj.StandardProfil
@@ -37,14 +36,12 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.time.ZonedDateTime
 
 @Component
 @StandardProfil
-@Qualifier("Rest")
 @ConditionalOnProperty("innsending.rest.enabled", havingValue = "true", matchIfMissing = false)
 class RestInnsendingClient(
     private val k9SakService: K9SakService,
@@ -57,7 +54,7 @@ class RestInnsendingClient(
         val json = objectMapper().readTree(pair.second)
         // Unntakshåndtering for å kopiere journalpost, 2 ulike typer av "rapids"-behov.
         // KopierJournalpost skall ikke sendes in til K9Sak.
-        if (!json["@behov"]["KopierPunsjbarJournalpost"].isMissingOrNull()) {
+        if (json["@behov"]["KopierPunsjbarJournalpost"] != null) {
             kopierJournalpost(json)
             return
         }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 
 @Component
 @StandardProfil
-@Qualifier("Kafka")
 @ConditionalOnProperty("innsending.rest.enabled", havingValue = "false", matchIfMissing = true)
 class KafkaInnsendingClient(
     @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>,
