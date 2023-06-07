@@ -137,6 +137,27 @@ private fun WireMockServer.stubSafHenteJournalpost(
     return this
 }
 
+private fun WireMockServer.stubSafHenteJournalpostPunsjbolle(
+    journalpostId: JournalpostId,
+    responseBody: String,
+): WireMockServer {
+    WireMock.stubFor(WireMock.post(WireMock
+        .urlPathMatching(".*$path/graphql.*"))
+        .withRequestBody(ContainsPattern(journalpostId))
+        .withHeader("Nav-Callid", AnythingPattern())
+        .willReturn(WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(responseBody)
+            .withStatus(200)
+        )
+    )
+    return this
+}
+
+fun WireMockServer.stubSafPunsjbolleHentFerdigstillJournalpostOk() = stubSafHenteJournalpostPunsjbolle(
+    journalpostId = "7523521",
+    responseBody = SafMockResponses.OkResponseHenteFerdigstillJournalpost
+)
 fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
 fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
     journalpostId = JournalpostIds.AbacError,
@@ -312,6 +333,49 @@ private object SafMockResponses {
       ],
       "data": {
         "journalpost": null
+      }
+    }
+    """.trimIndent()
+
+    @Language("JSON")
+    val OkResponseHenteFerdigstillJournalpost = """
+    {
+      "data": {
+        "journalpost": {
+          "journalpostId": "7523521",
+          "tema": "OMS",
+          "journalposttype": "N",
+          "journalstatus": "FERDIGSTILT",
+          "relevanteDatoer" : [
+          {
+            "dato" : "2022-10-12T12:53:21.046Z",
+            "datotype" : "DATO_REGISTRERT"
+          }
+          ],
+          "bruker": {
+            "type": "FNR",
+            "id": "02020050123"
+          },
+          "dokumenter": [
+            {
+              "dokumentInfoId": "470164680",
+              "dokumentvarianter": [
+                {
+                  "variantformat": "ARKIV",
+                  "saksbehandlerHarTilgang": true
+                },
+                {
+                  "variantformat": "ORIGINAL",
+                  "saksbehandlerHarTilgang": true
+                }
+              ]
+            },
+          ],
+          "avsenderMottaker": {
+            "id": "02020050123",
+            "type": "FNR"
+          }
+        }
       }
     }
     """.trimIndent()

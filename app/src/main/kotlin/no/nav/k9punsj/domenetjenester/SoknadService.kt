@@ -4,7 +4,6 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
-import kotlin.coroutines.coroutineContext
 
 @Service
 internal class SoknadService(
@@ -25,6 +23,10 @@ internal class SoknadService(
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway
 ) {
+
+    init {
+        logger.info("SøknadService init: innsendingClient = ${innsendingClient.toString()}")
+    }
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
@@ -57,24 +59,18 @@ internal class SoknadService(
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
         }
 
-        val correlationId = try {
-            coroutineContext.hentCorrelationId()
-        } catch (e: Exception) {
-            UUID.randomUUID().toString()
-        }
-
         try {
             innsendingClient.sendSøknad(
                 søknadId = søknad.søknadId.id,
                 søknad = søknad,
-                correlationId = correlationId,
+                correlationId = UUID.randomUUID().toString(), // TODO: Erstattes med f.eks. LogFilter
                 tilleggsOpplysninger = mapOf(
                     PunsjetAvSaksbehandler to punsjetAvSaksbehandler,
                     Søknadtype to brevkode.kode
                 )
             )
         } catch (e: Exception) {
-            logger.error("Feil vid innsending av søknad for journalpostIder: ${søknad.journalposter}")
+            logger.error("Feil vid innsending av søknad for journalpostIder: ${journalpostIder.joinToString(", ")}")
             return Pair(HttpStatus.INTERNAL_SERVER_ERROR, e.stackTraceToString())
         }
 

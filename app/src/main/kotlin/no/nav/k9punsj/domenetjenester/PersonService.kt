@@ -48,12 +48,10 @@ class PersonService(
     }
 
     suspend fun finnAktørId(norskIdent: String): String {
-        val person = personRepository.hentPersonVedPersonIdent(norskIdent)
-        if (person != null) {
-            return person.aktørId
+        personRepository.hentPersonVedPersonIdent(norskIdent)?.let {
+            return it.aktørId
         }
-        val pdlResponse = pdlService.identifikator(norskIdent)
-        return pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
-            ?: throw IllegalStateException("Fant ikke aktørId i PDL")
+
+        return pdlService.aktørIdFor(norskIdent) ?: throw IllegalStateException("Fant ikke aktørId i PDL")
     }
 }

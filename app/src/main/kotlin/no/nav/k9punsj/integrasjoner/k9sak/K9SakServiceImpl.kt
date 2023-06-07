@@ -11,6 +11,7 @@ import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
@@ -18,8 +19,11 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
@@ -52,6 +56,7 @@ class K9SakServiceImpl(
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
+        internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
     }
@@ -192,11 +197,19 @@ class K9SakServiceImpl(
             LocalDate.of(aar, 12, 31)
         )
 
+        val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
+        val pleietrengendeAktørId = if(!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
+            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+        } else null
+        val annenpartAktørId = if(!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
+        } else null
+
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
-            personService.finnAktørId(k9SaksnummerGrunnlag.søker),
-            k9SaksnummerGrunnlag.pleietrengende?.let { personService.finnAktørId(it) },
-            k9SaksnummerGrunnlag.annenPart?.let { personService.finnAktørId(it) },
+            søkerAktørId,
+            pleietrengendeAktørId,
+            annenpartAktørId,
             periode,
         )
 
@@ -238,6 +251,34 @@ class K9SakServiceImpl(
         }
     }
 
+    override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+        val forsendelseMottattTidspunkt = soeknad.mottatt.withZoneSameInstant(Oslo).toLocalDateTime()
+
+        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
+        @Language("JSON")
+        val body = """
+            [{
+                "saksnummer": "${grunnlag.saksnummer}",
+                "journalpostId": "${grunnlag.journalpostId}",
+                "ytelseType": {
+                    "kode": "${soeknad.søknadstype.k9YtelseType}",
+                    "kodeverk": "FAGSAK_YTELSE"
+                },
+                "kanalReferanse": "${grunnlag.referanse}",
+                "type": "${soeknad.søknadstype.brevkode.kode}",
+                "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
+                "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
+                "payload": "${Base64.getUrlEncoder().encodeToString(soeknad.søknadJson.toString().toByteArray())}"
+            }]
+        """.trimIndent()
+
+        val (_, feil) = httpPost(body, sendInnSøknadUrl)
+        require(feil.isNullOrEmpty()) {
+            log.error("Feil ved sending av søknad til k9-sak: $feil")
+            throw IllegalStateException("Feil ved sending av søknad til k9-sak: $feil")
+        }
+    }
+
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
         val (request, _, result) = "$baseUrl$url"
             .httpPost()
@@ -258,7 +299,7 @@ class K9SakServiceImpl(
                     "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
                 )
                 log.error(error.toString())
-                Pair(null, "Feil ved henting av peridoer fra k9-sak")
+                Pair(null, "Feil ved kall til k9-sak")
             }
         )
     }

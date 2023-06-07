@@ -4,6 +4,7 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
     PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS"),
     PLEIEPENGER_LIVETS_SLUTTFASE("PPN", "Pleiepenger i livets sluttfase", "PP", "OMS"),
     OMSORGSPENGER("OMP", "Omsorgspenger", "OM", "OMS"),
+    OMSORGSPENGER_UTBETALING("OMP_UT", "Omsorgspenger", "OM", "OMS"),
     OMSORGSPENGER_KRONISK_SYKT_BARN("OMP_KS", "Omsorgspenger kronisk sykt barn", "OM", "OMS"),
     OMSORGSPENGER_MIDLERTIDIG_ALENE("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS"),
     OMSORGSPENGER_ALENE_OMSORGEN("OMP_AO", "Alene om omsorgen", "OM", "OMS"),
@@ -21,6 +22,10 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val infotrygdBeh
             } else {
                 return UKJENT
             }
+        }
+
+        fun fraNavn(navn: String): FagsakYtelseType {
+            return values().firstOrNull { it.name == navn } ?: UDEFINERT
         }
     }
 }

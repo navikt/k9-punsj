@@ -62,6 +62,8 @@ no.nav:
   infotrygd:
     base_url: ${K9_INFOTRYGD_BASE_URL}
     scope: ${K9_INFOTRYGD_SCOPE}
+  sak:
+    base_url: ${SAK_BASE_URL}
   security:
     sts:
       client:

@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.eksternt.pdl
 
 import no.nav.k9punsj.TestProfil
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
 import no.nav.k9punsj.integrasjoner.pdl.PdlResponse
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
@@ -73,6 +74,16 @@ internal class TestPdlService : PdlService {
                 mellomnavn = null,
                 etternavn = "Søkersen",
                 gradering = Personopplysninger.Gradering.STRENGT_FORTROLIG_UTLAND
+            )
+        )
+        setOf("02020050123") -> setOf(
+            Personopplysninger(
+                identitetsnummer = "02020050123",
+                fødselsdato = LocalDate.parse("1980-05-06"),
+                fornavn = "Søker",
+                mellomnavn = null,
+                etternavn = "Søkersen",
+                gradering = Personopplysninger.Gradering.UGRADERT
             )
         )
         else -> setOf()

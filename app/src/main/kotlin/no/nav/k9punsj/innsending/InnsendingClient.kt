@@ -2,6 +2,7 @@ package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import de.huxhorn.sulky.ulid.ULID
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.rapid.behov.Behov
@@ -37,7 +38,7 @@ interface InnsendingClient {
         ).keyValue
     }
 
-    fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
+    suspend fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
         send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
     }
 
@@ -70,9 +71,9 @@ interface InnsendingClient {
         ).keyValue
     }
 
-    fun sendKopierJournalpost(info: KopierJournalpostInfo) = send(mapKopierJournalpost(info))
+    suspend fun sendKopierJournalpost(info: KopierJournalpostInfo) = send(mapKopierJournalpost(info))
 
-    fun send(pair: Pair<String, String>)
+    suspend fun send(pair: Pair<String, String>)
 
     companion object {
         private val logger = LoggerFactory.getLogger(InnsendingClient::class.java)

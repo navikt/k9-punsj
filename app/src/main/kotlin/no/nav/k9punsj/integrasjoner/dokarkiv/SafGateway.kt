@@ -12,11 +12,14 @@ import no.nav.k9punsj.felles.FeilIAksjonslogg
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.NotatUnderArbeidFeil
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
+import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.json.JSONObject
@@ -183,6 +186,13 @@ class SafGateway(
         )
     }
 
+    internal suspend fun hentFerdigstillJournalpost(
+        journalpostId: JournalpostId
+    ): FerdigstillJournalpost {
+        return hentDataFraSaf(journalpostId.toString())
+            .mapFerdigstillJournalpost(journalpostId)
+    }
+
     internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
@@ -235,6 +245,41 @@ class SafGateway(
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
     internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
+
+    internal fun hentFerdigstillJournalpostQuery(journalpostId: String) = """
+            {"query":"query {journalpost(journalpostId:\"${journalpostId}\"){journalstatus,journalposttype,tittel,avsenderMottaker{navn},dokumenter{dokumentInfoId,tittel}}}"}
+        """.trimIndent()
+
+    private fun JSONObject.notNullNotBlankString(key: String) =
+        has(key) && get(key) is String && getString(key).isNotBlank()
+
+    private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
+        true -> getString(key)
+        false -> null
+    }
+
+    internal fun JSONObject.mapFerdigstillJournalpost(journalpostId: JournalpostId) =
+        getJSONObject("journalpost")
+            .let { journalpost ->
+                FerdigstillJournalpost(
+                    journalpostId = journalpostId,
+                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
+                    status = journalpost.getString("journalstatus").somJournalpostStatus(),
+                    type = journalpost.getString("journalposttype").somJournalpostType(),
+                    tittel = journalpost.stringOrNull("tittel"),
+                    dokumenter = journalpost.getJSONArray("dokumenter").map { it as JSONObject }.map {
+                        FerdigstillJournalpost.Dokument(
+                            dokumentId = it.getString("dokumentInfoId"),
+                            tittel = it.stringOrNull("tittel")
+                        )
+                    }.toSet(),
+                    sak = FerdigstillJournalpost.Sak(
+                        sakstype = null,
+                        fagsaksystem = null,
+                        fagsakId = null
+                    )
+                )
+            }
 
     override fun health() = Mono.just(
         accessTokenClient.helsesjekk(
