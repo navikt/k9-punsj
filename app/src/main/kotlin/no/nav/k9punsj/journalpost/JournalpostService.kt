@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
@@ -18,6 +19,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.dto.DokumentInfo
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
+import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import org.json.JSONObject
@@ -65,7 +67,6 @@ class JournalpostService(
             }
         }
     }
-
 
     internal suspend fun hentJournalpostInfo(journalpostId: String): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
@@ -145,6 +146,20 @@ class JournalpostService(
                 medType
             }
         }
+    }
+
+    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto) {
+        val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
+        dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+            dataFraSaf = journalpostDataFraSaf,
+            journalpostId = dto.journalpostId,
+            identitetsnummer = dto.brukerIdent.somIdentitetsnummer(),
+            enhetKode = "9999",
+            sak = Sak(
+                sakstype = Sak.SaksType.FAGSAK,
+                fagsakId = dto.saksnummer
+            )
+        )
     }
 
     internal suspend fun journalførMotGenerellSak(
@@ -233,7 +248,6 @@ class JournalpostService(
                     logger.error("Feilet med å ferdigstille journalpost med id = [{}]", journalpostId)
                     return status to body
                 }
-
             } else {
                 logger.info("Journalpost er allerede ferdigstilt.")
             }
@@ -307,7 +321,8 @@ private data class ParsedSafJournalpost(
     fun ikkeErFerdigBehandlet(): Boolean {
         return !listOf(
             SafDtos.Journalstatus.JOURNALFOERT,
-            SafDtos.Journalstatus.FERDIGSTILT)
+            SafDtos.Journalstatus.FERDIGSTILT
+        )
             .contains(journalstatus)
     }
 }

@@ -31,7 +31,6 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 

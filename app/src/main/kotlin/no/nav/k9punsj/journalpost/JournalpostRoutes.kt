@@ -212,7 +212,8 @@ internal class JournalpostRoutes(
                 journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
                 val punsjJournalpost = journalpostService.hent(dto.journalpostId)
 
-
+                // Oppdater og ferdigstill journalpost
+                journalpostService.oppdaterOgFerdigstillForMottak(dto)
 
                 aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                     punsjJournalpost = punsjJournalpost,
