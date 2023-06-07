@@ -35,7 +35,7 @@
         <!-- Kontrakt -->
         <k9-sak.version>3.4.8</k9-sak.version>
         <k9-formidling.version>0.0.30</k9-formidling.version>
-        <k9-format.version>8.0.9</k9-format.version>
+        <k9-format.version>8.3.2</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
