@@ -13,7 +13,6 @@ import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
-import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.NotatUnderArbeidFeil
 import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
@@ -33,14 +32,12 @@ import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.time.LocalDate
 import java.util.*
 import kotlin.coroutines.coroutineContext
 
@@ -54,7 +51,6 @@ class SafGateway(
 
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(SafGateway::class.java)
-        private const val MaksAntallJournalposter = 50
         private const val VariantType = "ARKIV"
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
@@ -227,69 +223,6 @@ class SafGateway(
         }
     }
 
-    internal suspend fun hentOriginaleJournalpostIder(
-        fagsystem: String,
-        saksnummer: String,
-        fraOgMed: LocalDate
-    ): Map<JournalpostId, Set<JournalpostId>> {
-
-        val request = hentOriginalJournalpostIderQuery(
-            fagsystem = fagsystem,
-            saksnummer = saksnummer,
-            fraOgMed = fraOgMed
-        )
-
-        return hentDataFraSafMedQuery(request)
-            .getJSONObject("dokumentoversiktFagsak")
-            .getJSONArray("journalposter")
-            .asSequence()
-            .map { it as JSONObject }
-            .map { it.getString("journalpostId").somJournalpostId() to it.originaleJournalpostIder() }
-            .toMap()
-            .mapValues { it.value.toSet() }
-            .also {
-                require(it.size < MaksAntallJournalposter) {
-                    "Fant ${it.size} journalposter, støtter maks $MaksAntallJournalposter"
-                }
-            }
-    }
-
-    private suspend fun hentDataFraSafMedQuery(query: String): JSONObject {
-        val accessToken = cachedAccessTokenClient
-            .getAccessToken(
-                scopes = henteDokumentScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
-            )
-
-        val (httpStatusCode, response) = client
-            .post()
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(query))
-            .awaitExchange { Pair(it.statusCode(), it.awaitEntity<String>()) }
-
-        check(httpStatusCode.is2xxSuccessful || !response.body.isNullOrEmpty()) {
-            throw IllegalStateException("Fick feil ved henting av data fra SAF. $httpStatusCode")
-        }
-
-        return response.body!!.safData()
-    }
-
-    internal suspend fun hentTypeOgStatus(
-        journalpostId: JournalpostId,
-    ): Pair<JoarkTyper.JournalpostType, JoarkTyper.JournalpostStatus> {
-
-        val request = hentTypeOgStatusQuery(journalpostId = journalpostId)
-
-        return hentDataFraSafMedQuery(request).getJSONObject("journalpost")
-            .let { journalpost ->
-                journalpost.getString("journalposttype")
-                    .somJournalpostType() to journalpost.getString("journalstatus").somJournalpostStatus()
-            }
-    }
-
     internal fun håndterFeil(
         it: FuelError,
         request: Request,
@@ -313,25 +246,8 @@ class SafGateway(
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
     internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
 
-    private fun JSONObject.originaleJournalpostIder() =
-        getJSONArray("dokumenter")
-            .map { it as JSONObject }
-            .mapNotNull { it.stringOrNull("originalJournalpostId")?.somJournalpostId() }
-
     internal fun hentFerdigstillJournalpostQuery(journalpostId: String) = """
             {"query":"query {journalpost(journalpostId:\"${journalpostId}\"){journalstatus,journalposttype,tittel,avsenderMottaker{navn},dokumenter{dokumentInfoId,tittel}}}"}
-        """.trimIndent()
-
-    internal fun hentTypeOgStatusQuery(journalpostId: JournalpostId) = """
-            {"query":"query {journalpost(journalpostId:\"${journalpostId}\"){journalposttype,journalstatus}}"}
-        """.trimIndent()
-
-    internal fun hentOriginalJournalpostIderQuery(
-        fagsystem: String,
-        saksnummer: String,
-        fraOgMed: LocalDate
-    ) = """
-            {"query":"query {dokumentoversiktFagsak(tema:OMS,fagsak:{fagsaksystem:\"$fagsystem\",fagsakId:\"$saksnummer\"},foerste:$MaksAntallJournalposter,fraDato:\"$fraOgMed\"){journalposter{journalpostId,dokumenter{originalJournalpostId}}}}"}
         """.trimIndent()
 
     private fun JSONObject.notNullNotBlankString(key: String) =

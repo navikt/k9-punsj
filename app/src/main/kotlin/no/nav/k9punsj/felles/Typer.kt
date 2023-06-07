@@ -20,15 +20,6 @@ data class Identitetsnummer private constructor(private val value: String) {
     }
 }
 
-data class Saksnummer private constructor(private val value: String) {
-    init { require(value.matches(Regex)) { "$value er et ugyldig saksnummer" } }
-    override fun toString() = value
-    internal companion object {
-        private val Regex = "[A-Za-z0-9]{4,20}".toRegex()
-        internal fun String.somSaksnummer() = Saksnummer(this)
-    }
-}
-
 data class IdentOgJournalpost(
     val norskIdent: String,
     val journalpostId: String
