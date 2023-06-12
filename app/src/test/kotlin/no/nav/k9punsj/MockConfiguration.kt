@@ -11,7 +11,6 @@ import no.nav.k9punsj.wiremock.getAaregBaseUrl
 import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
 import no.nav.k9punsj.wiremock.getEregBaseUrl
 import no.nav.k9punsj.wiremock.getGosysBaseUrl
-import no.nav.k9punsj.wiremock.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl
 import no.nav.k9punsj.wiremock.getK9sakBaseUrl
 import no.nav.k9punsj.wiremock.getPdlBaseUrl
 import no.nav.k9punsj.wiremock.getSafBaseUrl
@@ -67,8 +66,6 @@ internal object MockConfiguration {
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
-            "K9_INFOTRYGD_BASE_URL" to wireMockServer.getInfotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
-            "K9_INFOTRYGD_SCOPE" to "infotrygd/.default",
             "SAK_BASE_URL" to wireMockServer.getSakBaseUrl(),
         )
     }

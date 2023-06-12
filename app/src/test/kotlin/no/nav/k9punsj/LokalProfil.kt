@@ -3,12 +3,10 @@ package no.nav.k9punsj
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.k9punsj.configuration.DbConfiguration
 import no.nav.k9punsj.configuration.getDataSource
-import no.nav.k9punsj.kafka.HendelseProducer
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 import org.flywaydb.core.api.output.MigrateResult
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 import javax.sql.DataSource
@@ -19,6 +17,7 @@ annotation class LokalProfil
 @TestConfiguration
 @LokalProfil
 class LokalBeans {
+
     @Bean
     fun lokalDataSource(dbConfiguration: DbConfiguration): DataSource {
         return hikariConfigLocal(dbConfiguration)

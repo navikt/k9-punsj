@@ -109,7 +109,7 @@ internal class MapOlpTilK9Format(
                 return
             }
         }
-        val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
+        val kursHolder = Kursholder(institusjonsUuid)
         val kursPerioder = this.kursperioder?.map {
             KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst, it.begrunnelseReisetidTil, it.begrunnelseReisetidHjem)
         }?.toList()

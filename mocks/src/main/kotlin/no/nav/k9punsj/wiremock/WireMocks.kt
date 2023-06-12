@@ -41,5 +41,4 @@ fun initWireMock(
     .stubAareg()
     .stubEreg()
     .stubJournalføringAvNotat()
-    .mockInfotrygdGrunnlagPaaroerendeSykdom()
     .stubFerdigstillJournalpost()
