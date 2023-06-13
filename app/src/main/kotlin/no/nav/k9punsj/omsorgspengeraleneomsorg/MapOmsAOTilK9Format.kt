@@ -4,10 +4,11 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
+import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorg
-import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
+import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorgSøknadValidator
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.StringUtils.erSatt
@@ -29,6 +30,7 @@ internal class MapOmsAOTilK9Format(
             dto.leggTilMottattDatoOgKlokkeslett()
             dto.soekerId?.leggTilSøker()
             dto.leggTilJournalposter(journalpostIder = journalpostIder)
+            dto.leggtilBegrunnelseForInnsending()
             val omsorgspengerAleneOmsorg = OmsorgspengerAleneOmsorg(
                 dto.barn?.leggTilBarn(),
                 dto.soeknadsperiode?.somK9Periode()
@@ -36,7 +38,7 @@ internal class MapOmsAOTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerAleneOmsorg)
-            feil.addAll(Validator.valider(søknad.getYtelse())) // TODO: 20/01/2022 Validerer ingenting...
+            feil.addAll(Validator.valider(søknad))
         }.onFailure { throwable ->
             logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
@@ -50,6 +52,14 @@ internal class MapOmsAOTilK9Format(
     private fun String.leggTilSøknadId() {
         if (erSatt()) {
             søknad.medSøknadId(this)
+        }
+    }
+
+    private fun OmsorgspengerAleneOmsorgSøknadDto.leggtilBegrunnelseForInnsending() {
+        if(!this.begrunnelseForInnsending.isNullOrEmpty()) {
+            val begrunnelseForInnsending = BegrunnelseForInnsending()
+                .medBegrunnelseForInnsending(this.begrunnelseForInnsending)
+            søknad.medBegrunnelseForInnsending(begrunnelseForInnsending)
         }
     }
 
@@ -101,7 +111,7 @@ internal class MapOmsAOTilK9Format(
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsAOTilK9Format::class.java)
 
-        private val Validator = OmsorgspengerKroniskSyktBarn().validator
+        private val Validator = OmsorgspengerAleneOmsorgSøknadValidator()
         private const val Versjon = "1.0.0"
     }
 }
