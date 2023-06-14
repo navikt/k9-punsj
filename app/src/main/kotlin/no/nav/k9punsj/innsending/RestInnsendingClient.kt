@@ -151,7 +151,7 @@ class RestInnsendingClient(
         val nyJournalpostRequest = JournalPostRequest(
             eksternReferanseId = correlationId,
             tittel = "PunsjetSøknad",
-            brevkode = brevkode.kode,
+            brevkode = "K9_PUNSJ_INNSENDING",
             tema = Tema.OMS,
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
