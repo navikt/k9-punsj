@@ -43,7 +43,7 @@ internal class SoknadService(
 
         val journalposter = safGateway.hentJournalposter(journalpostIdListe)
         val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
-            .filter { it.journalposttype.equals(SafDtos.JournalpostType.U) }
+            .filter { it.journalposttype == SafDtos.JournalpostType.U.toString() }
             .map { it.journalpostId }
             .toSet()
         if (journalposterMedTypeUtgaaende.isNotEmpty()) {
@@ -52,7 +52,7 @@ internal class SoknadService(
 
         val journalposterMedStatusFeilregistrert = journalposter.filterNotNull()
             .filter { it.journalstatus != null }
-            .filter { it.journalstatus!!.equals(SafDtos.Journalstatus.FEILREGISTRERT.toString()) }
+            .filter { it.journalstatus!! == SafDtos.Journalstatus.FEILREGISTRERT.toString() }
             .map { it.journalpostId }
             .toSet()
         if (journalposterMedStatusFeilregistrert.isNotEmpty()) {
