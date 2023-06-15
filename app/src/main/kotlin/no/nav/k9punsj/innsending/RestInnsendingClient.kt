@@ -91,7 +91,6 @@ class RestInnsendingClient(
             )
             k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
                 k9Saksnummer = objectMapper().readValue<SaksnummerDto>(it).saksnummer
-
             }
         }
 
@@ -151,7 +150,7 @@ class RestInnsendingClient(
         val nyJournalpostRequest = JournalPostRequest(
             eksternReferanseId = correlationId,
             tittel = "PunsjetSøknad",
-            brevkode = "K9_PUNSJ_INNSENDING",
+            brevkode = K9_PUNSJ_INNSENDING_BREVKODE,
             tema = Tema.OMS,
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
@@ -203,5 +202,11 @@ class RestInnsendingClient(
         val FARGE_REGEX = "#[a-fA-F0-9]{6}".toRegex()
         const val DEFAULT_FARGE = "#C1B5D0"
         private fun JsonNode.hentString() = asText().replace("\"", "")
+
+        /**
+         * Brevkode som brukes i k9-sak som unntakshåndtering. Leder til att oppsummerings-pdfen punsj genererer ikke
+         * havner i listen av dokumenter som skall klassifiseres under sykdom.
+         */
+        const val K9_PUNSJ_INNSENDING_BREVKODE = "K9_PUNSJ_INNSENDING"
     }
 }

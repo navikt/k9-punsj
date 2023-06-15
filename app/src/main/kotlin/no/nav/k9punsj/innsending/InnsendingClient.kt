@@ -15,15 +15,12 @@ import java.util.*
 
 interface InnsendingClient {
     fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
+
         val søknadMap = søknad.somMap()
         val behovssekvensId = ulid.nextULID()
 
-        logger.info(
-            "Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",
-            keyValue("soknad_id", søknadId),
-            keyValue("correlation_id", correlationId),
-            keyValue("behovssekvens_id", behovssekvensId)
-        )
+        logger.info("Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",)
+
         return Behovssekvens(
             id = behovssekvensId,
             correlationId = correlationId,

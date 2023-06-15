@@ -30,6 +30,10 @@ interface K9SakService {
 
     suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
 
+    /**
+     * Henter saksnummer fra K9Sak, hvis det ikke finnes oppretter vi en ny fagsak.
+     * Bruker behandlingsAar fra PunsjJournalpost for å sikkre riktig periode for saksnummeret.
+     */
     suspend fun hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag): Pair<String?, String?>
 
     suspend fun hentSisteSaksnummerForPeriode(
