@@ -2,6 +2,7 @@ package no.nav.k9punsj.integrasjoner.gosys
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
@@ -48,7 +49,9 @@ internal class GosysService(
             ?: return ServerResponse.status(HttpStatus.NOT_FOUND).buildAndAwait()
                 .also { logger.warn("Kunne ikke finne journalpost med id {}", oppgaveRequest.journalpostId) }
 
-        if (!journalpostInfo.kanOpprettesJournalføringsoppgave) {
+        if (!(journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name
+                && journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+        ) {
             logger.warn(
                 "Kan kun opprette journalføringsoppgaver på inngående journalposter i status mottatt.",
                 StructuredArguments.keyValue("journalpost_id", oppgaveRequest.journalpostId)

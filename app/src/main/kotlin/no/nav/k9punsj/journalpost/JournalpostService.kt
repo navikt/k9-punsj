@@ -99,15 +99,8 @@ class JournalpostService(
                     aktørId = aktørId,
                     mottattDato = mottattDato,
                     erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
-                    kanOpprettesJournalføringsoppgave = (SafDtos.JournalpostType.I == parsedJournalpost.journalpostType && SafDtos.Journalstatus.MOTTATT == parsedJournalpost.journalstatus).also {
-                        if (!it) {
-                            logger.info(
-                                "Kan ikke opprettes journalføringsoppgave. Journalposttype=${safJournalpost.journalposttype}, Journalstatus=${safJournalpost.journalstatus}",
-                                keyValue("journalpost_id", journalpostId)
-                            )
-                        }
-                    },
-                    journalpostStatus = safJournalpost.journalstatus!!
+                    journalpostStatus = safJournalpost.journalstatus!!,
+                    journalpostType = safJournalpost.journalposttype
                 )
             }
         }

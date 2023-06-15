@@ -14,7 +14,6 @@ data class JournalpostInfoDto(
     val kanSendeInn: Boolean,
     val erSaksbehandler: Boolean? = null,
     val journalpostStatus: String,
-    val kanOpprettesJournalføringsoppgave: Boolean,
     val kanKopieres: Boolean = punsjInnsendingType != PunsjInnsendingType.KOPI && erInngående, // Brukes av frontend,
     val gosysoppgaveId: String?,
 )

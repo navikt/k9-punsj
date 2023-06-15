@@ -126,7 +126,6 @@ internal class JournalpostRoutes(
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
-                        kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus
                     )
 
@@ -295,8 +294,6 @@ internal class JournalpostRoutes(
                     }
                 }
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = true,
@@ -307,6 +304,8 @@ internal class JournalpostRoutes(
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
                 }
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
@@ -461,12 +460,6 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
-                    journalpostId = journalpostId,
-                    erSendtInn = false,
-                    ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-                )
-
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = false,
@@ -501,6 +494,12 @@ internal class JournalpostRoutes(
                             .json()
                             .bodyValueAndAwait(OasFeil(it.message))
                     }
+                )
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                    journalpostId = journalpostId,
+                    erSendtInn = false,
+                    ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 )
 
                 return@RequestContext resultat
