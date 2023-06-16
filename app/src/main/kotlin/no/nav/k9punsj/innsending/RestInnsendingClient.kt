@@ -45,6 +45,16 @@ class RestInnsendingClient(
     private val kafkaKopierjournalpostInnsendingClient: KafkaKopierjournalpostInnsendingClient
 ) : InnsendingClient {
 
+    private companion object {
+        val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
+
+        /**
+         * Brevkode som brukes i k9-sak som unntakshåndtering. Leder til att oppsummerings-pdfen punsj genererer ikke
+         * havner i listen av dokumenter som skall klassifiseres under sykdom.
+         */
+        const val K9_PUNSJ_INNSENDING_BREVKODE = "K9_PUNSJ_INNSENDING"
+    }
+
     override suspend fun send(pair: Pair<String, String>) {
         val json = objectMapper().readTree(pair.second)
         /* Unntakshåndtering for å kopiere journalpost, 2 ulike typer av "rapids"-behov.
@@ -91,7 +101,6 @@ class RestInnsendingClient(
             )
             k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first?.let {
                 k9Saksnummer = objectMapper().readValue<SaksnummerDto>(it).saksnummer
-
             }
         }
 
@@ -137,13 +146,13 @@ class RestInnsendingClient(
         ferdigstillJournalposter.forEach { ferdigstillJournalpost ->
             dokarkivGateway.oppdaterJournalpostForFerdigstilling(correlationId, ferdigstillJournalpost)
             dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
+            logger.info("Ferdigstilt journalpost=[${ferdigstillJournalpost.journalpostId}]")
         }
 
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
             html = HtmlGenerator.genererHtml(
                 tittel = "PunsjetSøknad",
-                farge = søknadJson.farge(),
                 json = søknadJson
             )
         )
@@ -151,7 +160,7 @@ class RestInnsendingClient(
         val nyJournalpostRequest = JournalPostRequest(
             eksternReferanseId = correlationId,
             tittel = "PunsjetSøknad",
-            brevkode = brevkode.kode,
+            brevkode = K9_PUNSJ_INNSENDING_BREVKODE,
             tema = Tema.OMS,
             kanal = Kanal.INGEN_DISTRIBUSJON,
             journalposttype = JournalpostType.NOTAT,
@@ -166,7 +175,7 @@ class RestInnsendingClient(
         )
 
         val journalpostId = dokarkivGateway.opprettJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
-        logger.info("Opprettet JournalpostId=[$journalpostId]")
+        logger.info("Opprettet Oppsummerings-PDF for PunsjetSøknad. JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
         val søknadGrunnlag = SendPunsjetSoeknadTilK9SakGrunnlag(
@@ -186,22 +195,7 @@ class RestInnsendingClient(
         false -> asText()
     }
 
-    private fun JsonNode.farge() = when {
-        isMissingOrNull() -> DEFAULT_FARGE
-        hentString().matches(FARGE_REGEX) -> hentString()
-        else -> DEFAULT_FARGE.also {
-            logger.warn("Ugyldig farge=[${hentString()} satt i meldingen, defaulter til farge=[$it]")
-        }
-    }
-
     private fun JsonNode.isMissingOrNull() = isMissingNode || isNull
-
     override fun toString(): String = "RestInnsendingClient"
 
-    private companion object {
-        val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
-        val FARGE_REGEX = "#[a-fA-F0-9]{6}".toRegex()
-        const val DEFAULT_FARGE = "#C1B5D0"
-        private fun JsonNode.hentString() = asText().replace("\"", "")
-    }
 }

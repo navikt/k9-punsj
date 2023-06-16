@@ -191,7 +191,10 @@ internal class MappeService(
             journalposter = listOf(nySøknad.journalpostId),
             mottattDato = søknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = søknadfelles.klokkeslett,
-            soekerId = norskIdent
+            soekerId = norskIdent,
+            barn = nySøknad.pleietrengendeIdent?.let {
+                OmsorgspengerAleneOmsorgSøknadDto.BarnDto(norskIdent = it, foedselsdato = null)
+            },
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
     }

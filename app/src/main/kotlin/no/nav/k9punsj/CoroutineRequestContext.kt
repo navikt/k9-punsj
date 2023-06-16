@@ -114,7 +114,7 @@ private fun Routes(
     }
     onError<Throwable> { error, serverRequest ->
         val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
-        logger.warn("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
+        logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
             ExceptionResponse(
