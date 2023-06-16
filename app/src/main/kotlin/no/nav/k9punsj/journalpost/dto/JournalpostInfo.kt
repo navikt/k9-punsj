@@ -9,6 +9,6 @@ data class JournalpostInfo(
     val dokumenter: List<DokumentInfo>,
     val mottattDato: LocalDateTime,
     val erInngående: Boolean,
-    val kanOpprettesJournalføringsoppgave: Boolean,
     val journalpostStatus: String,
+    val journalpostType: String
 )

@@ -15,6 +15,7 @@ import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
@@ -116,6 +117,10 @@ internal class JournalpostRoutes(
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
                     val punsjInnsendingType = punsjJournalpost?.type?.let { PunsjInnsendingType.fraKode(it) }
 
+                    val kanOpprettesJournalforingsOppgave =
+                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
@@ -126,7 +131,7 @@ internal class JournalpostRoutes(
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
-                        kanOpprettesJournalføringsoppgave = journalpostInfo.kanOpprettesJournalføringsoppgave,
+                        kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus
                     )
 
@@ -295,8 +300,6 @@ internal class JournalpostRoutes(
                     }
                 }
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = true,
@@ -307,6 +310,8 @@ internal class JournalpostRoutes(
                 if (!status.is2xxSuccessful) {
                     return@RequestContext ServerResponse.status(status).bodyValueAndAwait(body!!)
                 }
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
 
                 logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
 
@@ -461,12 +466,6 @@ internal class JournalpostRoutes(
                         .notFound()
                         .buildAndAwait()
 
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
-                    journalpostId = journalpostId,
-                    erSendtInn = false,
-                    ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
-                )
-
                 val (status, body) = journalpostService.settTilFerdig(
                     journalpostId = journalpostId,
                     ferdigstillJournalpost = false,
@@ -501,6 +500,12 @@ internal class JournalpostRoutes(
                             .json()
                             .bodyValueAndAwait(OasFeil(it.message))
                     }
+                )
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                    journalpostId = journalpostId,
+                    erSendtInn = false,
+                    ansvarligSaksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
                 )
 
                 return@RequestContext resultat
