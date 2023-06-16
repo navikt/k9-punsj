@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.0.7</version>
         <relativePath/>
     </parent>
     <groupId>no.nav.k9</groupId>
@@ -20,7 +20,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
         <springdoc.version>2.1.0</springdoc.version>
         <kotlinx-coroutines.version>1.7.1</kotlinx-coroutines.version>
         <logback.logstash.version>7.3</logback.logstash.version>
@@ -34,13 +34,13 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>3.4.9</k9-sak.version>
-        <k9-formidling.version>0.0.30</k9-formidling.version>
-        <k9-format.version>8.3.3</k9-format.version>
+        <k9-formidling.version>0.0.31</k9-formidling.version>
+        <k9-format.version>8.3.4</k9-format.version>
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>12.15.0</zonky-postgresql.version>
         <mockk.version>1.13.5</mockk.version>
-        <wiremock.version>3.0.0-beta-9</wiremock.version> <!-- Beta for Jetty 11 support -->
+        <wiremock.version>3.0.0-beta-10</wiremock.version> <!-- Beta for Jetty 11 support -->
         <jsonassert.version>1.5.1</jsonassert.version>
     </properties>
 
