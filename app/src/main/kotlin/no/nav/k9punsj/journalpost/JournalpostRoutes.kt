@@ -15,6 +15,7 @@ import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
@@ -116,6 +117,10 @@ internal class JournalpostRoutes(
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
                     val punsjInnsendingType = punsjJournalpost?.type?.let { PunsjInnsendingType.fraKode(it) }
 
+                    val kanOpprettesJournalforingsOppgave =
+                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
@@ -126,6 +131,7 @@ internal class JournalpostRoutes(
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
+                        kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus
                     )
 
