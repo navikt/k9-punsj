@@ -4,6 +4,7 @@ import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
@@ -12,6 +13,8 @@ import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import org.flywaydb.core.Flyway
+import org.springframework.context.annotation.Bean
+import org.springframework.stereotype.Component
 import javax.sql.DataSource
 
 class DatabaseUtil {

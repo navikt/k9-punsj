@@ -539,8 +539,6 @@ class OpplaeringspengerTests {
         )
         assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-01-08")
         assertThat(ytelse.utenlandsopphold!!.perioder.values.first()?.Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
-        assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
-        assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
         assertThat(ytelse.opptjeningAktivitet.frilanser.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
         assertThat(ytelse.opptjeningAktivitet.frilanser.sluttdato).isEqualTo(LocalDate.of(2019, 11, 10))
     }

@@ -75,7 +75,6 @@ internal class K9PunsjApplicationWithMocks {
                 port = 8085,
                 azureV2Url = lokaltKjørendeAzureV2OrNull(),
                 profiles = "local"
-
             )
             runBlocking {
                 applicationContext?.getBean(JournalpostService::class.java)?.lagre(
