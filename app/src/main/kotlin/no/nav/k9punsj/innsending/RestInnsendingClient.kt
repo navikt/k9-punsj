@@ -152,7 +152,7 @@ class RestInnsendingClient(
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
             html = HtmlGenerator.genererHtml(
-                tittel = "PunsjetSøknad",
+                tittel = "Innsending fra Punsj",
                 json = søknadJson
             )
         )
