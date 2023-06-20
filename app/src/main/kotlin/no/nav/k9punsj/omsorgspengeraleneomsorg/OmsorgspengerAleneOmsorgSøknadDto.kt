@@ -20,7 +20,7 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     val klokkeslett: LocalTime? = null,
     val barn: BarnDto? = null,
     val journalposter: List<String>? = null,
-    val soeknadsperiode: PeriodeDto? = null,
+    val periode: PeriodeDto? = null,
     val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,

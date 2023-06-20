@@ -10,9 +10,11 @@ import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorg
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerAleneOmsorgSøknadValidator
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.StringUtils.erSatt
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 internal class MapOmsAOTilK9Format(
@@ -33,7 +35,7 @@ internal class MapOmsAOTilK9Format(
             dto.leggtilBegrunnelseForInnsending()
             val omsorgspengerAleneOmsorg = OmsorgspengerAleneOmsorg(
                 dto.barn?.leggTilBarn(),
-                dto.soeknadsperiode?.somK9Periode()
+                dto.periode?.utledDato()?.somK9Periode()
             )
 
             // Fullfører søknad & validerer
@@ -115,3 +117,21 @@ internal class MapOmsAOTilK9Format(
         private const val Versjon = "1.0.0"
     }
 }
+
+fun PeriodeDto.utledDato(): PeriodeDto {
+    if (fom == null) return this
+
+    return when {
+        fom.siste2Årene() -> PeriodeDto(fom, tom)
+        else -> PeriodeDto(LocalDate.now().minusYears(1).startenAvÅret(), tom)
+    }
+}
+
+private fun LocalDate.siste2Årene(): Boolean {
+    val dagensDato = LocalDate.now()
+    val startenAvIfjor = LocalDate.of(dagensDato.year - 1, 1, 1)
+    val sluttenAvDetteÅret = LocalDate.of(dagensDato.year, 12, 31)
+    return this in startenAvIfjor..sluttenAvDetteÅret
+}
+
+private fun LocalDate.startenAvÅret() = LocalDate.parse("${year}-01-01")
