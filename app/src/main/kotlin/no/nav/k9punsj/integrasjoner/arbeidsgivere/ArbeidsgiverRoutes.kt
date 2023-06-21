@@ -35,7 +35,8 @@ internal class ArbeidsgiverRoutes(
                             arbeidsgiverService.hentArbeidsgivere(
                                 identitetsnummer = request.identitetsnummer(),
                                 fom = request.fom(),
-                                tom = request.tom()
+                                tom = request.tom(),
+                                historikk = request.historikk()
                             )
                         )
                 } else {
@@ -94,6 +95,10 @@ internal class ArbeidsgiverRoutes(
         private fun ServerRequest.tom() = queryParamOrNull("tom")
             ?.let { LocalDate.parse(it) }
             ?: LocalDate.now(Oslo).plusMonths(6)
+
+        private fun ServerRequest.historikk() = queryParamOrNull("historikk")
+            ?.let { it.toBoolean() }
+            ?: false
 
         private fun ServerRequest.identitetsnummer(): String {
             return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {

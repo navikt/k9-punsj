@@ -30,7 +30,8 @@ internal class ArbeidsgiverService(
     internal suspend fun hentArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        historikk: Boolean = false
     ): Arbeidsgivere {
         val cacheKey = Triple(identitetsnummer, fom, tom)
 
@@ -38,7 +39,8 @@ internal class ArbeidsgiverService(
             null -> slåOppArbeidsgivere(
                 identitetsnummer = identitetsnummer,
                 fom = fom,
-                tom = tom
+                tom = tom,
+                historikk = historikk
             ).also { arbeidsgivereCache.put(cacheKey, it) }
             else -> cacheValue
         }
@@ -75,12 +77,14 @@ internal class ArbeidsgiverService(
     private suspend fun slåOppArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        historikk: Boolean
     ): Arbeidsgivere {
         val arbeidsforhold = aaregClient.hentArbeidsforhold(
             identitetsnummer = identitetsnummer,
             fom = fom,
-            tom = tom
+            tom = tom,
+            historikk = historikk
         )
 
         return Arbeidsgivere(
