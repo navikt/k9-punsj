@@ -17,10 +17,11 @@ internal class ArbeidsgiverService(
         .maximumSize(100)
         .build()
 
-    private val arbeidsgivereMedIdCache: Cache<Triple<String, LocalDate, LocalDate>, ArbeidsgivereMedArbeidsforholdId> = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(10))
-        .maximumSize(100)
-        .build()
+    private val arbeidsgivereMedIdCache: Cache<Triple<String, LocalDate, LocalDate>, ArbeidsgivereMedArbeidsforholdId> =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .maximumSize(100)
+            .build()
 
     private val organisasjonsnavnCache: Cache<String, String> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
@@ -46,6 +47,20 @@ internal class ArbeidsgiverService(
         }
     }
 
+    internal suspend fun hentArbeidsgivereHistorikk(
+        identitetsnummer: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        historikk: Boolean
+    ): Arbeidsgivere {
+        return slåOppArbeidsgivere(
+            identitetsnummer = identitetsnummer,
+            fom = fom,
+            tom = tom,
+            historikk = historikk
+        )
+    }
+
     internal suspend fun hentArbeidsgivereMedId(
         identitetsnummer: String,
         fom: LocalDate,
@@ -59,6 +74,7 @@ internal class ArbeidsgiverService(
                 fom = fom,
                 tom = tom
             ).also { arbeidsgivereMedIdCache.put(cacheKey, it) }
+
             else -> cacheValue
         }
     }
@@ -71,6 +87,7 @@ internal class ArbeidsgiverService(
                     it
                 )
             }
+
             else -> cacheValue
         }
 

@@ -35,6 +35,30 @@ internal class ArbeidsgiverRoutes(
                             arbeidsgiverService.hentArbeidsgivere(
                                 identitetsnummer = request.identitetsnummer(),
                                 fom = request.fom(),
+                                tom = request.tom()
+                            )
+                        )
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
+            }
+        }
+    }
+
+    @Bean
+    fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
+        GET(ArbeidsgivereHistorikkPath) { request ->
+            RequestContext(coroutineContext, request) {
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivereHistorikk(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
                                 tom = request.tom(),
                                 historikk = request.historikk()
                             )
@@ -86,6 +110,7 @@ internal class ArbeidsgiverRoutes(
 
     private companion object {
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
+        private const val ArbeidsgivereHistorikkPath = "/api/arbeidsgivere-historikk"
         private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
