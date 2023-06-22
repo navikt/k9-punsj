@@ -17,10 +17,11 @@ internal class ArbeidsgiverService(
         .maximumSize(100)
         .build()
 
-    private val arbeidsgivereMedIdCache: Cache<Triple<String, LocalDate, LocalDate>, ArbeidsgivereMedArbeidsforholdId> = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(10))
-        .maximumSize(100)
-        .build()
+    private val arbeidsgivereMedIdCache: Cache<Triple<String, LocalDate, LocalDate>, ArbeidsgivereMedArbeidsforholdId> =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(10))
+            .maximumSize(100)
+            .build()
 
     private val organisasjonsnavnCache: Cache<String, String> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
@@ -30,7 +31,8 @@ internal class ArbeidsgiverService(
     internal suspend fun hentArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        historikk: Boolean = false
     ): Arbeidsgivere {
         val cacheKey = Triple(identitetsnummer, fom, tom)
 
@@ -38,10 +40,25 @@ internal class ArbeidsgiverService(
             null -> slåOppArbeidsgivere(
                 identitetsnummer = identitetsnummer,
                 fom = fom,
-                tom = tom
+                tom = tom,
+                historikk = historikk
             ).also { arbeidsgivereCache.put(cacheKey, it) }
             else -> cacheValue
         }
+    }
+
+    internal suspend fun hentArbeidsgivereHistorikk(
+        identitetsnummer: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        historikk: Boolean
+    ): Arbeidsgivere {
+        return slåOppArbeidsgivere(
+            identitetsnummer = identitetsnummer,
+            fom = fom,
+            tom = tom,
+            historikk = historikk
+        )
     }
 
     internal suspend fun hentArbeidsgivereMedId(
@@ -57,6 +74,7 @@ internal class ArbeidsgiverService(
                 fom = fom,
                 tom = tom
             ).also { arbeidsgivereMedIdCache.put(cacheKey, it) }
+
             else -> cacheValue
         }
     }
@@ -69,18 +87,21 @@ internal class ArbeidsgiverService(
                     it
                 )
             }
+
             else -> cacheValue
         }
 
     private suspend fun slåOppArbeidsgivere(
         identitetsnummer: String,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        historikk: Boolean
     ): Arbeidsgivere {
         val arbeidsforhold = aaregClient.hentArbeidsforhold(
             identitetsnummer = identitetsnummer,
             fom = fom,
-            tom = tom
+            tom = tom,
+            historikk = historikk
         )
 
         return Arbeidsgivere(

@@ -27,10 +27,11 @@ internal class AaregClient(
         identitetsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
+        historikk: Boolean = false
     ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader()
         val url =
-            """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=false"""
+            """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=$historikk"""
 
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)

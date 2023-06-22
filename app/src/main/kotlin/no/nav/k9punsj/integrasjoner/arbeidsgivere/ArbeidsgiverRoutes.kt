@@ -48,6 +48,31 @@ internal class ArbeidsgiverRoutes(
     }
 
     @Bean
+    fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
+        GET(ArbeidsgivereHistorikkPath) { request ->
+            RequestContext(coroutineContext, request) {
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivereHistorikk(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom(),
+                                historikk = request.historikk()
+                            )
+                        )
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
+            }
+        }
+    }
+
+    @Bean
     fun hentArbeidsgivereMedIdRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgivereMedIdPath) { request ->
             RequestContext(coroutineContext, request) {
@@ -85,6 +110,7 @@ internal class ArbeidsgiverRoutes(
 
     private companion object {
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
+        private const val ArbeidsgivereHistorikkPath = "/api/arbeidsgivere-historikk"
         private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
@@ -94,6 +120,10 @@ internal class ArbeidsgiverRoutes(
         private fun ServerRequest.tom() = queryParamOrNull("tom")
             ?.let { LocalDate.parse(it) }
             ?: LocalDate.now(Oslo).plusMonths(6)
+
+        private fun ServerRequest.historikk() = queryParamOrNull("historikk")
+            ?.let { it.toBoolean() }
+            ?: false
 
         private fun ServerRequest.identitetsnummer(): String {
             return requireNotNull(headers().header("X-Nav-NorskIdent").firstOrNull()) {
