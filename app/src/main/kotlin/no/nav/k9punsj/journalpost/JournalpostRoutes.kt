@@ -84,7 +84,7 @@ internal class JournalpostRoutes(
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
-        internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
+        @Deprecated("Skall fjernes") internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val SettBehandlingsAar = "/journalpost/settBehandlingsAar/{$JournalpostIdKey}"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
@@ -212,18 +212,25 @@ internal class JournalpostRoutes(
                     url = Urls.Mottak
                 )?.let { return@RequestContext it }
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
-                val punsjFagsakYtelseType = FagsakYtelseType.fromKode(dto.fagsakYtelseTypeKode)
+                val oppdatertJournalpost = journalpostService.hent(dto.journalpostId).copy(
+                    ytelse = dto.fagsakYtelseTypeKode,
+                    aktørId = pdlService.aktørIdFor(dto.brukerIdent),
+                    behandlingsAar = dto.periode?.fom?.year
+                )
 
-                journalpostService.settFagsakYtelseType(punsjFagsakYtelseType, dto.journalpostId)
-                val punsjJournalpost = journalpostService.hent(dto.journalpostId)
+                val journalpostErFerdigstilt = journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name
 
-                // Oppdater og ferdigstill journalpost
-                journalpostService.oppdaterOgFerdigstillForMottak(dto)
+                // Oppdater og ferdigstill journalpost hvis vi har saksnummer
+                if(!journalpostErFerdigstilt && dto.saksnummer != null) {
+                    journalpostService.oppdaterOgFerdigstillForMottak(dto)
+                }
+
+                journalpostService.lagre(punsjJournalpost = oppdatertJournalpost)
 
                 aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
-                    punsjJournalpost = punsjJournalpost,
+                    punsjJournalpost = oppdatertJournalpost,
                     aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-                    type = punsjJournalpost.type,
+                    type = oppdatertJournalpost.type,
                     ytelse = dto.fagsakYtelseTypeKode
                 )
 
@@ -259,6 +266,10 @@ internal class JournalpostRoutes(
             }
         }
 
+        /***
+         * Denne er deprecated, allt skal til k9-sak.
+         * Kobling til riktig sak skjer med hjelp av /journalpost/settBehandlingsAar/ & /journalpost/mottak
+         */
         POST("/api${Urls.SkalTilK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
