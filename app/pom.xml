@@ -11,7 +11,7 @@
         <gson.version>2.10.1</gson.version>
         <fuel.version>2.3.1</fuel.version>
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
-        <verapdf.version>1.22.2</verapdf.version>
+        <verapdf.version>1.24.1</verapdf.version>
         <handlebars.version>4.3.1</handlebars.version>
     </properties>
     <parent>
