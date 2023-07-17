@@ -4,7 +4,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-punsj
     username: x-access-token
-    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
+    password: ${{secrets.READER_TOKEN}}
 updates:
   - package-ecosystem: maven
     directory: "/"
@@ -17,6 +17,7 @@ updates:
       spring:
         patterns:
           - "spring*"
+          - "org.spring*"
       maven:
         patterns:
           - "*"
@@ -24,6 +25,7 @@ updates:
           - "no.nav*"
           - "*k9*"
           - "spring*"
+          - "org.spring*"
 
   - package-ecosystem: github-actions
     directory: "/"
