@@ -13,8 +13,23 @@ updates:
     open-pull-requests-limit: 15
     registries:
       - k9-punsj
+    groups:
+      spring:
+        patterns:
+          - "spring*"
+      maven:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "no.nav*"
+          - "*k9*"
+          - "spring*"
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    groups:
+      github:
+        patterns:
+          - "*"
