@@ -25,7 +25,7 @@
         <kotlinx-coroutines.version>1.7.2</kotlinx-coroutines.version>
         <logback.logstash.version>7.4</logback.logstash.version>
         <token-support.version>3.0.3</token-support.version>
-        <dusseldorf-ktor.version>3.2.3.1-b31dd02</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>4.0.2</dusseldorf-ktor.version>
         <k9-rapid.version>1.20230601082432-b338e04</k9-rapid.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
