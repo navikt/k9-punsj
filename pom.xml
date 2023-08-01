@@ -22,7 +22,7 @@
         <java.version>17</java.version>
         <kotlin.version>1.9.0</kotlin.version>
         <springdoc.version>2.1.0</springdoc.version>
-        <kotlinx-coroutines.version>1.7.2</kotlinx-coroutines.version>
+        <kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
         <logback.logstash.version>7.4</logback.logstash.version>
         <token-support.version>3.0.3</token-support.version>
         <dusseldorf-ktor.version>3.2.3.1-b31dd02</dusseldorf-ktor.version>
