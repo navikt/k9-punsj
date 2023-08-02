@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: ghcr.io/navikt/kafka-manager/kafka-manager:2.2022.06.28_10.32-8669b1a0d98c
+  image: europe-north1-docker.pkg.dev/nais-management-233d/poao/kafka-manager:2023.08.02-07.02-45dfb71
   port: 8080
   webproxy: true
   ingresses:
