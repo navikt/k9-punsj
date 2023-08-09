@@ -30,7 +30,7 @@
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <orgjson.version>20230618</orgjson.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
 
         <!-- Kontrakt -->
         <k9-sak.version>4.0.0</k9-sak.version>
