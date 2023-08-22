@@ -25,6 +25,7 @@ fun initWireMock(
     .stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk()
     .stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler()
     .stubSafHenteDokumentNotFound()
+    .stubSafIkkeStøttet()
     .stubSafHenteDokumentAbacError()
     .stubSafHentJournalpostOk()
     .stubSafHentJournalpostAbacError()

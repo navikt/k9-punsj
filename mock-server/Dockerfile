@@ -1,4 +1,4 @@
-FROM navikt/java:13-appdynamics
+FROM ghcr.io/navikt/baseimages/temurin:17-appdynamics
 
 COPY src/main/resources ./static
 COPY target/k9-punsj-mock-server.jar ./app.jar

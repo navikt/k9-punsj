@@ -116,6 +116,11 @@ fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
     httpStatus = 404
 )
 
+fun WireMockServer.stubSafIkkeStøttet() = stubSafHenteDokumentError(
+    journalpostId = JournalpostIds.IkkeStøttet,
+    httpStatus = 409
+)
+
 fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
     journalpostId = JournalpostIds.AbacError,
     httpStatus = 403
@@ -179,6 +184,7 @@ object JournalpostIds {
     const val AbacError: JournalpostId = "500"
     const val IkkeKomplettTilgang: JournalpostId = "403"
     const val FinnesIkke: JournalpostId = "404"
+    const val IkkeStøttet: JournalpostId = "409"
     const val Utgått: JournalpostId = "1337"
 
 }
