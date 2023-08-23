@@ -68,6 +68,18 @@
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.zonky.test.postgres</groupId>
+                <artifactId>embedded-postgres-binaries-bom</artifactId>
+                <version>15.3.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Workaround for CVEs -->
         <dependency>
@@ -217,6 +229,7 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
             <version>${wiremock.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.helse</groupId>
@@ -236,11 +249,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.zonky.test.postgres</groupId>
-            <artifactId>embedded-postgres-binaries-bom</artifactId>
-            <version>${zonky-postgresql.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <version>${embedded-postgres.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
@@ -264,12 +276,6 @@
             <groupId>com.github.seratch</groupId>
             <artifactId>kotliquery</artifactId>
             <version>${kotliquery.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.zonky.test</groupId>
-            <artifactId>embedded-postgres</artifactId>
-            <version>${embedded-postgres.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
