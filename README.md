@@ -24,9 +24,8 @@ vault read postgresql/preprod-fss/creds/k9-punsj-user
 ---
 ### Bygge lokalt
 ```
-export GITHUB_USERNAME=x-access-token
 export GITHUB_PASSWORD=et-personal-access-token-med-read-packages-tilgang
-./mvnw clean install --settings .m2/settings.xml 
+mvn clean install --settings .m2/settings.xml 
 ```
 
 Eventuelt om du har satt opp username password for server med id `github` i din lokale settings.xml som håndterer dette.

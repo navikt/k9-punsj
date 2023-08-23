@@ -60,7 +60,7 @@ internal class K9PunsjApplicationWithMocks {
         fun main(args: Array<String>) {
             val wireMockServer = initWireMock(
                 port = 8084,
-                rootDirectory = "mock-server/src/main/resources"
+                rootDirectory = "src/test/resources"
             )
 
             Runtime.getRuntime().addShutdownHook(

@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContainsPattern
 import org.intellij.lang.annotations.Language
-import wiremock.com.google.common.net.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 
 typealias JournalpostId = String
 
@@ -110,6 +110,21 @@ private fun WireMockServer.stubSafHenteDokumentError(
     )
     return this
 }
+
+private fun WireMockServer.stubIkkeStøttet(
+    journalpostId: JournalpostId,
+    httpStatus: Int,
+): WireMockServer {
+    WireMock.stubFor( // .urlPathMatching(".*$path/graphql.*"))
+        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")
+        ).willReturn(
+            WireMock.aResponse()
+                .withStatus(httpStatus)
+        )
+    )
+    return this
+}
+
 
 fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
     journalpostId = JournalpostIds.FinnesIkke,
