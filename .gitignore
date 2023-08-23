@@ -31,4 +31,4 @@ build/
 .vscode/
 
 .DS_Store
-/app/generated-pdf-*.pdf
+**generated-pdf-*.pdf
