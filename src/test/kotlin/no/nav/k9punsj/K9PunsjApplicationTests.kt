@@ -2,7 +2,6 @@ package no.nav.k9punsj
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.util.Periode
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
@@ -11,28 +10,15 @@ import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.test.context.TestPropertySource
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 
-@ExtendWith(SpringExtension::class)
-@TestPropertySource(locations = ["classpath:application.yml"])
 class K9PunsjApplicationTests {
 
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
     private val dummyPdf = ClassPathResource("__files/dummy_soknad.pdf").inputStream.readBytes()
-
-    // Standardverdier for test
-    private val standardIdent = "01122334410"
-    private val standardFraOgMed: LocalDate = LocalDate.of(2020, 3, 1)
-    private val standardTilOgMed: LocalDate = LocalDate.of(2020, 3, 31)
-    private val standardPeriode: Periode = Periode(standardFraOgMed, standardTilOgMed)
-    private val standardBarnetsIdent: String = "29022050115"
 
     val client = TestSetup.client
 

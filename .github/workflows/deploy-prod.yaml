@@ -19,7 +19,6 @@ jobs:
       - name: Bygge JAR
         run: mvn clean package -DskipTests
         env:
-          GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Sett tags for docker
@@ -33,7 +32,7 @@ jobs:
 
       - name: Bygg & last opp Docker image
         run: |
-          docker build --pull --tag ${IMAGE_BASE}:${TAG} ./app/.
+          docker build --pull --tag ${IMAGE_BASE}:${TAG} .
           docker push ${IMAGE_BASE} --all-tags
 
       - name: Sett image for nais deploy

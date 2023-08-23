@@ -5,7 +5,7 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
 
 fun initWireMock(
     port: Int,
-    rootDirectory: String = "../mocks/src/main/resources"
+    rootDirectory: String = "src/test/resources"
 ) = WireMockBuilder()
     .withPort(port)
     .withAzureSupport()
