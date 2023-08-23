@@ -7,4 +7,4 @@ COPY docker-init-scripts/import-serviceuser-credentials.sh /init-scripts/21-impo
 COPY docker-init-scripts/import-appdynamics-settings.sh /init-scripts/22-import-appdynamics-settings.sh
 
 
-COPY target/*.jar ./
+COPY target/*.jar app.jar
