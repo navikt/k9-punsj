@@ -103,6 +103,32 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
+    suspend fun hentHvis(journalpostIder: List<String>): Map<PunsjJournalpost, Boolean> {
+        return using(sessionOf(dataSource)) {
+            it.transaction { tx ->
+                //language=PostgreSQL
+                val resultat = tx.run(
+                    queryOf(
+                        "select ferdig_behandlet, data from $JOURNALPOST_TABLE where journalpost_id in (${
+                            IntRange(0, journalpostIder.size - 1).joinToString { t -> ":p$t" }
+                        })",
+                        IntRange(0, journalpostIder.size - 1).associate { t -> "p$t" to journalpostIder[t] as Any }
+                    )
+                        .map { row ->
+                            row.string("data") to row.boolean("ferdig_behandlet")
+                        }.asList
+                )
+                if (resultat.isNotEmpty()) {
+                    return@transaction resultat.associate { row ->
+                        objectMapper.readValue(row.first, PunsjJournalpost::class.java) to row.second
+                    }
+                }
+                return@transaction emptyMap()
+            }
+        }
+    }
+
+
     suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(

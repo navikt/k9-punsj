@@ -252,6 +252,32 @@ internal class JournalpostOpenApi {
     ) {
     }
 
+    @PostMapping(JournalpostRoutes.Urls.LukkJournalposterDebugg, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis en eller flere journalposter har blitt lukket"
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Alle journalposter har allerede blitt lukket i punsj, eller alle er åpne i SAF"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Ingen av journalpostene eksisterer ikke i punsj"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Lukker alle journalposter i k9-punsj og k9-los. Sjekker først om de er lukket i SAF",
+        security = [SecurityRequirement(name = "BearerAuth")]
+    )
+    fun LukkJournalposterDebugg(
+        @PathVariable("journalpost_id") journalpostId: String
+    ) {
+    }
+
     @PostMapping(JournalpostRoutes.Urls.JournalførPåGenerellSak, produces = ["application/json"])
     @ApiResponses(
         value = [
