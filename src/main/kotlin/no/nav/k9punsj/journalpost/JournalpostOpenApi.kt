@@ -274,7 +274,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun LukkJournalposterDebugg(
-        @PathVariable("journalpost_id") journalpostId: String
+        @RequestBody body: JournalpostRoutes.JournalpostIderRequest
     ) {
     }
 
