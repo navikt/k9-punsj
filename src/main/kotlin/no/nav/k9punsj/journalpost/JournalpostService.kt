@@ -197,6 +197,10 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
+    internal suspend fun hentHvisJournalpostMedIder(journalpostId: List<String>): Map<PunsjJournalpost, Boolean> {
+        return journalpostRepository.hentHvis(journalpostId)
+    }
+
     internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
         return journalpostRepository.kanSendeInn(journalpostId)
     }

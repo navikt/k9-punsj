@@ -94,6 +94,7 @@ internal class JournalpostRoutes(
         // for drift i prod
         internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
+        internal const val LukkJournalposterDebugg = "/journalpost/lukkDebugg"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
     }
 
@@ -396,6 +397,56 @@ internal class JournalpostRoutes(
             }
         }
 
+        POST("/api${Urls.LukkJournalposterDebugg}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostIder = request.journalpostIder().journalpostIder
+
+                val punsjJper = journalpostService.hentHvisJournalpostMedIder(journalpostIder)
+                if (punsjJper.isEmpty()) {
+                    return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+                }
+
+                val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }
+                if (uferdigePunsj.isEmpty()) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(ResultatDto("Alle er allerede ferdig behandlet"))
+                }
+
+                val medSafStatus = uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
+                val ferdigeSaf = medSafStatus.filter { it.value == SafDtos.Journalstatus.FERDIGSTILT.name }.keys
+                if (ferdigeSaf.isEmpty()) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.BAD_REQUEST)
+                        .json()
+                        .bodyValueAndAwait(ResultatDto("Ingen er lukket i SAF"))
+                }
+
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
+                journalpostService.settAlleTilFerdigBehandlet(ferdigeSaf.toList())
+
+                val reqSet = journalpostIder.toSet()
+                val fantIkkeIPunsj = reqSet.minus(punsjJper.keys.map { it.journalpostId }.toSet()).joinToString()
+                val fantIkkeIPunsjTekst =
+                    if (fantIkkeIPunsj.isNotEmpty()) "Fantes ikke i punsj: $fantIkkeIPunsj" else ""
+
+                val alleredeLukketIPunsj = reqSet.minus(uferdigePunsj.toSet())
+                val alleredeLukketIPunsjTekst =
+                    if (alleredeLukketIPunsj.isNotEmpty()) "Allerede lukket i punsj: $alleredeLukketIPunsj" else ""
+
+                val ikkeLukketISaf = reqSet.minus(ferdigeSaf)
+                val ikkeLukketISafTekst =
+                    if (ikkeLukketISaf.isNotEmpty()) "Ikke lukket i SAF så disse ble ikke ferdigstilt: $ikkeLukketISaf" else ""
+
+                return@RequestContext ServerResponse.status(HttpStatus.OK)
+                    .bodyValueAndAwait(ResultatDto(
+                        """Lukket journalposter: ${ferdigeSaf.joinToString()}. $fantIkkeIPunsjTekst. $alleredeLukketIPunsjTekst. $ikkeLukketISafTekst. """))
+            }
+        }
+
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
@@ -613,6 +664,9 @@ internal class JournalpostRoutes(
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
+
+    internal data class JournalpostIderRequest(val journalpostIder: List<String>)
+    private suspend fun ServerRequest.journalpostIder(): JournalpostIderRequest = body(BodyExtractors.toMono(JournalpostIderRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
