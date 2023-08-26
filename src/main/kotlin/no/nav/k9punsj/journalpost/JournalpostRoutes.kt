@@ -417,7 +417,8 @@ internal class JournalpostRoutes(
                 }
 
                 val medSafStatus = uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
-                val ferdigeSaf = medSafStatus.filter { it.value == SafDtos.Journalstatus.FERDIGSTILT.name }.keys
+                val ferdigStatuser = arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
+                val ferdigeSaf = medSafStatus.filter { it.value in ferdigStatuser }.keys
                 if (ferdigeSaf.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
@@ -443,7 +444,7 @@ internal class JournalpostRoutes(
 
                 return@RequestContext ServerResponse.status(HttpStatus.OK)
                     .bodyValueAndAwait(ResultatDto(
-                        """Lukket journalposter: ${ferdigeSaf.joinToString()}. $fantIkkeIPunsjTekst. $alleredeLukketIPunsjTekst. $ikkeLukketISafTekst. """))
+                        """Lukket journalposter: $ferdigeSaf. $fantIkkeIPunsjTekst. $alleredeLukketIPunsjTekst. $ikkeLukketISafTekst. """))
             }
         }
 
