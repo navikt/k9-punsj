@@ -412,31 +412,34 @@ internal class JournalpostRoutes(
                 val fantIkkeIPunsjTekst = diffTekst(journalpostIder, punsjJperIder, "Fantes ikke i punsj")
 
                 val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }.toSet()
+                val alleredeLukketIPunsjTekst = diffTekst(punsjJperIder, uferdigePunsj, "Allerede lukket i punsj")
                 if (uferdigePunsj.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Alle er allerede ferdig behandlet. $fantIkkeIPunsjTekst"))
+                        .bodyValueAndAwait(ResultatDto("Alle er ferdig behandlet i punsj eller finnes ikke i punsj: " +
+                                "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"))
                 }
 
-                val alleredeLukketIPunsjTekst = diffTekst(punsjJperIder, uferdigePunsj, "Allerede lukket i punsj")
+
 
                 val medSafStatus =
                     uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
                 val ferdigStatuser =
                     arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
                 val ferdigeSaf = medSafStatus.filter { it.value in ferdigStatuser }.keys
+                val ikkeLukketISafTekst = diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
                 if (ferdigeSaf.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Ingen er lukket i SAF. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"))
+                        .bodyValueAndAwait(ResultatDto("Alle er ferdig behandlet i punsj, finnes ikke i punsj eller ikke lukket i SAF. " +
+                                "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"))
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
                 journalpostService.settAlleTilFerdigBehandlet(ferdigeSaf.toList())
 
-                val ikkeLukketISafTekst = diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
 
                 return@RequestContext ServerResponse.status(HttpStatus.OK)
                     .bodyValueAndAwait(
