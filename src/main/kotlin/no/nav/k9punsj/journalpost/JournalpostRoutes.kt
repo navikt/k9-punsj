@@ -399,16 +399,16 @@ internal class JournalpostRoutes(
 
         POST("/api${Urls.LukkJournalposterDebugg}") { request ->
             RequestContext(coroutineContext, request) {
-                val journalpostIder = request.journalpostIder().journalpostIder
+                val journalpostIder = request.journalpostIder().journalpostIder.toSet()
 
-                val punsjJper = journalpostService.hentHvisJournalpostMedIder(journalpostIder)
+                val punsjJper = journalpostService.hentHvisJournalpostMedIder(journalpostIder.toList())
                 if (punsjJper.isEmpty()) {
                     return@RequestContext ServerResponse
                         .notFound()
                         .buildAndAwait()
                 }
 
-                val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }
+                val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }.toSet()
                 if (uferdigePunsj.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
@@ -416,8 +416,10 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait(ResultatDto("Alle er allerede ferdig behandlet"))
                 }
 
-                val medSafStatus = uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
-                val ferdigStatuser = arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
+                val medSafStatus =
+                    uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
+                val ferdigStatuser =
+                    arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
                 val ferdigeSaf = medSafStatus.filter { it.value in ferdigStatuser }.keys
                 if (ferdigeSaf.isEmpty()) {
                     return@RequestContext ServerResponse
@@ -429,22 +431,25 @@ internal class JournalpostRoutes(
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
                 journalpostService.settAlleTilFerdigBehandlet(ferdigeSaf.toList())
 
-                val reqSet = journalpostIder.toSet()
-                val fantIkkeIPunsj = reqSet.minus(punsjJper.keys.map { it.journalpostId }.toSet()).joinToString()
+                val punsjJperIder = punsjJper.keys.map { it.journalpostId }.toSet()
+                val fantIkkeIPunsj = journalpostIder.minus(punsjJperIder)
                 val fantIkkeIPunsjTekst =
-                    if (fantIkkeIPunsj.isNotEmpty()) "Fantes ikke i punsj: $fantIkkeIPunsj" else ""
+                    if (fantIkkeIPunsj.isNotEmpty()) "Fantes ikke i punsj: $fantIkkeIPunsj \n" else ""
 
-                val alleredeLukketIPunsj = reqSet.minus(uferdigePunsj.toSet())
+                val alleredeLukketIPunsj = punsjJperIder.minus(uferdigePunsj)
                 val alleredeLukketIPunsjTekst =
-                    if (alleredeLukketIPunsj.isNotEmpty()) "Allerede lukket i punsj: $alleredeLukketIPunsj" else ""
+                    if (alleredeLukketIPunsj.isNotEmpty()) "Allerede lukket i punsj: $alleredeLukketIPunsj \n" else ""
 
-                val ikkeLukketISaf = reqSet.minus(ferdigeSaf)
+                val ikkeLukketISaf = uferdigePunsj.minus(ferdigeSaf)
                 val ikkeLukketISafTekst =
-                    if (ikkeLukketISaf.isNotEmpty()) "Ikke lukket i SAF så disse ble ikke ferdigstilt: $ikkeLukketISaf" else ""
+                    if (ikkeLukketISaf.isNotEmpty()) "Ikke lukket i SAF så disse ble ikke ferdigstilt: $ikkeLukketISaf \n" else ""
 
                 return@RequestContext ServerResponse.status(HttpStatus.OK)
-                    .bodyValueAndAwait(ResultatDto(
-                        """Lukket journalposter: $ferdigeSaf. $fantIkkeIPunsjTekst. $alleredeLukketIPunsjTekst. $ikkeLukketISafTekst. """))
+                    .bodyValueAndAwait(
+                        ResultatDto(
+                            "Lukket journalposter: $ferdigeSaf. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst $ikkeLukketISafTekst"
+                        )
+                    )
             }
         }
 
