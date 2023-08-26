@@ -408,13 +408,18 @@ internal class JournalpostRoutes(
                         .buildAndAwait()
                 }
 
+                val punsjJperIder = punsjJper.keys.map { it.journalpostId }.toSet()
+                val fantIkkeIPunsjTekst = diffTekst(journalpostIder, punsjJperIder, "Fantes ikke i punsj")
+
                 val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }.toSet()
                 if (uferdigePunsj.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Alle er allerede ferdig behandlet"))
+                        .bodyValueAndAwait(ResultatDto("Alle er allerede ferdig behandlet. $fantIkkeIPunsjTekst"))
                 }
+
+                val alleredeLukketIPunsjTekst = diffTekst(punsjJperIder, uferdigePunsj, "Allerede lukket i punsj")
 
                 val medSafStatus =
                     uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
@@ -425,24 +430,13 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Ingen er lukket i SAF"))
+                        .bodyValueAndAwait(ResultatDto("Ingen er lukket i SAF. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"))
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
                 journalpostService.settAlleTilFerdigBehandlet(ferdigeSaf.toList())
 
-                val punsjJperIder = punsjJper.keys.map { it.journalpostId }.toSet()
-                val fantIkkeIPunsj = journalpostIder.minus(punsjJperIder)
-                val fantIkkeIPunsjTekst =
-                    if (fantIkkeIPunsj.isNotEmpty()) "Fantes ikke i punsj: $fantIkkeIPunsj \n" else ""
-
-                val alleredeLukketIPunsj = punsjJperIder.minus(uferdigePunsj)
-                val alleredeLukketIPunsjTekst =
-                    if (alleredeLukketIPunsj.isNotEmpty()) "Allerede lukket i punsj: $alleredeLukketIPunsj \n" else ""
-
-                val ikkeLukketISaf = uferdigePunsj.minus(ferdigeSaf)
-                val ikkeLukketISafTekst =
-                    if (ikkeLukketISaf.isNotEmpty()) "Ikke lukket i SAF så disse ble ikke ferdigstilt: $ikkeLukketISaf \n" else ""
+                val ikkeLukketISafTekst = diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
 
                 return@RequestContext ServerResponse.status(HttpStatus.OK)
                     .bodyValueAndAwait(
@@ -637,6 +631,11 @@ internal class JournalpostRoutes(
                     .bodyValueAndAwait("Journalposten vil bli kopiert.")
             }
         }
+    }
+
+    private fun diffTekst(setA: Set<String>, setB: Set<String>, prefix: String): String {
+        val diff = setA.minus(setB)
+        return if (diff.isNotEmpty()) "$prefix: $diff" else ""
     }
 
     private suspend fun utvidJournalpostMedMottattDato(
