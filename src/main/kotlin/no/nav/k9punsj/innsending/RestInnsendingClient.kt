@@ -45,26 +45,9 @@ class RestInnsendingClient(
     private val kafkaKopierjournalpostInnsendingClient: KafkaKopierjournalpostInnsendingClient
 ) : InnsendingClient {
 
-    private companion object {
-        val logger = LoggerFactory.getLogger(RestInnsendingClient::class.java)
-
-        /**
-         * Brevkode som brukes i k9-sak som unntakshåndtering. Leder til att oppsummerings-pdfen punsj genererer ikke
-         * havner i listen av dokumenter som skall klassifiseres under sykdom.
-         */
-        const val K9_PUNSJ_INNSENDING_BREVKODE = "K9_PUNSJ_INNSENDING"
-    }
 
     override suspend fun send(pair: Pair<String, String>) {
         val json = objectMapper().readTree(pair.second)
-        /* Unntakshåndtering for å kopiere journalpost, 2 ulike typer av "rapids"-behov.
-        *  KopierJournalpost skall ikke sendes in til K9Sak.
-        *  Sendes på Kafka å plukkes opp av punsjbollen for kopiering.
-        */
-        if (json["@behov"]["KopierPunsjbarJournalpost"] != null) {
-            kafkaKopierjournalpostInnsendingClient.send(pair)
-            return
-        }
 
         // Mappe om json til object
         val correlationId = json["@correlationId"].asText()
