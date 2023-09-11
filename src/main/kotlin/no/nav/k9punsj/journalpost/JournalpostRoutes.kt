@@ -84,7 +84,8 @@ internal class JournalpostRoutes(
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
-        @Deprecated("Skall fjernes") internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
+        @Deprecated("Skall fjernes")
+        internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
         internal const val SettBehandlingsAar = "/journalpost/settBehandlingsAar/{$JournalpostIdKey}"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
@@ -121,6 +122,9 @@ internal class JournalpostRoutes(
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+                    val erFerdigstiltEllerJournalfoert = (
+                        journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -133,7 +137,8 @@ internal class JournalpostRoutes(
                         erInngående = journalpostInfo.erInngående,
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
-                        journalpostStatus = journalpostInfo.journalpostStatus
+                        journalpostStatus = journalpostInfo.journalpostStatus,
+                        erFerdigstilt = erFerdigstiltEllerJournalfoert
                     )
 
                     utvidJournalpostMedMottattDato(
@@ -219,10 +224,11 @@ internal class JournalpostRoutes(
                     behandlingsAar = dto.periode?.fom?.year
                 )
 
-                val journalpostErFerdigstilt = journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name
+                val journalpostErFerdigstilt =
+                    journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name
 
                 // Oppdater og ferdigstill journalpost hvis vi har saksnummer
-                if(!journalpostErFerdigstilt && dto.saksnummer != null) {
+                if (!journalpostErFerdigstilt && dto.saksnummer != null) {
                     journalpostService.oppdaterOgFerdigstillForMottak(dto)
                 }
 
@@ -417,24 +423,31 @@ internal class JournalpostRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Alle er ferdig behandlet i punsj eller finnes ikke i punsj: " +
-                                "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"))
+                        .bodyValueAndAwait(
+                            ResultatDto(
+                                "Alle er ferdig behandlet i punsj eller finnes ikke i punsj: " +
+                                    "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"
+                            )
+                        )
                 }
-
-
 
                 val medSafStatus =
                     uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
                 val ferdigStatuser =
                     arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
                 val ferdigeSaf = medSafStatus.filter { it.value in ferdigStatuser }.keys
-                val ikkeLukketISafTekst = diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
+                val ikkeLukketISafTekst =
+                    diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
                 if (ferdigeSaf.isEmpty()) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.BAD_REQUEST)
                         .json()
-                        .bodyValueAndAwait(ResultatDto("Alle er ferdig behandlet i punsj, finnes ikke i punsj eller ikke lukket i SAF. " +
-                                "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"))
+                        .bodyValueAndAwait(
+                            ResultatDto(
+                                "Alle er ferdig behandlet i punsj, finnes ikke i punsj eller ikke lukket i SAF. " +
+                                    "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"
+                            )
+                        )
                 }
 
                 aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
@@ -600,9 +613,12 @@ internal class JournalpostRoutes(
                 }
 
                 val k9FagsakYtelseType = journalpost?.ytelse?.let {
-                    journalpost.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it))
+                    journalpost.utledK9sakFagsakYtelseType(
+                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
+                            it
+                        )
+                    )
                 } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
-
 
                 val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
 
@@ -674,14 +690,16 @@ internal class JournalpostRoutes(
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
 
     internal data class JournalpostIderRequest(val journalpostIder: List<String>)
-    private suspend fun ServerRequest.journalpostIder(): JournalpostIderRequest = body(BodyExtractors.toMono(JournalpostIderRequest::class.java)).awaitFirst()
+
+    private suspend fun ServerRequest.journalpostIder(): JournalpostIderRequest =
+        body(BodyExtractors.toMono(JournalpostIderRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.søknadId() = body(BodyExtractors.toMono(SettPåVentDto::class.java)).awaitFirst()
-    private suspend fun ServerRequest.lukkJournalpostRequest() = body(BodyExtractors.toMono(LukkJournalpostDto::class.java)).awaitFirst()
+    private suspend fun ServerRequest.lukkJournalpostRequest() =
+        body(BodyExtractors.toMono(LukkJournalpostDto::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.identOgJournalpost() =
         body(BodyExtractors.toMono(IdentOgJournalpost::class.java)).awaitFirst()
-
 }

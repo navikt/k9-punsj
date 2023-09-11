@@ -390,7 +390,7 @@ private object SafMockResponses {
                   "saksbehandlerHarTilgang": true
                 }
               ]
-            },
+            }
           ],
           "avsenderMottaker": {
             "id": "02020050123",
