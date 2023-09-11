@@ -26,7 +26,6 @@ javax:
     ssl:
       trustStore: ${NAV_TRUSTSTORE_PATH}
       trustStorePassword: ${NAV_TRUSTSTORE_PASSWORD}
-
 springdoc:
   api-docs:
     path: /internal/api-docs
@@ -106,3 +105,8 @@ no.nav:
 
 server:
   port: ${PORT:8080}
+
+spring:
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: true

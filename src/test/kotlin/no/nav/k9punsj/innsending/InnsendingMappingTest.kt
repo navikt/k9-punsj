@@ -13,6 +13,8 @@ import no.nav.k9punsj.util.LesFraFilUtil
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
@@ -66,20 +68,24 @@ internal class InnsendingMappingTest {
         val dto: T = objectMapper().convertValue(søknad)
         val k9Format = when (dto) {
             is OmsorgspengerKroniskSyktBarnSøknadDto -> {
-                MapOmsKSBTilK9Format(
+                val (søknad, feil) = MapOmsKSBTilK9Format(
                     søknadId = dto.soeknadId,
                     journalpostIder = dto.journalposter?.toSet() ?: emptySet(),
                     dto = dto
-                ).søknadOgFeil().first
+                ).søknadOgFeil()
+                assert(feil.isEmpty()) { "Feil ved mapping til k9Format: $feil" }
+                søknad
             }
 
             is PleiepengerSyktBarnSøknadDto -> {
-                MapPsbTilK9Format(
+                val (søknad, feil) = MapPsbTilK9Format(
                     søknadId = dto.soeknadId,
                     journalpostIder = dto.journalposter?.toSet() ?: emptySet(),
                     perioderSomFinnesIK9 = emptyList(),
                     dto = dto
-                ).søknadOgFeil().first
+                ).søknadOgFeil()
+                assert(feil.isEmpty()) { "Feil ved mapping til k9Format: $feil" }
+                søknad
             }
 
             else -> throw IllegalArgumentException("Ikke støttet type.")
