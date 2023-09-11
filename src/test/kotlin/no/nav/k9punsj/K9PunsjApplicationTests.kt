@@ -93,7 +93,8 @@ class K9PunsjApplicationTests {
             "journalpostStatus": "MOTTATT",
             "kanOpprettesJournalføringsoppgave": true,
             "kanKopieres": true,
-            "gosysoppgaveId": null
+            "gosysoppgaveId": null,
+            "erFerdigstilt": false
         }
             """.trimIndent(),
             body,
@@ -126,5 +127,36 @@ class K9PunsjApplicationTests {
         }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitStatuscode()
 
         assertEquals(HttpStatus.FORBIDDEN, httpStatus)
+    }
+
+    @Test
+    fun `journalposter med status ferdigstilt eller journalfort for erFerdigstilt true`(): Unit = runBlocking {
+        val body: String = client.get().uri {
+            it.pathSegment("api", "journalpost", "7523521").build()
+        }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitBodyWithType()
+
+        JSONAssert.assertEquals(
+            """{
+            "journalpostId": "7523521",
+            "norskIdent": "02020050123",
+            "dokumenter": [
+                {
+                    "dokumentId": "470164680"
+                },
+            ],
+            "venter": null,
+            "punsjInnsendingType": null,
+            "kanSendeInn": true,
+            "erSaksbehandler": true,
+            "journalpostStatus": "FERDIGSTILT",
+            "kanOpprettesJournalføringsoppgave": false,
+            "kanKopieres": false,
+            "gosysoppgaveId": null,
+            "erFerdigstilt": true
+        }
+            """.trimIndent(),
+            body,
+            true
+        )
     }
 }
