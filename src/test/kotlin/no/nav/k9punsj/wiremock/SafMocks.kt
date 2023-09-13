@@ -25,6 +25,7 @@ fun WireMockServer.stubSaf() = stubSafHenteDokumentOk()
     .stubSafHentJournalpostAbacError()
     .stubSafHentJournalpostIkkeKomplettTilgang()
     .stubSafHentJournalpostFinnesIkke()
+    .stubSafPunsjbolleHentFerdigstillJournalpostOk()
 
 fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
     WireMock.stubFor(
