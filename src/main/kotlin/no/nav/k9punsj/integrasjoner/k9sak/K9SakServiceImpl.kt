@@ -23,7 +23,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
-import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
 import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.utils.objectMapper
@@ -249,34 +248,6 @@ class K9SakServiceImpl(
             Pair(SaksnummerDto(saksnummer), null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
-        }
-    }
-
-    override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
-        val forsendelseMottattTidspunkt = soeknad.mottatt.withZoneSameInstant(Oslo).toLocalDateTime()
-
-        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
-        @Language("JSON")
-        val body = """
-            [{
-                "saksnummer": "${grunnlag.saksnummer}",
-                "journalpostId": "${grunnlag.journalpostId}",
-                "ytelseType": {
-                    "kode": "${soeknad.søknadstype.k9YtelseType}",
-                    "kodeverk": "FAGSAK_YTELSE"
-                },
-                "kanalReferanse": "${grunnlag.referanse}",
-                "type": "${soeknad.søknadstype.brevkode.kode}",
-                "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
-                "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
-                "payload": "${Base64.getUrlEncoder().encodeToString(soeknad.søknadJson.toString().toByteArray())}"
-            }]
-        """.trimIndent()
-
-        val (_, feil) = httpPost(body, sendInnSøknadUrl)
-        require(feil.isNullOrEmpty()) {
-            log.error("Feil ved sending av søknad til k9-sak: $feil")
-            throw IllegalStateException("Feil ved sending av søknad til k9-sak: $feil")
         }
     }
 

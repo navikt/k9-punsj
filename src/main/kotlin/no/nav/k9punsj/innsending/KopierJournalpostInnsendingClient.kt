@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 class KopierJournalpostInnsendingClient(
     @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>,
     @Value("\${no.nav.kafka.k9_rapid.topic}") private val k9rapidTopic: String
-) {
+): InnsendingClient {
     private val clientId = kafkaBaseProperties.getValue(CommonClientConfigs.CLIENT_ID_CONFIG)
     private val kafkaProducer = KafkaProducer(
         kafkaBaseProperties.toMutableMap().also {
@@ -29,7 +29,7 @@ class KopierJournalpostInnsendingClient(
         StringSerializer()
     )
 
-    suspend fun send(pair: Pair<String, String>) {
+    override suspend fun send(pair: Pair<String, String>) {
         val (key, value) = pair
         kotlin.runCatching {
             kafkaProducer.send(ProducerRecord(k9rapidTopic, key, value)).get()
