@@ -86,12 +86,22 @@ internal class TestPdlService : PdlService {
                 gradering = Personopplysninger.Gradering.UGRADERT
             )
         )
-        setOf("02020050121") -> setOf(
+        setOf("02020050121") -> setOf( // OLP tester
             Personopplysninger(
                 identitetsnummer = "02020050123",
                 fødselsdato = LocalDate.parse("1980-05-06"),
                 fornavn = "Anders",
-                mellomnavn = null,
+                mellomnavn = "OLP",
+                etternavn = "Andersen",
+                gradering = Personopplysninger.Gradering.UGRADERT
+            )
+        )
+        setOf("02022352121") -> setOf( // PSB tester
+            Personopplysninger(
+                identitetsnummer = "02022352121",
+                fødselsdato = LocalDate.parse("1980-05-06"),
+                fornavn = "Anders",
+                mellomnavn = "PSB",
                 etternavn = "Andersen",
                 gradering = Personopplysninger.Gradering.UGRADERT
             )
