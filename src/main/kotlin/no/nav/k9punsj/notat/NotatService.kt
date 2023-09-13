@@ -42,8 +42,7 @@ class NotatService(
                 )
             )
 
-        val notatJson = objectMapper().writeValueAsString(notat)
-        val notatObject = objectMapper().readValue<ObjectNode>(notatJson)
+        val notatObject = objectMapper().convertValue(notat, ObjectNode::class.java)
 
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = coroutineContext.hentCorrelationId(),
