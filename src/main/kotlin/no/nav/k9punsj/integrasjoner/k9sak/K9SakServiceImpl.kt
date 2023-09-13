@@ -9,6 +9,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.sak.typer.Periode
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -269,6 +270,35 @@ class K9SakServiceImpl(
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(soeknad.søknadJson.toString().toByteArray())}"
+            }]
+        """.trimIndent()
+
+        val (_, feil) = httpPost(body, sendInnSøknadUrl)
+        require(feil.isNullOrEmpty()) {
+            log.error("Feil ved sending av søknad til k9-sak: $feil")
+            throw IllegalStateException("Feil ved sending av søknad til k9-sak: $feil")
+        }
+    }
+
+    override suspend fun sendInnSoeknad(soknad: Søknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+        val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
+        val søknadJson = objectMapper().writeValueAsString(soknad)
+
+        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
+        @Language("JSON")
+        val body = """
+            [{
+                "saksnummer": "${grunnlag.saksnummer}",
+                "journalpostId": "${grunnlag.journalpostId}",
+                "ytelseType": {
+                    "kode": "${grunnlag.fagsakYtelseType.kode}",
+                    "kodeverk": "FAGSAK_YTELSE"
+                },
+                "kanalReferanse": "${grunnlag.referanse}",
+                "type": "${grunnlag.brevkode.kode}",
+                "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
+                "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
+                "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
             }]
         """.trimIndent()
 

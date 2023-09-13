@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -43,8 +44,14 @@ interface K9SakService {
         pleietrengende: String?
     ): Pair<SaksnummerDto?, String?>
 
+    @Deprecated("Bruk sendInnSoeknad med k9-format søknad")
     suspend fun sendInnSoeknad(
         soeknad: PunsjetSøknad,
+        grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag
+    )
+
+    suspend fun sendInnSoeknad(
+        soeknad: Søknad,
         grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag
     )
 }

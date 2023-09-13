@@ -12,6 +12,19 @@ typealias JournalpostId = String
 private const val path = "/saf-mock"
 
 fun WireMockServer.getSafBaseUrl() = baseUrl() + path
+fun WireMockServer.stubSaf() = stubSafHenteDokumentOk()
+    .stubSafHenteDokumentOkForside()
+    .stubSafHenteDokumentOkDelingAvOmsorgsdager()
+    .stubSafHenteDokumentOkDelingAvOmsorgsdagerSamværserklæring()
+    .stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk()
+    .stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler()
+    .stubSafHenteDokumentNotFound()
+    .stubSafIkkeStøttet()
+    .stubSafHenteDokumentAbacError()
+    .stubSafHentJournalpostOk()
+    .stubSafHentJournalpostAbacError()
+    .stubSafHentJournalpostIkkeKomplettTilgang()
+    .stubSafHentJournalpostFinnesIkke()
 
 fun WireMockServer.stubSafHenteDokumentOk(): WireMockServer {
     WireMock.stubFor(
@@ -32,14 +45,15 @@ fun WireMockServer.stubSafHenteDokumentOkForside(): WireMockServer {
             WireMock.aResponse()
                 .withHeader("Content-Type", "application/pdf")
                 .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Førsteside.pdf")
-                    .readAllBytes())
+                .withBody(
+                    this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Førsteside.pdf")
+                        .readAllBytes()
+                )
                 .withStatus(200)
         )
     )
     return this
 }
-
 
 fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer {
     WireMock.stubFor(
@@ -47,8 +61,10 @@ fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdager(): WireMockServer 
             WireMock.aResponse()
                 .withHeader("Content-Type", "application/pdf")
                 .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf")
-                    .readAllBytes())
+                .withBody(
+                    this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Melding om deling av omsorgsdager.pdf")
+                        .readAllBytes()
+                )
                 .withStatus(200)
         )
     )
@@ -61,8 +77,10 @@ fun WireMockServer.stubSafHenteDokumentOkDelingAvOmsorgsdagerSamværserklæring(
             WireMock.aResponse()
                 .withHeader("Content-Type", "application/pdf")
                 .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/Samværserklæring.pdf")
-                    .readAllBytes())
+                .withBody(
+                    this::class.java.getResourceAsStream("/__files/omsorgspenger/Samværserklæring.pdf")
+                        .readAllBytes()
+                )
                 .withStatus(200)
         )
     )
@@ -75,8 +93,10 @@ fun WireMockServer.stubSafHenteDokumentOkEkstraOmsorgsdagerKronisk(): WireMockSe
             WireMock.aResponse()
                 .withHeader("Content-Type", "application/pdf")
                 .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn.pdf")
-                    .readAllBytes())
+                .withBody(
+                    this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om ekstra omsorgsdager ved kronisk sykt eller funksjonshemmet barn.pdf")
+                        .readAllBytes()
+                )
                 .withStatus(200)
         )
     )
@@ -89,14 +109,15 @@ fun WireMockServer.stubSafHenteDokumentOkNårArbeidsgiverIkkeBetaler(): WireMock
             WireMock.aResponse()
                 .withHeader("Content-Type", "application/pdf")
                 .withHeader(CONTENT_DISPOSITION, "inline; filename=${JournalpostIds.Ok}_ARKIV.pdf")
-                .withBody(this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler.pdf")
-                    .readAllBytes())
+                .withBody(
+                    this::class.java.getResourceAsStream("/__files/omsorgspenger/NAV - Søknad om utbetaling av omsorgspenger når arbeidsgiver ikke utbetaler.pdf")
+                        .readAllBytes()
+                )
                 .withStatus(200)
         )
     )
     return this
 }
-
 
 private fun WireMockServer.stubSafHenteDokumentError(
     journalpostId: JournalpostId,
@@ -116,7 +137,8 @@ private fun WireMockServer.stubIkkeStøttet(
     httpStatus: Int,
 ): WireMockServer {
     WireMock.stubFor( // .urlPathMatching(".*$path/graphql.*"))
-        WireMock.get(WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")
+        WireMock.get(
+            WireMock.urlPathMatching(".*$path/rest/hentdokument/${journalpostId}.*")
         ).willReturn(
             WireMock.aResponse()
                 .withStatus(httpStatus)
@@ -124,7 +146,6 @@ private fun WireMockServer.stubIkkeStøttet(
     )
     return this
 }
-
 
 fun WireMockServer.stubSafHenteDokumentNotFound() = stubSafHenteDokumentError(
     journalpostId = JournalpostIds.FinnesIkke,
@@ -146,13 +167,15 @@ private fun WireMockServer.stubSafHenteJournalpost(
     responseBody: String = SafMockResponses.OkResponseHenteJournalpost,
 ): WireMockServer {
     val contentBodyPattern = if (journalpostId == null) AnythingPattern() else ContainsPattern(journalpostId)
-    WireMock.stubFor(WireMock.post(WireMock.urlPathMatching(".*$path/graphql.*"))
-        .withRequestBody(contentBodyPattern)
-        .willReturn(WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(responseBody)
-            .withStatus(200)
-        )
+    WireMock.stubFor(
+        WireMock.post(WireMock.urlPathMatching(".*$path/graphql.*"))
+            .withRequestBody(contentBodyPattern)
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody)
+                    .withStatus(200)
+            )
     )
     return this
 }
@@ -161,15 +184,19 @@ private fun WireMockServer.stubSafHenteJournalpostPunsjbolle(
     journalpostId: JournalpostId,
     responseBody: String,
 ): WireMockServer {
-    WireMock.stubFor(WireMock.post(WireMock
-        .urlPathMatching(".*$path/graphql.*"))
-        .withRequestBody(ContainsPattern(journalpostId))
-        .withHeader("Nav-Callid", AnythingPattern())
-        .willReturn(WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(responseBody)
-            .withStatus(200)
+    WireMock.stubFor(
+        WireMock.post(
+            WireMock
+                .urlPathMatching(".*$path/graphql.*")
         )
+            .withRequestBody(ContainsPattern(journalpostId))
+            .withHeader("Nav-Callid", AnythingPattern())
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody)
+                    .withStatus(200)
+            )
     )
     return this
 }
@@ -178,6 +205,7 @@ fun WireMockServer.stubSafPunsjbolleHentFerdigstillJournalpostOk() = stubSafHent
     journalpostId = "7523521",
     responseBody = SafMockResponses.OkResponseHenteFerdigstillJournalpost
 )
+
 fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
 fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
     journalpostId = JournalpostIds.AbacError,
@@ -201,7 +229,6 @@ object JournalpostIds {
     const val FinnesIkke: JournalpostId = "404"
     const val IkkeStøttet: JournalpostId = "409"
     const val Utgått: JournalpostId = "1337"
-
 }
 
 private object SafMockResponses {

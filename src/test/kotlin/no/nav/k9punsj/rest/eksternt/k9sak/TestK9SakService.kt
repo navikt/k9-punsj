@@ -1,5 +1,6 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
+import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
@@ -98,10 +99,14 @@ internal class TestK9SakService : K9SakService {
         søker: String,
         pleietrengende: String?
     ): Pair<SaksnummerDto?, String?> {
-        TODO("Not yet implemented")
+        return Pair(SaksnummerDto("ABC123"), null)
     }
 
     override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
-        TODO("Not yet implemented")
+        // do nothing
+    }
+
+    override suspend fun sendInnSoeknad(soeknad: Søknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+        // do nothing
     }
 }

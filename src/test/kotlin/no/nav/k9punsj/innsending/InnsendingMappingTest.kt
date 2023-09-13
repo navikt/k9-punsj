@@ -1,8 +1,13 @@
 package no.nav.k9punsj.innsending
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.rapid.behov.Behov
+import no.nav.k9.rapid.behov.Behovssekvens
+import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9punsj.innsending.InnsendingClient.Companion.somMap
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.MapOmsKSBTilK9Format
@@ -85,7 +90,7 @@ internal class InnsendingMappingTest {
             else -> throw IllegalArgumentException("Ikke støttet type.")
         }
 
-        val (_, value) = innsendingClient.mapSøknad(
+        val (_, value) = mapSøknad(
             søknadId = k9Format.søknadId.id,
             søknad = k9Format,
             tilleggsOpplysninger = mapOf(
@@ -102,6 +107,25 @@ internal class InnsendingMappingTest {
         assertEquals("1.0.0", behov.getString("versjon"))
         val k9FormatSøknad = behov.getJSONObject("søknad")
         assertEquals(ytelse.kode(), k9FormatSøknad.getJSONObject("ytelse").getString("type"))
+    }
+
+    private fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
+
+        val søknadMap = søknad.somMap()
+        val behovssekvensId = ULID().nextULID()
+
+        return Behovssekvens(
+            id = behovssekvensId,
+            correlationId = correlationId,
+            behov = arrayOf(
+                Behov(
+                    navn = "PunsjetSøknad",
+                    input = tilleggsOpplysninger
+                        .plus("PunsjetSøknad" to søknadMap)
+                        .plus("versjon" to "1.0.0")
+                )
+            )
+        ).keyValue
     }
 
     private fun mapKopierJournalpostOgAssert(fagsakYtelseType: FagsakYtelseType, søknadstype: String) {

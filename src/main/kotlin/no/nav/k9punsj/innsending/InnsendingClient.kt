@@ -14,31 +14,6 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 interface InnsendingClient {
-    fun mapSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any>): Pair<String, String> {
-
-        val søknadMap = søknad.somMap()
-        val behovssekvensId = ulid.nextULID()
-
-        logger.info("Sender søknad. Tilleggsopplysninger=${tilleggsOpplysninger.keys}",)
-
-        return Behovssekvens(
-            id = behovssekvensId,
-            correlationId = correlationId,
-            behov = arrayOf(
-                Behov(
-                    navn = PunsjetSøknadBehovNavn,
-                    input = tilleggsOpplysninger
-                        .plus(PunsjetSøknadSøknadKey to søknadMap)
-                        .plus(VersjonKey to PunsjetSøknadVersjon)
-                )
-            )
-        ).keyValue
-    }
-
-    suspend fun sendSøknad(søknadId: String, søknad: Søknad, correlationId: String, tilleggsOpplysninger: Map<String, Any> = emptyMap()) {
-        send(mapSøknad(søknadId, søknad, correlationId, tilleggsOpplysninger))
-    }
-
     fun mapKopierJournalpost(info: KopierJournalpostInfo): Pair<String, String> {
         val behovssekvensId = ulid.nextULID()
         val correlationId = UUID.randomUUID().toString()
@@ -77,10 +52,6 @@ interface InnsendingClient {
         private val objectMapper = objectMapper()
         private val ulid = ULID()
         private const val VersjonKey = "versjon"
-
-        private const val PunsjetSøknadBehovNavn = "PunsjetSøknad"
-        private const val PunsjetSøknadSøknadKey = "søknad"
-        private const val PunsjetSøknadVersjon = "1.0.0"
 
         private const val KopierPunsjbarJournalpostBehovNavn = "KopierPunsjbarJournalpost"
         private const val KopierPunsjbarJournalpostVersjon = "1.0.0"
