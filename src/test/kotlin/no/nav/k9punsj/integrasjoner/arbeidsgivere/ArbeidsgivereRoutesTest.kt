@@ -66,6 +66,29 @@ internal class ArbeidsgivereRoutesTest {
         assertEquals(HttpStatus.NOT_FOUND, httpStatus)
     }
 
+    @Test
+    fun `henter historiske arbeidsgivere`() {
+        val (status, body) = getArbeidsgiverListeMedHistoriske("22053826656")
+        assertEquals(HttpStatus.OK, status)
+        val forventetResponse = """
+            {
+              "organisasjoner": [
+                  {
+                    "organisasjonsnummer": "27500",
+                    "navn": "QuakeWorld AS"
+                  },{
+                    "organisasjonsnummer": "27015",
+                    "navn": "CounterStrike AS"
+                  },{
+                    "organisasjonsnummer": "5001",
+                    "navn": "Ultima Online AS"
+                  },
+              ]
+            }
+        """.trimIndent()
+        JSONAssert.assertEquals(forventetResponse, body, true)
+    }
+
     private fun getArbeidsgivere(
         identitetsnummer: String
     ): Pair<HttpStatusCode, String?> = runBlocking {
@@ -80,6 +103,22 @@ internal class ArbeidsgivereRoutesTest {
     private fun getArbeidsgiverNavn(organisasjonsnummer: String): Pair<HttpStatusCode, String?> = runBlocking {
         client.get()
             .uri { it.path("/api/arbeidsgiver").queryParam("organisasjonsnummer", organisasjonsnummer).build() }
+            .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+    }
+
+    private fun getArbeidsgiverListeMedHistoriske(
+        identitetsnummer: String
+    ): Pair<HttpStatusCode, String?> = runBlocking {
+        client.get()
+            .uri { it.path("/api/arbeidsgivere-historikk")
+                .queryParam("fom", "2023-01-01")
+                .queryParam("tom", "2023-12-31")
+                .queryParam("historikk", "true")
+                .build()
+            }
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", identitetsnummer)
             .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
     }
 }

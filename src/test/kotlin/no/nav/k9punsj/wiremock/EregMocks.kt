@@ -7,6 +7,16 @@ import org.intellij.lang.annotations.Language
 
 private const val path = "/ereg-mock"
 
+fun WireMockServer.getEregBaseUrl() = baseUrl() + path
+fun WireMockServer.stubEreg(): WireMockServer =
+    stubHentOrganisasjonNøkkelinformasjon()
+        .stubHentOrganisasjonNøkkelinformasjonIkkeFunnet("993110469")
+        .stubHentOrganisasjonMedNavn("27500", "QuakeWorld")
+        .stubHentOrganisasjonMedNavn("27015", "CounterStrike")
+        .stubHentOrganisasjonMedNavn("5001", "Ultima Online")
+        .stubHentOrganisasjonMedNavn("2456", "Valheim")
+
+
 private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjon(): WireMockServer {
     WireMock.stubFor(
         WireMock.get(WireMock.urlPathMatching(".*$path/organisasjon/.*/noekkelinfo"))
@@ -22,6 +32,37 @@ private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjon(): WireMockSer
     )
     return this
 }
+
+private fun WireMockServer.stubHentOrganisasjonMedNavn(
+    orgNr: String,
+    orgNavn: String
+): WireMockServer {
+    val navnRespons = """
+        {
+          "navn": {
+            "navnelinje1": "$orgNavn",
+            "navnelinje2": "",
+            "navnelinje3": null,
+            "navnelinje5": "AS"
+          }
+        }
+        """.trimIndent()
+
+    WireMock.stubFor(
+        WireMock.get(WireMock.urlPathMatching(".*$path/organisasjon/$orgNr/noekkelinfo"))
+            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
+            .withHeader("Nav-Call-Id", AnythingPattern())
+            .withHeader("Accept", WireMock.equalTo("application/json"))
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withStatus(200)
+                    .withBody(navnRespons)
+            )
+    )
+    return this
+}
+
 private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjonIkkeFunnet(
     organisasjonsnummer: String
 ): WireMockServer {
@@ -37,12 +78,6 @@ private fun WireMockServer.stubHentOrganisasjonNøkkelinformasjonIkkeFunnet(
     )
     return this
 }
-
-fun WireMockServer.stubEreg() : WireMockServer =
-    stubHentOrganisasjonNøkkelinformasjon()
-    .stubHentOrganisasjonNøkkelinformasjonIkkeFunnet("993110469")
-
-fun WireMockServer.getEregBaseUrl() = baseUrl() + path
 
 @Language("JSON")
 private val DefaultResponse = """
