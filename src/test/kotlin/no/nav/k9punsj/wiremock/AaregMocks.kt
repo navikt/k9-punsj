@@ -10,9 +10,17 @@ import java.time.ZoneId
 
 private const val path = "/aareg-mock"
 
+fun WireMockServer.stubAareg() : WireMockServer =
+    stubHentArbeidsforhold(identitetsnummer = AnythingPattern(), response = defaultResponse)
+        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22222222222"), response = "[]")
+        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22053826656"), response = flereArbeidsforholdIar, historikk = true)
+
+fun WireMockServer.getAaregBaseUrl() = baseUrl() + path
+
 private fun WireMockServer.stubHentArbeidsforhold(
     identitetsnummer: StringValuePattern,
-    response: String
+    response: String,
+    historikk: Boolean = false
 ): WireMockServer {
     WireMock.stubFor(
         WireMock.get(WireMock.urlPathMatching(".*$path/arbeidstaker/arbeidsforhold.*"))
@@ -20,7 +28,7 @@ private fun WireMockServer.stubHentArbeidsforhold(
             .withHeader("Nav-Call-Id", AnythingPattern())
             .withHeader("Accept", WireMock.equalTo("application/json"))
             .withHeader("Nav-Personident", identitetsnummer)
-            .withQueryParam("historikk", WireMock.equalTo("false"))
+            .withQueryParam("historikk", WireMock.equalTo(historikk.toString()))
             .withQueryParam("sporingsinformasjon", WireMock.equalTo("false"))
             .withQueryParam("rapporteringsordning", WireMock.equalTo("A_ORDNINGEN"))
             .willReturn(
@@ -33,17 +41,12 @@ private fun WireMockServer.stubHentArbeidsforhold(
     return this
 }
 
-fun WireMockServer.stubAareg() : WireMockServer =
-    stubHentArbeidsforhold(identitetsnummer = AnythingPattern(), response = DefaultResponse)
-    .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22222222222"), response = "[]")
-
-fun WireMockServer.getAaregBaseUrl() = baseUrl() + path
-
-val fom =  LocalDate.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
-val tom =  LocalDate.now(ZoneId.of("Europe/Oslo")).plusMonths(6)
+private val fom =  LocalDate.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
+private val tom =  LocalDate.now(ZoneId.of("Europe/Oslo")).plusMonths(6)
+private val idag = LocalDate.now(ZoneId.of("Europe/Oslo"))
 
 @Language("JSON")
-private val DefaultResponse = """
+private val defaultResponse = """
 [
     {
         "id": "979312059-arbf-1",
@@ -91,6 +94,92 @@ private val DefaultResponse = """
         "ansettelsesperiode": {
           "startdato": "${fom.minusYears(2)}",
           "sluttdato": "${tom.minusYears(2)}"
+        }
+    }
+]
+""".trimIndent()
+
+@Language("JSON")
+private val flereArbeidsforholdIar = """
+[
+    {
+        "id": "QuakeWorld",
+        "arbeidssted": {
+            "type": "Organisasjon",
+            "identer": [
+                {
+                  "ident": "27500",
+                  "type": "ORGANISASJONSNUMMER"
+                }
+            ]
+        },
+        "ansettelsesperiode": {
+          "startdato": "$idag",
+          "sluttdato": null
+        }
+    },
+    {
+        "id": "CounterStrike",
+        "arbeidssted": {
+            "type": "Organisasjon",
+            "identer": [
+                {
+                  "ident": "27015",
+                  "type": "ORGANISASJONSNUMMER"
+                }
+            ]
+        },
+        "ansettelsesperiode": {
+          "startdato": "${idag.minusMonths(2)}",
+          "sluttdato": "${idag.minusMonths(1)}"
+        }
+    }, 
+    {
+        "id": "Ultima Online",
+        "arbeidssted": {
+            "type": "Organisasjon",
+            "identer": [
+                {
+                  "ident": "5001",
+                  "type": "ORGANISASJONSNUMMER"
+                }
+            ]
+        },
+        "ansettelsesperiode": {
+          "startdato": "${idag.minusMonths(4)}",
+          "sluttdato": "${idag.minusMonths(3)}"
+        }
+    },
+    {
+        "id": "Ultima Online 2",
+        "arbeidssted": {
+            "type": "Organisasjon",
+            "identer": [
+                {
+                  "ident": "5002",
+                  "type": "AKTORID"
+                }
+            ]
+        },
+        "ansettelsesperiode": {
+          "startdato": "${idag.minusMonths(4)}",
+          "sluttdato": "${idag.minusMonths(3)}"
+        }
+    },
+    {
+        "id": "Valheim",
+        "arbeidssted": {
+            "type": "Organisasjon",
+            "identer": [
+                {
+                  "ident": "2456",
+                  "type": "ORGANISASJONSNUMMER"
+                }
+            ]
+        },
+        "ansettelsesperiode": {
+          "startdato": "${idag.minusMonths(8)}",
+          "sluttdato": "${idag.minusMonths(7)}"
         }
     }
 ]
