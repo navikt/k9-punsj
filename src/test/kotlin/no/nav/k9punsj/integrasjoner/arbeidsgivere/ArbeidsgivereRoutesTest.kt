@@ -17,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.reactive.function.client.awaitExchange
+import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 internal class ArbeidsgivereRoutesTest {
@@ -67,7 +68,7 @@ internal class ArbeidsgivereRoutesTest {
     }
 
     @Test
-    fun `henter historiske arbeidsgivere`() {
+    fun `henter historiske arbeidsgivere fra siste 6 mån, tar kun med de som har orgnr`() {
         val (status, body) = getArbeidsgiverListeMedHistoriske("22053826656")
         assertEquals(HttpStatus.OK, status)
         val forventetResponse = """
@@ -76,10 +77,12 @@ internal class ArbeidsgivereRoutesTest {
                   {
                     "organisasjonsnummer": "27500",
                     "navn": "QuakeWorld AS"
-                  },{
+                  },
+                  {
                     "organisasjonsnummer": "27015",
                     "navn": "CounterStrike AS"
-                  },{
+                  },
+                  {
                     "organisasjonsnummer": "5001",
                     "navn": "Ultima Online AS"
                   },
@@ -111,8 +114,6 @@ internal class ArbeidsgivereRoutesTest {
     ): Pair<HttpStatusCode, String?> = runBlocking {
         client.get()
             .uri { it.path("/api/arbeidsgivere-historikk")
-                .queryParam("fom", "2023-01-01")
-                .queryParam("tom", "2023-12-31")
                 .queryParam("historikk", "true")
                 .build()
             }

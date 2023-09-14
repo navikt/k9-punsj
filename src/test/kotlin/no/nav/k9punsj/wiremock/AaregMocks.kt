@@ -178,8 +178,8 @@ private val flereArbeidsforholdIar = """
             ]
         },
         "ansettelsesperiode": {
-          "startdato": "${idag.minusYears(12)}",
-          "sluttdato": "${idag.minusYears(11)}"
+          "startdato": "${idag.minusMonths(8)}",
+          "sluttdato": "${idag.minusMonths(7)}"
         }
     }
 ]
