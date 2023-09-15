@@ -27,7 +27,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -179,17 +178,13 @@ internal class SoknadService(
         logger.info("Opprettet Oppsummerings-PDF for PunsjetSøknad. JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
-        val søknadGrunnlag = SendPunsjetSoeknadTilK9SakGrunnlag(
-            saksnummer = k9Saksnummer,
-            journalpostId = journalpostId,
-            referanse = correlationId,
-            brevkode = brevkode,
-            fagsakYtelseType = fagsakYtelseType
-        )
 
         k9SakService.sendInnSoeknad(
-            soeknad = søknad,
-            grunnlag = søknadGrunnlag
+            soknad = søknad,
+            journalpostId = journalpostId.toString(),
+            fagsakYtelseType = fagsakYtelseType,
+            saksnummer = k9Saksnummer,
+            brevkode = brevkode
         )
 
 

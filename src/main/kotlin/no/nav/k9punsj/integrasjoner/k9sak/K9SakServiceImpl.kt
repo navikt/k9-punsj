@@ -6,8 +6,10 @@ import com.github.kittinunf.fuel.httpPost
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
+import no.nav.k9.sak.typer.JournalpostId
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.StandardProfil
@@ -23,7 +25,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
-import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
@@ -251,22 +252,29 @@ class K9SakServiceImpl(
         }
     }
 
-    override suspend fun sendInnSoeknad(soknad: Søknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+    override suspend fun sendInnSoeknad(
+        soknad: Søknad,
+        journalpostId: String,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        saksnummer: String,
+        brevkode: Brevkode
+    ) {
         val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
         val søknadJson = objectMapper().writeValueAsString(soknad)
+        val callId = hentCallId()
 
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val body = """
             [{
-                "saksnummer": "${grunnlag.saksnummer}",
-                "journalpostId": "${grunnlag.journalpostId}",
+                "saksnummer": "$saksnummer",
+                "journalpostId": "$journalpostId",
                 "ytelseType": {
-                    "kode": "${grunnlag.fagsakYtelseType.kode}",
+                    "kode": "${fagsakYtelseType.kode}",
                     "kodeverk": "FAGSAK_YTELSE"
                 },
-                "kanalReferanse": "${grunnlag.referanse}",
-                "type": "${grunnlag.brevkode.kode}",
+                "kanalReferanse": "$callId",
+                "type": "${brevkode.kode}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
