@@ -8,6 +8,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
@@ -48,7 +49,8 @@ internal class SoknadService(
     private val k9SakService: K9SakService,
     private val sakClient: SakClient,
     private val pdlService: PdlService,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
+    private val aksjonspunktService: AksjonspunktService
 ) {
 
     internal suspend fun sendSøknad(
@@ -88,11 +90,16 @@ internal class SoknadService(
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
         }
 
+
         val fagsakIder = journalposter.filterNotNull()
             .filterNot { it.sak?.fagsakId.isNullOrEmpty() }
             .map { it.journalpostId to it.sak?.fagsakId }
             .toSet()
 
+        /*
+        * Bruker fagsakId fra journalposten om den finnes, ellers henter vi den fra k9sak
+        * Kaster feil om vi har fler æn 1 unik fagsakId
+        */
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
                 throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
@@ -108,7 +115,7 @@ internal class SoknadService(
                 søker = søkerFnr,
                 pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
                 annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
-                journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato? Vilken journalpost er riktig?
+                journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato, hentes fra behandlingsAar.
             )
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: $k9Respons.second" }
@@ -149,8 +156,8 @@ internal class SoknadService(
             )
         }
 
+        // TODO: Håndtere om vi manglerAvsendernavn?
         val manglerAvsendernavn = ferdigstillJournalposter.filter { it.manglerAvsendernavn() }
-
         require(manglerAvsendernavn.isEmpty()) {
             "Mangler avsendernavn på journalposter=[${manglerAvsendernavn.map { it.journalpostId }}]"
         }
@@ -198,7 +205,6 @@ internal class SoknadService(
         logger.info("Opprettet Oppsummerings-PDF for PunsjetSøknad. JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
-
         k9SakService.sendInnSoeknad(
             soknad = søknad,
             journalpostId = journalpostId.toString(),
@@ -212,6 +218,11 @@ internal class SoknadService(
         journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
         logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
         søknadRepository.markerSomSendtInn(søknad.søknadId.id)
+        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+            journalpostId = journalpostIdListe,
+            erSendtInn = true,
+            ansvarligSaksbehandler = punsjetAvSaksbehandler
+        )
 
         søknadMetrikkService.publiserMetrikker(søknad)
         return null
