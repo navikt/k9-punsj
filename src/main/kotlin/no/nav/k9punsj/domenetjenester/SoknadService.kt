@@ -1,6 +1,7 @@
 package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
@@ -60,7 +61,10 @@ internal class SoknadService(
         val journalpostIdListe = journalpostIder.toList()
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
         val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
-        val søknadJson = objectMapper().writeValueAsString(søknad)
+
+        val søkerFnr = søknad.søker.personIdent.toString()
+        val ytelse = søknad.getYtelse<Ytelse>()
+        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fraNavn(ytelse.type.kode())
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -84,19 +88,34 @@ internal class SoknadService(
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $journalposterMedStatusFeilregistrert"
         }
 
-        val ytelse = søknad.getYtelse<Ytelse>()
-        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fraNavn(ytelse.type.kode())
-        val søkerFnr = søknad.søker.personIdent.toString()
+        val fagsakIder = journalposter.filterNotNull()
+            .filterNot { it.sak?.fagsakId.isNullOrEmpty() }
+            .map { it.journalpostId to it.sak?.fagsakId }
+            .toSet()
 
-        // Hent k9saksnummer
-        val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-            søknadstype = fagsakYtelseType,
-            søker = søkerFnr,
-            pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
-            annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
-            journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato? Vilken journalpost er riktig?
-        )
-        val k9Saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag).first
+        val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
+            if(fagsakIder.size > 1) {
+                throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
+            }
+            fagsakIder.map {
+                logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
+            }
+            fagsakIder.first().second
+        } else {
+            // Hent k9saksnummer
+            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
+                søknadstype = fagsakYtelseType,
+                søker = søkerFnr,
+                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
+                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
+                journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato? Vilken journalpost er riktig?
+            )
+            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
+            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: $k9Respons.second" }
+            logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
+            k9Respons.first
+        }
+
         require(k9Saksnummer != null) { "K9Saksnummer er null" }
 
         // Sikkrer att saken kommer opp som valg i modia, ikke vart implementert sedan flytten till synkron
@@ -147,8 +166,7 @@ internal class SoknadService(
             logger.info("Ferdigstilt journalpost=[${ferdigstillJournalpost.journalpostId}]")
         }
 
-        val søknadObject = objectMapper().readValue<ObjectNode>(søknadJson)
-
+        val søknadObject = objectMapper().convertValue<ObjectNode>(søknad)
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
             html = HtmlGenerator.genererHtml(

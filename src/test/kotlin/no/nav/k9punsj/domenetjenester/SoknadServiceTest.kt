@@ -11,6 +11,7 @@ import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.Ytelse
+import no.nav.k9.søknad.ytelse.Ytelse.PLEIEPENGER_SYKT_BARN
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -145,7 +146,9 @@ internal class SoknadServiceTest {
     fun `Feilregistrert journalpost returnerar conflict fra innsending i soknadservice`() = runBlocking {
         coEvery { mockSafGateway.hentJournalposter(any()) }.returns(listOf(feilregistrertJournalpost))
         val result = soknadService.sendSøknad(
-            søknad = Søknad().medSøknadId("1"),
+            søknad = Søknad().medSøknadId("1")
+                .medSøker(Søker(NorskIdentitetsnummer.of("123")))
+                .medYtelse(PleiepengerSyktBarn()),
             brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD,
             journalpostIder = mutableSetOf("525115311")
         )
