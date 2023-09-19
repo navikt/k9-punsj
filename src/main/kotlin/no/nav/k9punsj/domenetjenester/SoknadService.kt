@@ -167,6 +167,8 @@ internal class SoknadService(
         }
 
         val søknadObject = objectMapper().convertValue<ObjectNode>(søknad)
+        søknadObject.put("punsjet av", punsjetAvSaksbehandler)
+
         // Journalfør o ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
             html = HtmlGenerator.genererHtml(
