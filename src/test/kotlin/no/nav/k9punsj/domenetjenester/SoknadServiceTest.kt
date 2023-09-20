@@ -13,6 +13,7 @@ import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9.søknad.ytelse.Ytelse.PLEIEPENGER_SYKT_BARN
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
+import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
@@ -74,6 +75,9 @@ internal class SoknadServiceTest {
     @MockK
     private lateinit var mockSafGateway: SafGateway
 
+    @MockK
+    private lateinit var aksjonspunktService: AksjonspunktService
+
     private lateinit var soknadService: SoknadService
 
     @BeforeAll
@@ -97,7 +101,8 @@ internal class SoknadServiceTest {
             k9SakService = k9SakService,
             sakClient = sakClient,
             pdlService = pdlService,
-            dokarkivGateway = dokarkivGateway
+            dokarkivGateway = dokarkivGateway,
+            aksjonspunktService = aksjonspunktService
         )
     }
 
