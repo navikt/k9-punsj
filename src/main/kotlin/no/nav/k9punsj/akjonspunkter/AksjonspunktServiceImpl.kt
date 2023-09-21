@@ -67,35 +67,6 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
-    override suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(
-        journalpostId: String,
-        aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
-        ansvarligSaksbehandler: String?
-    ) {
-        val journalpost = journalpostService.hent(journalpostId)
-        val eksternId = journalpost.uuid
-        val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
-        val aksjonspunktEntitet = aksjonspunktRepository.hentAksjonspunkt(journalpostId, aksjonspunktKode.kode)!!
-        val punsjDtoJson = lagPunsjDto(
-            eksternId = eksternId,
-            journalpostId = journalpostId,
-            aktørId = journalpost.aktørId,
-            aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
-            ferdigstiltAv = ansvarligSaksbehandler
-        )
-
-        hendelseProducer.sendMedOnSuccess(
-            topicName = k9losAksjonspunkthendelseTopic,
-            data = punsjDtoJson,
-            key = eksternId.toString()
-        ) {
-            runBlocking {
-                aksjonspunktRepository.settStatus(aksjonspunktEntitet.aksjonspunktId, AksjonspunktStatus.UTFØRT)
-                log.info("Setter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ") til UTFØRT")
-            }
-        }
-    }
-
     override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(
         journalpostId: String,
         erSendtInn: Boolean,

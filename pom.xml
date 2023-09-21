@@ -35,7 +35,7 @@
         <!-- Kontrakt -->
         <k9-sak.version>4.1.2</k9-sak.version>
         <k9-formidling.version>1.0.0</k9-formidling.version>
-        <k9-format.version>8.3.4</k9-format.version>
+        <k9-format.version>9.0.4</k9-format.version>
         <k9-rapid.version>1.20230823104755-1fc16e7</k9-rapid.version>
 
         <!-- database -->
@@ -48,7 +48,6 @@
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.7</mockk.version>
-        <wiremock.version>3.0.0-beta-10</wiremock.version> <!-- Beta for Jetty 11 support -->
         <jsonassert.version>1.5.1</jsonassert.version>
 
         <!-- pdf -->
@@ -64,7 +63,7 @@
         <fuel.version>2.3.1</fuel.version>
         <kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
         <token-support.version>3.0.3</token-support.version>
-        <dusseldorf-ktor.version>4.0.8</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>4.0.10</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
 
@@ -126,7 +125,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-jakarta</artifactId>
+            <artifactId>soknad</artifactId>
             <version>${k9-format.version}</version>
         </dependency>
         <dependency>
@@ -226,22 +225,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>${wiremock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>no.nav.helse</groupId>
             <artifactId>dusseldorf-test-support</artifactId>
             <scope>test</scope>
             <version>${dusseldorf-ktor.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.tomakehurst</groupId>
-                    <artifactId>wiremock-jre8</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

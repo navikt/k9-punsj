@@ -75,9 +75,6 @@ internal class SoknadServiceTest {
     @MockK
     private lateinit var mockSafGateway: SafGateway
 
-    @MockK
-    private lateinit var aksjonspunktService: AksjonspunktService
-
     private lateinit var soknadService: SoknadService
 
     @BeforeAll
@@ -101,8 +98,7 @@ internal class SoknadServiceTest {
             k9SakService = k9SakService,
             sakClient = sakClient,
             pdlService = pdlService,
-            dokarkivGateway = dokarkivGateway,
-            aksjonspunktService = aksjonspunktService
+            dokarkivGateway = dokarkivGateway
         )
     }
 

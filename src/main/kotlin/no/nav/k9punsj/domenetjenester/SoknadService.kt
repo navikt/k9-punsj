@@ -2,13 +2,11 @@ package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.Ytelse
-import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
@@ -49,8 +47,7 @@ internal class SoknadService(
     private val k9SakService: K9SakService,
     private val sakClient: SakClient,
     private val pdlService: PdlService,
-    private val dokarkivGateway: DokarkivGateway,
-    private val aksjonspunktService: AksjonspunktService
+    private val dokarkivGateway: DokarkivGateway
 ) {
 
     internal suspend fun sendSøknad(
@@ -218,11 +215,6 @@ internal class SoknadService(
         journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
         logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
         søknadRepository.markerSomSendtInn(søknad.søknadId.id)
-        aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
-            journalpostId = journalpostIdListe,
-            erSendtInn = true,
-            ansvarligSaksbehandler = punsjetAvSaksbehandler
-        )
 
         søknadMetrikkService.publiserMetrikker(søknad)
         return null
