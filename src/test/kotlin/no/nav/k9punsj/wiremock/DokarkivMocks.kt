@@ -2,7 +2,6 @@ package no.nav.k9punsj.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.AnythingPattern
 
 private const val path = "/dokarkiv-mock"
 
