@@ -8,7 +8,7 @@ internal class NotatPDFGeneratorTest {
     private val notatPDFGenerator = NotatPDFGenerator()
 
     @Test
-    internal fun test() {
+    internal fun `Genererer PDF`() {
         val pdf = notatPDFGenerator.genererPDF(
             NotatOpplysninger(
                 søkerIdentitetsnummer = "29099012345",
