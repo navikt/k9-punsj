@@ -3,16 +3,14 @@ package no.nav.k9punsj.wiremock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 
+
 private const val path = "/dokarkiv-mock"
 
 fun WireMockServer.getDokarkivBaseUrl() = baseUrl() + path
-fun WireMockServer.stubDokarkiv() = stubJournalføringAvNotat()
-    .stubFerdigstillJournalpost()
-    .stubOpprettOgFerdigstillJournalpost()
-    .stubOppdaterForFerdigstilling()
-    .stubFerdigstill()
 
-fun WireMockServer.stubJournalføringAvNotat() : WireMockServer{
+fun WireMockServer.stubJournalføringAvNotat(
+    responsStatus: Int = 201
+) : WireMockServer{
     WireMock.stubFor(
         WireMock.post(
             WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost"))
@@ -41,7 +39,7 @@ fun WireMockServer.stubJournalføringAvNotat() : WireMockServer{
             .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].dokumentVarianter[1].fysiskDokument", WireMock.matching(".*")))
             .willReturn(
                 WireMock.aResponse()
-                    .withStatus(201)
+                    .withStatus(responsStatus)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
                         //language=json
@@ -54,8 +52,9 @@ fun WireMockServer.stubJournalføringAvNotat() : WireMockServer{
     )
     return this
 }
-
-fun WireMockServer.stubFerdigstillJournalpost() : WireMockServer{
+fun WireMockServer.stubFerdigstillJournalpost(
+    responsStatus: Int = 200
+) : WireMockServer{
     WireMock.stubFor(
         WireMock.patch(
             WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost/.*/ferdigstill"))
@@ -65,7 +64,7 @@ fun WireMockServer.stubFerdigstillJournalpost() : WireMockServer{
             .withRequestBody(WireMock.matchingJsonPath("$.journalfoerendeEnhet", WireMock.equalTo("Hjemmekontor")))
             .willReturn(
                 WireMock.aResponse()
-                    .withStatus(200)
+                    .withStatus(responsStatus)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
                         //language=json
@@ -74,62 +73,6 @@ fun WireMockServer.stubFerdigstillJournalpost() : WireMockServer{
                           "journalpostId": "201"
                         }
                     """.trimIndent())
-            )
-    )
-    return this
-}
-
-fun WireMockServer.stubOpprettOgFerdigstillJournalpost() : WireMockServer{
-    WireMock.stubFor(
-        WireMock.post(
-            WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost"))
-            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
-            .withHeader("Nav-Callid", WireMock.matching(".*"))
-            .withHeader("Authorization", WireMock.matching(".*"))
-            .withRequestBody(WireMock.matchingJsonPath("$.dokumenter[0].brevkode", WireMock.equalTo("K9_PUNSJ_INNSENDING")))
-            .willReturn(
-                WireMock.aResponse()
-                    .withStatus(201)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        //language=json
-                        """
-                        {
-                          "journalpostId": "7523522"
-                        }
-                    """.trimIndent())
-            )
-    )
-    return this
-}
-
-fun WireMockServer.stubOppdaterForFerdigstilling() : WireMockServer{
-    WireMock.stubFor(
-        WireMock.put(
-            WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost/.*"))
-            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
-            .withHeader("Nav-Callid", WireMock.matching(".*"))
-            .withHeader("Authorization", WireMock.matching(".*"))
-            .withRequestBody(WireMock.matchingJsonPath("$.tema", WireMock.equalTo("OMS")))
-            .willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-            )
-    )
-    return this
-}
-
-fun WireMockServer.stubFerdigstill() : WireMockServer{
-    WireMock.stubFor(
-        WireMock.patch(
-            WireMock.urlPathMatching("$path/rest/journalpostapi/v1/journalpost/.*/ferdigstill"))
-            .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
-            .withHeader("Nav-Callid", WireMock.matching(".*"))
-            .withHeader("Authorization", WireMock.matching(".*"))
-            .withRequestBody(WireMock.matchingJsonPath("$.journalfoerendeEnhet", WireMock.equalTo("9999")))
-            .willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
             )
     )
     return this

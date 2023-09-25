@@ -1,7 +1,5 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
-import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
@@ -10,6 +8,8 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -98,16 +98,10 @@ internal class TestK9SakService : K9SakService {
         søker: String,
         pleietrengende: String?
     ): Pair<SaksnummerDto?, String?> {
-        return Pair(SaksnummerDto("ABC123"), null)
+        TODO("Not yet implemented")
     }
 
-    override suspend fun sendInnSoeknad(
-        soknad: Søknad,
-        journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
-        saksnummer: String,
-        brevkode: Brevkode
-    ) {
-        // do nothing
+    override suspend fun sendInnSoeknad(soeknad: PunsjetSøknad, grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag) {
+        TODO("Not yet implemented")
     }
 }

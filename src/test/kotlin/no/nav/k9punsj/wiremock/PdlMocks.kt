@@ -11,10 +11,6 @@ import org.intellij.lang.annotations.Language
 private const val path = "/pdl-mock"
 
 fun WireMockServer.getPdlBaseUrl() = baseUrl() + path
-fun WireMockServer.stubPdl() = stubPdlHenteAktøridOk()
-    .stubPdlHenteAktøridFinnesIkke()
-    .stubPdlHenteAktøridIkkeAutentisert()
-    .stubPdlHenteAktøridOkPost()
 
 object AktørIds {
     const val Ok : String = "200"

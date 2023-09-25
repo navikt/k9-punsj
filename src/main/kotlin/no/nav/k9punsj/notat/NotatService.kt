@@ -1,9 +1,5 @@
 package no.nav.k9punsj.notat
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.readValues
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
 import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
@@ -16,7 +12,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
-import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
 import org.springframework.stereotype.Service
 import kotlin.coroutines.coroutineContext
@@ -42,8 +37,6 @@ class NotatService(
                 )
             )
 
-        val notatObject = objectMapper().convertValue(notat, ObjectNode::class.java)
-
         val journalPostRequest = JournalPostRequest(
             eksternReferanseId = coroutineContext.hentCorrelationId(),
             tittel = notat.tittel,
@@ -58,7 +51,7 @@ class NotatService(
             brukerIdent = notat.søkerIdentitetsnummer,
             avsenderNavn = innloggetBrukerIdent,
             pdf = notatPdf,
-            json = notatObject
+            json = JSONObject(notat)
         )
 
         return journalpostService.opprettJournalpost(journalPostRequest)
