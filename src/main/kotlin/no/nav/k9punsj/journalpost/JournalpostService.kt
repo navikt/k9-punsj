@@ -2,7 +2,6 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -171,7 +170,7 @@ class JournalpostService(
     }
 
     internal suspend fun opprettJournalpost(journalPostRequest: JournalPostRequest): JournalPostResponse {
-        return dokarkivGateway.opprettJournalpost(journalPostRequest)
+        return dokarkivGateway.opprettOgFerdigstillJournalpost(journalPostRequest)
     }
 
     private fun utledMottattDato(parsedSafJournalpost: ParsedSafJournalpost): LocalDateTime {

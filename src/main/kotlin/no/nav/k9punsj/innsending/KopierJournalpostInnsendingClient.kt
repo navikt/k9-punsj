@@ -10,17 +10,14 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 @Component
 @StandardProfil
-@ConditionalOnProperty("innsending.rest.enabled", havingValue = "false", matchIfMissing = true)
-class KafkaInnsendingClient(
+class KopierJournalpostInnsendingClient(
     @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>,
     @Value("\${no.nav.kafka.k9_rapid.topic}") private val k9rapidTopic: String
-) : InnsendingClient {
+): InnsendingClient {
     private val clientId = kafkaBaseProperties.getValue(CommonClientConfigs.CLIENT_ID_CONFIG)
     private val kafkaProducer = KafkaProducer(
         kafkaBaseProperties.toMutableMap().also {
@@ -43,9 +40,7 @@ class KafkaInnsendingClient(
         }
     }
 
-    override fun toString() = "KafkaInnsendingClient: Innsendinger sendes på Topic=[$k9rapidTopic], ClientId=[$clientId]"
-
     private companion object {
-        private val logger = LoggerFactory.getLogger(KafkaInnsendingClient::class.java)
+        private val logger = LoggerFactory.getLogger(KopierJournalpostInnsendingClient::class.java)
     }
 }
