@@ -18,4 +18,5 @@ interface AksjonspunktService {
 
     suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: Collection<String>, erSendtInn: Boolean, ansvarligSaksbehandler: String?)
     suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId: String, erSendtInn: Boolean, ansvarligSaksbehandler: String?)
+    suspend fun settUtførtAksjonspunktOgSendLukkOppgaveTilK9Los(journalpostId: String, aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>, ansvarligSaksbehandler: String?)
 }

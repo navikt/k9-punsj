@@ -6,11 +6,6 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.helse.dusseldorf.testsupport.jws.NaisSts
 
 private const val path = "/access-token-mock"
-fun WireMockServer.stubAccessTokens() = stubSaksbehandlerAccessToken()
-    .stubNavHeader()
-    .stubNaisStsTokenResponseGet()
-    .stubNaisStsTokenResponsePost()
-    .stubNaisStsTokenResponsePut()
 
 fun WireMockServer.stubSaksbehandlerAccessToken(): WireMockServer {
 

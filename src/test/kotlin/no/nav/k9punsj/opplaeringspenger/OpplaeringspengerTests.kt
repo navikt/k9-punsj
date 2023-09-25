@@ -255,12 +255,12 @@ class OpplaeringspengerTests {
         val (_, status, body) = opprettOgSendInnSoeknad(
             soeknadJson = gyldigSoeknad,
             ident = norskIdent,
-            journalpostid = "99998888"
+            journalpostid = "9999"
         )
         assertThat(body.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, status)
 
-        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("99998888"))).isFalse
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("9999"))).isFalse
     }
 
     @Test
@@ -449,7 +449,7 @@ class OpplaeringspengerTests {
         // GUI format
         assertNotNull(søknadViaGet)
         assertThat(søknadViaGet.soekerId).isEqualTo(norskIdent)
-        assertThat(søknadViaGet.journalposter!![0]).isEqualTo("99998888")
+        assertThat(søknadViaGet.journalposter!![0]).isEqualTo("9999")
         assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
         assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
         assertThat(søknadViaGet.soeknadsperiode?.first()?.fom).isEqualTo(LocalDate.of(2018, 12, 30))

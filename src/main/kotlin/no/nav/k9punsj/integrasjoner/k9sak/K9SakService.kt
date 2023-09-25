@@ -1,11 +1,11 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
-import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.PunsjetSøknad
+import no.nav.k9punsj.integrasjoner.k9sak.dto.SendPunsjetSoeknadTilK9SakGrunnlag
 
 interface K9SakService {
 
@@ -44,10 +44,7 @@ interface K9SakService {
     ): Pair<SaksnummerDto?, String?>
 
     suspend fun sendInnSoeknad(
-        soknad: Søknad,
-        journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
-        saksnummer: String,
-        brevkode: Brevkode
+        soeknad: PunsjetSøknad,
+        grunnlag: SendPunsjetSoeknadTilK9SakGrunnlag
     )
 }
