@@ -61,7 +61,7 @@ internal class SoknadService(
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
         val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
 
-        val søkerFnr = søknad.søker.personIdent.toString()
+        val søkerFnr = søknad.søker.personIdent.verdi
         val ytelse = søknad.getYtelse<Ytelse>()
         val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fraNavn(ytelse.type.kode())
 
@@ -110,12 +110,12 @@ internal class SoknadService(
             val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
                 søknadstype = fagsakYtelseType,
                 søker = søkerFnr,
-                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
-                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent.toString(),
+                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
+                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
                 journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato, hentes fra behandlingsAar.
             )
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
-            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: $k9Respons.second" }
+            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
             logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
