@@ -6,10 +6,10 @@ import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
-import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.Søknadstype
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.journalforjson.HtmlGenerator
@@ -62,8 +62,8 @@ internal class SoknadService(
         val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
 
         val søkerFnr = søknad.søker.personIdent.verdi
-        val ytelse = søknad.getYtelse<Ytelse>()
-        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fraNavn(ytelse.type.kode())
+        val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
+        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
