@@ -93,11 +93,6 @@ internal data class FerdigstillJournalpost(
         check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
     }
 
-    internal fun ferdigstillPayload() : String {
-        check(kanFerdigstilles) { "Journalposten $journalpostId kan ikke ferdigstilles." }
-        return FerdigstillPayload
-    }
-
     internal data class Bruker(
         internal val identitetsnummer: Identitetsnummer,
         internal val sak: Pair<Fagsystem, Saksnummer>? = null,

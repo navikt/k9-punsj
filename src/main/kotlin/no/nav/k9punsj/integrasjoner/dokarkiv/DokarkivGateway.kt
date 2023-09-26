@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.dokarkiv
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
@@ -21,12 +22,10 @@ import no.nav.k9punsj.felles.UgyldigToken
 import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.innsending.dto.NyJournalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
 import org.intellij.lang.annotations.Language
-import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,32 +104,25 @@ class DokarkivGateway(
             ?: "Feilet med å ferdigstille journalpost")
     }
 
-    internal suspend fun opprettJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
+    internal suspend fun opprettOgFerdigstillJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = coroutineContext.hentAuthentication().accessToken
             )
 
+        val body = BodyInserters.fromValue(journalpostRequest.dokarkivPayload())
+
         val response = client
             .post()
-            .uri(URI.create(opprettJournalpostUrl))
+            .uri(URI.create(opprettOgFerdigstillJournalpostUrl))
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(journalpostRequest.dokarkivPayload())
+            .body(body)
             .retrieve()
-            .onStatus(
-                { status: HttpStatusCode -> status.isError },
-                { errorResponse: ClientResponse ->
-                    errorResponse.toEntity<String>().subscribe { entity: ResponseEntity<String> ->
-                        logger.error("Feilet med å opprette journalpost. Feil: {}", entity.toString())
-                    }
-                    errorResponse.createException()
-                }
-            )
             .toEntity(JournalPostResponse::class.java)
             .awaitFirst()
 
@@ -138,7 +130,7 @@ class DokarkivGateway(
             return response.body!!
         }
 
-        throw IllegalStateException("Feilet med å opprette journalpost")
+        throw IllegalStateException("Feilet med å opprette journalpost: ${response.statusCode} -> ${response.body}")
     }
 
     internal suspend fun ferdigstillJournalpost(journalpostId: String, enhet: String): ResponseEntity<String> {
@@ -164,7 +156,6 @@ class DokarkivGateway(
     }
 
     internal suspend fun oppdaterJournalpostForFerdigstilling(
-        correlationId: String,
         ferdigstillJournalpost: FerdigstillJournalpost
     ) {
         val url = ferdigstillJournalpost.journalpostId.toString().oppdaterJournalpostUrl()
@@ -217,7 +208,7 @@ class DokarkivGateway(
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
-    private val opprettJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
+    private val opprettOgFerdigstillJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
     private fun String.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this/ferdigstill"
 
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
@@ -298,7 +289,7 @@ data class JournalPostRequest(
     internal val brukerIdent: String,
     internal val avsenderNavn: String,
     internal val pdf: ByteArray,
-    internal val json: JSONObject
+    internal val json: ObjectNode
 ) {
     internal fun dokarkivPayload(): String {
         @Language("JSON")
@@ -347,7 +338,7 @@ data class JournalPostRequest(
 
     private companion object {
         private fun ByteArray.base64() = Base64.getEncoder().encodeToString(this)
-        private fun JSONObject.base64() = this.toString().toByteArray().base64()
+        private fun ObjectNode.base64() = this.toString().toByteArray().base64()
     }
 }
 
