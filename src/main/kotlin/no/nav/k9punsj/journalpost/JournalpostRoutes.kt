@@ -224,11 +224,11 @@ internal class JournalpostRoutes(
                     behandlingsAar = dto.periode?.fom?.year
                 )
 
-                val journalpostErFerdigstilt =
-                    journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name
+                val journalpostErFerdigstiltEllerJournalfoert =
+                    journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.erFerdigstiltEllerJournalfoert
 
                 // Oppdater og ferdigstill journalpost hvis vi har saksnummer
-                if (!journalpostErFerdigstilt && dto.saksnummer != null) {
+                if (!journalpostErFerdigstiltEllerJournalfoert!! && dto.saksnummer != null) {
                     journalpostService.oppdaterOgFerdigstillForMottak(dto)
                 }
 
