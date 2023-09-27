@@ -82,10 +82,6 @@ data class PersonPdl(
     }
 }
 
-data class HentPerson(
-    val norskIdent: String
-)
-
 internal fun PersonPdl.navn(): String {
     return data.hentPerson.navn[0].forkortetNavn
         ?: (data.hentPerson.navn[0].fornavn + " " + data.hentPerson.navn[0].etternavn)
@@ -94,8 +90,4 @@ internal fun PersonPdl.navn(): String {
 data class PdlPersonDto(
     val norskIdent: String,
     val aktørId: String
-)
-
-data class PdlResponseDto(
-    val person: PdlPersonDto
 )
