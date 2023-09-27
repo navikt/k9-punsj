@@ -176,7 +176,7 @@ internal class SoknadServiceTest {
                 sak = FerdigstillJournalpost.Sak(null, null, null)
             )
         )
-        coEvery { k9SakService.hentEllerOpprettSaksnummer(any()) }.returns(Pair("ABC123", null))
+        //coEvery { k9SakService.hentEllerOpprettSaksnummer(any()) }.returns(Pair("ABC123", null))
         coEvery { pdlService.hentPersonopplysninger(any()) }.returns(
             setOf(
                 Personopplysninger(

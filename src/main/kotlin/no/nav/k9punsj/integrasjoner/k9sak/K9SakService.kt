@@ -32,9 +32,9 @@ interface K9SakService {
 
     /**
      * Henter saksnummer fra K9Sak, hvis det ikke finnes oppretter vi en ny fagsak.
-     * Bruker behandlingsAar fra PunsjJournalpost for å sikkre riktig periode for saksnummeret.
+     * Periode hentes fra soknaden å defaulter til 1/1 og 31/12 hvis fom eller tom ikke er satt.
      */
-    suspend fun hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag): Pair<String?, String?>
+    suspend fun hentEllerOpprettSaksnummer(søknadId: String): Pair<String?, String?>
 
     suspend fun hentSisteSaksnummerForPeriode(
         fagsakYtelseType: FagsakYtelseType,
