@@ -6,7 +6,6 @@ import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -27,7 +26,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.sak.SakClient
@@ -113,7 +111,7 @@ class SoknadService(
                     fagsakYtelseType = fagsakYtelseType
                 )
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
-            logger.info("Fick saksnummer (${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
+            logger.info("Fick saksnummer ${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
 

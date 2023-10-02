@@ -13,7 +13,6 @@ import no.nav.k9.sak.typer.Periode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -26,7 +25,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
-import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
 import no.nav.k9punsj.omsorgspengermidlertidigalene.tilOmsMAvisning
@@ -45,7 +43,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.net.URI
 import java.time.LocalDate
-import java.util.*
+import java.util.Base64
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -222,8 +221,15 @@ class K9SakServiceImpl(
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
+        val response = httpPost(body, "/fordel/fagsak/opprett")
 
-        return httpPost(body, "/fordel/fagsak/opprett")
+        return try {
+            val saksnummer = JSONObject(response.first).getString("saksnummer").toString()
+            Pair(saksnummer, null)
+        } catch (e: Exception) {
+            Pair(null, "Feilet deserialisering")
+        }
+
     }
 
     override suspend fun hentSisteSaksnummerForPeriode(
