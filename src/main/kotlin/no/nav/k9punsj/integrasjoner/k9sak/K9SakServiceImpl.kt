@@ -9,15 +9,16 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
-import no.nav.k9.sak.typer.JournalpostId
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
@@ -26,6 +27,13 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUr
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.journalpost.JournalpostService
+import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
+import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
+import no.nav.k9punsj.omsorgspengermidlertidigalene.tilOmsMAvisning
+import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtvisning
+import no.nav.k9punsj.opplaeringspenger.tilOlpvisning
+import no.nav.k9punsj.pleiepengerlivetssluttfase.tilPlsvisning
+import no.nav.k9punsj.pleiepengersyktbarn.tilPsbvisning
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -47,7 +55,8 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
     private val personService: PersonService,
-    private val journalpostService: JournalpostService
+    private val journalpostService: JournalpostService,
+    private val soknadService: SoknadService,
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -185,26 +194,28 @@ class K9SakServiceImpl(
         }
     }
 
-    /*
-    * 1. Utleder periode fra PunsjJournalpost.behandlingsAar eller bruker nåvarande år som periode.
-    * 2. Slår opp saksnummer basert på ytelsetype, periode & inkluderte aktørIder.
-     */
     override suspend fun hentEllerOpprettSaksnummer(
-        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag,
+        søknadId: String
     ): Pair<String?, String?> {
-        val aar = journalpostService.hentBehandlingsAar(k9SaksnummerGrunnlag.journalpostId)
-        val periode = Periode(
-            LocalDate.of(aar, 1, 12),
-            LocalDate.of(aar, 12, 31)
-        )
+        val søknad = soknadService.hentSøknad(søknadId)
+            ?: return Pair(null, "Fant ikke søknad")
+        val fagsakYtelseType = soknadService.henteYtelsetypeForSøknad(søknad!!.søknadId)
+            ?: return Pair(null, "Fant ikke fagsakytelsetype")
+        val k9SaksnummerGrunnlag = søknad.tilK9saksnummerGrunnlag(fagsakYtelseType)
 
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
-        val pleietrengendeAktørId = if(!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
-            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
-        } else null
-        val annenpartAktørId = if(!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
-            personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
-        } else null
+        val pleietrengendeAktørId =
+            if (!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+            } else null
+        val annenpartAktørId =
+            if (!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
+            } else null
+        val periode = Periode(
+            k9SaksnummerGrunnlag.periode?.fom ?: LocalDate.now().withMonth(1).withDayOfMonth(1),
+            k9SaksnummerGrunnlag.periode?.tom ?: LocalDate.now().withMonth(12).withDayOfMonth(31)
+        )
 
         val payloadMedAktørId = FinnEllerOpprettSak(
             FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
@@ -310,6 +321,112 @@ class K9SakServiceImpl(
                 log.error(error.toString())
                 Pair(null, "Feil ved kall til k9-sak")
             }
+        )
+    }
+
+    private fun SøknadEntitet.tilK9saksnummerGrunnlag(
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+    ): HentK9SaksnummerGrunnlag {
+        // Kontrakt  fra k9-sak FagsakYtelseType
+        // https://github.com/navikt/k9-sak/blob/83b654701d242629a20eabbab642c399c6c27182/kodeverk/src/main/java/no/nav/k9/kodeverk/behandling/FagsakYtelseType.java#L57
+        return when (fagsakYtelseType) {
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> {
+                val psbVisning = this.tilPsbvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = psbVisning.soekerId!!,
+                    pleietrengende = psbVisning.barn?.norskIdent,
+                    annenPart = null,
+                    periode = psbVisning.soeknadsperiode?.firstOrNull()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER -> {
+                val omsVisning = this.tilOmsUtvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = omsVisning.soekerId!!,
+                    pleietrengende = null,
+                    annenPart = null,
+                    periode = omsVisning.periodeForHeleAretMedFravaer()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_UTBETALING -> {
+                val omsUtvisning = this.tilOmsUtvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = omsUtvisning.soekerId!!,
+                    pleietrengende = null,
+                    annenPart = null,
+                    periode = omsUtvisning.periodeForHeleAretMedFravaer()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN -> {
+                val omsAoVisning = this.tilOmsAOvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = omsAoVisning.soekerId!!,
+                    pleietrengende = omsAoVisning.barn!!.norskIdent,
+                    annenPart = null,
+                    periode = omsAoVisning.periode
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE -> {
+                val omsMaVisning = this.tilOmsMAvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = omsMaVisning.soekerId!!,
+                    pleietrengende = null,
+                    annenPart = omsMaVisning.annenForelder!!.norskIdent,
+                    periode = omsMaVisning.annenForelder.periode
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN -> {
+                val omsKsVisning = this.tilOmsKSBvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = omsKsVisning.soekerId!!,
+                    pleietrengende = omsKsVisning.barn!!.norskIdent,
+                    annenPart = null,
+                    periode = omsKsVisning.mottattDato?.periodeDtoForHeleAret()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE -> {
+                val tilPlsvisning = this.tilPlsvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = tilPlsvisning.soekerId!!,
+                    pleietrengende = tilPlsvisning.pleietrengende!!.norskIdent,
+                    annenPart = null,
+                    periode = tilPlsvisning.soeknadsperiode?.firstOrNull()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.OPPLÆRINGSPENGER -> {
+                val tilOlpvisning = this.tilOlpvisning()
+                HentK9SaksnummerGrunnlag(
+                    søknadstype = fagsakYtelseType,
+                    søker = tilOlpvisning.soekerId!!,
+                    pleietrengende = tilOlpvisning.barn!!.norskIdent,
+                    annenPart = null,
+                    periode = tilOlpvisning.soeknadsperiode?.firstOrNull()
+                )
+            }
+
+            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
+            no.nav.k9punsj.felles.FagsakYtelseType.UDEFINERT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
+        }
+    }
+
+    private fun LocalDate.periodeDtoForHeleAret(): PeriodeDto {
+        return PeriodeDto(
+            fom = this.withMonth(1).withDayOfMonth(1),
+            tom = this.withMonth(12).withDayOfMonth(31)
         )
     }
 

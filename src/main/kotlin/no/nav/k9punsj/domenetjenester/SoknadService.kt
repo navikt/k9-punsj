@@ -6,7 +6,9 @@ import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Søknadstype
@@ -39,7 +41,7 @@ import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
-internal class SoknadService(
+class SoknadService(
     private val journalpostService: JournalpostService,
     private val søknadRepository: SøknadRepository,
     private val søknadMetrikkService: SøknadMetrikkService,
@@ -47,7 +49,8 @@ internal class SoknadService(
     private val k9SakService: K9SakService,
     private val sakClient: SakClient,
     private val pdlService: PdlService,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
+    private val bunkeRepository: BunkeRepository
 ) {
 
     internal suspend fun sendSøknad(
@@ -59,7 +62,7 @@ internal class SoknadService(
 
         val journalpostIdListe = journalpostIder.toList()
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
-        val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
+        val punsjetAvSaksbehandler = hentSistEndretAvSaksbehandler(søknad.søknadId.id)
 
         val søkerFnr = søknad.søker.personIdent.verdi
         val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
@@ -106,15 +109,7 @@ internal class SoknadService(
             }
             fagsakIder.first().second
         } else {
-            // Hent k9saksnummer
-            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = fagsakYtelseType,
-                søker = søkerFnr,
-                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
-                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
-                journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato, hentes fra behandlingsAar.
-            )
-            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
+            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(søknad.søknadId.toString())
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
             logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
@@ -238,6 +233,12 @@ internal class SoknadService(
 
     suspend fun hentSistEndretAvSaksbehandler(søknadId: String): String {
         return søknadRepository.hentSøknad(søknadId)?.endret_av!!.replace("\"", "")
+    }
+
+    suspend fun henteYtelsetypeForSøknad(søknadId: String): FagsakYtelseType? {
+        return hentSøknad(søknadId)?.bunkeId?.let { bunkeId ->
+            bunkeRepository.hentYtelseTypeForBunke(bunkeId)
+        }
     }
 
     private suspend fun leggerVedPayload(

@@ -15,8 +15,6 @@ import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
@@ -37,7 +35,6 @@ internal class OmsorgspengerAleneOmsorgService(
     private val azureGraphService: IAzureGraphService,
     private val journalpostService: JournalpostService,
     private val soknadService: SoknadService,
-    private val k9SakService: K9SakService,
     private val aksjonspunktService: AksjonspunktService
 ) {
 
@@ -76,26 +73,6 @@ internal class OmsorgspengerAleneOmsorgService(
     }
 
     suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
-        // oppretter sak i k9-sak hvis det ikke finnes fra før
-        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-            søknadstype = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
-            annenPart = opprettNySøknad.annenPart,
-            søker = opprettNySøknad.norskIdent,
-            pleietrengende = opprettNySøknad.pleietrengendeIdent,
-            journalpostId = opprettNySøknad.journalpostId
-        )
-
-        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
-            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
-        )
-
-        if (feil != null) {
-            return ServerResponse
-                .badRequest()
-                .json()
-                .bodyValueAndAwait(feil)
-        }
-
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
             ytelseType = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,

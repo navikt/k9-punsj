@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
 @Service
-internal class SakClient(
+class SakClient(
     @Value("\${no.nav.sak.base_url}") private val baseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
 ) {

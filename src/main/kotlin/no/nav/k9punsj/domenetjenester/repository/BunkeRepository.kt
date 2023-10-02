@@ -72,4 +72,23 @@ class BunkeRepository(private val dataSource: DataSource) {
             }
         }
     }
+
+    suspend fun hentYtelseTypeForBunke(bunkeId: String): FagsakYtelseType? {
+        return using(sessionOf(dataSource)) {
+            return@using it.transaction { tx ->
+                return@transaction tx.run(
+                    queryOf(
+                        """
+                                select ytelse_type from $BUNKE_TABLE where bunke_id = :bunkeId
+                             """,
+                        mapOf(
+                            "bunkeId" to UUID.fromString(bunkeId)
+                        )
+                    ).map { row ->
+                        FagsakYtelseType.fromKode(row.string("ytelse_type"))
+                    }.asSingle
+                )
+            }
+        }
+    }
 }

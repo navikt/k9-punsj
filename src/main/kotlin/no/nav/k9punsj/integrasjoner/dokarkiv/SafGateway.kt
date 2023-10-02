@@ -94,17 +94,21 @@ class SafGateway(
             UUID.randomUUID().toString()
         }
 
-        val response = client
-            .post()
-            .uri { it.pathSegment("graphql").build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, correlationId)
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(SafDtos.JournalpostQuery(journalpostId))
-            .retrieve()
-            .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
-            .awaitFirst()
+        val response = try {
+            client
+                .post()
+                .uri { it.pathSegment("graphql").build() }
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, correlationId)
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+                .retrieve()
+                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+                .awaitFirst()
+        } catch (e: Exception) {
+            throw IllegalStateException("Feil ved oppslag mot SAF graphql. ${e.message}", e)
+        }
 
         val safResponse = response.body
         val errors = safResponse?.errors

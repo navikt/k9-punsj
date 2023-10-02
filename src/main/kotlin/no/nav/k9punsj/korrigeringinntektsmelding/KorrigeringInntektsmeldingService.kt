@@ -18,7 +18,6 @@ import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.omsorgspengerutbetaling.SvarOmsUtDto
@@ -82,26 +81,6 @@ internal class KorrigeringInntektsmeldingService(
     }
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
-        // oppretter sak i k9-sak hvis det ikke finnes fra før
-        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-            søknadstype = FagsakYtelseType.OMSORGSPENGER,
-            annenPart = opprettNySøknad.annenPart,
-            søker = opprettNySøknad.norskIdent,
-            pleietrengende = opprettNySøknad.pleietrengendeIdent,
-            journalpostId = opprettNySøknad.journalpostId
-        )
-
-        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
-            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
-        )
-
-        if (feil != null) {
-            return ServerResponse
-                .badRequest()
-                .json()
-                .bodyValueAndAwait(feil)
-        }
-
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
@@ -248,6 +227,7 @@ internal class KorrigeringInntektsmeldingService(
             .bodyValueAndAwait(søknad)
     }
 
+    @Deprecated("Skall flyttes til felles k9sak-route")
     internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): ServerResponse {
         val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
             søker = matchFagsakMedPeriode.brukerIdent,
