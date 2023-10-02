@@ -6,6 +6,7 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 
 interface K9SakService {
 
@@ -34,7 +35,10 @@ interface K9SakService {
      * Henter saksnummer fra K9Sak, hvis det ikke finnes oppretter vi en ny fagsak.
      * Periode hentes fra soknaden å defaulter til 1/1 og 31/12 hvis fom eller tom ikke er satt.
      */
-    suspend fun hentEllerOpprettSaksnummer(søknadId: String): Pair<String?, String?>
+    suspend fun hentEllerOpprettSaksnummer(
+        søknadEntitet: SøknadEntitet,
+        fagsakYtelseType: FagsakYtelseType
+    ): Pair<String?, String?>
 
     suspend fun hentSisteSaksnummerForPeriode(
         fagsakYtelseType: FagsakYtelseType,

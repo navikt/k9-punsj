@@ -54,9 +54,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
-    private val personService: PersonService,
-    private val journalpostService: JournalpostService,
-    private val soknadService: SoknadService,
+    private val personService: PersonService
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -195,13 +193,10 @@ class K9SakServiceImpl(
     }
 
     override suspend fun hentEllerOpprettSaksnummer(
-        søknadId: String
+        søknadEntitet: SøknadEntitet,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): Pair<String?, String?> {
-        val søknad = soknadService.hentSøknad(søknadId)
-            ?: return Pair(null, "Fant ikke søknad")
-        val fagsakYtelseType = soknadService.henteYtelsetypeForSøknad(søknad!!.søknadId)
-            ?: return Pair(null, "Fant ikke fagsakytelsetype")
-        val k9SaksnummerGrunnlag = søknad.tilK9saksnummerGrunnlag(fagsakYtelseType)
+        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
 
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
         val pleietrengendeAktørId =

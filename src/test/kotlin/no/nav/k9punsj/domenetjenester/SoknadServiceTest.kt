@@ -79,9 +79,6 @@ internal class SoknadServiceTest {
 
     private lateinit var soknadService: SoknadService
 
-    @MockK
-    private lateinit var bunkeRepository: BunkeRepository
-
     @BeforeAll
     fun setup() {
         MockKAnnotations.init(this)
@@ -95,7 +92,6 @@ internal class SoknadServiceTest {
             )
         )
         coEvery { mockJournalpostService.hent(any()) }.returns(PunsjJournalpost(UUID.randomUUID(), "1", aktørId = "1"))
-        coEvery { bunkeRepository.hentYtelseTypeForBunke(any()) }.returns(FagsakYtelseType.OMSORGSPENGER)
         soknadService = SoknadService(
             journalpostService = mockJournalpostService,
             søknadRepository = mockSøknadRepository,
@@ -104,8 +100,7 @@ internal class SoknadServiceTest {
             k9SakService = k9SakService,
             sakClient = sakClient,
             pdlService = pdlService,
-            dokarkivGateway = dokarkivGateway,
-            bunkeRepository = bunkeRepository,
+            dokarkivGateway = dokarkivGateway
         )
     }
 

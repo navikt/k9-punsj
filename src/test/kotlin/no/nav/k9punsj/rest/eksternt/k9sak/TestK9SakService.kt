@@ -7,6 +7,7 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -86,7 +87,10 @@ internal class TestK9SakService : K9SakService {
         second = null
     )
 
-    override suspend fun hentEllerOpprettSaksnummer(søknadId: String): Pair<String?, String?> {
+    override suspend fun hentEllerOpprettSaksnummer(
+        søknadEntitet: SøknadEntitet,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+    ): Pair<String?, String?> {
         return Pair("ABC123", null)
     }
 

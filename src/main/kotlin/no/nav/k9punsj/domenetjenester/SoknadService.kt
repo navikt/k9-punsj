@@ -49,8 +49,7 @@ class SoknadService(
     private val k9SakService: K9SakService,
     private val sakClient: SakClient,
     private val pdlService: PdlService,
-    private val dokarkivGateway: DokarkivGateway,
-    private val bunkeRepository: BunkeRepository
+    private val dokarkivGateway: DokarkivGateway
 ) {
 
     internal suspend fun sendSøknad(
@@ -66,7 +65,7 @@ class SoknadService(
 
         val søkerFnr = søknad.søker.personIdent.verdi
         val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
-        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fromKode(k9YtelseType)
+        val fagsakYtelseType = FagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -109,7 +108,10 @@ class SoknadService(
             }
             fagsakIder.first().second
         } else {
-            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(søknad.søknadId.toString())
+            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
+                    søknadEntitet = hentSøknad(søknad.søknadId.id)!!,
+                    fagsakYtelseType = fagsakYtelseType
+                )
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
             logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
@@ -233,12 +235,6 @@ class SoknadService(
 
     suspend fun hentSistEndretAvSaksbehandler(søknadId: String): String {
         return søknadRepository.hentSøknad(søknadId)?.endret_av!!.replace("\"", "")
-    }
-
-    suspend fun henteYtelsetypeForSøknad(søknadId: String): FagsakYtelseType? {
-        return hentSøknad(søknadId)?.bunkeId?.let { bunkeId ->
-            bunkeRepository.hentYtelseTypeForBunke(bunkeId)
-        }
     }
 
     private suspend fun leggerVedPayload(
