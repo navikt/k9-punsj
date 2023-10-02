@@ -14,7 +14,9 @@ import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9.søknad.ytelse.Ytelse.PLEIEPENGER_SYKT_BARN
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -77,6 +79,9 @@ internal class SoknadServiceTest {
 
     private lateinit var soknadService: SoknadService
 
+    @MockK
+    private lateinit var bunkeRepository: BunkeRepository
+
     @BeforeAll
     fun setup() {
         MockKAnnotations.init(this)
@@ -90,6 +95,7 @@ internal class SoknadServiceTest {
             )
         )
         coEvery { mockJournalpostService.hent(any()) }.returns(PunsjJournalpost(UUID.randomUUID(), "1", aktørId = "1"))
+        coEvery { bunkeRepository.hentYtelseTypeForBunke(any()) }.returns(FagsakYtelseType.OMSORGSPENGER)
         soknadService = SoknadService(
             journalpostService = mockJournalpostService,
             søknadRepository = mockSøknadRepository,
@@ -98,7 +104,8 @@ internal class SoknadServiceTest {
             k9SakService = k9SakService,
             sakClient = sakClient,
             pdlService = pdlService,
-            dokarkivGateway = dokarkivGateway
+            dokarkivGateway = dokarkivGateway,
+            bunkeRepository = bunkeRepository,
         )
     }
 

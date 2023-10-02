@@ -109,13 +109,6 @@ class SoknadService(
             }
             fagsakIder.first().second
         } else {
-            // Hent k9saksnummer
-            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = fagsakYtelseType,
-                søker = søkerFnr,
-                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
-                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi
-            )
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(søknad.søknadId.toString())
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
             logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
