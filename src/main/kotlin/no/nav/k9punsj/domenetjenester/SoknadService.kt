@@ -113,7 +113,7 @@ class SoknadService(
                     fagsakYtelseType = fagsakYtelseType
                 )
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
-            logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
+            logger.info("Fick saksnummer (${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
 
