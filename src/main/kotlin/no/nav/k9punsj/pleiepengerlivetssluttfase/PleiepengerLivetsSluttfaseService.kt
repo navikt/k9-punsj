@@ -65,7 +65,7 @@ internal class PleiepengerLivetsSluttfaseService(
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
-        val søknad = mappeService.hentSøknad(søknadId)
+        val søknad = soknadService.hentSøknad(søknadId)
             ?: return ServerResponse.notFound().buildAndAwait()
 
         return ServerResponse
@@ -95,7 +95,7 @@ internal class PleiepengerLivetsSluttfaseService(
     }
 
     internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
@@ -195,7 +195,7 @@ internal class PleiepengerLivetsSluttfaseService(
     internal suspend fun validerSøknad(soknadTilValidering: PleiepengerLivetsSluttfaseSøknadDto): ServerResponse {
         val eksisterendePerioderFraK9Sak = henterPerioderSomFinnesIK9sak(soknadTilValidering)
             ?.first ?: emptyList()
-        val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
                 .buildAndAwait()
@@ -266,7 +266,6 @@ internal class PleiepengerLivetsSluttfaseService(
         }
     }
 
-    @Deprecated("Flyttes til felles k9-sak tjeneste")
     private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {
         if (dto.soekerId.isNullOrBlank() || dto.pleietrengende == null || dto.pleietrengende.norskIdent.isNullOrBlank()) {
             return null

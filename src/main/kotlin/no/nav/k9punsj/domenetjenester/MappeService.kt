@@ -441,11 +441,6 @@ internal class MappeService(
         }
         return Mappe(mappeId, søker, bunkerMedSøknader)
     }
-
-    @Deprecated("Bruk soknadService")
-    suspend fun hentSøknad(søknad: String): SøknadEntitet? {
-        return soknadService.hentSøknad(søknad)
-    }
 }
 
 private data class Søknadfelles(

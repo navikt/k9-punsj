@@ -66,7 +66,7 @@ internal class KorrigeringInntektsmeldingService(
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
-        val søknad = mappeService.hentSøknad(søknadId)
+        val søknad = soknadService.hentSøknad(søknadId)
 
         return if (søknad == null) {
             ServerResponse
@@ -114,7 +114,7 @@ internal class KorrigeringInntektsmeldingService(
     }
 
     internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
@@ -182,7 +182,7 @@ internal class KorrigeringInntektsmeldingService(
     }
 
     internal suspend fun validerSøknad(soknadTilValidering: KorrigeringInntektsmeldingDto): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
                 .buildAndAwait()

@@ -66,7 +66,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
-        val søknad = mappeService.hentSøknad(søknad = søknadId)
+        val søknad = soknadService.hentSøknad(søknadId)
             ?: return ServerResponse.notFound().buildAndAwait()
 
         return ServerResponse
@@ -112,7 +112,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     }
 
     internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
@@ -190,7 +190,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     }
 
     internal suspend fun validerSøknad(soknadTilValidering: OmsorgspengerMidlertidigAleneSøknadDto): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
                 .buildAndAwait()
