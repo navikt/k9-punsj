@@ -34,12 +34,12 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>4.1.2</k9-sak.version>
-        <k9-formidling.version>1.0.0</k9-formidling.version>
+        <k9-formidling.version>1.0.4</k9-formidling.version>
         <k9-format.version>9.0.4</k9-format.version>
-        <k9-rapid.version>1.20230823104755-1fc16e7</k9-rapid.version>
+        <k9-rapid.version>1.20231002100147-90c2022</k9-rapid.version>
 
         <!-- database -->
-        <flyway-core.version>9.22.1</flyway-core.version>
+        <flyway-core.version>9.22.2</flyway-core.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <HikariCP.version>5.0.1</HikariCP.version>
         <kotliquery.version>1.9.0</kotliquery.version>
@@ -47,7 +47,7 @@
 
         <!-- Test + Mock -->
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
-        <mockk.version>1.13.7</mockk.version>
+        <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
 
         <!-- pdf -->
