@@ -50,18 +50,6 @@ class JournalpostService(
     internal suspend fun hentSafJournalPost(journalpostId: String): SafDtos.Journalpost? =
         safGateway.hentJournalpostInfo(journalpostId)
 
-    @Deprecated("Periode skal hentes fra søknaden i soknadservice. FIXME")
-    internal suspend fun lagreBehandlingsAar(journalpostId: String, behandlingsAar: Int) {
-        val journalpost = journalpostRepository.hentHvis(journalpostId)
-        if (journalpost != null) {
-            logger.info("Oppdaterer behandlingsår ($behandlingsAar) for journalpost: $journalpostId")
-            val medBehandlingsAar = journalpost.copy(behandlingsAar = behandlingsAar)
-            journalpostRepository.lagre(medBehandlingsAar) {
-                medBehandlingsAar
-            }
-        }
-    }
-
     internal suspend fun hentJournalpostInfo(journalpostId: String): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
 

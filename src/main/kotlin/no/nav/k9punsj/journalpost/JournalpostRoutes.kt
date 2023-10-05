@@ -27,9 +27,7 @@ import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
-import no.nav.k9punsj.journalpost.dto.ResultatDto
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
-import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
@@ -55,7 +53,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -213,8 +211,7 @@ internal class JournalpostRoutes(
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
                 val oppdatertJournalpost = journalpostService.hent(dto.journalpostId).copy(
                     ytelse = dto.fagsakYtelseTypeKode,
-                    aktørId = pdlService.aktørIdFor(dto.brukerIdent),
-                    behandlingsAar = dto.periode?.fom?.year
+                    aktørId = pdlService.aktørIdFor(dto.brukerIdent)
                 )
 
                 val journalpostErFerdigstilt =
