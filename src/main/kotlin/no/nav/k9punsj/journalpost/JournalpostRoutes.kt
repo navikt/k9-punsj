@@ -27,9 +27,7 @@ import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
-import no.nav.k9punsj.journalpost.dto.ResultatDto
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
-import no.nav.k9punsj.journalpost.dto.SkalTilInfotrygdSvar
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
@@ -55,7 +53,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -84,19 +82,12 @@ internal class JournalpostRoutes(
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
-        @Deprecated("Skall fjernes")
-        internal const val SkalTilK9sak = "/journalpost/skaltilk9sak"
+        @Deprecated("Kan fjernes fra frontend")
         internal const val SettBehandlingsAar = "/journalpost/settBehandlingsAar/{$JournalpostIdKey}"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
         internal const val Mottak = "/journalpost/mottak"
-
-        // for drift i prod
-        internal const val ResettInfoOmJournalpost = "/journalpost/resett/{$JournalpostIdKey}"
-        internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
-        internal const val LukkJournalposterDebugg = "/journalpost/lukkDebugg"
-        internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -220,8 +211,7 @@ internal class JournalpostRoutes(
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
                 val oppdatertJournalpost = journalpostService.hent(dto.journalpostId).copy(
                     ytelse = dto.fagsakYtelseTypeKode,
-                    aktørId = pdlService.aktørIdFor(dto.brukerIdent),
-                    behandlingsAar = dto.periode?.fom?.year
+                    aktørId = pdlService.aktørIdFor(dto.brukerIdent)
                 )
 
                 val journalpostErFerdigstilt =
@@ -245,52 +235,12 @@ internal class JournalpostRoutes(
             }
         }
 
+        // Deprecated: Kan fjernes fra frontend.
         POST("/api${Urls.SettBehandlingsAar}") { request ->
             RequestContext(coroutineContext, request) {
-                val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
-                    url = Urls.SettBehandlingsAar
-                )?.let { return@RequestContext it }
-
-                val journalpostId = request.journalpostId()
-                val behandlingsAar = try {
-                    request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
-                } catch (e: Exception) {
-                    val nåVærendeÅr = LocalDate.now().year
-                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
-                    nåVærendeÅr
-                }
-
-                journalpostService.lagreBehandlingsAar(
-                    journalpostId = journalpostId,
-                    behandlingsAar = behandlingsAar
-                )
-
                 return@RequestContext ServerResponse.ok()
                     .json()
-                    .bodyValueAndAwait(BehandlingsAarDto(behandlingsAar = behandlingsAar))
-            }
-        }
-
-        /***
-         * Denne er deprecated, allt skal til k9-sak.
-         * Kobling til riktig sak skjer med hjelp av /journalpost/settBehandlingsAar/ & /journalpost/mottak
-         */
-        POST("/api${Urls.SkalTilK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
-                val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
-                    url = Urls.SkalTilK9sak
-                )?.let { return@RequestContext it }
-
-                val skalTilK9Sak = true // Pr. 20.3.23 skal alt rutes til k9sak.
-
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(SkalTilInfotrygdSvar(k9sak = skalTilK9Sak))
+                    .bodyValueAndAwait(BehandlingsAarDto(behandlingsAar = LocalDate.now().year))
             }
         }
 
@@ -335,166 +285,6 @@ internal class JournalpostRoutes(
 
                 return@RequestContext ServerResponse
                     .ok()
-                    .buildAndAwait()
-            }
-        }
-
-        GET("/api${Urls.ResettInfoOmJournalpost}") { request ->
-            RequestContext(coroutineContext, request) {
-                val journalpostId = request.journalpostId()
-
-                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
-
-                if (kanSendeInn) {
-                    val nyVerdi = journalpost.copy(skalTilK9 = null)
-                    journalpostService.lagre(nyVerdi)
-
-                    return@RequestContext ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt resatt!"))
-                }
-                return@RequestContext ServerResponse
-                    .badRequest()
-                    .bodyValueAndAwait("Kan ikke endre på en journalpost som har blitt sendt fra punsj")
-            }
-        }
-
-        GET("/api${Urls.LukkJournalpostDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
-                val journalpostId = request.journalpostId()
-                val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
-
-                journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-
-                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
-                if (kanSendeInn) {
-                    aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
-                    val (status, body) = journalpostService.settTilFerdig(
-                        journalpostId = journalpostId,
-                        ferdigstillJournalpost = false,
-                        enhet = enhet,
-                        sak = null,
-                        søkerIdentitetsnummer = null
-                    )
-                    if (!status.is2xxSuccessful) {
-                        return@RequestContext ServerResponse.status(status)
-                            .bodyValueAndAwait(body!!)
-                    }
-                    logger.info("Journalpost lukkes", keyValue("journalpost_id", journalpostId))
-
-                    return@RequestContext ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt lukket i punsj og i los"))
-                } else {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.BAD_REQUEST)
-                        .json()
-                        .bodyValueAndAwait(ResultatDto("Journalpost med id $journalpostId har blitt lukket fra før! (Ingen endring)"))
-                }
-            }
-        }
-
-        POST("/api${Urls.LukkJournalposterDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
-                val journalpostIder = request.journalpostIder().journalpostIder.toSet()
-
-                val punsjJper = journalpostService.hentHvisJournalpostMedIder(journalpostIder.toList())
-                if (punsjJper.isEmpty()) {
-                    return@RequestContext ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-                }
-
-                val punsjJperIder = punsjJper.keys.map { it.journalpostId }.toSet()
-                val fantIkkeIPunsjTekst = diffTekst(journalpostIder, punsjJperIder, "Fantes ikke i punsj")
-
-                val uferdigePunsj = punsjJper.filter { !it.value }.map { it.key.journalpostId }.toSet()
-                val alleredeLukketIPunsjTekst = diffTekst(punsjJperIder, uferdigePunsj, "Allerede lukket i punsj")
-                if (uferdigePunsj.isEmpty()) {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.BAD_REQUEST)
-                        .json()
-                        .bodyValueAndAwait(
-                            ResultatDto(
-                                "Alle er ferdig behandlet i punsj eller finnes ikke i punsj: " +
-                                    "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"
-                            )
-                        )
-                }
-
-                val medSafStatus =
-                    uferdigePunsj.associateWith { journalpostService.hentSafJournalPost(it)!!.journalstatus }
-                val ferdigStatuser =
-                    arrayOf(SafDtos.Journalstatus.FERDIGSTILT.name, SafDtos.Journalstatus.JOURNALFOERT.name)
-                val ferdigeSaf = medSafStatus.filter { it.value in ferdigStatuser }.keys
-                val ikkeLukketISafTekst =
-                    diffTekst(uferdigePunsj, ferdigeSaf, "Ikke lukket i SAF så disse ble ikke ferdigstilt")
-                if (ferdigeSaf.isEmpty()) {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.BAD_REQUEST)
-                        .json()
-                        .bodyValueAndAwait(
-                            ResultatDto(
-                                "Alle er ferdig behandlet i punsj, finnes ikke i punsj eller ikke lukket i SAF. " +
-                                    "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"
-                            )
-                        )
-                }
-
-                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(ferdigeSaf, false, null)
-                journalpostService.settAlleTilFerdigBehandlet(ferdigeSaf.toList())
-
-
-                return@RequestContext ServerResponse.status(HttpStatus.OK)
-                    .bodyValueAndAwait(
-                        ResultatDto(
-                            "Lukket journalposter: $ferdigeSaf. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst $ikkeLukketISafTekst"
-                        )
-                    )
-            }
-        }
-
-        GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
-            RequestContext(coroutineContext, request) {
-                val journalpostId = request.journalpostId()
-                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext ServerResponse
-                        .notFound()
-                        .buildAndAwait()
-
-                if (journalpost.payload != null) {
-                    try {
-                        journalpostService.hentJournalpostInfo(journalpostId = request.journalpostId())
-                            ?: return@RequestContext ServerResponse
-                                .notFound()
-                                .buildAndAwait()
-
-                        return@RequestContext ServerResponse
-                            .status(HttpStatus.OK)
-                            .json()
-                            .bodyValueAndAwait(journalpost.payload)
-                    } catch (cause: IkkeStøttetJournalpost) {
-                        return@RequestContext ServerResponse
-                            .status(HttpStatus.CONFLICT)
-                            .json()
-                            .bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
-                    } catch (case: IkkeTilgang) {
-                        return@RequestContext ServerResponse
-                            .status(HttpStatus.FORBIDDEN)
-                            .buildAndAwait()
-                    }
-                }
-                return@RequestContext ServerResponse
-                    .badRequest()
                     .buildAndAwait()
             }
         }
@@ -652,11 +442,6 @@ internal class JournalpostRoutes(
         }
     }
 
-    private fun diffTekst(setA: Set<String>, setB: Set<String>, prefix: String): String {
-        val diff = setA.minus(setB)
-        return if (diff.isNotEmpty()) "$prefix: $diff" else ""
-    }
-
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
@@ -690,9 +475,6 @@ internal class JournalpostRoutes(
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
 
     internal data class JournalpostIderRequest(val journalpostIder: List<String>)
-
-    private suspend fun ServerRequest.journalpostIder(): JournalpostIderRequest =
-        body(BodyExtractors.toMono(JournalpostIderRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.ident() = body(BodyExtractors.toMono(IdentDto::class.java)).awaitFirst()
 

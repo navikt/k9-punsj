@@ -1,12 +1,14 @@
 package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 
 import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.SøknadValidator
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn
+import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarnSøknadValidator
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -32,7 +34,7 @@ internal class MapOmsKSBTilK9Format(
 
             // Fullfører søknad & validerer
             søknad.medYtelse(omsorgspengerKroniskSyktBarn)
-            feil.addAll(Validator.valider(søknad.getYtelse())) // TODO: 20/01/2022 Validerer ingenting...
+            feil.addAll(Validator.valider(søknad))
         }.onFailure { throwable ->
             logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("søknad", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
@@ -102,7 +104,7 @@ internal class MapOmsKSBTilK9Format(
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOmsKSBTilK9Format::class.java)
         private val Oslo = ZoneId.of("Europe/Oslo")
-        private val Validator = OmsorgspengerKroniskSyktBarn().validator
+        private val Validator = OmsorgspengerKroniskSyktBarnSøknadValidator()
         private const val Versjon = "1.0.0"
 
         private fun String?.erSatt() = !isNullOrBlank()

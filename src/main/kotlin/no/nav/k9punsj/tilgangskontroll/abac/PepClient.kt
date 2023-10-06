@@ -53,12 +53,31 @@ class PepClient(
         return decision
     }
 
+    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+
+        fnr.forEach {
+            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+        }
+        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+    }
+
+
     override suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
         val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
         loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
         return decision
+    }
+
+    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+
+        fnr.forEach {
+            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
+        }
+        return fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
     override suspend fun erSaksbehandler(): Boolean {
@@ -103,24 +122,6 @@ class PepClient(
             .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
             .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los")
-    }
-
-    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-
-        fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
-        }
-        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
-    }
-
-    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-
-        fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
-        }
-        return fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
     private suspend fun loggTilAudit(

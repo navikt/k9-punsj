@@ -223,17 +223,6 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    @Deprecated("Bruk JournalpostService")
-    suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
-        val journalpost = hentHvis(journalpostId)
-        if (journalpost != null) {
-            val medType = journalpost.copy(ytelse = ytelseType.kode)
-            lagre(medType) {
-                medType
-            }
-        }
-    }
-
     suspend fun settInnsendingstype(type: PunsjInnsendingType, journalpostId: String) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {
