@@ -1,17 +1,15 @@
 package no.nav.k9punsj.kafka
 
 import no.nav.k9punsj.IkkeTestProfil
-import no.nav.k9punsj.configuration.KafkaConfig.Companion.AIVEN
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 
 @Component
 @IkkeTestProfil
 class KafkaHendelseProducer(
-    @Qualifier(AIVEN) private val kafkaTemplate: KafkaTemplate<String, String>
+    private val kafkaTemplate: KafkaTemplate<String, String>
 ) : HendelseProducer {
     override fun send(topicName: String, data: String, key: String) {
         kafkaTemplate.send(topicName, key, data).exceptionally {
