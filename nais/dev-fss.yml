@@ -17,6 +17,7 @@ spec:
     inbound:
       rules:
         - application: k9-punsj-oidc-auth-proxy
+        - application: k9-sak
   liveness:
     path: /internal/actuator/info
     initialDelay: 20

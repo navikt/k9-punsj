@@ -248,11 +248,6 @@ class SafGateway(
     }
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
-    internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
-
-    internal fun hentFerdigstillJournalpostQuery(journalpostId: String) = """
-            {"query":"query {journalpost(journalpostId:\"${journalpostId}\"){journalstatus,journalposttype,tittel,avsenderMottaker{navn},dokumenter{dokumentInfoId,tittel}}}"}
-        """.trimIndent()
 
     private fun JSONObject.notNullNotBlankString(key: String) =
         has(key) && get(key) is String && getString(key).isNotBlank()

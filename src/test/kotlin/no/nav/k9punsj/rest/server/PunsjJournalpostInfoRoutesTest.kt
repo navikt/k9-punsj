@@ -9,6 +9,7 @@ import no.nav.k9punsj.journalpost.dto.SøkUferdigJournalposter
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.k9SakToken
+import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -93,5 +94,18 @@ class PunsjJournalpostInfoRoutesTest {
 
         val status = res.awaitStatuscode()
         assertEquals(HttpStatus.UNAUTHORIZED, status)
+    }
+
+    @Test
+    fun `Http 200 om vi har azure ad token`() = runBlocking {
+        val azureToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.Azure.V2_0.saksbehandlerAccessToken()}"
+        val res = client.post().uri {
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
+            .header(HttpHeaders.AUTHORIZATION, azureToken)
+            .body(BodyInserters.fromValue(json))
+
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.OK, status)
     }
 }
