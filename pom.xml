@@ -25,7 +25,7 @@
         <kotlin.version>1.9.10</kotlin.version>
 
         <!-- spring relatert -->
-        <springdoc.version>2.1.0</springdoc.version>
+        <springdoc.version>2.2.0</springdoc.version>
         <snakeyaml.version>2.2</snakeyaml.version>
 
         <!-- logging -->
