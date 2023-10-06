@@ -2,8 +2,7 @@ graph LR
 topic-punsj-til-formidling{{privat-k9punsj-aksjonspunkthendelse-v1}}
 topic-punsj-til-los{{privat-k9-dokumenthendelse}}
 topic-punsj-til-punsjbolle{{omsorgspenger.k9-rapid-v2}}
-onprem-topic-fordel-til-punsj{{onprem:privat-k9-fordel-journalforing-v1}}
-aiven-topic-fordel-til-punsj{{aiven:k9saksbehandling.punsjbar-journalpost}}
+topic-fordel-til-punsj{{k9saksbehandling.punsjbar-journalpost}}
 
 k9-punsj-frontend --> |punsjer inn papirsoknader| k9-punsj
 k9-punsj --> |lagrer, henter, modifiserer soknader, mapper, bunker, journalposter, personer, aksjonspunkt og brev| k9-punsj-db[(k9-punsj-db)]
@@ -11,10 +10,8 @@ k9-punsj --> |oppretter/henter fagsaknummer, henter ruting| k9-punsjbolle
 k9-punsj --> |henter perioder og inntektsmeldinger | k9-sak
 k9-punsj --> |sender søknad| topic-punsj-til-punsjbolle
 k9-punsjbolle --> |konsumerer innsendt søknad| topic-punsj-til-punsjbolle
-k9-fordel --> |sender punsjbar journalposthendelse| onprem-topic-fordel-til-punsj
-k9-punsj .-> |konsumerer punsjbar journalposthendelse| onprem-topic-fordel-til-punsj
-k9-fordel --> |sender punsjbar journalposthendelse| aiven-topic-fordel-til-punsj
-k9-punsj .-> |konsumerer punsjbar journalposthendelse| aiven-topic-fordel-til-punsj
+k9-fordel --> |sender punsjbar journalposthendelse| topic-fordel-til-punsj
+k9-punsj .-> |konsumerer punsjbar journalposthendelse| topic-fordel-til-punsj
 k9-punsj --> |sender aksjonspunkthendelse| topic-punsj-til-los
 k9-los .-> |konsumerer aksjonspunkthendelse| topic-punsj-til-los
 k9-punsj --> |sender brevbestilling| topic-punsj-til-formidling

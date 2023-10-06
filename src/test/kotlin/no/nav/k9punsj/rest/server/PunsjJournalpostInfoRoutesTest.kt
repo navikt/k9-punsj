@@ -21,22 +21,11 @@ import org.springframework.web.reactive.function.BodyInserters
 class PunsjJournalpostInfoRoutesTest {
 
     private val client = TestSetup.client
-    private val k9sakToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.k9SakToken()}"
-
-    @Test
-    fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj`(): Unit = runBlocking {
-        val res = client.get().uri {
-            it.pathSegment("api", "journalpost", "uferdig", "1000000000000").build()
-        }.header(HttpHeaders.AUTHORIZATION, k9sakToken)
-
-        val status = res.awaitStatuscode()
-        assertEquals(HttpStatus.OK, status)
-    }
+    private val json: JsonB = objectMapper().convertValue(SøkUferdigJournalposter("1000000000000", null))
 
     @Test
     fun `Får en liste med journalpostIder som ikke er ferdig behandlet av punsj post`(): Unit = runBlocking {
-        val json: JsonB = objectMapper().convertValue(SøkUferdigJournalposter("1000000000000", null))
-
+        val k9sakToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.k9SakToken()}"
         val res = client.post().uri {
             it.pathSegment("api", "journalpost", "uferdig").build()
         }
@@ -45,5 +34,64 @@ class PunsjJournalpostInfoRoutesTest {
 
         val status = res.awaitStatuscode()
         assertEquals(HttpStatus.OK, status)
+    }
+
+    @Test
+    fun `Http 500 om vi sender feil body`(): Unit = runBlocking {
+        val k9sakToken = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.k9SakToken()}"
+        val res = client.post().uri {
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
+            .header(HttpHeaders.AUTHORIZATION, k9sakToken)
+            .body(BodyInserters.fromValue("""json"""))
+
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, status)
+    }
+
+    @Test
+    fun `Http 401 om vi har token fra riktig applikasjon men feil aud`() = runBlocking {
+        val stsTokenLosApi = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.generateJwt(
+            application = "srvk9sak",
+            overridingClaims = mapOf(
+                "aud" to "k9losapi"
+            ))}"
+        val res = client.post().uri {
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
+            .header(HttpHeaders.AUTHORIZATION, stsTokenLosApi)
+            .body(BodyInserters.fromValue(json))
+
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.UNAUTHORIZED, status)
+    }
+
+    @Test
+    fun `Http 401 om vi har token til annen applikasjon`() = runBlocking {
+        val stsTokenLosApi = "Bearer ${no.nav.helse.dusseldorf.testsupport.jws.NaisSts.generateJwt(
+            application = "srvk9losapi",
+            overridingClaims = mapOf(
+                "sub" to "srvk9losapi",
+                "aud" to "srvk9losapi"
+            ))}"
+        val res = client.post().uri {
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
+            .header(HttpHeaders.AUTHORIZATION, stsTokenLosApi)
+            .body(BodyInserters.fromValue(json))
+
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.UNAUTHORIZED, status)
+    }
+
+    @Test
+    fun `Http 401 om ikke har token`() = runBlocking {
+        val res = client.post().uri {
+            it.pathSegment("api", "journalpost", "uferdig").build()
+        }
+            .body(BodyInserters.fromValue(json))
+
+        val status = res.awaitStatuscode()
+        assertEquals(HttpStatus.UNAUTHORIZED, status)
     }
 }

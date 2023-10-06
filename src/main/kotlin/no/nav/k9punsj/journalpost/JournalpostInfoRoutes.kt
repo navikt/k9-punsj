@@ -23,31 +23,12 @@ internal class JournalpostInfoRoutes(
     private val journalpostService: JournalpostService
 ) {
 
-    private companion object {
-        private const val AktørIdKey = "aktor_id"
-        private val logger = LoggerFactory.getLogger(JournalpostInfoRoutes::class.java)
-    }
-
     internal object Urls {
-        internal const val HentÅpneJournalposter = "/journalpost/uferdig/{$AktørIdKey}"
         internal const val HentÅpneJournalposterPost = "/journalpost/uferdig"
     }
 
     @Bean
     fun JournalpostInfoRoutes() = K9SakRoutes(authenticationHandler) {
-        GET("/api${Urls.HentÅpneJournalposter}") { request ->
-            RequestContext(coroutineContext, request) {
-                val aktørId = request.aktørId()
-                val journalpostIder = journalpostService.finnJournalposterPåPersonBareFraFordel(aktørId)
-                    .map { journalpost -> JournalpostIdDto(journalpost.journalpostId) }
-
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(JournalpostIderDto(journalpostIder))
-            }
-        }
-
         POST("/api${Urls.HentÅpneJournalposterPost}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.søkUferdigJournalposter()
@@ -66,8 +47,6 @@ internal class JournalpostInfoRoutes(
             }
         }
     }
-
-    private fun ServerRequest.aktørId(): String = pathVariable(AktørIdKey)
 
     private suspend fun ServerRequest.søkUferdigJournalposter() =
         body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
