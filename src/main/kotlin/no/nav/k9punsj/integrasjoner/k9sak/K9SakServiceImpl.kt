@@ -23,7 +23,6 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsaker
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
@@ -230,38 +229,6 @@ class K9SakServiceImpl(
             Pair(null, "Feilet deserialisering")
         }
 
-    }
-
-    override suspend fun hentSisteSaksnummerForPeriode(
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
-        periode: PeriodeDto?,
-        søker: String,
-        pleietrengende: String?
-    ): Pair<SaksnummerDto?, String?> {
-        val hentSaksnummerForPeriodeDto = HentSaksnummerForPeriodeDto(
-            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
-            bruker = søker,
-            pleietrengende = listOfNotNull(pleietrengende).ifEmpty { null },
-            periode = periode
-        )
-
-        val body = kotlin.runCatching { objectMapper().writeValueAsString(hentSaksnummerForPeriodeDto) }.getOrNull()
-            ?: return Pair(null, "Feilet serialisering")
-
-        val (response, feil) = httpPost(body, sokFagsaker)
-        return try {
-            if (response == null) {
-                return Pair(null, feil!!)
-            }
-            val saksnummer = response.fagsaker()
-                .filterNot { it.gyldigPeriode?.fom == null }
-                .sortedBy { it.gyldigPeriode!!.fom }
-                .first()
-                .saksnummer
-            Pair(SaksnummerDto(saksnummer), null)
-        } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
-        }
     }
 
     override suspend fun sendInnSoeknad(
