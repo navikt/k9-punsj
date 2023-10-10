@@ -6,10 +6,8 @@ import no.nav.k9punsj.TestProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -89,18 +87,9 @@ internal class TestK9SakService : K9SakService {
 
     override suspend fun hentEllerOpprettSaksnummer(
         søknadEntitet: SøknadEntitet,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+        fagsakYtelseType: FagsakYtelseType
     ): Pair<String?, String?> {
         return Pair("ABC123", null)
-    }
-
-    override suspend fun hentSisteSaksnummerForPeriode(
-        fagsakYtelseType: FagsakYtelseType,
-        periode: PeriodeDto?,
-        søker: String,
-        pleietrengende: String?
-    ): Pair<SaksnummerDto?, String?> {
-        return Pair(SaksnummerDto("ABC123"), null)
     }
 
     override suspend fun sendInnSoeknad(
