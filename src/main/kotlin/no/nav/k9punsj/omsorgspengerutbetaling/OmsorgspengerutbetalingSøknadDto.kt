@@ -59,8 +59,6 @@ data class OmsorgspengerutbetalingSøknadDto(
 
     /*
      * Plukker ut første fraværsperiode og skaper ny Periode for det året.
-     * Dette for å kunne hente ut eksisterende perioder for tidigare år på omsorgspenger saksnummer som får
-     * nytt saksnr hvert år
      */
     fun periodeForHeleAretMedFravaer(): PeriodeDto? {
         return if(fravaersperioder.isNullOrEmpty() || fravaersperioder.first().periode.fom == null) {

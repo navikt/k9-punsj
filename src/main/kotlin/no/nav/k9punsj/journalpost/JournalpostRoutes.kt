@@ -214,12 +214,17 @@ internal class JournalpostRoutes(
                     aktørId = pdlService.aktørIdFor(dto.brukerIdent)
                 )
 
-                val journalpostErFerdigstilt =
-                    journalpostService.hentSafJournalPost(oppdatertJournalpost.journalpostId)?.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name
+                val journalpostInfo =
+                    journalpostService.hentJournalpostInfo(oppdatertJournalpost.journalpostId)
+
+                val erFerdigstiltEllerJournalfoert = (
+                    journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                        journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
                 // Oppdater og ferdigstill journalpost hvis vi har saksnummer
-                if (!journalpostErFerdigstilt && dto.saksnummer != null) {
+                if (!erFerdigstiltEllerJournalfoert && dto.saksnummer != null) {
                     journalpostService.oppdaterOgFerdigstillForMottak(dto)
+                    logger.info("Ferdigstilt journalpost : ${oppdatertJournalpost.journalpostId}")
                 }
 
                 journalpostService.lagre(punsjJournalpost = oppdatertJournalpost)

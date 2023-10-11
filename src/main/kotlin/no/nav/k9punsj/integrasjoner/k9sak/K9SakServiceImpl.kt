@@ -24,6 +24,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldi
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
 import no.nav.k9punsj.omsorgspengermidlertidigalene.tilOmsMAvisning
@@ -310,13 +311,13 @@ class K9SakServiceImpl(
             }
 
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER -> {
-                val omsVisning = this.tilOmsUtvisning()
+                val omsVisning = this.tilOmsvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
                     søker = omsVisning.soekerId!!,
                     pleietrengende = null,
                     annenPart = null,
-                    periode = omsVisning.periodeForHeleAretMedFravaer()
+                    periode = omsVisning.fravaersperioder?.firstOrNull()?.periode
                 )
             }
 
