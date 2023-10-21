@@ -98,7 +98,6 @@ internal class SoknadServiceTest {
             søknadMetrikkService = mockSøknadMetrikkService,
             safGateway = mockSafGateway,
             k9SakService = k9SakService,
-            sakClient = sakClient,
             pdlService = pdlService,
             dokarkivGateway = dokarkivGateway
         )

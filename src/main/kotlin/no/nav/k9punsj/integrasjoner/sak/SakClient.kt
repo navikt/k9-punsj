@@ -16,7 +16,8 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
-@Service
+//@Service
+// Trenger tilgang i AD før vi tar denne i bruk
 class SakClient(
     @Value("\${no.nav.sak.base_url}") private val baseUrl: URI,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,

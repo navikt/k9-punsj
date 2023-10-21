@@ -45,7 +45,6 @@ class SoknadService(
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway,
     private val k9SakService: K9SakService,
-    private val sakClient: SakClient,
     private val pdlService: PdlService,
     private val dokarkivGateway: DokarkivGateway
 ) {

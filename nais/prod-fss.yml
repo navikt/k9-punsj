@@ -94,14 +94,8 @@ spec:
       value: api://prod-fss.pdl.pdl-api/.default
 
     # Sikkerhet:
-    - name: NAIS_STS_TOKEN_ENDPOINT
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/token
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
-    - name: APP_NAISSTS_aud
-      value: "srvk9sak"
-    - name: APP_NAISSTS_discovery_url
-      value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
