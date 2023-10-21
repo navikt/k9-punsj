@@ -52,7 +52,6 @@ import java.util.UUID
         MappeRepository::class,
         BunkeRepository::class,
         SøknadRepository::class,
-        SakClient::class,
         SoknadService::class,
         InnsendingClient::class,
         K9SakService::class,
@@ -75,9 +74,6 @@ internal class AksjonspunktServiceImplTest {
 
     @MockBean
     private lateinit var innsendingClient: InnsendingClient
-
-    @MockBean
-    private lateinit var sakClient: SakClient
 
     @MockBean
     private lateinit var søknadMetrikkService: SøknadMetrikkService
