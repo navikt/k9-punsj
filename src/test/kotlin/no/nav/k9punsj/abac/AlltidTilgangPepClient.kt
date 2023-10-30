@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component
 @TestProfil
 @LokalProfil
 internal class AlltidTilgangPepClient : IPepClient {
-    override suspend fun harInnloggetBrukerTilgangTilOgLeseSakForFnr(fnr: List<String>, urlKallet: String) = true
-    override suspend fun harInnloggetBrukerTilgangTilOgSkriveSakForFnr(fnr: String, urlKallet: String) = true
-    override suspend fun harInnloggetBrukerTilgangTilOgSkriveSakForFnr(fnr: List<String>, urlKallet: String) = true
+    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String) = true
+    override suspend fun harBasisTilgang(fnr: String, urlKallet: String) = true
+    override suspend fun sendeInnTilgang(fnr: String, urlKallet: String) = true
+    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String) = true
     override suspend fun erSaksbehandler() = true
 }

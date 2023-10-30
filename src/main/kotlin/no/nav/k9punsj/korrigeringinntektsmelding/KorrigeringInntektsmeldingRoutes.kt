@@ -9,11 +9,16 @@ import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsakMedPerioder
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
+import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -43,8 +48,8 @@ internal class KorrigeringInntektsmeldingRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -62,8 +67,8 @@ internal class KorrigeringInntektsmeldingRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = opprettNySøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = opprettNySøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -81,8 +86,8 @@ internal class KorrigeringInntektsmeldingRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = sendSøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = sendSøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -94,8 +99,8 @@ internal class KorrigeringInntektsmeldingRoutes(
             RequestContext(coroutineContext, request) {
                 val søknad = request.korrigeringInntektsmelding()
                 søknad.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                        fnr = norskIdent,
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
                         url = Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }
@@ -108,8 +113,8 @@ internal class KorrigeringInntektsmeldingRoutes(
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnrList = listOf(matchfagsakMedPeriode.brukerIdent),
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsakMedPeriode.brukerIdent),
                     url = Urls.HentArbeidsforholdIderFraK9sak
                 )?.let { return@RequestContext it }
 
