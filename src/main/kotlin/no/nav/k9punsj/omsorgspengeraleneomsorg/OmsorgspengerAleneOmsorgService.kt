@@ -16,7 +16,6 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
@@ -36,8 +35,7 @@ internal class OmsorgspengerAleneOmsorgService(
     private val azureGraphService: IAzureGraphService,
     private val journalpostService: JournalpostService,
     private val soknadService: SoknadService,
-    private val aksjonspunktService: AksjonspunktService,
-    private val inloggetUtils: InnloggetUtils
+    private val aksjonspunktService: AksjonspunktService
 ) {
 
     private val logger = LoggerFactory.getLogger(OmsorgspengerAleneOmsorgService::class.java)

@@ -4,7 +4,7 @@ import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
-import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -17,29 +17,32 @@ import kotlin.coroutines.coroutineContext
 internal class ArbeidsgiverRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val arbeidsgiverService: ArbeidsgiverService,
-    private val inloggetUtils: InnloggetUtils,
+    private val pepClient: IPepClient
 ) {
+
+    suspend fun String.harTilgang() =
+        pepClient.harBasisTilgang(this, ArbeidsgiverePath)
 
     @Bean
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgiverePath) { request ->
             RequestContext(coroutineContext, request) {
-                inloggetUtils.harInnloggetBrukerTilgangTilOgLeseSakForFnr(
-                    listOf(request.identitetsnummer()), ArbeidsgiverePath
-                )?.let {
-                    return@RequestContext it
-                }
-
-                ServerResponse
-                    .status(HttpStatus.OK)
-                    .json()
-                    .bodyValueAndAwait(
-                        arbeidsgiverService.hentArbeidsgivere(
-                            identitetsnummer = request.identitetsnummer(),
-                            fom = request.fom(),
-                            tom = request.tom()
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivere(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom()
+                            )
                         )
-                    )
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
             }
         }
     }
@@ -48,22 +51,23 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgivereHistorikkPath) { request ->
             RequestContext(coroutineContext, request) {
-                inloggetUtils.harInnloggetBrukerTilgangTilOgLeseSakForFnr(listOf(request.identitetsnummer()), ArbeidsgiverePath)?.let {
-                    return@RequestContext it
-                }
-
-                ServerResponse
-                    .status(HttpStatus.OK)
-                    .json()
-                    .bodyValueAndAwait(
-                        arbeidsgiverService.hentArbeidsgivereHistorikk(
-                            identitetsnummer = request.identitetsnummer(),
-                            fom = request.fom(),
-                            tom = request.tom(),
-                            historikk = request.historikk()
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivereHistorikk(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom(),
+                                historikk = request.historikk()
+                            )
                         )
-                    )
-
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
             }
         }
     }
@@ -72,21 +76,22 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereMedIdRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgivereMedIdPath) { request ->
             RequestContext(coroutineContext, request) {
-                inloggetUtils.harInnloggetBrukerTilgangTilOgLeseSakForFnr(listOf(request.identitetsnummer()), ArbeidsgiverePath)?.let {
-                    return@RequestContext it
-                }
-
-                ServerResponse
-                    .status(HttpStatus.OK)
-                    .json()
-                    .bodyValueAndAwait(
-                        arbeidsgiverService.hentArbeidsgivereMedId(
-                            identitetsnummer = request.identitetsnummer(),
-                            fom = request.fom(),
-                            tom = request.tom()
+                if (request.identitetsnummer().harTilgang()) {
+                    ServerResponse
+                        .status(HttpStatus.OK)
+                        .json()
+                        .bodyValueAndAwait(
+                            arbeidsgiverService.hentArbeidsgivereMedId(
+                                identitetsnummer = request.identitetsnummer(),
+                                fom = request.fom(),
+                                tom = request.tom()
+                            )
                         )
-                    )
-
+                } else {
+                    ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .buildAndAwait()
+                }
             }
         }
     }

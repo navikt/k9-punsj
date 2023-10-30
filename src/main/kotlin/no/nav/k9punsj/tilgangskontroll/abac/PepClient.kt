@@ -1,6 +1,7 @@
 package no.nav.k9punsj.tilgangskontroll.abac
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.configuration.AuditConfiguration
@@ -26,6 +27,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
+private val gson = GsonBuilder().setPrettyPrinting().create()
+
 private const val XACML_CONTENT_TYPE = "application/xacml+json"
 private const val DOMENE = "k9"
 
@@ -42,7 +45,15 @@ class PepClient(
     private val log: Logger = LoggerFactory.getLogger(PepClient::class.java)
     private val cache = Cache<Boolean>()
 
-    override suspend fun harInnloggetBrukerTilgangTilOgLeseSakForFnr(fnr: List<String>, urlKallet: String): Boolean {
+    override suspend fun harBasisTilgang(fnr: String, urlKallet: String): Boolean {
+        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
+        val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
+        val decision = evaluate(requestBuilder)
+        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+        return decision
+    }
+
+    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
 
         fnr.forEach {
@@ -52,21 +63,21 @@ class PepClient(
     }
 
 
-    override suspend fun harInnloggetBrukerTilgangTilOgSkriveSakForFnr(fnr: String, urlKallet: String): Boolean {
+    override suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val requestBuilder = tilgangSakRequest(identTilInnloggetBruker, fnr)
+        val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
         val decision = evaluate(requestBuilder)
         loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
         return decision
     }
 
-    override suspend fun harInnloggetBrukerTilgangTilOgSkriveSakForFnr(fnr: List<String>, urlKallet: String): Boolean {
+    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
         val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
 
         fnr.forEach {
             loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
         }
-        return fnr.map { tilgangSakRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+        return fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
     }
 
     override suspend fun erSaksbehandler(): Boolean {
@@ -89,7 +100,7 @@ class PepClient(
             .addResourceAttribute(RESOURCE_FNR, fnr)
     }
 
-    private fun tilgangSakRequest(
+    private fun sendeInnTilgangRequest(
         identTilInnloggetBruker: String,
         fnr: String
     ): XacmlRequestBuilder {
@@ -110,7 +121,7 @@ class PepClient(
             .addActionAttribute(ACTION_ID, "create")
             .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
-            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los") // TODO: k9punsj != k9los !
+            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los")
     }
 
     private suspend fun loggTilAudit(
@@ -143,7 +154,7 @@ class PepClient(
     }
 
     private suspend fun evaluate(xacmlRequestBuilder: XacmlRequestBuilder): Boolean {
-        val xacmlJson = objectMapper().writeValueAsString(xacmlRequestBuilder.build())
+        val xacmlJson = gson.toJson(xacmlRequestBuilder.build())
         val get = cache.get(xacmlJson)
 
         if (get == null) {

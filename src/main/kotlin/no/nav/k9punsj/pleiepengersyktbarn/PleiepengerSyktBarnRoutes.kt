@@ -43,7 +43,7 @@ internal class PleiepengerSyktBarnRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(fnr = norskIdent, url = Urls.HenteMappe)
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
 
                 pleiepengerSyktBarnService.henteMappe(norskIdent)
@@ -68,8 +68,8 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = søknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = søknad.norskIdent,
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
@@ -80,8 +80,8 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val søknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = søknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = søknad.norskIdent,
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
@@ -93,8 +93,8 @@ internal class PleiepengerSyktBarnRoutes(
             RequestContext(coroutineContext, request) {
                 val søknad = request.mapPleiepengerSøknad()
                 søknad.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                        fnr = norskIdent,
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
                         url = Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }
@@ -106,8 +106,8 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnrList = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 

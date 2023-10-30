@@ -49,8 +49,8 @@ internal class OmsorgspengerutbetalingRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -68,8 +68,8 @@ internal class OmsorgspengerutbetalingRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = opprettNySøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = opprettNySøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -87,8 +87,8 @@ internal class OmsorgspengerutbetalingRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnr = sendSøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = sendSøknad.norskIdent,
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -100,8 +100,8 @@ internal class OmsorgspengerutbetalingRoutes(
             RequestContext(coroutineContext, request) {
                 val søknad = request.omsorgspengerutbetalingSøknadDto()
                 søknad.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                        fnr = norskIdent,
+                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                        norskIdent = norskIdent,
                         url = Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }
@@ -113,8 +113,8 @@ internal class OmsorgspengerutbetalingRoutes(
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnrList = listOf(matchfagsakMedPeriode.brukerIdent),
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsakMedPeriode.brukerIdent),
                     url = Urls.HentArbeidsforholdIderFraK9sak
                 )?.let { return@RequestContext it }
 
@@ -125,8 +125,8 @@ internal class OmsorgspengerutbetalingRoutes(
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
-                    fnrList = listOf(matchfagsak.brukerIdent),
+                innlogget.harInnloggetBrukerTilgangTil(
+                    norskIdentDto = listOf(matchfagsak.brukerIdent),
                     url = PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
