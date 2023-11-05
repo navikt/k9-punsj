@@ -46,9 +46,9 @@
         <embedded-postgres.version>2.0.4</embedded-postgres.version>
 
         <!-- Test + Mock -->
-        <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
+        <testcontainers.version>1.17.3</testcontainers.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
@@ -66,18 +66,6 @@
         <dusseldorf-ktor.version>4.0.10</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.zonky.test.postgres</groupId>
-                <artifactId>embedded-postgres-binaries-bom</artifactId>
-                <version>${zonky-postgresql.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Workaround for CVEs -->
@@ -236,9 +224,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.zonky.test</groupId>
-            <artifactId>embedded-postgres</artifactId>
-            <version>${embedded-postgres.version}</version>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

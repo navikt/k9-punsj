@@ -1,0 +1,51 @@
+{
+  "cluster": "dev-gcp",
+  "kafkaPool": "nav-dev",
+  "clusterFss": "dev-fss",
+  "ingress": "https://k9-punsj-gcp.intern.dev.nav.no",
+  "externalHosts": [
+    "https://saf-q1.dev.intern.nav.no",
+    "https://sak-q1.dev.intern.nav.no",
+    "https://oppgave-q1.dev-fss-pub.nais.io",
+    "https://pdl-api.dev.intern.nav.no",
+    "https://abac-k9.dev-fss-pub.nais.io",
+    "https://k9-sak.dev-fss-pub.nais.io",
+    "https://aareg-services-q1.dev.intern.nav.no",
+    "https://ereg-services-q1.dev.intern.nav.no",
+    "https://dokarkiv-q1.dev.intern.nav.no"
+  ],
+  "database": {
+    "tier": "db-n1-standard-1",
+    "diskAutoresize": "true",
+    "highAvailability": "false"
+  },
+  "azureGrupper": [
+    "93e8903d-5c3f-4cbe-929e-0afeb22dec73",
+    "5bc5cae2-3ef9-4897-9828-766757299de8",
+    "5c7003ff-b3ba-407c-9b58-7fea9bf7cb2e",
+    "dfcd9962-1b94-4b6f-bdac-09dcca355be7",
+    "f171716a-aaab-4e76-8869-047abaebb8f5",
+    "0bc9661c-975c-4adb-86d1-a97172490662"
+  ],
+  "env": {
+    "SAF_BASE_URL": "https://saf-q1.dev.intern.nav.no",
+    "SAF_HENTE_JOURNALPOST_SCOPES": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
+    "SAF_HENTE_DOKUMENT_SCOPES": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
+    "SAK_BASE_URL": "https://sak-q1.dev.intern.nav.no",
+    "GOSYS_BASE_URL": "https://oppgave-q1.dev-fss-pub.nais.io",
+    "GOSYS_BASE_SCOPE": "api://dev-fss.oppgavehandtering.oppgave-q1/.default",
+    "PDL_BASE_URL": "https://pdl-api.dev.intern.nav.no/graphql",
+    "PDL_SCOPE": "api://dev-fss.pdl.pdl-api/.default",
+    "ABAC_PDP_ENDPOINT_URL": "http://abac-k9.dev-fss-pub.nais.io/application/authorize",
+    "K9SAK_BASE_URL": "https://k9-sak.dev-fss-pub.nais.io/k9/sak/api",
+    "K9SAK_SCOPE": "api://dev-fss.k9saksbehandling.k9-sak/.default",
+    "AAREG_BASE_URL": "https://aareg-services-q1.dev.intern.nav.no/api/v2",
+    "AAREG_SCOPE": "api://dev-fss.arbeidsforhold.aareg-services-nais-q1/.default",
+    "EREG_BASE_URL": "https://ereg-services-q1.dev.intern.nav.no/api/v1",
+    "DOKARKIV_BASE_URL": "https://dokarkiv-q1.dev.intern.nav.no",
+    "DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"
+  },
+  "featureToggle": {
+    "FERDIGSTILL_GOSYSOPPGAVE_ENABLED": "true"
+  }
+}

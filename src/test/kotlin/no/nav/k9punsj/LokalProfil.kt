@@ -1,8 +1,7 @@
 package no.nav.k9punsj
 
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.k9punsj.configuration.DbConfiguration
-import no.nav.k9punsj.configuration.getDataSource
+import no.nav.k9punsj.util.DatabaseUtil
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 import org.flywaydb.core.api.output.MigrateResult
@@ -23,17 +22,17 @@ class LokalBeans {
         return hikariConfigLocal(dbConfiguration)
     }
 
-    private fun hikariConfigLocal(hikariConfig: DbConfiguration): HikariDataSource {
-        runMigrationLocal(hikariConfig)
-        return getDataSource(hikariConfig)
+    private fun hikariConfigLocal(hikariConfig: DbConfiguration): DataSource {
+        val dataSource = DatabaseUtil.dataSource
+        runMigrationLocal(dataSource)
+        return dataSource
     }
 
-    private fun runMigrationLocal(configuration: DbConfiguration): MigrateResult? {
-        val hikariDataSource = HikariDataSource(configuration.hikariConfig())
+    private fun runMigrationLocal(dataSource: DataSource): MigrateResult? {
         val load = Flyway.configure()
             .cleanDisabled(false)
             .locations("migreringer/")
-            .dataSource(hikariDataSource)
+            .dataSource(dataSource)
             .load()
         return try {
             load.migrate()

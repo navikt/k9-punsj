@@ -8,8 +8,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
+import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -26,11 +25,13 @@ internal class SjekkOmUtløptJobbTest {
     @MockBean
     lateinit var hendelseProducer: HendelseProducer
 
+    var databaseUtil = DatabaseUtil
+
     @Test
     fun `Skal finne alle aksjonspunkter som har utløpt og sende oppgaver på disse`(): Unit = runBlocking {
         // Arrange
-        val aksjonspunktRepository = getAksjonspunktRepo()
-        val journalpostRepository = getJournalpostRepo()
+        val aksjonspunktRepository = databaseUtil.getAksjonspunktRepo()
+        val journalpostRepository = databaseUtil.getJournalpostRepo()
 
         val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
             aksjonspunktRepository = aksjonspunktRepository,

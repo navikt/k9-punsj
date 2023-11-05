@@ -1,0 +1,92 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: k9-punsj
+  namespace: k9saksbehandling
+  labels:
+    team: k9saksbehandling
+spec:
+  image: {{ image }}
+  port: 8080
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+        {{#each azureGrupper as |gruppe|}}
+           - id: {{gruppe}}
+        {{/each}}
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        tier: db-f1-micro
+        diskAutoresize: true
+        highAvailability: {{ database.highAvailability }}
+        databases:
+          - name: k9-punsj
+            envVarPrefix: DATABASE
+  accessPolicy:
+    inbound:
+      rules:
+        - application: k9-punsj-oidc-auth-proxy
+          cluster: {{clusterFss}}
+        - application: k9-sak
+          cluster: {{clusterFss}}
+    outbound:
+      external:
+      {{#each externalHosts as |url|}}
+         - host: {{url}}
+      {{/each}}
+  liveness:
+    path: /internal/actuator/info
+    initialDelay: 20
+  readiness:
+    path: /internal/actuator/info
+    initialDelay: 20
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  ingresses:
+    - {{ ingress }}
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /internal/actuator/prometheus
+  kafka:
+    pool: nav-dev
+  env:
+  {{#each env}}
+     - name: {{@key}}
+       value: {{this}}
+  {{/each}}
+
+    - name: SWAGGER_SERVER_BASE_URL
+      value: {{ingress}}
+
+    # Audit logging
+    - name: AUDITLOGGER_ENABLED
+      value: "true"
+    - name: AUDITLOGGER_VENDOR
+      value: "k9"
+    - name: AUDITLOGGER_PRODUCT
+      value: "k9-punsj"
+
+    # Integrasjoner (Kafka)
+    - name: K9_RAPID_TOPIC
+      value: "omsorgspenger.k9-rapid-v2"
+    - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
+      value: "k9saksbehandling.punsj-aksjonspunkthendelse-v1"
+    - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
+      value: "k9saksbehandling.k9-dokumenthendelse-v1"
+
+  {{#each featureToggle}}
+     - name: {{@key}}
+       value: {{this}}
+  {{/each}}

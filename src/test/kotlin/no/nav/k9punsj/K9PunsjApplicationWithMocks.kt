@@ -65,7 +65,7 @@ internal class K9PunsjApplicationWithMocks {
 
             Runtime.getRuntime().addShutdownHook(
                 Thread {
-                    DatabaseUtil.embeddedPostgres.close()
+                    DatabaseUtil.postgresContainer?.stop()
                     wireMockServer.stop()
                 }
             )
