@@ -35,7 +35,6 @@ import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
-import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.slf4j.Logger
@@ -63,7 +62,6 @@ internal class JournalpostRoutes(
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
     private val aksjonspunktService: AksjonspunktService,
-    private val pepClient: IPepClient,
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
@@ -124,7 +122,7 @@ internal class JournalpostRoutes(
                         venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = journalpostId),
                         punsjInnsendingType = punsjInnsendingType,
                         kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId)),
-                        erSaksbehandler = pepClient.erSaksbehandler(),
+                        erSaksbehandler = innlogget.erInloggetBrukerSaksbehandlerIK9(),
                         erInngående = journalpostInfo.erInngående,
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
@@ -204,8 +202,8 @@ internal class JournalpostRoutes(
         POST("/api${Urls.Mottak}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
+                    fnr = norskIdent,
                     url = Urls.Mottak
                 )?.let { return@RequestContext it }
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
@@ -396,10 +394,8 @@ internal class JournalpostRoutes(
                 dto.barn?.let { identListe.add(it) }
                 dto.annenPart?.let { identListe.add(it) }
 
-                if (!pepClient.sendeInnTilgang(identListe, Urls.KopierJournalpost)) {
-                    return@RequestContext ServerResponse
-                        .status(HttpStatus.FORBIDDEN)
-                        .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
+                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(identListe, Urls.KopierJournalpost)?.let {
+                    return@RequestContext it
                 }
 
                 val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
