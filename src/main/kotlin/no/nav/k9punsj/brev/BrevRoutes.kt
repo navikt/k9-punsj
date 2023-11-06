@@ -49,8 +49,8 @@ internal class BrevRoutes(
                         .bodyValueAndAwait(OasFeil(it.message!!))
                 }
 
-                innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(dokumentbestillingDto.soekerId),
+                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
+                    fnrList = listOf(dokumentbestillingDto.soekerId),
                     url = request.path()
                 )?.let { return@RequestContext it }
 
@@ -79,7 +79,7 @@ internal class BrevRoutes(
         GET("/api${Urls.HentAktørId}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                innlogget.harInnloggetBrukerTilgangTilOgSkriveSakForFnr(
                     norskIdent,
                     Urls.HentAktørId
                 )?.let { return@RequestContext it }
