@@ -16,7 +16,6 @@
   ],
   "database": {
     "tier": "db-n1-standard-1",
-    "diskAutoresize": "true",
     "highAvailability": "false"
   },
   "azureGrupper": [
