@@ -57,7 +57,7 @@
 
         <!-- serdes -->
         <gson.version>2.10.1</gson.version>
-        <jackson-kotlin.version>2.15.3</jackson-kotlin.version>
+        <jackson-kotlin.version>2.16.0</jackson-kotlin.version>
         <orgjson.version>20231013</orgjson.version>
 
         <fuel.version>2.3.1</fuel.version>
