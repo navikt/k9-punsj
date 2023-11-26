@@ -10,7 +10,6 @@
     </parent>
 
     <version>${revision}${sha1}${changelist}</version>
-
     <groupId>no.nav.k9</groupId>
     <artifactId>k9-punsj</artifactId>
     <packaging>jar</packaging>
