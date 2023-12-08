@@ -30,6 +30,11 @@ internal object MockConfiguration {
 
         return mapOf(
             "PORT" to "$port",
+            "DATABASE_HOST" to "localhost",
+            "DATABASE_PORT" to DatabaseUtil.postgresContainer?.getFirstMappedPort().toString(),
+            "DATABASE_USERNAME" to "k9_punsj",
+            "DATABASE_PASSWORD" to "k9_punsj",
+            "DATABASE_DATABASE" to "k9_punsj",
             "AZURE_APP_CLIENT_ID" to "k9-punsj",
             "AZURE_APP_JWK" to ClientCredentials.ClientA.privateKeyJwk,
             "AZURE_OPENID_CONFIG_TOKEN_ENDPOINT" to tokenUrl,
@@ -50,10 +55,6 @@ internal object MockConfiguration {
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
             "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
-            "DEFAULTDS_USERNAME" to "postgres",
-            "DEFAULTDS_PASSWORD" to "postgres",
-            "DEFAULTDS_URL" to "jdbc:postgresql://localhost:${DatabaseUtil.embeddedPostgres.port}/postgres",
-            "DEFAULTDS_VAULT_MOUNTPATH" to "",
             "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
             "AUDITLOGGER_ENABLED" to "false",
             "ABAC_PDP_ENDPOINT_URL" to "",
