@@ -95,7 +95,7 @@ class SoknadService(
         * Bruker fagsakId fra journalposten om den finnes, ellers henter vi den fra k9sak
         * Kaster feil om vi har fler æn 1 unik fagsakId
         */
-        val søknadEntitet = søknadRepository.hentSøknad(søknad.søknadId.id)
+        val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
                 throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
@@ -107,7 +107,7 @@ class SoknadService(
         } else {
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
                     k9FormatSøknad = søknad,
-                    søknadEntitet = søknadEntitet!!,
+                    søknadEntitet = søknadEntitet,
                     fagsakYtelseType = fagsakYtelseType
                 )
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
