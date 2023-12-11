@@ -45,7 +45,6 @@ class SoknadService(
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway,
     private val k9SakService: K9SakService,
-    private val sakClient: SakClient,
     private val pdlService: PdlService,
     private val dokarkivGateway: DokarkivGateway
 ) {
@@ -97,6 +96,7 @@ class SoknadService(
         * Bruker fagsakId fra journalposten om den finnes, ellers henter vi den fra k9sak
         * Kaster feil om vi har fler æn 1 unik fagsakId
         */
+        val søknadEntitet = søknadRepository.hentSøknad(søknad.søknadId.id)
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
                 throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
@@ -107,7 +107,8 @@ class SoknadService(
             fagsakIder.first().second
         } else {
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
-                    søknadEntitet = hentSøknad(søknad.søknadId.id)!!,
+                    k9FormatSøknad = søknad,
+                    søknadEntitet = søknadEntitet!!,
                     fagsakYtelseType = fagsakYtelseType
                 )
             require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
@@ -116,9 +117,6 @@ class SoknadService(
         }
 
         require(k9Saksnummer != null) { "K9Saksnummer er null" }
-
-        // Sikkrer att saken kommer opp som valg i modia, ikke vart implementert sedan flytten till synkron
-        //sakClient.forsikreSakskoblingFinnes(k9Saksnummer, søknad.søker.toString(), UUID.randomUUID().toString())
 
         // Ferdigstill journalposter
         val søkerNavn = pdlService.hentPersonopplysninger(setOf(søkerFnr))
@@ -186,7 +184,7 @@ class SoknadService(
             dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
-            saksnummer = k9Saksnummer!!,
+            saksnummer = k9Saksnummer,
             brukerIdent = søkerFnr,
             avsenderNavn = punsjetAvSaksbehandler,
             pdf = pdf,

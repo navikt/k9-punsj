@@ -30,11 +30,8 @@ interface K9SakService {
 
     suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
 
-    /**
-     * Henter saksnummer fra K9Sak, hvis det ikke finnes oppretter vi en ny fagsak.
-     * Periode hentes fra soknaden å defaulter til 1/1 og 31/12 hvis fom eller tom ikke er satt.
-     */
     suspend fun hentEllerOpprettSaksnummer(
+        k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
         fagsakYtelseType: FagsakYtelseType
     ): Pair<String?, String?>
