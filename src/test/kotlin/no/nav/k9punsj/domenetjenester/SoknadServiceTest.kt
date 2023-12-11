@@ -23,7 +23,6 @@ import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
-import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
@@ -32,7 +31,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
@@ -61,9 +59,6 @@ internal class SoknadServiceTest {
 
     @MockK(relaxUnitFun = true)
     private lateinit var mockJournalpostService: JournalpostService
-
-    @MockK(relaxUnitFun = true)
-    private lateinit var sakClient: SakClient
 
     @MockK(relaxUnitFun = true)
     private lateinit var dokarkivGateway: DokarkivGateway
