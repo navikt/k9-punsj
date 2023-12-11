@@ -28,7 +28,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.utils.objectMapper

@@ -76,10 +76,6 @@ spec:
     - name: SAF_HENTE_DOKUMENT_SCOPES
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
-    # SAK
-    - name: SAK_BASE_URL
-      value: https://sak-q1.dev.intern.nav.no
-
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
       value: http://oppgave-q1.oppgavehandtering

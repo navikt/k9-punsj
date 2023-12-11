@@ -14,7 +14,6 @@ import no.nav.k9punsj.wiremock.getGosysBaseUrl
 import no.nav.k9punsj.wiremock.getK9sakBaseUrl
 import no.nav.k9punsj.wiremock.getPdlBaseUrl
 import no.nav.k9punsj.wiremock.getSafBaseUrl
-import no.nav.k9punsj.wiremock.getSakBaseUrl
 import java.net.URI
 
 internal object MockConfiguration {
@@ -65,8 +64,7 @@ internal object MockConfiguration {
             "AAREG_SCOPE" to "aareg-services-nais/.default",
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
-            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
-            "SAK_BASE_URL" to wireMockServer.getSakBaseUrl(),
+            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1"
         )
     }
 }
