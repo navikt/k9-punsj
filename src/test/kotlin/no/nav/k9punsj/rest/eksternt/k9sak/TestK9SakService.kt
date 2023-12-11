@@ -86,6 +86,7 @@ internal class TestK9SakService : K9SakService {
     )
 
     override suspend fun hentEllerOpprettSaksnummer(
+        k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
         fagsakYtelseType: FagsakYtelseType
     ): Pair<String?, String?> {

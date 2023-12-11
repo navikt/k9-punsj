@@ -72,6 +72,7 @@ class LokalK9SakService : K9SakService {
     )
 
     override suspend fun hentEllerOpprettSaksnummer(
+        k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): Pair<String?, String?> {

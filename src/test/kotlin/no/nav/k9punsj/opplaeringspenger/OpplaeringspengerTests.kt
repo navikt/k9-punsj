@@ -39,6 +39,7 @@ import java.time.Duration
 import java.time.LocalDate
 
 @ExtendWith(SpringExtension::class, MockKExtension::class)
+@Disabled("OLP er ikke i bruk eller under utvikling")
 class OpplaeringspengerTests {
 
     private val client = TestSetup.client

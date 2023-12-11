@@ -18,7 +18,6 @@ import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
@@ -52,7 +51,6 @@ import java.util.UUID
         MappeRepository::class,
         BunkeRepository::class,
         SøknadRepository::class,
-        SakClient::class,
         SoknadService::class,
         InnsendingClient::class,
         K9SakService::class,
@@ -75,9 +73,6 @@ internal class AksjonspunktServiceImplTest {
 
     @MockBean
     private lateinit var innsendingClient: InnsendingClient
-
-    @MockBean
-    private lateinit var sakClient: SakClient
 
     @MockBean
     private lateinit var søknadMetrikkService: SøknadMetrikkService
