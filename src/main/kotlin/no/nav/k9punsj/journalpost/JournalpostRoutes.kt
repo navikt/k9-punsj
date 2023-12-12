@@ -82,7 +82,6 @@ internal class JournalpostRoutes(
         internal const val Dokument = "/journalpost/{$JournalpostIdKey}/dokument/{$DokumentIdKey}"
         internal const val HentJournalposter = "/journalpost/hent"
         internal const val SettPåVent = "/journalpost/vent/{$JournalpostIdKey}"
-        @Deprecated("Kan fjernes fra frontend")
         internal const val SettBehandlingsAar = "/journalpost/settBehandlingsAar/{$JournalpostIdKey}"
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
@@ -240,12 +239,31 @@ internal class JournalpostRoutes(
             }
         }
 
-        // Deprecated: Kan fjernes fra frontend.
         POST("/api${Urls.SettBehandlingsAar}") { request ->
             RequestContext(coroutineContext, request) {
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
+                    norskIdent = norskIdent,
+                    url = Urls.SettBehandlingsAar
+                )?.let { return@RequestContext it }
+
+                val journalpostId = request.journalpostId()
+                val behandlingsAar = try {
+                    request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
+                } catch (e: Exception) {
+                    val nåVærendeÅr = LocalDate.now().year
+                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
+                    nåVærendeÅr
+                }
+
+                journalpostService.lagreBehandlingsAar(
+                    journalpostId = journalpostId,
+                    behandlingsAar = behandlingsAar
+                )
+
                 return@RequestContext ServerResponse.ok()
                     .json()
-                    .bodyValueAndAwait(BehandlingsAarDto(behandlingsAar = LocalDate.now().year))
+                    .bodyValueAndAwait(BehandlingsAarDto(behandlingsAar = behandlingsAar))
             }
         }
 

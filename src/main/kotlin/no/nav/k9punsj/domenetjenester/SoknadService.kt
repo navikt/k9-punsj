@@ -98,7 +98,7 @@ class SoknadService(
         val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
-                throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
             }
             fagsakIder.map {
                 logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
@@ -110,7 +110,9 @@ class SoknadService(
                     søknadEntitet = søknadEntitet,
                     fagsakYtelseType = fagsakYtelseType
                 )
-            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
+            require(k9Respons.second.isNullOrBlank()) {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Feil ved henting av saksnummer: ${k9Respons.second}"
+            }
             logger.info("Fick saksnummer ${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
@@ -119,7 +121,7 @@ class SoknadService(
 
         // Ferdigstill journalposter
         val søkerNavn = pdlService.hentPersonopplysninger(setOf(søkerFnr))
-        require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
+        require(søkerNavn.isNotEmpty()) { return HttpStatus.INTERNAL_SERVER_ERROR to "Fant ikke søker i PDL" }
         val bruker = FerdigstillJournalpost.Bruker(
             identitetsnummer = søkerFnr.somIdentitetsnummer(),
             navn = søkerNavn.first().navn(),

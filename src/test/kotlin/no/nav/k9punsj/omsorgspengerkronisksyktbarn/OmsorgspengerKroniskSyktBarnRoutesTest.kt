@@ -1,5 +1,6 @@
 package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
@@ -17,6 +18,7 @@ import no.nav.k9punsj.util.WebClientUtils.getAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssert
 import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
 import no.nav.k9punsj.util.WebClientUtils.putAndAssert
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -272,6 +274,58 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         Assertions.assertNotNull(søknad)
         assertThat(søknad.harInfoSomIkkeKanPunsjes).isEqualTo(true)
         assertThat(søknad.harMedisinskeOpplysninger).isEqualTo(true)
+    }
+
+    @Test
+    fun `Innsending uten periode`(): Unit = runBlocking {
+        val norskIdent = "02022352122"
+        val soeknadJson: SøknadJson = objectMapper().readValue("""
+            {
+              "soeknadId": "988bedeb-3324-4d2c-9277-dcbb5cc26577",
+              "soekerId": "11111111111",
+              "journalposter": [
+                "123456"
+              ],
+              "mottattDato": "2023-12-07",
+              "klokkeslett": "12:00",
+              "barn": {
+                "norskIdent": "22222222222",
+                "foedselsdato": ""
+              },
+              "harInfoSomIkkeKanPunsjes": false,
+              "harMedisinskeOpplysninger": true
+            }
+           """
+        )
+        val journalpostid = abs(Random(234234).nextInt()).toString()
+        tilpasserSøknadsMalTilTesten(soeknadJson, norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknadJson, ident = norskIdent, journalpostid)
+
+        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(soeknadJson),
+            api,
+            søknadTypeUri,
+            "valider"
+        )
+
+        assertThat(body.feil?.isEmpty())
+
+        val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = soeknadJson["soeknadId"] as String)
+
+        val resultat = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(sendSøknad),
+            api,
+            søknadTypeUri,
+            "send"
+        )
+
+        assertThat(resultat.feil?.isEmpty())
     }
 
     @Test
