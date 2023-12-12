@@ -28,7 +28,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.utils.objectMapper
@@ -96,9 +95,10 @@ class SoknadService(
         * Bruker fagsakId fra journalposten om den finnes, ellers henter vi den fra k9sak
         * Kaster feil om vi har fler æn 1 unik fagsakId
         */
+        val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
-                throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
             }
             fagsakIder.map {
                 logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
@@ -106,22 +106,22 @@ class SoknadService(
             fagsakIder.first().second
         } else {
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
-                    søknadEntitet = hentSøknad(søknad.søknadId.id)!!,
+                    k9FormatSøknad = søknad,
+                    søknadEntitet = søknadEntitet,
                     fagsakYtelseType = fagsakYtelseType
                 )
-            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
+            require(k9Respons.second.isNullOrBlank()) {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Feil ved henting av saksnummer: ${k9Respons.second}"
+            }
             logger.info("Fick saksnummer ${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
 
         require(k9Saksnummer != null) { "K9Saksnummer er null" }
 
-        // Sikkrer att saken kommer opp som valg i modia, ikke vart implementert sedan flytten till synkron
-        //sakClient.forsikreSakskoblingFinnes(k9Saksnummer, søknad.søker.toString(), UUID.randomUUID().toString())
-
         // Ferdigstill journalposter
         val søkerNavn = pdlService.hentPersonopplysninger(setOf(søkerFnr))
-        require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
+        require(søkerNavn.isNotEmpty()) { return HttpStatus.INTERNAL_SERVER_ERROR to "Fant ikke søker i PDL" }
         val bruker = FerdigstillJournalpost.Bruker(
             identitetsnummer = søkerFnr.somIdentitetsnummer(),
             navn = søkerNavn.first().navn(),
@@ -185,7 +185,7 @@ class SoknadService(
             dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
-            saksnummer = k9Saksnummer!!,
+            saksnummer = k9Saksnummer,
             brukerIdent = søkerFnr,
             avsenderNavn = punsjetAvSaksbehandler,
             pdf = pdf,

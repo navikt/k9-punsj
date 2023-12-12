@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.k9sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
@@ -11,6 +12,7 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.søknad.Søknad
+import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -24,6 +26,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldi
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
@@ -53,6 +56,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    private val journalpostService: JournalpostService,
     private val personService: PersonService
 ) : K9SakService {
 
@@ -64,7 +68,6 @@ class K9SakServiceImpl(
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
-        internal const val sokFagsaker = "/fagsak/sok"
         internal const val finnFagsak = "/fordel/fagsak/sok"
     }
 
@@ -134,7 +137,7 @@ class K9SakServiceImpl(
             }
             val resultat = objectMapper().readValue<List<Periode>>(json)
             val liste = resultat
-                .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
+                .map { PeriodeDto(it.fom, it.tom) }.toList()
             Pair(liste, null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
@@ -192,9 +195,11 @@ class K9SakServiceImpl(
     }
 
     override suspend fun hentEllerOpprettSaksnummer(
+        k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): Pair<String?, String?> {
+        // Bruker k9saksnummergrunnlag for å mappe
         val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
 
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
@@ -206,17 +211,31 @@ class K9SakServiceImpl(
             if (!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
                 personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
             } else null
-        val periode = Periode(
-            k9SaksnummerGrunnlag.periode?.fom ?: LocalDate.now().withMonth(1).withDayOfMonth(1),
-            k9SaksnummerGrunnlag.periode?.tom ?: LocalDate.now().withMonth(12).withDayOfMonth(31)
+
+        val ytelseTypeKode = FagsakYtelseType.fraKode(fagsakYtelseType.kode).kode
+
+        val periodeFraK9Format = try {
+            k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode
+        } catch (e: Exception) {
+            log.info("Fant ikke søknadsperiode")
+            null
+        }
+        val journalpostId = k9FormatSøknad.journalposter.first().journalpostId
+        val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
+
+        val k9sakPeriode = periodeFraK9Format?.iso8601?.let {
+            no.nav.k9.sak.typer.Periode(it)
+        } ?: no.nav.k9.sak.typer.Periode(
+            LocalDate.of(behandlingsAar, 1, 1),
+            LocalDate.of(behandlingsAar, 12, 31)
         )
 
         val payloadMedAktørId = FinnEllerOpprettSak(
-            FagsakYtelseType.fraKode(k9SaksnummerGrunnlag.søknadstype.kode).kode,
+            ytelseTypeKode,
             søkerAktørId,
             pleietrengendeAktørId,
             annenpartAktørId,
-            periode,
+            k9sakPeriode
         )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
@@ -229,7 +248,6 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering")
         }
-
     }
 
     override suspend fun sendInnSoeknad(
@@ -296,17 +314,15 @@ class K9SakServiceImpl(
     private fun SøknadEntitet.tilK9saksnummerGrunnlag(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
     ): HentK9SaksnummerGrunnlag {
-        // Kontrakt  fra k9-sak FagsakYtelseType
-        // https://github.com/navikt/k9-sak/blob/83b654701d242629a20eabbab642c399c6c27182/kodeverk/src/main/java/no/nav/k9/kodeverk/behandling/FagsakYtelseType.java#L57
         return when (fagsakYtelseType) {
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> {
                 val psbVisning = this.tilPsbvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = psbVisning.soekerId!!,
-                    pleietrengende = psbVisning.barn?.norskIdent,
+                    søker = requireNotNull(psbVisning.soekerId),
+                    pleietrengende = requireNotNull(psbVisning.barn).norskIdent,
                     annenPart = null,
-                    periode = psbVisning.soeknadsperiode?.firstOrNull()
+                    periode = null
                 )
             }
 
@@ -314,10 +330,10 @@ class K9SakServiceImpl(
                 val omsVisning = this.tilOmsvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = omsVisning.soekerId!!,
+                    søker = requireNotNull(omsVisning.soekerId),
                     pleietrengende = null,
                     annenPart = null,
-                    periode = omsVisning.fravaersperioder?.firstOrNull()?.periode
+                    periode = null
                 )
             }
 
@@ -325,10 +341,10 @@ class K9SakServiceImpl(
                 val omsUtvisning = this.tilOmsUtvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = omsUtvisning.soekerId!!,
+                    søker = requireNotNull(omsUtvisning.soekerId),
                     pleietrengende = null,
                     annenPart = null,
-                    periode = omsUtvisning.periodeForHeleAretMedFravaer()
+                    periode = null
                 )
             }
 
@@ -336,10 +352,10 @@ class K9SakServiceImpl(
                 val omsAoVisning = this.tilOmsAOvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = omsAoVisning.soekerId!!,
-                    pleietrengende = omsAoVisning.barn!!.norskIdent,
+                    søker = requireNotNull(omsAoVisning.soekerId),
+                    pleietrengende = requireNotNull(omsAoVisning.barn).norskIdent,
                     annenPart = null,
-                    periode = omsAoVisning.periode
+                    periode = null
                 )
             }
 
@@ -347,10 +363,10 @@ class K9SakServiceImpl(
                 val omsMaVisning = this.tilOmsMAvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = omsMaVisning.soekerId!!,
+                    søker = requireNotNull(omsMaVisning.soekerId),
                     pleietrengende = null,
-                    annenPart = omsMaVisning.annenForelder!!.norskIdent,
-                    periode = omsMaVisning.annenForelder.periode
+                    annenPart = requireNotNull(omsMaVisning.annenForelder).norskIdent,
+                    periode = null
                 )
             }
 
@@ -358,10 +374,10 @@ class K9SakServiceImpl(
                 val omsKsVisning = this.tilOmsKSBvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = omsKsVisning.soekerId!!,
-                    pleietrengende = omsKsVisning.barn!!.norskIdent,
+                    søker = requireNotNull(omsKsVisning.soekerId),
+                    pleietrengende = requireNotNull(omsKsVisning.barn).norskIdent,
                     annenPart = null,
-                    periode = omsKsVisning.mottattDato?.periodeDtoForHeleAret()
+                    periode = null
                 )
             }
 
@@ -369,10 +385,10 @@ class K9SakServiceImpl(
                 val tilPlsvisning = this.tilPlsvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = tilPlsvisning.soekerId!!,
-                    pleietrengende = tilPlsvisning.pleietrengende!!.norskIdent,
+                    søker = requireNotNull(tilPlsvisning.soekerId),
+                    pleietrengende = requireNotNull(tilPlsvisning.pleietrengende).norskIdent,
                     annenPart = null,
-                    periode = tilPlsvisning.soeknadsperiode?.firstOrNull()
+                    periode = null
                 )
             }
 
@@ -380,23 +396,16 @@ class K9SakServiceImpl(
                 val tilOlpvisning = this.tilOlpvisning()
                 HentK9SaksnummerGrunnlag(
                     søknadstype = fagsakYtelseType,
-                    søker = tilOlpvisning.soekerId!!,
-                    pleietrengende = tilOlpvisning.barn!!.norskIdent,
+                    søker = requireNotNull(tilOlpvisning.soekerId),
+                    pleietrengende = requireNotNull(tilOlpvisning.barn).norskIdent,
                     annenPart = null,
-                    periode = tilOlpvisning.soeknadsperiode?.firstOrNull()
+                    periode = null
                 )
             }
 
             no.nav.k9punsj.felles.FagsakYtelseType.UKJENT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
             no.nav.k9punsj.felles.FagsakYtelseType.UDEFINERT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
         }
-    }
-
-    private fun LocalDate.periodeDtoForHeleAret(): PeriodeDto {
-        return PeriodeDto(
-            fom = this.withMonth(1).withDayOfMonth(1),
-            tom = this.withMonth(12).withDayOfMonth(31)
-        )
     }
 
     internal companion object {
@@ -434,13 +443,6 @@ class K9SakServiceImpl(
             val ytelseType: FagsakYtelseType,
             val bruker: String,
             val pleietrengende: String? = null,
-        )
-
-        data class HentSaksnummerForPeriodeDto(
-            val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: List<String>? = null,
-            val periode: PeriodeDto?
         )
 
         data class FinnFagsakDto(
