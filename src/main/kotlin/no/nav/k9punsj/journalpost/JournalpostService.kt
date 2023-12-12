@@ -50,6 +50,23 @@ class JournalpostService(
     internal suspend fun hentSafJournalPost(journalpostId: String): SafDtos.Journalpost? =
         safGateway.hentJournalpostInfo(journalpostId)
 
+    internal suspend fun hentBehandlingsAar(journalpostId: String): Int {
+        val behandlingsAar = journalpostRepository.hent(journalpostId).behandlingsAar
+        logger.info("Hentet behandlingsår ($behandlingsAar) for journalpost: $journalpostId")
+        return behandlingsAar ?: LocalDate.now().year
+    }
+
+    internal suspend fun lagreBehandlingsAar(journalpostId: String, behandlingsAar: Int) {
+        val journalpost = journalpostRepository.hentHvis(journalpostId)
+        if (journalpost != null) {
+            logger.info("Oppdaterer behandlingsår ($behandlingsAar) for journalpost: $journalpostId")
+            val medBehandlingsAar = journalpost.copy(behandlingsAar = behandlingsAar)
+            journalpostRepository.lagre(medBehandlingsAar) {
+                medBehandlingsAar
+            }
+        }
+    }
+
     internal suspend fun hentJournalpostInfo(journalpostId: String): JournalpostInfo? {
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId)
 
@@ -88,7 +105,7 @@ class JournalpostService(
         }
     }
 
-    @Deprecated("Kan sende in betyr att den har blitt sendt in fra før? FIXME")
+    // TODO: Kan sende in betyr att den har blitt sendt in fra før? FIXME
     internal fun kanSendesInn(søknadEntitet: SøknadEntitet): MutableSet<String> {
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)

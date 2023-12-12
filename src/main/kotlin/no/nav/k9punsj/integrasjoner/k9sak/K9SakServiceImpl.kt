@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.k9sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
@@ -25,6 +26,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldi
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
 import no.nav.k9punsj.omsorgspengerkronisksyktbarn.tilOmsKSBvisning
@@ -54,6 +56,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    private val journalpostService: JournalpostService,
     private val personService: PersonService
 ) : K9SakService {
 
@@ -210,14 +213,23 @@ class K9SakServiceImpl(
             } else null
 
         val ytelseTypeKode = FagsakYtelseType.fraKode(fagsakYtelseType.kode).kode
-        val k9sakPeriode = no.nav.k9.sak.typer.Periode(k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode.iso8601)
+
+        val journalpostId = k9FormatSøknad.journalposter.first().journalpostId
+        val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
+        val k9sakPeriode = k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode.iso8601?.let {
+            no.nav.k9.sak.typer.Periode(it)
+        }?: no.nav.k9.sak.typer.Periode(
+                LocalDate.of(behandlingsAar, 1, 1),
+                LocalDate.of(behandlingsAar, 12, 31)
+        )
+
 
         val payloadMedAktørId = FinnEllerOpprettSak(
             ytelseTypeKode,
             søkerAktørId,
             pleietrengendeAktørId,
             annenpartAktørId,
-            k9sakPeriode,
+            k9sakPeriode
         )
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
@@ -230,7 +242,6 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering")
         }
-
     }
 
     override suspend fun sendInnSoeknad(
