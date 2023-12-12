@@ -214,15 +214,21 @@ class K9SakServiceImpl(
 
         val ytelseTypeKode = FagsakYtelseType.fraKode(fagsakYtelseType.kode).kode
 
+        val periodeFraK9Format = try {
+            k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode
+        } catch (e: Exception) {
+            log.info("Fant ikke søknadsperiode")
+            null
+        }
         val journalpostId = k9FormatSøknad.journalposter.first().journalpostId
         val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
-        val k9sakPeriode = k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode.iso8601?.let {
-            no.nav.k9.sak.typer.Periode(it)
-        }?: no.nav.k9.sak.typer.Periode(
-                LocalDate.of(behandlingsAar, 1, 1),
-                LocalDate.of(behandlingsAar, 12, 31)
-        )
 
+        val k9sakPeriode = periodeFraK9Format?.iso8601?.let {
+            no.nav.k9.sak.typer.Periode(it)
+        } ?: no.nav.k9.sak.typer.Periode(
+            LocalDate.of(behandlingsAar, 1, 1),
+            LocalDate.of(behandlingsAar, 12, 31)
+        )
 
         val payloadMedAktørId = FinnEllerOpprettSak(
             ytelseTypeKode,
