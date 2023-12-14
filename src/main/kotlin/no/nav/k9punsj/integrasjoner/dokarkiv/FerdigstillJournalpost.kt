@@ -14,6 +14,7 @@ internal data class FerdigstillJournalpost(
     private val status: JoarkTyper.JournalpostStatus,
     private val type: JoarkTyper.JournalpostType,
     private val avsendernavn: String? = null,
+    private val avsenderId: String? = null,
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
     private val bruker: Bruker? = null,
@@ -70,8 +71,9 @@ internal data class FerdigstillJournalpost(
             }
             json.put("dokumenter", jsonDokumenter)
         }
-        // Mangler navn på avsender
-        if (avsendernavn.isNullOrBlank() && !type.erNotat) {
+
+        // Hvis avsenderId er satt, så skal ikke avsendernavn være satt
+        if (avsenderId.isNullOrBlank() && avsendernavn.isNullOrBlank() && !type.erNotat) {
             json.put("avsenderMottaker", JSONObject().also { it.put("navn", bruker.navn!!) })
             utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
         }
