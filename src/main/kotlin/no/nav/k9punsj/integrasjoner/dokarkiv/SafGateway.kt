@@ -262,7 +262,7 @@ class SafGateway(
             .let { journalpost ->
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
-                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
+                    avsenderIdType = journalpost.getJSONObject("avsenderMottaker").stringOrNull("idType"),
                     status = journalpost.getString("journalstatus").somJournalpostStatus(),
                     type = journalpost.getString("journalposttype").somJournalpostType(),
                     tittel = journalpost.stringOrNull("tittel"),
