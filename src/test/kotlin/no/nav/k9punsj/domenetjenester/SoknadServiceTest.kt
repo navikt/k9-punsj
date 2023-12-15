@@ -165,7 +165,6 @@ internal class SoknadServiceTest {
                 journalpostId = "525115311".somJournalpostId(),
                 status = "F".somJournalpostStatus(),
                 type = "I".somJournalpostType(),
-                avsendernavn = null,
                 tittel = null,
                 dokumenter = emptySet(),
                 bruker = null,

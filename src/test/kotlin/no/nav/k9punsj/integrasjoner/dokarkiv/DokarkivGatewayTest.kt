@@ -19,7 +19,7 @@ class DokarkivGatewayTest {
             journalpostId = "598146191".somJournalpostId(),
             status = "MOTTATT".somJournalpostStatus(),
             type = "I".somJournalpostType(),
-            avsendernavn = "Pessimistisk, Bildekort",
+            avsenderIdType = "FNR",
             tittel = "Søknad om utbetaling av omsorgspenger for arbeidstaker",
             dokumenter = setOf(
                 FerdigstillJournalpost.Dokument(
@@ -47,8 +47,7 @@ class DokarkivGatewayTest {
             journalpostId = "598146191".somJournalpostId(),
             status = "MOTTATT".somJournalpostStatus(),
             type = "I".somJournalpostType(),
-            avsenderId = "15069205221",
-            avsendernavn = "En eller annen avsender",
+            avsenderIdType = "FNR",
             tittel = "Søknad om utbetaling av omsorgspenger for arbeidstaker",
             dokumenter = setOf(
                 FerdigstillJournalpost.Dokument(
