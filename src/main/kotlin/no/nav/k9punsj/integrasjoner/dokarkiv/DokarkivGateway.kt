@@ -250,9 +250,7 @@ class DokarkivGateway(
             .let { journalpost ->
                 val avsenderMottaker = journalpost.getJSONObject("avsenderMottaker")
                 val avsenderIdType = avsenderMottaker.stringOrNull("idType")
-                val avsenderId = if (avsenderIdType == "FNR") avsenderMottaker.stringOrNull("id") else null
-                val avsendernavn = if (avsenderId.isNullOrBlank()) avsenderMottaker.stringOrNull("navn") else null
-
+                val avsendernavn = if (avsenderIdType.isNullOrBlank()) avsenderMottaker.stringOrNull("navn") else null
                 val journalpostStatus = journalpost.getString("journalstatus").somJournalpostStatus()
                 val journalpostType = journalpost.getString("journalposttype").somJournalpostType()
                 val tittel = journalpost.stringOrNull("tittel")
@@ -267,7 +265,6 @@ class DokarkivGateway(
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
                     avsendernavn = avsendernavn,
-                    avsenderId = avsenderId,
                     status = journalpostStatus,
                     type = journalpostType,
                     tittel = tittel,
