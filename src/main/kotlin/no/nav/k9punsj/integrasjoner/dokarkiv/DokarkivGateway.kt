@@ -250,6 +250,7 @@ class DokarkivGateway(
             .let { journalpost ->
                 val avsenderMottaker = journalpost.getJSONObject("avsenderMottaker")
                 val avsenderIdType = avsenderMottaker.stringOrNull("idType")
+                // Henter avsenderNavn kun hvis idType er null eller blank.
                 val avsendernavn = if (avsenderIdType.isNullOrBlank()) avsenderMottaker.stringOrNull("navn") else null
                 val journalpostStatus = journalpost.getString("journalstatus").somJournalpostStatus()
                 val journalpostType = journalpost.getString("journalposttype").somJournalpostType()

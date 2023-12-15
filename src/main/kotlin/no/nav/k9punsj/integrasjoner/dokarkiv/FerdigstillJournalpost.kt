@@ -72,7 +72,6 @@ internal data class FerdigstillJournalpost(
             json.put("dokumenter", jsonDokumenter)
         }
 
-        // Hvis avsenderId er satt, så skal ikke avsendernavn være satt
         if (avsendernavn.isNullOrBlank() && !type.erNotat) {
             json.put("avsenderMottaker", JSONObject().also { it.put("navn", bruker.navn!!) })
             utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
