@@ -23,7 +23,6 @@ import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
@@ -65,7 +64,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
         val norskIdent = "01010050053"
-        val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
+        val pleietrengendeIdent = "02020050163"
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, UUID.randomUUID().toString())
 
         client.postAndAssert<OpprettNySøknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -79,8 +79,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
         val norskIdent = "02020050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostId = UUID.randomUUID().toString()
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostId)
 
         client.postAndAssert<OpprettNySøknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -107,10 +108,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     fun `Hent en søknad`(): Unit = runBlocking {
         val søknad = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(2224).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val resPost = client.postAndAssert<OpprettNySøknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -141,10 +143,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     fun `Oppdaterer en søknad`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val nySøknadRespons = client.postAndAssert<OpprettNySøknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -177,10 +180,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val nySøknadRespons = client.postAndAssert<OpprettNySøknad>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -237,10 +241,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     @Test
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
+        val pleietrengendeIdent = "01010050053"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
-        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, pleietrengendeIdent, journalpostid)
 
         val (status, body) = client.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
@@ -256,10 +261,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     @Test
     fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
         val norskIdent = "02022352121"
+        val pleietrengendeIdent = "01010050053"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, pleietrengendeIdent)
 
         val søknad = client.getAndAssert<OmsorgspengerKroniskSyktBarnSøknadDto>(
             norskIdent = null,
@@ -279,10 +285,12 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     @Test
     fun `Innsending uten periode`(): Unit = runBlocking {
         val norskIdent = "02022352122"
-        val soeknadJson: SøknadJson = objectMapper().readValue("""
+        val soeknadJson: SøknadJson = objectMapper().readValue(
+            """
             {
               "soeknadId": "988bedeb-3324-4d2c-9277-dcbb5cc26577",
               "soekerId": "11111111111",
+              "pleietrengendeIdent": "22222222222",
               "journalposter": [
                 "123456"
               ],
@@ -329,7 +337,6 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     }
 
     @Test
-    @Disabled("Test passer ikke fordi k9-format ikke validerer noe på denne ytelsen.")
     fun `skal få feil hvis barn ikke er fylt ut`(): Unit = runBlocking {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB()
@@ -350,18 +357,18 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
         assertThat(body.feil?.get(0)?.felt).isEqualTo("ytelse.barn")
     }
 
-    private fun opprettSøknad(personnummer: String, journalpostId: String) =
+    private fun opprettSøknad(personnummer: String, pleietrengendeIdent: String, journalpostId: String) =
         OpprettNySøknad(
             norskIdent = personnummer,
             journalpostId = journalpostId,
-            pleietrengendeIdent = null,
+            pleietrengendeIdent = pleietrengendeIdent,
             annenPart = null
         )
 
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null
+        journalpostId: String? = null,
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -376,7 +383,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String
+        søknadId: String,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
@@ -384,9 +391,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId()
+        pleietrengendeIdent: String,
+        journalpostid: String = IdGenerator.nesteId(),
     ): OasSoknadsfeil {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, pleietrengendeIdent, journalpostid)
 
         // oppretter en søknad
         val response = client.postAndAssert(
@@ -441,9 +449,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest {
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId()
+        pleietrengendeIdent: String,
+        journalpostid: String = IdGenerator.nesteId(),
     ): OmsorgspengerKroniskSyktBarnSøknadDto {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, pleietrengendeIdent, journalpostid)
 
         // oppretter en søknad
         val resPost = client.postAndAssert(

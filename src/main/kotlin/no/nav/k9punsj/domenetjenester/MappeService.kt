@@ -163,6 +163,7 @@ internal class MappeService(
     suspend fun førsteInnsendingOmsKSB(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
+        val pleietrengendeIdent = requireNotNull(nySøknad.pleietrengendeIdent) { "Mangler pleietrengendeIdent" }
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
 
@@ -173,6 +174,7 @@ internal class MappeService(
             mottattDato = søknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = søknadfelles.klokkeslett,
             soekerId = norskIdent,
+            barn = OmsorgspengerKroniskSyktBarnSøknadDto.BarnDto(pleietrengendeIdent, null),
             harInfoSomIkkeKanPunsjes = false,
             harMedisinskeOpplysninger = false
         )
