@@ -94,17 +94,21 @@ class SafGateway(
             UUID.randomUUID().toString()
         }
 
-        val response = client
-            .post()
-            .uri { it.pathSegment("graphql").build() }
-            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, correlationId)
-            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
-            .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(SafDtos.JournalpostQuery(journalpostId))
-            .retrieve()
-            .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
-            .awaitFirst()
+        val response = try {
+            client
+                .post()
+                .uri { it.pathSegment("graphql").build() }
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, correlationId)
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(SafDtos.JournalpostQuery(journalpostId))
+                .retrieve()
+                .toEntity(SafDtos.JournalpostResponseWrapper::class.java)
+                .awaitFirst()
+        } catch (e: Exception) {
+            throw IllegalStateException("Feil ved oppslag mot SAF graphql. ${e.message}", e)
+        }
 
         val safResponse = response.body
         val errors = safResponse?.errors
@@ -244,11 +248,6 @@ class SafGateway(
     }
 
     internal fun String.safData() = JSONObject(this).getJSONObject("data")
-    internal fun String.saker() = JSONObject(this).getJSONObject("data").getJSONArray("saker")
-
-    internal fun hentFerdigstillJournalpostQuery(journalpostId: String) = """
-            {"query":"query {journalpost(journalpostId:\"${journalpostId}\"){journalstatus,journalposttype,tittel,avsenderMottaker{navn},dokumenter{dokumentInfoId,tittel}}}"}
-        """.trimIndent()
 
     private fun JSONObject.notNullNotBlankString(key: String) =
         has(key) && get(key) is String && getString(key).isNotBlank()
@@ -263,7 +262,7 @@ class SafGateway(
             .let { journalpost ->
                 FerdigstillJournalpost(
                     journalpostId = journalpostId,
-                    avsendernavn = journalpost.getJSONObject("avsenderMottaker").stringOrNull("navn"),
+                    avsenderIdType = journalpost.getJSONObject("avsenderMottaker").stringOrNull("idType"),
                     status = journalpost.getString("journalstatus").somJournalpostStatus(),
                     type = journalpost.getString("journalposttype").somJournalpostType(),
                     tittel = journalpost.stringOrNull("tittel"),

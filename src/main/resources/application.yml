@@ -1,10 +1,4 @@
 management:
-  metrics:
-    web:
-      server:
-        request:
-          autotime:
-            enabled: true
   health:
     diskspace:
       enabled: false
@@ -59,8 +53,6 @@ no.nav:
   gosys:
     base_url: ${GOSYS_BASE_URL}
     scope: ${GOSYS_BASE_SCOPE}
-  sak:
-    base_url: ${SAK_BASE_URL}
   security:
     sts:
       client:

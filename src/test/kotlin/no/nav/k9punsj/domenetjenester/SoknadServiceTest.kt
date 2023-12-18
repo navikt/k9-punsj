@@ -14,14 +14,15 @@ import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9.søknad.ytelse.Ytelse.PLEIEPENGER_SYKT_BARN
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
-import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
@@ -30,7 +31,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.integrasjoner.pdl.Personopplysninger
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
@@ -59,9 +59,6 @@ internal class SoknadServiceTest {
 
     @MockK(relaxUnitFun = true)
     private lateinit var mockJournalpostService: JournalpostService
-
-    @MockK(relaxUnitFun = true)
-    private lateinit var sakClient: SakClient
 
     @MockK(relaxUnitFun = true)
     private lateinit var dokarkivGateway: DokarkivGateway
@@ -96,7 +93,6 @@ internal class SoknadServiceTest {
             søknadMetrikkService = mockSøknadMetrikkService,
             safGateway = mockSafGateway,
             k9SakService = k9SakService,
-            sakClient = sakClient,
             pdlService = pdlService,
             dokarkivGateway = dokarkivGateway
         )
@@ -169,14 +165,13 @@ internal class SoknadServiceTest {
                 journalpostId = "525115311".somJournalpostId(),
                 status = "F".somJournalpostStatus(),
                 type = "I".somJournalpostType(),
-                avsendernavn = null,
                 tittel = null,
                 dokumenter = emptySet(),
                 bruker = null,
                 sak = FerdigstillJournalpost.Sak(null, null, null)
             )
         )
-        coEvery { k9SakService.hentEllerOpprettSaksnummer(any()) }.returns(Pair("ABC123", null))
+        //coEvery { k9SakService.hentEllerOpprettSaksnummer(any()) }.returns(Pair("ABC123", null))
         coEvery { pdlService.hentPersonopplysninger(any()) }.returns(
             setOf(
                 Personopplysninger(

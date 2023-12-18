@@ -1,21 +1,19 @@
 package no.nav.k9punsj.innsending
 
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.configuration.KafkaConfig.Companion.AIVEN
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
 @StandardProfil
 class KopierJournalpostInnsendingClient(
-    @Qualifier(AIVEN) kafkaBaseProperties: Map<String, Any>,
+    kafkaBaseProperties: Map<String, Any>,
     @Value("\${no.nav.kafka.k9_rapid.topic}") private val k9rapidTopic: String
 ): InnsendingClient {
     private val clientId = kafkaBaseProperties.getValue(CommonClientConfigs.CLIENT_ID_CONFIG)

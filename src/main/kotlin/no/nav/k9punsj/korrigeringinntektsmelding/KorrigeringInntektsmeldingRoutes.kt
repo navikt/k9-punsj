@@ -109,6 +109,7 @@ internal class KorrigeringInntektsmeldingRoutes(
             }
         }
 
+        // TODO: Denne skal ikke vara i en søknadstype, flytte till k9-sak route el. liknande
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()

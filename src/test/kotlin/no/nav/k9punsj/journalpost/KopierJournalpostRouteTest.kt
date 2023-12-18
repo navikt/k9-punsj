@@ -29,7 +29,6 @@ import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -167,7 +166,7 @@ internal class KopierJournalpostRouteTest {
         hendelseMottaker.prosesser(melding)
 
         val journalpost = journalpostRepository.hent(journalpostId)
-        assertNotNull(journalpost)
+        Assertions.assertNotNull(journalpost)
 
         val body = client.postAndAssertAwaitWithStatusAndBody<String, String>(
             authorizationHeader = saksbehandlerAuthorizationHeader,
@@ -200,7 +199,7 @@ internal class KopierJournalpostRouteTest {
         hendelseMottaker.prosesser(melding)
 
         val journalpost = journalpostRepository.hent(journalpostId)
-        assertNotNull(journalpost)
+        Assertions.assertNotNull(journalpost)
 
         val gyldigÅr = LocalDate.now().year + 1
         val payload = BehandlingsAarDto(behandlingsAar = gyldigÅr)

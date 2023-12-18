@@ -7,6 +7,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Søknadstype
@@ -25,10 +26,8 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
 import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.integrasjoner.sak.SakClient
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.utils.objectMapper
@@ -39,13 +38,12 @@ import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 @Service
-internal class SoknadService(
+class SoknadService(
     private val journalpostService: JournalpostService,
     private val søknadRepository: SøknadRepository,
     private val søknadMetrikkService: SøknadMetrikkService,
     private val safGateway: SafGateway,
     private val k9SakService: K9SakService,
-    private val sakClient: SakClient,
     private val pdlService: PdlService,
     private val dokarkivGateway: DokarkivGateway
 ) {
@@ -59,11 +57,11 @@ internal class SoknadService(
 
         val journalpostIdListe = journalpostIder.toList()
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
-        val punsjetAvSaksbehandler = søknadRepository.hentSøknad(søknad.søknadId.id)?.endret_av!!.replace("\"", "")
+        val punsjetAvSaksbehandler = hentSistEndretAvSaksbehandler(søknad.søknadId.id)
 
         val søkerFnr = søknad.søker.personIdent.verdi
         val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
-        val fagsakYtelseType = no.nav.k9punsj.felles.FagsakYtelseType.fromKode(k9YtelseType)
+        val fagsakYtelseType = FagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -97,37 +95,33 @@ internal class SoknadService(
         * Bruker fagsakId fra journalposten om den finnes, ellers henter vi den fra k9sak
         * Kaster feil om vi har fler æn 1 unik fagsakId
         */
+        val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
             if(fagsakIder.size > 1) {
-                throw IllegalStateException("Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}")
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
             }
             fagsakIder.map {
                 logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
             }
             fagsakIder.first().second
         } else {
-            // Hent k9saksnummer
-            val k9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-                søknadstype = fagsakYtelseType,
-                søker = søkerFnr,
-                pleietrengende = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
-                annenPart = søknad.berørtePersoner?.firstOrNull()?.personIdent?.verdi,
-                journalpostId = journalpostIder.first() // TODO: Brukes for å utlede dato, hentes fra behandlingsAar.
-            )
-            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag)
-            require(k9Respons.second.isNullOrBlank()) { "Feil ved henting av saksnummer: ${k9Respons.second}" }
-            logger.info("Fick saksnummer (${k9Respons.second} av K9Sak for Journalpost ${journalpostIder.first()}")
+            val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
+                    k9FormatSøknad = søknad,
+                    søknadEntitet = søknadEntitet,
+                    fagsakYtelseType = fagsakYtelseType
+                )
+            require(k9Respons.second.isNullOrBlank()) {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Feil ved henting av saksnummer: ${k9Respons.second}"
+            }
+            logger.info("Fick saksnummer ${k9Respons.first} av K9Sak for Journalpost ${journalpostIder.first()}")
             k9Respons.first
         }
 
         require(k9Saksnummer != null) { "K9Saksnummer er null" }
 
-        // Sikkrer att saken kommer opp som valg i modia, ikke vart implementert sedan flytten till synkron
-        //sakClient.forsikreSakskoblingFinnes(k9Saksnummer, søknad.søker.toString(), UUID.randomUUID().toString())
-
         // Ferdigstill journalposter
         val søkerNavn = pdlService.hentPersonopplysninger(setOf(søkerFnr))
-        require(søkerNavn.isNotEmpty()) { throw IllegalStateException("Fant ikke søker i PDL") }
+        require(søkerNavn.isNotEmpty()) { return HttpStatus.INTERNAL_SERVER_ERROR to "Fant ikke søker i PDL" }
         val bruker = FerdigstillJournalpost.Bruker(
             identitetsnummer = søkerFnr.somIdentitetsnummer(),
             navn = søkerNavn.first().navn(),
@@ -191,7 +185,7 @@ internal class SoknadService(
             dokumentkategori = DokumentKategori.IS,
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
-            saksnummer = k9Saksnummer!!,
+            saksnummer = k9Saksnummer,
             brukerIdent = søkerFnr,
             avsenderNavn = punsjetAvSaksbehandler,
             pdf = pdf,

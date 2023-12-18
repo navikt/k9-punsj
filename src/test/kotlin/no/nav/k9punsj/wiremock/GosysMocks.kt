@@ -16,10 +16,7 @@ private fun WireMockServer.stubOpprettOppgave(): WireMockServer {
             .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsj"))
             .withRequestBody(WireMock.matchingJsonPath("$.aktoerId"))
             .withRequestBody(WireMock.matchingJsonPath("$.journalpostId"))
-            .withRequestBody(WireMock.matchingJsonPath("$.fristFerdigstillelse"))
-            .withRequestBody(WireMock.matchingJsonPath("$.prioritet", WireMock.equalTo("NORM")))
             .withRequestBody(WireMock.matchingJsonPath("$.tema", WireMock.equalTo("OMS")))
-            .withRequestBody(WireMock.matchingJsonPath("$.oppgavetype", WireMock.equalTo("JFR")))
             .withRequestBody(WireMock.matchingJsonPath("$.gjelder", WireMock.absent()))
             .willReturn(
                 WireMock.aResponse()

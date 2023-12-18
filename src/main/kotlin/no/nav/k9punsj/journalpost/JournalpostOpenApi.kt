@@ -167,7 +167,7 @@ internal class JournalpostOpenApi {
     ) {
     }
 
-    @GetMapping(JournalpostRoutes.Urls.ResettInfoOmJournalpost, produces = ["application/json"])
+    @GetMapping(JournalpostDriftRoutes.Urls.ResettInfoOmJournalpost, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
@@ -186,14 +186,15 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Resette journalpost",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
     )
     fun ResettInfoOmJournalpost(
         @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
-    @GetMapping(JournalpostRoutes.Urls.HentHvaSomHarBlittSendtInn, produces = ["application/json"])
+    @GetMapping(JournalpostDriftRoutes.Urls.HentHvaSomHarBlittSendtInn, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
@@ -219,14 +220,15 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
     )
     fun HentHvaSomHarBlittSendtInn(
         @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
-    @GetMapping(JournalpostRoutes.Urls.LukkJournalpostDebugg, produces = ["application/json"])
+    @GetMapping(JournalpostDriftRoutes.Urls.LukkJournalpostDebugg, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
@@ -245,14 +247,15 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Lukker en journalpost i k9-punsj og k9-los",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
     )
     fun LukkJournalpostDebugg(
         @PathVariable("journalpost_id") journalpostId: String
     ) {
     }
 
-    @PostMapping(JournalpostRoutes.Urls.LukkJournalposterDebugg, produces = ["application/json"])
+    @PostMapping(JournalpostDriftRoutes.Urls.LukkJournalposterDebugg, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
@@ -271,7 +274,8 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Lukker alle journalposter i k9-punsj og k9-los. Sjekker først om de er lukket i SAF",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
     )
     fun LukkJournalposterDebugg(
         @RequestBody body: JournalpostRoutes.JournalpostIderRequest

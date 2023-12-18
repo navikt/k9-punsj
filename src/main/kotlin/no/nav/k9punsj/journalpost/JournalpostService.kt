@@ -105,6 +105,7 @@ class JournalpostService(
         }
     }
 
+    // TODO: Kan sende in betyr att den har blitt sendt in fra før? FIXME
     internal fun kanSendesInn(søknadEntitet: SøknadEntitet): MutableSet<String> {
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -200,6 +201,7 @@ class JournalpostService(
         return journalpostRepository.hentHvis(journalpostId)
     }
 
+    @Deprecated("Kan sende in betyr att den har blitt sendt in fra før? FIXME")
     internal suspend fun kanSendeInn(journalpostId: List<String>): Boolean {
         return journalpostRepository.kanSendeInn(journalpostId)
     }

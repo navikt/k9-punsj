@@ -17,7 +17,6 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
-import no.nav.k9punsj.integrasjoner.k9sak.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.openapi.OasFeil
@@ -40,8 +39,8 @@ internal class OpplaeringspengerService(
     private val azureGraphService: IAzureGraphService,
     private val objectMapper: ObjectMapper,
     private val soknadService: SoknadService,
-    private val k9SakService: K9SakService,
-    private val aksjonspunktService: AksjonspunktService
+    private val aksjonspunktService: AksjonspunktService,
+    private val k9SakService: K9SakService
 ) {
 
     private companion object {
@@ -66,7 +65,7 @@ internal class OpplaeringspengerService(
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
-        val søknad = mappeService.hentSøknad(søknadId)
+        val søknad = soknadService.hentSøknad(søknadId)
             ?: return ServerResponse
                 .notFound()
                 .buildAndAwait()
@@ -102,7 +101,7 @@ internal class OpplaeringspengerService(
     }
 
     internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(sendSøknad.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(sendSøknad.soeknadId)
             ?: return ServerResponse.badRequest().buildAndAwait()
 
         try {
@@ -183,26 +182,6 @@ internal class OpplaeringspengerService(
     }
 
     internal suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
-        // oppretter sak i k9-sak hvis det ikke finnes fra før
-        val hentK9SaksnummerGrunnlag = HentK9SaksnummerGrunnlag(
-            søknadstype = FagsakYtelseType.OPPLÆRINGSPENGER,
-            annenPart = nySøknad.annenPart,
-            søker = nySøknad.norskIdent,
-            pleietrengende = nySøknad.pleietrengendeIdent,
-            journalpostId = nySøknad.journalpostId
-        )
-
-        val (_, feil) = k9SakService.hentEllerOpprettSaksnummer(
-            k9SaksnummerGrunnlag = hentK9SaksnummerGrunnlag
-        )
-
-        if (feil != null) {
-            return ServerResponse
-                .badRequest()
-                .json()
-                .bodyValueAndAwait(feil)
-        }
-
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
             FagsakYtelseType.OPPLÆRINGSPENGER,
@@ -221,7 +200,7 @@ internal class OpplaeringspengerService(
     internal suspend fun validerSøknad(
         soknadTilValidering: OpplaeringspengerSøknadDto
     ): ServerResponse {
-        val søknadEntitet = mappeService.hentSøknad(soknadTilValidering.soeknadId)
+        val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
                 .buildAndAwait()
@@ -272,6 +251,7 @@ internal class OpplaeringspengerService(
             .bodyValueAndAwait(søknad)
     }
 
+    @Deprecated("Flyttes til felles k9-sak tjeneste")
     internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): ServerResponse {
         val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
             matchfagsak.brukerIdent,

@@ -24,8 +24,10 @@ jobs:
         run: mvn clean package --settings ./.m2/settings.xml
         env:
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
+
       - name: Bygg Docker image
         run: docker build --pull .
+
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
         with:

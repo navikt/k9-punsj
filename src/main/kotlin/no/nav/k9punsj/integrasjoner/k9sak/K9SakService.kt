@@ -5,7 +5,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.felles.dto.SøknadEntitet
 
 interface K9SakService {
 
@@ -30,18 +30,11 @@ interface K9SakService {
 
     suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?>
 
-    /**
-     * Henter saksnummer fra K9Sak, hvis det ikke finnes oppretter vi en ny fagsak.
-     * Bruker behandlingsAar fra PunsjJournalpost for å sikkre riktig periode for saksnummeret.
-     */
-    suspend fun hentEllerOpprettSaksnummer(k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag): Pair<String?, String?>
-
-    suspend fun hentSisteSaksnummerForPeriode(
-        fagsakYtelseType: FagsakYtelseType,
-        periode: PeriodeDto?,
-        søker: String,
-        pleietrengende: String?
-    ): Pair<SaksnummerDto?, String?>
+    suspend fun hentEllerOpprettSaksnummer(
+        k9FormatSøknad: Søknad,
+        søknadEntitet: SøknadEntitet,
+        fagsakYtelseType: FagsakYtelseType
+    ): Pair<String?, String?>
 
     suspend fun sendInnSoeknad(
         soknad: Søknad,

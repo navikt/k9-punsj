@@ -62,9 +62,13 @@ internal fun K9SakRoutes(
 ) = Routes(
     authenticationHandler,
     routes,
-    setOf("naissts")
+    setOf("naissts", "azurev2")
 ) { jwtToken ->
-    jwtToken.containsClaim("sub", "srvk9sak")
+    if(jwtToken.jwtTokenClaims.issuer.contains("security-token-service")) {
+        jwtToken.containsClaim("sub", "srvk9sak")
+    } else {
+        true
+    }
 }
 
 internal fun SaksbehandlerRoutes(
