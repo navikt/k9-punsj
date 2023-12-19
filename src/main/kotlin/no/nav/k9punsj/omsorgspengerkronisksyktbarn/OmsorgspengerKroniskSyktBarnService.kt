@@ -229,6 +229,11 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
         }
+        val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+        mappeService.utfyllendeInnsendingOmsKSB(
+            omsorgspengerKroniskSyktBarnSøknadDto = soknadTilValidering,
+            saksbehandler = saksbehandler
+        )
         return ServerResponse
             .status(HttpStatus.ACCEPTED)
             .json()
