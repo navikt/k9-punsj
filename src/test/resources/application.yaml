@@ -8,3 +8,6 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 3
     driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8080
