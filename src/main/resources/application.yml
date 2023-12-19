@@ -1,3 +1,7 @@
+spring:
+  flyway:
+    enabled: true
+
 management:
   health:
     diskspace:

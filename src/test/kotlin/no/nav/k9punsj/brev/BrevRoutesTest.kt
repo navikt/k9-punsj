@@ -13,7 +13,6 @@ import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -26,7 +25,7 @@ import java.util.*
 @ActiveProfiles("test")
 internal class BrevRoutesTest: AbstractContainerBaseTest() {
 
-    private val client = WebClient.create("http://localhost:$port/")
+    private val client = WebClient.create("http://localhost:$applicationPort/")
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test

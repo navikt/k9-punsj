@@ -2,12 +2,11 @@ package no.nav.k9punsj
 
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.mockk.impl.annotations.MockK
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.K9PunsjApplicationWithMocks.Companion.startup
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
@@ -15,37 +14,23 @@ import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.kafka.HendelseProducer
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.wiremock.initWireMock
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.postgresql.ds.PGSimpleDataSource
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Bean
-import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.config.KafkaListenerContainerFactory
-import org.springframework.kafka.core.ConsumerFactory
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
-import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.net.URI
-import java.time.Duration
 import javax.sql.DataSource
 import kotlin.concurrent.thread
 
@@ -60,7 +45,8 @@ abstract class AbstractContainerBaseTest {
 
     private lateinit var postgreSQLContainer12: PostgreSQLContainer12
 
-    var port: Int = 0
+    @Value("\${server.port}")
+    var applicationPort: String = "8080"
 
     @Autowired
     lateinit var personRepository: PersonRepository
@@ -83,6 +69,10 @@ abstract class AbstractContainerBaseTest {
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, String>
 
+    @MockBean
+    lateinit var pepClient: IPepClient
+
+
     @Bean
     fun dataSource(): DataSource {
         HikariConfig().apply {
@@ -103,19 +93,18 @@ abstract class AbstractContainerBaseTest {
     fun setupRestServiceServers() {
     }
 
+    @Test
+    fun contextLoads() {
+    }
+
     companion object {
+        private val logger = LoggerFactory.getLogger(AbstractContainerBaseTest::class.java)
+        val wireMockServer: WireMockServer
 
         init {
-            val wireMockServer = initWireMock(
+            wireMockServer = initWireMock(
                 port = 8084,
                 rootDirectory = "src/test/resources"
-            )
-
-            startup(
-                wireMockServer = wireMockServer,
-                port = 8085,
-                azureV2Url = lokaltKjørendeAzureV2OrNull(),
-                profiles = "test"
             )
 
 
@@ -130,9 +119,7 @@ abstract class AbstractContainerBaseTest {
                     System.setProperty("spring.datasource.username", username)
                     System.setProperty("spring.datasource.password", password)
                 }
-            }.also {
-                threads.add(it)
-            }
+            }.also { threads.add(it) }
 
             thread {
                 KafkaContainer741().apply {
@@ -142,6 +129,17 @@ abstract class AbstractContainerBaseTest {
             }.also { threads.add(it) }
 
             threads.forEach { it.join() }
+
+            MockConfiguration.config(
+                wireMockServer = wireMockServer,
+                port = 8085,
+                azureV2Url = lokaltKjørendeAzureV2OrNull()
+            ).forEach { t, u ->
+                System.setProperty(t, u)
+            }
+
+            // define test configuration
+
         }
 
         fun lokaltKjørendeAzureV2OrNull(): URI? {
@@ -163,12 +161,12 @@ abstract class AbstractContainerBaseTest {
 
     @AfterAll
     fun opprydning() {
+        wireMockServer.stop()
     }
 
     @BeforeAll
     fun setup() {
         //vedtakKafkaConsumer.subscribeHvisIkkeSubscribed(VEDTAK_TOPIC)
-        port = postgreSQLContainer12.exposedPorts.first()
     }
 
 }
