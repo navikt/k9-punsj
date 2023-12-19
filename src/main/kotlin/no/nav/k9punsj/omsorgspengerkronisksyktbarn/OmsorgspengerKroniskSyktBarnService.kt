@@ -183,6 +183,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
         } catch (e: Exception) {
+            logger.error(e.localizedMessage, e)
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .json()
