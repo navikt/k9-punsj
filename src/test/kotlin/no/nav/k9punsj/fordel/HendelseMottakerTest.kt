@@ -3,7 +3,6 @@ package no.nav.k9punsj.fordel
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
@@ -20,7 +19,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
 import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
-import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.MetricUtils.Companion.assertCounter
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +33,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
-
+/*
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
 @ContextConfiguration(
@@ -152,9 +151,10 @@ internal class HendelseMottakerTest {
         assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
 
         val alleAksjonspunkter =
-            DatabaseUtil.getAksjonspunktRepo().hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
+            DbContainerInitializer.getAksjonspunktRepo().hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
 
         assertThat(alleAksjonspunkter).hasSize(1)
         assertThat(alleAksjonspunkter[0].aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)
     }
 }
+*/

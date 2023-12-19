@@ -3,7 +3,6 @@ package no.nav.k9punsj.akjonspunkter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
@@ -56,8 +55,7 @@ import java.util.UUID
         K9SakService::class,
         PersonService::class,
         PersonRepository::class,
-        TestPdlService::class,
-        TestBeans::class
+        TestPdlService::class
     ]
 )
 internal class AksjonspunktServiceImplTest {

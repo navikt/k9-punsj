@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.micrometer.core.instrument.MockClock
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
@@ -39,7 +38,6 @@ import java.util.UUID
 @ActiveProfiles("test")
 @ContextConfiguration(
     classes = [
-        TestBeans::class,
         HendelseMottaker::class,
         AksjonspunktServiceImpl::class,
         JournalpostRepository::class,

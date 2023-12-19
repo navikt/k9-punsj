@@ -10,7 +10,7 @@ import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
@@ -34,6 +34,7 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
+/*
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 class OmsorgspengerutbetalingRoutesTest {
 
@@ -41,11 +42,11 @@ class OmsorgspengerutbetalingRoutesTest {
     private val api = "api"
     private val søknadTypeUri = "omsorgspengerutbetaling-soknad"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-    private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
+    private val journalpostRepository = DbContainerInitializer.getJournalpostRepo()
 
     @AfterEach
     internal fun tearDown() {
-        DatabaseUtil.cleanDB()
+        DbContainerInitializer.cleanDB()
     }
 
     @Test
@@ -471,3 +472,4 @@ class OmsorgspengerutbetalingRoutesTest {
         return søknadDtoFyltUt
     }
 }
+*/

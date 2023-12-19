@@ -1,7 +1,5 @@
 package no.nav.k9punsj.rest.eksternt.pdl
 
-import no.nav.k9punsj.TestProfil
-import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.integrasjoner.pdl.IdentPdl
 import no.nav.k9punsj.integrasjoner.pdl.PdlResponse
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
@@ -10,7 +8,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
-@TestProfil
 internal class TestPdlService : PdlService {
     private val dummyFnr = "11111111111"
     private val dummyAktørId = "1000000000000"

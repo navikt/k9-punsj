@@ -1,33 +1,32 @@
 package no.nav.k9punsj.brev
 
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
-import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.reactive.function.client.awaitExchange
 import java.util.*
 
-@ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class BrevRoutesTest {
+@ActiveProfiles("test")
+internal class BrevRoutesTest: AbstractContainerBaseTest() {
 
-    private val client = TestSetup.client
+    private val client = WebClient.create("http://localhost:$port/")
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
@@ -65,7 +64,7 @@ internal class BrevRoutesTest {
             type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode
         )
 
-        DatabaseUtil.getJournalpostRepo().lagre(jp) {
+        journalpostRepository.lagre(jp) {
             jp
         }
         return journalpostId
