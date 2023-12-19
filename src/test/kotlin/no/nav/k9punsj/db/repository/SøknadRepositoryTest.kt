@@ -1,19 +1,25 @@
 package no.nav.k9punsj.db.repository
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
+import no.nav.k9punsj.domenetjenester.repository.MappeRepository
+import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.util.*
 
-@ExtendWith(SpringExtension::class)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
 internal class SøknadRepositoryTest {
 
     private val standardIdent = "01122334410"
@@ -25,18 +31,17 @@ internal class SøknadRepositoryTest {
     private val journalpostid1 = "29486889"
     private val journalpostid2 = "29486887"
 
-    val søknadRepository = DatabaseUtil.getSøknadRepo()
-    val personRepository = DatabaseUtil.getPersonRepo()
-    val bunkeRepository = DatabaseUtil.getBunkeRepo()
-    val mappeRepo = DatabaseUtil.getMappeRepo()
+    @Autowired
+    lateinit var personRepository: PersonRepository
 
-    @AfterEach
-    internal fun tearDown() {
-        DatabaseUtil.cleanSøknadRepo()
-        DatabaseUtil.cleanBunkeRepo()
-        DatabaseUtil.cleanMappeRepo()
-        DatabaseUtil.cleanPersonRepo()
-    }
+    @Autowired
+    lateinit var mappeRepo: MappeRepository
+
+    @Autowired
+    lateinit var søknadRepository: SøknadRepository
+
+    @Autowired
+    lateinit var bunkeRepository: BunkeRepository
 
     @Test
     fun `Skal lagre pleiepenger sykt barn søknad`(): Unit = runBlocking {

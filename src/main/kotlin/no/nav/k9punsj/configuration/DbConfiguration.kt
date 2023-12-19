@@ -3,7 +3,7 @@ package no.nav.k9punsj.configuration
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-
+/*
 @Configuration
 class DbConfiguration(
     @Value("\${no.nav.db.url}") private val url: String,
@@ -12,8 +12,8 @@ class DbConfiguration(
     @Value("\${no.nav.db.vault_mountpath}") private val vaultMountpath: String
 ) {
 
-    @Bean
-    fun hikariConfig() = createHikariConfig(url, username, password)
+    //@Bean
+    //fun hikariConfig() = createHikariConfig(url, username, password)
 
     @Bean
     fun isVaultEnabled(): Boolean {
@@ -34,3 +34,4 @@ class DbConfiguration(
 fun getDbNameFromUrl(urlWithDbName: String): String {
     return Regex("(?<=/)[a-zA-Z][-_a-zA-Z\\d]*\$").find(urlWithDbName)?.value ?: ""
 }
+*/

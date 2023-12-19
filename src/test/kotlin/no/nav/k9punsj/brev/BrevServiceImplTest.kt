@@ -6,7 +6,6 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
-import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -36,8 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(
     classes = [
         JournalpostRepository::class,
-        BrevServiceImpl::class,
-        TestBeans::class
+        BrevServiceImpl::class
     ]
 )
 internal class BrevServiceImplTest {

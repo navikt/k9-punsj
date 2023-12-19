@@ -1,8 +1,6 @@
 package no.nav.k9punsj
 
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.k9punsj.configuration.DbConfiguration
-import no.nav.k9punsj.configuration.getDataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 import org.flywaydb.core.api.output.MigrateResult
@@ -13,7 +11,7 @@ import javax.sql.DataSource
 
 @Profile("local")
 annotation class LokalProfil
-
+/*
 @TestConfiguration
 @LokalProfil
 class LokalBeans {
@@ -48,3 +46,4 @@ class LokalBeans {
         }
     }
 }
+*/

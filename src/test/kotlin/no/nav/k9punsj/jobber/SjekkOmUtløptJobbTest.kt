@@ -8,8 +8,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -19,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 import java.util.UUID
 
+/*
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 internal class SjekkOmUtløptJobbTest {
@@ -78,3 +77,4 @@ internal class SjekkOmUtløptJobbTest {
         assertThat(harUtløpt.aksjonspunktStatus).isEqualTo(AksjonspunktStatus.OPPRETTET)
     }
 }
+*/

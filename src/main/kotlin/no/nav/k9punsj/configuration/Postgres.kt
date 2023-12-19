@@ -6,7 +6,7 @@ import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import java.util.Locale
 import javax.sql.DataSource
-
+/*
 enum class Role {
     Admin;
 
@@ -47,3 +47,4 @@ fun loadFlyway(dataSource: DataSource, initSql: String? = null) =
 fun runMigration(dataSource: DataSource, initSql: String? = null): MigrateResult? {
     return loadFlyway(dataSource, initSql).migrate()
 }
+*/

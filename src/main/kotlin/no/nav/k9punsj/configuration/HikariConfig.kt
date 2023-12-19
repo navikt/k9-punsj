@@ -2,7 +2,7 @@ package no.nav.k9punsj.configuration
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-
+/*
 fun createHikariConfig(
     jdbcUrl: String,
     username: String? = null,
@@ -24,3 +24,4 @@ fun hikariConfig(hikariConfig: DbConfiguration): HikariDataSource {
     migrate(hikariConfig)
     return getDataSource(hikariConfig)
 }
+*/

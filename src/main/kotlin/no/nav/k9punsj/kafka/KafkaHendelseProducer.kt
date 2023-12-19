@@ -1,13 +1,11 @@
 package no.nav.k9punsj.kafka
 
-import no.nav.k9punsj.IkkeTestProfil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 
 @Component
-@IkkeTestProfil
 class KafkaHendelseProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>
 ) : HendelseProducer {

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import de.huxhorn.sulky.ulid.ULID
-import no.nav.k9punsj.configuration.DbConfiguration
-import no.nav.k9punsj.configuration.hikariConfig
 import no.nav.k9punsj.utils.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -38,11 +36,13 @@ class K9PunsjApplication {
         return NettyReactiveWebServerFactory()
     }
 
+    /*
     @Bean
     @StandardProfil
     fun databaseInitializer(dbConfiguration: DbConfiguration): DataSource {
         return hikariConfig(dbConfiguration)
     }
+     */
 }
 
 fun main(args: Array<String>) {
