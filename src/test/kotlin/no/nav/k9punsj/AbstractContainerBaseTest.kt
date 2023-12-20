@@ -3,6 +3,7 @@ package no.nav.k9punsj
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.ninjasquad.springmockk.MockkBean
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
@@ -15,13 +16,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.junit.jupiter.MockitoExtension
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -38,18 +38,18 @@ private class KafkaContainer741 : KafkaContainer(DockerImageName.parse("confluen
     classes = [K9PunsjApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 abstract class AbstractContainerBaseTest {
 
     private lateinit var postgreSQLContainer12: PostgreSQLContainer12
 
+    @MockkBean
+    lateinit var pepClient: IPepClient
+
     @Autowired
     protected lateinit var webTestClient: WebTestClient
-
-    @MockBean
-    lateinit var iPepClient: IPepClient
 
     @PostConstruct
     fun setupRestServiceServers() {
