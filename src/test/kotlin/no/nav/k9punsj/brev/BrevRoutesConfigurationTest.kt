@@ -1,5 +1,6 @@
 package no.nav.k9punsj.brev
 
+import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.AbstractContainerBaseTest
@@ -24,6 +25,8 @@ internal class BrevRoutesConfigurationTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Bestill brev og send til k9-formidling på kafka`(): Unit = runBlocking {
+        coEvery { pepClient.sendeInnTilgang("01110050053", "api/brev/bestill") } returns true
+
         val dokumentbestillingDto = DokumentbestillingDto(
             journalpostId = lagJournalpost(),
             soekerId = "01110050053",

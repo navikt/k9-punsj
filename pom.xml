@@ -49,6 +49,7 @@
         <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.19.3</testcontainers.version>
+        <springmockk.version>4.0.2</springmockk.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
@@ -222,6 +223,12 @@
         </dependency>
 
         <!-- Testing & Mocks -->
+        <dependency>
+            <groupId>com.ninja-squad</groupId>
+            <artifactId>springmockk</artifactId>
+            <version>${springmockk.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk-jvm</artifactId>
