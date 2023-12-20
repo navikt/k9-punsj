@@ -3,6 +3,8 @@ spring:
     active: test
   flyway:
     enabled: true
+    baselineOnMigrate: true
+    clean-on-validation-error: true
   datasource:
     hikari:
       minimum-idle: 1
