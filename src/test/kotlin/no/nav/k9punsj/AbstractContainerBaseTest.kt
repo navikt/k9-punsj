@@ -3,35 +3,30 @@ package no.nav.k9punsj
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
-import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
-import no.nav.k9punsj.domenetjenester.repository.MappeRepository
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.wiremock.initWireMock
+import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Bean
-import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.net.URI
-import javax.sql.DataSource
 import kotlin.concurrent.thread
 
 
@@ -39,66 +34,46 @@ private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>
 private class KafkaContainer741 : KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1"))
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//@EnableMockOAuth2Server
-@SpringBootTest
+@SpringBootTest(
+    classes = [K9PunsjApplication::class],
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+)
+@ExtendWith(MockitoExtension::class)
+@AutoConfigureWebTestClient
+@ActiveProfiles("test")
 abstract class AbstractContainerBaseTest {
 
     private lateinit var postgreSQLContainer12: PostgreSQLContainer12
 
-    @Value("\${server.port}")
-    var applicationPort: String = "8080"
-
     @Autowired
-    lateinit var personRepository: PersonRepository
-
-    @Autowired
-    lateinit var mappeRepository: MappeRepository
-
-    @Autowired
-    lateinit var søknadRepository: SøknadRepository
-
-    @Autowired
-    lateinit var bunkeRepository: BunkeRepository
-
-    @Autowired
-    lateinit var journalpostRepository: JournalpostRepository
-
-    @Autowired
-    lateinit var aksjonspunktRepository: AksjonspunktRepository
-
-    @Autowired
-    lateinit var kafkaTemplate: KafkaTemplate<String, String>
+    protected lateinit var webTestClient: WebTestClient
 
     @MockBean
-    lateinit var pepClient: IPepClient
-
-
-    @Bean
-    fun dataSource(): DataSource {
-        HikariConfig().apply {
-            jdbcUrl = postgreSQLContainer12.jdbcUrl
-            username = postgreSQLContainer12.username
-            password = postgreSQLContainer12.password
-        }.also {
-            return HikariDataSource(it)
-        }
-    }
-
-
-    @Autowired
-    lateinit var safGateway: SafGateway
-
+    lateinit var iPepClient: IPepClient
 
     @PostConstruct
     fun setupRestServiceServers() {
     }
 
+    @BeforeAll
+    fun setup() {
+    }
+
+    @AfterAll
+    fun opprydning() {
+        wireMockServer.stop()
+    }
+
     @Test
-    fun contextLoads() {
+    fun contextLoads(): Unit = runBlocking {
+        assertThat(webTestClient).isNotNull
+        healthCheck()
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(AbstractContainerBaseTest::class.java)
+        val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
+
         val wireMockServer: WireMockServer
 
         init {
@@ -137,9 +112,6 @@ abstract class AbstractContainerBaseTest {
             ).forEach { t, u ->
                 System.setProperty(t, u)
             }
-
-            // define test configuration
-
         }
 
         fun lokaltKjørendeAzureV2OrNull(): URI? {
@@ -159,14 +131,12 @@ abstract class AbstractContainerBaseTest {
 
     }
 
-    @AfterAll
-    fun opprydning() {
-        wireMockServer.stop()
+    fun healthCheck() {
+        webTestClient
+            .get()
+            .uri { it.path("/internal/actuator/info").build() }
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(String::class.java).isEqualTo("{}")
     }
-
-    @BeforeAll
-    fun setup() {
-        //vedtakKafkaConsumer.subscribeHvisIkkeSubscribed(VEDTAK_TOPIC)
-    }
-
 }

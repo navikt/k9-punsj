@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: reactive
   profiles:
     active: test
   flyway:
@@ -12,4 +14,11 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 server:
-  port: 8080
+  port: 8085
+
+logging:
+  level:
+    web: TRACE
+    org:
+      springframework:
+        web: TRACE
