@@ -3,11 +3,9 @@ package no.nav.k9punsj
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.ninjasquad.springmockk.MockkBean
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.wiremock.initWireMock
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
@@ -20,18 +18,16 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.utility.DockerImageName
 import java.net.URI
 import kotlin.concurrent.thread
 
 
 private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
-private class KafkaContainer741 : KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1"))
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -41,12 +37,10 @@ private class KafkaContainer741 : KafkaContainer(DockerImageName.parse("confluen
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
+@EmbeddedKafka
 abstract class AbstractContainerBaseTest {
 
     private lateinit var postgreSQLContainer12: PostgreSQLContainer12
-
-    @MockkBean
-    lateinit var pepClient: IPepClient
 
     @Autowired
     protected lateinit var webTestClient: WebTestClient
@@ -93,13 +87,6 @@ abstract class AbstractContainerBaseTest {
                     System.setProperty("spring.datasource.url", jdbcUrl)
                     System.setProperty("spring.datasource.username", username)
                     System.setProperty("spring.datasource.password", password)
-                }
-            }.also { threads.add(it) }
-
-            thread {
-                KafkaContainer741().apply {
-                    start()
-                    System.setProperty("KAFKA_BROKERS", bootstrapServers)
                 }
             }.also { threads.add(it) }
 

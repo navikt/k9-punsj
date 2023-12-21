@@ -1,9 +1,9 @@
 package no.nav.k9punsj.brev
 
-import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.brev.BrevRoutes.Urls.BestillBrev
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -25,8 +25,6 @@ internal class BrevRoutesConfigurationTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Bestill brev og send til k9-formidling på kafka`(): Unit = runBlocking {
-        coEvery { pepClient.sendeInnTilgang("01110050053", "api/brev/bestill") } returns true
-
         val dokumentbestillingDto = DokumentbestillingDto(
             journalpostId = lagJournalpost(),
             soekerId = "01110050053",
@@ -39,7 +37,7 @@ internal class BrevRoutesConfigurationTest : AbstractContainerBaseTest() {
         val dokumentBestillingDtoJson = objectMapper().writeValueAsString(dokumentbestillingDto)
 
         webTestClient.post()
-            .uri { it.pathSegment("api", "brev", "bestill").build() }
+            .uri { it.path("/api${BestillBrev}").build() }
             .header("Authorization", saksbehandlerAuthorizationHeader)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(dokumentBestillingDtoJson))
