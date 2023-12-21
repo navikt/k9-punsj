@@ -1,26 +1,27 @@
 package no.nav.k9punsj.db.repository
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils
 import java.time.LocalDate
 import java.util.*
 
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-internal class SøknadRepositoryTest {
+
+internal class SøknadRepositoryTest: AbstractContainerBaseTest() {
 
     private val standardIdent = "01122334410"
     private val standardAktørId = "1000000000000"
@@ -42,6 +43,10 @@ internal class SøknadRepositoryTest {
 
     @Autowired
     lateinit var bunkeRepository: BunkeRepository
+
+    @BeforeEach
+    fun setUp() {
+    }
 
     @Test
     fun `Skal lagre pleiepenger sykt barn søknad`(): Unit = runBlocking {
