@@ -6,6 +6,10 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
+import no.nav.k9punsj.domenetjenester.repository.MappeRepository
+import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.wiremock.initWireMock
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
@@ -18,9 +22,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.jdbc.JdbcTestUtils
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.PostgreSQLContainer
 import java.net.URI
@@ -44,6 +50,9 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     protected lateinit var webTestClient: WebTestClient
+
+    @Autowired
+    lateinit var jdbcTemplate: JdbcTemplate
 
     @PostConstruct
     fun setupRestServiceServers() {
@@ -115,7 +124,13 @@ abstract class AbstractContainerBaseTest {
                 false -> null
             }
         }
+    }
 
+    protected fun cleanUpDB() {
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, SøknadRepository.SØKNAD_TABLE)
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, BunkeRepository.BUNKE_TABLE)
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, MappeRepository.MAPPE_TABLE)
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, PersonRepository.PERSON_TABLE)
     }
 
     fun healthCheck() {
