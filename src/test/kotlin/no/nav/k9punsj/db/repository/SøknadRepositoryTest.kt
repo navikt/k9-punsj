@@ -10,6 +10,7 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -39,15 +40,18 @@ internal class SøknadRepositoryTest: AbstractContainerBaseTest() {
     @Autowired
     lateinit var bunkeRepository: BunkeRepository
 
+    @BeforeEach
+    fun setUp() {
+        cleanUpDB()
+    }
+
     @Test
     fun `Skal lagre pleiepenger sykt barn søknad`(): Unit = runBlocking {
-        cleanUpDB()
         opprettOgAssertSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, LesFraFilUtil.søknadFraFrontend())
     }
 
     @Test
     fun `Skal lagre omsorgspenger kronisk sykt barn søknad`(): Unit = runBlocking {
-        cleanUpDB()
         opprettOgAssertSøknad(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB())
     }
 
