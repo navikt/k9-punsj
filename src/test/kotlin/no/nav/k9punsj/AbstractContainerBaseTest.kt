@@ -6,10 +6,12 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.wiremock.initWireMock
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
@@ -131,6 +133,8 @@ abstract class AbstractContainerBaseTest {
         JdbcTestUtils.deleteFromTables(jdbcTemplate, BunkeRepository.BUNKE_TABLE)
         JdbcTestUtils.deleteFromTables(jdbcTemplate, MappeRepository.MAPPE_TABLE)
         JdbcTestUtils.deleteFromTables(jdbcTemplate, PersonRepository.PERSON_TABLE)
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, AksjonspunktRepository.AKSJONSPUNKT_TABLE)
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, JournalpostRepository.JOURNALPOST_TABLE)
     }
 
     fun healthCheck() {
