@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
@@ -13,10 +13,8 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
-internal class JournalpostServiceTest {
+internal class JournalpostServiceTest: AbstractContainerBaseTest() {
 
     @MockK
     private lateinit var safGateway: SafGateway
