@@ -1,63 +1,28 @@
 package no.nav.k9punsj.fordel
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.MockClock
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
-import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.doNothing
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
+import java.util.*
 
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("test")
-@ContextConfiguration(
-    classes = [
-        HendelseMottaker::class,
-        AksjonspunktServiceImpl::class,
-        JournalpostRepository::class,
-        JournalpostService::class,
-        SafGateway::class,
-        DokarkivGateway::class,
-        ObjectMapper::class,
-        AksjonspunktRepository::class,
-        PersonService::class,
-        PersonRepository::class,
-        TestPdlService::class,
-        SøknadRepository::class,
-        AksjonspunktServiceImpl::class,
-        SoknadService::class,
-        InnsendingClient::class,
-        SimpleMeterRegistry::class,
-        MockClock::class
-    ]
-)
-internal class FordelKafkaTest {
+
+internal class FordelKafkaTest: AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer
