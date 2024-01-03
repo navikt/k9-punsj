@@ -16,7 +16,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
     @Test
     fun `hente gyldige verdier for gjelder`() {
         webTestClient.get()
-            .uri { it.pathSegment("api", "gosys", "gjelder").build() }
+            .uri{ it.path("/api/gosys/gjelder").build() }
             .exchange()
             .expectStatus().isOk
             .expectBody().json(Gjelder.JSON)
@@ -33,7 +33,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         """.trimIndent()
 
         webTestClient.post()
-            .uri { it.path("api/gosysopprettJournalforingsoppgave").build() }
+            .uri { it.path("/api/gosys/opprettJournalforingsoppgave/").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(body))
@@ -53,7 +53,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         """.trimIndent()
 
         webTestClient.post()
-            .uri { it.path("api/gosysopprettJournalforingsoppgave").build() }
+            .uri { it.path("/api/gosys/opprettJournalforingsoppgave/").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(body))
