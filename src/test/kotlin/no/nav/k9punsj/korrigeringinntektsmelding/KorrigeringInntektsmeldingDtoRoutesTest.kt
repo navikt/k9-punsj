@@ -60,12 +60,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
 
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .exchange()
-            .expectStatus().isCreated
+        opprettNySøknad(opprettNySøknad)
     }
 
     @Test
@@ -74,12 +69,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
 
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .exchange()
-            .expectStatus().isCreated
+        opprettNySøknad(opprettNySøknad)
 
         webTestClient.get()
             .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
@@ -103,15 +93,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .returnResult<IdentOgJournalpost>()
-            .responseHeaders.location
+        val location = opprettNySøknad(opprettNySøknad)
 
         webTestClient.get()
             .uri { it.path("/$api/$søknadTypeUri/mappe/${hentSøknadId(location)}").build() }
@@ -135,15 +117,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(opprettNySøknad))
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .returnResult<IdentOgJournalpost>()
-            .responseHeaders.location
+        val location = opprettNySøknad(opprettNySøknad)
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
@@ -292,15 +266,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .returnResult<IdentOgJournalpost>()
-            .responseHeaders.location
+        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
 
         leggerPåNySøknadId(soeknadJson, location)
 
@@ -344,15 +310,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .returnResult<Any>()
-            .responseHeaders.location
+        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
 
         leggerPåNySøknadId(soeknadJson, location)
 
@@ -370,4 +328,14 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         Assertions.assertNotNull(responseBody)
         Assertions.assertNotNull(responseBody!!.soekerId)
     }
+
+    private fun opprettNySøknad(requestBody: IdentOgJournalpost) = webTestClient.post()
+        .uri { it.path("/$api/$søknadTypeUri").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .body(BodyInserters.fromValue(requestBody))
+        .exchange()
+        .expectStatus().isCreated
+        .expectHeader().exists("Location")
+        .returnResult<Any>()
+        .responseHeaders.location
 }
