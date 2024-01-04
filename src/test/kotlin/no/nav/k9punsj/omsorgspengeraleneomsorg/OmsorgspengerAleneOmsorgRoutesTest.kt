@@ -1,62 +1,48 @@
 package no.nav.k9punsj.omsorgspengeraleneomsorg
 
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.DbContainerInitializer
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
-import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
-import no.nav.k9punsj.util.WebClientUtils.getAndAssert
-import no.nav.k9punsj.util.WebClientUtils.postAndAssert
-import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
-import no.nav.k9punsj.util.WebClientUtils.putAndAssert
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
-import java.time.LocalDate
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
-/*
-@ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class OmsorgspengerAleneOmsorgRoutesTest {
-    private val client = TestSetup.client
+internal class OmsorgspengerAleneOmsorgRoutesTest : AbstractContainerBaseTest() {
     private val api = "api"
     private val søknadTypeUri = "omsorgspenger-alene-om-omsorgen-soknad"
-    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-    private val journalpostRepository = DbContainerInitializer.getJournalpostRepo()
+
+    @Autowired
+    lateinit var journalpostRepository: JournalpostRepository
 
     @AfterEach
     internal fun tearDown() {
-        DbContainerInitializer.cleanDB()
+        cleanUpDB()
     }
 
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        val body = client.getAndAssert<SvarOmsAODto>(
-            norskIdent = norskIdent,
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            api,
-            søknadTypeUri,
-            "mappe"
-        )
-        Assertions.assertTrue(body.søknader!!.isEmpty())
+
+        webTestClient.get()
+            .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .header("X-Nav-NorskIdent", norskIdent)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody().jsonPath("$.søknader").isEmpty
     }
 
     @Test
@@ -65,13 +51,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         val pleietrengende = "01010050023"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString(), pleietrengende)
 
-        client.postAndAssert(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.CREATED,
-            requestBody = BodyInserters.fromValue(opprettNySøknad),
-            api,
-            søknadTypeUri
-        )
+       opprettNySøknad(opprettNySøknad)
     }
 
     @Test
@@ -83,16 +63,12 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid, pleietrengende)
 
-        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            navNorskIdentHeader = null,
-            assertStatus = HttpStatus.ACCEPTED,
-            requestBody = BodyInserters.fromValue(soeknad),
-            api,
-            søknadTypeUri,
-            "valider"
-        )
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
+        webTestClient.post()
+            .uri { it.path("/$api/$søknadTypeUri/valider").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .body(BodyInserters.fromValue(soeknad))
+            .exchange()
+            .expectStatus().isAccepted
     }
 
     @Test
@@ -103,8 +79,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
-        org.assertj.core.api.Assertions.assertThat(body.feil).isNull()
+        opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
         org.assertj.core.api.Assertions.assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -116,15 +91,17 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        val søknad = opprettOgLagreSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
+        val søknad =
+            opprettOgLagreSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid, pleietrengende)
 
-        val søknadViaGet = client.get()
-            .uri { it.pathSegment(api, søknadTypeUri, "mappe", søknad.soeknadId).build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .awaitBodyWithType<OmsorgspengerAleneOmsorgSøknadDto>()
-
-        org.assertj.core.api.Assertions.assertThat(søknadViaGet.begrunnelseForInnsending).isEqualTo("JEG VET IKKE")
-        org.assertj.core.api.Assertions.assertThat(søknadViaGet.barn?.foedselsdato).isEqualTo(LocalDate.of(2018, 10, 30))
+        webTestClient.get()
+            .uri { it.path("/$api/$søknadTypeUri/mappe/${søknad.soeknadId}").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.begrunnelseForInnsending").isEqualTo("JEG VET IKKE")
+            .jsonPath("$.barn.foedselsdato").isEqualTo("2018-10-30")
     }
 
     @Test
@@ -141,37 +118,28 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
             pleietrengende = pleietrengende
         )
 
-        val body = client.putAndAssert<MutableMap<String, Any?>, OmsorgspengerAleneOmsorgSøknadDto>(
-            norskIdent = null,
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(soeknad),
-            api,
-            søknadTypeUri,
-            "oppdater"
-        )
+        val body = oppdaterSøknad(soeknad)
 
         Assertions.assertNotNull(body)
-        Assertions.assertEquals(norskIdent, body.soekerId)
+        Assertions.assertEquals(norskIdent, body!!.soekerId)
 
-        val søknadViaGet = client.getAndAssert<OmsorgspengerAleneOmsorgSøknadDto>(
-            norskIdent = norskIdent,
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            api,
-            søknadTypeUri,
-            "mappe",
-            soeknad["soeknadId"] as String
-        )
-
-        Assertions.assertNotNull(søknadViaGet)
-        org.assertj.core.api.Assertions.assertThat(body.metadata).isEqualTo(søknadViaGet.metadata)
+        webTestClient.get()
+            .uri { it.path("/$api/$søknadTypeUri/mappe/${soeknad["soeknadId"]}").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .header("X-Nav-NorskIdent", norskIdent)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(OmsorgspengerAleneOmsorgSøknadDto::class.java)
+            .consumeWith {
+                Assertions.assertNotNull(it.responseBody)
+                Assertions.assertEquals(body.metadata, it.responseBody!!.metadata)
+            }
     }
 
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-        pleietrengende: String
+        pleietrengende: String,
     ): OpprettNySøknad {
         return OpprettNySøknad(
             norskIdent = personnummer,
@@ -184,7 +152,7 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null
+        journalpostId: String? = null,
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -194,37 +162,30 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String
+        pleietrengende: String,
     ): OmsorgspengerAleneOmsorgSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
         // oppretter en søknad
-        val resPost = client.postAndAssert(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.CREATED,
-            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api,
-            søknadTypeUri
-        )
-
-        val location = resPost.headers().asHttpHeaders().location
-        Assertions.assertNotNull(location)
+        val location = webTestClient.post()
+            .uri { it.path("/$api/$søknadTypeUri").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().exists("Location")
+            .returnResult(OmsorgspengerAleneOmsorgSøknadDto::class.java)
+            .responseHeaders.location
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, OmsorgspengerAleneOmsorgSøknadDto>(
-            norskIdent = null,
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(soeknadJson),
-            api,
-            søknadTypeUri,
-            "oppdater"
-        )
+        val omsorgspengerAleneOmsorgSøknadDto = oppdaterSøknad(soeknadJson)
 
-        Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
-        return søknadDtoFyltUt
+        Assertions.assertNotNull(omsorgspengerAleneOmsorgSøknadDto)
+        Assertions.assertNotNull(omsorgspengerAleneOmsorgSøknadDto!!.soekerId)
+
+        return omsorgspengerAleneOmsorgSøknadDto
     }
 
     private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, location: URI?) {
@@ -238,65 +199,60 @@ internal class OmsorgspengerAleneOmsorgRoutesTest {
         soeknadJson: SøknadJson,
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
-        pleietrengende: String
-    ): OasSoknadsfeil {
+        pleietrengende: String,
+    ) {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid, pleietrengende)
 
         // oppretter en søknad
-        val response = client.postAndAssert(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.CREATED,
-            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
-            api,
-            søknadTypeUri
-        )
-
-        val location = response.headers().asHttpHeaders().location
-        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode())
-        Assertions.assertNotNull(location)
+        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt: OmsorgspengerAleneOmsorgSøknadDto = client.putAndAssert(
-            norskIdent = null,
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(soeknadJson),
-            api,
-            søknadTypeUri,
-            "oppdater"
-        )
+        val søknadDtoFyltUt = oppdaterSøknad(soeknadJson)
 
-        Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
+        Assertions.assertNotNull(søknadDtoFyltUt)
+        Assertions.assertNotNull(søknadDtoFyltUt!!.soekerId)
 
         val søknadId = søknadDtoFyltUt.soeknadId
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
-
         val journalposter = søknadDtoFyltUt.journalposter!!
 
         val kanSendeInn = journalpostRepository.kanSendeInn(journalposter)
         org.assertj.core.api.Assertions.assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            navNorskIdentHeader = null,
-            assertStatus = HttpStatus.ACCEPTED,
-            requestBody = BodyInserters.fromValue(sendSøknad),
-            api,
-            søknadTypeUri,
-            "send"
-        )
-
-        return body
+        webTestClient.post()
+            .uri { it.path("/$api/$søknadTypeUri/send").build() }
+            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+            .body(BodyInserters.fromValue(sendSøknad))
+            .exchange()
+            .expectStatus().isAccepted
     }
+
+    private fun opprettNySøknad(innsendingForOpprettelseAvMappe: OpprettNySøknad) = webTestClient.post()
+        .uri { it.path("/$api/$søknadTypeUri").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+        .exchange()
+        .expectStatus().isCreated
+        .expectHeader().exists("Location")
+        .returnResult(OmsorgspengerAleneOmsorgSøknadDto::class.java)
+        .responseHeaders.location
+
+    private fun oppdaterSøknad(soeknadJson: SøknadJson) = webTestClient.put()
+        .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .body(BodyInserters.fromValue(soeknadJson))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody(OmsorgspengerAleneOmsorgSøknadDto::class.java)
+        .returnResult().responseBody
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String
+        søknadId: String,
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
 }
-*/
