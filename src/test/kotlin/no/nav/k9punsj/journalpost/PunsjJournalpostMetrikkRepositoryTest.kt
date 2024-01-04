@@ -1,37 +1,36 @@
 package no.nav.k9punsj.journalpost
 
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.test.context.TestPropertySource
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 import java.util.stream.IntStream
 
-/*
-@ExtendWith(SpringExtension::class, MockKExtension::class)
-@TestPropertySource(locations = ["classpath:application.yml"])
-internal class PunsjJournalpostMetrikkRepositoryTest {
+internal class PunsjJournalpostMetrikkRepositoryTest: AbstractContainerBaseTest() {
 
-    private val journalpostRepo = DbContainerInitializer.getJournalpostRepo()
-    private val journalpostMetrikkRepository = DbContainerInitializer.journalpostMetrikkRepository()
+    @Autowired
+    lateinit var journalpostRepo: JournalpostRepository
+
+    @Autowired
+    lateinit var journalpostMetrikkRepository: JournalpostMetrikkRepository
 
     @BeforeEach
     internal fun setUp() {
-        DbContainerInitializer.cleanDB()
+        cleanUpDB()
     }
 
     @AfterEach
     internal fun tearDown() {
-        DbContainerInitializer.cleanDB()
+       cleanUpDB()
     }
 
     @Test
@@ -91,4 +90,3 @@ internal class PunsjJournalpostMetrikkRepositoryTest {
         }
     }
 }
-*/
