@@ -46,11 +46,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        webTestClient.get()
-            .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .header("X-Nav-NorskIdent", norskIdent)
-            .exchange()
+        hentMappe(norskIdent)
             .expectStatus().isOk
             .expectBody().jsonPath("$.søknader").isEmpty
     }
@@ -71,11 +67,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         opprettNySøknad(opprettNySøknad)
 
-        webTestClient.get()
-            .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .header("X-Nav-NorskIdent", norskIdent)
-            .exchange()
+        hentMappe(norskIdent)
             .expectStatus().isOk
             .expectBody(SvarOmsDto::class.java)
             .consumeWith {
@@ -95,11 +87,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         val location = opprettNySøknad(opprettNySøknad)
 
-        webTestClient.get()
-            .uri { it.path("/$api/$søknadTypeUri/mappe/${hentSøknadId(location)}").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .header("X-Nav-NorskIdent", norskIdent)
-            .exchange()
+        hentMappeGittSøknadIdFraLocation(location, norskIdent)
             .expectStatus().isOk
             .expectBody(KorrigeringInntektsmeldingDto::class.java)
             .consumeWith {
@@ -121,11 +109,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        webTestClient.put()
-            .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(søknadFraFrontend))
-            .exchange()
+        oppdaterEksisterendeSøknad(søknadFraFrontend)
             .expectStatus().isOk
             .expectBody(KorrigeringInntektsmeldingDto::class.java)
             .consumeWith {
@@ -164,11 +148,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri/valider").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(soeknad))
-            .exchange()
+        validerSøknad(soeknad)
             .expectStatus().isAccepted
             .expectBody(OasSoknadsfeil::class.java)
             .consumeWith {
@@ -184,11 +164,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri/valider").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(soeknad))
-            .exchange()
+        validerSøknad(soeknad)
             .expectStatus().isBadRequest
             .expectBody(OasSoknadsfeil::class.java)
             .consumeWith {
@@ -271,11 +247,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = webTestClient.put()
-            .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(soeknadJson))
-            .exchange()
+        val søknadDtoFyltUt = oppdaterEksisterendeSøknad(soeknadJson)
             .expectStatus().isOk
             .expectBody(KorrigeringInntektsmeldingDto::class.java)
             .returnResult()
@@ -315,11 +287,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val responseBody = webTestClient.put()
-            .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(soeknadJson))
-            .exchange()
+        val responseBody = oppdaterEksisterendeSøknad(soeknadJson)
             .expectStatus().isOk
             .expectBody(KorrigeringInntektsmeldingDto::class.java)
             .returnResult()
@@ -329,13 +297,40 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         Assertions.assertNotNull(responseBody!!.soekerId)
     }
 
-    private fun opprettNySøknad(requestBody: IdentOgJournalpost) = webTestClient.post()
+    private fun opprettNySøknad(requestBody: IdentOgJournalpost): URI? = webTestClient.post()
         .uri { it.path("/$api/$søknadTypeUri").build() }
         .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
         .body(BodyInserters.fromValue(requestBody))
         .exchange()
         .expectStatus().isCreated
         .expectHeader().exists("Location")
-        .returnResult<Any>()
+        .returnResult<KorrigeringInntektsmeldingDto>()
         .responseHeaders.location
+
+    private fun hentMappe(norskIdent: String) = webTestClient.get()
+        .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .header("X-Nav-NorskIdent", norskIdent)
+        .exchange()
+
+    private fun hentMappeGittSøknadIdFraLocation(
+        location: URI?,
+        norskIdent: String,
+    ) = webTestClient.get()
+        .uri { it.path("/$api/$søknadTypeUri/mappe/${hentSøknadId(location)}").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .header("X-Nav-NorskIdent", norskIdent)
+        .exchange()
+
+    private fun oppdaterEksisterendeSøknad(søknadFraFrontend: SøknadJson) = webTestClient.put()
+        .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .body(BodyInserters.fromValue(søknadFraFrontend))
+        .exchange()
+
+    private fun validerSøknad(soeknad: SøknadJson) = webTestClient.post()
+        .uri { it.path("/$api/$søknadTypeUri/valider").build() }
+        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
+        .body(BodyInserters.fromValue(soeknad))
+        .exchange()
 }
