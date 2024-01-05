@@ -62,11 +62,13 @@ abstract class AbstractContainerBaseTest {
 
     @BeforeAll
     fun setup() {
+        cleanUpDB()
     }
 
     @AfterAll
     fun opprydning() {
         wireMockServer.stop()
+        cleanUpDB()
     }
 
     @Test
