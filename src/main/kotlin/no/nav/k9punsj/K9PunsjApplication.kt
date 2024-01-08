@@ -33,14 +33,6 @@ class K9PunsjApplication {
     fun reactiveWebServerFactory(): ReactiveWebServerFactory {
         return NettyReactiveWebServerFactory()
     }
-
-    /*
-    @Bean
-    @StandardProfil
-    fun databaseInitializer(dbConfiguration: DbConfiguration): DataSource {
-        return hikariConfig(dbConfiguration)
-    }
-     */
 }
 
 fun main(args: Array<String>) {
