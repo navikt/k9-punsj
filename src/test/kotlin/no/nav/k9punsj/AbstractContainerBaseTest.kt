@@ -14,7 +14,6 @@ import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.wiremock.initWireMock
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -77,10 +76,7 @@ abstract class AbstractContainerBaseTest {
 
         threads.forEach { it.join() }
 
-        wireMockServer = initWireMock(
-            port = 8084,
-            rootDirectory = "src/test/resources"
-        )
+        wireMockServer = initWireMock(rootDirectory = "src/test/resources")
 
         MockConfiguration.config(
             wireMockServer = wireMockServer,
