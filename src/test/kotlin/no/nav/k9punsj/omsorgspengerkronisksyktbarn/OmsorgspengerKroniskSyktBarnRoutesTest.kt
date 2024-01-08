@@ -51,7 +51,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
         val norskIdent = "01010050053"
-        val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
+        val pleietrengendeIdent = "02020050163"
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, UUID.randomUUID().toString())
 
         opprettNySøknad(opprettNySøknad)
     }
@@ -60,8 +61,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
         val norskIdent = "02020050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostId = UUID.randomUUID().toString()
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostId)
 
         opprettNySøknad(opprettNySøknad)
         hentMappe(norskIdent)
@@ -77,10 +79,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Hent en søknad`(): Unit = runBlocking {
         val søknad = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(2224).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val location = opprettNySøknad(opprettNySøknad)
 
@@ -97,10 +100,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Oppdaterer en søknad`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val location = opprettNySøknad(opprettNySøknad)
 
@@ -119,10 +123,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
+        val pleietrengendeIdent = "01010050053"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostid)
 
         val location = opprettNySøknad(opprettNySøknad)
 
@@ -159,10 +164,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
+        val pleietrengendeIdent = "01010050053"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
-        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
+        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, pleietrengendeIdent, journalpostid)
 
         validerSøknad(soeknad)
             .expectStatus().isEqualTo(HttpStatus.ACCEPTED)
@@ -175,10 +181,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
         val norskIdent = "02022352121"
+        val pleietrengendeIdent = "01010050053"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, pleietrengendeIdent)
 
         hentMappe(oppdatertSoeknadDto.soeknadId, norskIdent)
             .expectStatus().isOk
@@ -198,6 +205,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             {
               "soeknadId": "988bedeb-3324-4d2c-9277-dcbb5cc26577",
               "soekerId": "11111111111",
+              "pleietrengendeIdent": "22222222222",
               "journalposter": [
                 "123456"
               ],
@@ -229,7 +237,6 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    //@Disabled("Test passer ikke fordi k9-format ikke validerer noe på denne ytelsen.")
     fun `skal få feil hvis barn ikke er fylt ut`(): Unit = runBlocking {
         val norskIdent = "02022352122"
         val soeknad: SøknadJson = LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB()
@@ -249,11 +256,11 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             }
     }
 
-    private fun opprettSøknad(personnummer: String, journalpostId: String) =
+    private fun opprettSøknad(personnummer: String, pleietrengendeIdent: String, journalpostId: String) =
         OpprettNySøknad(
             norskIdent = personnummer,
             journalpostId = journalpostId,
-            pleietrengendeIdent = null,
+            pleietrengendeIdent = pleietrengendeIdent,
             annenPart = null
         )
 
@@ -283,9 +290,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
+        pleietrengendeIdent: String,
         journalpostid: String = IdGenerator.nesteId(),
     ) {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, pleietrengendeIdent, journalpostid)
 
         // oppretter en søknad
         val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
@@ -315,9 +323,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
+        pleietrengendeIdent: String,
         journalpostid: String = IdGenerator.nesteId(),
     ): OmsorgspengerKroniskSyktBarnSøknadDto {
-        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = opprettSøknad(ident, pleietrengendeIdent, journalpostid)
 
         // oppretter en søknad
         val location = opprettNySøknad(innsendingForOpprettelseAvMappe)

@@ -183,6 +183,7 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
         } catch (e: Exception) {
+            logger.error(e.localizedMessage, e)
             return ServerResponse
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .json()
@@ -228,6 +229,11 @@ internal class OmsorgspengerKroniskSyktBarnService(
                 .json()
                 .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
         }
+        val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
+        mappeService.utfyllendeInnsendingOmsKSB(
+            omsorgspengerKroniskSyktBarnSøknadDto = soknadTilValidering,
+            saksbehandler = saksbehandler
+        )
         return ServerResponse
             .status(HttpStatus.ACCEPTED)
             .json()
