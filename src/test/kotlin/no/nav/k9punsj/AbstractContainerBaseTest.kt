@@ -14,6 +14,7 @@ import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.wiremock.initWireMock
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -26,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.jdbc.JdbcTestUtils
@@ -38,6 +40,7 @@ import kotlin.concurrent.thread
 private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DirtiesContext
 @SpringBootTest(
     classes = [K9PunsjApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
@@ -50,11 +53,43 @@ abstract class AbstractContainerBaseTest {
 
     private lateinit var postgreSQLContainer12: PostgreSQLContainer12
 
+    lateinit var wireMockServer: WireMockServer
+
     @Autowired
     protected lateinit var webTestClient: WebTestClient
 
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
+
+    init {
+        val threads = mutableListOf<Thread>()
+        thread {
+            PostgreSQLContainer12().apply {
+                // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
+                // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
+                withCommand("postgres", "-c", "wal_level=logical")
+                start()
+                System.setProperty("spring.datasource.url", jdbcUrl)
+                System.setProperty("spring.datasource.username", username)
+                System.setProperty("spring.datasource.password", password)
+            }
+        }.also { threads.add(it) }
+
+        threads.forEach { it.join() }
+
+        wireMockServer = initWireMock(
+            port = 8084,
+            rootDirectory = "src/test/resources"
+        )
+
+        MockConfiguration.config(
+            wireMockServer = wireMockServer,
+            port = 8085,
+            azureV2Url = lokaltKjørendeAzureV2OrNull()
+        ).forEach { t, u ->
+            System.setProperty(t, u)
+        }
+    }
 
     @PostConstruct
     fun setupRestServiceServers() {
@@ -80,39 +115,6 @@ abstract class AbstractContainerBaseTest {
     companion object {
         private val logger = LoggerFactory.getLogger(AbstractContainerBaseTest::class.java)
         val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-
-        val wireMockServer: WireMockServer
-
-        init {
-            wireMockServer = initWireMock(
-                port = 8084,
-                rootDirectory = "src/test/resources"
-            )
-
-
-            val threads = mutableListOf<Thread>()
-            thread {
-                PostgreSQLContainer12().apply {
-                    // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
-                    // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
-                    withCommand("postgres", "-c", "wal_level=logical")
-                    start()
-                    System.setProperty("spring.datasource.url", jdbcUrl)
-                    System.setProperty("spring.datasource.username", username)
-                    System.setProperty("spring.datasource.password", password)
-                }
-            }.also { threads.add(it) }
-
-            threads.forEach { it.join() }
-
-            MockConfiguration.config(
-                wireMockServer = wireMockServer,
-                port = 8085,
-                azureV2Url = lokaltKjørendeAzureV2OrNull()
-            ).forEach { t, u ->
-                System.setProperty(t, u)
-            }
-        }
 
         fun lokaltKjørendeAzureV2OrNull(): URI? {
             val potensiellUrl = URI("http://localhost:8100/v2.0")
