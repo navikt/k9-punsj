@@ -1,28 +1,37 @@
 package no.nav.k9punsj.akjonspunkter
 
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
+import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
 
-@ExtendWith(SpringExtension::class)
-internal class AksjonspunktRepositoryTest {
+internal class AksjonspunktRepositoryTest: AbstractContainerBaseTest() {
+
+    @Autowired
+    lateinit var journalpostRepository : JournalpostRepository
+
+    @Autowired
+    lateinit var aksjonspunktRepository : AksjonspunktRepository
+
+    @BeforeEach
+    fun setUp() {
+        cleanUpDB()
+    }
 
     @Test
     fun `skal overskrive aksjonspunkt hvis det matcher på journalpostId + kode og status`(): Unit = runBlocking {
-        val journalpostRepo = DatabaseUtil.getJournalpostRepo()
+
         val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = "test", ytelse = "test")
 
-        journalpostRepo.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
-        val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
-
-        aksjonspunktRepo.opprettAksjonspunkt(
+        aksjonspunktRepository.opprettAksjonspunkt(
             AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
                 aksjonspunktKode = AksjonspunktKode.PUNSJ,
@@ -31,10 +40,10 @@ internal class AksjonspunktRepositoryTest {
             )
         )
 
-        val hentAlleAksjonspunkter = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
+        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter).hasSize(1)
 
-        aksjonspunktRepo.opprettAksjonspunkt(
+        aksjonspunktRepository.opprettAksjonspunkt(
             AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
                 aksjonspunktKode = AksjonspunktKode.PUNSJ,
@@ -43,21 +52,18 @@ internal class AksjonspunktRepositoryTest {
             )
         )
 
-        val hentAlleAksjonspunkter2 = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
+        val hentAlleAksjonspunkter2 = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter2).hasSize(1)
     }
 
     @Test
     fun `skal kunne opprette ny aksjonspunkt med samme kode hvis det ligger et der fra før med annen status`(): Unit = runBlocking {
-        val journalpostRepo = DatabaseUtil.getJournalpostRepo()
         val melding = FordelPunsjEventDto(aktørId = "1234567891", journalpostId = "667", type = "test", ytelse = "test")
 
-        journalpostRepo.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
-
-        val aksjonspunktRepo = DatabaseUtil.getAksjonspunktRepo()
+        journalpostRepository.opprettJournalpost(PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId))
 
         val aksjonspunktId = UUID.randomUUID().toString()
-        aksjonspunktRepo.opprettAksjonspunkt(
+        aksjonspunktRepository.opprettAksjonspunkt(
             AksjonspunktEntitet(
                 aksjonspunktId = aksjonspunktId,
                 aksjonspunktKode = AksjonspunktKode.PUNSJ,
@@ -66,12 +72,12 @@ internal class AksjonspunktRepositoryTest {
             )
         )
 
-        aksjonspunktRepo.settStatus(aksjonspunktId, AksjonspunktStatus.UTFØRT)
+        aksjonspunktRepository.settStatus(aksjonspunktId, AksjonspunktStatus.UTFØRT)
 
-        val hentAlleAksjonspunkter = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
+        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter).hasSize(1)
 
-        aksjonspunktRepo.opprettAksjonspunkt(
+        aksjonspunktRepository.opprettAksjonspunkt(
             AksjonspunktEntitet(
                 aksjonspunktId = UUID.randomUUID().toString(),
                 aksjonspunktKode = AksjonspunktKode.PUNSJ,
@@ -80,7 +86,7 @@ internal class AksjonspunktRepositoryTest {
             )
         )
 
-        val hentAlleAksjonspunkter2 = aksjonspunktRepo.hentAlleAksjonspunkter(melding.journalpostId)
+        val hentAlleAksjonspunkter2 = aksjonspunktRepository.hentAlleAksjonspunkter(melding.journalpostId)
         Assertions.assertThat(hentAlleAksjonspunkter2).hasSize(2)
     }
 }

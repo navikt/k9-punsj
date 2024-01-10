@@ -1,0 +1,24 @@
+spring:
+  main:
+    web-application-type: reactive
+  profiles:
+    active: test
+  flyway:
+    enabled: true
+    baselineOnMigrate: true
+    clean-on-validation-error: true
+  datasource:
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 3
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8085
+
+logging:
+  level:
+    web: TRACE
+    org:
+      springframework:
+        web: TRACE

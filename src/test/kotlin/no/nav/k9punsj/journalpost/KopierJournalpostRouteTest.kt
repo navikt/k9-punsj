@@ -1,18 +1,11 @@
 package no.nav.k9punsj.journalpost
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
-import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.PunsjInnsendingType
@@ -21,52 +14,22 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
-import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
-import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
-import no.nav.k9punsj.util.WebClientUtils.postAndAssert
-import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpStatus
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
 
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("test")
-@ContextConfiguration(
-    classes = [
-        TestBeans::class,
-        AksjonspunktServiceImpl::class,
-        JournalpostRepository::class,
-        JournalpostService::class,
-        SafGateway::class,
-        DokarkivGateway::class,
-        ObjectMapper::class,
-        AksjonspunktRepository::class,
-        AksjonspunktServiceImpl::class,
-        SoknadService::class,
-        InnsendingClient::class,
-        PersonService::class,
-        PersonRepository::class,
-        TestPdlService::class,
-        SøknadRepository::class
-    ]
-)
-internal class KopierJournalpostRouteTest {
+internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var safGateway: SafGateway
@@ -85,15 +48,17 @@ internal class KopierJournalpostRouteTest {
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktService
+
+    @Autowired
+    lateinit var journalpostRepository: JournalpostRepository
+
     private lateinit var hendelseMottaker: HendelseMottaker
 
     private lateinit var metricsEndpoint: MetricsEndpoint
 
-    private val client = TestSetup.client
     private val api = "api"
     private val journalpostUri = "journalpost"
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-    private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
     @BeforeEach
     internal fun setUp() {
@@ -108,11 +73,11 @@ internal class KopierJournalpostRouteTest {
 
     @AfterEach
     fun tearDown() {
-        DatabaseUtil.cleanDB()
+        cleanUpDB()
     }
 
     @Test
-    fun `Mapper kopierjournalpostinfo med barn og sender inn`() = runBlocking {
+    fun `Mapper kopierjournalpostinfo med barn og sender inn`(): Unit = runBlocking {
 
         val journalpostId = IdGenerator.nesteId()
         val melding = FordelPunsjEventDto(
@@ -132,17 +97,13 @@ internal class KopierJournalpostRouteTest {
             annenPart = null
         )
 
-        val body = client.postAndAssert(
-                authorizationHeader = saksbehandlerAuthorizationHeader,
-                assertStatus = HttpStatus.ACCEPTED,
-                requestBody = BodyInserters.fromValue(kopierJournalpostDto),
-                api,
-                journalpostUri,
-                "kopier",
-                journalpostId
-            )
-
-        Assertions.assertTrue(body.statusCode().is2xxSuccessful)
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/kopier/$journalpostId").build() }
+            .body(BodyInserters.fromValue(kopierJournalpostDto))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .exchange()
+            .expectStatus().isAccepted
     }
 
     @ParameterizedTest
@@ -154,7 +115,7 @@ internal class KopierJournalpostRouteTest {
             """{"behandlingsAar": -1}""",
         ]
     )
-    fun `Sett behandlingår med ugyldige verdier defaulter til nåværende år`(payload: String) = runBlocking {
+    fun `Sett behandlingår med ugyldige verdier defaulter til nåværende år`(payload: String): Unit = runBlocking {
 
         val journalpostId = IdGenerator.nesteId()
         val melding = FordelPunsjEventDto(
@@ -168,27 +129,25 @@ internal class KopierJournalpostRouteTest {
         val journalpost = journalpostRepository.hent(journalpostId)
         Assertions.assertNotNull(journalpost)
 
-        val body = client.postAndAssertAwaitWithStatusAndBody<String, String>(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            navNorskIdentHeader = journalpost.aktørId,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(payload),
-            api,
-            journalpostUri,
-            "settBehandlingsAar",
-            journalpostId
-        )
-
-        val forventetRespons = """
-            {
-              "behandlingsAar": ${LocalDate.now().year}
-            }""".trimIndent()
-
-        JSONAssert.assertEquals(forventetRespons, body, true)
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/settBehandlingsAar/${journalpostId}").build() }
+            .body(BodyInserters.fromValue(payload))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", journalpost.aktørId)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody().json(
+                """
+                {
+                  "behandlingsAar": ${LocalDate.now().year}
+                }
+                """.trimIndent()
+            )
     }
 
     @Test
-    fun `Sett behandlingår med gyldig verdi`() = runBlocking {
+    fun `Sett behandlingår med gyldig verdi`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
         val melding = FordelPunsjEventDto(
             aktørId = "1234567890",
@@ -204,22 +163,20 @@ internal class KopierJournalpostRouteTest {
         val gyldigÅr = LocalDate.now().year + 1
         val payload = BehandlingsAarDto(behandlingsAar = gyldigÅr)
 
-        val body = client.postAndAssertAwaitWithStatusAndBody<BehandlingsAarDto, String>(
-            authorizationHeader = saksbehandlerAuthorizationHeader,
-            navNorskIdentHeader = journalpost.aktørId,
-            assertStatus = HttpStatus.OK,
-            requestBody = BodyInserters.fromValue(payload),
-            api,
-            journalpostUri,
-            "settBehandlingsAar",
-            journalpostId
-        )
-
-        val forventetRespons = """
-        {
-          "behandlingsAar": $gyldigÅr
-        }""".trimIndent()
-
-        JSONAssert.assertEquals(forventetRespons, body, true)
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/settBehandlingsAar/$journalpostId").build() }
+            .body(BodyInserters.fromValue(payload))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", journalpost.aktørId)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody().json(
+                """
+                {
+                  "behandlingsAar": $gyldigÅr
+                }
+                """.trimIndent()
+            )
     }
 }

@@ -1,10 +1,8 @@
 package no.nav.k9punsj.akjonspunkter
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.TestBeans
-import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
@@ -18,49 +16,20 @@ import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.metrikker.SøknadMetrikkService
 import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
+import java.util.*
 
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("test")
-@ContextConfiguration(
-    classes = [
-        AksjonspunktServiceImpl::class,
-        JournalpostRepository::class,
-        JournalpostService::class,
-        SafGateway::class,
-        DokarkivGateway::class,
-        ObjectMapper::class,
-        AksjonspunktRepository::class,
-        MappeRepository::class,
-        BunkeRepository::class,
-        SøknadRepository::class,
-        SoknadService::class,
-        InnsendingClient::class,
-        K9SakService::class,
-        PersonService::class,
-        PersonRepository::class,
-        TestPdlService::class,
-        TestBeans::class
-    ]
-)
-internal class AksjonspunktServiceImplTest {
+internal class AksjonspunktServiceImplTest: AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer

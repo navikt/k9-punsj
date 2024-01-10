@@ -1,3 +1,14 @@
+spring:
+  datasource:
+    hikari:
+      connection-test-query: SELECT 1
+    url: ${DEFAULTDS_URL}
+    username: ${DEFAULTDS_USERNAME}
+    password:  ${DEFAULTDS_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+
 management:
   health:
     diskspace:
@@ -74,11 +85,6 @@ no.nav:
           accepted_audience: ${APP_NAISSTS_aud}
           proxyUrl:
 
-  db:
-    url: ${DEFAULTDS_URL}
-    username: ${DEFAULTDS_USERNAME}
-    password: ${DEFAULTDS_PASSWORD}
-    vault_mountpath: ${DEFAULTDS_VAULT_MOUNTPATH}
   abac:
     system_user: ${SYSTEMBRUKER_USERNAME}
     system_user_password: ${SYSTEMBRUKER_PASSWORD}
