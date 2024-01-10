@@ -5,7 +5,7 @@ spring:
       connection-init-sql: 'SET ROLE k9-punsj-admin'
     url: ${DEFAULTDS_URL}
     username: ${DEFAULTDS_USERNAME}
-    password:  ${DEFAULTDS_PASSWORD}
+    password: ${DEFAULTDS_PASSWORD}
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
