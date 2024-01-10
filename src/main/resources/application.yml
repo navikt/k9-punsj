@@ -1,8 +1,6 @@
 spring:
   flyway:
     enabled: true
-    baselineOnMigrate: true
-    clean-on-validation-error: true
 
 management:
   health:
