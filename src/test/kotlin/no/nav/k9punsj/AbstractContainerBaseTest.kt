@@ -20,20 +20,24 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.context.ApplicationContextInitializer
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.jdbc.JdbcTestUtils
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.util.ResourceUtils
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.utility.MountableFile
 import java.net.URI
-import kotlin.concurrent.thread
 
 
 private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
@@ -44,13 +48,12 @@ private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>
     classes = [K9PunsjApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
+@ContextConfiguration(initializers = [AbstractContainerBaseTest.Initializer::class])
 @ExtendWith(SpringExtension::class)
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @EmbeddedKafka
 abstract class AbstractContainerBaseTest {
-
-    private lateinit var postgreSQLContainer12: PostgreSQLContainer12
 
     lateinit var wireMockServer: WireMockServer
 
@@ -60,22 +63,52 @@ abstract class AbstractContainerBaseTest {
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
 
-    init {
-        val threads = mutableListOf<Thread>()
-        thread {
-            PostgreSQLContainer12().apply {
-                // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
-                // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
-                withCommand("postgres", "-c", "wal_level=logical")
-                start()
-                System.setProperty("spring.datasource.url", jdbcUrl)
-                System.setProperty("spring.datasource.username", username)
-                System.setProperty("spring.datasource.password", password)
+    companion object {
+        val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
+
+        private val postgreSQLContainer12 = PostgreSQLContainer12().apply {
+            // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
+            // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
+            withCommand("postgres", "-c", "wal_level=logical")
+
+            // Kopierer init.sql til containeren med script for å opprette rollen k9-punsj-admin.
+            withCopyFileToContainer(
+                MountableFile.forClasspathResource(
+                    "db/init.sql"
+                ),
+                "/docker-entrypoint-initdb.d/init.sql"
+            )
+        }
+
+        fun lokaltKjørendeAzureV2OrNull(): URI? {
+            val potensiellUrl = URI("http://localhost:8100/v2.0")
+            val kjørerLokalt = runBlocking {
+                val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
+                    .httpGet()
+                    .timeout(200)
+                    .awaitStringResponseResult()
+                response.statusCode == 200
             }
-        }.also { threads.add(it) }
+            return when (kjørerLokalt) {
+                true -> potensiellUrl
+                false -> null
+            }
+        }
+    }
 
-        threads.forEach { it.join() }
+    internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
+        override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
+            postgreSQLContainer12.start()
 
+            TestPropertyValues.of(
+                "no.nav.db.url=${postgreSQLContainer12.jdbcUrl}",
+                "no.nav.db.username=${postgreSQLContainer12.username}",
+                "no.nav.db.password=${postgreSQLContainer12.password}"
+            ).applyTo(configurableApplicationContext.environment)
+        }
+    }
+
+    init {
         wireMockServer = initWireMock(rootDirectory = "src/test/resources")
 
         MockConfiguration.config(
@@ -106,26 +139,6 @@ abstract class AbstractContainerBaseTest {
     fun contextLoads(): Unit = runBlocking {
         assertThat(webTestClient).isNotNull
         healthCheck()
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(AbstractContainerBaseTest::class.java)
-        val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
-
-        fun lokaltKjørendeAzureV2OrNull(): URI? {
-            val potensiellUrl = URI("http://localhost:8100/v2.0")
-            val kjørerLokalt = runBlocking {
-                val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
-                    .httpGet()
-                    .timeout(200)
-                    .awaitStringResponseResult()
-                response.statusCode == 200
-            }
-            return when (kjørerLokalt) {
-                true -> potensiellUrl
-                false -> null
-            }
-        }
     }
 
     protected fun cleanUpDB() {
