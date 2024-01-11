@@ -1,8 +1,8 @@
 spring:
   main:
+    # Fordi jetty introduseres av dussedorf-ktor-test > wiremock.
+    # Spring velger tydeligvis jetty framfor Netty som er introdusert av webflux.
     web-application-type: reactive
-  profiles:
-    active: test
   flyway:
     enabled: true
 
