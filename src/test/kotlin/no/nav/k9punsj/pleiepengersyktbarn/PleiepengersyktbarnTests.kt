@@ -1,70 +1,73 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
-import no.nav.k9.søknad.Søknad
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
-import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.journalpost.JournalpostRepository
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasSoknadsfeil
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
-import no.nav.k9punsj.utils.objectMapper
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
+import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
+import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
+import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
+import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.test.web.reactive.server.EntityExchangeResult
-import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.http.HttpStatusCode
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
 
-class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
+@ExtendWith(SpringExtension::class, MockKExtension::class)
+class PleiepengersyktbarnTests {
 
+    private val client = TestSetup.client
     private val api = "api"
     private val søknadTypeUri = "pleiepenger-sykt-barn-soknad"
-
-    @Autowired
-    lateinit var journalpostRepository: JournalpostRepository
-
-    @AfterEach
-    fun teardown() {
-        cleanUpDB()
-    }
+    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-
-        hentMappe(norskIdent)
-            .expectStatus().isOk
-            .expectBody(SvarPsbDto::class.java)
-            .consumeWith {
-                assertThat(it.responseBody!!.søknader!!).isEmpty()
-            }
+        val (status, body) = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", norskIdent)
+            .awaitStatusWithBody<SvarPsbDto>()
+        assertEquals(HttpStatus.OK, status)
+        assertTrue(body.søknader!!.isEmpty())
     }
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, "999")
-
-        opprettNySøknad(opprettNySøknad).expectStatus().isCreated
+        val status = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitStatuscode()
+        assertEquals(HttpStatus.CREATED, status)
     }
 
     @Test
@@ -72,16 +75,22 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val norskIdent = "02020050163"
         val opprettNySøknad = opprettSøknad(norskIdent, "9999")
 
-        opprettNySøknad(opprettNySøknad).expectStatus().isCreated
+        val status = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitStatuscode()
+        assertEquals(HttpStatus.CREATED, status)
 
-        hentMappe(norskIdent)
-            .expectStatus().isOk
-            .expectBody(SvarPsbDto::class.java)
-            .consumeWith {
-                val søknader = it.responseBody!!.søknader!!
-                assertThat(søknader).hasSize(1)
-                assertThat(it.responseBody!!.søknader?.first()?.journalposter?.first()).isEqualTo("9999")
-            }
+        val (httpStatus, body) = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", norskIdent)
+            .awaitStatusWithBody<SvarPsbDto>()
+        assertEquals(HttpStatus.OK, httpStatus)
+
+        val journalposterDto = body.søknader?.first()?.journalposter
+        assertEquals("9999", journalposterDto?.first())
     }
 
     @Test
@@ -93,16 +102,20 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = opprettNySøknad(opprettNySøknad)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location!!
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitExchangeBlocking()
 
-        val søknadViaGet = hentMappeGittSøknadId(hentSøknadId(location)!!)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .returnResult().responseBody!!
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
+
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadViaGet)
         assertEquals(journalpostid, søknadViaGet.journalposter?.first())
@@ -117,30 +130,36 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = opprettNySøknad(opprettNySøknad)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location!!
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        oppdaterSøknad(søknadFraFrontend)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertEquals(norskIdent, body.soekerId)
-                assertEquals(
-                    listOf(
-                        PeriodeDto(
-                            LocalDate.of(2018, 12, 30),
-                            LocalDate.of(2019, 10, 20)
-                        )
-                    ),
-                    body.soeknadsperiode
+        val (httpstatus, oppdatertSoeknadDto) = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(søknadFraFrontend))
+            .awaitStatusWithBody<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(oppdatertSoeknadDto)
+        assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
+        assertEquals(
+            listOf(
+                PeriodeDto(
+                    LocalDate.of(2018, 12, 30),
+                    LocalDate.of(2019, 10, 20)
                 )
-            }
+            ),
+            oppdatertSoeknadDto.soeknadsperiode
+        )
+        assertEquals(HttpStatus.OK, httpstatus)
     }
 
     @Test
@@ -152,19 +171,25 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = opprettNySøknad(opprettNySøknad)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location!!
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(opprettNySøknad))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        val oppdatertSoeknadDto = oppdaterSøknad(søknadFraFrontend)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .returnResult().responseBody!!
+        val (httpstatus, oppdatertSoeknadDto) = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(søknadFraFrontend))
+            .awaitStatusWithBody<PleiepengerSyktBarnSøknadDto>()
 
+        assertNotNull(oppdatertSoeknadDto)
         assertEquals(norskIdent, oppdatertSoeknadDto.soekerId)
         assertEquals(
             listOf(
@@ -175,26 +200,31 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
             ),
             oppdatertSoeknadDto.soeknadsperiode
         )
+        assertEquals(HttpStatus.OK, httpstatus)
 
-        hentMappeGittSøknadId(hentSøknadId(location)!!)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertThat(oppdatertSoeknadDto.metadata).isEqualTo(body.metadata)
-            }
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(søknadViaGet)
+        assertThat(oppdatertSoeknadDto.metadata).isEqualTo(søknadViaGet.metadata)
     }
 
     @Test
-    fun `Innsending av søknad returnerer 400 når mappe ikke finnes`(): Unit = runBlocking {
+    fun `Innsending av søknad returnerer 404 når mappe ikke finnes`(): Unit = runBlocking {
         val norskIdent = "12030050163"
         val søknadId = "d8e2c5a8-b993-4d2d-9cb5-fdb22a653a0c"
 
         val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = søknadId)
 
-        sendInnSøknad(sendSøknad)
-            .expectStatus().isBadRequest
-            .expectBody(OasSoknadsfeil::class.java)
+        val status = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(sendSøknad))
+            .awaitStatuscode()
+
+        assertEquals(HttpStatus.BAD_REQUEST, status)
     }
 
     @Test
@@ -220,13 +250,15 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(
+        val (_, status, body) = opprettOgSendInnSoeknad(
             soeknadJson = gyldigSoeknad,
             ident = norskIdent,
             journalpostid = "99997777"
-        ).expectStatus().isAccepted
+        )
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
 
-        assertThat(journalpostRepository.kanSendeInn(listOf("99997777"))).isFalse
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("99997777"))).isFalse
     }
 
     @Test
@@ -236,24 +268,22 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
             val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
             val journalpostId = "34234234"
             tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
-
-            val søknad =
+            val (id, status, body) =
                 opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
-                    .expectStatus().isAccepted
-                    .expectBody(Søknad::class.java)
-                    .returnResult().responseBody!!
 
-            assertThat(journalpostRepository.kanSendeInn(listOf(journalpostId))).isFalse
+            assertThat(body.feil).isNull()
+            assertEquals(HttpStatus.ACCEPTED, status)
+            assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostId))).isFalse
 
-            val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = søknad.søknadId.id)
+            val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = id)
+            val (httpstatus, body2) = client.post()
+                .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+                .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+                .body(BodyInserters.fromValue(sendSøknad))
+                .awaitStatusWithBody<OasFeil>()
 
-            sendInnSøknad(sendSøknad)
-                .expectStatus().isEqualTo(HttpStatus.CONFLICT)
-                .expectBody(OasFeil::class.java)
-                .consumeWith {
-                    val body = it.responseBody!!
-                    assertEquals("Innsendingen må inneholde minst en journalpost som kan sendes inn.", body.feil)
-                }
+            assertEquals(HttpStatus.CONFLICT, httpstatus)
+            assertThat(body2.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
         }
 
     @Test
@@ -263,8 +293,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val journalpostId = IdGenerator.nesteId()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostId)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
-            .expectStatus().isBadRequest
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
+
+        assertEquals(HttpStatus.BAD_REQUEST, status)
+        assertThat(body.feil).isNotEmpty
     }
 
     @Test
@@ -273,7 +305,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
     }
 
     @Test
@@ -282,13 +317,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
-            .expectStatus().isBadRequest
-            .expectBody(OasSoknadsfeil::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertThat(body.feil).isNotEmpty
-            }
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertEquals(HttpStatus.BAD_REQUEST, status)
+        assertThat(body.feil).isNotEmpty
     }
 
     @Test
@@ -297,7 +329,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
     }
 
     @Test
@@ -306,7 +341,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
+
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
     }
 
     @Test
@@ -317,15 +355,13 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        hentMappeGittSøknadId(oppdatertSoeknadDto.soeknadId)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertThat(body.lovbestemtFerie).isNotNull
-                assertThat(body.lovbestemtFerie).hasSize(1)
-                assertThat(body.lovbestemtFerie!![0].fom).isEqualTo(LocalDate.of(2021, 4, 14))
-            }
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(søknadViaGet)
+        assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
     }
 
     @Test
@@ -336,35 +372,28 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        hentMappeGittSøknadId(oppdatertSoeknadDto.soeknadId)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val søknad = it.responseBody!!
-                assertThat(søknad.opptjeningAktivitet).isNotNull
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende).isNotNull
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info).isNotNull
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.organisasjonsnummer).isEqualTo("890508087")
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
-                    LocalDate.of(2021, 5, 10)
-                )
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.landkode).isEqualTo("")
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerNavn).isEqualTo(
-                    "Regskapsfører"
-                )
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerTlf).isEqualTo("88888889")
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(
-                    false
-                )
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(
-                    false
-                )
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(
-                    listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet")
-                )
-            }
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(søknadViaGet)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.organisasjonsnummer).isEqualTo("890508087")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
+            LocalDate.of(2021, 5, 10)
+        )
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.landkode).isEqualTo("")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerNavn).isEqualTo("Regskapsfører")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerTlf).isEqualTo("88888889")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(
+            false
+        )
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(false)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(
+            listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet")
+        )
     }
 
     @Test
@@ -375,14 +404,14 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        hentMappeGittSøknadId(oppdatertSoeknadDto.soeknadId)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val søknad = it.responseBody!!
-                assertThat(søknad.harInfoSomIkkeKanPunsjes).isEqualTo(true)
-                assertThat(søknad.harMedisinskeOpplysninger).isEqualTo(false)
-            }
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertNotNull(søknadViaGet)
+        assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
+        assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(false)
     }
 
     @Test
@@ -392,7 +421,13 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        validerSøknad(soeknad).expectStatus().isAccepted
+        val httpStatus = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknad))
+            .awaitStatuscode()
+
+        assertEquals(HttpStatus.ACCEPTED, httpStatus)
     }
 
     @Test
@@ -404,22 +439,31 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val søknadId = opprettSoeknad(ident = norskIdent)
         leggerPåNySøknadId(soeknad, søknadId)
 
-        oppdaterSøknad(soeknad).expectStatus().isOk
+        client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknad))
+            .awaitExchangeBlocking()
 
         val med2: SøknadJson = LesFraFilUtil.søknadFraFrontendMed2()
         tilpasserSøknadsMalTilTesten(med2, norskIdent)
         leggerPåNySøknadId(med2, søknadId)
 
-        oppdaterSøknad(med2).expectStatus().isOk
+        client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(med2))
+            .awaitExchangeBlocking()
 
-        hentMappeGittSøknadId(hentSøknadId(søknadId)!!)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertThat(body.journalposter).hasSize(2)
-                assertThat(body.journalposter).isEqualTo(listOf("9999", "10000"))
-            }
+        val id = hentSøknadId(søknadId)
+
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", id).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
+
+        assertThat(søknadViaGet.journalposter).hasSize(2)
+        assertThat(søknadViaGet.journalposter).isEqualTo(listOf("9999", "10000"))
     }
 
     @Test
@@ -430,27 +474,28 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        hentMappeGittSøknadId(oppdatertSoeknadDto.soeknadId)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith { response: EntityExchangeResult<PleiepengerSyktBarnSøknadDto> ->
-                val søknad = response.responseBody!!
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
-                // k9-format, faktisk søknad format
-                val mapTilEksternFormat = MapPsbTilK9Format(
-                    søknad.soeknadId,
-                    søknad.journalposter!!.toSet(),
-                    emptyList(),
-                    søknad
-                )
+        // GUI format
+        assertNotNull(søknadViaGet)
 
-                assertThat(mapTilEksternFormat.feil()).isEmpty()
-                val k9Format = mapTilEksternFormat.søknad()
-                val ytelse = k9Format.getYtelse<PleiepengerSyktBarn>()
-                assertThat(ytelse.utenlandsopphold.perioder.size).isEqualTo(3)
-                val filter = ytelse.utenlandsopphold.perioder.values.filter { it.Årsak != null }
-                assertThat(filter[0].Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
-            }
+        // k9-format, faktisk søknad format
+        val mapTilEksternFormat = MapPsbTilK9Format(
+            søknadViaGet.soeknadId,
+            søknadViaGet.journalposter!!.toSet(),
+            emptyList(),
+            søknadViaGet
+        )
+
+        assertThat(mapTilEksternFormat.feil()).isEmpty()
+        val søknad = mapTilEksternFormat.søknad()
+        val ytelse = søknad.getYtelse<PleiepengerSyktBarn>()
+        assertThat(ytelse.utenlandsopphold.perioder.size).isEqualTo(3)
+        val filter = ytelse.utenlandsopphold.perioder.values.filter { it.Årsak != null }
+        assertThat(filter[0].Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
     }
 
     @Test
@@ -461,144 +506,144 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
 
-        hentMappeGittSøknadId(oppdatertSoeknadDto.soeknadId)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .consumeWith { response: EntityExchangeResult<PleiepengerSyktBarnSøknadDto> ->
-                val søknad = response.responseBody!!
-                assertThat(søknad.soekerId).isEqualTo(norskIdent)
-                assertThat(søknad.journalposter!![0]).isEqualTo("99997777")
-                assertThat(søknad.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
-                assertThat(søknad.barn?.norskIdent).isEqualTo("22222222222")
-                assertThat(søknad.soeknadsperiode?.first()?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
-                assertThat(søknad.soeknadsperiode?.first()?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
-                    LocalDate.of(2018, 12, 30)
-                )
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).hasSize(4)
-                assertThat(søknad.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
-                assertThat(søknad.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
-                assertThat(søknad.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("910909088")
-                assertThat(søknad.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("910909088")
-                assertThat(søknad.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.fom).isEqualTo(
-                    LocalDate.of(2018, 12, 30)
-                )
-                assertThat(søknad.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.tom).isEqualTo(
-                    LocalDate.of(2019, 10, 20)
-                )
-                assertThat(søknad.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].faktiskArbeidTimerPerDag).isEqualTo(
-                    "7,48"
-                )
-                assertThat(søknad.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].jobberNormaltTimerPerDag).isEqualTo(
-                    "7,48"
-                )
-                assertThat(søknad.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(
-                    LocalDate.of(
-                        2018,
-                        12,
-                        30
-                    )
-                )
-                assertThat(søknad.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo(
-                    "7"
-                )
-                assertThat(søknad.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(søknad.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
-                assertThat(søknad.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("7,5")
-                assertThat(søknad.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
-                assertThat(søknad.bosteder!![0].land).isEqualTo("RU")
-                assertThat(søknad.lovbestemtFerie!![0].fom).isEqualTo(LocalDate.of(2018, 12, 30))
-                assertThat(søknad.utenlandsopphold!![0].periode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
-                assertThat(søknad.soknadsinfo!!.harMedsoeker).isEqualTo(true)
-                assertThat(søknad.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
+        val søknadViaGet = client.get()
+            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
-                // k9-format, faktisk søknad format
-                val mapTilEksternFormat = MapPsbTilK9Format(
-                    søknad.soeknadId,
-                    søknad.journalposter!!.toSet(),
-                    emptyList(),
-                    søknad
-                )
+        // GUI format
+        assertNotNull(søknadViaGet)
+        assertThat(søknadViaGet.soekerId).isEqualTo(norskIdent)
+        assertThat(søknadViaGet.journalposter!![0]).isEqualTo("99997777")
+        assertThat(søknadViaGet.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
+        assertThat(søknadViaGet.barn?.norskIdent).isEqualTo("22222222222")
+        assertThat(søknadViaGet.soeknadsperiode?.first()?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soeknadsperiode?.first()?.tom).isEqualTo(LocalDate.of(2019, 10, 20))
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
+            LocalDate.of(2018, 12, 30)
+        )
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.tom).isNull()
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).hasSize(4)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
+        assertThat(søknadViaGet.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
+        assertThat(søknadViaGet.opptjeningAktivitet?.arbeidstaker!![0].organisasjonsnummer).isEqualTo("910909088")
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer).isEqualTo("910909088")
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.fom).isEqualTo(
+            LocalDate.of(2018, 12, 30)
+        )
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].periode?.tom).isEqualTo(
+            LocalDate.of(2019, 10, 20)
+        )
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].faktiskArbeidTimerPerDag).isEqualTo(
+            "7,48"
+        )
+        assertThat(søknadViaGet.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo?.perioder!![0].jobberNormaltTimerPerDag).isEqualTo(
+            "7,48"
+        )
+        assertThat(søknadViaGet.arbeidstid?.frilanserArbeidstidInfo!!.perioder?.first()?.periode?.fom).isEqualTo(
+            LocalDate.of(
+                2018,
+                12,
+                30
+            )
+        )
+        assertThat(søknadViaGet.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.perioder?.first()?.jobberNormaltTimerPerDag).isEqualTo(
+            "7"
+        )
+        assertThat(søknadViaGet.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
+        assertThat(søknadViaGet.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
+        assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
+        assertThat(søknadViaGet.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
+        assertThat(søknadViaGet.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("7,5")
+        assertThat(søknadViaGet.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
+        assertThat(søknadViaGet.bosteder!![0].land).isEqualTo("RU")
+        assertThat(søknadViaGet.lovbestemtFerie!![0].fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.utenlandsopphold!![0].periode?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
+        assertThat(søknadViaGet.soknadsinfo!!.harMedsoeker).isEqualTo(true)
+        assertThat(søknadViaGet.soknadsinfo!!.samtidigHjemme).isEqualTo(true)
 
-                assertThat(mapTilEksternFormat.feil()).isEmpty()
-                val k9Format = mapTilEksternFormat.søknad()
+        // k9-format, faktisk søknad format
+        val mapTilEksternFormat = MapPsbTilK9Format(
+            søknadViaGet.soeknadId,
+            søknadViaGet.journalposter!!.toSet(),
+            emptyList(),
+            søknadViaGet
+        )
 
-                assertThat(k9Format.søker.personIdent.verdi).isEqualTo(norskIdent)
-                val ytelse = k9Format.getYtelse<PleiepengerSyktBarn>()
+        assertThat(mapTilEksternFormat.feil()).isEmpty()
+        val søknad = mapTilEksternFormat.søknad()
 
-                assertThat(ytelse.barn.personIdent.verdi).isEqualTo("22222222222")
-                assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
-                assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
-                    "2018-12-30/.."
-                )
-                assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(
-                    4
-                )
-                assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
-                assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
-                assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("910909088")
-                assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.keys?.first()?.iso8601).isEqualTo(
-                    "2018-12-30/2019-10-20"
-                )
-                assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.faktiskArbeidTimerPerDag?.toString()).isEqualTo(
-                    "PT7H29M"
-                )
-                assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
-                    "PT7H29M"
-                )
-                assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(
-                    Duration.ofHours(7)
-                )
-                assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo(
-                    "2018-12-30/2019-10-20"
-                )
-                assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(ytelse.tilsynsordning?.perioder?.values?.first()?.etablertTilsynTimerPerDag.toString()).isEqualTo(
-                    "PT7H30M"
-                )
-                assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT7H30M")
-                assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
-                assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
-                assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(
-                    true
-                )
-                assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(
-                    false
-                )
-                assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-01-08")
-                assertThat(ytelse.utenlandsopphold!!.perioder.values.first()?.Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
-                assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
-                assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
-                assertThat(ytelse.opptjeningAktivitet.frilanser.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
-                assertThat(ytelse.opptjeningAktivitet.frilanser.sluttdato).isEqualTo(LocalDate.of(2019, 11, 10))
-            }
+        assertThat(søknad.søker.personIdent.verdi).isEqualTo(norskIdent)
+        val ytelse = søknad.getYtelse<PleiepengerSyktBarn>()
+
+        assertThat(ytelse.barn.personIdent.verdi).isEqualTo("22222222222")
+        assertThat(ytelse.søknadsperiode.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.opptjeningAktivitet.selvstendigNæringsdrivende?.get(0)?.perioder?.keys?.first()?.iso8601).isEqualTo(
+            "2018-12-30/.."
+        )
+        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.perioder?.values?.first()?.virksomhetstyper).hasSize(
+            4
+        )
+        assertThat(ytelse?.opptjeningAktivitet?.selvstendigNæringsdrivende?.get(0)?.virksomhetNavn).isEqualTo("FiskerAS")
+        assertThat(ytelse.opptjeningAktivitet?.frilanser?.startdato).isEqualTo("2019-10-10")
+        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].organisasjonsnummer.verdi).isEqualTo("910909088")
+        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.faktiskArbeidTimerPerDag?.toString()).isEqualTo(
+            "PT7H29M"
+        )
+        assertThat(ytelse.arbeidstid?.arbeidstakerList!![0].arbeidstidInfo.perioder?.values?.first()?.jobberNormaltTimerPerDag?.toString()).isEqualTo(
+            "PT7H29M"
+        )
+        assertThat(ytelse.arbeidstid?.selvstendigNæringsdrivendeArbeidstidInfo!!.get().perioder?.values?.first()?.jobberNormaltTimerPerDag).isEqualTo(
+            Duration.ofHours(7)
+        )
+        assertThat(ytelse.arbeidstid?.frilanserArbeidstidInfo!!.get().perioder?.keys?.first()?.iso8601).isEqualTo("2018-12-30/2019-10-20")
+        assertThat(ytelse.beredskap?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
+        assertThat(ytelse.nattevåk?.perioder?.values?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
+        assertThat(ytelse.tilsynsordning?.perioder?.values?.first()?.etablertTilsynTimerPerDag.toString()).isEqualTo("PT7H30M")
+        assertThat(ytelse.uttak?.perioder?.values?.first()?.timerPleieAvBarnetPerDag.toString()).isEqualTo("PT7H30M")
+        assertThat(ytelse.omsorg.relasjonTilBarnet.get()).isEqualTo(Omsorg.BarnRelasjon.MOR)
+        assertThat(ytelse.bosteder.perioder.values.first().land.landkode).isEqualTo("RU")
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2018-12-30/2019-06-20"))?.isSkalHaFerie).isEqualTo(
+            true
+        )
+        assertThat(ytelse.lovbestemtFerie!!.perioder?.get(Periode("2019-06-21/2019-10-20"))?.isSkalHaFerie).isEqualTo(
+            false
+        )
+        assertThat(ytelse.utenlandsopphold!!.perioder.keys.first()?.iso8601).isEqualTo("2018-12-30/2019-01-08")
+        assertThat(ytelse.utenlandsopphold!!.perioder.values.first()?.Årsak).isEqualTo(Utenlandsopphold.UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)
+        assertThat(ytelse.søknadInfo!!.get().samtidigHjemme).isEqualTo(true)
+        assertThat(ytelse.søknadInfo!!.get().harMedsøker).isEqualTo(true)
+        assertThat(ytelse.opptjeningAktivitet.frilanser.startdato).isEqualTo(LocalDate.of(2019, 10, 10))
+        assertThat(ytelse.opptjeningAktivitet.frilanser.sluttdato).isEqualTo(LocalDate.of(2019, 11, 10))
     }
 
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
-    ): WebTestClient.ResponseSpec {
+        journalpostid: String = IdGenerator.nesteId()
+    ): Triple<String, HttpStatusCode, OasSoknadsfeil> {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location!!
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = oppdaterSøknad(soeknadJson)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .returnResult().responseBody!!
+        val søknadDtoFyltUt = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknadJson))
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadDtoFyltUt.soekerId)
 
@@ -607,34 +652,44 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         val journalposter = søknadDtoFyltUt.journalposter!!
 
-        val kanSendeInn = journalpostRepository.kanSendeInn(journalposter)
+        val kanSendeInn = DatabaseUtil.getJournalpostRepo().kanSendeInn(journalposter)
         assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        return sendInnSøknad(sendSøknad)
+        val (httpstatus, oasSoknadsfeil) = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(sendSøknad))
+            .awaitStatusWithBody<OasSoknadsfeil>()
+        return Triple(søknadId, httpstatus, oasSoknadsfeil)
     }
 
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location!!
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = oppdaterSøknad(soeknadJson)
-            .expectStatus().isOk
-            .expectBody(PleiepengerSyktBarnSøknadDto::class.java)
-            .returnResult().responseBody!!
+        val søknadDtoFyltUt = client.put()
+            .uri { it.pathSegment(api, søknadTypeUri, "oppdater").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(soeknadJson))
+            .awaitBodyWithType<PleiepengerSyktBarnSøknadDto>()
 
         assertNotNull(søknadDtoFyltUt.soekerId)
         return søknadDtoFyltUt
@@ -642,64 +697,35 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
     private suspend fun opprettSoeknad(
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
+        journalpostid: String = IdGenerator.nesteId()
     ): URI? {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        return opprettNySøknad(innsendingForOpprettelseAvMappe)
-            .expectStatus().isCreated
-            .expectHeader().exists("Location")
-            .expectBody()
-            .returnResult().responseHeaders.location
+        val resPost = client.post()
+            .uri { it.pathSegment(api, søknadTypeUri).build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(innsendingForOpprettelseAvMappe))
+            .awaitExchangeBlocking()
+
+        val location = resPost.headers().asHttpHeaders().location
+        assertEquals(HttpStatus.CREATED, resPost.statusCode())
+        assertNotNull(location)
+
+        return location
     }
-
-    private fun hentMappe(norskIdent: String) = webTestClient.get()
-        .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
-        .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-        .header("X-Nav-NorskIdent", norskIdent)
-        .exchange()
-
-    private fun hentMappeGittSøknadId(søknadId: String) = webTestClient.get()
-        .uri { it.path("/$api/$søknadTypeUri/mappe/$søknadId").build() }
-        .header("Authorization", saksbehandlerAuthorizationHeader)
-        .exchange()
-
-    private fun opprettNySøknad(opprettNySøknad: OpprettNySøknad) = webTestClient.post()
-        .uri { it.path("/$api/$søknadTypeUri").build() }
-        .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-        .bodyValue(opprettNySøknad)
-        .exchange()
-
-    private fun oppdaterSøknad(søknadFraFrontend: SøknadJson) = webTestClient.put()
-        .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
-        .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-        .bodyValue(søknadFraFrontend)
-        .exchange()
-
-    private fun validerSøknad(soeknad: SøknadJson) = webTestClient.post()
-        .uri { it.path("/$api/$søknadTypeUri/valider").build() }
-        .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-        .bodyValue(soeknad)
-        .exchange()
-
-    private fun sendInnSøknad(sendSøknad: SendSøknad) = webTestClient.post()
-        .uri { it.path("/$api/$søknadTypeUri/send").build() }
-        .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-        .body(BodyInserters.fromValue(sendSøknad))
-        .exchange()
 }
 
 private fun opprettSøknad(
     personnummer: String,
-    journalpostId: String,
+    journalpostId: String
 ): OpprettNySøknad {
     return OpprettNySøknad(personnummer, journalpostId, null, null)
 }
 
 private fun lagSendSøknad(
     norskIdent: String,
-    søknadId: String,
+    søknadId: String
 ): SendSøknad {
     return SendSøknad(norskIdent, søknadId)
 }
@@ -707,7 +733,7 @@ private fun lagSendSøknad(
 private fun tilpasserSøknadsMalTilTesten(
     søknad: MutableMap<String, Any?>,
     norskIdent: String,
-    journalpostId: String? = null,
+    journalpostId: String? = null
 ) {
     søknad.replace("soekerId", norskIdent)
     if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))

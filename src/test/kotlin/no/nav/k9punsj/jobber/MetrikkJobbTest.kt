@@ -2,46 +2,39 @@ package no.nav.k9punsj.jobber
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
 import no.nav.k9punsj.metrikker.Metrikk
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.MetricUtils
 import no.nav.k9punsj.util.MetricUtils.MetrikkTag
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import java.util.*
 import java.util.stream.IntStream
 
-internal class MetrikkJobbTest: AbstractContainerBaseTest() {
+internal class MetrikkJobbTest {
 
     private lateinit var metrikkJobb: MetrikkJobb
+
     private lateinit var metricsEndpoint: MetricsEndpoint
+    private val simpleMeterRegistry = SimpleMeterRegistry()
 
-    @Autowired
-    lateinit var journalpostRepository: JournalpostRepository
-
-    @Autowired
-    lateinit var journalpostMetrikkRepository: JournalpostMetrikkRepository
+    private val journalpostRepo = DatabaseUtil.getJournalpostRepo()
 
     @BeforeEach
     internal fun setUp() {
-        cleanUpDB()
-        val simpleMeterRegistry = SimpleMeterRegistry()
-        metrikkJobb = MetrikkJobb(journalpostMetrikkRepository, simpleMeterRegistry)
+        DatabaseUtil.cleanDB()
+        metrikkJobb = MetrikkJobb(DatabaseUtil.journalpostMetrikkRepository(), simpleMeterRegistry)
         metricsEndpoint = MetricsEndpoint(simpleMeterRegistry)
     }
 
     @AfterEach
     internal fun tearDown() {
-        cleanUpDB()
+        DatabaseUtil.cleanDB()
     }
 
     @Test
@@ -54,8 +47,8 @@ internal class MetrikkJobbTest: AbstractContainerBaseTest() {
             type = PunsjInnsendingType.PAPIRSØKNAD.kode
         )
 
-        journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
-        journalpostRepository.ferdig(punsjJournalpost.journalpostId)
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
+        journalpostRepo.ferdig(punsjJournalpost.journalpostId)
         metrikkJobb.oppdaterMetrikkMåling()
 
         MetricUtils.assertGuage(
@@ -75,7 +68,7 @@ internal class MetrikkJobbTest: AbstractContainerBaseTest() {
             type = PunsjInnsendingType.PAPIRSØKNAD.kode
         )
 
-        journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
         metrikkJobb.oppdaterMetrikkMåling()
 
         MetricUtils.assertGuage(
@@ -126,7 +119,7 @@ internal class MetrikkJobbTest: AbstractContainerBaseTest() {
             aktørId = dummyAktørId,
             type = type.kode
         )
-        journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
+        journalpostRepo.lagre(punsjJournalpost) { punsjJournalpost }
         return punsjJournalpost
     }
 

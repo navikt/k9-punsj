@@ -1,28 +1,33 @@
 package no.nav.k9punsj.korrigeringinntektsmelding
 
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.openapi.OasSoknadsfeil
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
+import no.nav.k9punsj.util.WebClientUtils.getAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssert
+import no.nav.k9punsj.util.WebClientUtils.postAndAssertAwaitWithStatusAndBody
+import no.nav.k9punsj.util.WebClientUtils.putAndAssert
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.test.web.reactive.server.returnResult
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 import java.net.URI
 import java.time.LocalDate
@@ -30,25 +35,33 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
-class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
+@ExtendWith(SpringExtension::class, MockKExtension::class)
+class KorrigeringInntektsmeldingDtoRoutesTest {
 
+    private val client = TestSetup.client
     private val api = "api"
     private val søknadTypeUri = "omsorgspenger-soknad"
-
-    @Autowired
-    lateinit var journalpostRepository: JournalpostRepository
+    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
+    private val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
     @AfterEach
     internal fun tearDown() {
-        cleanUpDB()
+        DatabaseUtil.cleanDB()
     }
 
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        hentMappe(norskIdent)
-            .expectStatus().isOk
-            .expectBody().jsonPath("$.søknader").isEmpty
+        val body = client.getAndAssert<SvarOmsDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api,
+            søknadTypeUri,
+            "mappe"
+        )
+
+        Assertions.assertTrue(body.søknader!!.isEmpty())
     }
 
     @Test
@@ -56,7 +69,13 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val norskIdent = "01010050053"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
 
-        opprettNySøknad(opprettNySøknad)
+        client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api,
+            søknadTypeUri
+        )
     }
 
     @Test
@@ -65,15 +84,25 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
 
-        opprettNySøknad(opprettNySøknad)
+        client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api,
+            søknadTypeUri
+        )
 
-        hentMappe(norskIdent)
-            .expectStatus().isOk
-            .expectBody(SvarOmsDto::class.java)
-            .consumeWith {
-                val journalposter = it.responseBody?.søknader?.first()?.journalposter
-                Assertions.assertEquals(journalpostId, journalposter?.first())
-            }
+        val body = client.getAndAssert<SvarOmsDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api,
+            søknadTypeUri,
+            "mappe"
+        )
+
+        val journalposterDto = body.søknader?.first()?.journalposter
+        Assertions.assertEquals(journalpostId, journalposterDto?.first())
     }
 
     @Test
@@ -85,15 +114,29 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = opprettNySøknad(opprettNySøknad)
+        val resPost = client.postAndAssert<IdentOgJournalpost>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api,
+            søknadTypeUri
+        )
 
-        hentMappeGittSøknadIdFraLocation(location, norskIdent)
-            .expectStatus().isOk
-            .expectBody(KorrigeringInntektsmeldingDto::class.java)
-            .consumeWith {
-                val journalposter = it.responseBody?.journalposter
-                Assertions.assertEquals(journalpostid, journalposter?.first())
-            }
+        val location = resPost.headers().asHttpHeaders().location
+        Assertions.assertNotNull(location)
+
+        val søknadViaGet = client.getAndAssert<KorrigeringInntektsmeldingDto>(
+            norskIdent = norskIdent,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            api,
+            søknadTypeUri,
+            "mappe",
+            hentSøknadId(location)!!
+        )
+
+        Assertions.assertNotNull(søknadViaGet)
+        Assertions.assertEquals(journalpostid, søknadViaGet.journalposter?.first())
     }
 
     @Test
@@ -105,17 +148,31 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
 
-        val location = opprettNySøknad(opprettNySøknad)
+        val resPost = client.postAndAssert<IdentOgJournalpost>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(opprettNySøknad),
+            api,
+            søknadTypeUri
+        )
+
+        val location = resPost.headers().asHttpHeaders().location
+        Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(søknadFraFrontend, location)
 
-        oppdaterEksisterendeSøknad(søknadFraFrontend)
-            .expectStatus().isOk
-            .expectBody(KorrigeringInntektsmeldingDto::class.java)
-            .consumeWith {
-                Assertions.assertNotNull(it.responseBody)
-                Assertions.assertEquals(norskIdent, it.responseBody!!.soekerId)
-            }
+        val body = client.putAndAssert<MutableMap<String, Any?>, KorrigeringInntektsmeldingDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(søknadFraFrontend),
+            api,
+            søknadTypeUri,
+            "oppdater"
+        )
+
+        Assertions.assertNotNull(body)
+        Assertions.assertEquals(norskIdent, body.soekerId)
     }
 
     @Test
@@ -125,7 +182,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -136,7 +194,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -148,12 +207,17 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        validerSøknad(soeknad)
-            .expectStatus().isAccepted
-            .expectBody(OasSoknadsfeil::class.java)
-            .consumeWith {
-                Assertions.assertNull(it.responseBody?.feil)
-            }
+        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api,
+            søknadTypeUri,
+            "valider"
+        )
+
+        assertThat(body.feil).isNull()
     }
 
     @Test
@@ -164,12 +228,17 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
         opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostid)
 
-        validerSøknad(soeknad)
-            .expectStatus().isBadRequest
-            .expectBody(OasSoknadsfeil::class.java)
-            .consumeWith {
-                Assertions.assertEquals("mottattDato", it.responseBody?.feil?.get(0)?.feilkode)
-            }
+        val body = client.postAndAssertAwaitWithStatusAndBody<SøknadJson, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.BAD_REQUEST,
+            requestBody = BodyInserters.fromValue(soeknad),
+            api,
+            søknadTypeUri,
+            "valider"
+        )
+
+        assertThat(body.feil?.get(0)?.feilkode).isEqualTo("mottattDato")
     }
 
     @Test
@@ -179,7 +248,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        val body = opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
+        assertThat(body.feil).isNull()
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -192,21 +262,24 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
                 PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1))
             )
 
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri/k9sak/arbeidsforholdIder").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(dtoSpørring))
-            .exchange()
-            .expectStatus().isOk
-            .expectBodyList(ArbeidsgiverMedArbeidsforholdId::class.java)
-            .consumeWith<WebTestClient.ListBodySpec<ArbeidsgiverMedArbeidsforholdId>> {
-                Assertions.assertEquals("randomArbeidsforholdId", it.responseBody?.first()?.arbeidsforholdId?.first())
-            }
+        val oppdatertSoeknadDto =
+            client.postAndAssertAwaitWithStatusAndBody<MatchFagsakMedPeriode, List<ArbeidsgiverMedArbeidsforholdId>>(
+                authorizationHeader = saksbehandlerAuthorizationHeader,
+                navNorskIdentHeader = null,
+                assertStatus = HttpStatus.OK,
+                requestBody = BodyInserters.fromValue(dtoSpørring),
+                api,
+                søknadTypeUri,
+                "k9sak",
+                "arbeidsforholdIder"
+            )
+
+        Assertions.assertEquals("randomArbeidsforholdId", oppdatertSoeknadDto[0].arbeidsforholdId[0])
     }
 
     private fun opprettSøknad(
         personnummer: String,
-        journalpostId: String,
+        journalpostId: String
     ): IdentOgJournalpost {
         return IdentOgJournalpost(personnummer, journalpostId)
     }
@@ -214,7 +287,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     private fun tilpasserSøknadsMalTilTesten(
         søknad: MutableMap<String, Any?>,
         norskIdent: String,
-        journalpostId: String? = null,
+        journalpostId: String? = null
     ) {
         søknad.replace("soekerId", norskIdent)
         if (journalpostId != null) søknad.replace("journalposter", arrayOf(journalpostId))
@@ -229,7 +302,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
 
     private fun lagSendSøknad(
         norskIdent: String,
-        søknadId: String,
+        søknadId: String
     ): SendSøknad {
         return SendSøknad(norskIdent, søknadId)
     }
@@ -237,24 +310,37 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     private suspend fun opprettOgSendInnSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
-    ) {
+        journalpostid: String = IdGenerator.nesteId()
+    ): OasSoknadsfeil {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
+        val response = client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
+            api,
+            søknadTypeUri
+        )
+
+        val location = response.headers().asHttpHeaders().location
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode())
+        Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val søknadDtoFyltUt = oppdaterEksisterendeSøknad(soeknadJson)
-            .expectStatus().isOk
-            .expectBody(KorrigeringInntektsmeldingDto::class.java)
-            .returnResult()
-            .responseBody
+        val søknadDtoFyltUt: KorrigeringInntektsmeldingDto = client.putAndAssert(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknadJson),
+            api,
+            søknadTypeUri,
+            "oppdater"
+        )
 
-        Assertions.assertNotNull(søknadDtoFyltUt)
-        Assertions.assertNotNull(søknadDtoFyltUt!!.soekerId)
+        Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
 
         val søknadId = søknadDtoFyltUt.soeknadId
         val sendSøknad = lagSendSøknad(norskIdent = ident, søknadId = søknadId)
@@ -265,72 +351,52 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         assertThat(kanSendeInn).isTrue
 
         // sender en søknad
-        webTestClient.post()
-            .uri { it.path("/$api/$søknadTypeUri/send").build() }
-            .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-            .body(BodyInserters.fromValue(sendSøknad))
-            .exchange()
-            .expectStatus().isAccepted
-            .expectBody(Søknad::class.java)
+        val body = client.postAndAssertAwaitWithStatusAndBody<SendSøknad, OasSoknadsfeil>(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            navNorskIdentHeader = null,
+            assertStatus = HttpStatus.ACCEPTED,
+            requestBody = BodyInserters.fromValue(sendSøknad),
+            api,
+            søknadTypeUri,
+            "send"
+        )
+
+        return body
     }
 
     private suspend fun opprettOgLagreSoeknad(
         soeknadJson: SøknadJson,
         ident: String,
-        journalpostid: String = IdGenerator.nesteId(),
-    ) {
+        journalpostid: String = IdGenerator.nesteId()
+    ): PleiepengerSyktBarnSøknadDto {
         val innsendingForOpprettelseAvMappe = opprettSøknad(ident, journalpostid)
 
         // oppretter en søknad
-        val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
+        val resPost = client.postAndAssert(
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.CREATED,
+            requestBody = BodyInserters.fromValue(innsendingForOpprettelseAvMappe),
+            api,
+            søknadTypeUri
+        )
+
+        val location = resPost.headers().asHttpHeaders().location
+        Assertions.assertNotNull(location)
 
         leggerPåNySøknadId(soeknadJson, location)
 
         // fyller ut en søknad
-        val responseBody = oppdaterEksisterendeSøknad(soeknadJson)
-            .expectStatus().isOk
-            .expectBody(KorrigeringInntektsmeldingDto::class.java)
-            .returnResult()
-            .responseBody
+        val søknadDtoFyltUt = client.putAndAssert<SøknadJson, PleiepengerSyktBarnSøknadDto>(
+            norskIdent = null,
+            authorizationHeader = saksbehandlerAuthorizationHeader,
+            assertStatus = HttpStatus.OK,
+            requestBody = BodyInserters.fromValue(soeknadJson),
+            api,
+            søknadTypeUri,
+            "oppdater"
+        )
 
-        Assertions.assertNotNull(responseBody)
-        Assertions.assertNotNull(responseBody!!.soekerId)
+        Assertions.assertNotNull(søknadDtoFyltUt.soekerId)
+        return søknadDtoFyltUt
     }
-
-    private fun opprettNySøknad(requestBody: IdentOgJournalpost): URI? = webTestClient.post()
-        .uri { it.path("/$api/$søknadTypeUri").build() }
-        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-        .body(BodyInserters.fromValue(requestBody))
-        .exchange()
-        .expectStatus().isCreated
-        .expectHeader().exists("Location")
-        .returnResult<KorrigeringInntektsmeldingDto>()
-        .responseHeaders.location
-
-    private fun hentMappe(norskIdent: String) = webTestClient.get()
-        .uri { it.path("/$api/$søknadTypeUri/mappe").build() }
-        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-        .header("X-Nav-NorskIdent", norskIdent)
-        .exchange()
-
-    private fun hentMappeGittSøknadIdFraLocation(
-        location: URI?,
-        norskIdent: String,
-    ) = webTestClient.get()
-        .uri { it.path("/$api/$søknadTypeUri/mappe/${hentSøknadId(location)}").build() }
-        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-        .header("X-Nav-NorskIdent", norskIdent)
-        .exchange()
-
-    private fun oppdaterEksisterendeSøknad(søknadFraFrontend: SøknadJson) = webTestClient.put()
-        .uri { it.path("/$api/$søknadTypeUri/oppdater").build() }
-        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-        .body(BodyInserters.fromValue(søknadFraFrontend))
-        .exchange()
-
-    private fun validerSøknad(soeknad: SøknadJson) = webTestClient.post()
-        .uri { it.path("/$api/$søknadTypeUri/valider").build() }
-        .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
-        .body(BodyInserters.fromValue(soeknad))
-        .exchange()
 }

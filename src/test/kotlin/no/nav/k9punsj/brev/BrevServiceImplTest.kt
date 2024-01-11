@@ -6,24 +6,41 @@ import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType
-import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestBeans
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.dto.Person
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.utils.objectMapper
+import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-
-internal class BrevServiceImplTest: AbstractContainerBaseTest() {
+@ExtendWith(SpringExtension::class)
+@ActiveProfiles("test")
+@SpringBootTest
+@TestPropertySource(properties = ["spring.config.location = classpath:application.yml"])
+@ContextConfiguration(
+    classes = [
+        JournalpostRepository::class,
+        BrevServiceImpl::class,
+        TestBeans::class
+    ]
+)
+internal class BrevServiceImplTest {
 
     @MockBean
     private lateinit var hendelseProducer: HendelseProducer

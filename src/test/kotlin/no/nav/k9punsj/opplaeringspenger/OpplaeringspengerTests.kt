@@ -14,7 +14,7 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.DbContainerInitializer
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
@@ -38,7 +38,6 @@ import java.net.URI
 import java.time.Duration
 import java.time.LocalDate
 
-/*
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 @Disabled("OLP er ikke i bruk eller under utvikling")
 class OpplaeringspengerTests {
@@ -262,7 +261,7 @@ class OpplaeringspengerTests {
         assertThat(body.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, status)
 
-        assertThat(DbContainerInitializer.getJournalpostRepo().kanSendeInn(listOf("99998888"))).isFalse
+        assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf("99998888"))).isFalse
     }
 
     @Test
@@ -277,7 +276,7 @@ class OpplaeringspengerTests {
 
             assertThat(body.feil).isNull()
             assertEquals(HttpStatus.ACCEPTED, status)
-            assertThat(DbContainerInitializer.getJournalpostRepo().kanSendeInn(listOf(journalpostId))).isFalse
+            assertThat(DatabaseUtil.getJournalpostRepo().kanSendeInn(listOf(journalpostId))).isFalse
 
             val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = id)
             val (httpstatus, body2) = client.post()
@@ -579,7 +578,7 @@ class OpplaeringspengerTests {
 
         val journalposter = søknadDtoFyltUt.journalposter!!
 
-        val kanSendeInn = DbContainerInitializer.getJournalpostRepo().kanSendeInn(journalposter)
+        val kanSendeInn = DatabaseUtil.getJournalpostRepo().kanSendeInn(journalposter)
         assertThat(kanSendeInn).isTrue
 
         // sender en søknad
@@ -672,4 +671,3 @@ private fun leggerPåNySøknadId(søknadFraFrontend: MutableMap<String, Any?>, l
     val trim = søknadId?.trim('/')
     søknadFraFrontend.replace("soeknadId", trim)
 }
-*/

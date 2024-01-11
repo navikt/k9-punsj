@@ -1,29 +1,26 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.AbstractContainerBaseTest
-import no.nav.k9punsj.domenetjenester.repository.MappeRepository
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.util.DatabaseUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-internal class MappeRepositoryTest: AbstractContainerBaseTest() {
-
-    @Autowired
-    lateinit var mappeRepository: MappeRepository
-
-    @Autowired
-    lateinit var personRepository: PersonRepository
+@ExtendWith(SpringExtension::class)
+internal class MappeRepositoryTest {
 
     private val dummyFnr = "11111111111"
     private val dummyAktørId = "1000000000000"
 
     @Test
     internal fun HentAlleMapperSomInneholderEnNorskIdent(): Unit = runBlocking {
-        val person = personRepository.lagre(norskIdent = dummyFnr, aktørId = dummyAktørId)
+        val repository = DatabaseUtil.getMappeRepo()
+        val personRepo = DatabaseUtil.getPersonRepo()
 
-        val mappe = mappeRepository.opprettEllerHentMappeForPerson(personId = person.personId)
+        val person = personRepo.lagre(norskIdent = dummyFnr, aktørId = dummyAktørId)
+
+        val mappe = repository.opprettEllerHentMappeForPerson(personId = person.personId)
         assertThat(mappe).isNotNull
     }
 }

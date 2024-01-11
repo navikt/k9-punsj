@@ -6,7 +6,7 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
-import no.nav.k9punsj.util.DbContainerInitializer
+import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.wiremock.getAaregBaseUrl
 import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
 import no.nav.k9punsj.wiremock.getEregBaseUrl
@@ -49,6 +49,9 @@ internal object MockConfiguration {
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
             "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
+            "DEFAULTDS_USERNAME" to "postgres",
+            "DEFAULTDS_PASSWORD" to "postgres",
+            "DEFAULTDS_URL" to "jdbc:postgresql://localhost:${DatabaseUtil.embeddedPostgres.port}/postgres",
             "DEFAULTDS_VAULT_MOUNTPATH" to "",
             "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
             "AUDITLOGGER_ENABLED" to "false",

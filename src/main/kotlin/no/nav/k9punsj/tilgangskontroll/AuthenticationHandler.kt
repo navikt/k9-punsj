@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
 
 @Service
-class AuthenticationHandler(
+internal class AuthenticationHandler(
     multiIssuerProperties: MultiIssuerProperties
 ) {
 

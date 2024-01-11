@@ -15,7 +15,7 @@ class PeriodeDtoTest {
             tom = null
         ).utledDato()
 
-        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2023-01-01"))
+        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2022-01-01"))
     }
 
     @Test
@@ -25,7 +25,7 @@ class PeriodeDtoTest {
             tom = null
         ).utledDato()
 
-        assertThat(periodeNøyaktig2ÅrSiden.fom).isEqualTo(LocalDate.parse("2023-01-01"))
+        assertThat(periodeNøyaktig2ÅrSiden.fom).isEqualTo(LocalDate.parse("2022-01-01"))
     }
 
     @Test

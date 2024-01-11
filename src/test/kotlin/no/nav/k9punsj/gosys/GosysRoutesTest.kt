@@ -1,25 +1,35 @@
 package no.nav.k9punsj.gosys
 
+import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.integrasjoner.gosys.Gjelder
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpHeaders
+import org.junit.jupiter.api.extension.ExtendWith
+import org.skyscreamer.jsonassert.JSONAssert
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.awaitBodyOrNull
+import org.springframework.web.reactive.function.client.awaitExchange
 
-internal class GosysRoutesTest: AbstractContainerBaseTest() {
+@ExtendWith(SpringExtension::class, MockKExtension::class)
+internal class GosysRoutesTest {
+
+    private val client = TestSetup.client
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
     fun `hente gyldige verdier for gjelder`() {
-        webTestClient.get()
-            .uri{ it.path("/api/gosys/gjelder").build() }
-            .exchange()
-            .expectStatus().isOk
-            .expectBody().json(Gjelder.JSON)
+        val (statusCode, json) = "api/gosys/gjelder".get()
+        assertEquals(HttpStatus.OK, statusCode)
+        JSONAssert.assertEquals(Gjelder.JSON, json, true)
     }
 
     @Test
@@ -32,13 +42,8 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         }
         """.trimIndent()
 
-        webTestClient.post()
-            .uri { it.path("/api/gosys/opprettJournalforingsoppgave/").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
-            .exchange()
-            .expectStatus().isOk
+        val (statusCode, _) = "api/gosys/opprettJournalforingsoppgave/".post(body)
+        assertEquals(HttpStatus.OK, statusCode)
     }
 
     @Test
@@ -52,12 +57,26 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         }
         """.trimIndent()
 
-        webTestClient.post()
-            .uri { it.path("/api/gosys/opprettJournalforingsoppgave/").build() }
-            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(body))
-            .exchange()
-            .expectStatus().isOk
+        val (statusCode, _) = "api/gosys/opprettJournalforingsoppgave/".post(body)
+        assertEquals(HttpStatus.OK, statusCode)
+    }
+
+    private fun String.get(): Pair<HttpStatusCode, String?> = this.let { path ->
+        runBlocking {
+            client.get()
+                .uri { it.path(path).build() }
+                .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+        }
+    }
+
+    private fun String.post(body: String): Pair<HttpStatusCode, String?> = this.let { path ->
+        runBlocking {
+            client.post()
+                .uri { it.path(path).build() }
+                .header("Authorization", saksbehandlerAuthorizationHeader)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(body))
+                .awaitExchange { it.statusCode() to it.awaitBodyOrNull() }
+        }
     }
 }
