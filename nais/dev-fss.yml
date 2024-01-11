@@ -53,6 +53,9 @@ spec:
         kvPath: /serviceuser/data/dev/srvk9punsj
       - mountPath: /var/run/secrets/nais.io/appdynamics
         kvPath: /apikey/appdynamics/dev
+      - mountPath: /var/run/secrets/postgresql
+        kvPath: /postgresql/preprod-fss
+        format: env
   webproxy: true
   kafka:
     pool: nav-dev
