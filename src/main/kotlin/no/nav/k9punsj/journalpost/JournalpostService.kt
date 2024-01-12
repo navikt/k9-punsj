@@ -18,9 +18,9 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.dto.DokumentInfo
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
-import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
+import no.nav.k9punsj.journalpost.postmottak.JournalpostMottaksHaandteringDto
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

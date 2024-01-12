@@ -1,8 +1,8 @@
-package no.nav.k9punsj.journalpost.dto
+package no.nav.k9punsj.journalpost.postmottak
 
 import no.nav.k9punsj.felles.dto.PeriodeDto
 
-internal data class JournalpostMottaksHaandteringDto(
+data class JournalpostMottaksHaandteringDto(
     val brukerIdent: String,
     val barnIdent: String?,
     val annenPart: String?,

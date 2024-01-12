@@ -4,9 +4,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -21,7 +19,6 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
-import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
@@ -86,7 +83,6 @@ internal class JournalpostRoutes(
         internal const val LukkJournalpost = "/journalpost/lukk/{$JournalpostIdKey}"
         internal const val KopierJournalpost = "/journalpost/kopier/{$JournalpostIdKey}"
         internal const val JournalførPåGenerellSak = "/journalpost/ferdigstill"
-        internal const val Mottak = "/journalpost/mottak"
     }
 
     @Bean
@@ -197,47 +193,6 @@ internal class JournalpostRoutes(
                 aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
 
                 ServerResponse.ok().buildAndAwait()
-            }
-        }
-
-        POST("/api${Urls.Mottak}") { request ->
-            RequestContext(coroutineContext, request) {
-                val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
-                    url = Urls.Mottak
-                )?.let { return@RequestContext it }
-                val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
-                val oppdatertJournalpost = journalpostService.hent(dto.journalpostId).copy(
-                    ytelse = dto.fagsakYtelseTypeKode,
-                    aktørId = pdlService.aktørIdFor(dto.brukerIdent)
-                )
-
-                val journalpostInfo =
-                    journalpostService.hentJournalpostInfo(oppdatertJournalpost.journalpostId)
-
-                val erFerdigstiltEllerJournalfoert = (
-                    journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
-                        journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
-
-                // TODO: Hent og reserver saksnummer fra k9-sak?
-
-                // Oppdater og ferdigstill journalpost hvis vi har saksnummer
-                if (!erFerdigstiltEllerJournalfoert && dto.saksnummer != null) {
-                    journalpostService.oppdaterOgFerdigstillForMottak(dto)
-                    logger.info("Ferdigstilt journalpost : ${oppdatertJournalpost.journalpostId}")
-                }
-
-                journalpostService.lagre(punsjJournalpost = oppdatertJournalpost)
-
-                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
-                    punsjJournalpost = oppdatertJournalpost,
-                    aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-                    type = oppdatertJournalpost.type,
-                    ytelse = dto.fagsakYtelseTypeKode
-                )
-
-                ServerResponse.noContent().buildAndAwait()
             }
         }
 

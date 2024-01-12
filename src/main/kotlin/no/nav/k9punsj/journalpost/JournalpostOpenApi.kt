@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
-import no.nav.k9punsj.journalpost.dto.JournalpostMottaksHaandteringDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -303,30 +301,4 @@ internal class JournalpostOpenApi {
         @RequestBody body: IdentOgJournalpost
     ) {
     }
-
-    @PostMapping(JournalpostRoutes.Urls.Mottak)
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "204",
-                description = "Journalposten er oppdatert med ny data & akjsonspunkt sendt til k9-los"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "Saksbehandler har ikke tilgang"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "Uventet feil"
-            )
-        ]
-    )
-    @Operation(
-        summary = "Oppdaterer journalpost med ny data & sender aksjonspunkt med oppdatering til k9-los.",
-        security = [SecurityRequirement(name = "BearerAuth")]
-    )
-    fun håndterMottak(
-        @RequestHeader("X-Nav-NorskIdent") norskIdent: String,
-        @RequestBody body: JournalpostMottaksHaandteringDto
-    ) {}
 }
