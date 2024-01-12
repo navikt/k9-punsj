@@ -1,5 +1,6 @@
 package no.nav.k9punsj.configuration
-
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +14,10 @@ class DbConfiguration(
 ) {
 
     @Bean
-    fun hikariConfig() = createHikariConfig(url, username, password)
+    fun hikariConfig(): HikariConfig = createHikariConfig(url, username, password)
+
+    @Bean
+    fun datasource(): HikariDataSource = createHikariDatasource(this)
 
     @Bean
     fun isVaultEnabled(): Boolean {

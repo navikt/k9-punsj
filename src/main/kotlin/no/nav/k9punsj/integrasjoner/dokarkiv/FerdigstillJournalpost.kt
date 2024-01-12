@@ -13,7 +13,7 @@ internal data class FerdigstillJournalpost(
     internal val journalpostId: JournalpostId,
     private val status: JoarkTyper.JournalpostStatus,
     private val type: JoarkTyper.JournalpostType,
-    private val avsendernavn: String? = null,
+    private val avsenderIdType: String? = null,
     private val tittel: String? = null,
     private val dokumenter: Set<Dokument> = emptySet(),
     private val bruker: Bruker? = null,
@@ -21,8 +21,12 @@ internal data class FerdigstillJournalpost(
 ) {
 
     private val mangler = mutableListOf<Mangler>().also { alleMangler ->
-        if (bruker == null) { alleMangler.add(Mangler.Bruker) }
-        if (avsendernavn.isNullOrBlank() && bruker?.navn.isNullOrBlank() && !type.erNotat) { alleMangler.add(Mangler.Avsendernavn) }
+        if (bruker == null) {
+            alleMangler.add(Mangler.Bruker)
+        }
+        if (avsenderIdType.isNullOrBlank() && bruker?.identitetsnummer == null && !type.erNotat) {
+            alleMangler.add(Mangler.AvsenderIdType)
+        }
     }.toList()
 
     internal val erFerdigstilt = status.erFerdigstilt || status.erJournalført
@@ -70,11 +74,14 @@ internal data class FerdigstillJournalpost(
             }
             json.put("dokumenter", jsonDokumenter)
         }
-        // Mangler navn på avsender
-        if (avsendernavn.isNullOrBlank() && !type.erNotat) {
-            json.put("avsenderMottaker", JSONObject().also { it.put("navn", bruker.navn!!) })
+
+        // Oppdaterer avsenderId hvis avsenderIdType mangler
+        if (avsenderIdType.isNullOrBlank() && !type.erNotat) {
+            logger.info("AvsenderIdType manglet for journalpost $journalpostId. Oppdaterer med avsenderMottaker.id=[***]")
+            json.put("avsenderMottaker", JSONObject().also { it.put("id", bruker.identitetsnummer.toString()) })
             utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
         }
+
         return json.toString().also {
             if (utfyllendeInformasjon.isNotEmpty()) {
                 logger.info("Utfyllende informasjon ved oppdatering: ${utfyllendeInformasjon.joinToString(", ")}")
@@ -82,7 +89,7 @@ internal data class FerdigstillJournalpost(
         }
     }
 
-    private fun mangler() : List<Mangler> {
+    private fun mangler(): List<Mangler> {
         check(!erFerdigstilt) { "Journalpost $journalpostId er allerede ferdigstilt." }
         return mangler
     }
@@ -112,7 +119,8 @@ internal data class FerdigstillJournalpost(
 
     internal enum class Mangler {
         Bruker,
-        Avsendernavn
+        Avsendernavn,
+        AvsenderIdType,
     }
 
     private companion object {

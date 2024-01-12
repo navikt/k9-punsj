@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.util.DatabaseUtil
+import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -65,7 +65,7 @@ internal class K9PunsjApplicationWithMocks {
 
             Runtime.getRuntime().addShutdownHook(
                 Thread {
-                    DatabaseUtil.embeddedPostgres.close()
+                    DbContainerInitializer.postgresContainer.close()
                     wireMockServer.stop()
                 }
             )

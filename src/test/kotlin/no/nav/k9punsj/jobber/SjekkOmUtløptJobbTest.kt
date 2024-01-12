@@ -1,39 +1,39 @@
 package no.nav.k9punsj.jobber
 
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktEntitet
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
+import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.akjonspunkter.VentÅrsakType
+import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getAksjonspunktRepo
-import no.nav.k9punsj.util.DatabaseUtil.Companion.getJournalpostRepo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension::class, MockKExtension::class)
-internal class SjekkOmUtløptJobbTest {
+internal class SjekkOmUtløptJobbTest : AbstractContainerBaseTest() {
 
     @MockBean
     lateinit var hendelseProducer: HendelseProducer
 
+    @Autowired
+    lateinit var aksonspunktRepository: AksjonspunktRepository
+
+    @Autowired
+    lateinit var journalpostRepository: JournalpostRepository
+
+
     @Test
     fun `Skal finne alle aksjonspunkter som har utløpt og sende oppgaver på disse`(): Unit = runBlocking {
-        // Arrange
-        val aksjonspunktRepository = getAksjonspunktRepo()
-        val journalpostRepository = getJournalpostRepo()
 
         val sjekkOmUtløptJobb = SjekkOmUtløptJobb(
-            aksjonspunktRepository = aksjonspunktRepository,
+            aksjonspunktRepository = aksonspunktRepository,
             hendelseProducer = hendelseProducer,
             journalpostRepository = journalpostRepository,
             k9losAksjonspunkthendelseTopic = "test",
@@ -52,7 +52,7 @@ internal class SjekkOmUtløptJobbTest {
         }
 
         val aksjonspunktId = UUID.randomUUID().toString()
-        aksjonspunktRepository.opprettAksjonspunkt(
+        aksonspunktRepository.opprettAksjonspunkt(
             AksjonspunktEntitet(
                 aksjonspunktId,
                 AksjonspunktKode.VENTER_PÅ_INFORMASJON,
@@ -67,7 +67,7 @@ internal class SjekkOmUtløptJobbTest {
         sjekkOmUtløptJobb.sjekkeOmAksjonspunktHarLøptUt()
 
         // Assert
-        val hentAlleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(punsjJournalpost.journalpostId)
+        val hentAlleAksjonspunkter = aksonspunktRepository.hentAlleAksjonspunkter(punsjJournalpost.journalpostId)
         assertThat(hentAlleAksjonspunkter).hasSize(2)
 
         val venterPåInformasjon =

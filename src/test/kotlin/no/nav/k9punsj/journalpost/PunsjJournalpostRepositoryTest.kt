@@ -1,46 +1,46 @@
 package no.nav.k9punsj.journalpost
 
-import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
-import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
-import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
-import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.test.context.TestPropertySource
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.UUID
+import java.util.*
 
-@ExtendWith(SpringExtension::class, MockKExtension::class)
-@TestPropertySource(locations = ["classpath:application.yml"])
-internal class PunsjJournalpostRepositoryTest {
 
-    val client = TestSetup.client
-    private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
+internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
+
+    @Autowired
+    private lateinit var journalpostRepository: JournalpostRepository
 
     @Test
     fun `Skal finne alle journalposter på personen`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
+            PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+            )
         journalpostRepository.lagre(punsjJournalpost1) {
             punsjJournalpost1
         }
 
         val punsjJournalpost2 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
+            PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+            )
         journalpostRepository.lagre(punsjJournalpost2) {
             punsjJournalpost2
         }
@@ -59,16 +59,25 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `Skal bare finne de fra fordel`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
+            PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+            )
         journalpostRepository.lagre(punsjJournalpost1, PunsjJournalpostKildeType.SAKSBEHANDLER) {
             punsjJournalpost1
         }
 
         val punsjJournalpost2 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, type = PunsjInnsendingType.PAPIRSØKNAD.kode)
+            PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+            )
         journalpostRepository.lagre(punsjJournalpost2, PunsjJournalpostKildeType.FORDEL) {
             punsjJournalpost2
         }
@@ -87,7 +96,6 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `Skal sette status til ferdig`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
@@ -110,7 +118,12 @@ internal class PunsjJournalpostRepositoryTest {
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(2)
 
-        journalpostRepository.settAlleTilFerdigBehandlet(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))
+        journalpostRepository.settAlleTilFerdigBehandlet(
+            listOf(
+                punsjJournalpost1.journalpostId,
+                punsjJournalpost2.journalpostId
+            )
+        )
 
         val finnJournalposterPåPersonSkalGiTom = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPersonSkalGiTom).isEmpty()
@@ -119,30 +132,28 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `Endepunkt brukt for resett av journalpost fungerer`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
-        val punsjJournalpost1 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, skalTilK9 = false)
-        journalpostRepository.lagre(punsjJournalpost1) {
-            punsjJournalpost1
-        }
+        val punsjJournalpost = PunsjJournalpost(
+            uuid = UUID.randomUUID(),
+            journalpostId = IdGenerator.nesteId(),
+            aktørId = dummyAktørId,
+            skalTilK9 = false
+        )
+        journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
 
-        val res =
-            client.get().uri {
-                it.pathSegment("api", "journalpost", "resett", punsjJournalpost1.journalpostId).build()
-            }.header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader).awaitExchangeBlocking()
-
-        Assertions.assertEquals(HttpStatus.OK, res.statusCode())
+        webTestClient.get()
+            .uri { it.path("/api/journalpost/resett/${punsjJournalpost.journalpostId}").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .exchange()
+            .expectStatus().isOk
 
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
-
         Assertions.assertEquals(finnJournalposterPåPerson[0].skalTilK9, null)
     }
 
     @Test
     fun `Skal sjekke om punsj kan sende inn`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
@@ -169,7 +180,12 @@ internal class PunsjJournalpostRepositoryTest {
             journalpostRepository.kanSendeInn(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))
         assertThat(kanSendeInn).isTrue
 
-        journalpostRepository.settAlleTilFerdigBehandlet(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))
+        journalpostRepository.settAlleTilFerdigBehandlet(
+            listOf(
+                punsjJournalpost1.journalpostId,
+                punsjJournalpost2.journalpostId
+            )
+        )
 
         val kanSendeInn2 =
             journalpostRepository.kanSendeInn(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))
@@ -180,7 +196,6 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `skal sette kilde hvis journalposten ikke finnes i databasen fra før`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost2 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
@@ -192,7 +207,12 @@ internal class PunsjJournalpostRepositoryTest {
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
 
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId), dummyAktørId)
+        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
+            listOf(
+                punsjJournalpost1.journalpostId,
+                punsjJournalpost2.journalpostId
+            ), dummyAktørId
+        )
 
         assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(2)
     }
@@ -200,10 +220,14 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `skal vise om journalposten må til infotrygd`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost2 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId, skalTilK9 = false)
+            PunsjJournalpost(
+                uuid = UUID.randomUUID(),
+                journalpostId = IdGenerator.nesteId(),
+                aktørId = dummyAktørId,
+                skalTilK9 = false
+            )
         journalpostRepository.lagre(punsjJournalpost2) {
             punsjJournalpost2
         }
@@ -214,7 +238,6 @@ internal class PunsjJournalpostRepositoryTest {
     @Test
     fun `skal kunne sette alle til ferdig`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
@@ -228,14 +251,25 @@ internal class PunsjJournalpostRepositoryTest {
             punsjJournalpost2
         }
 
-        journalpostRepository.settAlleTilFerdigBehandlet(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))
-        assertThat(journalpostRepository.kanSendeInn(listOf(punsjJournalpost1.journalpostId, punsjJournalpost2.journalpostId))).isFalse()
+        journalpostRepository.settAlleTilFerdigBehandlet(
+            listOf(
+                punsjJournalpost1.journalpostId,
+                punsjJournalpost2.journalpostId
+            )
+        )
+        assertThat(
+            journalpostRepository.kanSendeInn(
+                listOf(
+                    punsjJournalpost1.journalpostId,
+                    punsjJournalpost2.journalpostId
+                )
+            )
+        ).isFalse()
     }
 
     @Test
     fun `skal feil hvis ikke alle kan settes til ferdig`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost1 =
             PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
@@ -243,7 +277,8 @@ internal class PunsjJournalpostRepositoryTest {
             punsjJournalpost1
         }
 
-        val punsjJournalpost2 = PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
+        val punsjJournalpost2 =
+            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
 
         var harFåttEx = false
         try {
@@ -264,15 +299,14 @@ internal class PunsjJournalpostRepositoryTest {
     fun `Forventer at gosysoppgaveId blir persistert på journalpost`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
         val forventetGosysoppgaveId = IdGenerator.nesteId()
-        val journalpostRepository = DatabaseUtil.getJournalpostRepo()
 
         val punsjJournalpost = PunsjJournalpost(
-                uuid = UUID.randomUUID(),
-                journalpostId = IdGenerator.nesteId(),
-                aktørId = dummyAktørId,
-                type = PunsjInnsendingType.SAMTALEREFERAT.kode,
-                gosysoppgaveId = forventetGosysoppgaveId
-            )
+            uuid = UUID.randomUUID(),
+            journalpostId = IdGenerator.nesteId(),
+            aktørId = dummyAktørId,
+            type = PunsjInnsendingType.SAMTALEREFERAT.kode,
+            gosysoppgaveId = forventetGosysoppgaveId
+        )
 
         journalpostRepository.lagre(punsjJournalpost) { punsjJournalpost }
 

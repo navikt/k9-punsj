@@ -1,62 +1,29 @@
 package no.nav.k9punsj.fordel
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.TestBeans
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.domenetjenester.repository.PersonRepository
-import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
-import no.nav.k9punsj.rest.eksternt.pdl.TestPdlService
-import no.nav.k9punsj.util.DatabaseUtil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.MetricUtils.Companion.assertCounter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.*
 
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("test")
-@ContextConfiguration(
-    classes = [
-        TestBeans::class,
-        AksjonspunktServiceImpl::class,
-        JournalpostRepository::class,
-        JournalpostService::class,
-        SafGateway::class,
-        DokarkivGateway::class,
-        ObjectMapper::class,
-        AksjonspunktRepository::class,
-        AksjonspunktServiceImpl::class,
-        SoknadService::class,
-        InnsendingClient::class,
-        PersonService::class,
-        PersonRepository::class,
-        TestPdlService::class,
-        SøknadRepository::class
-    ]
-)
-internal class HendelseMottakerTest {
+internal class HendelseMottakerTest: AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var safGateway: SafGateway
@@ -75,6 +42,9 @@ internal class HendelseMottakerTest {
 
     @Autowired
     private lateinit var aksjonspunktService: AksjonspunktService
+
+    @Autowired
+    lateinit var aksjonspunktRepository: AksjonspunktRepository
 
     private lateinit var hendelseMottaker: HendelseMottaker
 
@@ -151,8 +121,7 @@ internal class HendelseMottakerTest {
         val journalpost = journalpostService.hent(meldingSomSkalLukkeOppgave.journalpostId)
         assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
 
-        val alleAksjonspunkter =
-            DatabaseUtil.getAksjonspunktRepo().hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
+        val alleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
 
         assertThat(alleAksjonspunkter).hasSize(1)
         assertThat(alleAksjonspunkter[0].aksjonspunktStatus).isEqualTo(AksjonspunktStatus.UTFØRT)

@@ -1,3 +1,9 @@
+spring:
+  flyway:
+    enabled: true
+    init-sqls:
+      - SET ROLE "k9-punsj-admin"
+
 management:
   health:
     diskspace:
@@ -23,26 +29,33 @@ no.nav:
   versjon: '@project.version@'
   beskrivelse: '@project.description@'
   swagger_server_base_url: ${SWAGGER_SERVER_BASE_URL:http://localhost:8085}
+
   dokarkiv:
     base_url: ${DOKARKIV_BASE_URL}
     scope: ${DOKARKIV_SCOPE}
+
   saf:
     base_url: ${SAF_BASE_URL}
     scopes:
       hente_journalpost_scopes: ${SAF_HENTE_JOURNALPOST_SCOPES}
       hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES}
+
   pdl:
     base_url: ${PDL_BASE_URL}
     scope: ${PDL_SCOPE}
+
   k9sak:
     base_url: ${K9SAK_BASE_URL}
     scope: ${K9SAK_SCOPE}
+
   k9punsjbolle:
     base_url: ${K9PUNSJBOLLE_BASE_URL}
     scope: ${K9PUNSJBOLLE_SCOPE}
+
   gosys:
     base_url: ${GOSYS_BASE_URL}
     scope: ${GOSYS_BASE_SCOPE}
+
   security:
     jwt:
       expirythreshold: 1
@@ -62,6 +75,7 @@ no.nav:
     username: ${DEFAULTDS_USERNAME}
     password: ${DEFAULTDS_PASSWORD}
     vault_mountpath: ${DEFAULTDS_VAULT_MOUNTPATH}
+
   abac:
     system_user: ${SYSTEMBRUKER_USERNAME}
     system_user_password: ${SYSTEMBRUKER_PASSWORD}
