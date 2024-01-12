@@ -220,6 +220,8 @@ internal class JournalpostRoutes(
                     journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                         journalpostInfo?.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
+                // TODO: Hent og reserver saksnummer fra k9-sak?
+
                 // Oppdater og ferdigstill journalpost hvis vi har saksnummer
                 if (!erFerdigstiltEllerJournalfoert && dto.saksnummer != null) {
                     journalpostService.oppdaterOgFerdigstillForMottak(dto)
