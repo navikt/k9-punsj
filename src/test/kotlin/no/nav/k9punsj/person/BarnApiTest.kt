@@ -2,6 +2,7 @@ package no.nav.k9punsj.person
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
@@ -12,10 +13,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@ExtendWith(SpringExtension::class)
-class BarnApiTest {
-
-    private val client = TestSetup.client
+class BarnApiTest : AbstractContainerBaseTest() {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
 
     @Test
@@ -27,8 +25,13 @@ class BarnApiTest {
             }
         """.trimIndent()
 
-        val hentBarnJson = hentBarnJson("01110050053")
-        JSONAssert.assertEquals(forventet, hentBarnJson, true)
+        webTestClient.get()
+            .uri { it.pathSegment("api", "barn").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", "01110050053")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody().json(forventet)
     }
 
     @Test
@@ -54,15 +57,12 @@ class BarnApiTest {
         }
         """.trimIndent()
 
-        val hentBarnJson = hentBarnJson("66666666666")
-        JSONAssert.assertEquals(forventet, hentBarnJson, true)
-    }
-
-    private suspend fun hentBarnJson(identitetsnummer: String): String {
-        return client.get()
+        webTestClient.get()
             .uri { it.pathSegment("api", "barn").build() }
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", identitetsnummer)
-            .awaitBodyWithType()
+            .header("X-Nav-NorskIdent", "66666666666")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody().json(forventet)
     }
 }

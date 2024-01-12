@@ -2,6 +2,7 @@ package no.nav.k9punsj.configuration
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import getDataSource
 
 fun createHikariConfig(
     jdbcUrl: String,
@@ -20,7 +21,6 @@ fun createHikariConfig(
     isAutoCommit = true
 }
 
-fun hikariConfig(hikariConfig: DbConfiguration): HikariDataSource {
-    migrate(hikariConfig)
-    return getDataSource(hikariConfig)
+fun createHikariDatasource(dbConfiguration: DbConfiguration): HikariDataSource {
+    return getDataSource(dbConfiguration)
 }
