@@ -15,4 +15,4 @@ jobs:
       security-events: write
     with:
       use-reader: true
-      java-version: 17
+      java-version: 21
