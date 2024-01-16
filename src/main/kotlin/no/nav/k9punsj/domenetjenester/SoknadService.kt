@@ -160,6 +160,7 @@ class SoknadService(
 
         ferdigstillJournalposter.forEach { ferdigstillJournalpost ->
             dokarkivGateway.oppdaterJournalpostForFerdigstilling(ferdigstillJournalpost)
+            // TODO: Håndtere om vi får feil ved ferdigstilling?
             dokarkivGateway.ferdigstillJournalpost(ferdigstillJournalpost.journalpostId.toString(), "9999")
             logger.info("Ferdigstilt journalpost=[${ferdigstillJournalpost.journalpostId}]")
         }
