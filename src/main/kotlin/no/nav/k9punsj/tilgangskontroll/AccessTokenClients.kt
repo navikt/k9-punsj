@@ -16,6 +16,10 @@ internal class AccessTokenClients(
     @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String,
     @Value("\${no.nav.security.jwt.client.azure.jwk}") azureJwk: String,
     @Value("\${no.nav.security.jwt.client.azure.token_endpoint}") azureTokenEndpoint: URI,
+
+    @Value("\${systembruker.username}") clientId: String,
+    @Value("\${systembruker.password}") clientSecret: String,
+    @Value("\${no.nav.security.sts.client.token_endpoint}") stsTokenEndpoint: URI
 ) {
 
     private companion object {
@@ -35,6 +39,13 @@ internal class AccessTokenClients(
         throw IllegalArgumentException("Azure JWK på feil format.")
     }
 
+    private val naisStsClient = ClientSecretAccessTokenClient(
+        clientId = clientId,
+        clientSecret = clientSecret,
+        tokenEndpoint = stsTokenEndpoint,
+        authenticationMode = ClientSecretAccessTokenClient.AuthenticationMode.BASIC
+    )
+
     private val signedJwtAzureAccessTokenClient = SignedJwtAccessTokenClient(
         clientId = azureClientId,
         tokenEndpoint = azureTokenEndpoint,
@@ -45,6 +56,10 @@ internal class AccessTokenClients(
     @Bean
     @Qualifier("azure")
     internal fun azureAccessTokenClient(): AccessTokenClient = signedJwtAzureAccessTokenClient
+
+    @Bean
+    @Qualifier("sts")
+    internal fun stsAccessTokenClient(): AccessTokenClient = naisStsClient
 }
 
 private val logger: Logger = LoggerFactory.getLogger("no.nav.k9.AccessTokenHelsesjekk")
