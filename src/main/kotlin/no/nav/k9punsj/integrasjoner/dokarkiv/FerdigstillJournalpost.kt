@@ -82,7 +82,8 @@ internal data class FerdigstillJournalpost(
                 it.put("idType", "FNR")
                 it.put("id", bruker.identitetsnummer.toString())
             })
-            utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
+            utfyllendeInformasjon.add("avsenderMottaker.idType=FNR")
+            utfyllendeInformasjon.add("avsenderMottaker.id=[***]")
         }
 
         return json.toString().also {
