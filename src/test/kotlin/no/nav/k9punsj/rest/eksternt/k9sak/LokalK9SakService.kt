@@ -6,6 +6,7 @@ import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -87,5 +88,9 @@ class LokalK9SakService : K9SakService {
         brevkode: Brevkode
     ) {
         // do nothing
+    }
+
+    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
+        return Pair(SaksnummerDto("ABC123"), null)
     }
 }

@@ -5,6 +5,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 
 interface K9SakService {
@@ -43,4 +44,6 @@ interface K9SakService {
         saksnummer: String,
         brevkode: Brevkode
     )
+
+    suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?>
 }

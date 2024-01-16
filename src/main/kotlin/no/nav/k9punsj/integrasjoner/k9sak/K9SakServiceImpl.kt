@@ -24,6 +24,7 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.reserverSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -57,7 +58,7 @@ class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
     private val journalpostService: JournalpostService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
@@ -69,6 +70,7 @@ class K9SakServiceImpl(
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val finnFagsak = "/fordel/fagsak/sok"
+        internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -107,7 +109,7 @@ class K9SakServiceImpl(
         søker: String,
         barn: String?,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
-        periode: PeriodeDto
+        periode: PeriodeDto,
     ): Pair<List<PeriodeDto>?, String?> {
         val søkerAktørId = personService.finnAktørId(søker)
         val barnAktørId = barn?.let { personService.finnAktørId(barn) }
@@ -197,7 +199,7 @@ class K9SakServiceImpl(
     override suspend fun hentEllerOpprettSaksnummer(
         k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): Pair<String?, String?> {
         // Bruker k9saksnummergrunnlag for å mappe
         val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
@@ -255,7 +257,7 @@ class K9SakServiceImpl(
         journalpostId: String,
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
         saksnummer: String,
-        brevkode: Brevkode
+        brevkode: Brevkode,
     ) {
         val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
         val søknadJson = objectMapper().writeValueAsString(soknad)
@@ -286,6 +288,28 @@ class K9SakServiceImpl(
         }
     }
 
+    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
+        val (result, feil) = httpPost("", reserverSaksnummerUrl)
+        if (feil != null) {
+            log.error("Feil ved reservasjon av saksnummer: $feil")
+            return Pair(null, feil)
+        }
+        if (result == null) {
+            log.error("Response body er null")
+            return Pair(null, "Response body er null")
+        }
+        return kotlin.runCatching { objectMapper().readValue<SaksnummerDto>(result) }
+            .fold(
+                onSuccess = { saksnummerDto: SaksnummerDto -> Pair(saksnummerDto, null) },
+                onFailure = { throwable: Throwable ->
+                    Pair(
+                        null,
+                        "Feilet deserialisering av saksnummerDto ved reservasjon: $throwable"
+                    )
+                }
+            )
+    }
+
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
         val (request, _, result) = "$baseUrl$url"
             .httpPost()
@@ -312,7 +336,7 @@ class K9SakServiceImpl(
     }
 
     private fun SøknadEntitet.tilK9saksnummerGrunnlag(
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
     ): HentK9SaksnummerGrunnlag {
         return when (fagsakYtelseType) {
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> {
@@ -449,7 +473,7 @@ class K9SakServiceImpl(
             val ytelseType: FagsakYtelseType,
             val aktørId: String,
             val pleietrengendeAktørId: String? = null,
-            val periode: PeriodeDto
+            val periode: PeriodeDto,
         )
 
         data class MatchArbeidsforholdDto(
