@@ -18,7 +18,7 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 internal class OidcRoutes(
     private val authenticationHandler: AuthenticationHandler,
-    @Qualifier("azure") accessTokenClient: AccessTokenClient
+    @Qualifier("sts") accessTokenClient: AccessTokenClient
 ) {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val scope: Set<String> = setOf("openid")

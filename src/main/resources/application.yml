@@ -17,6 +17,16 @@ management:
         include: info, health, prometheus
       base-path: /internal/actuator
 
+systembruker:
+  username: ${SYSTEMBRUKER_USERNAME}
+  password: ${SYSTEMBRUKER_PASSWORD}
+
+javax:
+  net:
+    ssl:
+      trustStore: ${NAV_TRUSTSTORE_PATH}
+      trustStorePassword: ${NAV_TRUSTSTORE_PASSWORD}
+
 springdoc:
   api-docs:
     path: /internal/api-docs
@@ -57,6 +67,9 @@ no.nav:
     scope: ${GOSYS_BASE_SCOPE}
 
   security:
+    sts:
+      client:
+        token_endpoint: ${NAIS_STS_TOKEN_ENDPOINT}
     jwt:
       expirythreshold: 1
       client:
@@ -69,6 +82,10 @@ no.nav:
           discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
           accepted_audience: ${AZURE_APP_CLIENT_ID}
           proxyUrl: ${HTTP_PROXY:}
+        naissts:
+          discoveryurl: ${APP_NAISSTS_discovery_url}
+          accepted_audience: ${APP_NAISSTS_aud}
+          proxyUrl:
 
   db:
     url: ${DEFAULTDS_URL}
