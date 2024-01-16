@@ -78,7 +78,10 @@ internal data class FerdigstillJournalpost(
         // Oppdaterer avsenderId hvis avsenderIdType mangler
         if (avsenderIdType.isNullOrBlank() && !type.erNotat) {
             logger.info("AvsenderIdType manglet for journalpost $journalpostId. Oppdaterer med avsenderMottaker.id=[***]")
-            json.put("avsenderMottaker", JSONObject().also { it.put("id", bruker.identitetsnummer.toString()) })
+            json.put("avsenderMottaker", JSONObject().also {
+                it.put("idType", "FNR")
+                it.put("id", bruker.identitetsnummer.toString())
+            })
             utfyllendeInformasjon.add("avsenderMottaker.navn=[***]")
         }
 
