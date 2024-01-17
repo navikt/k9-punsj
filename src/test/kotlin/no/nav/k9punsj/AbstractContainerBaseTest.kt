@@ -34,13 +34,12 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.jdbc.JdbcTestUtils
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.util.ResourceUtils
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.MountableFile
 import java.net.URI
 
 
-private class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
+class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
