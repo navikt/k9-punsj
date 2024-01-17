@@ -199,15 +199,18 @@ internal class JournalpostDriftRoutes(
                 val (vellykkedeFerdigstillinger, feiledeFerdigstillinger) = ferdigstillJournalposterResponse
                     .partition { it.statusCode.is2xxSuccessful } // Del i vellykkede og feilede ferdigstillinger
 
+                val ferdigstillJournalpostResponseDto = FerdigstillJournalpostResponseDto(
+                    vellykketFerdigstilteJournalposter = vellykkedeFerdigstillinger.map { it.toString() },
+                    feiledeFerdigstillinger = feiledeFerdigstillinger.map { it.toString() },
+                    ikkeFerdigstiltUtenSakstilknytning = utenSakstilknytning.map { it.journalpostId },
+                    alleredeFerdigstilteJournalposter = ferdigstilte.map { it.journalpostId }
+                )
+                logger.info("Response: {}", ferdigstillJournalpostResponseDto)
                 return@RequestContext ServerResponse
                     .status(HttpStatus.OK)
                     .bodyValueAndAwait(
-                        FerdigstillJournalpostResponseDto(
-                            vellykketFerdigstilteJournalposter = vellykkedeFerdigstillinger.map { it.toString() },
-                            feiledeFerdigstillinger = feiledeFerdigstillinger.map { it.toString() },
-                            ikkeFerdigstiltUtenSakstilknytning = utenSakstilknytning.map { it.journalpostId },
-                            alleredeFerdigstilteJournalposter = ferdigstilte.map { it.journalpostId }
-                        ))
+                        ferdigstillJournalpostResponseDto
+                    )
             }
         }
 
