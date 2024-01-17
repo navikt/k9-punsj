@@ -7,6 +7,7 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.journalpost.dto.ResultatDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -23,13 +24,15 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
+import kotlin.math.log
 
 @Configuration
 internal class JournalpostDriftRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val aksjonspunktService: AksjonspunktService,
-    private val azureGraphService: IAzureGraphService
+    private val dokarkivGateway: DokarkivGateway,
+    private val azureGraphService: IAzureGraphService,
 ) {
 
     private companion object {
@@ -43,6 +46,7 @@ internal class JournalpostDriftRoutes(
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
         internal const val LukkJournalposterDebugg = "/journalpost/lukkDebugg"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
+        internal const val FerdigstillJournalpostForDebugg = "/journalpost/ferdigstillDebugg/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -134,7 +138,7 @@ internal class JournalpostDriftRoutes(
                         .bodyValueAndAwait(
                             ResultatDto(
                                 "Alle er ferdig behandlet i punsj eller finnes ikke i punsj: " +
-                                    "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"
+                                        "$alleredeLukketIPunsjTekst $fantIkkeIPunsjTekst"
                             )
                         )
                 }
@@ -153,7 +157,7 @@ internal class JournalpostDriftRoutes(
                         .bodyValueAndAwait(
                             ResultatDto(
                                 "Alle er ferdig behandlet i punsj, finnes ikke i punsj eller ikke lukket i SAF. " +
-                                    "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"
+                                        "$ikkeLukketISafTekst. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst"
                             )
                         )
                 }
@@ -168,6 +172,42 @@ internal class JournalpostDriftRoutes(
                             "Lukket journalposter: $ferdigeSaf. $fantIkkeIPunsjTekst $alleredeLukketIPunsjTekst $ikkeLukketISafTekst"
                         )
                     )
+            }
+        }
+
+        POST("/api${Urls.FerdigstillJournalpostForDebugg}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostIder = request.journalpostIder().journalpostIder.toSet()
+                logger.info("Forsøker å ferdigstille journalposter: {}", journalpostIder)
+
+                val journalposterIDb = journalpostService.hentHvisJournalpostMedIder(journalpostIder.toList())
+                if (journalposterIDb.isEmpty()) {
+                    logger.info("Fant ingen journalposter i punsj med id {}", journalpostIder)
+                    return@RequestContext ServerResponse.notFound().buildAndAwait()
+                }
+
+                val (ferdigstilte, ikkeFerdigstilte) = journalposterIDb
+                    .map { journalpostService.hentSafJournalPost(it.key.journalpostId)!! } // Hent saf journalpost
+                    .partition { it.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name } // Del i ferdigstilte og ikke ferdigstilte
+
+                val (medSakstilknytning, utenSakstilknytning) = ikkeFerdigstilte
+                    .partition { it.sak?.fagsakId != null } // Del i med og uten sakstilknytning
+
+                val ferdigstillJournalposterResponse = medSakstilknytning
+                    .map { dokarkivGateway.ferdigstillJournalpost(it.journalpostId, "9999") } // Ferdigstill journalposter
+
+                val (vellykkedeFerdigstillinger, feiledeFerdigstillinger) = ferdigstillJournalposterResponse
+                    .partition { it.statusCode.is2xxSuccessful } // Del i vellykkede og feilede ferdigstillinger
+
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.OK)
+                    .bodyValueAndAwait(
+                        FerdigstillJournalpostResponseDto(
+                            vellykketFerdigstilteJournalposter = vellykkedeFerdigstillinger.map { it.toString() },
+                            feiledeFerdigstillinger = feiledeFerdigstillinger.map { it.toString() },
+                            ikkeFerdigstiltUtenSakstilknytning = utenSakstilknytning.map { it.journalpostId },
+                            alleredeFerdigstilteJournalposter = ferdigstilte.map { it.journalpostId }
+                        ))
             }
         }
 
@@ -207,6 +247,13 @@ internal class JournalpostDriftRoutes(
             }
         }
     }
+
+    data class FerdigstillJournalpostResponseDto(
+        val vellykketFerdigstilteJournalposter: List<String?>,
+        val alleredeFerdigstilteJournalposter: List<String?>,
+        val feiledeFerdigstillinger: List<String?>,
+        val ikkeFerdigstiltUtenSakstilknytning: List<String?>,
+    )
 
     private fun diffTekst(setA: Set<String>, setB: Set<String>, prefix: String): String {
         val diff = setA.minus(setB)
