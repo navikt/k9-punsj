@@ -35,6 +35,7 @@ class PostMottakService(
         if(saksnummerDto == null) {
             return Pair(null, "Saksnummer er null")
         }
+        logger.info("Reservert saksnummer: ${saksnummerDto.saksnummer}")
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
             oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummerDto)
@@ -62,6 +63,7 @@ class PostMottakService(
         oppdatertJournalpost: PunsjJournalpost,
         saksnummerDto: SaksnummerDto
     ) {
+        logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: ${saksnummerDto.saksnummer}")
         journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummerDto)
         logger.info("Ferdigstilt journalpost: ${oppdatertJournalpost.journalpostId}")
     }
