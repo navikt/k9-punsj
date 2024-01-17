@@ -9,10 +9,12 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
+@Profile("test") // TODO: Erstatt med mock
 internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,

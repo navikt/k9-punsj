@@ -2,11 +2,12 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto
+import no.nav.k9punsj.K9SakRoutes
 import no.nav.k9punsj.RequestContext
-import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.journalpost.dto.JournalpostIderDto
 import no.nav.k9punsj.journalpost.dto.SøkUferdigJournalposter
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.BodyExtractors
@@ -27,7 +28,7 @@ internal class JournalpostInfoRoutes(
     }
 
     @Bean
-    fun JournalpostInfoRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun JournalpostInfoRoutes() = K9SakRoutes(authenticationHandler) {
         POST("/api${Urls.HentÅpneJournalposterPost}") { request ->
             RequestContext(coroutineContext, request) {
                 val dto = request.søkUferdigJournalposter()

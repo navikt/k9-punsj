@@ -6,7 +6,6 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
-import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.wiremock.getAaregBaseUrl
 import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
 import no.nav.k9punsj.wiremock.getEregBaseUrl
@@ -20,7 +19,8 @@ internal object MockConfiguration {
     internal fun config(
         wireMockServer: WireMockServer,
         port: Int,
-        azureV2Url: URI?
+        azureV2Url: URI?,
+        postgresqlContainer: PostgreSQLContainer12? = null
     ): Map<String, String> {
         val (wellKnownUrl, tokenUrl) = when (azureV2Url) {
             null -> wireMockServer.getAzureV2WellKnownUrl() to wireMockServer.getAzureV2TokenUrl()
@@ -50,6 +50,9 @@ internal object MockConfiguration {
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
             "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
             "DEFAULTDS_VAULT_MOUNTPATH" to "",
+            "DEFAULTDS_URL" to "${postgresqlContainer?.jdbcUrl}",
+            "DEFAULTDS_USERNAME" to "${postgresqlContainer?.username}",
+            "DEFAULTDS_PASSWORD" to "${postgresqlContainer?.password}",
             "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
             "AUDITLOGGER_ENABLED" to "false",
             "ABAC_PDP_ENDPOINT_URL" to "",

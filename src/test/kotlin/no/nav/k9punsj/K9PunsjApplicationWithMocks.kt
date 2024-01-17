@@ -6,16 +6,32 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.wiremock.initWireMock
 import org.springframework.boot.Banner
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
+import org.testcontainers.utility.MountableFile
 import java.net.URI
-import java.util.UUID
+import java.util.*
 
 internal class K9PunsjApplicationWithMocks {
     internal companion object {
+        private val postgreSQLContainer12 = PostgreSQLContainer12().apply {
+            // Cloud SQL har wal_level = 'logical' på grunn av flagget cloudsql.logical_decoding i
+            // naiserator.yaml. Vi må sette det samme lokalt for at flyway migrering skal fungere.
+            withCommand("postgres", "-c", "wal_level=logical")
+
+            // Kopierer init.sql til containeren med script for å opprette rollen k9-punsj-admin.
+            withCopyFileToContainer(
+                MountableFile.forClasspathResource(
+                    "db/init.sql"
+                ),
+                "/docker-entrypoint-initdb.d/init.sql"
+            )
+        }
+
         internal fun startup(
             wireMockServer: WireMockServer,
             port: Int,
@@ -29,7 +45,8 @@ internal class K9PunsjApplicationWithMocks {
                     MockConfiguration.config(
                         wireMockServer = wireMockServer,
                         port = port,
-                        azureV2Url = azureV2Url
+                        azureV2Url = azureV2Url,
+                        postgresqlContainer = postgreSQLContainer12
                     )
                 )
                 .main(K9PunsjApplication::class.java)
@@ -63,9 +80,11 @@ internal class K9PunsjApplicationWithMocks {
                 rootDirectory = "src/test/resources"
             )
 
+            postgreSQLContainer12.start()
+
             Runtime.getRuntime().addShutdownHook(
                 Thread {
-                    DbContainerInitializer.postgresContainer.close()
+                    postgreSQLContainer12.close()
                     wireMockServer.stop()
                 }
             )
@@ -86,6 +105,18 @@ internal class K9PunsjApplicationWithMocks {
                     )
                 )
             }
+        }
+    }
+
+    internal class PostgresqlContainerInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
+        override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
+            postgreSQLContainer12.start()
+
+            TestPropertyValues.of(
+                "no.nav.db.url=${postgreSQLContainer12.jdbcUrl}",
+                "no.nav.db.username=${postgreSQLContainer12.username}",
+                "no.nav.db.password=${postgreSQLContainer12.password}"
+            ).applyTo(configurableApplicationContext.environment)
         }
     }
 }

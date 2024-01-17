@@ -56,6 +56,21 @@ private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
 internal fun CoroutineContext.hentAuthentication(): Authentication =
     hentAttributt("authentication") as? Authentication ?: throw IllegalStateException("Authentication ikke satt")
 
+internal fun K9SakRoutes(
+    authenticationHandler: AuthenticationHandler,
+    routes: CoRouterFunctionDsl.() -> Unit
+) = Routes(
+    authenticationHandler,
+    routes,
+    setOf("naissts", "azurev2")
+) { jwtToken ->
+    if(jwtToken.jwtTokenClaims.issuer.contains("security-token-service")) {
+        jwtToken.containsClaim("sub", "srvk9sak")
+    } else {
+        true
+    }
+}
+
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
     routes: CoRouterFunctionDsl.() -> Unit
