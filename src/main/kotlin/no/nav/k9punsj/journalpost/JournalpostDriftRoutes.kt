@@ -46,7 +46,7 @@ internal class JournalpostDriftRoutes(
         internal const val HentHvaSomHarBlittSendtInn = "/journalpost/hentForDebugg/{$JournalpostIdKey}"
         internal const val LukkJournalposterDebugg = "/journalpost/lukkDebugg"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
-        internal const val FerdigstillJournalpostForDebugg = "/journalpost/ferdigstillDebugg/{$JournalpostIdKey}"
+        internal const val FerdigstillJournalpostForDebugg = "/journalpost/ferdigstillDebugg"
     }
 
     @Bean
