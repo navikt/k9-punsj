@@ -301,4 +301,31 @@ internal class JournalpostOpenApi {
         @RequestBody body: IdentOgJournalpost
     ) {
     }
+
+    @PostMapping(JournalpostDriftRoutes.Urls.FerdigstillJournalpostForDebugg, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis en eller flere journalposter har blitt ferdigstilt"
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Journalposter som ikke ble funnet i punsj."
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Ingen av journalpostene eksisterer i punsj"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Ferdigstiller journalposter som ikke ferdigstilt og som har sakstilknytning",
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
+    )
+    fun FerdigstillJournalposterDebugg(
+        @RequestBody body: JournalpostRoutes.JournalpostIderRequest
+    ) {
+    }
 }
