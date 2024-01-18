@@ -46,4 +46,12 @@ interface K9SakService {
     )
 
     suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?>
+    suspend fun opprettSakOgSendInnSøknad(
+        soknad: Søknad,
+        søknadEntitet: SøknadEntitet,
+        journalpostId: String,
+        fagsakYtelseType: FagsakYtelseType,
+        saksnummer: String,
+        brevkode: Brevkode,
+    )
 }

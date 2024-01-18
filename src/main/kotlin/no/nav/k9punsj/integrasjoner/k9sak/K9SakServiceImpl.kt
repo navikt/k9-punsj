@@ -24,6 +24,8 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettFagsakUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettSakOgSendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.reserverSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
@@ -71,6 +73,8 @@ class K9SakServiceImpl(
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val finnFagsak = "/fordel/fagsak/sok"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
+        internal const val opprettFagsakUrl = "/fordel/fagsak/opprett"
+        internal const val opprettSakOgSendInnSøknadUrl = "/fordel//mottak/journalpost/sak/opprett"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -242,7 +246,7 @@ class K9SakServiceImpl(
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
-        val response = httpPost(body, "/fordel/fagsak/opprett")
+        val response = httpPost(body, opprettFagsakUrl)
 
         return try {
             val saksnummer = JSONObject(response.first).getString("saksnummer").toString()
@@ -308,6 +312,62 @@ class K9SakServiceImpl(
                     )
                 }
             )
+    }
+
+    override suspend fun opprettSakOgSendInnSøknad(
+        soknad: Søknad,
+        søknadEntitet: SøknadEntitet,
+        journalpostId: String,
+        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        saksnummer: String,
+        brevkode: Brevkode,
+    ) {
+        val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
+        val søknadJson = objectMapper().writeValueAsString(soknad)
+        val callId = hentCallId()
+
+        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
+        val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
+        val pleietrengendeAktørId =
+            if (!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+            } else null
+        val annenpartAktørId =
+            if (!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
+            } else null
+
+        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
+        @Language("JSON")
+        val body = """
+            [{
+                "aktørId": "$søkerAktørId",
+                "pleietrengendeAktørId": "$pleietrengendeAktørId",
+                "relatertPersonAktørId": "$annenpartAktørId",
+                "saksnummer": "$saksnummer",
+                "journalpostId": "$journalpostId",
+                "periode": {
+                    "fom": "${k9SaksnummerGrunnlag.periode?.fom}",
+                    "tom": "${k9SaksnummerGrunnlag.periode?.tom}"
+                },
+                "ytelseType": {
+                    "kode": "${fagsakYtelseType.kode}",
+                    "kodeverk": "FAGSAK_YTELSE"
+                },
+                "kanalReferanse": "$callId",
+                "type": "${brevkode.kode}",
+                "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
+                "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
+                "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
+            }]
+        """.trimIndent()
+
+        val (_, feil) = httpPost(body, opprettSakOgSendInnSøknadUrl)
+        require(feil.isNullOrEmpty()) {
+            val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
+            log.error(feilmelding)
+            throw IllegalStateException(feilmelding)
+        }
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {

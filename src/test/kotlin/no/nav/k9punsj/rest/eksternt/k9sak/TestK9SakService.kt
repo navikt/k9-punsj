@@ -107,4 +107,15 @@ internal class TestK9SakService : K9SakService {
     override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
         return Pair(SaksnummerDto("ABC123"), null)
     }
+
+    override suspend fun opprettSakOgSendInnSøknad(
+        soknad: Søknad,
+        søknadEntitet: SøknadEntitet,
+        journalpostId: String,
+        fagsakYtelseType: FagsakYtelseType,
+        saksnummer: String,
+        brevkode: Brevkode,
+    ) {
+        // do nothing
+    }
 }
