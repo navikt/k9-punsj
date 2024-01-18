@@ -251,7 +251,7 @@ internal class JournalpostDriftRoutes(
         }
     }
 
-    data class FerdigstillJournalpostResponseDto(
+    private data class FerdigstillJournalpostResponseDto(
         val vellykketFerdigstilteJournalposter: List<String?>,
         val alleredeFerdigstilteJournalposter: List<String?>,
         val feiledeFerdigstillinger: List<String?>,
