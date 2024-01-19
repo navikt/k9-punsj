@@ -226,13 +226,7 @@ class SoknadService(
         brevkode: Brevkode,
         journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
-        val correlationId = hentCorrelationId(coroutineContext)
         val journalpostIdListe = journalpostIder.toList()
-        val punsjetAvSaksbehandler = hentSistEndretAvSaksbehandler(søknad.søknadId.id)
-
-        val søkerFnr = søknad.søker.personIdent.verdi
-        val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
-        val fagsakYtelseType = FagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposteneKanSendesInn(journalpostIdListe)) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -248,9 +242,9 @@ class SoknadService(
             return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $feilregistrerteJournalposter"
         }
 
-        val ikkeFerdigstilteJournalposter = ikkeFerdigstilteJournalposter(journalposter)
-        if (ikkeFerdigstilteJournalposter.isNotEmpty()) {
-            return HttpStatus.CONFLICT to "Journalposter som ikke er ferdigstilt er ikke støttet: $ikkeFerdigstilteJournalposter"
+        val ikkeFerdigstiltEllerJournalførteJournalposter = ikkeFerdigstiltEllerJournalførteJournalposter(journalposter)
+        if (ikkeFerdigstiltEllerJournalførteJournalposter.isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter som ikke er ferdigstilt eller journalført er ikke støttet: $ikkeFerdigstiltEllerJournalførteJournalposter"
         }
 
         val fagsakIder = fagsaker(journalposter)
@@ -260,7 +254,7 @@ class SoknadService(
             }
 
             fagsakIder.size > 1 -> {
-                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Det er ikke tillatt med flere fagsakIder på journalpostene: ${fagsakIder.map { it.second }}"
             }
         }
 
@@ -268,9 +262,10 @@ class SoknadService(
         require(k9Saksnummer != null) { "K9Saksnummer er null" }
 
         val søknadObject = objectMapper().convertValue<ObjectNode>(søknad)
+        val punsjetAvSaksbehandler = hentSistEndretAvSaksbehandler(søknad.søknadId.id)
         søknadObject.put("punsjet av", punsjetAvSaksbehandler)
 
-        // Journalfør o ferdigstill søknadjson
+        // Journalfør og ferdigstill søknadjson
         val pdf = PdfGenerator.genererPdf(
             html = HtmlGenerator.genererHtml(
                 tittel = "Innsending fra Punsj",
@@ -279,7 +274,7 @@ class SoknadService(
         )
 
         val nyJournalpostMedPunsjetSøknadsopplysninger = JournalPostRequest(
-            eksternReferanseId = correlationId,
+            eksternReferanseId = hentCorrelationId(coroutineContext),
             tittel = "PunsjetSøknad",
             brevkode = K9_PUNSJ_INNSENDING_BREVKODE,
             tema = Tema.OMS,
@@ -289,7 +284,7 @@ class SoknadService(
             fagsystem = FagsakSystem.K9,
             sakstype = SaksType.FAGSAK,
             saksnummer = k9Saksnummer,
-            brukerIdent = søkerFnr,
+            brukerIdent = søknad.søker.personIdent.verdi,
             avsenderNavn = punsjetAvSaksbehandler,
             pdf = pdf,
             json = søknadObject
@@ -305,11 +300,10 @@ class SoknadService(
             soknad = søknad,
             søknadEntitet = søknadEntitet ,
             journalpostId = journalpostId.toString(),
-            fagsakYtelseType = fagsakYtelseType,
+            fagsakYtelseType = FagsakYtelseType.fromKode(Søknadstype.fraBrevkode(brevkode).k9YtelseType),
             saksnummer = k9Saksnummer,
             brevkode = brevkode
         )
-
 
         leggerVedPayload(søknad, journalpostIder)
         journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
@@ -333,10 +327,10 @@ class SoknadService(
             .map { it.journalpostId }
             .toSet()
 
-    private fun ikkeFerdigstilteJournalposter(journalposter: List<SafDtos.Journalpost?>) =
+    private fun ikkeFerdigstiltEllerJournalførteJournalposter(journalposter: List<SafDtos.Journalpost?>) =
         journalposter.asSequence().filterNotNull()
             .filterNot { it.journalstatus == null }
-            .filterNot { it.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.toString() }
+            .filterNot { it.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.toString() || it.journalstatus == SafDtos.Journalstatus.JOURNALFOERT.toString() }
             .map { it.journalpostId }
             .toSet()
 
