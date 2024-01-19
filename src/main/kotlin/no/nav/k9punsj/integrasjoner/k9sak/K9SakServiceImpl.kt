@@ -74,7 +74,7 @@ class K9SakServiceImpl(
         internal const val finnFagsak = "/fordel/fagsak/sok"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val opprettFagsakUrl = "/fordel/fagsak/opprett"
-        internal const val opprettSakOgSendInnSøknadUrl = "/fordel//mottak/journalpost/sak/opprett"
+        internal const val opprettSakOgSendInnSøknadUrl = "/fordel/mottak/journalpost/sak/opprett"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
