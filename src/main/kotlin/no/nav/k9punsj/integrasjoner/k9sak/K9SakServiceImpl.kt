@@ -58,7 +58,7 @@ import kotlin.coroutines.coroutineContext
 class K9SakServiceImpl(
     @Value("\${no.nav.k9sak.base_url}") private val baseUrl: URI,
     @Value("\${no.nav.k9sak.scope}") private val k9sakScope: Set<String>,
-    @Qualifier("sts") private val accessTokenClient: AccessTokenClient,
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
     private val journalpostService: JournalpostService,
     private val personService: PersonService,
 ) : K9SakService {
@@ -376,7 +376,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(emptySet()).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
