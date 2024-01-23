@@ -388,17 +388,19 @@ class K9SakServiceImpl(
             null
         }
 
-        val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
-
-        val k9sakPeriode = periodeFraK9Format?.iso8601?.let {
-            val periode = Periode(it)
+        return if (periodeFraK9Format?.iso8601 != null) {
+            val periode = Periode(periodeFraK9Format.iso8601)
             log.info("Fant periode fra k9-format: $periode")
             periode
-        } ?: Periode(
-            LocalDate.of(behandlingsAar, 1, 1),
-            LocalDate.of(behandlingsAar, 12, 31)
-        )
-        return k9sakPeriode
+        } else {
+            val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
+            val periode = Periode(
+                LocalDate.of(behandlingsAar, 1, 1),
+                LocalDate.of(behandlingsAar, 12, 31)
+            )
+            log.info("Fant ikke periode fra k9-format. Bruker behandlingsår: $periode")
+            periode
+        }
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
