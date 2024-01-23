@@ -344,8 +344,8 @@ class K9SakServiceImpl(
         val body = """
             [{
                 "aktørId": "$søkerAktørId",
-                "pleietrengendeAktørId": "$pleietrengendeAktørId",
-                "relatertPersonAktørId": "$annenpartAktørId",
+                "pleietrengendeAktørId": ${pleietrengendeAktørId?.let { "\"$it\"" }},
+                "relatertPersonAktørId": ${annenpartAktørId?.let { "\"$it\"" }},
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
                 "periode": {
