@@ -230,8 +230,8 @@ class K9SakServiceImpl(
         val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
 
         val k9sakPeriode = periodeFraK9Format?.iso8601?.let {
-            no.nav.k9.sak.typer.Periode(it)
-        } ?: no.nav.k9.sak.typer.Periode(
+            Periode(it)
+        } ?: Periode(
             LocalDate.of(behandlingsAar, 1, 1),
             LocalDate.of(behandlingsAar, 12, 31)
         )
@@ -337,6 +337,8 @@ class K9SakServiceImpl(
                 personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
             } else null
 
+        val k9sakPeriode = utledK9sakPeriode(soknad, journalpostId)
+
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val body = """
@@ -347,8 +349,8 @@ class K9SakServiceImpl(
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
                 "periode": {
-                    "fom": "${k9SaksnummerGrunnlag.periode?.fom}",
-                    "tom": "${k9SaksnummerGrunnlag.periode?.tom}"
+                    "fom": "${k9sakPeriode.fom}",
+                    "tom": "${k9sakPeriode.tom}"
                 },
                 "ytelseType": {
                     "kode": "${fagsakYtelseType.kode}",
@@ -362,12 +364,36 @@ class K9SakServiceImpl(
             }]
         """.trimIndent()
 
+        log.info("Oppretter sak og sender inn søknad til k9-sak med body: {}", body)
+
         val (_, feil) = httpPost(body, opprettSakOgSendInnSøknadUrl)
         require(feil.isNullOrEmpty()) {
             val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
             log.error(feilmelding)
             throw IllegalStateException(feilmelding)
         }
+    }
+
+    private fun utledK9sakPeriode(soknad: Søknad, journalpostId: String): Periode {
+        val ytelse = soknad.getYtelse<Ytelse>()
+        val periodeFraK9Format = try {
+            ytelse.søknadsperiode
+        } catch (e: Exception) {
+            log.warn("Fant ikke søknadsperiode i søknad for ytelse ${ytelse.type} med journalpostId $journalpostId")
+            null
+        }
+
+        val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
+
+        val k9sakPeriode = periodeFraK9Format?.iso8601?.let {
+            val periode = Periode(it)
+            log.info("Fant periode fra k9-format: $periode")
+            periode
+        } ?: Periode(
+            LocalDate.of(behandlingsAar, 1, 1),
+            LocalDate.of(behandlingsAar, 12, 31)
+        )
+        return k9sakPeriode
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
