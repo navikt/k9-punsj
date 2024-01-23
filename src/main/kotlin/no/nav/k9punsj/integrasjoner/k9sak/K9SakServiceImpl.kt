@@ -364,8 +364,6 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        log.info("Oppretter sak og sender inn søknad til k9-sak med body: {}", body)
-
         val (_, feil) = httpPost(body, opprettSakOgSendInnSøknadUrl)
         require(feil.isNullOrEmpty()) {
             val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
