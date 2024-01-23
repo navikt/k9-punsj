@@ -9,6 +9,7 @@ import no.nav.k9punsj.omsorgspengerutbetaling.OmsorgspengerutbetalingSøknadDto
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
+import no.nav.k9punsj.wiremock.JournalpostIds.FerdigstiltMedSaksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -30,7 +31,7 @@ internal class SoknadIntegrasjonsTest : AbstractContainerBaseTest() {
     fun `Sender in søknad mottatt 2023 til k9 for OMS 2022 og får riktig saksnummer`(): Unit = runBlocking {
         val norskIdent = "03011939596"
         val soeknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUt2022()
-        val journalpostid = abs(Random(234234).nextInt()).toString()
+        val journalpostid = FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(soeknadJson, norskIdent, journalpostid)
         val soeknad = opprettOgLagreSoeknad(soeknadJson = soeknadJson, ident = norskIdent, journalpostid)
 
