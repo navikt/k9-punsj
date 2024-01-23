@@ -375,11 +375,16 @@ class K9SakServiceImpl(
     }
 
     private fun utledK9sakPeriode(soknad: Søknad, journalpostId: String): Periode {
-        val ytelse = soknad.getYtelse<Ytelse>()
+        val ytelse = try {
+            soknad.getYtelse<Ytelse>()
+            } catch (e: Exception) {
+                log.error("feilet med å hente ytelser fra søknad med journalpostId $journalpostId")
+            null
+        }
         val periodeFraK9Format = try {
-            ytelse.søknadsperiode
+            ytelse?.søknadsperiode
         } catch (e: Exception) {
-            log.warn("Fant ikke søknadsperiode i søknad for ytelse ${ytelse.type} med journalpostId $journalpostId")
+            log.warn("Fant ikke søknadsperiode i søknad for ytelse ${ytelse?.type} med journalpostId $journalpostId")
             null
         }
 
