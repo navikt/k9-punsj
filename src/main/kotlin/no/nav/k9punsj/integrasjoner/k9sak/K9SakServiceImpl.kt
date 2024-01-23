@@ -270,7 +270,7 @@ class K9SakServiceImpl(
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val body = """
-            {
+            [{
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
                 "ytelseType": {
@@ -282,7 +282,7 @@ class K9SakServiceImpl(
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
-            }
+            }]
         """.trimIndent()
 
         val (_, feil) = httpPost(body, sendInnSøknadUrl)
@@ -342,7 +342,7 @@ class K9SakServiceImpl(
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val body = """
-            [{
+            {
                 "aktørId": "$søkerAktørId",
                 "pleietrengendeAktørId": ${pleietrengendeAktørId?.let { "\"$it\"" }},
                 "relatertPersonAktørId": ${annenpartAktørId?.let { "\"$it\"" }},
@@ -361,7 +361,7 @@ class K9SakServiceImpl(
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
-            }]
+            }
         """.trimIndent()
 
         log.info("Oppretter sak og sender inn søknad til k9-sak med body: {}", body)
