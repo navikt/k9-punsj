@@ -164,7 +164,7 @@ class DokarkivGateway(
 
         return kotlin.runCatching {
             client
-                .patch()
+                .put()
                 .uri(URI(journalpostId.oppdaterJournalpostUrl()))
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
