@@ -155,6 +155,29 @@ class DokarkivGateway(
         }.håndterFeil()
     }
 
+    internal suspend fun oppdaterJournalpost(jsonString: String, journalpostId: String): ResponseEntity<String> {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        return kotlin.runCatching {
+            client
+                .patch()
+                .uri(URI(journalpostId.oppdaterJournalpostUrl()))
+                .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(jsonString)
+                .retrieve()
+                .toEntity(String::class.java)
+                .awaitFirst()
+        }.håndterFeil()
+    }
+
     internal suspend fun oppdaterJournalpostForFerdigstilling(
         ferdigstillJournalpost: FerdigstillJournalpost
     ) {
