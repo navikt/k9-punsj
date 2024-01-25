@@ -24,6 +24,7 @@ import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
+import no.nav.k9punsj.journalpost.dto.Sak
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
@@ -65,7 +66,7 @@ internal class JournalpostRoutes(
     private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
-    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
+    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
 ) {
 
     private companion object {
@@ -105,12 +106,14 @@ internal class JournalpostRoutes(
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
                     val punsjInnsendingType = punsjJournalpost?.type?.let { PunsjInnsendingType.fraKode(it) }
 
+                    val safJournalPost = journalpostService.hentSafJournalPost(journalpostId = journalpostId)
+
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+                                journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
-                        journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                                    journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -124,7 +127,8 @@ internal class JournalpostRoutes(
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
-                        erFerdigstilt = erFerdigstiltEllerJournalfoert
+                        erFerdigstilt = erFerdigstiltEllerJournalfoert,
+                        sak = safJournalPost?.sak?.let { Sak(it.fagsakId, it.fagsaksystem) }
                     )
 
                     utvidJournalpostMedMottattDato(
@@ -209,7 +213,10 @@ internal class JournalpostRoutes(
                     request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
                 } catch (e: Exception) {
                     val nåVærendeÅr = LocalDate.now().year
-                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
+                    logger.info(
+                        "Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}",
+                        e
+                    )
                     nåVærendeÅr
                 }
 
