@@ -24,26 +24,37 @@ class PostMottakService(
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
     }
 
-    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<SaksnummerDto?, String?> {
+    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<String?, String?> {
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummerDto, feil) = k9SakService.reserverSaksnummer()
+        val (saksnummer, feil) = if (mottattJournalpost.saksnummer.isNullOrBlank()) {
+            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer()
+            if (feil != null) {
+                return Pair(null, feil)
+            }
+            reservertSaksnummerDto?.let {
+                logger.info("Bruker reservert saksnummer: ${it.saksnummer}")
+                Pair(it.saksnummer, null)
+            } ?: Pair(null, "Saksnummer er null")
+        } else {
+            logger.info("Bruker eksisterende saksnummer: ${mottattJournalpost.saksnummer}")
+            Pair(mottattJournalpost.saksnummer, null)
+        }
         if (feil != null) {
             return Pair(null, feil)
         }
-        if(saksnummerDto == null) {
+        if (saksnummer == null) {
             return Pair(null, "Saksnummer er null")
         }
-        logger.info("Reservert saksnummer: ${saksnummerDto.saksnummer}")
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
-            oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummerDto)
+            oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummer)
             lagreTilDB(oppdatertJournalpost)
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
         }
 
-        return Pair(saksnummerDto, null)
+        return Pair(saksnummer, null)
     }
 
     private suspend fun opprettAksjonspunktOgSendTilK9Los(
@@ -61,10 +72,10 @@ class PostMottakService(
     private suspend fun oppdaterOgFerdigstillJournalpostMedSaksnummer(
         mottattJournalpost: JournalpostMottaksHaandteringDto,
         oppdatertJournalpost: PunsjJournalpost,
-        saksnummerDto: SaksnummerDto
+        saksnummer: String
     ) {
-        logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: ${saksnummerDto.saksnummer}")
-        journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummerDto)
+        logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: $saksnummer")
+        journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummer)
         logger.info("Ferdigstilt journalpost: ${oppdatertJournalpost.journalpostId}")
     }
 

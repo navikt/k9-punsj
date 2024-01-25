@@ -8,7 +8,6 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
@@ -142,7 +141,7 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummerDto: SaksnummerDto) {
+    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String) {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
         dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
@@ -151,7 +150,7 @@ class JournalpostService(
             enhetKode = "9999",
             sak = Sak(
                 sakstype = Sak.SaksType.FAGSAK,
-                fagsakId = saksnummerDto.saksnummer
+                fagsakId = saksnummer
             )
         )
     }
