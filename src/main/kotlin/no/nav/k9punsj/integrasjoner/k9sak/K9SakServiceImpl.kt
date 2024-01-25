@@ -337,7 +337,7 @@ class K9SakServiceImpl(
                 personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
             } else null
 
-        val k9sakPeriode = utledK9sakPeriode(soknad, journalpostId)
+        val k9sakPeriode = utledK9sakPeriode(soknad, journalpostId, saksnummer, søkerAktørId)
 
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
@@ -372,11 +372,16 @@ class K9SakServiceImpl(
         }
     }
 
-    private fun utledK9sakPeriode(soknad: Søknad, journalpostId: String): Periode {
+    private suspend fun utledK9sakPeriode(
+        soknad: Søknad,
+        journalpostId: String,
+        saksnummer: String,
+        søkerAktørId: String,
+    ): Periode {
         val ytelse = try {
             soknad.getYtelse<Ytelse>()
-            } catch (e: Exception) {
-                log.error("feilet med å hente ytelser fra søknad med journalpostId $journalpostId")
+        } catch (e: Exception) {
+            log.error("feilet med å hente ytelser fra søknad med journalpostId $journalpostId")
             null
         }
         val periodeFraK9Format = try {
@@ -386,19 +391,47 @@ class K9SakServiceImpl(
             null
         }
 
+        val periodeFraFagsak = periodeFraFagsak(søkerAktørId, saksnummer)
+        if (periodeFraK9Format?.iso8601.isNullOrBlank() && periodeFraFagsak.fom == null) {
+            val feilmelding = "Både periode fra k9-format periode fra fagsak er null. Kan ikke utlede periode for å opperette sak"
+            log.error(feilmelding)
+            throw IllegalStateException(feilmelding)
+        }
+
         return if (periodeFraK9Format?.iso8601 != null) {
             val periode = Periode(periodeFraK9Format.iso8601)
             log.info("Fant periode fra k9-format: $periode")
             periode
         } else {
-            val behandlingsAar = runBlocking { journalpostService.hentBehandlingsAar(journalpostId) }
-            val periode = Periode(
-                LocalDate.of(behandlingsAar, 1, 1),
-                LocalDate.of(behandlingsAar, 12, 31)
+            val behandlingsÅr = periodeFraFagsak.fom.year
+            Periode(
+                LocalDate.of(behandlingsÅr, 1, 1),
+                LocalDate.of(behandlingsÅr, 12, 31)
             )
-            log.info("Fant ikke periode fra k9-format. Bruker behandlingsår: $periode")
-            periode
         }
+    }
+
+    private suspend fun K9SakServiceImpl.periodeFraFagsak(
+        søkerAktørId: String,
+        saksnummer: String,
+    ): Periode {
+        val (fagsaker, feil) = hentFagsaker(søkerAktørId)
+        if (feil != null) {
+            log.error("Feil ved henting av fagsaker: $feil")
+            throw IllegalStateException("Feil ved henting av fagsaker: $feil")
+        }
+        val fagsak = fagsaker?.firstOrNull { it.saksnummer == saksnummer }
+        if (fagsak == null) {
+            log.error("Fant ikke fagsak med saksnummer $saksnummer")
+            throw IllegalStateException("Fant ikke fagsak med saksnummer $saksnummer")
+        }
+        val periode = fagsak.gyldigPeriode?.let { Periode(it.fom, it.tom) }
+        requireNotNull(periode) {
+            log.error("Fant ikke periode fra fagsak ($saksnummer)")
+            throw IllegalStateException("Fant ikke periode fra fagsak ($saksnummer)")
+        }
+        log.info("Fant ikke periode fra k9-format. Bruker periode fra fagsak ($saksnummer): $periode ")
+        return periode
     }
 
     private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
