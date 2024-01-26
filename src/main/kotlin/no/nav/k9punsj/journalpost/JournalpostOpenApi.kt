@@ -328,4 +328,31 @@ internal class JournalpostOpenApi {
         @RequestBody body: JournalpostRoutes.JournalpostIderRequest
     ) {
     }
+
+    @PostMapping(JournalpostDriftRoutes.Urls.OppdaterJournalpostForDebugg, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis en eller flere journalposter har blitt oppdatert"
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Journalposter som ikke ble funnet i punsj."
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Ingen av journalpostene eksisterer i punsj"
+            )
+        ]
+    )
+    @Operation(
+        summary = "Oppdaterer journalposter som ikke ferdigstilt og som mangler idType og id på avsenderMottaker",
+        security = [SecurityRequirement(name = "BearerAuth")],
+        tags = ["Drift"]
+    )
+    fun OppdaterJournalposterDebugg(
+        @RequestBody body: JournalpostDriftRoutes.OppdaterJournalpostRequest
+    ) {
+    }
 }

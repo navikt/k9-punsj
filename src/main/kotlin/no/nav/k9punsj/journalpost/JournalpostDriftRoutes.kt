@@ -24,7 +24,6 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
-import kotlin.math.log
 
 @Configuration
 internal class JournalpostDriftRoutes(
@@ -47,6 +46,7 @@ internal class JournalpostDriftRoutes(
         internal const val LukkJournalposterDebugg = "/journalpost/lukkDebugg"
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
         internal const val FerdigstillJournalpostForDebugg = "/journalpost/ferdigstillDebugg"
+        internal const val OppdaterJournalpostForDebugg = "/journalpost/oppdaterDebugg"
     }
 
     @Bean
@@ -214,6 +214,57 @@ internal class JournalpostDriftRoutes(
             }
         }
 
+        POST("/api${Urls.OppdaterJournalpostForDebugg}") { request ->
+            RequestContext(coroutineContext, request) {
+                val oppdaterJournalpostRequest = request.journalposter()
+                logger.info("Forsøker å oppdatere journalposter: {}", oppdaterJournalpostRequest)
+
+                val journalposter = oppdaterJournalpostRequest.journalposter
+                val journalposterIDb =
+                    journalpostService.hentHvisJournalpostMedIder(journalposter.map { it.journalpostId })
+                if (journalposterIDb.isEmpty()) {
+                    logger.info("Fant ingen journalposter i punsj med id {}", oppdaterJournalpostRequest)
+                    return@RequestContext ServerResponse.notFound().buildAndAwait()
+                }
+
+                val (ferdigstilte, ikkeFerdigstilte) = journalposterIDb
+                    .map { journalpostService.hentSafJournalPost(it.key.journalpostId)!! } // Hent saf journalpost
+                    .partition { it.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name } // Del i ferdigstilte og ikke ferdigstilte
+
+
+                val (vellykkedeOppdateringer, feiledeOppdateringer) = ikkeFerdigstilte
+                    .map { safJournalpost: SafDtos.Journalpost ->
+                        val journalpostSomOppdateres =
+                            journalposter.first { safJournalpost.journalpostId == it.journalpostId }
+                        dokarkivGateway.oppdaterJournalpost(
+                            //language=json
+                            """
+                            {
+                              "avsenderMottaker": {
+                                "idType": "FNR",
+                                "id": "${journalpostSomOppdateres.søkerFnr}"
+                              }
+                            }
+                        """.trimIndent(),
+                            journalpostId = safJournalpost.journalpostId
+                        )
+                    }
+                    .partition { it.statusCode.is2xxSuccessful }
+
+                val ferdigstillJournalpostResponseDto = OppdaterJournalpostResponseDto(
+                    vellykkedeOppdateringer = vellykkedeOppdateringer.map { it.toString() },
+                    feiledeOppdateringer = feiledeOppdateringer.map { it.toString() },
+                    alleredeFerdigstilteJournalposter = ferdigstilte.map { it.journalpostId }
+                )
+                logger.info("Response: {}", ferdigstillJournalpostResponseDto)
+                return@RequestContext ServerResponse
+                    .status(HttpStatus.OK)
+                    .bodyValueAndAwait(
+                        ferdigstillJournalpostResponseDto
+                    )
+            }
+        }
+
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
@@ -258,6 +309,12 @@ internal class JournalpostDriftRoutes(
         val ikkeFerdigstiltUtenSakstilknytning: List<String?>,
     )
 
+    private data class OppdaterJournalpostResponseDto(
+        val vellykkedeOppdateringer: List<String?>,
+        val feiledeOppdateringer: List<String?>,
+        val alleredeFerdigstilteJournalposter: List<String?>,
+    )
+
     private fun diffTekst(setA: Set<String>, setB: Set<String>, prefix: String): String {
         val diff = setA.minus(setB)
         return if (diff.isNotEmpty()) "$prefix: $diff" else ""
@@ -266,6 +323,15 @@ internal class JournalpostDriftRoutes(
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
 
     internal data class JournalpostIderRequest(val journalpostIder: List<String>)
+    internal data class OppdaterJournalpostRequest(val journalposter: List<OppdaterJournalpostRequestDTO>)
+    internal data class OppdaterJournalpostRequestDTO(val journalpostId: String, val søkerFnr: String) {
+        override fun toString(): String {
+            return "OppdaterJournalpostRequestDTO(journalpostId='$journalpostId')"
+        }
+    }
+
+    private suspend fun ServerRequest.journalposter(): OppdaterJournalpostRequest =
+        body(BodyExtractors.toMono(OppdaterJournalpostRequest::class.java)).awaitFirst()
 
     private suspend fun ServerRequest.journalpostIder(): JournalpostIderRequest =
         body(BodyExtractors.toMono(JournalpostIderRequest::class.java)).awaitFirst()
