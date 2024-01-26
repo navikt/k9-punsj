@@ -393,7 +393,8 @@ class K9SakServiceImpl(
             null
         }
 
-        val periodeFraFagsak = periodeFraFagsak(søkerAktørId, saksnummer)
+        val søkerIdent = soknad.søker.personIdent.verdi
+        val periodeFraFagsak = periodeFraFagsak(søkerIdent, saksnummer)
         if (periodeFraK9Format?.iso8601.isNullOrBlank() && periodeFraFagsak.fom == null) {
             val feilmelding = "Både periode fra k9-format periode fra fagsak er null. Kan ikke utlede periode for å opperette sak"
             log.error(feilmelding)
@@ -414,15 +415,15 @@ class K9SakServiceImpl(
     }
 
     private suspend fun K9SakServiceImpl.periodeFraFagsak(
-        søkerAktørId: String,
+        søkerIdent: String,
         saksnummer: String,
     ): Periode {
-        val (fagsaker, feil) = hentFagsaker(søkerAktørId)
+        val (fagsaker, feil) = hentFagsaker(søkerIdent)
         if (feil != null) {
             log.error("Feil ved henting av fagsaker: $feil")
             throw IllegalStateException("Feil ved henting av fagsaker: $feil")
         }
-        log.info("Fant fagsaker: $fagsaker. Søker etter fagsak med saksnummer $saksnummer og søkerAktørId $søkerAktørId")
+        log.info("Fant fagsaker: $fagsaker. Søker etter fagsak med saksnummer $saksnummer og søkerIdent $søkerIdent")
         val fagsak = fagsaker?.firstOrNull { it.saksnummer == saksnummer }
         if (fagsak == null) {
             log.error("Fant ikke fagsak med saksnummer $saksnummer")
