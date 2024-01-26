@@ -195,7 +195,6 @@ class K9SakServiceImpl(
 
         return if (!json.isNullOrEmpty()) {
             val pair = Pair(json.fagsaker(), null)
-            log.info("Fant fagsaker: ${pair.first}")
             pair
         } else {
             Pair(null, feil)
@@ -423,7 +422,6 @@ class K9SakServiceImpl(
             log.error("Feil ved henting av fagsaker: $feil")
             throw IllegalStateException("Feil ved henting av fagsaker: $feil")
         }
-        log.info("Fant fagsaker: $fagsaker. Søker etter fagsak med saksnummer $saksnummer og søkerIdent $søkerIdent")
         val fagsak = fagsaker?.firstOrNull { it.saksnummer == saksnummer }
         if (fagsak == null) {
             log.error("Fant ikke fagsak med saksnummer $saksnummer")
