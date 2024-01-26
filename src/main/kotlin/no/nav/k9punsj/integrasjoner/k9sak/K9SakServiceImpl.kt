@@ -391,19 +391,13 @@ class K9SakServiceImpl(
             null
         }
 
-        val søkerIdent = soknad.søker.personIdent.verdi
-        val periodeFraFagsak = periodeFraFagsak(søkerIdent, saksnummer)
-        if (periodeFraK9Format?.iso8601.isNullOrBlank() && periodeFraFagsak.fom == null) {
-            val feilmelding = "Både periode fra k9-format periode fra fagsak er null. Kan ikke utlede periode for å opperette sak"
-            log.error(feilmelding)
-            throw IllegalStateException(feilmelding)
-        }
-
         return if (periodeFraK9Format?.iso8601 != null) {
             val periode = Periode(periodeFraK9Format.iso8601)
             log.info("Fant periode fra k9-format: $periode")
             periode
         } else {
+            val søkerIdent = soknad.søker.personIdent.verdi
+            val periodeFraFagsak = periodeFraFagsak(søkerIdent, saksnummer)
             val behandlingsÅr = periodeFraFagsak.fom.year
             Periode(
                 LocalDate.of(behandlingsÅr, 1, 1),
