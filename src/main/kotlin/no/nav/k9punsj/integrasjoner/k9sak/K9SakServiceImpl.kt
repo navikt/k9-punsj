@@ -194,7 +194,9 @@ class K9SakServiceImpl(
         val (json, feil) = httpPost(body, sokFagsakerUrl)
 
         return if (!json.isNullOrEmpty()) {
-            Pair(json.fagsaker(), null)
+            val pair = Pair(json.fagsaker(), null)
+            log.info("Fant fagsaker: ${pair.first}")
+            pair
         } else {
             Pair(null, feil)
         }
