@@ -338,7 +338,7 @@ class K9SakServiceImpl(
                 personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
             } else null
 
-        val k9sakPeriode = utledK9sakPeriode(soknad, journalpostId, saksnummer, søkerAktørId)
+        val k9sakPeriode = utledK9sakPeriode(soknad, journalpostId, saksnummer)
 
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
@@ -376,13 +376,12 @@ class K9SakServiceImpl(
     private suspend fun utledK9sakPeriode(
         soknad: Søknad,
         journalpostId: String,
-        saksnummer: String,
-        søkerAktørId: String,
+        saksnummer: String
     ): Periode {
         val ytelse = try {
             soknad.getYtelse<Ytelse>()
         } catch (e: Exception) {
-            log.error("feilet med å hente ytelser fra søknad med journalpostId $journalpostId")
+            log.error("feilet med å hente ytelse fra søknad med journalpostId $journalpostId")
             null
         }
         val periodeFraK9Format = try {
