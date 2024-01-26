@@ -420,6 +420,7 @@ class K9SakServiceImpl(
             log.error("Feil ved henting av fagsaker: $feil")
             throw IllegalStateException("Feil ved henting av fagsaker: $feil")
         }
+        log.info("Fant fagsaker: $fagsaker. Søker etter fagsak med saksnummer $saksnummer")
         val fagsak = fagsaker?.firstOrNull { it.saksnummer == saksnummer }
         if (fagsak == null) {
             log.error("Fant ikke fagsak med saksnummer $saksnummer")
