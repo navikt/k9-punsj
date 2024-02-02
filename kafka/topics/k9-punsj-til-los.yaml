@@ -1,0 +1,28 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: k9-punsj-til-los
+  namespace: k9saksbehandling
+  labels:
+    team: k9saksbehandling
+spec:
+  pool: {{pool}}
+  config:
+    cleanupPolicy: delete
+    minimumInSyncReplicas: 1
+    partitions: 3
+    replication: 2
+    retentionBytes: -1
+    retentionHours: 720
+  acl:
+    - team: k9saksbehandling
+      application: k9-punsj
+      access: write
+    - team: k9saksbehandling
+      application: k9-los-api
+      access: read
+    {{#if enablekafkamanager}}
+    - team: k9saksbehandling
+      application: k9-kafka-manager
+      access: readwrite
+    {{/if}}

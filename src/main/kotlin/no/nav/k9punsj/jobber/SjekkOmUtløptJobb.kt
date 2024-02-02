@@ -5,7 +5,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktEntitet
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.fordel.PunsjEventDto
+import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -68,7 +68,8 @@ class SjekkOmUtløptJobb @Autowired constructor(
                 aksjonspunktKoderMedStatusListe = mutableMapOf(
                     aksjonspunkt.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.PUNSJ_HAR_UTLØPT.kode to AksjonspunktStatus.OPPRETTET.kode
-                )
+                ),
+                type = punsjJournalpost.type ?: "UKJENT"
             )
         )
         hendelseProducer.send(

@@ -9,7 +9,7 @@ import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.Dokument
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
@@ -270,7 +270,7 @@ class JournalpostService(
         return journalpostRepository.opprettJournalpost(jp)
     }
 
-    internal suspend fun settInnsendingstype(type: PunsjInnsendingType, journalpostId: String) {
+    internal suspend fun settInnsendingstype(type: K9FordelType, journalpostId: String) {
         journalpostRepository.settInnsendingstype(type, journalpostId)
     }
 }

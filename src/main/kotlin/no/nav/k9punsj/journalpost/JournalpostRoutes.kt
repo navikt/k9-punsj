@@ -11,7 +11,7 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
@@ -103,7 +103,7 @@ internal class JournalpostRoutes(
                     }
 
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
-                    val punsjInnsendingType = punsjJournalpost?.type?.let { PunsjInnsendingType.fraKode(it) }
+                    val k9FordelType = punsjJournalpost?.type?.let { K9FordelType.fraKode(it) }
 
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
@@ -117,7 +117,7 @@ internal class JournalpostRoutes(
                         norskIdent = norskIdent,
                         dokumenter = journalpostInfo.dokumenter,
                         venter = aksjonspunktService.sjekkOmDenErPåVent(journalpostId = journalpostId),
-                        punsjInnsendingType = punsjInnsendingType,
+                        punsjInnsendingType = k9FordelType,
                         kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId)),
                         erSaksbehandler = pepClient.erSaksbehandler(),
                         erInngående = journalpostInfo.erInngående,
@@ -175,7 +175,7 @@ internal class JournalpostRoutes(
                         dokumenter = dok,
                         dato = it.mottattDato?.toLocalDate(),
                         klokkeslett = it.mottattDato?.toLocalTime(),
-                        punsjInnsendingType = if (it.type != null) PunsjInnsendingType.fraKode(it.type) else null
+                        k9FordelType = if (it.type != null) K9FordelType.fraKode(it.type) else null
                     )
                 }.toList()
 
@@ -392,7 +392,7 @@ internal class JournalpostRoutes(
 
                 val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
 
-                if (journalpost?.type != null && journalpost.type == PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode) {
+                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
                     return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
                 }
 

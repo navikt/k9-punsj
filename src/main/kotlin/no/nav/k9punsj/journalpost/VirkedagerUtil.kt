@@ -1,6 +1,6 @@
 package no.nav.k9punsj.journalpost
 
-import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.fordel.K9FordelType
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 
@@ -19,7 +19,7 @@ internal class VirkedagerUtil {
             if (type == null) {
                 return mottattDato
             }
-            if (PunsjInnsendingType.sjekkOmDetErScanning(type)) {
+            if (K9FordelType.sjekkOmDetErScanning(type)) {
                 return mottattDato.trekkFraToVirkeDager()
             }
             return mottattDato
