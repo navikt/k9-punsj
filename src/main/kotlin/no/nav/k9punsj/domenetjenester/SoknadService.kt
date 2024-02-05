@@ -253,7 +253,7 @@ class SoknadService(
                 return HttpStatus.INTERNAL_SERVER_ERROR to "Journalpostene må ha sakstilknytning: ${fagsakIder.map { it.second }}"
             }
 
-            fagsakIder.size > 1 -> {
+            fagsakIder.distinctBy { it.second }.size > 1 -> {
                 return HttpStatus.INTERNAL_SERVER_ERROR to "Det er ikke tillatt med flere fagsakIder på journalpostene: ${fagsakIder.map { it.second }}"
             }
         }
