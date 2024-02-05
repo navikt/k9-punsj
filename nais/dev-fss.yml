@@ -17,6 +17,9 @@ spec:
     inbound:
       rules:
         - application: k9-punsj-oidc-auth-proxy
+        - application: k9-punsj-frontend
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-sak
   liveness:
     path: /internal/actuator/info
@@ -37,6 +40,7 @@ spec:
       memory: 512Mi
   ingresses:
     - https://k9-punsj.dev.intern.nav.no
+    - https://k9-punsj.dev-fss-pub.nais.io
   replicas:
     min: 1
     max: 1
