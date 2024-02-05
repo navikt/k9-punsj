@@ -175,7 +175,7 @@ internal class JournalpostRoutes(
                         dokumenter = dok,
                         dato = it.mottattDato?.toLocalDate(),
                         klokkeslett = it.mottattDato?.toLocalTime(),
-                        k9FordelType = if (it.type != null) K9FordelType.fraKode(it.type) else null
+                        punsjInnsendingType = if (it.type != null) K9FordelType.fraKode(it.type) else null
                     )
                 }.toList()
 
