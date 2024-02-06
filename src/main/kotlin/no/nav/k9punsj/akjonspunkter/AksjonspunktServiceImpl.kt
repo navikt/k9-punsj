@@ -54,7 +54,7 @@ internal class AksjonspunktServiceImpl(
             aktørId = punsjJournalpost.aktørId,
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
             ytelse = ytelse,
-            type = punsjJournalpost.type ?: "UKJENT"
+            type = punsjJournalpost.type!!
         )
 
         log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -107,7 +107,7 @@ internal class AksjonspunktServiceImpl(
                 aksjonspunkter = mutableMap,
                 sendtInn = erSendtInn,
                 ferdigstiltAv = ansvarligSaksbehandler,
-                type = journalpost.type ?: "UKJENT"
+                type = journalpost.type!!
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -180,7 +180,7 @@ internal class AksjonspunktServiceImpl(
                     AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
                 barnIdent = barnIdent,
-                type = journalpost.type ?: "UKJENT",
+                type = journalpost.type!!
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -208,7 +208,7 @@ internal class AksjonspunktServiceImpl(
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     ),
                     barnIdent = barnIdent,
-                    type = journalpost.type ?: "UKJENT",
+                    type = journalpost.type!!
                 )
 
                 hendelseProducer.sendMedOnSuccess(
