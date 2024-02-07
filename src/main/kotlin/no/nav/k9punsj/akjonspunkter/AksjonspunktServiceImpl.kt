@@ -122,6 +122,14 @@ internal class AksjonspunktServiceImpl(
                     }
                 }
             }
+
+            hendelseProducer.sendMedOnSuccess(
+                topicName = k9PunsjTilLosTopic,
+                data = punsjDtoJson,
+                key = eksternId.toString()
+            ) {
+             // DO NOTHING
+            }
         }
     }
 
@@ -195,6 +203,14 @@ internal class AksjonspunktServiceImpl(
                     log.info("Opprettet aksjonspunkt(${aksjonspunktEntitet.aksjonspunktId}) med kode (${aksjonspunktEntitet.aksjonspunktKode.kode})")
                 }
             }
+
+            hendelseProducer.sendMedOnSuccess(
+                topicName = k9PunsjTilLosTopic,
+                data = punsjDtoJson,
+                key = eksternId.toString()
+            ) {
+                // DO NOTHING
+            }
         } else {
             // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent, det finnes altså ingen punsje oppgave opprinnelig
             val ventePunkt =
@@ -221,10 +237,22 @@ internal class AksjonspunktServiceImpl(
                         log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
                     }
                 }
+
+                hendelseProducer.sendMedOnSuccess(
+                    topicName = k9PunsjTilLosTopic,
+                    data = punsjDtoJson,
+                    key = eksternId.toString()
+                ) {
+                    // DO NOTHING
+                }
             } else {
                 log.info("Denne journalposten($journalpostId) venter allerede - venter til ${ventePunkt?.frist_tid}")
             }
         }
+    }
+
+    private suspend fun sendNåStatusTilLosForAlleJournalposter() {
+        // TODO: Implementere..
     }
 
     private suspend fun utledAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost): String? {

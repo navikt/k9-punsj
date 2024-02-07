@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost.dto
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.fordel.K9FordelType
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -13,7 +14,7 @@ data class PunsjJournalpost(
     val aktørId: String?,
     val skalTilK9: Boolean? = null,
     val mottattDato: LocalDateTime? = null,
-    val type: String? = null,
+    val type: String? = K9FordelType.UKJENT.kode,
     val gosysoppgaveId: String? = null,
     val ytelse: String? = null,
     val payload: String? = null,
