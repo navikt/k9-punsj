@@ -251,4 +251,20 @@ class JournalpostRepository(private val dataSource: DataSource) {
 
         return !using.contains(true)
     }
+
+    @Deprecated("Skall kun brukes for å hente ut journalposter som skal sendes til k9-los-api for ny oppgavemodell")
+    fun hentÅpneJournalposter(): List<PunsjJournalpost> {
+        return using(sessionOf(dataSource)) {
+            val statement = queryOf(
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE FERDIG_BEHANDLET IS FALSE"
+            )
+            val resultat = it.run(
+                statement
+                    .map { row ->
+                        row.string("data")
+                    }.asList
+            )
+            resultat.map { res -> objectMapper.readValue(res, PunsjJournalpost::class.java) }
+        }
+    }
 }

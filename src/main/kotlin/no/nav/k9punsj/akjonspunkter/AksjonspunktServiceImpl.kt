@@ -27,7 +27,7 @@ internal class AksjonspunktServiceImpl(
     private val søknadsService: SoknadService,
     private val personService: PersonService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
-    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String,
+    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String
 ) : AksjonspunktService {
 
     private companion object {
@@ -128,7 +128,7 @@ internal class AksjonspunktServiceImpl(
                 data = punsjDtoJson,
                 key = eksternId.toString()
             ) {
-             // DO NOTHING
+                // DO NOTHING
             }
         }
     }
@@ -251,8 +251,35 @@ internal class AksjonspunktServiceImpl(
         }
     }
 
+    @Deprecated("Skall kun brukes for å hente ut journalposter som skal sendes til k9-los-api for ny oppgavemodell")
     private suspend fun sendNåStatusTilLosForAlleJournalposter() {
-        // TODO: Implementere..
+        val aapneJournalposter = journalpostService.hentÅpneJournalposter()
+
+        for (punsjJournalpost in aapneJournalposter) {
+            val aksjonspunkterPaJournalpost =
+                aksjonspunktRepository.hentAlleAksjonspunkter(punsjJournalpost.journalpostId).associate {
+                    it.aksjonspunktKode.kode to it.aksjonspunktStatus.kode
+                }
+
+            // TODO: Trenger mer info her? Finns det en bedre måte og sende journalpost på?
+            val punsjDtoJson = lagPunsjDto(
+                eksternId = punsjJournalpost.uuid,
+                journalpostId = punsjJournalpost.journalpostId,
+                ytelse = punsjJournalpost.ytelse,
+                aktørId = punsjJournalpost.aktørId,
+                barnIdent = null,
+                type = punsjJournalpost.type!!,
+                aksjonspunkter = aksjonspunkterPaJournalpost
+            )
+            hendelseProducer.sendMedOnSuccess(
+                topicName = k9PunsjTilLosTopic,
+                data = punsjDtoJson,
+                key = punsjJournalpost.uuid.toString()
+            ) {
+                // DO NOTHING
+            }
+        }
+
     }
 
     private suspend fun utledAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost): String? {
@@ -274,7 +301,7 @@ internal class AksjonspunktServiceImpl(
         eksternId: UUID,
         journalpostId: String,
         aktørId: String?,
-        aksjonspunkter: MutableMap<String, String>,
+        aksjonspunkter: Map<String, String>,
         ytelse: String? = null,
         type: String,
         barnIdent: String? = null,

@@ -273,6 +273,11 @@ class JournalpostService(
     internal suspend fun settInnsendingstype(type: K9FordelType, journalpostId: String) {
         journalpostRepository.settInnsendingstype(type, journalpostId)
     }
+
+    @Deprecated("Skall kun brukes for å hente ut journalposter som skal sendes til k9-los-api for ny oppgavemodell")
+    internal suspend fun hentÅpneJournalposter(): List<PunsjJournalpost> {
+        return journalpostRepository.hentÅpneJournalposter()
+    }
 }
 
 private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
