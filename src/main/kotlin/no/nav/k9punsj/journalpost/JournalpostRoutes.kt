@@ -115,6 +115,12 @@ internal class JournalpostRoutes(
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                                     journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
+                    val k9FagsakYtelseType = punsjJournalpost?.ytelse?.let {
+                        punsjJournalpost.utledK9sakFagsakYtelseType(
+                            k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                        )
+                    }
+
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
@@ -128,7 +134,8 @@ internal class JournalpostRoutes(
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
                         erFerdigstilt = erFerdigstiltEllerJournalfoert,
-                        sak = safJournalPost?.sak?.let { Sak(it.fagsakId, it.fagsaksystem) }
+                        sak = safJournalPost?.sak?.let { Sak(it.fagsakId, it.fagsaksystem) },
+                        fagsakYtelseType = k9FagsakYtelseType
                     )
 
                     utvidJournalpostMedMottattDato(

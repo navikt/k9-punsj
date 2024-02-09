@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.fordel.PunsjInnsendingType
 
 data class JournalpostInfoDto(
@@ -19,4 +20,5 @@ data class JournalpostInfoDto(
     val erFerdigstilt: Boolean, // Brukes av frontend for å bestemme om ytelse å fagsak må settes før punsjing. (Ref: Postmottak)
     val gosysoppgaveId: String?,
     val sak: Sak?,
+    val fagsakYtelseType: FagsakYtelseType? = null,
 )
