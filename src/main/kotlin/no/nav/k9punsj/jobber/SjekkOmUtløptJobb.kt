@@ -5,7 +5,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktEntitet
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.fordel.PunsjEventDto
+import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
@@ -23,7 +24,8 @@ class SjekkOmUtløptJobb @Autowired constructor(
     val aksjonspunktRepository: AksjonspunktRepository,
     val hendelseProducer: HendelseProducer,
     val journalpostRepository: JournalpostRepository,
-    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String
+    @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
+    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String
 ) {
 
     private val logger = LoggerFactory.getLogger(SjekkOmUtløptJobb::class.java)
@@ -65,14 +67,21 @@ class SjekkOmUtløptJobb @Autowired constructor(
                 journalpostId = punsjJournalpost.journalpostId,
                 eventTid = LocalDateTime.now(),
                 aktørId = punsjJournalpost.aktørId,
-                aksjonspunktKoderMedStatusListe = mutableMapOf(
+                aksjonspunktKoderMedStatusListe = mapOf(
                     aksjonspunkt.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.PUNSJ_HAR_UTLØPT.kode to AksjonspunktStatus.OPPRETTET.kode
-                )
+                ),
+                type = punsjJournalpost.type ?: K9FordelType.UKJENT.kode
             )
         )
         hendelseProducer.send(
             topicName = k9losAksjonspunkthendelseTopic,
+            data = punsjEventJson,
+            key = punsjJournalpost.uuid.toString()
+        )
+
+        hendelseProducer.send(
+            topicName = k9PunsjTilLosTopic,
             data = punsjEventJson,
             key = punsjJournalpost.uuid.toString()
         )

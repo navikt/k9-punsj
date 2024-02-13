@@ -3,8 +3,7 @@ package no.nav.k9punsj.journalpost
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import no.nav.k9punsj.utils.objectMapper
@@ -223,7 +222,7 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun settInnsendingstype(type: PunsjInnsendingType, journalpostId: String) {
+    suspend fun settInnsendingstype(type: K9FordelType, journalpostId: String) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(type = type.kode)
@@ -251,5 +250,21 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
 
         return !using.contains(true)
+    }
+
+    @Deprecated("Skall kun brukes for å hente ut journalposter som skal sendes til k9-los-api for ny oppgavemodell")
+    fun hentÅpneJournalposter(): List<PunsjJournalpost> {
+        return using(sessionOf(dataSource)) {
+            val statement = queryOf(
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE FERDIG_BEHANDLET IS FALSE"
+            )
+            val resultat = it.run(
+                statement
+                    .map { row ->
+                        row.string("data")
+                    }.asList
+            )
+            resultat.map { res -> objectMapper.readValue(res, PunsjJournalpost::class.java) }
+        }
     }
 }

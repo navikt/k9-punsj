@@ -11,7 +11,10 @@ server:
 
 logging:
   level:
-    web: TRACE
+    web: INFO
     org:
       springframework:
-        web: TRACE
+        web: INFO
+      apache:
+        kafka: WARN
+    kafka: WARN
