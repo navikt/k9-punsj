@@ -64,7 +64,10 @@ internal object MockConfiguration {
             "AAREG_SCOPE" to "aareg-services-nais/.default",
             "EREG_BASE_URL" to wireMockServer.getEregBaseUrl(),
             "SEND_BREVBESTILLING_TIL_K9_FORMIDLING" to "privat-k9-dokumenthendelse",
-            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1"
+            "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
+            "SEND_OPPDATERING_TIL_K9LOS" to "k9saksbehandling.k9-punsj-til-los",
+            "K9_FORDEL_TOPIC" to "k9saksbehandling.fordel-journalforing",
+            "K9_PUNSJBOLLE_TOPIC" to "k9saksbehandling.punsjbar-journalpost"
         )
     }
 }

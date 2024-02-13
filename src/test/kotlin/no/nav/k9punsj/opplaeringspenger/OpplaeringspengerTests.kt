@@ -1,43 +1,5 @@
 package no.nav.k9punsj.opplaeringspenger
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import io.mockk.junit5.MockKExtension
-import kotlinx.coroutines.runBlocking
-import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
-import no.nav.k9.søknad.felles.type.Periode
-import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger
-import no.nav.k9punsj.TestSetup
-import no.nav.k9punsj.felles.dto.OpprettNySøknad
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.SendSøknad
-import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.util.DbContainerInitializer
-import no.nav.k9punsj.util.IdGenerator
-import no.nav.k9punsj.util.LesFraFilUtil
-import no.nav.k9punsj.util.SøknadJson
-import no.nav.k9punsj.util.TestUtils.hentSøknadId
-import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
-import no.nav.k9punsj.util.WebClientUtils.awaitExchangeBlocking
-import no.nav.k9punsj.util.WebClientUtils.awaitStatusWithBody
-import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
-import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.reactive.function.BodyInserters
-import java.net.URI
-import java.time.Duration
-import java.time.LocalDate
-
 /*
 @ExtendWith(SpringExtension::class, MockKExtension::class)
 @Disabled("OLP er ikke i bruk eller under utvikling")

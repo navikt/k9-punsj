@@ -1,8 +1,10 @@
-package no.nav.k9punsj.fordel
+package no.nav.k9punsj.kafka
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.fordel.FordelPunsjEventDto.Companion.somFordelPunsjEventDto
+import no.nav.k9punsj.fordel.HendelseMottaker
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import java.io.IOException
@@ -10,7 +12,9 @@ import java.io.IOException
 @Component
 @StandardProfil
 class KafkaConsumers(
-    val hendelseMottaker: HendelseMottaker
+    val hendelseMottaker: HendelseMottaker,
+    @Value("\${no.nav.kafka.k9_punsjbolle.topic}") private val meldingerFraPunsjbolleTopic: String,
+    @Value("\${no.nav.kafka.k9_fordel.topic}") private val meldingerFraFordelTopic: String,
 ) {
 
     @KafkaListener(
@@ -20,7 +24,7 @@ class KafkaConsumers(
     )
     @Throws(IOException::class)
     fun consumePunsjbarJournalpost(message: String) {
-        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(PUNSJBOLLE_TOPIC)) }
+        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(meldingerFraPunsjbolleTopic)) }
     }
 
     @KafkaListener(
@@ -30,7 +34,7 @@ class KafkaConsumers(
     )
     @Throws(IOException::class)
     fun consumeFordelJournalpost(message: String) {
-        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(FORDEL_TOPIC)) }
+        runBlocking { hendelseMottaker.prosesser(message.somFordelPunsjEventDto(meldingerFraFordelTopic)) }
     }
 
     private companion object {
