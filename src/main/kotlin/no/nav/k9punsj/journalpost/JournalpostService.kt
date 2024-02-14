@@ -254,6 +254,10 @@ class JournalpostService(
         return HttpStatus.OK to "OK"
     }
 
+    suspend fun settTilFerdig(journalpostId: String) {
+        journalpostRepository.ferdig(journalpostId)
+    }
+
     internal suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
         return journalpostRepository.journalpostIkkeEksisterer(journalpostId)
     }
