@@ -150,8 +150,7 @@ internal class JournalpostRoutes(
                                 gyldigPeriode = it.gyldigPeriode,
                                 pleietrengendeIdent = it.pleietrengendeIdent
                             )
-                        },
-                        fagsakYtelseType = k9FagsakYtelseType
+                        }
                     )
 
                     utvidJournalpostMedMottattDato(

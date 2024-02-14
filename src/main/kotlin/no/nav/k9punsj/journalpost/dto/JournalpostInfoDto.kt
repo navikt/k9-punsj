@@ -20,5 +20,5 @@ data class JournalpostInfoDto(
     val erFerdigstilt: Boolean, // Brukes av frontend for å bestemme om ytelse å fagsak må settes før punsjing. (Ref: Postmottak)
     val gosysoppgaveId: String?,
     val sak: Sak?,
-    val fagsakYtelseType: FagsakYtelseType? = null,
+    val reservertSaksnummer: Boolean? = erFerdigstilt && sak == null, // Brukes av frontend for å vite om det er reservert saksnummer i K9.
 )
