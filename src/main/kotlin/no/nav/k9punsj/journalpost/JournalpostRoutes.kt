@@ -31,6 +31,7 @@ import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
+import no.nav.k9punsj.sak.SakService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -64,6 +65,7 @@ internal class JournalpostRoutes(
     private val pepClient: IPepClient,
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
+    private val sakService: SakService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
@@ -121,6 +123,13 @@ internal class JournalpostRoutes(
                         )
                     }
 
+                    // Hvis journalposten har sakstilhørighet, hent sak fra K9sak
+                    val sak = safJournalPost?.sak?.let { safSak: SafDtos.Sak ->
+                        norskIdent?.let { ident: String ->
+                            sakService.hentSaker(ident).firstOrNull { it.fagsakId == safSak.fagsakId }
+                        }
+                    }
+
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
                         norskIdent = norskIdent,
@@ -134,7 +143,14 @@ internal class JournalpostRoutes(
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
                         erFerdigstilt = erFerdigstiltEllerJournalfoert,
-                        sak = safJournalPost?.sak?.let { Sak(it.fagsakId, it.fagsaksystem) },
+                        sak = sak?.let {
+                            Sak(
+                                fagsakId = it.fagsakId,
+                                sakstype = it.sakstype,
+                                gyldigPeriode = it.gyldigPeriode,
+                                pleietrengendeIdent = it.pleietrengendeIdent
+                            )
+                        },
                         fagsakYtelseType = k9FagsakYtelseType
                     )
 
