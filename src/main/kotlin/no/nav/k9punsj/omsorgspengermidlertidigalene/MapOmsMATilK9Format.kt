@@ -2,6 +2,7 @@ package no.nav.k9punsj.omsorgspengermidlertidigalene
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
@@ -20,7 +21,7 @@ internal class MapOmsMATilK9Format(
     journalpostIder: Set<String>,
     dto: OmsorgspengerMidlertidigAleneSøknadDto
 ) {
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val omsorgspengerMidlertidigAlene = OmsorgspengerMidlertidigAlene()
     private val feil = mutableListOf<Feil>()
 

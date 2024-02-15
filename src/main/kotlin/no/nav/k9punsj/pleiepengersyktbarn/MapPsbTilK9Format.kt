@@ -2,6 +2,7 @@ package no.nav.k9punsj.pleiepengersyktbarn
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.Journalpost
@@ -33,7 +34,7 @@ internal class MapPsbTilK9Format(
     dto: PleiepengerSyktBarnSøknadDto
 ) {
 
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val pleiepengerSyktBarn = PleiepengerSyktBarn()
     private val feil = mutableListOf<Feil>()
 

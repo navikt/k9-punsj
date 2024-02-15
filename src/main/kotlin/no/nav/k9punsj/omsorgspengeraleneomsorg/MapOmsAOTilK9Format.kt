@@ -2,6 +2,7 @@ package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
@@ -22,7 +23,7 @@ internal class MapOmsAOTilK9Format(
     journalpostIder: Set<String>,
     dto: OmsorgspengerAleneOmsorgSøknadDto
 ) {
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val feil = mutableListOf<Feil>()
 
     init {

@@ -2,6 +2,7 @@ package no.nav.k9punsj.opplaeringspenger
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
@@ -40,7 +41,7 @@ internal class MapOlpTilK9Format(
     dto: OpplaeringspengerSøknadDto
 ) {
 
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val opplaeringspenger = Opplæringspenger()
     private val feil = mutableListOf<Feil>()
 
