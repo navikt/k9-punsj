@@ -3,14 +3,8 @@ package no.nav.k9punsj.fordel
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 
-/*
-*
-* Dette er en kontrakt som settes av K9-Fordel
-* https://github.com/navikt/k9-fordel/blob/323140f23a7ee80e32943fbaad8081265478b8b1/fordel/domene/src/main/java/no/nav/k9/domenetjenester/punsj/PunsjInnsendingType.java
-*
- */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-enum class K9FordelType(val kode: String, val navn: String, val erScanning: Boolean) {
+enum class PunsjInnsendingType(val kode: String, val navn: String, val erScanning: Boolean) {
     PAPIRSØKNAD("PAPIRSØKNAD", "Papirsøknad", true),
     DIGITAL_SØKNAD("DIGITAL_SØKNAD", "Digital søknad", false),
     PAPIRETTERSENDELSE("PAPIRETTERSENDELSE", "Papirettersendelse", true),
@@ -29,7 +23,7 @@ enum class K9FordelType(val kode: String, val navn: String, val erScanning: Bool
     companion object {
         @JsonCreator
         @JvmStatic
-        fun fraKode(kode: String): K9FordelType = values().find {
+        fun fraKode(kode: String): PunsjInnsendingType = values().find {
             it.kode == kode
         } ?: UKJENT
 

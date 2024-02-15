@@ -3,7 +3,7 @@ package no.nav.k9punsj.metrikker
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 import javax.sql.DataSource
@@ -31,7 +31,7 @@ class JournalpostMetrikkRepository(private val dataSource: DataSource) {
         }
     }
 
-    suspend fun hentAntallJournalposttyper(): List<Pair<Int, K9FordelType>> {
+    suspend fun hentAntallJournalposttyper(): List<Pair<Int, PunsjInnsendingType>> {
         return using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 //language=PostgreSQL
@@ -41,11 +41,11 @@ class JournalpostMetrikkRepository(private val dataSource: DataSource) {
                     ).map { row ->
                         val antall = row.int("antall")
                         val type = row.stringOrNull("type")?.replace("\"", "") // fjerner ekstra fnutter ""
-                        val k9FordelType = type?.let {
-                            if ("null" == it) K9FordelType.UKJENT
-                            else K9FordelType.fraKode(it)
-                        } ?: K9FordelType.UKJENT
-                        Pair(antall, k9FordelType)
+                        val punsjInnsendingType = type?.let {
+                            if ("null" == it) PunsjInnsendingType.UKJENT
+                            else PunsjInnsendingType.fraKode(it)
+                        } ?: PunsjInnsendingType.UKJENT
+                        Pair(antall, punsjInnsendingType)
                     }.asList
                 )
                 return@transaction antallTyper

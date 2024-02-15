@@ -10,7 +10,6 @@ import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.kafka.HendelseProducer
 import no.nav.k9punsj.utils.objectMapper
@@ -48,7 +47,7 @@ internal class FordelKafkaTest: AbstractContainerBaseTest() {
 
     @Test
     fun `motta melding om journalføringsoppgave fra fordel`() {
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = K9FordelType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = "666", type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
         val topicCaptor = ArgumentCaptor.forClass(String::class.java)
         val keyCaptor = ArgumentCaptor.forClass(String::class.java)
@@ -60,9 +59,7 @@ internal class FordelKafkaTest: AbstractContainerBaseTest() {
         runBlocking {
             hendelseMottaker.prosesser(melding)
             val punsjJournalpost =
-                PunsjJournalpost(
-                    UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId, type = K9FordelType.PAPIRSØKNAD.kode
-                )
+                PunsjJournalpost(UUID.randomUUID(), journalpostId = melding.journalpostId, aktørId = melding.aktørId)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
                 punsjJournalpost,
                 Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),

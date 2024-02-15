@@ -37,7 +37,6 @@ internal class SjekkOmUtløptJobbTest : AbstractContainerBaseTest() {
             hendelseProducer = hendelseProducer,
             journalpostRepository = journalpostRepository,
             k9losAksjonspunkthendelseTopic = "test",
-            k9PunsjTilLosTopic = "test"
         )
 
         val dummyAktørId = "1000000000000"

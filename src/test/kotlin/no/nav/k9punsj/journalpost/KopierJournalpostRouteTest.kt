@@ -8,7 +8,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
-import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
@@ -83,7 +83,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val melding = FordelPunsjEventDto(
             aktørId = "1234567890",
             journalpostId = journalpostId,
-            type = K9FordelType.PAPIRSØKNAD.kode,
+            type = PunsjInnsendingType.PAPIRSØKNAD.kode,
             ytelse = "PSB"
         )
         hendelseMottaker.prosesser(melding)
@@ -121,7 +121,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val melding = FordelPunsjEventDto(
             aktørId = "1234567890",
             journalpostId = journalpostId,
-            type = K9FordelType.PAPIRSØKNAD.kode,
+            type = PunsjInnsendingType.PAPIRSØKNAD.kode,
             ytelse = "PSB"
         )
         hendelseMottaker.prosesser(melding)
@@ -152,7 +152,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val melding = FordelPunsjEventDto(
             aktørId = "1234567890",
             journalpostId = journalpostId,
-            type = K9FordelType.PAPIRSØKNAD.kode,
+            type = PunsjInnsendingType.PAPIRSØKNAD.kode,
             ytelse = "PSB"
         )
         hendelseMottaker.prosesser(melding)

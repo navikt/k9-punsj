@@ -6,7 +6,7 @@ import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.brev.BrevRoutes.Urls.BestillBrev
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.brev.dto.MottakerDto
-import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.util.IdGenerator
@@ -54,7 +54,7 @@ internal class BrevRoutesConfigurationTest : AbstractContainerBaseTest() {
             uuid = UUID.randomUUID(),
             journalpostId = journalpostId,
             aktørId = aktørId,
-            type = K9FordelType.INNTEKTSMELDING_UTGÅTT.kode
+            type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode
         )
 
         journalpostRepository.lagre(jp) {

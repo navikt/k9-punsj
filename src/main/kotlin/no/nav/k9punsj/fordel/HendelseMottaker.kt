@@ -31,7 +31,7 @@ class HendelseMottaker @Autowired constructor(
 
         if (journalpostIkkeEksisterer) {
             val aktørId = fordelPunsjEventDto.aktørId
-            val punsjEventType = K9FordelType.fraKode(fordelPunsjEventDto.type).kode
+            val punsjEventType = PunsjInnsendingType.fraKode(fordelPunsjEventDto.type).kode
             val ytelse = FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode
             val gosysoppgaveId = fordelPunsjEventDto.gosysoppgaveId
 
@@ -55,10 +55,10 @@ class HendelseMottaker @Autowired constructor(
                 ytelse = fordelPunsjEventDto.ytelse
             )
         } else {
-            if (K9FordelType.fraKode(fordelPunsjEventDto.type) == K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+            if (PunsjInnsendingType.fraKode(fordelPunsjEventDto.type) == PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                 val journalpostFraDb = journalpostService.hent(journalpostId)
-                if (journalpostFraDb.type != null && K9FordelType.fraKode(journalpostFraDb.type) != K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
-                    journalpostService.settInnsendingstype(K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
+                if (journalpostFraDb.type != null && PunsjInnsendingType.fraKode(journalpostFraDb.type) != PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+                    journalpostService.settInnsendingstype(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
                     aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(journalpostId, false, null)
                 } else {
                     log.info("Journalposten($journalpostId) kjenner punsj fra før, blir ikke laget ny oppgave")

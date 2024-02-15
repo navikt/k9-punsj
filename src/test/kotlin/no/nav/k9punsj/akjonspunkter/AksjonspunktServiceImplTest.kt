@@ -11,7 +11,7 @@ import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
-import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
+import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway

@@ -2,9 +2,10 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.AbstractContainerBaseTest
-import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
+import no.nav.k9punsj.util.DbContainerInitializer
 import no.nav.k9punsj.util.IdGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +35,7 @@ internal class PunsjJournalpostMetrikkRepositoryTest: AbstractContainerBaseTest(
 
     @Test
     fun hentAntallFerdigBehandledeJournalposter(): Unit = runBlocking {
-        val journalpost = opprettJournalpost(IdGenerator.nesteId(), K9FordelType.PAPIRSØKNAD)
+        val journalpost = opprettJournalpost(IdGenerator.nesteId(), PunsjInnsendingType.PAPIRSØKNAD)
 
         journalpostRepo.lagre(journalpost) { journalpost }
         journalpostRepo.ferdig(journalpost.journalpostId)
@@ -46,31 +47,31 @@ internal class PunsjJournalpostMetrikkRepositoryTest: AbstractContainerBaseTest(
 
     @Test
     fun hentAntallPunsjInnsendingstyper(): Unit = runBlocking {
-        genererJournalposter(antall = 9, type = K9FordelType.PAPIRSØKNAD)
-        genererJournalposter(antall = 8, type = K9FordelType.DIGITAL_ETTERSENDELSE)
-        genererJournalposter(antall = 7, type = K9FordelType.PAPIRETTERSENDELSE)
-        genererJournalposter(antall = 6, type = K9FordelType.KOPI)
-        genererJournalposter(antall = 5, type = K9FordelType.INNLOGGET_CHAT)
-        genererJournalposter(antall = 4, type = K9FordelType.INNTEKTSMELDING_UTGÅTT)
-        genererJournalposter(antall = 3, type = K9FordelType.PAPIRINNTEKTSOPPLYSNINGER)
-        genererJournalposter(antall = 2, type = K9FordelType.SKRIV_TIL_OSS_SPØRMSÅL)
-        genererJournalposter(antall = 1, type = K9FordelType.SKRIV_TIL_OSS_SVAR)
+        genererJournalposter(antall = 9, type = PunsjInnsendingType.PAPIRSØKNAD)
+        genererJournalposter(antall = 8, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE)
+        genererJournalposter(antall = 7, type = PunsjInnsendingType.PAPIRETTERSENDELSE)
+        genererJournalposter(antall = 6, type = PunsjInnsendingType.KOPI)
+        genererJournalposter(antall = 5, type = PunsjInnsendingType.INNLOGGET_CHAT)
+        genererJournalposter(antall = 4, type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT)
+        genererJournalposter(antall = 3, type = PunsjInnsendingType.PAPIRINNTEKTSOPPLYSNINGER)
+        genererJournalposter(antall = 2, type = PunsjInnsendingType.SKRIV_TIL_OSS_SPØRMSÅL)
+        genererJournalposter(antall = 1, type = PunsjInnsendingType.SKRIV_TIL_OSS_SVAR)
 
         val antallTyper = journalpostMetrikkRepository.hentAntallJournalposttyper()
         assertThat(antallTyper).containsExactlyInAnyOrder(
-            Pair(9, K9FordelType.PAPIRSØKNAD),
-            Pair(8, K9FordelType.DIGITAL_ETTERSENDELSE),
-            Pair(7, K9FordelType.PAPIRETTERSENDELSE),
-            Pair(6, K9FordelType.KOPI),
-            Pair(5, K9FordelType.INNLOGGET_CHAT),
-            Pair(4, K9FordelType.INNTEKTSMELDING_UTGÅTT),
-            Pair(3, K9FordelType.PAPIRINNTEKTSOPPLYSNINGER),
-            Pair(2, K9FordelType.SKRIV_TIL_OSS_SPØRMSÅL),
-            Pair(1, K9FordelType.SKRIV_TIL_OSS_SVAR)
+            Pair(9, PunsjInnsendingType.PAPIRSØKNAD),
+            Pair(8, PunsjInnsendingType.DIGITAL_ETTERSENDELSE),
+            Pair(7, PunsjInnsendingType.PAPIRETTERSENDELSE),
+            Pair(6, PunsjInnsendingType.KOPI),
+            Pair(5, PunsjInnsendingType.INNLOGGET_CHAT),
+            Pair(4, PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT),
+            Pair(3, PunsjInnsendingType.PAPIRINNTEKTSOPPLYSNINGER),
+            Pair(2, PunsjInnsendingType.SKRIV_TIL_OSS_SPØRMSÅL),
+            Pair(1, PunsjInnsendingType.SKRIV_TIL_OSS_SVAR)
         )
     }
 
-    private suspend fun opprettJournalpost(dummyAktørId: String, type: K9FordelType): PunsjJournalpost {
+    private suspend fun opprettJournalpost(dummyAktørId: String, type: PunsjInnsendingType): PunsjJournalpost {
         val punsjJournalpost = PunsjJournalpost(
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
@@ -81,7 +82,7 @@ internal class PunsjJournalpostMetrikkRepositoryTest: AbstractContainerBaseTest(
         return punsjJournalpost
     }
 
-    private suspend fun genererJournalposter(antall: Int, type: K9FordelType) {
+    private suspend fun genererJournalposter(antall: Int, type: PunsjInnsendingType) {
         IntStream.range(0, antall).forEach {
             runBlocking {
                 opprettJournalpost(IdGenerator.nesteId(), type)

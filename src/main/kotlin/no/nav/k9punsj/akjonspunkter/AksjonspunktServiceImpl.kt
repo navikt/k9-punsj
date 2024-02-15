@@ -4,8 +4,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.integrasjoner.k9losapi.K9LosOppgaveStatusDto
-import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
+import no.nav.k9punsj.fordel.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.VentDto
@@ -27,7 +26,6 @@ internal class AksjonspunktServiceImpl(
     private val søknadsService: SoknadService,
     private val personService: PersonService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
-    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String
 ) : AksjonspunktService {
 
     private companion object {
@@ -54,10 +52,8 @@ internal class AksjonspunktServiceImpl(
             aktørId = punsjJournalpost.aktørId,
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
             ytelse = ytelse,
-            type = punsjJournalpost.type!!
+            type = type
         )
-
-        log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
 
         hendelseProducer.sendMedOnSuccess(
             topicName = k9losAksjonspunkthendelseTopic,
@@ -66,22 +62,9 @@ internal class AksjonspunktServiceImpl(
         ) {
             runBlocking {
                 aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                log.info("Sendt aksjonspunkt til los via topic $k9losAksjonspunkthendelseTopic")
+                log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
             }
         }
-
-        hendelseProducer.sendMedOnSuccess(
-            topicName = k9PunsjTilLosTopic,
-            data = punsjDtoJson,
-            key = eksternId.toString()
-        ) {
-            runBlocking {
-                aksjonspunktRepository.opprettAksjonspunkt(aksjonspunktEntitet)
-                log.info("Sendt aksjonspunkt til los via topic $k9PunsjTilLosTopic")
-            }
-        }
-
-        log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
     }
 
     override suspend fun settUtførtPåAltSendLukkOppgaveTilK9Los(
@@ -106,8 +89,7 @@ internal class AksjonspunktServiceImpl(
                 aktørId = journalpost.aktørId,
                 aksjonspunkter = mutableMap,
                 sendtInn = erSendtInn,
-                ferdigstiltAv = ansvarligSaksbehandler,
-                type = journalpost.type!!
+                ferdigstiltAv = ansvarligSaksbehandler
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -121,14 +103,6 @@ internal class AksjonspunktServiceImpl(
                         log.info("Setter aksjonspunkt(" + it.aksjonspunktId + ") med kode (" + it.aksjonspunktKode.kode + ") til UTFØRT")
                     }
                 }
-            }
-
-            hendelseProducer.sendMedOnSuccess(
-                topicName = k9PunsjTilLosTopic,
-                data = punsjDtoJson,
-                key = eksternId.toString()
-            ) {
-                // DO NOTHING
             }
         }
     }
@@ -187,8 +161,7 @@ internal class AksjonspunktServiceImpl(
                     AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
-                barnIdent = barnIdent,
-                type = journalpost.type!!
+                barnIdent = barnIdent
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -203,14 +176,6 @@ internal class AksjonspunktServiceImpl(
                     log.info("Opprettet aksjonspunkt(${aksjonspunktEntitet.aksjonspunktId}) med kode (${aksjonspunktEntitet.aksjonspunktKode.kode})")
                 }
             }
-
-            hendelseProducer.sendMedOnSuccess(
-                topicName = k9PunsjTilLosTopic,
-                data = punsjDtoJson,
-                key = eksternId.toString()
-            ) {
-                // DO NOTHING
-            }
         } else {
             // inntreffer der man går manuelt inn i punsj og ønsker å sette noe på vent, det finnes altså ingen punsje oppgave opprinnelig
             val ventePunkt =
@@ -223,8 +188,7 @@ internal class AksjonspunktServiceImpl(
                     aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     ),
-                    barnIdent = barnIdent,
-                    type = journalpost.type!!
+                    barnIdent = barnIdent
                 )
 
                 hendelseProducer.sendMedOnSuccess(
@@ -237,49 +201,10 @@ internal class AksjonspunktServiceImpl(
                         log.info("Opprettet aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
                     }
                 }
-
-                hendelseProducer.sendMedOnSuccess(
-                    topicName = k9PunsjTilLosTopic,
-                    data = punsjDtoJson,
-                    key = eksternId.toString()
-                ) {
-                    // DO NOTHING
-                }
             } else {
                 log.info("Denne journalposten($journalpostId) venter allerede - venter til ${ventePunkt?.frist_tid}")
             }
         }
-    }
-
-    @Deprecated("Skall kun brukes for å hente ut journalposter som skal sendes til k9-los-api for ny oppgavemodell")
-    private suspend fun sendNåStatusTilLosForAlleJournalposter() {
-        val aapneJournalposter = journalpostService.hentÅpneJournalposter()
-
-        for (punsjJournalpost in aapneJournalposter) {
-            val aksjonspunkterPaJournalpost =
-                aksjonspunktRepository.hentAlleAksjonspunkter(punsjJournalpost.journalpostId).associate {
-                    it.aksjonspunktKode.kode to it.aksjonspunktStatus.kode
-                }
-
-            // TODO: Trenger mer info her? Finns det en bedre måte og sende journalpost på?
-            val punsjDtoJson = lagPunsjDto(
-                eksternId = punsjJournalpost.uuid,
-                journalpostId = punsjJournalpost.journalpostId,
-                ytelse = punsjJournalpost.ytelse,
-                aktørId = punsjJournalpost.aktørId,
-                barnIdent = null,
-                type = punsjJournalpost.type!!,
-                aksjonspunkter = aksjonspunkterPaJournalpost
-            )
-            hendelseProducer.sendMedOnSuccess(
-                topicName = k9PunsjTilLosTopic,
-                data = punsjDtoJson,
-                key = punsjJournalpost.uuid.toString()
-            ) {
-                // DO NOTHING
-            }
-        }
-
     }
 
     private suspend fun utledAktørId(søknadId: String?, punsjJournalpost: PunsjJournalpost): String? {
@@ -301,14 +226,12 @@ internal class AksjonspunktServiceImpl(
         eksternId: UUID,
         journalpostId: String,
         aktørId: String?,
-        aksjonspunkter: Map<String, String>,
+        aksjonspunkter: MutableMap<String, String>,
         ytelse: String? = null,
-        type: String,
+        type: String? = null,
         barnIdent: String? = null,
         sendtInn: Boolean? = null,
-        ferdigstiltAv: String? = null,
-        mottattDato: LocalDateTime? = null,
-        status: K9LosOppgaveStatusDto? = null
+        ferdigstiltAv: String? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId = eksternId.toString(),
@@ -320,9 +243,7 @@ internal class AksjonspunktServiceImpl(
             ytelse = ytelse,
             type = type,
             sendtInn = sendtInn,
-            ferdigstiltAv = ferdigstiltAv,
-            mottattDato = mottattDato,
-            status = status
+            ferdigstiltAv = ferdigstiltAv
         )
 
         return objectMapper().writeValueAsString(punsjEventDto)

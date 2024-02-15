@@ -66,7 +66,7 @@ internal class HendelseMottakerTest: AbstractContainerBaseTest() {
     fun `skal lagre ned informasjon om journalpost`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
 
-        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = K9FordelType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val melding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
         hendelseMottaker.prosesser(melding)
 
         val journalpost = journalpostService.hent(journalpostId)
@@ -82,44 +82,44 @@ internal class HendelseMottakerTest: AbstractContainerBaseTest() {
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når det kommer samme uten status`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = K9FordelType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
-        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = K9FordelType.DIGITAL_ETTERSENDELSE.kode)
+        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
         journalpostService.lagre(punsjJournalpostTilDb)
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
         val journalpost = journalpostService.hent(journalpostId)
-        assertThat(journalpost.type).isEqualTo(K9FordelType.DIGITAL_ETTERSENDELSE.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal ikke lagre ned informasjon om journalpost når journalposten har ankommet fra før med samme status`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = K9FordelType.PAPIRSØKNAD.kode, ytelse = "PSB")
+        val meldingSomIkkeSkalBrukes = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PAPIRSØKNAD.kode, ytelse = "PSB")
 
-        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = K9FordelType.DIGITAL_ETTERSENDELSE.kode)
+        val punsjJournalpostTilDb = PunsjJournalpost(UUID.randomUUID(), journalpostId = meldingSomIkkeSkalBrukes.journalpostId, aktørId = meldingSomIkkeSkalBrukes.aktørId, type = PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
         journalpostService.lagre(punsjJournalpostTilDb)
 
         hendelseMottaker.prosesser(meldingSomIkkeSkalBrukes)
 
         val journalpost = journalpostService.hent(journalpostId)
-        assertThat(journalpost.type).isEqualTo(K9FordelType.DIGITAL_ETTERSENDELSE.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.DIGITAL_ETTERSENDELSE.kode)
     }
 
     @Test
     fun `skal fjerne oppgave når det kommer info fra fordel`(): Unit = runBlocking {
         val journalpostId = IdGenerator.nesteId()
-        val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = K9FordelType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
+        val førsteMelding = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode, ytelse = "PSB")
 
         hendelseMottaker.prosesser(førsteMelding)
 
-        val meldingSomSkalLukkeOppgave = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode, ytelse = "PSB")
+        val meldingSomSkalLukkeOppgave = FordelPunsjEventDto(aktørId = "1234567890", journalpostId = journalpostId, type = PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode, ytelse = "PSB")
 
         hendelseMottaker.prosesser(meldingSomSkalLukkeOppgave)
 
         val journalpost = journalpostService.hent(meldingSomSkalLukkeOppgave.journalpostId)
-        assertThat(journalpost.type).isEqualTo(K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
+        assertThat(journalpost.type).isEqualTo(PunsjInnsendingType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG.kode)
 
         val alleAksjonspunkter = aksjonspunktRepository.hentAlleAksjonspunkter(journalpostId = førsteMelding.journalpostId)
 

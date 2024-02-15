@@ -32,9 +32,3 @@ build/
 
 .DS_Store
 **generated-pdf-*.pdf
-
-# CDXGEN files
-app.atom
-bom.*
-reachables.slices.json
-usages.slices.json

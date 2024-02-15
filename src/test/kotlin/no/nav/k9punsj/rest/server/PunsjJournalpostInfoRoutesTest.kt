@@ -1,14 +1,21 @@
 package no.nav.k9punsj.rest.server
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestSetup
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.journalpost.dto.SøkUferdigJournalposter
 import no.nav.k9punsj.utils.objectMapper
+import no.nav.k9punsj.util.WebClientUtils.awaitStatuscode
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.reactive.function.BodyInserters
 
 class PunsjJournalpostInfoRoutesTest : AbstractContainerBaseTest() {

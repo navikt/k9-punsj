@@ -1,6 +1,6 @@
 package no.nav.k9punsj.journalpost
 
-import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.fordel.PunsjInnsendingType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -9,7 +9,7 @@ internal class VirkedagerUtilTest {
 
     @Test
     fun `skal gi 2 dager ekstra på papirsøknad`() {
-        val papirsøknad = K9FordelType.PAPIRSØKNAD
+        val papirsøknad = PunsjInnsendingType.PAPIRSØKNAD
         val mandag = LocalDateTime.of(2021, 5, 31, 10, 22)
         val tirsdag = LocalDateTime.of(2021, 6, 1, 10, 22)
         val onsdag = LocalDateTime.of(2021, 6, 2, 10, 22)
@@ -37,7 +37,7 @@ internal class VirkedagerUtilTest {
 
     @Test
     fun `skal ikke gi 2 dager ekstra på ikke papirsøknad`() {
-        val papirsøknad = K9FordelType.DIGITAL_ETTERSENDELSE
+        val papirsøknad = PunsjInnsendingType.DIGITAL_ETTERSENDELSE
 
         val søndag = LocalDateTime.of(2021, 6, 6, 10, 22)
 

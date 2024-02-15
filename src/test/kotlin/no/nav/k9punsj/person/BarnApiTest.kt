@@ -3,10 +3,15 @@ package no.nav.k9punsj.person
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.TestSetup
+import no.nav.k9punsj.util.WebClientUtils.awaitBodyWithType
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
 class BarnApiTest : AbstractContainerBaseTest() {
     private val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
