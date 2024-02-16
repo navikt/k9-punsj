@@ -3,7 +3,6 @@ package no.nav.k9punsj.journalpost.postmottak
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
@@ -29,7 +28,10 @@ class PostMottakService(
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
         val (saksnummer, feil) = if (mottattJournalpost.saksnummer.isNullOrBlank()) {
-            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer()
+            if (mottattJournalpost.barnIdent.isNullOrBlank()) {
+                return Pair(null, "Barn ident er påkrevd ved reservering av saksnummer.")
+            }
+            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer(mottattJournalpost.barnIdent)
             if (feil != null) {
                 return Pair(null, feil)
             }

@@ -293,8 +293,23 @@ class K9SakServiceImpl(
         }
     }
 
-    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
-        val (result, feil) = httpPost("", reserverSaksnummerUrl)
+    /**
+     * Reserverer saksnummer i k9-sak.
+     * Returnerer saksnummer og eventuell feilmelding.
+     * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
+     */
+    override suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?> {
+        val pleietrengendeAktørId =
+            personService.finnEllerOpprettPersonVedNorskIdent(barnIdent).aktørId
+
+        // language=JSON
+        val body = """
+            {
+                "pleietrengendeAktørId": "$pleietrengendeAktørId"
+            }
+        """.trimIndent()
+
+        val (result, feil) = httpPost(body, reserverSaksnummerUrl)
         if (feil != null) {
             log.error("Feil ved reservasjon av saksnummer: $feil")
             return Pair(null, feil)
@@ -376,7 +391,7 @@ class K9SakServiceImpl(
     private suspend fun utledK9sakPeriode(
         soknad: Søknad,
         journalpostId: String,
-        saksnummer: String
+        saksnummer: String,
     ): Periode {
         val ytelse = try {
             soknad.getYtelse<Ytelse>()
