@@ -20,6 +20,6 @@ internal class FordelPunsjEventDtoTest {
 
         val fordelPunsjEventDto = dto.somFordelPunsjEventDto(topic)
 
-        Assertions.assertThat(fordelPunsjEventDto.type).isEqualTo(PunsjInnsendingType.INNTEKTSMELDING_UTGÅTT.kode)
+        Assertions.assertThat(fordelPunsjEventDto.type).isEqualTo(K9FordelType.INNTEKTSMELDING_UTGÅTT.kode)
     }
 }

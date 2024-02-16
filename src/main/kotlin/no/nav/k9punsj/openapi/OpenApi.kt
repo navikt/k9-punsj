@@ -1,24 +1,16 @@
 package no.nav.k9punsj.openapi
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import io.swagger.v3.core.converter.AnnotatedType
-import io.swagger.v3.core.converter.ModelConverter
-import io.swagger.v3.core.converter.ModelConverterContext
-import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
-import io.swagger.v3.oas.models.media.ObjectSchema
-import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.servers.Server
-import no.nav.k9punsj.fordel.PunsjInnsendingType
-import no.nav.k9punsj.integrasjoner.pdl.PdlPersonDto
+import no.nav.k9punsj.fordel.K9FordelType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import java.net.URI
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -87,5 +79,5 @@ data class OasJournalpostDto(
     val dato: LocalDate?,
     @JsonFormat(pattern = "HH:mm")
     val klokkeslett: LocalTime?,
-    val punsjInnsendingType: PunsjInnsendingType?
+    val punsjInnsendingType: K9FordelType?
 )

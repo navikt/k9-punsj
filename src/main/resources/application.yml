@@ -89,8 +89,14 @@ no.nav:
       topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
     k9_los:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+    k9_punsj_til_los:
+      topic: ${SEND_OPPDATERING_TIL_K9LOS}
     k9_rapid:
       topic: ${K9_RAPID_TOPIC}
+    k9_fordel:
+      topic: ${K9_FORDEL_TOPIC}
+    k9_punsjbolle:
+      topic: ${K9_PUNSJBOLLE_TOPIC}
     override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
 
 server:

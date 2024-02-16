@@ -2,7 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.AbstractContainerBaseTest
-import no.nav.k9punsj.fordel.PunsjInnsendingType
+import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import no.nav.k9punsj.util.IdGenerator
@@ -28,7 +28,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
                 uuid = UUID.randomUUID(),
                 journalpostId = IdGenerator.nesteId(),
                 aktørId = dummyAktørId,
-                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+                type = K9FordelType.PAPIRSØKNAD.kode
             )
         journalpostRepository.lagre(punsjJournalpost1) {
             punsjJournalpost1
@@ -39,7 +39,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
                 uuid = UUID.randomUUID(),
                 journalpostId = IdGenerator.nesteId(),
                 aktørId = dummyAktørId,
-                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+                type = K9FordelType.PAPIRSØKNAD.kode
             )
         journalpostRepository.lagre(punsjJournalpost2) {
             punsjJournalpost2
@@ -53,7 +53,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
 
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(2)
-        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(PunsjInnsendingType.PAPIRSØKNAD.kode)
+        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(K9FordelType.PAPIRSØKNAD.kode)
     }
 
     @Test
@@ -65,7 +65,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
                 uuid = UUID.randomUUID(),
                 journalpostId = IdGenerator.nesteId(),
                 aktørId = dummyAktørId,
-                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+                type = K9FordelType.PAPIRSØKNAD.kode
             )
         journalpostRepository.lagre(punsjJournalpost1, PunsjJournalpostKildeType.SAKSBEHANDLER) {
             punsjJournalpost1
@@ -76,7 +76,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
                 uuid = UUID.randomUUID(),
                 journalpostId = IdGenerator.nesteId(),
                 aktørId = dummyAktørId,
-                type = PunsjInnsendingType.PAPIRSØKNAD.kode
+                type = K9FordelType.PAPIRSØKNAD.kode
             )
         journalpostRepository.lagre(punsjJournalpost2, PunsjJournalpostKildeType.FORDEL) {
             punsjJournalpost2
@@ -90,7 +90,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
 
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPersonBareFordel(dummyAktørId)
         assertThat(finnJournalposterPåPerson).hasSize(1)
-        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(PunsjInnsendingType.PAPIRSØKNAD.kode)
+        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(K9FordelType.PAPIRSØKNAD.kode)
     }
 
     @Test
@@ -304,7 +304,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
             uuid = UUID.randomUUID(),
             journalpostId = IdGenerator.nesteId(),
             aktørId = dummyAktørId,
-            type = PunsjInnsendingType.SAMTALEREFERAT.kode,
+            type = K9FordelType.SAMTALEREFERAT.kode,
             gosysoppgaveId = forventetGosysoppgaveId
         )
 
@@ -315,7 +315,7 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
         assertThat(journalpost.gosysoppgaveId!!).isEqualTo(forventetGosysoppgaveId)
 
         val finnJournalposterPåPerson = journalpostRepository.finnJournalposterPåPerson(dummyAktørId)
-        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(PunsjInnsendingType.SAMTALEREFERAT.kode)
+        assertThat(finnJournalposterPåPerson[0].type).isEqualTo(K9FordelType.SAMTALEREFERAT.kode)
         assertThat(finnJournalposterPåPerson[0].gosysoppgaveId).isEqualTo(forventetGosysoppgaveId)
     }
 }
