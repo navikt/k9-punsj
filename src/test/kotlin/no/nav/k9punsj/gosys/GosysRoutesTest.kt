@@ -17,6 +17,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
     fun `hente gyldige verdier for gjelder`() {
         webTestClient.get()
             .uri{ it.path("/api/gosys/gjelder").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .exchange()
             .expectStatus().isOk
             .expectBody().json(Gjelder.JSON)
