@@ -2,6 +2,7 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
 import no.nav.k9.søknad.felles.personopplysninger.Søker
@@ -25,7 +26,7 @@ internal class MapOmsTilK9Format(
     journalpostIder: Set<String>,
     dto: KorrigeringInntektsmeldingDto
 ) {
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
     private val feil = mutableListOf<Feil>()
 

@@ -2,6 +2,7 @@ package no.nav.k9punsj.omsorgspengerutbetaling
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.fravær.AktivitetFravær
 import no.nav.k9.søknad.felles.fravær.FraværPeriode
 import no.nav.k9.søknad.felles.fravær.FraværÅrsak
@@ -32,7 +33,7 @@ internal class MapOmsUtTilK9Format(
     dto: OmsorgspengerutbetalingSøknadDto,
     eksisterendePerioder: List<PeriodeDto>
 ) {
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val omsorgspengerUtbetaling = OmsorgspengerUtbetaling()
     private val feil = mutableListOf<Feil>()
 

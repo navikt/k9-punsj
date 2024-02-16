@@ -2,6 +2,7 @@ package no.nav.k9punsj.pleiepengerlivetssluttfase
 
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
+import no.nav.k9.søknad.felles.Kildesystem
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold
 import no.nav.k9.søknad.felles.type.Journalpost
@@ -37,7 +38,7 @@ internal class MapPlsfTilK9Format(
     dto: PleiepengerLivetsSluttfaseSøknadDto
 ) {
 
-    private val søknad = Søknad()
+    private val søknad = Søknad().medKildesystem(Kildesystem.PUNSJ)
     private val pleipengerLivetsSluttfase = PleipengerLivetsSluttfase()
     private val feil = mutableListOf<Feil>()
 
