@@ -18,6 +18,9 @@ spec:
       rules:
         - application: k9-punsj-oidc-auth-proxy
         - application: k9-sak
+        - application: k9-punsj-frontend
+          namespace: k9saksbehandling
+          cluster: prod-gcp
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
@@ -38,6 +41,7 @@ spec:
   ingresses:
     - https://k9-punsj.nais.adeo.no
     - https://k9-punsj.intern.nav.no
+    - https://k9-punsj.prod-fss-pub.nais.io
   replicas:
     min: 1
     max: 1
