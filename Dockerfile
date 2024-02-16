@@ -8,4 +8,3 @@ COPY docker-init-scripts/import-appdynamics-settings.sh /init-scripts/22-import-
 
 
 COPY target/*.jar app.jar
-Œ
