@@ -298,16 +298,20 @@ class K9SakServiceImpl(
      * Returnerer saksnummer og eventuell feilmelding.
      * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
      */
-    override suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?> {
+    override suspend fun reserverSaksnummer(barnIdent: String?): Pair<SaksnummerDto?, String?> {
         val pleietrengendeAktørId =
-            personService.finnEllerOpprettPersonVedNorskIdent(barnIdent).aktørId
+            barnIdent?.let {
+                personService.finnEllerOpprettPersonVedNorskIdent(barnIdent).aktørId
+            }
 
         // language=JSON
-        val body = """
+        val body = pleietrengendeAktørId?.let {
+            """
             {
-                "pleietrengendeAktørId": "$pleietrengendeAktørId"
+                "pleietrengendeAktørId": "$it"
             }
-        """.trimIndent()
+            """.trimIndent()
+        } ?: ""
 
         val (result, feil) = httpPost(body, reserverSaksnummerUrl)
         if (feil != null) {
