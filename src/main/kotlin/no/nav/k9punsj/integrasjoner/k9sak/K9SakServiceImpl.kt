@@ -434,7 +434,9 @@ class K9SakServiceImpl(
             log.error("Feil ved henting av fagsaker: $feil")
             throw IllegalStateException("Feil ved henting av fagsaker: $feil")
         }
-        val fagsak = fagsaker?.firstOrNull { it.saksnummer == saksnummer }
+        val fagsak = fagsaker?.firstOrNull {
+            logger.info("Sjekker fagsak: ${it.saksnummer} == $saksnummer")
+            it.saksnummer == saksnummer }
         if (fagsak == null) {
             log.error("Fant ikke fagsak med saksnummer $saksnummer")
             throw IllegalStateException("Fant ikke fagsak med saksnummer $saksnummer")
@@ -571,6 +573,8 @@ class K9SakServiceImpl(
     }
 
     internal companion object {
+        private val logger = LoggerFactory.getLogger(K9SakServiceImpl::class.java)
+
         private suspend fun hentCallId() = try {
             coroutineContext.hentCallId()
         } catch (e: Exception) {
