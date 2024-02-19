@@ -1,7 +1,6 @@
 package no.nav.k9punsj.integrasjoner.gosys
 
 import kotlinx.coroutines.reactive.awaitFirst
-import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.felles.IkkeTilgang
@@ -29,7 +28,7 @@ internal class GosysRoutes(
     }
 
     @Bean
-    fun PublicGosysRoutes() = PublicRoutes {
+    fun PublicGosysRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.Gjelder}") {
             return@GET ServerResponse
                 .status(HttpStatus.OK)

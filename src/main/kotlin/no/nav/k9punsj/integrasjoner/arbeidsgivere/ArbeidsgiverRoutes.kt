@@ -1,6 +1,5 @@
 package no.nav.k9punsj.integrasjoner.arbeidsgivere
 
-import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -97,7 +96,7 @@ internal class ArbeidsgiverRoutes(
     }
 
     @Bean
-    fun hentArbeidsgiverInfoRoute() = PublicRoutes {
+    fun hentArbeidsgiverInfoRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api/arbeidsgiver") { request ->
             RequestContext(coroutineContext, request) {
                 when (val navn = arbeidsgiverService.hentOrganisasjonsnavn(request.organisasjonsnummer())) {

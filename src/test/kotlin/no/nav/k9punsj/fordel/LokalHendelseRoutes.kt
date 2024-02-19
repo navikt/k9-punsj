@@ -2,8 +2,9 @@ package no.nav.k9punsj.fordel
 
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.LokalProfil
-import no.nav.k9punsj.PublicRoutes
 import no.nav.k9punsj.RequestContext
+import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -17,7 +18,8 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 @LokalProfil
 class LokalHendelseRoutes(
-    private val hendelseMottaker: HendelseMottaker
+    private val hendelseMottaker: HendelseMottaker,
+    private val authenticationHandler: AuthenticationHandler
 ) {
 
     internal object Urls {
@@ -25,7 +27,7 @@ class LokalHendelseRoutes(
     }
 
     @Bean
-    fun prosesserHendelseRoute() = PublicRoutes {
+    fun prosesserHendelseRoute() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val fordelPunsjEventDto = request.request()

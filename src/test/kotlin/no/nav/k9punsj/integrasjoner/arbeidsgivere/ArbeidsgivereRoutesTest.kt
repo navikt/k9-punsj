@@ -52,6 +52,7 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
     fun `hente navn på arbeidsgiver som finnes`() {
         webTestClient.get()
             .uri { it.path("/api/arbeidsgiver").queryParam("organisasjonsnummer", "979312059").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .exchange()
             .expectStatus().isOk
             .expectBody().json("""{"navn":"NAV AS"}""")
@@ -61,6 +62,7 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
     fun `hente navn på arbeidsgiver som ikke finnes`() {
         webTestClient.get()
             .uri { it.path("/api/arbeidsgiver").queryParam("organisasjonsnummer", "993110469").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .exchange()
             .expectStatus().isNotFound
     }
