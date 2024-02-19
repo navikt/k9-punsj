@@ -248,6 +248,7 @@ class SoknadService(
         }
 
         val fagsakIder = fagsaker(journalposter)
+        logger.info("Fant fagsakIder på journalpostene: ${fagsakIder.map { it.second }}")
         when {
             fagsakIder.isEmpty() -> {
                 return HttpStatus.INTERNAL_SERVER_ERROR to "Journalpostene må ha sakstilknytning: ${fagsakIder.map { it.second }}"
@@ -314,7 +315,7 @@ class SoknadService(
         return null
     }
 
-    private fun fagsaker(journalposter: List<SafDtos.Journalpost?>) =
+    private fun fagsaker(journalposter: List<SafDtos.Journalpost?>): Set<Pair<String, String?>> =
         journalposter.filterNotNull()
             .filterNot { it.sak?.fagsakId.isNullOrEmpty() }
             .map { it.journalpostId to it.sak?.fagsakId }
