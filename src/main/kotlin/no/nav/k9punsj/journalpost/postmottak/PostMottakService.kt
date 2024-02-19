@@ -29,9 +29,9 @@ class PostMottakService(
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
         val (saksnummer, feil) = if (mottattJournalpost.saksnummer.isNullOrBlank()) {
-            if (mottattJournalpost.fagsakYtelseTypeKode == FagsakYtelseType.OMSORGSPENGER.kode && mottattJournalpost.barnIdent.isNullOrBlank()) {
+            /*if (mottattJournalpost.fagsakYtelseTypeKode == FagsakYtelseType.OMSORGSPENGER.kode && mottattJournalpost.barnIdent.isNullOrBlank()) {
                 return Pair(null, "Barn ident er påkrevd ved reservering av saksnummer.")
-            }
+            }*/
             val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer(mottattJournalpost.barnIdent)
             if (feil != null) {
                 return Pair(null, feil)
