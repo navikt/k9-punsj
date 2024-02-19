@@ -65,10 +65,6 @@ internal fun SaksbehandlerRoutes(
     setOf("azurev2")
 ) { true }
 
-internal fun PublicRoutes(
-    routes: CoRouterFunctionDsl.() -> Unit
-) = Routes(null, routes, null, null)
-
 private fun Routes(
     authenticationHandler: AuthenticationHandler?,
     routes: CoRouterFunctionDsl.() -> Unit,
