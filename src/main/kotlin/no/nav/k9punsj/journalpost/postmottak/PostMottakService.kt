@@ -83,7 +83,6 @@ class PostMottakService(
 
     private suspend fun lagreTilDB(oppdatertJournalpost: PunsjJournalpost) {
         journalpostService.lagre(punsjJournalpost = oppdatertJournalpost)
-        journalpostService.settTilFerdig(oppdatertJournalpost.journalpostId)
     }
 
     private fun erFerdigstiltEllerJournalført(safJournalpostinfo: JournalpostInfo?): Boolean {
