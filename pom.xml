@@ -297,7 +297,7 @@
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <artifactId>flyway-database-postgresql</artifactId>
             <version>${flyway-core.version}</version>
         </dependency>
         <dependency>
