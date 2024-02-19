@@ -3,8 +3,9 @@ package no.nav.k9punsj.journalpost.postmottak
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
+import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -19,12 +20,30 @@ class PostMottakService(
     private val pdlService: PdlService,
     private val k9SakService: K9SakService,
     private val aksjonspunktService: AksjonspunktService,
+    private val personService: PersonService
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
     }
 
     suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<String?, String?> {
+        val barnIdent = mottattJournalpost.barnIdent
+        val pleietrengendeAktørId = if (!barnIdent.isNullOrBlank()) {
+            personService.finnPersonVedNorskIdent(barnIdent)?.aktørId
+        } else null
+        requireNotNull(pleietrengendeAktørId) { "Fant ikke aktørId for barn." }
+
+        val fagsaker = k9SakService.hentFagsaker(mottattJournalpost.brukerIdent)
+
+        fagsaker.first?.let { it: Set<Fagsak> ->
+            if (it.isNotEmpty()) {
+                val eksisterendeFagsak = it.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
+                if (eksisterendeFagsak != null && mottattJournalpost.saksnummer == null) {
+                    return Pair(null, "Kunne ikke reservere saksnummer. Fagsak (${eksisterendeFagsak.saksnummer}) finnes allerede for pleietrengende.")
+                }
+            }
+        }
+
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
@@ -32,7 +51,7 @@ class PostMottakService(
             /*if (mottattJournalpost.fagsakYtelseTypeKode == FagsakYtelseType.OMSORGSPENGER.kode && mottattJournalpost.barnIdent.isNullOrBlank()) {
                 return Pair(null, "Barn ident er påkrevd ved reservering av saksnummer.")
             }*/
-            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer(mottattJournalpost.barnIdent)
+            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer(barnIdent)
             if (feil != null) {
                 return Pair(null, feil)
             }
