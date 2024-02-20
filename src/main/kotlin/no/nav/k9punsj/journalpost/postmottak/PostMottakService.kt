@@ -69,6 +69,8 @@ class PostMottakService(
             oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummer)
             lagreTilDB(oppdatertJournalpost)
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
+        } else {
+            logger.info("Journalpost er allerede ferdigstilt eller journalført")
         }
 
         return saksnummer to null
@@ -101,9 +103,11 @@ class PostMottakService(
     }
 
     private fun erFerdigstiltEllerJournalført(safJournalpostinfo: JournalpostInfo?): Boolean {
-        val erFerdigstiltEllerJournalfoert = (
-                safJournalpostinfo?.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
-                        safJournalpostinfo?.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+        val safJournalpostStatus = safJournalpostinfo?.journalpostStatus
+        logger.info("safJournalpostStatus=$safJournalpostStatus")
+        val erFerdigstiltEllerJournalfoert = (safJournalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                safJournalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+
         logger.info("Sjekker om journalpost erFerdigstiltEllerJournalført= $erFerdigstiltEllerJournalfoert")
         return erFerdigstiltEllerJournalfoert
     }
