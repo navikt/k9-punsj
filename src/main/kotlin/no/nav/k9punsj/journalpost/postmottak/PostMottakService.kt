@@ -45,27 +45,30 @@ class PostMottakService(
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummer, feil) = if (eksisterendeSaksnummer.isNullOrBlank()) {
-            logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
-            return when {
-                barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
-                else -> k9SakService.reserverSaksnummer(barnIdent)
-
-            }.also { (reservertSaksnummerDto, feil) ->
-                if (feil != null) {
-                    return null to feil
+        val (saksnummer, feil) = when {
+            eksisterendeSaksnummer.isNullOrBlank() -> {
+                logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
+                return when {
+                    barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
+                    else -> k9SakService.reserverSaksnummer(barnIdent)
                 }
-                if (reservertSaksnummerDto == null) {
-                    logger.error("Saksnummer er null")
-                    return null to "Saksnummer er null"
-                } else {
-                    logger.info("Bruker reservert saksnummer: ${reservertSaksnummerDto.saksnummer}")
-                    reservertSaksnummerDto.saksnummer to null
-                }
+                    .also { (reservertSaksnummerDto, feil) ->
+                        if (feil != null) {
+                            return null to feil
+                        }
+                        if (reservertSaksnummerDto == null) {
+                            logger.error("Saksnummer er null")
+                            return null to "Saksnummer er null"
+                        } else {
+                            logger.info("Bruker reservert saksnummer: ${reservertSaksnummerDto.saksnummer}")
+                            reservertSaksnummerDto.saksnummer to null
+                        }
+                    }
             }
-        } else {
-            logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
-            eksisterendeSaksnummer to null
+            else -> {
+                logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
+                eksisterendeSaksnummer to null
+            }
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
