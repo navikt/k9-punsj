@@ -90,7 +90,11 @@ class LokalK9SakService : K9SakService {
         // do nothing
     }
 
-    override suspend fun reserverSaksnummer(barnIdent: String?): Pair<SaksnummerDto?, String?> {
+    override suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?> {
+        return Pair(SaksnummerDto("ABC123"), null)
+    }
+
+    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
         return Pair(SaksnummerDto("ABC123"), null)
     }
 
