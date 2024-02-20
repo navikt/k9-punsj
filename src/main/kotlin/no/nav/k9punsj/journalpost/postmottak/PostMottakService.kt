@@ -80,11 +80,15 @@ class PostMottakService(
         oppdatertJournalpost: PunsjJournalpost,
         mottattJournalpost: JournalpostMottaksHaandteringDto,
     ) {
+        val fagsakYtelseTypeKode = mottattJournalpost.fagsakYtelseTypeKode
+        val type = oppdatertJournalpost.type
+        val aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET)
+        logger.info("Oppretter aksjonspunkt og sender til K9Los for journalpost: ${oppdatertJournalpost.journalpostId}. Type: $type, ytelse: $fagsakYtelseTypeKode, aksjonspunkt: $aksjonspunkt")
         aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
             punsjJournalpost = oppdatertJournalpost,
-            aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-            type = oppdatertJournalpost.type,
-            ytelse = mottattJournalpost.fagsakYtelseTypeKode
+            aksjonspunkt = aksjonspunkt,
+            type = type,
+            ytelse = fagsakYtelseTypeKode
         )
     }
 
@@ -99,6 +103,7 @@ class PostMottakService(
     }
 
     private suspend fun lagreTilDB(oppdatertJournalpost: PunsjJournalpost) {
+        logger.info("Lagrer journalpost til DB: ${oppdatertJournalpost.journalpostId}")
         journalpostService.lagre(punsjJournalpost = oppdatertJournalpost)
     }
 
