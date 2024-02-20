@@ -20,7 +20,7 @@ class PostMottakService(
     private val pdlService: PdlService,
     private val k9SakService: K9SakService,
     private val aksjonspunktService: AksjonspunktService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
@@ -33,9 +33,10 @@ class PostMottakService(
 
         logger.info("Verifiserer at det ikke det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
         k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
-            fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }?.takeIf { mottattJournalpost.saksnummer == null }?.let {
-                return null to "Kunne ikke reservere saksnummer. Fagsak (${it.saksnummer}) finnes allerede for pleietrengende."
-            }
+            fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
+                ?.takeIf { mottattJournalpost.saksnummer == null }?.let {
+                    return null to "Kunne ikke reservere saksnummer. Fagsak (${it.saksnummer}) finnes allerede for pleietrengende."
+                }
         }
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
@@ -46,7 +47,11 @@ class PostMottakService(
             it to null
         } ?: run {
             logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
-            return k9SakService.reserverSaksnummer(barnIdent).also { (reservertSaksnummerDto, feil) ->
+            return when {
+                barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
+                else -> k9SakService.reserverSaksnummer(barnIdent)
+
+            }.also { (reservertSaksnummerDto, feil) ->
                 if (feil != null) {
                     return null to feil
                 }
@@ -58,10 +63,6 @@ class PostMottakService(
                     reservertSaksnummerDto.saksnummer to null
                 }
             }
-        }
-
-        if (feil != null) {
-            return null to feil
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
@@ -88,7 +89,7 @@ class PostMottakService(
     private suspend fun oppdaterOgFerdigstillJournalpostMedSaksnummer(
         mottattJournalpost: JournalpostMottaksHaandteringDto,
         oppdatertJournalpost: PunsjJournalpost,
-        saksnummer: String
+        saksnummer: String,
     ) {
         logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: $saksnummer")
         journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummer)

@@ -298,19 +298,46 @@ class K9SakServiceImpl(
      * Returnerer saksnummer og eventuell feilmelding.
      * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
      */
-    override suspend fun reserverSaksnummer(barnIdent: String?): Pair<SaksnummerDto?, String?> {
-        val pleietrengendeAktørId = if (!barnIdent.isNullOrBlank()) { personService.finnAktørId(barnIdent) } else null
+    override suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?> {
+        val pleietrengendeAktørId = personService.finnAktørId(barnIdent)
 
         // language=JSON
-        val body = pleietrengendeAktørId?.let {
+        val body =
             """
             {
-                "pleietrengendeAktørId": "$it"
+                "pleietrengendeAktørId": "$pleietrengendeAktørId"
             }
             """.trimIndent()
-        } ?: ""
 
         val (result, feil) = httpPost(body, reserverSaksnummerUrl)
+        if (feil != null) {
+            log.error("Feil ved reservasjon av saksnummer: $feil")
+            return Pair(null, feil)
+        }
+        if (result == null) {
+            log.error("Response body er null")
+            return Pair(null, "Response body er null")
+        }
+        return kotlin.runCatching { objectMapper().readValue<SaksnummerDto>(result) }
+            .fold(
+                onSuccess = { saksnummerDto: SaksnummerDto -> Pair(saksnummerDto, null) },
+                onFailure = { throwable: Throwable ->
+                    Pair(
+                        null,
+                        "Feilet deserialisering av saksnummerDto ved reservasjon: $throwable"
+                    )
+                }
+            )
+    }
+
+    /**
+     * Reserverer saksnummer i k9-sak.
+     * Returnerer saksnummer og eventuell feilmelding.
+     * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
+     */
+    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
+
+        val (result, feil) = httpPost("", reserverSaksnummerUrl)
         if (feil != null) {
             log.error("Feil ved reservasjon av saksnummer: $feil")
             return Pair(null, feil)
