@@ -4,8 +4,8 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -45,30 +45,23 @@ class PostMottakService(
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummer, feil) = when {
-            eksisterendeSaksnummer.isNullOrBlank() -> {
-                logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
-                return when {
-                    barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
-                    else -> k9SakService.reserverSaksnummer(barnIdent)
-                }
-                    .also { (reservertSaksnummerDto, feil) ->
-                        if (feil != null) {
-                            return null to feil
-                        }
-                        if (reservertSaksnummerDto == null) {
-                            logger.error("Saksnummer er null")
-                            return null to "Saksnummer er null"
-                        } else {
-                            logger.info("Bruker reservert saksnummer: ${reservertSaksnummerDto.saksnummer}")
-                            reservertSaksnummerDto.saksnummer to null
-                        }
-                    }
+        val (saksnummer, feil) = if (eksisterendeSaksnummer.isNullOrBlank()) {
+            logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
+            val (reservertSaksnummerDto, feil) = reserverSaksnummer(barnIdent)
+
+            if (feil != null) {
+                return null to feil
             }
-            else -> {
-                logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
-                eksisterendeSaksnummer to null
+
+            if (reservertSaksnummerDto == null) {
+                logger.error("Saksnummer er null")
+                return null to "Saksnummer er null"
             }
+
+            reservertSaksnummerDto.saksnummer to null
+        } else {
+            logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
+            eksisterendeSaksnummer to null
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
@@ -87,6 +80,11 @@ class PostMottakService(
         }
 
         return saksnummer to null
+    }
+
+    private suspend fun reserverSaksnummer(barnIdent: String?): Pair<SaksnummerDto?, String?> = when {
+        barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
+        else -> k9SakService.reserverSaksnummer(barnIdent)
     }
 
     private suspend fun opprettAksjonspunktOgSendTilK9Los(
