@@ -104,6 +104,7 @@ class PostMottakService(
         val erFerdigstiltEllerJournalfoert = (
                 safJournalpostinfo?.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                         safJournalpostinfo?.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+        logger.info("Sjekker om journalpost erFerdigstiltEllerJournalført= $erFerdigstiltEllerJournalfoert")
         return erFerdigstiltEllerJournalfoert
     }
 
