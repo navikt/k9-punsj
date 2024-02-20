@@ -12,6 +12,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 
 @Service
@@ -66,7 +67,14 @@ class PostMottakService(
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
-            oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummer)
+            val (_, ferdigstillingFeil) = oppdaterOgFerdigstillJournalpostMedSaksnummer(
+                mottattJournalpost,
+                oppdatertJournalpost,
+                saksnummer
+            )
+            if (ferdigstillingFeil != null) {
+                return null to feil
+            }
             lagreTilDB(oppdatertJournalpost)
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
         } else {
@@ -96,10 +104,16 @@ class PostMottakService(
         mottattJournalpost: JournalpostMottaksHaandteringDto,
         oppdatertJournalpost: PunsjJournalpost,
         saksnummer: String,
-    ) {
+    ): Pair<HttpStatusCode?, String?> {
         logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: $saksnummer")
-        journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummer)
-        logger.info("Ferdigstilt journalpost: ${oppdatertJournalpost.journalpostId}")
+        val (httpStatusCode, _) = journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummer)
+
+        return if (!httpStatusCode.is2xxSuccessful) {
+            httpStatusCode to "Feil ved ferdigstilling av journalpost: ${oppdatertJournalpost.journalpostId}. HttpStatusCode: $httpStatusCode"
+        } else {
+            logger.info("Ferdigstilt journalpost: ${oppdatertJournalpost.journalpostId}")
+            null to null
+        }
     }
 
     private suspend fun lagreTilDB(oppdatertJournalpost: PunsjJournalpost) {

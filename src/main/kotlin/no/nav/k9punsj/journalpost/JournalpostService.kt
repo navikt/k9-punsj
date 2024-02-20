@@ -141,9 +141,9 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String) {
+    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String): Pair<HttpStatusCode, String> {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
-        dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+        return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
             journalpostId = dto.journalpostId,
             identitetsnummer = dto.brukerIdent.somIdentitetsnummer(),
