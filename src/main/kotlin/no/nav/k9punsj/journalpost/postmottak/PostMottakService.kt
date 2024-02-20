@@ -31,7 +31,6 @@ class PostMottakService(
         val pleietrengendeAktørId = if (!barnIdent.isNullOrBlank()) {
             personService.finnPersonVedNorskIdent(barnIdent)?.aktørId
         } else null
-        requireNotNull(pleietrengendeAktørId) { "Fant ikke aktørId for barn." }
 
         val fagsaker = k9SakService.hentFagsaker(mottattJournalpost.brukerIdent)
 
