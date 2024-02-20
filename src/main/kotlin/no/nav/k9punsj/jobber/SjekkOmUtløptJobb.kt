@@ -6,6 +6,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.integrasjoner.k9losapi.K9LosOppgaveStatusDto
 import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
@@ -71,7 +72,8 @@ class SjekkOmUtløptJobb @Autowired constructor(
                     aksjonspunkt.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.PUNSJ_HAR_UTLØPT.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
-                type = punsjJournalpost.type ?: K9FordelType.UKJENT.kode
+                type = punsjJournalpost.type ?: K9FordelType.UKJENT.kode,
+                status = K9LosOppgaveStatusDto.AAPEN
             )
         )
         hendelseProducer.send(

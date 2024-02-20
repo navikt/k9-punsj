@@ -39,7 +39,7 @@ import org.testcontainers.utility.MountableFile
 import java.net.URI
 
 
-class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12.2-alpine")
+class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
