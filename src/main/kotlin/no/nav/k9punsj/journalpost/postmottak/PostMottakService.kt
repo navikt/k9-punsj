@@ -33,9 +33,11 @@ class PostMottakService(
             ?.let { personService.finnPersonVedNorskIdent(it)?.aktørId }
 
         logger.info("Verifiserer at det ikke det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
+        val eksisterendeSaksnummer = mottattJournalpost.saksnummer
+
         k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
             fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
-                ?.takeIf { mottattJournalpost.saksnummer == null }?.let {
+                ?.takeIf { eksisterendeSaksnummer == null }?.let {
                     return null to "Kunne ikke reservere saksnummer. Fagsak (${it.saksnummer}) finnes allerede for pleietrengende."
                 }
         }
@@ -43,10 +45,7 @@ class PostMottakService(
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummer, feil) = mottattJournalpost.saksnummer.takeUnless { it.isNullOrBlank() }?.let { it: String ->
-            logger.info("Bruker eksisterende saksnummer: $it")
-            it to null
-        } ?: run {
+        val (saksnummer, feil) = if (eksisterendeSaksnummer.isNullOrBlank()) {
             logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
             return when {
                 barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
@@ -64,6 +63,9 @@ class PostMottakService(
                     reservertSaksnummerDto.saksnummer to null
                 }
             }
+        } else {
+            logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
+            eksisterendeSaksnummer to null
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
