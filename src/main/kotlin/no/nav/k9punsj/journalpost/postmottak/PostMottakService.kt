@@ -26,47 +26,42 @@ class PostMottakService(
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
     }
 
-    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<String?, String?> {
+    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<Any?, String?> {
         val barnIdent = mottattJournalpost.barnIdent
-        val pleietrengendeAktørId = if (!barnIdent.isNullOrBlank()) {
-            personService.finnPersonVedNorskIdent(barnIdent)?.aktørId
-        } else null
+        val pleietrengendeAktørId = barnIdent.takeUnless { it.isNullOrBlank() }
+            ?.let { personService.finnPersonVedNorskIdent(it)?.aktørId }
 
-        val fagsaker = k9SakService.hentFagsaker(mottattJournalpost.brukerIdent)
-
-        fagsaker.first?.let { it: Set<Fagsak> ->
-            if (it.isNotEmpty()) {
-                val eksisterendeFagsak = it.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
-                if (eksisterendeFagsak != null && mottattJournalpost.saksnummer == null) {
-                    return Pair(null, "Kunne ikke reservere saksnummer. Fagsak (${eksisterendeFagsak.saksnummer}) finnes allerede for pleietrengende.")
-                }
+        logger.info("Verifiserer at det ikke det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
+        k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
+            fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }?.takeIf { mottattJournalpost.saksnummer == null }?.let {
+                return null to "Kunne ikke reservere saksnummer. Fagsak (${it.saksnummer}) finnes allerede for pleietrengende."
             }
         }
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummer, feil) = if (mottattJournalpost.saksnummer.isNullOrBlank()) {
-            /*if (mottattJournalpost.fagsakYtelseTypeKode == FagsakYtelseType.OMSORGSPENGER.kode && mottattJournalpost.barnIdent.isNullOrBlank()) {
-                return Pair(null, "Barn ident er påkrevd ved reservering av saksnummer.")
-            }*/
-            val (reservertSaksnummerDto, feil) = k9SakService.reserverSaksnummer(barnIdent)
-            if (feil != null) {
-                return Pair(null, feil)
+        val (saksnummer, feil) = mottattJournalpost.saksnummer.takeUnless { it.isNullOrBlank() }?.let { it: String ->
+            logger.info("Bruker eksisterende saksnummer: $it")
+            it to null
+        } ?: run {
+            logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
+            return k9SakService.reserverSaksnummer(barnIdent).also { (reservertSaksnummerDto, feil) ->
+                if (feil != null) {
+                    return null to feil
+                }
+                if (reservertSaksnummerDto == null) {
+                    logger.error("Saksnummer er null")
+                    return null to "Saksnummer er null"
+                } else {
+                    logger.info("Bruker reservert saksnummer: ${reservertSaksnummerDto.saksnummer}")
+                    reservertSaksnummerDto.saksnummer to null
+                }
             }
-            reservertSaksnummerDto?.let {
-                logger.info("Bruker reservert saksnummer: ${it.saksnummer}")
-                Pair(it.saksnummer, null)
-            } ?: Pair(null, "Saksnummer er null")
-        } else {
-            logger.info("Bruker eksisterende saksnummer: ${mottattJournalpost.saksnummer}")
-            Pair(mottattJournalpost.saksnummer, null)
         }
+
         if (feil != null) {
-            return Pair(null, feil)
-        }
-        if (saksnummer == null) {
-            return Pair(null, "Saksnummer er null")
+            return null to feil
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
@@ -75,7 +70,7 @@ class PostMottakService(
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
         }
 
-        return Pair(saksnummer, null)
+        return saksnummer to null
     }
 
     private suspend fun opprettAksjonspunktOgSendTilK9Los(
@@ -111,12 +106,17 @@ class PostMottakService(
         return erFerdigstiltEllerJournalfoert
     }
 
-    private suspend fun hentJournalpostInfoFraSaf(oppdatertJournalpost: PunsjJournalpost) =
-        journalpostService.hentJournalpostInfo(oppdatertJournalpost.journalpostId)
+    private suspend fun hentJournalpostInfoFraSaf(oppdatertJournalpost: PunsjJournalpost): JournalpostInfo? {
+        logger.info("Henter journalpostinfo fra SAF: ${oppdatertJournalpost.journalpostId}")
+        return journalpostService.hentJournalpostInfo(oppdatertJournalpost.journalpostId)
+    }
 
-    private suspend fun hentOgOppdaterJournalpostFraDB(mottattJournalpost: JournalpostMottaksHaandteringDto) =
-        journalpostService.hent(mottattJournalpost.journalpostId).copy(
+    private suspend fun hentOgOppdaterJournalpostFraDB(mottattJournalpost: JournalpostMottaksHaandteringDto): PunsjJournalpost {
+        logger.info("Henter og oppdaterer journalpost fra DB: ${mottattJournalpost.journalpostId}")
+        val aktørId = pdlService.aktørIdFor(mottattJournalpost.brukerIdent)
+        return journalpostService.hent(mottattJournalpost.journalpostId).copy(
             ytelse = mottattJournalpost.fagsakYtelseTypeKode,
-            aktørId = pdlService.aktørIdFor(mottattJournalpost.brukerIdent)
+            aktørId = aktørId
         )
+    }
 }
