@@ -54,7 +54,8 @@ internal class AksjonspunktServiceImpl(
             aktørId = punsjJournalpost.aktørId,
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
             ytelse = ytelse,
-            type = punsjJournalpost.type!!
+            type = punsjJournalpost.type!!,
+            status = K9LosOppgaveStatusDto.AAPEN
         )
 
         log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -107,7 +108,8 @@ internal class AksjonspunktServiceImpl(
                 aksjonspunkter = mutableMap,
                 sendtInn = erSendtInn,
                 ferdigstiltAv = ansvarligSaksbehandler,
-                type = journalpost.type!!
+                type = journalpost.type!!,
+                status = K9LosOppgaveStatusDto.LUKKET
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -188,7 +190,8 @@ internal class AksjonspunktServiceImpl(
                     AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
                 barnIdent = barnIdent,
-                type = journalpost.type!!
+                type = journalpost.type!!,
+                status = K9LosOppgaveStatusDto.VENTER
             )
 
             hendelseProducer.sendMedOnSuccess(
@@ -224,7 +227,8 @@ internal class AksjonspunktServiceImpl(
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     ),
                     barnIdent = barnIdent,
-                    type = journalpost.type!!
+                    type = journalpost.type!!,
+                    status = K9LosOppgaveStatusDto.VENTER
                 )
 
                 hendelseProducer.sendMedOnSuccess(
@@ -261,6 +265,25 @@ internal class AksjonspunktServiceImpl(
                     it.aksjonspunktKode.kode to it.aksjonspunktStatus.kode
                 }
 
+            // TODO: Utled status
+            // Hvordan håndtere flere aksjonspunkter? Sortere på opprettet_tid og ta den siste?
+            var status = aksjonspunkterPaJournalpost.values.firstOrNull()
+                ?.let { if (it == AksjonspunktStatus.OPPRETTET.kode) K9LosOppgaveStatusDto.AAPEN else K9LosOppgaveStatusDto.VENTER }
+                ?: K9LosOppgaveStatusDto.AAPEN
+
+            // Sjekker ifall journalposten er ferdigstilt/journalfoert og setter status til lukket
+            journalpostService.hentSafJournalPost(punsjJournalpost.journalpostId)?.let {
+                when (it.journalstatus) {
+                    "JOURNALFOERT", "FERDIGSTILT" -> {
+                        status = K9LosOppgaveStatusDto.LUKKET
+                    }
+
+                    else -> {
+                        // DO NOTHING
+                    }
+                }
+            }
+
             // TODO: Trenger mer info her? Finns det en bedre måte og sende journalpost på?
             val punsjDtoJson = lagPunsjDto(
                 eksternId = punsjJournalpost.uuid,
@@ -269,7 +292,8 @@ internal class AksjonspunktServiceImpl(
                 aktørId = punsjJournalpost.aktørId,
                 barnIdent = null,
                 type = punsjJournalpost.type!!,
-                aksjonspunkter = aksjonspunkterPaJournalpost
+                aksjonspunkter = aksjonspunkterPaJournalpost,
+                status = status
             )
             hendelseProducer.sendMedOnSuccess(
                 topicName = k9PunsjTilLosTopic,
@@ -308,7 +332,7 @@ internal class AksjonspunktServiceImpl(
         sendtInn: Boolean? = null,
         ferdigstiltAv: String? = null,
         mottattDato: LocalDateTime? = null,
-        status: K9LosOppgaveStatusDto? = null
+        status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId = eksternId.toString(),
