@@ -32,7 +32,7 @@ class PostMottakService(
         val pleietrengendeAktørId = barnIdent.takeUnless { it.isNullOrBlank() }
             ?.let { personService.finnPersonVedNorskIdent(it)?.aktørId }
 
-        logger.info("Verifiserer at det ikke det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
+        logger.info("Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
         k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
