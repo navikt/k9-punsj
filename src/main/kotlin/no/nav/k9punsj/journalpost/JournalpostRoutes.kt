@@ -124,11 +124,14 @@ internal class JournalpostRoutes(
                     }
 
                     // Hvis journalposten har sakstilhørighet, hent sak fra K9sak
-                    val sak = safJournalPost?.sak?.let { safSak: SafDtos.Sak ->
+                    val safSak = safJournalPost?.sak
+                    val k9Sak = safSak?.let { sak: SafDtos.Sak ->
                         norskIdent?.let { ident: String ->
-                            sakService.hentSaker(ident).firstOrNull { it.fagsakId == safSak.fagsakId }
+                            sakService.hentSaker(ident).firstOrNull { it.fagsakId == sak.fagsakId }
                         }
                     }
+
+                    val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && safSak!= null && k9Sak == null
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -143,14 +146,13 @@ internal class JournalpostRoutes(
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
                         erFerdigstilt = erFerdigstiltEllerJournalfoert,
-                        sak = sak?.let {
-                            Sak(
-                                fagsakId = it.fagsakId,
-                                sakstype = it.sakstype,
-                                gyldigPeriode = it.gyldigPeriode,
-                                pleietrengendeIdent = it.pleietrengendeIdent
-                            )
-                        }
+                        sak = Sak(
+                            reservertSaksnummer = erReservertSaksnummer,
+                            fagsakId = safSak?.fagsakId,
+                            gyldigPeriode = k9Sak?.gyldigPeriode,
+                            pleietrengendeIdent = k9Sak?.pleietrengendeIdent,
+                            k9FagsakYtelseType = k9FagsakYtelseType
+                        )
                     )
 
                     utvidJournalpostMedMottattDato(
