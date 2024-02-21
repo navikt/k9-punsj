@@ -32,12 +32,12 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>4.1.4</k9-sak.version>
-        <k9-formidling.version>1.0.5</k9-formidling.version>
+        <k9-formidling.version>1.0.7</k9-formidling.version>
         <k9-format.version>9.0.6</k9-format.version>
-        <k9-rapid.version>1.20231019060904-f8be04b</k9-rapid.version>
+        <k9-rapid.version>1.20240115061003-339d641</k9-rapid.version>
 
         <!-- database -->
-        <postgresql.version>42.7.1</postgresql.version>
+        <postgresql.version>42.7.2</postgresql.version>
         <flyway.version>10.8.1</flyway.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <HikariCP.version>5.1.0</HikariCP.version>
@@ -49,7 +49,7 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.19.5</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
-        <wiremock.version>3.4.0</wiremock.version>
+        <wiremock.version>3.4.1</wiremock.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
@@ -64,7 +64,7 @@
         <fuel.version>2.3.1</fuel.version>
         <kotlinx-coroutines.version>1.8.0</kotlinx-coroutines.version>
         <token-support.version>4.0.5</token-support.version>
-        <dusseldorf-ktor.version>4.0.10</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>4.2.1</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
 
