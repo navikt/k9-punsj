@@ -152,7 +152,7 @@ internal class JournalpostRoutes(
                             fagsakId = safSak?.fagsakId,
                             gyldigPeriode = k9Fagsak?.gyldigPeriode,
                             pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
-                            k9FagsakYtelseType = k9FagsakYtelseType
+                            sakstype = k9FagsakYtelseType?.kode
                         )
                     )
 

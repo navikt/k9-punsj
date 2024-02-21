@@ -1,6 +1,5 @@
 package no.nav.k9punsj.journalpost.dto
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.PeriodeDto
 
 data class Sak(
@@ -8,5 +7,5 @@ data class Sak(
     val fagsakId: String?,
     val gyldigPeriode: PeriodeDto?,
     val pleietrengendeIdent: String?,
-    val k9FagsakYtelseType: FagsakYtelseType?,
+    val sakstype: String?,
 )
