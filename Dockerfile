@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:21-appdynamics
+FROM ghcr.io/navikt/baseimages/temurin:21-appdynamics@sha256:5805ced01cf05bc2e5c2c35a8cdb21c8ce7ce0eb50557006fe12c3e03acfbbb0
 
 ENV APPD_ENABLED=true
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-punsj
