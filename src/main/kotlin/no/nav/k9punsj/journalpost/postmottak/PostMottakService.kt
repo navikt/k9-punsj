@@ -37,8 +37,8 @@ class PostMottakService(
 
         k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
             fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
-                ?.takeIf { eksisterendeSaksnummer == null }?.let {
-                    return null to "Kunne ikke reservere saksnummer. Fagsak (${it.saksnummer}) finnes allerede for pleietrengende."
+                ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
+                    throw EksisterendeFagsakPåPleietrengendeException(mottattJournalpost.journalpostId, eksisterendeFagsak)
                 }
         }
 
