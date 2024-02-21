@@ -125,13 +125,14 @@ internal class JournalpostRoutes(
 
                     // Hvis journalposten har sakstilhørighet, hent sak fra K9sak
                     val safSak = safJournalPost?.sak
-                    val k9Sak = safSak?.let { sak: SafDtos.Sak ->
+                    val k9Fagsak = safSak?.let { sak: SafDtos.Sak ->
                         norskIdent?.let { ident: String ->
                             sakService.hentSaker(ident).firstOrNull { it.fagsakId == sak.fagsakId }
                         }
                     }
 
-                    val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && safSak!= null && k9Sak == null
+                    val erReservertSaksnummer =
+                        erFerdigstiltEllerJournalfoert && safSak != null && safSak.fagsakId != null && k9Fagsak == null
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -149,8 +150,8 @@ internal class JournalpostRoutes(
                         sak = Sak(
                             reservertSaksnummer = erReservertSaksnummer,
                             fagsakId = safSak?.fagsakId,
-                            gyldigPeriode = k9Sak?.gyldigPeriode,
-                            pleietrengendeIdent = k9Sak?.pleietrengendeIdent,
+                            gyldigPeriode = k9Fagsak?.gyldigPeriode,
+                            pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
                             k9FagsakYtelseType = k9FagsakYtelseType
                         )
                     )
