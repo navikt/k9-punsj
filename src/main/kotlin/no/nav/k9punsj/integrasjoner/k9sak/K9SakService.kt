@@ -45,8 +45,7 @@ interface K9SakService {
         brevkode: Brevkode
     )
 
-    suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?>
-    suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?>
+    suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto
     suspend fun opprettSakOgSendInnSøknad(
         soknad: Søknad,
         søknadEntitet: SøknadEntitet,

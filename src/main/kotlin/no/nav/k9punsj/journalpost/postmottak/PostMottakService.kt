@@ -1,12 +1,13 @@
 package no.nav.k9punsj.journalpost.postmottak
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.ReserverSaksnummerDto
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
@@ -28,40 +29,46 @@ class PostMottakService(
     }
 
     suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<Any?, String?> {
+        val brukerIdent = mottattJournalpost.brukerIdent
+        val brukerAktørId =
+            pdlService.aktørIdFor(brukerIdent) ?: throw IllegalStateException("Fant ikke aktørId for brukerIdent")
+
         val barnIdent = mottattJournalpost.barnIdent
         val pleietrengendeAktørId = barnIdent.takeUnless { it.isNullOrBlank() }
-            ?.let { personService.finnPersonVedNorskIdent(it)?.aktørId }
+            ?.let { personService.finnAktørId(it) }
+
+        val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
 
         logger.info("Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
-        k9SakService.hentFagsaker(mottattJournalpost.brukerIdent).first?.let { fagsaker ->
+        k9SakService.hentFagsaker(brukerIdent).first?.let { fagsaker ->
             fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
                 ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
-                    throw EksisterendeFagsakPåPleietrengendeException(mottattJournalpost.journalpostId, eksisterendeFagsak)
+                    throw EksisterendeFagsakPåPleietrengendeException(
+                        mottattJournalpost.journalpostId,
+                        eksisterendeFagsak
+                    )
                 }
         }
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
-        val (saksnummer, feil) = if (eksisterendeSaksnummer.isNullOrBlank()) {
+        val saksnummer = if (eksisterendeSaksnummer.isNullOrBlank()) {
             logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
-            val (reservertSaksnummerDto, feil) = reserverSaksnummer(barnIdent)
+            val reservertSaksnummerDto = k9SakService.reserverSaksnummer(
+                ReserverSaksnummerDto(
+                    brukerAktørId = brukerAktørId,
+                    pleietrengendeAktørId = pleietrengendeAktørId,
+                    ytelseType = fagsakYtelseType
+                )
+            )
 
-            if (feil != null) {
-                return null to feil
-            }
-
-            if (reservertSaksnummerDto == null) {
-                logger.error("Saksnummer er null")
-                return null to "Saksnummer er null"
-            }
-
-            reservertSaksnummerDto.saksnummer to null
+            reservertSaksnummerDto.saksnummer
         } else {
             logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
-            eksisterendeSaksnummer to null
+            eksisterendeSaksnummer
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
@@ -71,7 +78,7 @@ class PostMottakService(
                 saksnummer
             )
             if (ferdigstillingFeil != null) {
-                return null to feil
+                return null to ferdigstillingFeil
             }
             lagreTilDB(oppdatertJournalpost)
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
@@ -80,11 +87,6 @@ class PostMottakService(
         }
 
         return saksnummer to null
-    }
-
-    private suspend fun reserverSaksnummer(barnIdent: String?): Pair<SaksnummerDto?, String?> = when {
-        barnIdent.isNullOrBlank() -> k9SakService.reserverSaksnummer()
-        else -> k9SakService.reserverSaksnummer(barnIdent)
     }
 
     private suspend fun opprettAksjonspunktOgSendTilK9Los(

@@ -1,6 +1,7 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.runBlocking
@@ -15,6 +16,7 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.RestKallException
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
@@ -47,6 +49,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
 import java.util.Base64
@@ -91,7 +94,10 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (json, feil) = httpPost(body, hentPerioderUrl)
+        val (json, feil) = kotlin.runCatching { httpPost(body, hentPerioderUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
@@ -127,16 +133,26 @@ class K9SakServiceImpl(
         val saksnummerBody = kotlin.runCatching { objectMapper().writeValueAsString(finnFagsakDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (saksnummerJson, saksnummerFeil) = httpPost(saksnummerBody, finnFagsak)
+        val (saksnummerJson, saksnummerFeil) = kotlin.runCatching { httpPost(saksnummerBody, finnFagsak) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
+
         saksnummerFeil?.let { Pair(null, saksnummerFeil) }
 
         val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
             ?: return Pair(null, "Fant ikke saksnummer")
 
-        val (json, feil) = httpPost(
-            saksnummerJson,
-            "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}"
+        val (json, feil) = kotlin.runCatching {
+            httpPost(
+                saksnummerJson,
+                "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}"
+            )
+        }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
         )
+
         return try {
             if (json == null) {
                 return Pair(null, feil!!)
@@ -164,7 +180,10 @@ class K9SakServiceImpl(
         val body = kotlin.runCatching { objectMapper().writeValueAsString(matchDto) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
-        val (json, feil) = httpPost(body, hentIntektsmeldingerUrl)
+        val (json, feil) = kotlin.runCatching { httpPost(body, hentIntektsmeldingerUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
 
         return try {
             if (json == null) {
@@ -191,7 +210,10 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        val (json, feil) = httpPost(body, sokFagsakerUrl)
+        val (json, feil) = runCatching { httpPost(body, sokFagsakerUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
 
         return if (!json.isNullOrEmpty()) {
             val pair = Pair(json.fagsaker(), null)
@@ -247,7 +269,11 @@ class K9SakServiceImpl(
 
         val body = kotlin.runCatching { objectMapper().writeValueAsString(payloadMedAktørId) }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
-        val response = httpPost(body, opprettFagsakUrl)
+
+        val response = kotlin.runCatching { httpPost(body, opprettFagsakUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
 
         return try {
             val saksnummer = JSONObject(response.first).getString("saksnummer").toString()
@@ -286,7 +312,10 @@ class K9SakServiceImpl(
             }]
         """.trimIndent()
 
-        val (_, feil) = httpPost(body, sendInnSøknadUrl)
+        val (_, feil) = runCatching { httpPost(body, sendInnSøknadUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { Pair(null, it.message) }
+        )
         require(feil.isNullOrEmpty()) {
             log.error("Feil ved sending av søknad til k9-sak: $feil")
             throw IllegalStateException("Feil ved sending av søknad til k9-sak: $feil")
@@ -296,63 +325,21 @@ class K9SakServiceImpl(
     /**
      * Reserverer saksnummer i k9-sak.
      * Returnerer saksnummer og eventuell feilmelding.
-     * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
+     * @param reserverSaksnummerDto: Data som trengs for å reservere saksnummer.
      */
-    override suspend fun reserverSaksnummer(barnIdent: String): Pair<SaksnummerDto?, String?> {
-        val pleietrengendeAktørId = personService.finnAktørId(barnIdent)
+    override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto {
+        val body = objectMapper().writeValueAsString(reserverSaksnummerDto)
+        val result = httpPost(body, reserverSaksnummerUrl)
 
-        // language=JSON
-        val body =
-            """
-            {
-                "pleietrengendeAktørId": "$pleietrengendeAktørId"
-            }
-            """.trimIndent()
-
-        val (result, feil) = httpPost(body, reserverSaksnummerUrl)
-        if (feil != null) {
-            log.error("Feil ved reservasjon av saksnummer: $feil")
-            return Pair(null, feil)
-        }
-        if (result == null) {
-            log.error("Response body er null")
-            return Pair(null, "Response body er null")
-        }
         return kotlin.runCatching { objectMapper().readValue<SaksnummerDto>(result) }
             .fold(
-                onSuccess = { saksnummerDto: SaksnummerDto -> Pair(saksnummerDto, null) },
+                onSuccess = { saksnummerDto: SaksnummerDto -> saksnummerDto },
                 onFailure = { throwable: Throwable ->
-                    Pair(
-                        null,
-                        "Feilet deserialisering av saksnummerDto ved reservasjon: $throwable"
-                    )
-                }
-            )
-    }
-
-    /**
-     * Reserverer saksnummer i k9-sak.
-     * Returnerer saksnummer og eventuell feilmelding.
-     * @param barnIdent: Identitetsnummer til pleietrengende. (Fødselsnummer eller D-nummer). Brukes for å koble saksnummer til pleietrengende.
-     */
-    override suspend fun reserverSaksnummer(): Pair<SaksnummerDto?, String?> {
-
-        val (result, feil) = httpPost("", reserverSaksnummerUrl)
-        if (feil != null) {
-            log.error("Feil ved reservasjon av saksnummer: $feil")
-            return Pair(null, feil)
-        }
-        if (result == null) {
-            log.error("Response body er null")
-            return Pair(null, "Response body er null")
-        }
-        return kotlin.runCatching { objectMapper().readValue<SaksnummerDto>(result) }
-            .fold(
-                onSuccess = { saksnummerDto: SaksnummerDto -> Pair(saksnummerDto, null) },
-                onFailure = { throwable: Throwable ->
-                    Pair(
-                        null,
-                        "Feilet deserialisering av saksnummerDto ved reservasjon: $throwable"
+                    throw RestKallException(
+                        titel = "Feil ved reservering av saksnummer",
+                        message = "Feilet ved deserialisering av respons ved reservering av saksnummer: ${throwable.message}",
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                        uri = URI.create(reserverSaksnummerUrl)
                     )
                 }
             )
@@ -408,7 +395,10 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        val (_, feil) = httpPost(body, opprettSakOgSendInnSøknadUrl)
+        val (_, feil) = runCatching { httpPost(body, opprettSakOgSendInnSøknadUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { Pair(null, it.message) }
+        )
         require(feil.isNullOrEmpty()) {
             val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
             log.error(feilmelding)
@@ -475,7 +465,7 @@ class K9SakServiceImpl(
         return periode
     }
 
-    private suspend fun httpPost(body: String, url: String): Pair<String?, String?> {
+    private suspend fun httpPost(body: String, url: String): String {
         val (request, _, result) = "$baseUrl$url"
             .httpPost()
             .body(body)
@@ -487,15 +477,18 @@ class K9SakServiceImpl(
             ).awaitStringResponseResult()
 
         return result.fold(
-            { success ->
-                Pair(success, null)
-            },
-            { error ->
+            { success: String -> success },
+            { error: FuelError ->
                 log.error(
                     "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
                 )
                 log.error(error.toString())
-                Pair(null, "Feil ved kall til k9-sak")
+                throw RestKallException(
+                    titel = "Restkall mot k9-sak feilet",
+                    message = error.response.body().asString("text/plain"),
+                    httpStatus = HttpStatus.valueOf(error.response.statusCode),
+                    uri = error.response.url.toURI()
+                )
             }
         )
     }
