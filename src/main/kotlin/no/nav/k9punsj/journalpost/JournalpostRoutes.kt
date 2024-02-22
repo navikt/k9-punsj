@@ -462,7 +462,7 @@ internal class JournalpostRoutes(
         val harSafSak = safSak != null
         val safSakHarFagsakId = safSak?.fagsakId != null
         val ikkeHarFagsak = k9Fagsak == null
-        require(safSak?.fagsakId == k9Fagsak?.fagsakId) { "FagsakId fra SAF og k9-sak er ikke like." }
+        require(safSak?.fagsakId == k9Fagsak?.fagsakId) { "FagsakId fra SAF (${safSak?.fagsakId}) og k9-sak (${k9Fagsak?.fagsakId}) er ikke like." }
 
         val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && harSafSak && safSakHarFagsakId && ikkeHarFagsak
         logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
