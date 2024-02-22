@@ -1,6 +1,6 @@
 package no.nav.k9punsj.journalpost.postmottak
 
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.web.ErrorResponseException

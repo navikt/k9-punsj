@@ -2,6 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -15,6 +16,7 @@ import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
@@ -32,6 +34,7 @@ import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.sak.SakService
+import no.nav.k9punsj.sak.dto.SakInfoDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -66,6 +69,7 @@ internal class JournalpostRoutes(
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
     private val sakService: SakService,
+    private val k9SakService: K9SakService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
@@ -131,8 +135,8 @@ internal class JournalpostRoutes(
                         }
                     }
 
-                    val erReservertSaksnummer =
-                        erFerdigstiltEllerJournalfoert && safSak != null && safSak.fagsakId != null && k9Fagsak == null
+                    val utledetSak = utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType)
+                    logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -147,13 +151,7 @@ internal class JournalpostRoutes(
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
                         erFerdigstilt = erFerdigstiltEllerJournalfoert,
-                        sak = Sak(
-                            reservertSaksnummer = erReservertSaksnummer,
-                            fagsakId = safSak?.fagsakId,
-                            gyldigPeriode = k9Fagsak?.gyldigPeriode,
-                            pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
-                            sakstype = k9FagsakYtelseType?.kode
-                        )
+                        sak = utledetSak
                     )
 
                     utvidJournalpostMedMottattDato(
@@ -450,6 +448,50 @@ internal class JournalpostRoutes(
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .bodyValueAndAwait("Journalposten vil bli kopiert.")
+            }
+        }
+    }
+
+    private suspend fun utledSak(
+        erFerdigstiltEllerJournalfoert: Boolean,
+        safSak: SafDtos.Sak?,
+        k9Fagsak: SakInfoDto?,
+        k9FagsakYtelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType?,
+    ): Sak {
+        logger.info("Utleder sak for journalpost")
+        val harSafSak = safSak != null
+        val safSakHarFagsakId = safSak?.fagsakId != null
+        val ikkeHarFagsak = k9Fagsak == null
+        require(safSak?.fagsakId == k9Fagsak?.fagsakId) { "FagsakId fra SAF og k9-sak er ikke like." }
+
+        val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && harSafSak && safSakHarFagsakId && ikkeHarFagsak
+        logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
+
+        return when (erReservertSaksnummer) {
+            true -> {
+                logger.info("Utleder reservert sak. Henter reservert saksnummer fra k9-sak med fagsakId: ${safSak!!.fagsakId}")
+                val reservertSaksnummerDto = k9SakService.hentReservertSaksnummer(
+                    Saksnummer(safSak.fagsakId)
+                )
+                logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
+                Sak(
+                    reservertSaksnummer = true,
+                    fagsakId = reservertSaksnummerDto.saksnummer,
+                    gyldigPeriode = null,
+                    pleietrengendeIdent = reservertSaksnummerDto.pleietrengendeAktørId,
+                    sakstype = reservertSaksnummerDto.ytelseType.kode
+                )
+            }
+
+            else -> {
+                logger.info("Utleder fagsak fra k9-sak med fagsakId: ${safSak?.fagsakId}")
+                Sak(
+                    reservertSaksnummer = false,
+                    fagsakId = safSak?.fagsakId,
+                    gyldigPeriode = k9Fagsak?.gyldigPeriode,
+                    pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
+                    sakstype = k9FagsakYtelseType?.kode
+                )
             }
         }
     }

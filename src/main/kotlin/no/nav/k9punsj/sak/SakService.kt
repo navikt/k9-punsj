@@ -1,7 +1,7 @@
 package no.nav.k9punsj.sak
 
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.sak.dto.SakInfoDto
 import org.slf4j.LoggerFactory

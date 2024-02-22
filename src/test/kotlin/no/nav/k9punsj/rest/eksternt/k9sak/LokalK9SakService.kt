@@ -1,6 +1,7 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
@@ -8,9 +9,11 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -92,6 +95,11 @@ class LokalK9SakService : K9SakService {
     }
 
     override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto) = SaksnummerDto("ABC123")
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer) = HentReservertSaksnummerDto(
+        saksnummer = "ABC123",
+        ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        brukerAktørId = "123456789",
+    )
 
     override suspend fun opprettSakOgSendInnSøknad(
         soknad: Søknad,

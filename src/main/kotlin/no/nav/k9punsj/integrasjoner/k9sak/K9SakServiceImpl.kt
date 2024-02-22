@@ -2,8 +2,11 @@ package no.nav.k9punsj.integrasjoner.k9sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -12,6 +15,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.sak.typer.Periode
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.ytelse.Ytelse
 import no.nav.k9punsj.StandardProfil
@@ -26,11 +30,16 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettFagsakUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettSakOgSendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.reserverSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
@@ -75,9 +84,10 @@ class K9SakServiceImpl(
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val finnFagsak = "/fordel/fagsak/sok"
-        internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val opprettFagsakUrl = "/fordel/fagsak/opprett"
         internal const val opprettSakOgSendInnSøknadUrl = "/fordel/fagsak/opprett/journalpost"
+        internal const val hentReservertSaksnummerUrl = "/saksnummer"
+        internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -324,8 +334,9 @@ class K9SakServiceImpl(
 
     /**
      * Reserverer saksnummer i k9-sak.
-     * Returnerer saksnummer og eventuell feilmelding.
+     * Returnerer saksnummer.
      * @param reserverSaksnummerDto: Data som trengs for å reservere saksnummer.
+     * @throws RestKallException hvis det oppstår feil ved reservering av saksnummer.
      */
     override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto {
         val body = objectMapper().writeValueAsString(reserverSaksnummerDto)
@@ -338,6 +349,29 @@ class K9SakServiceImpl(
                     throw RestKallException(
                         titel = "Feil ved reservering av saksnummer",
                         message = "Feilet ved deserialisering av respons ved reservering av saksnummer: ${throwable.message}",
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                        uri = URI.create(reserverSaksnummerUrl)
+                    )
+                }
+            )
+    }
+
+    /**
+     * Henter reservert saksnummer i k9-sak.
+     * Returnerer reservert saksnummer og data relatert til reservert saksnummer.
+     * @param saksnummer: Saksnummer som skal hentes.
+     * @throws RestKallException hvis det oppstår feil ved henting av reservert saksnummer.
+     */
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): HentReservertSaksnummerDto {
+        val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}")
+
+        return kotlin.runCatching { objectMapper().readValue<HentReservertSaksnummerDto>(result) }
+            .fold(
+                onSuccess = { saksnummerDto: HentReservertSaksnummerDto -> saksnummerDto },
+                onFailure = { throwable: Throwable ->
+                    throw RestKallException(
+                        titel = "Feil ved henting av reservert saksnummer",
+                        message = "Feilet ved deserialisering av respons ved henting av reservert saksnummer: ${throwable.message}",
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                         uri = URI.create(reserverSaksnummerUrl)
                     )
@@ -476,22 +510,40 @@ class K9SakServiceImpl(
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
 
-        return result.fold(
-            { success: String -> success },
-            { error: FuelError ->
-                log.error(
-                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
-                )
-                log.error(error.toString())
-                throw RestKallException(
-                    titel = "Restkall mot k9-sak feilet",
-                    message = error.response.body().asString("text/plain"),
-                    httpStatus = HttpStatus.valueOf(error.response.statusCode),
-                    uri = error.response.url.toURI()
-                )
-            }
-        )
+        return håndterFuelResult(result, request)
     }
+
+    private suspend fun httpGet(url: String): String {
+        val (request, _, result) = "$baseUrl$url"
+            .httpGet()
+            .header(
+                HttpHeaders.ACCEPT to "application/json",
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.CONTENT_TYPE to "application/json",
+                "callId" to hentCallId()
+            ).awaitStringResponseResult()
+
+        return håndterFuelResult(result, request)
+    }
+
+    private fun håndterFuelResult(
+        result: Result<String, FuelError>,
+        request: Request,
+    ) = result.fold(
+        { success: String -> success },
+        { error: FuelError ->
+            log.error(
+                "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+            )
+            log.error(error.toString())
+            throw RestKallException(
+                titel = "Restkall mot k9-sak feilet",
+                message = error.response.body().asString("text/plain"),
+                httpStatus = HttpStatus.valueOf(error.response.statusCode),
+                uri = error.response.url.toURI()
+            )
+        }
+    )
 
     private fun SøknadEntitet.tilK9saksnummerGrunnlag(
         fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,

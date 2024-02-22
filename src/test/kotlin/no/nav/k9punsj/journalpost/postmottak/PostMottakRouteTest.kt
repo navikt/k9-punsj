@@ -8,7 +8,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.CALL_ID_KEY
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
