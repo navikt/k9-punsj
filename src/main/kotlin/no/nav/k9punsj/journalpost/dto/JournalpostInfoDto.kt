@@ -19,6 +19,5 @@ data class JournalpostInfoDto(
     val kanKopieres: Boolean = punsjInnsendingType != K9FordelType.KOPI && erInngående, // Brukes av frontend,
     val erFerdigstilt: Boolean, // Brukes av frontend for å bestemme om ytelse å fagsak må settes før punsjing. (Ref: Postmottak)
     val gosysoppgaveId: String?,
-    val sak: Sak?,
-    val reservertSaksnummer: Boolean? = erFerdigstilt && sak == null, // Brukes av frontend for å vite om det er reservert saksnummer i K9.
+    val sak: Sak?
 )
