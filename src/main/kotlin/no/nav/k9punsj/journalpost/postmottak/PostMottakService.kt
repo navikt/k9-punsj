@@ -148,7 +148,8 @@ class PostMottakService(
         val aktørId = pdlService.aktørIdFor(mottattJournalpost.brukerIdent)
         return journalpostService.hent(mottattJournalpost.journalpostId).copy(
             ytelse = mottattJournalpost.fagsakYtelseTypeKode,
-            aktørId = aktørId
+            aktørId = aktørId,
+            behandlingsAar = mottattJournalpost.behandlingsÅr
         )
     }
 }
