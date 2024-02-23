@@ -137,7 +137,7 @@ internal class JournalpostRoutes(
                         }
                     }
 
-                    val utledetSak = utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType)
+                    val utledetSak = utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType, punsjJournalpost)
                     logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
@@ -459,6 +459,7 @@ internal class JournalpostRoutes(
         safSak: SafDtos.Sak?,
         k9Fagsak: SakInfoDto?,
         k9FagsakYtelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType?,
+        punsjJournalpost: PunsjJournalpost?,
     ): Sak {
         logger.info("Utleder sak for journalpost")
         val harSafSak = safSak != null
@@ -483,7 +484,8 @@ internal class JournalpostRoutes(
                     fagsakId = reservertSaksnummerDto.saksnummer,
                     gyldigPeriode = null,
                     pleietrengendeIdent = pleietrengendeIdent,
-                    sakstype = reservertSaksnummerDto.ytelseType.kode
+                    sakstype = reservertSaksnummerDto.ytelseType.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
             }
 
@@ -494,7 +496,8 @@ internal class JournalpostRoutes(
                     fagsakId = safSak?.fagsakId,
                     gyldigPeriode = k9Fagsak?.gyldigPeriode,
                     pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
-                    sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode
+                    sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
             }
         }

@@ -8,6 +8,7 @@ data class Sak(
     val gyldigPeriode: PeriodeDto?,
     val pleietrengendeIdent: String?,
     val sakstype: String?,
+    val behandlingsÅr: Int?,
 ) {
     override fun toString(): String {
         return "Sak(reservertSaksnummer=$reservertSaksnummer, fagsakId=$fagsakId, sakstype=$sakstype, gyldigPeriode=$gyldigPeriode, harPleietrengendeIdent=${!pleietrengendeIdent.isNullOrBlank()})"

@@ -84,6 +84,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             )
     }
 
+
     @ParameterizedTest
     @ValueSource(strings = ["1999", "2101", "null"])
     fun `forventer feil dersom behandlingsår er ugyldig for OMP`(behandlingsår: String?): Unit = runBlocking {
