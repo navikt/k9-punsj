@@ -37,13 +37,8 @@ internal class PostMottakRoutes(
                 )?.let { return@RequestContext it }
 
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
+                val saksnummerDto= postMottakService.klassifiserOgJournalfør(dto)
 
-                val (saksnummerDto, feil) = postMottakService.klassifiserOgJournalfør(dto)
-                if (feil != null) {
-                    return@RequestContext ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .bodyValueAndAwait(OasFeil(feil))
-                }
-                requireNotNull(saksnummerDto) { "Saksnummer er null" }
                 return@RequestContext ServerResponse.ok().bodyValueAndAwait(saksnummerDto)
             }
         }

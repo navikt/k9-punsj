@@ -5,6 +5,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
@@ -14,7 +15,6 @@ import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,10 +29,14 @@ class PostMottakService(
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
     }
 
-    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): Pair<Any?, String?> {
+    suspend fun klassifiserOgJournalfør(mottattJournalpost: JournalpostMottaksHaandteringDto): SaksnummerDto {
         val brukerIdent = mottattJournalpost.brukerIdent
         val brukerAktørId =
-            pdlService.aktørIdFor(brukerIdent) ?: throw IllegalStateException("Fant ikke aktørId for brukerIdent")
+            pdlService.aktørIdFor(brukerIdent) ?: throw PostMottakException(
+                melding = "Fant ikke aktørId for brukerIdent: $brukerIdent",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                journalpostId = mottattJournalpost.journalpostId
+            )
 
         val barnIdent = mottattJournalpost.barnIdent
         val pleietrengendeAktørId = barnIdent.takeUnless { it.isNullOrBlank() }
@@ -74,21 +78,14 @@ class PostMottakService(
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
-            val (_, ferdigstillingFeil) = oppdaterOgFerdigstillJournalpostMedSaksnummer(
-                mottattJournalpost,
-                oppdatertJournalpost,
-                saksnummer
-            )
-            if (ferdigstillingFeil != null) {
-                return null to ferdigstillingFeil
-            }
+            oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummer)
             lagreTilDB(oppdatertJournalpost)
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
         } else {
             logger.info("Journalpost er allerede ferdigstilt eller journalført")
         }
 
-        return saksnummer to null
+        return SaksnummerDto(saksnummer)
     }
 
     private suspend fun opprettAksjonspunktOgSendTilK9Los(
@@ -111,15 +108,18 @@ class PostMottakService(
         mottattJournalpost: JournalpostMottaksHaandteringDto,
         oppdatertJournalpost: PunsjJournalpost,
         saksnummer: String,
-    ): Pair<HttpStatusCode?, String?> {
+    ) {
         logger.info("Ferdigstiller journalpost: ${oppdatertJournalpost.journalpostId} med saksnummer: $saksnummer")
         val (httpStatusCode, _) = journalpostService.oppdaterOgFerdigstillForMottak(mottattJournalpost, saksnummer)
 
         return if (!httpStatusCode.is2xxSuccessful) {
-            httpStatusCode to "Feil ved ferdigstilling av journalpost: ${oppdatertJournalpost.journalpostId}. HttpStatusCode: $httpStatusCode"
+            throw PostMottakException(
+                melding = "Feil ved ferdigstilling av journalpost.",
+                httpStatus = HttpStatus.valueOf(httpStatusCode.value()),
+                journalpostId = mottattJournalpost.journalpostId
+            )
         } else {
             logger.info("Ferdigstilt journalpost: ${oppdatertJournalpost.journalpostId}")
-            null to null
         }
     }
 
