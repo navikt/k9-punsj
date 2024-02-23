@@ -494,7 +494,7 @@ internal class JournalpostRoutes(
                     fagsakId = safSak?.fagsakId,
                     gyldigPeriode = k9Fagsak?.gyldigPeriode,
                     pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
-                    sakstype = k9FagsakYtelseType?.kode
+                    sakstype = k9FagsakYtelseType?.kode ?: k9Fagsak?.sakstype
                 )
             }
         }
