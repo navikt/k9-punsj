@@ -59,16 +59,17 @@ class PostMottakService(
         }
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
+        val validertMottattJournalpost = mottattJournalpost.copy(behandlingsÅr = oppdatertJournalpost.behandlingsAar).valider()
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
         val saksnummer = if (eksisterendeSaksnummer.isNullOrBlank()) {
-            logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${mottattJournalpost.journalpostId}")
+            logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${validertMottattJournalpost.journalpostId}")
             val reservertSaksnummerDto = k9SakService.reserverSaksnummer(
                 ReserverSaksnummerDto(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
                     ytelseType = fagsakYtelseType,
-                    behandlingsÅr = mottattJournalpost.behandlingsÅr
+                    behandlingsÅr = validertMottattJournalpost.behandlingsÅr
                 )
             )
 
@@ -79,9 +80,9 @@ class PostMottakService(
         }
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
-            oppdaterOgFerdigstillJournalpostMedSaksnummer(mottattJournalpost, oppdatertJournalpost, saksnummer)
+            oppdaterOgFerdigstillJournalpostMedSaksnummer(validertMottattJournalpost, oppdatertJournalpost, saksnummer)
             lagreTilDB(oppdatertJournalpost)
-            opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, mottattJournalpost)
+            opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, validertMottattJournalpost)
         } else {
             logger.info("Journalpost er allerede ferdigstilt eller journalført")
         }

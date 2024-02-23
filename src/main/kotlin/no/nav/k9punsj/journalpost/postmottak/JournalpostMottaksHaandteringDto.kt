@@ -19,17 +19,31 @@ data class JournalpostMottaksHaandteringDto(
     val behandlingsÅr: Int? = null // Skal settes hvis fagsakYtelseTypeKode gjelder omsorgspenger
 ) {
     init {
+        valider()
+    }
+
+    fun valider(): JournalpostMottaksHaandteringDto{
         val ytelseType = FagsakYtelseType.fromString(fagsakYtelseTypeKode)
-        when(ytelseType) {
+        when (ytelseType) {
             PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE -> {} // OK
             OMSORGSPENGER, OMSORGSPENGER_KS, OMSORGSPENGER_MA, OMSORGSPENGER_AO -> {
                 if (behandlingsÅr == null || (behandlingsÅr !in 2000..2100)) {
-                    throw PostMottakException("Ugyldig verdi behandlingsÅr ($behandlingsÅr) for ytelseType $fagsakYtelseTypeKode", HttpStatus.BAD_REQUEST, journalpostId)
+                    throw PostMottakException(
+                        "Ugyldig verdi behandlingsÅr ($behandlingsÅr) for ytelseType $fagsakYtelseTypeKode",
+                        HttpStatus.BAD_REQUEST,
+                        journalpostId
+                    )
                 }
 
             }
+
             OPPLÆRINGSPENGER -> TODO()
-            else -> throw PostMottakException("Ikke støttet ytelseType $fagsakYtelseTypeKode", HttpStatus.BAD_REQUEST, journalpostId)
+            else -> throw PostMottakException(
+                "Ikke støttet ytelseType $fagsakYtelseTypeKode",
+                HttpStatus.BAD_REQUEST,
+                journalpostId
+            )
         }
+        return this
     }
 }
