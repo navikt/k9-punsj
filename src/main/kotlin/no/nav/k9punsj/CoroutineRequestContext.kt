@@ -102,14 +102,7 @@ private fun Routes(
     // Håndtering for problem-details
     onError<ErrorResponseException> { error: Throwable, serverRequest: ServerRequest ->
         if (error is ErrorResponseException) {
-            val problemDetail = error.body
-            problemDetail.instance = serverRequest.uri()
-            problemDetail.setProperty("correlationId", serverRequest.correlationId())
-
-            logger.error("{}", problemDetail)
-            ServerResponse
-                .status(error.statusCode)
-                .bodyValueAndAwait(problemDetail)
+            serverResponseAsProblemDetails(error, serverRequest)
         } else {
             throw error
         }
@@ -118,6 +111,23 @@ private fun Routes(
         ServerResponse
             .notFound()
             .buildAndAwait()
+    }
+    onError<DecodingException> { error, serverRequest ->
+        val exceptionId = ULID().nextValue().toString()
+        logger.error("DecodingException med id $exceptionId . URI: ${serverRequest.uri()}", error)
+
+        val responseError = findErrorResponseException(error)
+        if (responseError != null) {
+            serverResponseAsProblemDetails(responseError, serverRequest)
+        } else {
+            ServerResponse.badRequest().bodyValueAndAwait(
+                ExceptionResponse(
+                    message = error.message ?: "No details",
+                    uri = serverRequest.uri(),
+                    exceptionId = exceptionId
+                )
+            )
+        }
     }
     onError<Throwable> { error, serverRequest ->
         val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
@@ -131,19 +141,32 @@ private fun Routes(
             )
         )
     }
-    onError<DecodingException> { error, serverRequest ->
-        val exceptionId = ULID().nextValue().toString()
-        logger.error("DecodingException med id $exceptionId . URI: ${serverRequest.uri()}", error)
-
-        ServerResponse.badRequest().bodyValueAndAwait(
-            ExceptionResponse(
-                message = error.message ?: "Ingen detaljer",
-                uri = serverRequest.uri(),
-                exceptionId = exceptionId
-            )
-        )
-    }
     routes()
+}
+
+fun findErrorResponseException(error: Throwable?): ErrorResponseException? {
+    var cause = error
+    while (cause != null) {
+        if (cause is ErrorResponseException) {
+            return cause
+        }
+        cause = cause.cause
+    }
+    return null
+}
+
+private suspend fun serverResponseAsProblemDetails(
+    error: ErrorResponseException,
+    serverRequest: ServerRequest,
+): ServerResponse {
+    val problemDetail = error.body
+    problemDetail.instance = serverRequest.uri()
+    problemDetail.setProperty("correlationId", serverRequest.correlationId())
+
+    logger.error("{}", problemDetail)
+    return ServerResponse
+        .status(error.statusCode)
+        .bodyValueAndAwait(problemDetail)
 }
 
 internal suspend fun <T> RequestContext(

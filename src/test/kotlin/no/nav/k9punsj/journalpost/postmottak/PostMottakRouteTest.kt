@@ -14,6 +14,8 @@ import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyInserters
@@ -74,6 +76,50 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
                   "title": "Feil ved journalføring av journalpost $journalpostId",
                   "status": 409,
                   "detail": "Det eksisterer allerede en fagsak(PLEIEPENGER_SYKT_BARN - ABC123) på pleietrengende.",
+                  "instance": "/api/journalpost/mottak",
+                  "correlationId": "$correlationId"
+                }
+                """.trimIndent(), true
+            )
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["1999", "2101", "null"])
+    fun `forventer feil dersom behandlingsår er ugyldig for OMP`(behandlingsår: String?): Unit = runBlocking {
+        val journalpostId = IdGenerator.nesteId()
+        val correlationId = UUID.randomUUID().toString()
+        val brukerIdent = "123"
+
+        val barnIdent = "456"
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/mottak").build() }
+            .body(BodyInserters.fromValue(
+                """
+                {
+                  "journalpostId": "$journalpostId",
+                  "brukerIdent": "$brukerIdent",
+                  "barnIdent": "$barnIdent",
+                  "fagsakYtelseTypeKode": "${FagsakYtelseType.OMSORGSPENGER.kode}",
+                  "behandlingsÅr": $behandlingsår
+                }
+                """.trimIndent()
+            ))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", barnIdent)
+            .header(CALL_ID_KEY, correlationId)
+            .header("Content-Type", "application/json")
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
+            .expectBody()
+            .json(
+                //language=JSON
+                """
+                {
+                  "type": "/problem-details/post-mottak",
+                  "title": "Feil ved journalføring av journalpost $journalpostId",
+                  "status": 400,
+                  "detail": "Ugyldig verdi behandlingsÅr ($behandlingsår) for ytelseType OMP",
                   "instance": "/api/journalpost/mottak",
                   "correlationId": "$correlationId"
                 }
