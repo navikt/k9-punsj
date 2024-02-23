@@ -67,7 +67,8 @@ class PostMottakService(
                 ReserverSaksnummerDto(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
-                    ytelseType = fagsakYtelseType
+                    ytelseType = fagsakYtelseType,
+                    behandlingsÅr = mottattJournalpost.behandlingsÅr
                 )
             )
 
