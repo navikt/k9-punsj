@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus
 data class JournalpostMottaksHaandteringDto(
     val journalpostId: String,
     val brukerIdent: String,
-    val barnIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer.
+    val barnIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
     val fagsakYtelseTypeKode: String,
     val saksnummer: String?, // Settes kun ved tilknytning mot eksisterende sak.
     val behandlingsÅr: Int? = null // Skal settes hvis fagsakYtelseTypeKode gjelder omsorgspenger
@@ -29,7 +29,7 @@ data class JournalpostMottaksHaandteringDto(
 
             }
             OPPLÆRINGSPENGER -> TODO()
-            else -> throw IllegalArgumentException("Ikke støttet ytelseType: $fagsakYtelseTypeKode")
+            else -> throw PostMottakException("Ikke støttet ytelseType $fagsakYtelseTypeKode", HttpStatus.BAD_REQUEST, journalpostId)
         }
     }
 }
