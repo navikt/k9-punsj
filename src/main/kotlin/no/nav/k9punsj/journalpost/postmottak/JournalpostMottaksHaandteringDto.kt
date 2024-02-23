@@ -16,13 +16,9 @@ data class JournalpostMottaksHaandteringDto(
     val barnIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
     val fagsakYtelseTypeKode: String,
     val saksnummer: String?, // Settes kun ved tilknytning mot eksisterende sak.
-    val behandlingsÅr: Int? = null // Skal settes hvis fagsakYtelseTypeKode gjelder omsorgspenger
 ) {
-    init {
-        valider()
-    }
 
-    fun valider(): JournalpostMottaksHaandteringDto{
+    fun valider(behandlingsÅr: Int?): JournalpostMottaksHaandteringDto{
         val ytelseType = FagsakYtelseType.fromString(fagsakYtelseTypeKode)
         when (ytelseType) {
             PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE -> {} // OK

@@ -59,7 +59,7 @@ class PostMottakService(
         }
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
-        val validertMottattJournalpost = mottattJournalpost.copy(behandlingsÅr = oppdatertJournalpost.behandlingsAar).valider()
+        val validertMottattJournalpost = mottattJournalpost.valider(oppdatertJournalpost.behandlingsAar)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
         val saksnummer = if (eksisterendeSaksnummer.isNullOrBlank()) {
@@ -69,7 +69,7 @@ class PostMottakService(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
                     ytelseType = fagsakYtelseType,
-                    behandlingsÅr = validertMottattJournalpost.behandlingsÅr
+                    behandlingsÅr = oppdatertJournalpost.behandlingsAar
                 )
             )
 
@@ -150,8 +150,7 @@ class PostMottakService(
         val aktørId = pdlService.aktørIdFor(mottattJournalpost.brukerIdent)
         return journalpostService.hent(mottattJournalpost.journalpostId).copy(
             ytelse = mottattJournalpost.fagsakYtelseTypeKode,
-            aktørId = aktørId,
-            behandlingsAar = mottattJournalpost.behandlingsÅr
+            aktørId = aktørId
         )
     }
 }
