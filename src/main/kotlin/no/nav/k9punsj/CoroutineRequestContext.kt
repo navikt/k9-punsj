@@ -133,13 +133,18 @@ private fun Routes(
         val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
         logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
-        ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
-            ExceptionResponse(
-                message = error.message ?: "Uhåndtert feil uten detaljer",
-                uri = serverRequest.uri(),
-                exceptionId = exceptionId
+        val responseError = findErrorResponseException(error)
+        if (responseError != null) {
+            serverResponseAsProblemDetails(responseError, serverRequest)
+        } else {
+            ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
+                ExceptionResponse(
+                    message = error.message ?: "Uhåndtert feil uten detaljer",
+                    uri = serverRequest.uri(),
+                    exceptionId = exceptionId
+                )
             )
-        )
+        }
     }
     routes()
 }
