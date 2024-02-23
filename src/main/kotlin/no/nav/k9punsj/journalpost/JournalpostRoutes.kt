@@ -6,6 +6,7 @@ import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -64,6 +65,7 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
+    private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val innsendingClient: InnsendingClient,
@@ -473,11 +475,14 @@ internal class JournalpostRoutes(
                     Saksnummer(safSak.fagsakId)
                 )
                 logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
+                val pleietrengendeIdent = reservertSaksnummerDto.pleietrengendeAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
                 Sak(
                     reservertSaksnummer = true,
                     fagsakId = reservertSaksnummerDto.saksnummer,
                     gyldigPeriode = null,
-                    pleietrengendeIdent = reservertSaksnummerDto.pleietrengendeAktørId,
+                    pleietrengendeIdent = pleietrengendeIdent,
                     sakstype = reservertSaksnummerDto.ytelseType.kode
                 )
             }
