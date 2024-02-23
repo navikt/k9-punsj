@@ -13,6 +13,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 
@@ -45,9 +46,10 @@ class PostMottakService(
         k9SakService.hentFagsaker(brukerIdent).first?.let { fagsaker ->
             fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
                 ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
-                    throw EksisterendeFagsakPåPleietrengendeException(
-                        mottattJournalpost.journalpostId,
-                        eksisterendeFagsak
+                    throw PostMottakException(
+                        melding = "Det eksisterer allerede en fagsak(${eksisterendeFagsak.sakstype.name} - ${eksisterendeFagsak.saksnummer}) på pleietrengende.",
+                        httpStatus = HttpStatus.CONFLICT,
+                        journalpostId = mottattJournalpost.journalpostId
                     )
                 }
         }

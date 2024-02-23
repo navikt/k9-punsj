@@ -42,13 +42,10 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
         val correlationId = UUID.randomUUID().toString()
         val brukerIdent = "123"
 
-        coEvery { postMottakService.klassifiserOgJournalfør(any()) } throws EksisterendeFagsakPåPleietrengendeException(
-            journalpostId, Fagsak(
-                saksnummer = "ABC123",
-                sakstype = PLEIEPENGER_SYKT_BARN,
-                pleietrengendeAktorId = "456",
-                gyldigPeriode = null
-            )
+        coEvery { postMottakService.klassifiserOgJournalfør(any()) } throws PostMottakException(
+            melding = "Det eksisterer allerede en fagsak(PLEIEPENGER_SYKT_BARN - ABC123) på pleietrengende.",
+            httpStatus = HttpStatus.CONFLICT,
+            journalpostId = journalpostId
         )
 
         val mottaksHaandteringDto = JournalpostMottaksHaandteringDto(
@@ -73,10 +70,10 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
                 //language=JSON
                 """
                 {
-                  "type": "/problem-details/eksisterende-fagsak-på-pleietrengende",
-                  "title": "Eksisterende fagsak på pleietrengende",
+                  "type": "/problem-details/post-mottak",
+                  "title": "Feil ved journalføring av journalpost $journalpostId",
                   "status": 409,
-                  "detail": "Det eksisterer allerede en fagsak(PLEIEPENGER_SYKT_BARN - ABC123) på pleietrengende. JournalpostId = $journalpostId.",
+                  "detail": "Det eksisterer allerede en fagsak(PLEIEPENGER_SYKT_BARN - ABC123) på pleietrengende.",
                   "instance": "/api/journalpost/mottak",
                   "correlationId": "$correlationId"
                 }
