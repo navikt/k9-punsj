@@ -11,8 +11,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl
-import no.nav.k9punsj.integrasjoner.k9sak.dto.HentReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
@@ -95,11 +94,31 @@ class LokalK9SakService : K9SakService {
     }
 
     override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto) = SaksnummerDto("ABC123")
-    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer) = HentReservertSaksnummerDto(
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer) = ReservertSaksnummerDto(
         saksnummer = "ABC123",
         ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
         brukerAktørId = "123456789",
     )
+
+    override suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto> {
+        return setOf(
+            ReservertSaksnummerDto(
+                saksnummer = "ABC123",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                brukerAktørId = "123456789",
+            ),
+            ReservertSaksnummerDto(
+                saksnummer = "DEF456",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+                brukerAktørId = "123456789",
+            ),
+            ReservertSaksnummerDto(
+                saksnummer = "GHI789",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
+                brukerAktørId = "123456789",
+            )
+        )
+    }
 
     override suspend fun opprettSakOgSendInnSøknad(
         soknad: Søknad,

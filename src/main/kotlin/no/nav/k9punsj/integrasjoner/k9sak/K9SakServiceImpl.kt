@@ -31,6 +31,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReserverteSaksnummereUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettFagsakUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettSakOgSendInnSøknadUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.reserverSaksnummerUrl
@@ -38,7 +39,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUr
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.dto.HentReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
@@ -88,6 +89,7 @@ class K9SakServiceImpl(
         internal const val opprettSakOgSendInnSøknadUrl = "/fordel/fagsak/opprett/journalpost"
         internal const val hentReservertSaksnummerUrl = "/saksnummer"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
+        internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -362,16 +364,39 @@ class K9SakServiceImpl(
      * @param saksnummer: Saksnummer som skal hentes.
      * @throws RestKallException hvis det oppstår feil ved henting av reservert saksnummer.
      */
-    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): HentReservertSaksnummerDto {
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto {
         val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}")
 
-        return kotlin.runCatching { objectMapper().readValue<HentReservertSaksnummerDto>(result) }
+        return kotlin.runCatching { objectMapper().readValue<ReservertSaksnummerDto>(result) }
             .fold(
-                onSuccess = { saksnummerDto: HentReservertSaksnummerDto -> saksnummerDto },
+                onSuccess = { saksnummerDto: ReservertSaksnummerDto -> saksnummerDto },
                 onFailure = { throwable: Throwable ->
                     throw RestKallException(
                         titel = "Feil ved henting av reservert saksnummer",
                         message = "Feilet ved deserialisering av respons ved henting av reservert saksnummer: ${throwable.message}",
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                        uri = URI.create(reserverSaksnummerUrl)
+                    )
+                }
+            )
+    }
+
+    override suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto> {
+        //language=JSON
+        val body = """
+            {
+              "aktørId": "$søkerAktørId"
+            }
+        """.trimIndent()
+        val result = httpPost(body, hentReserverteSaksnummereUrl)
+
+        return kotlin.runCatching { objectMapper().readValue<Set<ReservertSaksnummerDto>>(result) }
+            .fold(
+                onSuccess = { reserverteSaksnummere: Set<ReservertSaksnummerDto> -> reserverteSaksnummere },
+                onFailure = { throwable: Throwable ->
+                    throw RestKallException(
+                        titel = "Feil ved henting av reserverte saksnummere",
+                        message = "Feilet ved deserialisering av respons ved henting av reserverte saksnummere: ${throwable.message}",
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                         uri = URI.create(reserverSaksnummerUrl)
                     )

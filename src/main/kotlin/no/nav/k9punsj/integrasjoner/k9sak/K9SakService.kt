@@ -9,7 +9,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
-import no.nav.k9punsj.integrasjoner.k9sak.dto.HentReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 
 interface K9SakService {
@@ -50,7 +50,8 @@ interface K9SakService {
     )
 
     suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto
-    suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): HentReservertSaksnummerDto
+    suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto
+    suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto>
 
     suspend fun opprettSakOgSendInnSøknad(
         soknad: Søknad,
