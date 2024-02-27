@@ -138,3 +138,5 @@ spec:
     # Feature toggles
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "false"
+    - name: KODEVERDI_SOM_STRING
+      value: "false"
