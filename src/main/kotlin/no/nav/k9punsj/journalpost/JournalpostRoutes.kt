@@ -11,6 +11,7 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
@@ -107,10 +108,10 @@ internal class JournalpostRoutes(
 
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+                                journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
-                        journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                                    journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -209,7 +210,10 @@ internal class JournalpostRoutes(
                     request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
                 } catch (e: Exception) {
                     val nåVærendeÅr = LocalDate.now().year
-                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
+                    logger.info(
+                        "Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}",
+                        e
+                    )
                     nåVærendeÅr
                 }
 
@@ -364,8 +368,6 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
-                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
 
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
@@ -377,47 +379,17 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
                 }
 
-                val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
-                if (safJournalpost != null && safJournalpost.journalposttype == "U") {
-                    return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
-                }
-
-                val k9FagsakYtelseType = journalpost?.ytelse?.let {
-                    journalpost.utledK9sakFagsakYtelseType(
-                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
-                            it
-                        )
-                    )
-                } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
-
-                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
-
-                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-                    return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
-                }
-
-                val støttedeYtelseTyperForKopiering = listOf(
-                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
-                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                    FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+                val nyJournalpostId = journalpostService.kopierJournalpost(
+                    journalpostId = journalpostId.somJournalpostId(),
+                    fra = dto.fra.somIdentitetsnummer(),
+                    til = dto.til.somIdentitetsnummer(),
+                    pleietrengende = dto.barn?.somIdentitetsnummer(),
+                    annenPart = dto.annenPart?.somIdentitetsnummer()
                 )
 
-                if (!støttedeYtelseTyperForKopiering.contains(fagsakYtelseType)) {
-                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
-                }
-
-                innsendingClient.sendKopierJournalpost(
-                    KopierJournalpostInfo(
-                        journalpostId = journalpostId,
-                        fra = dto.fra,
-                        til = dto.til,
-                        pleietrengende = dto.barn,
-                        ytelse = k9FagsakYtelseType
-                    )
-                )
                 return@RequestContext ServerResponse
-                    .status(HttpStatus.ACCEPTED)
-                    .bodyValueAndAwait("Journalposten vil bli kopiert.")
+                    .status(HttpStatus.CREATED)
+                    .bodyValueAndAwait(nyJournalpostId)
             }
         }
     }

@@ -6,11 +6,14 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
+import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -80,8 +84,41 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
     fun `Mapper kopierjournalpostinfo med barn og sender inn`(): Unit = runBlocking {
 
         val journalpostId = IdGenerator.nesteId()
+        Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
+            SafDtos.Journalpost(
+                journalpostId = journalpostId,
+                tema = null,
+                journalstatus = SafDtos.Journalstatus.JOURNALFOERT.name,
+                journalposttype = SafDtos.JournalpostType.N.name,
+                dokumenter = emptyList(),
+                relevanteDatoer = emptyList(),
+                avsender = null,
+                avsenderMottaker = null,
+                bruker = SafDtos.Bruker(
+                    id = "27519339353",
+                    type = "AKTOER_ID"
+                ),
+                sak = SafDtos.Sak(
+                    sakstype = SafDtos.Sakstype.FAGSAK,
+                    fagsakId = "CBA123",
+                    fagsaksystem = "K9",
+                    tema = SafDtos.Tema.OMS
+                ),
+                tittel = null
+            )
+        )
+
+        val nyJournalpostId = IdGenerator.nesteId()
+        Mockito.`when`(
+            dokarkivGateway.knyttTilAnnenSak(
+                journalpostId = journalpostId.somJournalpostId(),
+                identitetsnummer = "27519339353".somIdentitetsnummer(),
+                saksnummer = "CBA123"
+            )
+        ).thenReturn(nyJournalpostId.somJournalpostId())
+
         val melding = FordelPunsjEventDto(
-            aktørId = "1234567890",
+            aktørId = "27519339353",
             journalpostId = journalpostId,
             type = K9FordelType.PAPIRSØKNAD.kode,
             ytelse = "PSB"
@@ -103,7 +140,9 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .body(BodyInserters.fromValue(kopierJournalpostDto))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .exchange()
-            .expectStatus().isAccepted
+            .expectStatus().isCreated
+            .expectBody()
+            .json("""{"journalpostId":"$nyJournalpostId"}""")
     }
 
     @ParameterizedTest
