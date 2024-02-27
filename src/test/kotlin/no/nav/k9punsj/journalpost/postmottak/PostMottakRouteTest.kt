@@ -4,11 +4,9 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.CALL_ID_KEY
 import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
@@ -54,7 +52,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
         val mottaksHaandteringDto = JournalpostMottaksHaandteringDto(
             journalpostId = journalpostId,
             brukerIdent = brukerIdent,
-            barnIdent = "456",
+            pleietrengendeIdent = "456",
             fagsakYtelseTypeKode = FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode,
             saksnummer = null
         )
@@ -64,7 +62,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             .uri { it.path("/api/journalpost/mottak").build() }
             .body(BodyInserters.fromValue(mottaksHaandteringDto))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", mottaksHaandteringDto.barnIdent)
+            .header("X-Nav-NorskIdent", mottaksHaandteringDto.pleietrengendeIdent)
             .header(CALL_ID_KEY, correlationId)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
@@ -94,7 +92,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
         assertThrows<PostMottakException> { JournalpostMottaksHaandteringDto(
             journalpostId = journalpostId,
             brukerIdent = brukerIdent,
-            barnIdent = "456",
+            pleietrengendeIdent = "456",
             fagsakYtelseTypeKode = FagsakYtelseType.OMSORGSPENGER.kode,
             saksnummer = null
         ).valider(behandlingsår?.toIntOrNull()) }

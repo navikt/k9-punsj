@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus
 data class JournalpostMottaksHaandteringDto(
     val journalpostId: String,
     val brukerIdent: String,
-    val barnIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
+    val pleietrengendeIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
     val fagsakYtelseTypeKode: String,
     val saksnummer: String?, // Settes kun ved tilknytning mot eksisterende sak.
 ) {

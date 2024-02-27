@@ -38,8 +38,8 @@ class PostMottakService(
                 journalpostId = mottattJournalpost.journalpostId
             )
 
-        val barnIdent = mottattJournalpost.barnIdent
-        val pleietrengendeAktørId = barnIdent.takeUnless { it.isNullOrBlank() }
+        val pleietrengendeIdent = mottattJournalpost.pleietrengendeIdent
+        val pleietrengendeAktørId = pleietrengendeIdent.takeUnless { it.isNullOrBlank() }
             ?.let { personService.finnAktørId(it) }
 
         val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
