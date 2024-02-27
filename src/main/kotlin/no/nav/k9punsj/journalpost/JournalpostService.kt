@@ -273,16 +273,15 @@ class JournalpostService(
             throw IllegalStateException("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
         }
 
-        if ((safJournalpost!!.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.name &&
-                    safJournalpost.journalposttype == SafDtos.JournalpostType.N.name) ||
-            (safJournalpost.journalstatus == SafDtos.Journalstatus.JOURNALFOERT.name &&
-                    safJournalpost.journalposttype == SafDtos.JournalpostType.I.name)
-        ) {
-            throw IllegalStateException("Journalpost må ferdigstilles før den kopieres.")
+        if (safJournalpost != null) {
+            if (!safJournalpost.erFerdigstilt) {
+                throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
+            }
         }
 
-        val fagsakYtelseType = journalpost.ytelse?.let { FagsakYtelseType.fromKode(it) } ?:
-        throw IllegalStateException("Finner ikke ytelsestype for journalpost.")
+        val fagsakYtelseType = journalpost.ytelse?.let { FagsakYtelseType.fromKode(it) } ?: throw IllegalStateException(
+            "Finner ikke ytelsestype for journalpost."
+        )
 
         if (journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
             throw IllegalStateException("Kan ikke kopier journalpost med type inntektsmelding utgått.")
@@ -304,7 +303,7 @@ class JournalpostService(
         return dokarkivGateway.knyttTilAnnenSak(
             journalpostId = journalpostId,
             identitetsnummer = til,
-            saksnummer = "1234"
+            saksnummer = "CBA123"
         )
     }
 

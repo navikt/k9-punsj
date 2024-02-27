@@ -175,6 +175,8 @@ internal object SafDtos {
             true -> !(erEttersendelse || erSøknad)
             false -> false
         }
+        private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
+        val erFerdigstilt = ferdigstilteStatuser.contains(journalstatus)
     }
 
     internal data class Tilleggsopplysning(
