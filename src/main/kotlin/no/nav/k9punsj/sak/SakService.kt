@@ -37,6 +37,7 @@ internal class SakService(
                     gyldigPeriode = it.gyldigPeriode
                 )
             }
+            logger.info("Henter reserverte saksnummere fra k9...")
             val reserverteSaksnummere = k9SakService.hentReserverteSaksnummere(søkerAktørId).map {
                 SakInfoDto(
                     fagsakId = it.saksnummer,
