@@ -133,11 +133,14 @@ internal class JournalpostRoutes(
                     val safSak = safJournalPost?.sak
                     val k9Fagsak = safSak?.let { sak: SafDtos.Sak ->
                         norskIdent?.let { ident: String ->
-                            sakService.hentSaker(ident).firstOrNull { it.fagsakId == sak.fagsakId }
+                            sakService.hentSaker(ident)
+                                .filterNot { it.reservert }
+                                .firstOrNull { it.fagsakId == sak.fagsakId }
                         }
                     }
 
-                    val utledetSak = utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType, punsjJournalpost)
+                    val utledetSak =
+                        utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType, punsjJournalpost)
                     logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
@@ -464,7 +467,7 @@ internal class JournalpostRoutes(
         logger.info("Utleder sak for journalpost")
         val harSafSak = safSak != null
         val safSakHarFagsakId = safSak?.fagsakId != null
-        val ikkeHarFagsak = k9Fagsak == null || k9Fagsak.reservert
+        val ikkeHarFagsak = k9Fagsak == null
 
         val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && harSafSak && safSakHarFagsakId && ikkeHarFagsak
         logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
