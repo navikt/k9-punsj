@@ -464,7 +464,7 @@ internal class JournalpostRoutes(
         logger.info("Utleder sak for journalpost")
         val harSafSak = safSak != null
         val safSakHarFagsakId = safSak?.fagsakId != null
-        val ikkeHarFagsak = k9Fagsak == null
+        val ikkeHarFagsak = k9Fagsak == null || k9Fagsak.reservert
 
         val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && harSafSak && safSakHarFagsakId && ikkeHarFagsak
         logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
