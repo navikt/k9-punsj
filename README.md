@@ -5,6 +5,38 @@ Håndterer manuell `punching` av søknader, tilleggsinformasjon og avklaringer s
 [![](https://github.com/navikt/k9-punsj/workflows/Build%20and%20deploy/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+master%22)
 
 ---
+## Kode
+### Postmottak
+Flyt for klassifisering av journalposter mot sak.
+```mermaid
+flowchart TD
+    P[Postmottak - klassifisering og journalføring mot sak]
+    P --> JP1[fa:fa-book Journalpost 1 uten pleietrengende]
+    JP1 --> JP1A[Klassifiser og journalfør uten pleietrengende]
+    JP1A --> JP1B[Reservert saksnummer]
+    JP1B --> JP1C[Legg tilbake i kø]
+    JP1C --> JP1D[Fortsett på journalposten]
+    JP1D --> JP1E[fa:fa-child Oppgi pleietrengende]
+    JP1E --> FS1
+    P --> JP2[fa:fa-book Journalpost 2 uten pleietrengende]
+    JP2 --> JP2A[Klassifiser og journalfør uten pleietrengende]
+    JP2A --> JP2B[Reservert saksnummer]
+    JP2B --> JP2C[Legg tilbake i kø]
+    JP2C --> JP2D[Fortsett på journalposten]
+    JP2D --> JP2E[fa:fa-child Oppgi pleietrengende]
+    FS1 -->|Nei| JP2F[Send inn til k9-sak]
+    JP2F --> JP2G[fa:fa-check Oppretter fagsak]
+    P --> JP3[fa:fa-book Journalpost 3 med pleietrengende]
+    JP3 --> JP3A[Klassifiser og journalfør]
+    JP3A --> JP3B[Reservert saksnummer]
+    JP3B --> JP3C[Legg tilbake i kø]
+    JP3C --> JP3D[Fortsett på journalposten]
+    JP3D --> FS1
+    JP2E --> FS1{Eksisterer det fagsak på pleietrengende?}
+    FS1 -->|Ja| JP2H[Kopier journalpost]
+    JP2H --> JP2I[Journalfør ny JP mot eksisterende fagsak]
+```
+
 ## Deployment
 
 Push til master deployer til dev-miljø.
