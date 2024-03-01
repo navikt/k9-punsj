@@ -57,7 +57,7 @@ jobs:
           IMAGE: ${{ steps.docker-push.outputs.image }}
 
       - name: Maven Dependency Tree Dependency Submission
-        uses: advanced-security/maven-dependency-submission-action@v4.0.0 # feil i 4.0.1
+        uses: advanced-security/maven-dependency-submission-action@v4.0.1 # feil i 4.0.1
         with:
           settings-file: ./.m2/settings.xml
           ignore-maven-wrapper: true
