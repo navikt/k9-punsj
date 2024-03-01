@@ -47,9 +47,9 @@
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
-        <testcontainers.version>1.19.5</testcontainers.version>
+        <testcontainers.version>1.19.6</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
-        <wiremock.version>3.4.1</wiremock.version>
+        <wiremock.version>3.4.2</wiremock.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
