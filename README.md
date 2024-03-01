@@ -25,7 +25,7 @@ flowchart TD
     JP2C --> JP2D[Fortsett på journalposten]
     JP2D --> JP2E[fa:fa-child Oppgi pleietrengende]
     FS1 -->|Nei| JP2F[Send inn til k9-sak]
-    JP2F --> JP2G[fa:fa-check Oppretter fagsak]
+    JP2F --> JP2G[fa:fa-check Oppretter eller kobler til fagsak]
     P --> JP3[fa:fa-book Journalpost 3 med pleietrengende]
     JP3 --> JP3A[Klassifiser og journalfør]
     JP3A --> JP3B[Reservert saksnummer]
@@ -35,6 +35,11 @@ flowchart TD
     JP2E --> FS1{Eksisterer det fagsak på pleietrengende?}
     FS1 -->|Ja| JP2H[Kopier journalpost]
     JP2H --> JP2I[Journalfør ny JP mot eksisterende fagsak]
+    JP2I --> JP12J[Lukk gammel journalpost]
+    JP12J --> JP_KOPI_LOS[Tilbake til LOS og åpne kopi av journalpost]
+    JP_KOPI_LOS --> JP2F
+    
+    JP2G --> LOS[Tilbake til LOS]
 ```
 
 ## Deployment
