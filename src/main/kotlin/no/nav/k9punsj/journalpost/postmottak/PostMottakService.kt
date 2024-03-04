@@ -69,7 +69,7 @@ class PostMottakService(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
                     ytelseType = fagsakYtelseType,
-                    behandlingsÅr = oppdatertJournalpost.behandlingsAar
+                    behandlingsår = oppdatertJournalpost.behandlingsAar
                 )
             )
 

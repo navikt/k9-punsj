@@ -6,5 +6,5 @@ data class ReserverSaksnummerDto(
     val brukerAktørId: String,
     val pleietrengendeAktørId: String? = null,
     val ytelseType: FagsakYtelseType,
-    val behandlingsÅr: Int? = null,
+    val behandlingsår: Int? = null,
 )
