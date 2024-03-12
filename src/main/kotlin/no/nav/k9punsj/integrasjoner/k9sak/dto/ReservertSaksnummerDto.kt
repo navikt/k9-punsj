@@ -7,8 +7,9 @@ data class ReservertSaksnummerDto(
     val ytelseType: FagsakYtelseType,
     val brukerAktørId: String,
     val pleietrengendeAktørId: String? = null,
+    val behandlingsår: Int? = null,
 ) {
     override fun toString(): String {
-        return "HentReservertSaksnummerDto(saksnummer='$saksnummer', ytelseType=$ytelseType), harBrukerAktørId=${brukerAktørId.isNotBlank()}, harPleietrengendeAktørId=${!pleietrengendeAktørId.isNullOrBlank()}"
+        return "HentReservertSaksnummerDto(saksnummer='$saksnummer', ytelseType=$ytelseType), harBrukerAktørId=${brukerAktørId.isNotBlank()}, harPleietrengendeAktørId=${!pleietrengendeAktørId.isNullOrBlank()}, behandlingsår='$behandlingsår'"
     }
 }

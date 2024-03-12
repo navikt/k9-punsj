@@ -504,8 +504,7 @@ class K9SakServiceImpl(
             periode
         } else {
             val søkerIdent = soknad.søker.personIdent.verdi
-            val periodeFraFagsak = periodeFraFagsak(søkerIdent, saksnummer)
-            val behandlingsÅr = periodeFraFagsak.fom.year
+            val behandlingsÅr = hentReservertSaksnummer(Saksnummer(saksnummer)).behandlingsår ?: periodeFraFagsak(søkerIdent, saksnummer).fom.year
             Periode(
                 LocalDate.of(behandlingsÅr, 1, 1),
                 LocalDate.of(behandlingsÅr, 12, 31)
