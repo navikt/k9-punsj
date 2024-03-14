@@ -44,11 +44,15 @@ class PostMottakService(
 
         val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
 
+        val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
+        val validertMottattJournalpost = mottattJournalpost.valider(oppdatertJournalpost.behandlingsAar)
+
         logger.info("Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
         k9SakService.hentFagsaker(brukerIdent).first?.let { fagsaker ->
-            fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId }
+            fagsaker.firstOrNull { it.pleietrengendeAktorId == pleietrengendeAktørId && it.sakstype == fagsakYtelseType
+                    && (it.gyldigPeriode?.fom?.year == oppdatertJournalpost.behandlingsAar || oppdatertJournalpost.behandlingsAar == null) }
                 ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
                     throw PostMottakException(
                         melding = "Det eksisterer allerede en fagsak(${eksisterendeFagsak.sakstype.name} - ${eksisterendeFagsak.saksnummer}) på pleietrengende.",
@@ -58,8 +62,6 @@ class PostMottakService(
                 }
         }
 
-        val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
-        val validertMottattJournalpost = mottattJournalpost.valider(oppdatertJournalpost.behandlingsAar)
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
         val saksnummer = if (eksisterendeSaksnummer.isNullOrBlank()) {
