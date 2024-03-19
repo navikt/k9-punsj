@@ -7,7 +7,8 @@ enum class Behandlingstema(
     internal val kodeverksverdi: String
 ) {
     Omsorgspenger(kodeverksverdi = "ab0149"),
-    PleiepengerSyktBarn(kodeverksverdi = "ab0320"),
+    UtdatertPleiepengerSyktBarn(kodeverksverdi = "ab0320"),
+    PleiepengerSyktBarn(kodeverksverdi = "ab0435"),
     PleiepengerVedInstitusjonsopphold(kodeverksverdi = "ab0137"),
     PleiepengerPårørende(kodeverksverdi = "ab0094"),
     Opplæringspenger(kodeverksverdi = "ab0141")
@@ -35,8 +36,13 @@ enum class Gjelder(
     internal val aktiv: Boolean = true
 ) {
     /** Pleiepenger sykt barn **/
-    PleiepengerSyktBarn(
+    UtdatertPleiepengerSyktBarn(
         tekst = "Pleiepenger ny ordning",
+        behandlingstema = Behandlingstema.UtdatertPleiepengerSyktBarn,
+        aktiv = false
+    ),
+    PleiepengerSyktBarn(
+        tekst = "Pleiepenger",
         behandlingstema = Behandlingstema.PleiepengerSyktBarn
     ),
     PleiepengerVedInstitusjonsopphold(
