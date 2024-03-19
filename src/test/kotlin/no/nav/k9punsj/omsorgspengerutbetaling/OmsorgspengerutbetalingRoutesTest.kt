@@ -14,6 +14,7 @@ import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
+import no.nav.k9punsj.wiremock.JournalpostIds.FerdigstiltMedSaksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -172,7 +173,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekk()
-        val journalpostid = abs(Random(2234).nextInt()).toString()
+        val journalpostid = FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -225,7 +226,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekkKompleks()
-        val journalpostid = abs(Random(2256234).nextInt()).toString()
+        val journalpostid = FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)

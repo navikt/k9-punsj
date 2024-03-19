@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -25,16 +26,17 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
 private val logger: Logger = LoggerFactory.getLogger(CoroutineRequestContext::class.java)
-private const val REQUEST_ID_KEY = "request_id"
-private const val CORRELATION_ID_KEY = "correlation_id"
-private const val CALL_ID_KEY = "callId"
+const val REQUEST_ID_KEY = "request_id"
+const val CORRELATION_ID_KEY = "correlation_id"
+const val CALL_ID_KEY = "callId"
 
 private class CoroutineRequestContext : AbstractCoroutineContextElement(Key) {
     companion object Key : CoroutineContext.Key<CoroutineRequestContext>
+
     val attributter: MutableMap<String, Any> = mutableMapOf()
 }
 
-private fun CoroutineContext.requestContext() =
+private fun CoroutineContext.requestContext(): CoroutineRequestContext =
     get(CoroutineRequestContext.Key) ?: throw IllegalStateException("Request Context ikke satt.")
 
 internal fun CoroutineContext.hentAttributt(key: String): Any? = requestContext().attributter.getOrDefault(key, null)
@@ -58,7 +60,7 @@ internal fun CoroutineContext.hentAuthentication(): Authentication =
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,
-    routes: CoRouterFunctionDsl.() -> Unit
+    routes: CoRouterFunctionDsl.() -> Unit,
 ) = Routes(
     authenticationHandler,
     routes,
@@ -69,14 +71,15 @@ private fun Routes(
     authenticationHandler: AuthenticationHandler?,
     routes: CoRouterFunctionDsl.() -> Unit,
     issuerNames: Set<String>?,
-    isAccepted: ((jwtToken: JwtToken) -> Boolean)?
+    isAccepted: ((jwtToken: JwtToken) -> Boolean)?,
 ) = coRouter {
     before { serverRequest ->
         val callId = serverRequest
             .headers()
             .header(CALL_ID_KEY)
             .firstOrNull() ?: UUID.randomUUID().toString()
-        serverRequest.attributes()[REQUEST_ID_KEY] = serverRequest.headers().header("X-Request-ID").firstOrNull() ?: UUID.randomUUID().toString()
+        serverRequest.attributes()[REQUEST_ID_KEY] =
+            serverRequest.headers().header("X-Request-ID").firstOrNull() ?: UUID.randomUUID().toString()
         serverRequest.attributes()[CORRELATION_ID_KEY] = callId
         serverRequest.attributes()[CALL_ID_KEY] = callId
         logger.info("-> HTTP ${serverRequest.method().name()} ${serverRequest.path()}", e(serverRequest.contextMap()))
@@ -89,45 +92,92 @@ private fun Routes(
             issuerNames = issuerNames!!,
             isAccepted = isAccepted!!
         ) ?: requestedOperation(serverRequest)
-        logger.info("<- HTTP ${serverRequest.method().name()} ${serverRequest.path()} ${serverResponse.statusCode().value()}", e(serverRequest.contextMap()))
+        logger.info(
+            "<- HTTP ${serverRequest.method().name()} ${serverRequest.path()} ${
+                serverResponse.statusCode().value()
+            }", e(serverRequest.contextMap())
+        )
         serverResponse
+    }
+    // Håndtering for problem-details
+    onError<ErrorResponseException> { error: Throwable, serverRequest: ServerRequest ->
+        if (error is ErrorResponseException) {
+            serverResponseAsProblemDetails(error, serverRequest)
+        } else {
+            throw error
+        }
     }
     onError<IkkeFunnet> { _, _ ->
         ServerResponse
             .notFound()
             .buildAndAwait()
     }
-    onError<Throwable> { error, serverRequest ->
-        val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
-        logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
-
-        ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
-            ExceptionResponse(
-                message = error.message ?: "Uhåndtert feil uten detaljer",
-                uri = serverRequest.uri(),
-                exceptionId = exceptionId
-            )
-        )
-    }
     onError<DecodingException> { error, serverRequest ->
         val exceptionId = ULID().nextValue().toString()
         logger.error("DecodingException med id $exceptionId . URI: ${serverRequest.uri()}", error)
 
-        ServerResponse.badRequest().bodyValueAndAwait(
-            ExceptionResponse(
-                message = error.message ?: "Ingen detaljer",
-                uri = serverRequest.uri(),
-                exceptionId = exceptionId
+        val responseError = findErrorResponseException(error)
+        if (responseError != null) {
+            serverResponseAsProblemDetails(responseError, serverRequest)
+        } else {
+            ServerResponse.badRequest().bodyValueAndAwait(
+                ExceptionResponse(
+                    message = error.message ?: "No details",
+                    uri = serverRequest.uri(),
+                    exceptionId = exceptionId
+                )
             )
-        )
+        }
+    }
+    onError<Throwable> { error, serverRequest ->
+        val exceptionId = serverRequest.headers().header(CALL_ID_KEY).firstOrNull() ?: UUID.randomUUID().toString()
+        logger.error("Ukjent feil med id $exceptionId . URI: ${serverRequest.uri()}", error)
+
+        val responseError = findErrorResponseException(error)
+        if (responseError != null) {
+            serverResponseAsProblemDetails(responseError, serverRequest)
+        } else {
+            ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).bodyValueAndAwait(
+                ExceptionResponse(
+                    message = error.message ?: "Uhåndtert feil uten detaljer",
+                    uri = serverRequest.uri(),
+                    exceptionId = exceptionId
+                )
+            )
+        }
     }
     routes()
+}
+
+fun findErrorResponseException(error: Throwable?): ErrorResponseException? {
+    var cause = error
+    while (cause != null) {
+        if (cause is ErrorResponseException) {
+            return cause
+        }
+        cause = cause.cause
+    }
+    return null
+}
+
+private suspend fun serverResponseAsProblemDetails(
+    error: ErrorResponseException,
+    serverRequest: ServerRequest,
+): ServerResponse {
+    val problemDetail = error.body
+    problemDetail.instance = serverRequest.uri()
+    problemDetail.setProperty("correlationId", serverRequest.correlationId())
+
+    logger.error("{}", problemDetail)
+    return ServerResponse
+        .status(error.statusCode)
+        .bodyValueAndAwait(problemDetail)
 }
 
 internal suspend fun <T> RequestContext(
     context: CoroutineContext,
     serverRequest: ServerRequest,
-    block: suspend CoroutineScope.() -> T
+    block: suspend CoroutineScope.() -> T,
 ): T {
     return withContext(
         context
@@ -153,7 +203,7 @@ private fun ServerRequest.contextMap() = pathVariables().toMutableMap().apply {
 }
 
 data class Authentication(
-    internal val authorizationHeader: String
+    internal val authorizationHeader: String,
 ) {
     private val tokenType: String
     internal val accessToken: String
@@ -169,5 +219,5 @@ data class Authentication(
 data class ExceptionResponse(
     val message: String,
     val uri: URI,
-    val exceptionId: String
+    val exceptionId: String,
 )

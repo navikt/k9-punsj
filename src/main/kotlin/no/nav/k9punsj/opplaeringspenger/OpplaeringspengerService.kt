@@ -147,7 +147,7 @@ internal class OpplaeringspengerService(
                     .bodyValueAndAwait(SøknadFeil(søknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.OPPLÆRINGSPENGER_SOKNAD,
                 journalpostIder = journalpostIder

@@ -230,6 +230,7 @@ object JournalpostIds {
     const val FinnesIkke: JournalpostId = "404"
     const val IkkeStøttet: JournalpostId = "409"
     const val Utgått: JournalpostId = "1337"
+    const val FerdigstiltMedSaksnummer: JournalpostId = "7523521"
 }
 
 private object SafMockResponses {
@@ -391,10 +392,16 @@ private object SafMockResponses {
     {
       "data": {
         "journalpost": {
-          "journalpostId": "7523521",
+          "journalpostId": "${JournalpostIds.FerdigstiltMedSaksnummer}",
           "tema": "OMS",
           "journalposttype": "N",
           "journalstatus": "FERDIGSTILT",
+          "sak": {
+            "sakstype": "FAGSAK",
+            "fagsakId": "ABC123",
+            "fagsaksystem": "K9",
+            "tema": "OMS"
+          },
           "relevanteDatoer" : [
           {
             "dato" : "2022-10-12T12:53:21.046Z",
