@@ -52,6 +52,7 @@ data class OpprettNySøknad(
     val journalpostId: String,
     @JsonAlias("barnIdent") val pleietrengendeIdent: String?,
     val annenPart: String?,
+    val k9saksnummer: String?
 )
 
 data class PleietrengendeDto(

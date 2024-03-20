@@ -15,7 +15,8 @@ data class NyOmsMASøknad(
     val norskIdent: String,
     val journalpostId: String,
     val annenPart: String? = null,
-    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
+    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>,
+    val k9saksnummer: String?
 )
 
 data class OmsorgspengerMidlertidigAleneSøknadDto(
