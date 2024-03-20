@@ -16,6 +16,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -27,7 +28,8 @@ internal class AksjonspunktServiceImpl(
     private val søknadsService: SoknadService,
     private val personService: PersonService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
-    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String
+    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String,
+    @Value("\${SETT_PAA_VENT_TID}") private val tidPåVent: String?
 ) : AksjonspunktService {
 
     private companion object {
@@ -174,7 +176,7 @@ internal class AksjonspunktServiceImpl(
             aksjonspunktKode = AksjonspunktKode.VENTER_PÅ_INFORMASJON,
             journalpostId = journalpost.journalpostId,
             aksjonspunktStatus = AksjonspunktStatus.OPPRETTET,
-            frist_tid = LocalDateTime.now().plusWeeks(3),
+            frist_tid = if (tidPåVent != null) LocalDateTime.now().plus(Duration.parse(tidPåVent)) else LocalDateTime.now().plusWeeks(3),
             vent_årsak = VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER
         )
 
