@@ -110,7 +110,8 @@ class PleiepengerLivetsSluttfaseRoutesTest : AbstractContainerBaseTest() {
             personnummer,
             journalpostId,
             pleietrengende,
-            null
+            null,
+            k9saksnummer = null
         )
     }
 
