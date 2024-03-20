@@ -145,7 +145,8 @@ internal class OmsorgspengerAleneOmsorgRoutesTest : AbstractContainerBaseTest() 
             norskIdent = personnummer,
             journalpostId = journalpostId,
             pleietrengendeIdent = pleietrengende,
-            annenPart = null
+            annenPart = null,
+            k9saksnummer = null
         )
     }
 

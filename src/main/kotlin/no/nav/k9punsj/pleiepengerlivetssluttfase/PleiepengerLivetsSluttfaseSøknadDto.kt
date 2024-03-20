@@ -42,7 +42,8 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
 
     data class UttakDto(
@@ -74,7 +75,8 @@ internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }

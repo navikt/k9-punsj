@@ -21,7 +21,8 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -51,7 +52,8 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
                     soeknadId = s.søknadId,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }

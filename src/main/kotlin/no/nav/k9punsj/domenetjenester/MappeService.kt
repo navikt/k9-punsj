@@ -55,7 +55,7 @@ internal class MappeService(
                 harMedisinskeOpplysninger = false
             )
 
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, opplaeringspengerSøknadDto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, opplaeringspengerSøknadDto, nySøknad.k9saksnummer)
     }
 
     suspend fun førsteInnsendingPsb(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -78,7 +78,7 @@ internal class MappeService(
                 harMedisinskeOpplysninger = false
             )
 
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, pleiepengerSøknadDto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, pleiepengerSøknadDto, nySøknad.k9saksnummer)
     }
 
     suspend fun forsteInnsendingPls(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -106,7 +106,8 @@ internal class MappeService(
             bunkeId,
             soker,
             soknadfelles.journalposter,
-            pleiepengerLivetsSluttfaseSoknadDto
+            pleiepengerLivetsSluttfaseSoknadDto,
+            nySøknad.k9saksnummer
         )
     }
 
@@ -140,7 +141,7 @@ internal class MappeService(
             klokkeslett = søknadfelles.klokkeslett,
             soekerId = norskIdent
         )
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
 
     suspend fun førsteInnsendingOmsorgspengerutbetaling(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -157,7 +158,7 @@ internal class MappeService(
             klokkeslett = søknadfelles.klokkeslett,
             soekerId = norskIdent
         )
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
 
     suspend fun førsteInnsendingOmsKSB(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -178,7 +179,7 @@ internal class MappeService(
             harInfoSomIkkeKanPunsjes = false,
             harMedisinskeOpplysninger = false
         )
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
 
     suspend fun førsteInnsendingOmsAO(nySøknad: OpprettNySøknad): SøknadEntitet {
@@ -198,7 +199,7 @@ internal class MappeService(
                 OmsorgspengerAleneOmsorgSøknadDto.BarnDto(norskIdent = it, foedselsdato = null)
             },
         )
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
 
     suspend fun førsteInnsendingOmsMA(nySøknad: NyOmsMASøknad): SøknadEntitet {
@@ -222,7 +223,7 @@ internal class MappeService(
                 periode = null
             )
         )
-        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto)
+        return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
 
     private suspend fun opprettSøknadEntitet(
@@ -230,14 +231,16 @@ internal class MappeService(
         bunkeId: String,
         søker: Person,
         journalposter: MutableMap<String, Any?>,
-        dto: Any
+        dto: Any,
+        k9Saksnummer: String?
     ): SøknadEntitet {
         val søknadEntitet = SøknadEntitet(
             søknadId = søknadId.toString(),
             bunkeId = bunkeId,
             søkerId = søker.personId,
             journalposter = journalposter,
-            søknad = objectMapper().convertValue<JsonB>(dto)
+            søknad = objectMapper().convertValue<JsonB>(dto),
+            k9saksnummer = k9Saksnummer
         )
         return soknadService.opprettSøknad(søknadEntitet)
     }

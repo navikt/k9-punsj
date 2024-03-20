@@ -272,7 +272,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             norskIdent = personnummer,
             journalpostId = journalpostId,
             pleietrengendeIdent = pleietrengendeIdent,
-            annenPart = null
+            annenPart = null,
+            k9saksnummer = null
         )
 
     private fun tilpasserSøknadsMalTilTesten(
