@@ -29,7 +29,7 @@ internal class AksjonspunktServiceImpl(
     private val personService: PersonService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
     @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String,
-    @Value("\${SETT_PAA_VENT_TID:null}") private val tidPåVent: String?
+    @Value("\${SETT_PAA_VENT_TID:#{null}}") private val tidPåVent: String?
 ) : AksjonspunktService {
 
     private companion object {
