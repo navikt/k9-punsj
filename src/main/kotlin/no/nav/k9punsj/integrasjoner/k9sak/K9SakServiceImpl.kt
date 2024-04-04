@@ -455,7 +455,7 @@ class K9SakServiceImpl(
                 "journalpostId": "$journalpostId",
                 "periode": {
                     "fom": "${k9sakPeriode.fom}",
-                    "tom": "${k9sakPeriode.tom}"
+                    "tom": ${k9sakPeriode.tom?.let { "$it" } ?: null}
                 },
                 "ytelseType": {
                     "kode": "${fagsakYtelseType.kode}",
