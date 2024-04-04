@@ -379,10 +379,14 @@ class K9SakServiceImpl(
      * @param saksnummer: Saksnummer som skal hentes.
      * @throws RestKallException hvis det oppstår feil ved henting av reservert saksnummer.
      */
-    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto {
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto? {
         val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}")
-
-        return kotlin.runCatching { objectMapper().readValue<ReservertSaksnummerDto>(result) }
+        return if (result.isBlank()) null
+        else kotlin.runCatching {
+            objectMapper().readValue<ReservertSaksnummerDto>(
+                result
+            )
+        }
             .fold(
                 onSuccess = { saksnummerDto: ReservertSaksnummerDto -> saksnummerDto },
                 onFailure = { throwable: Throwable ->
@@ -504,7 +508,9 @@ class K9SakServiceImpl(
             periode
         } else {
             val søkerIdent = soknad.søker.personIdent.verdi
-            val behandlingsÅr = hentReservertSaksnummer(Saksnummer(saksnummer)).behandlingsår ?: periodeFraFagsak(søkerIdent, saksnummer).fom.year
+            val behandlingsÅr = hentReservertSaksnummer(Saksnummer(saksnummer))?.behandlingsår ?: periodeFraFagsak(
+                søkerIdent, saksnummer
+            ).fom.year
             Periode(
                 LocalDate.of(behandlingsÅr, 1, 1),
                 LocalDate.of(behandlingsÅr, 12, 31)

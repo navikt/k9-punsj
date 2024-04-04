@@ -479,15 +479,15 @@ internal class JournalpostRoutes(
                     Saksnummer(safSak.fagsakId)
                 )
                 logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
-                val pleietrengendeIdent = reservertSaksnummerDto.pleietrengendeAktørId?.let {
+                val pleietrengendeIdent = reservertSaksnummerDto?.pleietrengendeAktørId?.let {
                     personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
                 }
                 Sak(
                     reservertSaksnummer = true,
-                    fagsakId = reservertSaksnummerDto.saksnummer,
+                    fagsakId = reservertSaksnummerDto?.saksnummer,
                     gyldigPeriode = null,
                     pleietrengendeIdent = pleietrengendeIdent,
-                    sakstype = reservertSaksnummerDto.ytelseType.kode,
+                    sakstype = reservertSaksnummerDto?.ytelseType?.kode,
                     behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
             }

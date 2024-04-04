@@ -50,7 +50,7 @@ interface K9SakService {
     )
 
     suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto
-    suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto
+    suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto?
     suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto>
 
     suspend fun opprettSakOgSendInnSøknad(
