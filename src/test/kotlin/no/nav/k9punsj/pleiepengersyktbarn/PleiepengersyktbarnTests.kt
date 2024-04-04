@@ -710,7 +710,7 @@ private fun opprettSøknad(
     personnummer: String,
     journalpostId: String,
 ): OpprettNySøknad {
-    return OpprettNySøknad(personnummer, journalpostId, null, null)
+    return OpprettNySøknad(personnummer, journalpostId, null, null, null)
 }
 
 private fun lagSendSøknad(

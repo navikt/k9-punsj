@@ -37,7 +37,8 @@ data class OmsorgspengerutbetalingSøknadDto(
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
     val erKorrigering: Boolean ? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class FraværPeriode(
         val aktivitetsFravær: AktivitetFravær,
@@ -90,7 +91,7 @@ internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
             if (s.søknad != null) {
                 objectMapper().convertValue(s.søknad)
             } else {
-                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
     return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
