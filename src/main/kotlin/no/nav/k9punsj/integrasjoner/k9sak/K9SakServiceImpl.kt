@@ -314,7 +314,7 @@ class K9SakServiceImpl(
             [{
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
-                "ytelseType": "${fagsakYtelseType.kode}"
+                "ytelseType": "${fagsakYtelseType.kode}",
                 "kanalReferanse": "$callId",
                 "type": "${brevkode.kode}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
