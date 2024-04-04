@@ -14,6 +14,7 @@ data class JournalpostMottaksHaandteringDto(
     val journalpostId: String,
     val brukerIdent: String,
     val pleietrengendeIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
+    val relatertPersonIdent: String?, // Settes kun ved tilknytning mot reservert saksnummer (hvis man vet det).
     val fagsakYtelseTypeKode: String,
     val saksnummer: String?, // Settes kun ved tilknytning mot eksisterende sak.
 ) {

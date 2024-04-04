@@ -42,6 +42,10 @@ class PostMottakService(
         val pleietrengendeAktørId = pleietrengendeIdent.takeUnless { it.isNullOrBlank() }
             ?.let { personService.finnAktørId(it) }
 
+        val relatertPersonIdent = mottattJournalpost.relatertPersonIdent
+        val relatertPersonAktørId = relatertPersonIdent.takeUnless { it.isNullOrBlank() }
+            ?.let { personService.finnAktørId(it) }
+
         val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
@@ -70,6 +74,7 @@ class PostMottakService(
                 ReserverSaksnummerDto(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
+                    relatertPersonAktørId = relatertPersonAktørId,
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
                 )
