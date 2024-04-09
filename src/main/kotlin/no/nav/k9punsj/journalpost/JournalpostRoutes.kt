@@ -482,11 +482,15 @@ internal class JournalpostRoutes(
                 val pleietrengendeIdent = reservertSaksnummerDto?.pleietrengendeAktørId?.let {
                     personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
                 }
+                val relatertPersonIdent = reservertSaksnummerDto?.relatertPersonAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
                 Sak(
                     reservertSaksnummer = true,
                     fagsakId = reservertSaksnummerDto?.saksnummer,
                     gyldigPeriode = null,
                     pleietrengendeIdent = pleietrengendeIdent,
+                    relatertPersonIdent = relatertPersonIdent,
                     sakstype = reservertSaksnummerDto?.ytelseType?.kode,
                     behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
@@ -500,7 +504,8 @@ internal class JournalpostRoutes(
                     gyldigPeriode = k9Fagsak?.gyldigPeriode,
                     pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
                     sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode,
-                    behandlingsÅr = punsjJournalpost?.behandlingsAar
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar,
+                    relatertPersonIdent = k9Fagsak?.relatertPersonIdent
                 )
             }
         }

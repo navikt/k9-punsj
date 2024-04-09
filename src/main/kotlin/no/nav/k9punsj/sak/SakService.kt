@@ -29,24 +29,30 @@ internal class SakService(
                 val personIdent = it.pleietrengendeAktorId?.let { aktørId ->
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
+
+                val relatertPersonIdent = it.relatertPersonAktorId?.let { aktørId ->
+                    personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                }
                 SakInfoDto(
                     fagsakId = it.saksnummer,
                     reservert = false,
                     sakstype = it.sakstype.kode,
                     pleietrengendeIdent = personIdent,
+                    relatertPersonIdent = relatertPersonIdent,
                     gyldigPeriode = it.gyldigPeriode
                 )
             }
             logger.info("Henter reserverte saksnummere fra k9...")
             val reserverteSaksnummere = k9SakService.hentReserverteSaksnummere(søkerAktørId).map {
                 SakInfoDto(
-                    fagsakId = it.saksnummer,
                     reservert = true,
+                    fagsakId = it.saksnummer,
                     sakstype = it.ytelseType.kode,
                     pleietrengendeIdent = it.pleietrengendeAktørId?.let { aktørId ->
                         personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                     },
-                    gyldigPeriode = null
+                    gyldigPeriode = null,
+                    relatertPersonIdent = it.relatertPersonAktørId
                 )
             }
             // Returnerer fagsaker og reserverte saksnummere

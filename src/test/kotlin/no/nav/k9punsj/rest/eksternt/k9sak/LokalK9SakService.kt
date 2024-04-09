@@ -57,19 +57,22 @@ class LokalK9SakService : K9SakService {
                 saksnummer = "ABC123",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
+                relatertPersonAktorId =  null
             ),
             Fagsak(
                 saksnummer = "DEF456",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
+                relatertPersonAktorId = null
             ),
             Fagsak(
                 saksnummer = "GHI789",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 null,
-                gyldigPeriode = null
+                gyldigPeriode = null,
+                relatertPersonAktorId = null
             )
         ),
         second = null
