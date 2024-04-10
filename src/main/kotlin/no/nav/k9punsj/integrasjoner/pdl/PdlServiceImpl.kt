@@ -9,6 +9,7 @@ import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.IkkeTestProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.person.Behandling
 import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
 import org.slf4j.Logger
@@ -30,7 +31,7 @@ import kotlin.coroutines.coroutineContext
 class PdlServiceImpl(
     @Value("\${no.nav.pdl.base_url}") baseUrl: URI,
     @Value("\${no.nav.pdl.scope}") scope: String,
-    @Qualifier("azure") private val azureAccessTokenClient: AccessTokenClient
+    @Qualifier("azure") private val azureAccessTokenClient: AccessTokenClient,
 ) : ReactiveHealthIndicator, PdlService {
 
     private val cachedAzureAccessTokenClient = CachedAccessTokenClient(azureAccessTokenClient)
@@ -148,13 +149,20 @@ class PdlServiceImpl(
 
     private suspend fun requestPdl(
         queryRequest: QueryRequest,
-        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() }
+        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() },
     ): String {
         val response = client
             .post()
             .uri { it.build() }
             .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
             .header("Tema", "OMS")
+            .header(
+                "Behandlingsnummer",
+                Behandling.PLEIEPENGER_SYKT_BARN.behandlingsnummer,
+                Behandling.PLEIEPENGER_I_LIVETS_SLUTTFASE.behandlingsnummer,
+                Behandling.OMSORGSPENGERUTBETALING.behandlingsnummer,
+                Behandling.OMSORGSPENGER_RAMMEMELDING.behandlingsnummer
+            )
             .header(HttpHeaders.AUTHORIZATION, getAuthorizationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(queryRequest)
@@ -172,7 +180,7 @@ class PdlServiceImpl(
 
     private suspend fun requestPdlJson(
         queryRequest: QueryRequest,
-        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() }
+        getAuthorizationHeader: suspend () -> String = { userAuthorizationHeader() },
     ): ObjectNode {
         val response = objectMapper().readTree(requestPdl(queryRequest, getAuthorizationHeader)) as ObjectNode
 
@@ -191,7 +199,7 @@ class PdlServiceImpl(
     data class QueryRequest(
         val query: String,
         val variables: Map<String, Any>,
-        val operationName: String? = null
+        val operationName: String? = null,
     )
 
     private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
