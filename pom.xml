@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
+        <version>3.2.4</version>
         <relativePath/>
     </parent>
 
@@ -24,7 +24,7 @@
         <kotlin.version>1.9.22</kotlin.version>
 
         <!-- spring relatert -->
-        <springdoc.version>2.4.0</springdoc.version>
+        <springdoc.version>2.5.0</springdoc.version>
 
         <!-- logging -->
         <logback.logstash.version>7.4</logback.logstash.version>
