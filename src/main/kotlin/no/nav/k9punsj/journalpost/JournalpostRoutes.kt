@@ -65,7 +65,7 @@ internal class JournalpostRoutes(
     private val gosysService: GosysService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
-    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
+    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
 ) {
 
     private companion object {
@@ -107,10 +107,10 @@ internal class JournalpostRoutes(
 
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
+                                journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
-                        journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
-                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+                            journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
+                                    journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -209,7 +209,10 @@ internal class JournalpostRoutes(
                     request.body(BodyExtractors.toMono(BehandlingsAarDto::class.java)).awaitFirst().behandlingsAar
                 } catch (e: Exception) {
                     val nåVærendeÅr = LocalDate.now().year
-                    logger.info("Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}", e)
+                    logger.info(
+                        "Kunne ikke hente behandlingsår fra request. Setter til nåværende år ($nåVærendeÅr). Feil: {}",
+                        e
+                    )
                     nåVærendeÅr
                 }
 
@@ -367,6 +370,10 @@ internal class JournalpostRoutes(
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
 
+                val journalpostYtelse = journalpost.ytelse
+
+                logger.info("Kopierer journalpost med id=$journalpostId og ytelse=$journalpostYtelse")
+
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
                 dto.annenPart?.let { identListe.add(it) }
@@ -382,17 +389,19 @@ internal class JournalpostRoutes(
                     return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-                val k9FagsakYtelseType = journalpost?.ytelse?.let {
+
+                val k9FagsakYtelseType = journalpostYtelse?.let {
+                    val k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType
+                        .fraKode(it)
+
                     journalpost.utledK9sakFagsakYtelseType(
-                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
-                            it
-                        )
+                        k9sakFagsakYtelseType = k9sakFagsakYtelseType
                     )
                 } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
 
-                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
+                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpostYtelse)
 
-                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+                if (journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
                     return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
                 }
 
