@@ -321,7 +321,7 @@ class K9SakServiceImpl(
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknadJson.toString().toByteArray())}"
             }]
-            """
+            """.trimIndent()
         else
             """
             [{

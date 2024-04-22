@@ -28,7 +28,10 @@ internal fun PunsjJournalpost?.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType:
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN
     } else {
         val ytelse = when (this.ytelse) {
-            null -> k9sakFagsakYtelseType
+            null -> {
+                logger.info("Journalpost har ingen ytelse. Bruker ${k9sakFagsakYtelseType.kode}")
+                k9sakFagsakYtelseType
+            }
             no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER

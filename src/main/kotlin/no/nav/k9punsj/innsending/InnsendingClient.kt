@@ -18,7 +18,7 @@ interface InnsendingClient {
         val behovssekvensId = ulid.nextULID()
         val correlationId = UUID.randomUUID().toString()
         logger.info(
-            "Sender journalpost til kopiering.",
+            "Sender journalpost (${info.journalpostId}) til kopiering med ytelse ${info.ytelse.kode}",
             keyValue("journalpost_id", info.journalpostId),
             keyValue("correlation_id", correlationId),
             keyValue("behovssekvens_id", behovssekvensId)
