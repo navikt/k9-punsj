@@ -236,7 +236,8 @@ class K9SakServiceImpl(
             søkerAktørId,
             pleietrengendeAktørId,
             annenpartAktørId,
-            k9sakPeriode
+            k9sakPeriode,
+            null
         )
 
         val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId) }.getOrNull()
