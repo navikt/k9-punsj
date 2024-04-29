@@ -713,7 +713,7 @@ class K9SakServiceImpl(
                     sakstype = fagsakYtelseType,
                     pleietrengendeAktorId = pleietrengende,
                     gyldigPeriode = periodeDto,
-                    relatertPersonAktorId = relatertPersonAktorId
+                    relatertPersonAktørId = relatertPersonAktorId
                 )
             }.toSet()
 

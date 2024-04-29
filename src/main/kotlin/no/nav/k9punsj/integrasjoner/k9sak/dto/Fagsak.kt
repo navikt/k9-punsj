@@ -7,6 +7,6 @@ data class Fagsak(
     val saksnummer: String,
     val sakstype: FagsakYtelseType,
     val pleietrengendeAktorId: String?,
-    val relatertPersonAktorId: String?,
+    val relatertPersonAktørId: String?,
     val gyldigPeriode: PeriodeDto?
 )

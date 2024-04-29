@@ -30,7 +30,7 @@ internal class SakService(
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
 
-                val relatertPersonIdent = it.relatertPersonAktorId?.let { aktørId ->
+                val relatertPersonIdent = it.relatertPersonAktørId?.let { aktørId ->
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
                 SakInfoDto(

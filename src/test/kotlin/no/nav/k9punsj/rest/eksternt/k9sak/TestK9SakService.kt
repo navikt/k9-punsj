@@ -72,20 +72,20 @@ internal class TestK9SakService : K9SakService {
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
                 gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktorId =  null
+                relatertPersonAktørId =  null
             ),
             Fagsak(
                 saksnummer = "DEF456",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
                 null,
                 gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktorId = null
+                relatertPersonAktørId = null
             ),
             Fagsak(
                 saksnummer = "GHI789",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 null,
-                relatertPersonAktorId = null,
+                relatertPersonAktørId = null,
                 gyldigPeriode = null
             )
         ),
