@@ -469,7 +469,7 @@ internal class JournalpostRoutes(
         val safSakHarFagsakId = safSak?.fagsakId != null
         val ikkeHarFagsak = k9Fagsak == null
 
-        val erReservertSaksnummer = erFerdigstiltEllerJournalfoert && harSafSak && safSakHarFagsakId && ikkeHarFagsak
+        val erReservertSaksnummer = harSafSak && safSakHarFagsakId && ikkeHarFagsak
         logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
 
         return when (erReservertSaksnummer) {
