@@ -704,7 +704,7 @@ class K9SakServiceImpl(
                 val saksnummer = it.getString("saksnummer")
                 val sakstypeKode = it.getJSONObject("sakstype").getString("kode")
                 val pleietrengende = it.getStringOrNull("pleietrengendeAktørId")
-                val relatertPersonAktorId = it.getStringOrNull("relatertPersonAktorId")
+                val relatertPersonAktorId = it.getStringOrNull("relatertPersonAktørId")
                 val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
                 val gyldigPeriode: JSONObject? = it.optJSONObject("gyldigPeriode")
                 val periodeDto: PeriodeDto? = gyldigPeriode?.somPeriodeDto()
