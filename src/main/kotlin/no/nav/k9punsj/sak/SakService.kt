@@ -33,6 +33,9 @@ internal class SakService(
                 val relatertPersonIdent = it.relatertPersonAktørId?.let { aktørId ->
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
+                if (it.relatertPersonAktørId != null && relatertPersonIdent == null) {
+                    logger.error("Fant ikke person i PDL for relatertPersonAktørId.")
+                }
                 SakInfoDto(
                     fagsakId = it.saksnummer,
                     reservert = false,
