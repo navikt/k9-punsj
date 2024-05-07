@@ -4,6 +4,7 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -26,17 +27,23 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgiverePath) { request ->
             RequestContext(coroutineContext, request) {
-                if (request.identitetsnummer().harTilgang()) {
+                val identitetsnummer = request.identitetsnummer()
+
+                if (identitetsnummer.harTilgang()) {
+                    val fom = request.fom()
+                    val tom = request.tom()
+                    logger.info("Henter arbeidsgivere, fom=$fom, tom=$tom, historikk=false")
+
+                    val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
+                        identitetsnummer = identitetsnummer,
+                        fom = fom,
+                        tom = tom
+                    )
+                    logger.info("Hentet ${arbeidsgivere.organisasjoner.size} arbeidsgivere")
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(
-                            arbeidsgiverService.hentArbeidsgivere(
-                                identitetsnummer = request.identitetsnummer(),
-                                fom = request.fom(),
-                                tom = request.tom()
-                            )
-                        )
+                        .bodyValueAndAwait(arbeidsgivere)
                 } else {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -50,18 +57,26 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgivereHistorikkPath) { request ->
             RequestContext(coroutineContext, request) {
-                if (request.identitetsnummer().harTilgang()) {
+                val identitetsnummer = request.identitetsnummer()
+
+                if (identitetsnummer.harTilgang()) {
+                    val historikk = request.historikk()
+                    val fom = request.fom()
+                    val tom = request.tom()
+                    logger.info("Henter arbeidsgivere, fom=$fom, tom=$tom, historikk=$historikk")
+
+                    val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
+                        identitetsnummer = identitetsnummer,
+                        fom = fom,
+                        tom = tom,
+                        historikk = historikk
+                    )
+                    logger.info("Hentet ${arbeidsgivere.organisasjoner.size} arbeidsgivere")
+
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(
-                            arbeidsgiverService.hentArbeidsgivereHistorikk(
-                                identitetsnummer = request.identitetsnummer(),
-                                fom = request.fom(),
-                                tom = request.tom(),
-                                historikk = request.historikk()
-                            )
-                        )
+                        .bodyValueAndAwait(arbeidsgivere)
                 } else {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -108,6 +123,7 @@ internal class ArbeidsgiverRoutes(
     }
 
     private companion object {
+        private val logger = LoggerFactory.getLogger(ArbeidsgiverRoutes::class.java)
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
         private const val ArbeidsgivereHistorikkPath = "/api/arbeidsgivere-historikk"
         private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"

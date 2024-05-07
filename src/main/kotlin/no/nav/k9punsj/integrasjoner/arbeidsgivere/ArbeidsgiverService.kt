@@ -47,20 +47,6 @@ internal class ArbeidsgiverService(
         }
     }
 
-    internal suspend fun hentArbeidsgivereHistorikk(
-        identitetsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
-        historikk: Boolean
-    ): Arbeidsgivere {
-        return slåOppArbeidsgivere(
-            identitetsnummer = identitetsnummer,
-            fom = fom,
-            tom = tom,
-            historikk = historikk
-        )
-    }
-
     internal suspend fun hentArbeidsgivereMedId(
         identitetsnummer: String,
         fom: LocalDate,
