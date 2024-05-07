@@ -33,6 +33,7 @@ internal class AaregClient(
         val url =
             """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=$historikk"""
 
+        logger.info("Henter arbeidsforhold fra: $url")
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
             .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
