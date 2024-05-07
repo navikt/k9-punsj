@@ -49,7 +49,7 @@ internal class AaregClient(
         return Arbeidsforhold(
             organisasjoner = responseBody.deserialiser<List<AaregArbeidsforhold>>()
                 .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
-                .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
+                //.filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
                 .map {
                     OrganisasjonArbeidsforhold(
                         organisasjonsnummer = it.arbeidssted.identer.first().ident,

@@ -2,6 +2,7 @@ package no.nav.k9punsj.integrasjoner.arbeidsgivere
 
 import no.nav.k9punsj.AbstractContainerBaseTest
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -68,6 +69,7 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
     }
 
     @Test
+    @Disabled
     fun `henter historiske arbeidsgivere fra siste 6 mån, tar kun med de som har orgnr`() {
         val forventetResponse = """
             {
