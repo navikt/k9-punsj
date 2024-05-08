@@ -6,5 +6,6 @@ internal data class Arbeidsgivere(
 
 internal data class OrganisasjonArbeidsgiver(
     val organisasjonsnummer: String,
-    val navn: String
+    val navn: String,
+    val erAvsluttet: Boolean
 )

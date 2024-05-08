@@ -58,20 +58,21 @@ internal class AaregClient(
             "Uventet response fra Aareg. HttpStatus=${response.statusCode}, Response=$responseBody fra Url=$url"
         }
 
-        val deserialiser = responseBody.deserialiser<List<AaregArbeidsforhold>>()
-        logger.info("Hentet ${deserialiser.size} arbeidsforhold fra Aareg")
-        val organisasjoner = deserialiser
+        val aaregArbeidsforhold = responseBody.deserialiser<List<AaregArbeidsforhold>>()
+        logger.info("Hentet ${aaregArbeidsforhold.size} arbeidsforhold fra Aareg")
+        val organisasjoner = aaregArbeidsforhold
             .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
             .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
             .map {
                 OrganisasjonArbeidsforhold(
                     organisasjonsnummer = it.arbeidssted.identer.first().ident,
-                    arbeidsforholdId = it.id
+                    arbeidsforholdId = it.id,
+                    erAvsluttet = it.ansettelsesperiode.sluttdato != null
                 )
             }
             .toSet()
 
-        logger.info("Hentet ${organisasjoner.size} arbeidsgivere etter filtrering fra Aareg")
+        logger.info("Returnerer ${organisasjoner.size} arbeidsgivere filtrering")
         return Arbeidsforhold(
             organisasjoner = organisasjoner
         )
