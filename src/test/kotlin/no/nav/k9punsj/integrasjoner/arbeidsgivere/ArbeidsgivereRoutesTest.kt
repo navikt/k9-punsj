@@ -91,7 +91,7 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
 
         webTestClient.get()
             .uri {
-                it.path("/api/arbeidsgivere-historikk").queryParam("historikk", "true").build()
+                it.path("/api/arbeidsgivere").queryParam("inkluderAvsluttetArbeidsforhold", "true").build()
             }
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)

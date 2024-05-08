@@ -4,7 +4,6 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -32,43 +31,14 @@ internal class ArbeidsgiverRoutes(
                 if (identitetsnummer.harTilgang()) {
                     val fom = request.fom()
                     val tom = request.tom()
-
-                    val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
-                        identitetsnummer = identitetsnummer,
-                        fom = fom,
-                        tom = tom
-                    )
-                    ServerResponse
-                        .status(HttpStatus.OK)
-                        .json()
-                        .bodyValueAndAwait(arbeidsgivere)
-                } else {
-                    ServerResponse
-                        .status(HttpStatus.FORBIDDEN)
-                        .buildAndAwait()
-                }
-            }
-        }
-    }
-
-    @Bean
-    fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
-        GET(ArbeidsgivereHistorikkPath) { request ->
-            RequestContext(coroutineContext, request) {
-                val identitetsnummer = request.identitetsnummer()
-
-                if (identitetsnummer.harTilgang()) {
-                    val historikk = request.historikk()
-                    val fom = request.fom()
-                    val tom = request.tom()
+                    val inkluderAvsluttetArbeidsforhold = request.inkluderAvsluttetArbeidsforhold()
 
                     val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
                         identitetsnummer = identitetsnummer,
                         fom = fom,
                         tom = tom,
-                        inkluderAvsluttetArbeidsforhold = historikk
+                        inkluderAvsluttetArbeidsforhold = inkluderAvsluttetArbeidsforhold
                     )
-
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
@@ -119,9 +89,7 @@ internal class ArbeidsgiverRoutes(
     }
 
     private companion object {
-        private val logger = LoggerFactory.getLogger(ArbeidsgiverRoutes::class.java)
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
-        private const val ArbeidsgivereHistorikkPath = "/api/arbeidsgivere-historikk"
         private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
@@ -132,7 +100,7 @@ internal class ArbeidsgiverRoutes(
             ?.let { LocalDate.parse(it) }
             ?: LocalDate.now(Oslo).plusMonths(6)
 
-        private fun ServerRequest.historikk() = queryParamOrNull("historikk")
+        private fun ServerRequest.inkluderAvsluttetArbeidsforhold() = queryParamOrNull("inkluderAvsluttetArbeidsforhold")
             ?.let { it.toBoolean() }
             ?: false
 

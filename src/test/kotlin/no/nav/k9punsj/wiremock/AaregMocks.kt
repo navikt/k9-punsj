@@ -13,24 +13,29 @@ private const val path = "/aareg-mock"
 fun WireMockServer.stubAareg() : WireMockServer =
     stubHentArbeidsforhold(identitetsnummer = AnythingPattern(), response = defaultResponse)
         .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22222222222"), response = "[]")
-        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22053826656"), response = flereArbeidsforholdIar, historikk = true)
+        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22053826656"), response = flereArbeidsforholdIar, inkluderAvsluttetArbeidsforhold = true)
 
 fun WireMockServer.getAaregBaseUrl() = baseUrl() + path
 
 private fun WireMockServer.stubHentArbeidsforhold(
     identitetsnummer: StringValuePattern,
     response: String,
-    historikk: Boolean = false
+    inkluderAvsluttetArbeidsforhold: Boolean = false
 ): WireMockServer {
+    val builder = WireMock.get(WireMock.urlPathMatching(".*$path/arbeidstaker/arbeidsforhold.*"))
+        .withHeader("Authorization", WireMock.matching("Bearer ey.*"))
+        .withHeader("Nav-Call-Id", AnythingPattern())
+        .withHeader("Accept", WireMock.equalTo("application/json"))
+        .withHeader("Nav-Personident", identitetsnummer)
+        .withQueryParam("sporingsinformasjon", WireMock.equalTo("false"))
+        .withQueryParam("rapporteringsordning", WireMock.equalTo("A_ORDNINGEN"))
+
+    if (inkluderAvsluttetArbeidsforhold) {
+        builder.withQueryParam("arbeidsforholdstatus", WireMock.havingExactly("AKTIV", "AVSLUTTET", "FREMTIDIG"))
+    }
+
     WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/arbeidstaker/arbeidsforhold.*"))
-            .withHeader("Authorization", WireMock.matching("Bearer ey.*"))
-            .withHeader("Nav-Call-Id", AnythingPattern())
-            .withHeader("Accept", WireMock.equalTo("application/json"))
-            .withHeader("Nav-Personident", identitetsnummer)
-            .withQueryParam("historikk", WireMock.equalTo(historikk.toString()))
-            .withQueryParam("sporingsinformasjon", WireMock.equalTo("false"))
-            .withQueryParam("rapporteringsordning", WireMock.equalTo("A_ORDNINGEN"))
+        builder
             .willReturn(
                 WireMock.aResponse()
                     .withHeader("Content-Type", "application/json")
