@@ -102,7 +102,8 @@ internal class ArbeidsgiverService(
             organisasjoner = arbeidsforhold.organisasjoner.distinctBy { it.organisasjonsnummer }.map {
                 OrganisasjonArbeidsgiver(
                     organisasjonsnummer = it.organisasjonsnummer,
-                    navn = hentOrganisasjonsnavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig"
+                    navn = hentOrganisasjonsnavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig",
+                    erAvsluttet = it.erAvsluttet
                 )
             }.toSet()
         )

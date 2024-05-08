@@ -15,7 +15,8 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
             {
               "organisasjoner": [{
                 "organisasjonsnummer": "979312059",
-                "navn": "NAV AS"
+                "navn": "NAV AS",
+                "erAvsluttet": false
               }]
             }
         """.trimIndent()
@@ -74,15 +75,18 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
               "organisasjoner": [
                   {
                     "organisasjonsnummer": "27500",
-                    "navn": "QuakeWorld AS"
+                    "navn": "QuakeWorld AS",
+                    "erAvsluttet": false
                   },
                   {
                     "organisasjonsnummer": "27015",
-                    "navn": "CounterStrike AS"
+                    "navn": "CounterStrike AS",
+                    "erAvsluttet": true
                   },
                   {
                     "organisasjonsnummer": "5001",
-                    "navn": "Ultima Online AS"
+                    "navn": "Ultima Online AS",
+                    "erAvsluttet": true
                   },
               ]
             }

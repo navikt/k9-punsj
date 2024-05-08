@@ -66,7 +66,8 @@ internal class AaregClient(
             .map {
                 OrganisasjonArbeidsforhold(
                     organisasjonsnummer = it.arbeidssted.identer.first().ident,
-                    arbeidsforholdId = it.id
+                    arbeidsforholdId = it.id,
+                    erAvsluttet = it.ansettelsesperiode.sluttdato != null
                 )
             }
             .toSet()
