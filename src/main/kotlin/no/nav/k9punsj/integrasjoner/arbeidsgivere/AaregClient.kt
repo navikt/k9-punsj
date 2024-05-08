@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
 import kotlin.coroutines.coroutineContext
@@ -30,8 +31,19 @@ internal class AaregClient(
         historikk: Boolean = false
     ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader()
-        val url =
-            """$baseUrl/arbeidstaker/arbeidsforhold?rapporteringsordning=A_ORDNINGEN&sporingsinformasjon=false&historikk=$historikk"""
+
+        val uriBuilder = UriComponentsBuilder.fromUri(baseUrl)
+            .path("/arbeidstaker/arbeidsforhold")
+            .queryParam("rapporteringsordning", "A_ORDNINGEN")
+            .queryParam("sporingsinformasjon", false)
+            .queryParam("historikk", historikk)
+
+        if (historikk) {
+            uriBuilder
+                .queryParam("arbeidsforholdstatus", "AKTIV", "AVSLUTTET", "FREMTIDIG") // default er AKTIV og FREMTIDIG.
+        }
+
+        val url = uriBuilder.toUriString()
 
         logger.info("Henter arbeidsforhold fra: $url")
         val (_, response, result) = url.httpGet()
@@ -51,7 +63,7 @@ internal class AaregClient(
         logger.info("Hentet ${deserialiser.size} arbeidsforhold fra Aareg")
         val organisasjoner = deserialiser
             .filter { arbeidsforhold -> arbeidsforhold.arbeidssted.identer.any { it.type == AaregIdentType.ORGANISASJONSNUMMER } }
-            //.filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
+            .filter { it.ansettelsesperiode.harArbeidsforholdIPerioden(fom, tom) }
             .map {
                 OrganisasjonArbeidsforhold(
                     organisasjonsnummer = it.arbeidssted.identer.first().ident,

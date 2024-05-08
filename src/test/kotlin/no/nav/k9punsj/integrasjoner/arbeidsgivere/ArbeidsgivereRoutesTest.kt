@@ -69,7 +69,6 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    @Disabled
     fun `henter historiske arbeidsgivere fra siste 6 mån, tar kun med de som har orgnr`() {
         val forventetResponse = """
             {
