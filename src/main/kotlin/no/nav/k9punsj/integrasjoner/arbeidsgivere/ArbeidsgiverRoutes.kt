@@ -32,14 +32,12 @@ internal class ArbeidsgiverRoutes(
                 if (identitetsnummer.harTilgang()) {
                     val fom = request.fom()
                     val tom = request.tom()
-                    logger.info("Henter arbeidsgivere, fom=$fom, tom=$tom, historikk=false")
 
                     val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
                         identitetsnummer = identitetsnummer,
                         fom = fom,
                         tom = tom
                     )
-                    logger.info("Hentet ${arbeidsgivere.organisasjoner.size} arbeidsgivere")
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
@@ -63,15 +61,13 @@ internal class ArbeidsgiverRoutes(
                     val historikk = request.historikk()
                     val fom = request.fom()
                     val tom = request.tom()
-                    logger.info("Henter arbeidsgivere, fom=$fom, tom=$tom, historikk=$historikk")
 
                     val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
                         identitetsnummer = identitetsnummer,
                         fom = fom,
                         tom = tom,
-                        historikk = historikk
+                        inkluderAvsluttetArbeidsforhold = historikk
                     )
-                    logger.info("Hentet ${arbeidsgivere.organisasjoner.size} arbeidsgivere")
 
                     ServerResponse
                         .status(HttpStatus.OK)

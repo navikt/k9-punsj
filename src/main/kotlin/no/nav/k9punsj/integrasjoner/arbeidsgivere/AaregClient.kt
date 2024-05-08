@@ -28,7 +28,7 @@ internal class AaregClient(
         identitetsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
-        historikk: Boolean = false
+        inkluderAvsluttetArbeidsforhold: Boolean = false
     ): Arbeidsforhold {
         val authorizationHeader = cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader()
 
@@ -36,9 +36,8 @@ internal class AaregClient(
             .path("/arbeidstaker/arbeidsforhold")
             .queryParam("rapporteringsordning", "A_ORDNINGEN")
             .queryParam("sporingsinformasjon", false)
-            .queryParam("historikk", historikk)
 
-        if (historikk) {
+        if (inkluderAvsluttetArbeidsforhold) {
             uriBuilder
                 .queryParam("arbeidsforholdstatus", "AKTIV", "AVSLUTTET", "FREMTIDIG") // default er AKTIV og FREMTIDIG.
         }

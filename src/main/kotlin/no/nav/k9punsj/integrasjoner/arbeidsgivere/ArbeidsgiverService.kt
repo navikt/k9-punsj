@@ -2,6 +2,7 @@ package no.nav.k9punsj.integrasjoner.arbeidsgivere
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
@@ -11,6 +12,9 @@ internal class ArbeidsgiverService(
     private val aaregClient: AaregClient,
     private val eregClient: EregClient
 ) {
+    private companion object {
+        private val logger = LoggerFactory.getLogger(ArbeidsgiverService::class.java)
+    }
 
     private val arbeidsgivereCache: Cache<Triple<String, LocalDate, LocalDate>, Arbeidsgivere> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
@@ -32,18 +36,22 @@ internal class ArbeidsgiverService(
         identitetsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
-        historikk: Boolean = false
+        inkluderAvsluttetArbeidsforhold: Boolean = false
     ): Arbeidsgivere {
         val cacheKey = Triple(identitetsnummer, fom, tom)
-
+        logger.info("Henter arbeidsgivere, fom=$fom, tom=$tom, inkluderAvsluttetArbeidsforhold=$inkluderAvsluttetArbeidsforhold")
         return when (val cacheValue = arbeidsgivereCache.getIfPresent(cacheKey)) {
-            null -> slåOppArbeidsgivere(
-                identitetsnummer = identitetsnummer,
-                fom = fom,
-                tom = tom,
-                historikk = historikk
-            ).also { arbeidsgivereCache.put(cacheKey, it) }
+            null -> {
+                slåOppArbeidsgivere(
+                    identitetsnummer = identitetsnummer,
+                    fom = fom,
+                    tom = tom,
+                    inkluderAvsluttetArbeidsforhold = inkluderAvsluttetArbeidsforhold
+                ).also { arbeidsgivereCache.put(cacheKey, it) }
+            }
             else -> cacheValue
+        }.also {
+            logger.info("Hentet ${it.organisasjoner.size} arbeidsgivere.")
         }
     }
 
@@ -81,13 +89,13 @@ internal class ArbeidsgiverService(
         identitetsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
-        historikk: Boolean
+        inkluderAvsluttetArbeidsforhold: Boolean
     ): Arbeidsgivere {
         val arbeidsforhold = aaregClient.hentArbeidsforhold(
             identitetsnummer = identitetsnummer,
             fom = fom,
             tom = tom,
-            historikk = historikk
+            inkluderAvsluttetArbeidsforhold = inkluderAvsluttetArbeidsforhold
         )
 
         return Arbeidsgivere(
