@@ -69,7 +69,7 @@ internal class AaregClient(
             }
             .toSet()
 
-        logger.info("Hentet ${organisasjoner.size} arbeidsgivere fra Aareg etter filtrering")
+        logger.info("Returnerer ${organisasjoner.size} arbeidsgivere filtrering")
         return Arbeidsforhold(
             organisasjoner = organisasjoner
         )
