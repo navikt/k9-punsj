@@ -6,5 +6,6 @@ internal data class Arbeidsforhold(
 
 internal data class OrganisasjonArbeidsforhold(
     val arbeidsforholdId: String?,
-    val organisasjonsnummer: String
+    val organisasjonsnummer: String,
+    val erAvsluttet: Boolean = false
 )
