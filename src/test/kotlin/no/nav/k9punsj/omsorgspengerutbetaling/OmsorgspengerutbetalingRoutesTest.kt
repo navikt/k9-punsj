@@ -6,6 +6,7 @@ import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -253,8 +254,12 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-    ): IdentOgJournalpost {
-        return IdentOgJournalpost(personnummer, journalpostId)
+    ): OpprettNySøknad {
+        return OpprettNySøknad(
+            norskIdent = personnummer,
+            journalpostId = journalpostId,
+            k9saksnummer = "ABC123"
+        )
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -356,7 +361,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
         .header("X-Nav-NorskIdent", norskIdent)
         .exchange()
 
-    private fun opprettNySøknad(opprettNySøknad: IdentOgJournalpost) = webTestClient.post()
+    private fun opprettNySøknad(opprettNySøknad: OpprettNySøknad) = webTestClient.post()
         .uri("/$api/$søknadTypeUri")
         .header("Authorization", saksbehandlerAuthorizationHeader)
         .body(BodyInserters.fromValue(opprettNySøknad))

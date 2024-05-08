@@ -710,7 +710,13 @@ private fun opprettSøknad(
     personnummer: String,
     journalpostId: String,
 ): OpprettNySøknad {
-    return OpprettNySøknad(personnummer, journalpostId, null, null, null)
+    return OpprettNySøknad(
+        norskIdent = personnummer,
+        journalpostId = journalpostId,
+        k9saksnummer = "ABC123",
+        pleietrengendeIdent = null,
+        annenPart = null
+    )
 }
 
 private fun lagSendSøknad(

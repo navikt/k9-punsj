@@ -273,7 +273,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             journalpostId = journalpostId,
             pleietrengendeIdent = pleietrengendeIdent,
             annenPart = null,
-            k9saksnummer = null
+            k9saksnummer = "ABC123"
         )
 
     private fun tilpasserSøknadsMalTilTesten(

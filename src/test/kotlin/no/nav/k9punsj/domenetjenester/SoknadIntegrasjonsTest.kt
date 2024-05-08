@@ -2,7 +2,7 @@ package no.nav.k9punsj.domenetjenester
 
 import kotlinx.coroutines.runBlocking
 import no.nav.k9punsj.AbstractContainerBaseTest
-import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
 import no.nav.k9punsj.omsorgspengerutbetaling.OmsorgspengerutbetalingSøknadDto
@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import java.net.URI
-import kotlin.math.abs
-import kotlin.random.Random
 
 internal class SoknadIntegrasjonsTest : AbstractContainerBaseTest() {
 
@@ -63,7 +61,11 @@ internal class SoknadIntegrasjonsTest : AbstractContainerBaseTest() {
         ident: String,
         journalpostid: String = IdGenerator.nesteId(),
     ): OmsorgspengerutbetalingSøknadDto {
-        val innsendingForOpprettelseAvMappe = IdentOgJournalpost(ident, journalpostid)
+        val innsendingForOpprettelseAvMappe = OpprettNySøknad(
+            norskIdent = ident,
+            journalpostId = journalpostid,
+            k9saksnummer = "ABC123"
+        )
 
         // oppretter en søknad
         val location = opprettNySøknad(innsendingForOpprettelseAvMappe)
@@ -81,7 +83,7 @@ internal class SoknadIntegrasjonsTest : AbstractContainerBaseTest() {
         return søknadDtoFyltUt
     }
 
-    private fun opprettNySøknad(innsendingForOpprettelseAvMappe: IdentOgJournalpost): URI = webTestClient.post()
+    private fun opprettNySøknad(innsendingForOpprettelseAvMappe: OpprettNySøknad): URI = webTestClient.post()
         .uri { it.path("/$api/$søknadTypeUri").build() }
         .header("Authorization", saksbehandlerAuthorizationHeader)
         .bodyValue(innsendingForOpprettelseAvMappe)
