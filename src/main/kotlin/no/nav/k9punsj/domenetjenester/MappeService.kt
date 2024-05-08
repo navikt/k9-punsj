@@ -52,7 +52,8 @@ internal class MappeService(
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
                 klokkeslett = søknadfelles.klokkeslett,
                 harInfoSomIkkeKanPunsjes = false,
-                harMedisinskeOpplysninger = false
+                harMedisinskeOpplysninger = false,
+                k9saksnummer = nySøknad.k9saksnummer
             )
 
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, opplaeringspengerSøknadDto, nySøknad.k9saksnummer)
@@ -75,7 +76,8 @@ internal class MappeService(
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
                 klokkeslett = søknadfelles.klokkeslett,
                 harInfoSomIkkeKanPunsjes = false,
-                harMedisinskeOpplysninger = false
+                harMedisinskeOpplysninger = false,
+                k9saksnummer = nySøknad.k9saksnummer
             )
 
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, pleiepengerSøknadDto, nySøknad.k9saksnummer)
@@ -139,7 +141,8 @@ internal class MappeService(
             journalposter = listOf(nySøknad.journalpostId),
             mottattDato = søknadfelles.mottattDato?.toLocalDate(),
             klokkeslett = søknadfelles.klokkeslett,
-            soekerId = norskIdent
+            soekerId = norskIdent,
+            k9saksnummer = nySøknad.k9saksnummer
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
@@ -177,7 +180,8 @@ internal class MappeService(
             soekerId = norskIdent,
             barn = OmsorgspengerKroniskSyktBarnSøknadDto.BarnDto(pleietrengendeIdent, null),
             harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
+            harMedisinskeOpplysninger = false,
+            k9saksnummer = nySøknad.k9saksnummer
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
@@ -198,6 +202,7 @@ internal class MappeService(
             barn = nySøknad.pleietrengendeIdent?.let {
                 OmsorgspengerAleneOmsorgSøknadDto.BarnDto(norskIdent = it, foedselsdato = null)
             },
+            k9saksnummer = nySøknad.k9saksnummer
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }
@@ -221,7 +226,8 @@ internal class MappeService(
                 situasjonType = null,
                 situasjonBeskrivelse = null,
                 periode = null
-            )
+            ),
+            k9saksnummer = nySøknad.k9saksnummer
         )
         return opprettSøknadEntitet(søknadfelles.søknadsId, bunkeId, søker, søknadfelles.journalposter, dto, nySøknad.k9saksnummer)
     }

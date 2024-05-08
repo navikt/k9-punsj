@@ -27,7 +27,8 @@ data class KorrigeringInntektsmeldingDto(
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
-    val harMedisinskeOpplysninger: Boolean? = null
+    val harMedisinskeOpplysninger: Boolean? = null,
+    val k9saksnummer: String? = null,
 ) {
     data class FraværPeriode(
         val periode: PeriodeDto,
