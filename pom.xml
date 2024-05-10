@@ -21,7 +21,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>1.9.23</kotlin.version>
+        <kotlin.version>1.9.24</kotlin.version>
 
         <!-- spring relatert -->
         <springdoc.version>2.5.0</springdoc.version>
@@ -47,7 +47,7 @@
         <zonky-postgresql.version>13.4.0</zonky-postgresql.version>
         <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
-        <testcontainers.version>1.19.7</testcontainers.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
         <wiremock.version>3.5.4</wiremock.version>
 
@@ -62,7 +62,7 @@
         <orgjson.version>20240303</orgjson.version>
 
         <fuel.version>2.3.1</fuel.version>
-        <kotlinx-coroutines.version>1.8.0</kotlinx-coroutines.version>
+        <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
         <token-support.version>4.0.5</token-support.version>
         <dusseldorf-ktor.version>4.2.4</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
