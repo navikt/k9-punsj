@@ -71,7 +71,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
         val norskIdent = "02020050163"
-        val opprettNySøknad = opprettSøknad(norskIdent, "9999")
+        val opprettNySøknad = opprettSøknad(norskIdent, "9999", "DEF456")
 
         opprettNySøknad(opprettNySøknad).expectStatus().isCreated
 
@@ -80,8 +80,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
             .expectBody(SvarPsbDto::class.java)
             .consumeWith {
                 val søknader = it.responseBody!!.søknader!!
+                val søknadDto = søknader.first()
                 assertThat(søknader).hasSize(1)
-                assertThat(it.responseBody!!.søknader?.first()?.journalposter?.first()).isEqualTo("9999")
+                assertThat(søknadDto.journalposter?.first()).isEqualTo("9999")
+                assertThat(søknadDto.k9saksnummer).isEqualTo("DEF456")
             }
     }
 
@@ -116,7 +118,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val journalpostid = "9999"
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid, "DEF456")
 
         val location = opprettNySøknad(opprettNySøknad)
             .expectStatus().isCreated
@@ -709,11 +711,12 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 private fun opprettSøknad(
     personnummer: String,
     journalpostId: String,
+    k9saksnummer: String = "ABC123",
 ): OpprettNySøknad {
     return OpprettNySøknad(
         norskIdent = personnummer,
         journalpostId = journalpostId,
-        k9saksnummer = "ABC123",
+        k9saksnummer = k9saksnummer,
         pleietrengendeIdent = null,
         annenPart = null
     )

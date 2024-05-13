@@ -46,7 +46,9 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
                 OmsorgspengerKroniskSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
@@ -65,8 +67,11 @@ internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøk
         return OmsorgspengerKroniskSyktBarnSøknadDto(
             soeknadId = this.søknadId,
             harMedisinskeOpplysninger = false,
-            harInfoSomIkkeKanPunsjes = false
+            harInfoSomIkkeKanPunsjes = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

@@ -63,7 +63,9 @@ internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
                 OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
@@ -73,7 +75,9 @@ internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
 
 internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

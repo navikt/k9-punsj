@@ -102,9 +102,11 @@ internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
+        ?.map { s: SøknadEntitet ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer,
+                )
             } else {
                 PleiepengerSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
@@ -125,8 +127,11 @@ internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {
             soeknadId = this.søknadId,
             journalposter = hentUtJournalposter(this),
             harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
+            harMedisinskeOpplysninger = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(søknad).copy(
+        k9saksnummer = this.k9saksnummer
+    )
 }
