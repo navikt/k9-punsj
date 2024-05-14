@@ -143,3 +143,7 @@ spec:
       value: "true"
     - name: KODEVERDI_SOM_STRING
       value: "true"
+
+      # Swagger
+    - name: AZURE_LOGIN_URL
+      value: "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0"

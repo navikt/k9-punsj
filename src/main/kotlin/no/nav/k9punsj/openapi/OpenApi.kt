@@ -1,10 +1,16 @@
 package no.nav.k9punsj.openapi
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.security.OAuthFlow
+import io.swagger.v3.oas.models.security.OAuthFlows
+import io.swagger.v3.oas.models.security.Scopes
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.fordel.K9FordelType
 import org.springframework.beans.factory.annotation.Value
@@ -15,7 +21,11 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 @Component
-internal class OpenApi {
+internal class OpenApi(
+    @Value("\${springdoc.oAuthFlow.authorizationUrl}") val authorizationUrl: String,
+    @Value("\${springdoc.oAuthFlow.tokenUrl}") val tokenUrl: String,
+    @Value("\${springdoc.oAuthFlow.apiScope}") val apiScope: String
+) {
 
     @Bean
     internal fun openApi(
@@ -42,6 +52,30 @@ internal class OpenApi {
                         .url("https://github.com/navikt/k9-punsj/blob/master/LICENSE")
                 )
         )
+        .components(
+            Components()
+                .addSecuritySchemes("oauth2", azureLogin())
+        )
+        .addSecurityItem(
+            SecurityRequirement()
+                .addList("oauth2", listOf("read", "write"))
+        )
+
+    private fun azureLogin(): SecurityScheme {
+        return SecurityScheme()
+            .name("oauth2")
+            .type(SecurityScheme.Type.OAUTH2)
+            .scheme("oauth2")
+            .`in`(SecurityScheme.In.HEADER)
+            .flows(
+                OAuthFlows()
+                    .authorizationCode(
+                        OAuthFlow().authorizationUrl(authorizationUrl)
+                            .tokenUrl(tokenUrl)
+                            .scopes(Scopes().addString(apiScope, "read,write"))
+                    )
+            )
+    }
 }
 
 data class OasFeil(
