@@ -134,4 +134,12 @@ class SøknadRepository(private val dataSource: DataSource) {
             }
         }
     }
+
+    fun slettAlleSøknader() {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf("delete from $SØKNAD_TABLE").asExecute
+            )
+        }
+    }
 }

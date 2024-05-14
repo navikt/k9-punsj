@@ -35,6 +35,12 @@ internal class MappeService(
         return henterMappeMedAlleKoblinger(mappeRepository.opprettEllerHentMappeForPerson(person.personId), person)
     }
 
+    suspend fun slettMappeMedAlleKoblinger() {
+        soknadService.slettAlleSøknader() // Sletter først alle søknader
+        bunkeRepository.slettAlleBunker() // Sletter deretter alle bunker
+        mappeRepository.slettAlleMapper() // Til slutt, alle mapper
+    }
+
     suspend fun førsteInnsendingOlp(nySøknad: OpprettNySøknad): SøknadEntitet {
         val norskIdent = nySøknad.norskIdent
         val barnIdent = nySøknad.pleietrengendeIdent
