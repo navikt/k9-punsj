@@ -44,7 +44,8 @@ internal class SakService(
                     sakstype = it.sakstype.kode,
                     pleietrengendeIdent = personIdent,
                     relatertPersonIdent = relatertPersonIdent,
-                    gyldigPeriode = it.gyldigPeriode
+                    gyldigPeriode = it.gyldigPeriode,
+                    behandlingsår = null
                 )
             }
             logger.info("Henter reserverte saksnummere fra k9...")
@@ -57,7 +58,8 @@ internal class SakService(
                         personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                     },
                     gyldigPeriode = null,
-                    relatertPersonIdent = it.relatertPersonAktørId
+                    relatertPersonIdent = it.relatertPersonAktørId,
+                    behandlingsår = it.behandlingsår
                 )
             }
             // Returnerer fagsaker og reserverte saksnummere
