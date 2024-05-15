@@ -1,26 +1,18 @@
 package no.nav.k9punsj.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
+import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@SecurityScheme(
-    name = "BearerAuth",
-    type = SecuritySchemeType.OAUTH2,
-    scheme = OAUTH2,
-    bearerFormat = "JWT"
-)
 @Tag(name = "Forvaltning", description = "Håndtering av forvaltningsoppgaver")
 internal class ForvaltningOpenApi {
     @PostMapping(ForvaltningRoutes.Urls.SlettMappeMedAlleTilkoblinger)
@@ -45,7 +37,7 @@ internal class ForvaltningOpenApi {
     )
     @Operation(
         summary = "Sletter alle mapper med tilknyttede søknader og bunker",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun håndterSlettingAvMapper() {
     }

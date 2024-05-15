@@ -1,22 +1,14 @@
 package no.nav.k9punsj.notat
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
+import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-@SecurityScheme(
-    name = "BearerAuth",
-    type = SecuritySchemeType.OAUTH2,
-    scheme = OAUTH2,
-    bearerFormat = "JWT"
-)
 @Tag(name = "Notater", description = "Håndtering av Notater")
 internal class NotatController {
     @PostMapping(NotatRoutes.Urls.OpprettNotat, produces = ["application/json"])
@@ -34,7 +26,7 @@ internal class NotatController {
     )
     @Operation(
         summary = "Oppretter ny Notat i dokarkiv",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun opprettNotat(
         @RequestBody body: NyNotat

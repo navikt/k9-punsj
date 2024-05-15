@@ -15,6 +15,7 @@ import no.nav.k9punsj.felles.dto.PerioderDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,7 +31,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     @Operation(
         summary = "Henter data på person for omsorgspengerutbetaling",
         description = "Sendes NorskIdente til person som headere.",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -57,7 +58,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     )
     @Operation(
         summary = "Starte en helt ny søknad",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -114,7 +115,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     )
     @Operation(
         summary = "Oppdatere en søknad i en eksisterende mappe.",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -143,7 +144,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     )
     @Operation(
         summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -204,7 +205,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     )
     @Operation(
         summary = "Valider søknad mot k9-format sin kontrakt",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -256,7 +257,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     @Operation(
         summary = "Henter arbeidsforholdIder som ligger i k9-sak",
         description = "Henter arbeidsforholdIder som ligger i k9-sak",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
@@ -288,7 +289,7 @@ internal class OmsorgspengerutbetalingOpenApi {
     @Operation(
         summary = "Henter perioder som ligger i k9-sak",
         description = "Henter perioder som ligger i k9-sak",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
         value = [
