@@ -15,6 +15,8 @@ import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
+import no.nav.k9punsj.openapi.OpenApi
+import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @SecurityScheme(
     name = "BearerAuth",
     type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
+    scheme = OAUTH2,
     bearerFormat = "JWT"
 )
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")

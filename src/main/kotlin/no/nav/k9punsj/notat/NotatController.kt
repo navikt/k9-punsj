@@ -7,13 +7,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.web.bind.annotation.*
+import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
-@RestController
 @SecurityScheme(
     name = "BearerAuth",
     type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
+    scheme = OAUTH2,
     bearerFormat = "JWT"
 )
 @Tag(name = "Notater", description = "Håndtering av Notater")

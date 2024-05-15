@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
 import no.nav.k9punsj.sak.dto.SakInfoDto
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @SecurityScheme(
     name = "BearerAuth",
     type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
+    scheme = OAUTH2,
     bearerFormat = "JWT"
 )
 @Tag(name = "Saker", description = "Håndtering av saker")
