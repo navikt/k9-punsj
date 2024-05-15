@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @SecurityScheme(
     name = "BearerAuth",
-    type = SecuritySchemeType.HTTP,
+    type = SecuritySchemeType.OAUTH2,
     scheme = OAUTH2,
     bearerFormat = "JWT"
 )
