@@ -24,17 +24,16 @@ import java.time.LocalTime
 internal class OpenApi(
     @Value("\${springdoc.oAuthFlow.authorizationUrl}") val authorizationUrl: String,
     @Value("\${springdoc.oAuthFlow.tokenUrl}") val tokenUrl: String,
-    @Value("\${springdoc.oAuthFlow.apiScope}") val apiScope: String
+    @Value("\${springdoc.oAuthFlow.apiScope}") val apiScope: String,
+    @Value("\${no.nav.navn}") val navn: String,
+    @Value("\${no.nav.beskrivelse}") val beskrivelse: String,
+    @Value("\${no.nav.versjon}") val versjon: String,
+    @Value("\${no.nav.swagger_server_base_url}") val swaggerServerBaseUrl: URI,
+    @Value("\${no.nav.security.jwt.client.azure.client_id}") val azureClientId: String
 ) {
 
     @Bean
-    internal fun openApi(
-        @Value("\${no.nav.navn}") navn: String,
-        @Value("\${no.nav.beskrivelse}") beskrivelse: String,
-        @Value("\${no.nav.versjon}") versjon: String,
-        @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
-        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
-    ): OpenAPI = OpenAPI()
+    internal fun openApi(): OpenAPI = OpenAPI()
         .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
         .info(
             Info()
