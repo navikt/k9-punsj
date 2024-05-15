@@ -9,11 +9,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9punsj.openapi.OpenApi.SecuurityScheme.OAUTH2
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@SecurityScheme(
+    name = "BearerAuth",
+    type = SecuritySchemeType.HTTP,
+    scheme = OAUTH2,
+    bearerFormat = "JWT"
+)
 @Tag(name = "Forvaltning", description = "Håndtering av forvaltningsoppgaver")
 internal class ForvaltningOpenApi {
     @PostMapping(ForvaltningRoutes.Urls.SlettMappeMedAlleTilkoblinger)

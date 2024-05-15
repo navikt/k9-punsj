@@ -32,6 +32,10 @@ internal class OpenApi(
     @Value("\${no.nav.security.jwt.client.azure.client_id}") val azureClientId: String
 ) {
 
+    companion object SecuurityScheme {
+        const val OAUTH2 = "oauth2"
+    }
+
     @Bean
     internal fun openApi(): OpenAPI = OpenAPI()
         .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
@@ -53,20 +57,18 @@ internal class OpenApi(
         )
         .components(
             Components()
-                .addSecuritySchemes("oauth2", azureLogin())
-                .addSecuritySchemes("Authorization", azureLogin())
+                .addSecuritySchemes(OAUTH2, azureLogin())
         )
         .addSecurityItem(
             SecurityRequirement()
-                .addList("oauth2", listOf("read", "write"))
-                .addList("Authorization")
+                .addList(OAUTH2, listOf("read", "write"))
         )
 
     private fun azureLogin(): SecurityScheme {
         return SecurityScheme()
-            .name("oauth2")
+            .name(OAUTH2)
             .type(SecurityScheme.Type.OAUTH2)
-            .scheme("oauth2")
+            .scheme(OAUTH2)
             .`in`(SecurityScheme.In.HEADER)
             .flows(
                 OAuthFlows()
