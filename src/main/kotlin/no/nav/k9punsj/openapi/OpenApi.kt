@@ -55,10 +55,12 @@ internal class OpenApi(
         .components(
             Components()
                 .addSecuritySchemes("oauth2", azureLogin())
+                .addSecuritySchemes("Authorization", azureLogin())
         )
         .addSecurityItem(
             SecurityRequirement()
                 .addList("oauth2", listOf("read", "write"))
+                .addList("Authorization")
         )
 
     private fun azureLogin(): SecurityScheme {
