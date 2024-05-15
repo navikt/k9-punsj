@@ -14,12 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@SecurityScheme(
-    name = "BearerAuth",
-    type = SecuritySchemeType.HTTP,
-    scheme = "bearer",
-    bearerFormat = "JWT"
-)
 @Tag(name = "Forvaltning", description = "Håndtering av forvaltningsoppgaver")
 internal class ForvaltningOpenApi {
     @PostMapping(ForvaltningRoutes.Urls.SlettMappeMedAlleTilkoblinger)
