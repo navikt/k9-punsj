@@ -17,7 +17,8 @@ spec:
         extra:
           - "NAVident"
         groups:
-          - 0bc9661c-975c-4adb-86d1-a97172490662 # 0000-GA-k9-drift
+          # 0000-GA-k9-drift
+          - id: "0bc9661c-975c-4adb-86d1-a97172490662"
       singlePageApplication: true
       replyURLs:
         - https://k9-punsj.dev.intern.nav.no/internal/swagger/oauth2-redirect.html
