@@ -37,7 +37,7 @@ internal class ForvaltningRoutes(
         )
     )
     fun ForvaltningRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        POST("/api${Urls.SlettMappeMedAlleTilkoblinger}") { request ->
+        POST(Urls.SlettMappeMedAlleTilkoblinger) { request ->
             RequestContext(coroutineContext, request) {
                 mappeService.slettMappeMedAlleKoblinger()
                 return@RequestContext ServerResponse.ok().buildAndAwait()
