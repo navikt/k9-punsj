@@ -4,7 +4,6 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
-import org.springdoc.core.annotations.RouterOperation
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -24,7 +23,7 @@ internal class ForvaltningRoutes(
 
     @Bean
     fun ForvaltningRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        POST(Urls.SlettMappeMedAlleTilkoblinger) { request ->
+        POST("/api${Urls.SlettMappeMedAlleTilkoblinger}") { request ->
             RequestContext(coroutineContext, request) {
                 mappeService.slettMappeMedAlleKoblinger()
 
