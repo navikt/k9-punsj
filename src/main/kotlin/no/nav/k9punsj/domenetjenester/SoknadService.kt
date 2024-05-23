@@ -101,9 +101,10 @@ class SoknadService(
         * Kaster feil om vi har fler æn 1 unik fagsakId
         */
         val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
-        val k9Saksnummer = if (fagsakIder.isNotEmpty()) {
-            if (fagsakIder.size > 1) {
-                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
+        val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
+
+            if (fagsakIder.distinctBy { it.second }.size > 1) {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Det er ikke tillatt med flere fagsakIder på journalpostene: ${fagsakIder.map { it.second }}"
             }
             fagsakIder.map {
                 logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
