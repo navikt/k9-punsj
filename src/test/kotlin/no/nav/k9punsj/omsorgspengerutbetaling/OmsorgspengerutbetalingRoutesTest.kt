@@ -6,7 +6,6 @@ import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
-import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -15,7 +14,6 @@ import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
-import no.nav.k9punsj.wiremock.JournalpostIds.FerdigstiltMedSaksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -174,7 +172,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekk()
-        val journalpostid = FerdigstiltMedSaksnummer
+        val journalpostid = abs(Random(2234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -227,7 +225,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtTrekkKompleks()
-        val journalpostid = FerdigstiltMedSaksnummer
+        val journalpostid = abs(Random(2256234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -254,12 +252,8 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-    ): OpprettNySøknad {
-        return OpprettNySøknad(
-            norskIdent = personnummer,
-            journalpostId = journalpostId,
-            k9saksnummer = "ABC123"
-        )
+    ): IdentOgJournalpost {
+        return IdentOgJournalpost(personnummer, journalpostId)
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -361,7 +355,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
         .header("X-Nav-NorskIdent", norskIdent)
         .exchange()
 
-    private fun opprettNySøknad(opprettNySøknad: OpprettNySøknad) = webTestClient.post()
+    private fun opprettNySøknad(opprettNySøknad: IdentOgJournalpost) = webTestClient.post()
         .uri("/$api/$søknadTypeUri")
         .header("Authorization", saksbehandlerAuthorizationHeader)
         .body(BodyInserters.fromValue(opprettNySøknad))

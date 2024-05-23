@@ -1,16 +1,10 @@
 package no.nav.k9punsj.openapi
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
-import io.swagger.v3.oas.models.security.OAuthFlow
-import io.swagger.v3.oas.models.security.OAuthFlows
-import io.swagger.v3.oas.models.security.Scopes
-import io.swagger.v3.oas.models.security.SecurityRequirement
-import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import no.nav.k9punsj.fordel.K9FordelType
 import org.springframework.beans.factory.annotation.Value
@@ -21,23 +15,16 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 @Component
-internal class OpenApi(
-    @Value("\${springdoc.oAuthFlow.authorizationUrl}") val authorizationUrl: String,
-    @Value("\${springdoc.oAuthFlow.tokenUrl}") val tokenUrl: String,
-    @Value("\${springdoc.oAuthFlow.apiScope}") val apiScope: String,
-    @Value("\${no.nav.navn}") val navn: String,
-    @Value("\${no.nav.beskrivelse}") val beskrivelse: String,
-    @Value("\${no.nav.versjon}") val versjon: String,
-    @Value("\${no.nav.swagger_server_base_url}") val swaggerServerBaseUrl: URI,
-    @Value("\${no.nav.security.jwt.client.azure.client_id}") val azureClientId: String
-) {
-
-    companion object SecuurityScheme {
-        const val OAUTH2 = "oauth2"
-    }
+internal class OpenApi {
 
     @Bean
-    internal fun openApi(): OpenAPI = OpenAPI()
+    internal fun openApi(
+        @Value("\${no.nav.navn}") navn: String,
+        @Value("\${no.nav.beskrivelse}") beskrivelse: String,
+        @Value("\${no.nav.versjon}") versjon: String,
+        @Value("\${no.nav.swagger_server_base_url}") swaggerServerBaseUrl: URI,
+        @Value("\${no.nav.security.jwt.client.azure.client_id}") azureClientId: String
+    ): OpenAPI = OpenAPI()
         .addServersItem(Server().url("$swaggerServerBaseUrl/api").description("Swagger Server"))
         .info(
             Info()
@@ -55,30 +42,6 @@ internal class OpenApi(
                         .url("https://github.com/navikt/k9-punsj/blob/master/LICENSE")
                 )
         )
-        .components(
-            Components()
-                .addSecuritySchemes(OAUTH2, azureLogin())
-        )
-        .addSecurityItem(
-            SecurityRequirement()
-                .addList(OAUTH2, listOf("read", "write"))
-        )
-
-    private fun azureLogin(): SecurityScheme {
-        return SecurityScheme()
-            .name(OAUTH2)
-            .type(SecurityScheme.Type.OAUTH2)
-            .scheme(OAUTH2)
-            .`in`(SecurityScheme.In.HEADER)
-            .flows(
-                OAuthFlows()
-                    .authorizationCode(
-                        OAuthFlow().authorizationUrl(authorizationUrl)
-                            .tokenUrl(tokenUrl)
-                            .scopes(Scopes().addString(apiScope, "read,write"))
-                    )
-            )
-    }
 }
 
 data class OasFeil(

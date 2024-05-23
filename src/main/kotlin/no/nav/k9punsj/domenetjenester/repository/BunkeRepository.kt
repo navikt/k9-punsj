@@ -91,12 +91,4 @@ class BunkeRepository(private val dataSource: DataSource) {
             }
         }
     }
-
-    fun slettAlleBunker() {
-        using(sessionOf(dataSource)) {
-            it.run(
-                queryOf("delete from $BUNKE_TABLE").asExecute
-            )
-        }
-    }
 }

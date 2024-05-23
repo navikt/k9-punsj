@@ -27,8 +27,7 @@ data class KorrigeringInntektsmeldingDto(
     val arbeidsforholdId: String? = null,
     val fravaersperioder: List<FraværPeriode>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
-    val harMedisinskeOpplysninger: Boolean? = null,
-    val k9saksnummer: String? = null,
+    val harMedisinskeOpplysninger: Boolean? = null
 ) {
     data class FraværPeriode(
         val periode: PeriodeDto,
@@ -53,8 +52,7 @@ internal fun Mappe.tilOmsVisning(norskIdent: String): SvarOmsDto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue<KorrigeringInntektsmeldingDto>(s.søknad).copy(
-                    k9saksnummer = s.k9saksnummer,)
+                objectMapper().convertValue(s.søknad)
             } else {
                 KorrigeringInntektsmeldingDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
             }
@@ -64,7 +62,7 @@ internal fun Mappe.tilOmsVisning(norskIdent: String): SvarOmsDto {
 
 internal fun SøknadEntitet.tilOmsvisning(): KorrigeringInntektsmeldingDto {
     if (søknad == null) {
-        return KorrigeringInntektsmeldingDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
+        return KorrigeringInntektsmeldingDto(soeknadId = this.søknadId)
     }
-    return objectMapper().convertValue<KorrigeringInntektsmeldingDto>(søknad).copy(k9saksnummer = k9saksnummer)
+    return objectMapper().convertValue(søknad)
 }

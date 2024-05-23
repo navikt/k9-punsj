@@ -1,18 +1,14 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -57,22 +53,19 @@ class LokalK9SakService : K9SakService {
                 saksnummer = "ABC123",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktørId =  null
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
             ),
             Fagsak(
                 saksnummer = "DEF456",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktørId = null
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
             ),
             Fagsak(
                 saksnummer = "GHI789",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 null,
-                gyldigPeriode = null,
-                relatertPersonAktørId = null
+                gyldigPeriode = null
             )
         ),
         second = null
@@ -92,44 +85,6 @@ class LokalK9SakService : K9SakService {
         fagsakYtelseType: FagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode
-    ) {
-        // do nothing
-    }
-
-    override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto) = SaksnummerDto("ABC123")
-    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer) = ReservertSaksnummerDto(
-        saksnummer = "ABC123",
-        ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-        brukerAktørId = "123456789",
-    )
-
-    override suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto> {
-        return setOf(
-            ReservertSaksnummerDto(
-                saksnummer = "ABC123",
-                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                brukerAktørId = "123456789",
-            ),
-            ReservertSaksnummerDto(
-                saksnummer = "DEF456",
-                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
-                brukerAktørId = "123456789",
-            ),
-            ReservertSaksnummerDto(
-                saksnummer = "GHI789",
-                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
-                brukerAktørId = "123456789",
-            )
-        )
-    }
-
-    override suspend fun opprettSakOgSendInnSøknad(
-        soknad: Søknad,
-        søknadEntitet: SøknadEntitet,
-        journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
-        saksnummer: String,
-        brevkode: Brevkode,
     ) {
         // do nothing
     }

@@ -13,7 +13,6 @@ import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.wiremock.JournalpostIds
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -155,15 +154,10 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
-        val journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+        val journalpostid = abs(Random(56234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
-        opprettOgSendInnSoeknad(
-            soeknadJson = gyldigSoeknad,
-            ident = norskIdent,
-            pleietrengendeIdent = "01010050053",
-            journalpostid = journalpostid
-        )
+        opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
     }
 
@@ -226,14 +220,9 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             }
            """
         )
-        val journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+        val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknadJson, norskIdent, journalpostid)
-        opprettOgLagreSoeknad(
-            soeknadJson = soeknadJson,
-            ident = norskIdent,
-            pleietrengendeIdent = "01010050053",
-            journalpostid = journalpostid
-        )
+        opprettOgLagreSoeknad(soeknadJson = soeknadJson, ident = norskIdent, journalpostid)
 
         validerSøknad(soeknadJson)
             .expectStatus().isEqualTo(HttpStatus.ACCEPTED)
@@ -272,8 +261,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
             norskIdent = personnummer,
             journalpostId = journalpostId,
             pleietrengendeIdent = pleietrengendeIdent,
-            annenPart = null,
-            k9saksnummer = "ABC123"
+            annenPart = null
         )
 
     private fun tilpasserSøknadsMalTilTesten(

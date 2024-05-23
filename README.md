@@ -5,44 +5,6 @@ Håndterer manuell `punching` av søknader, tilleggsinformasjon og avklaringer s
 [![](https://github.com/navikt/k9-punsj/workflows/Build%20and%20deploy/badge.svg)](https://github.com/navikt/k9-punsj/actions?query=workflow%3A%22Build+master%22)
 
 ---
-## Kode
-### Postmottak
-Flyt for klassifisering av journalposter mot sak.
-```mermaid
-flowchart TD
-    P[Postmottak - klassifisering og journalføring mot sak]
-    P --> JP1[fa:fa-book Journalpost 1 uten pleietrengende]
-    JP1 --> JP1A[Klassifiser og journalfør uten pleietrengende]
-    JP1A --> JP1B[Reservert saksnummer]
-    JP1B --> JP1C[Legg tilbake i kø]
-    JP1C --> JP1D[Fortsett på journalposten]
-    JP1D --> JP1E[fa:fa-child Oppgi pleietrengende]
-    JP1E --> FS1
-    P --> JP2[fa:fa-book Journalpost 2 uten pleietrengende]
-    JP2 --> JP2A[Klassifiser og journalfør uten pleietrengende]
-    JP2A --> JP2B[Reservert saksnummer]
-    JP2B --> JP2C[Legg tilbake i kø]
-    JP2C --> JP2D[Fortsett på journalposten]
-    JP2D --> JP2E[fa:fa-child Oppgi pleietrengende]
-    FS1 -->|Nei| JP2F[Send inn til k9-sak]
-    JP2F --> JP2G[fa:fa-check Oppretter eller kobler til fagsak]
-    P --> JP3[fa:fa-book Journalpost 3 med pleietrengende]
-    JP3 --> JP3A[Klassifiser og journalfør]
-    JP3A --> JP3B[Reservert saksnummer]
-    JP3B --> JP3C[Legg tilbake i kø]
-    JP3C --> JP3D[Fortsett på journalposten]
-    JP3D --> FS1
-    JP2E --> FS1{Eksisterer det fagsak på pleietrengende?}
-    FS1 -->|Ja| JP2H[Kopier journalpost]
-    JP2H --> JP2I[Journalfør ny JP mot eksisterende fagsak]
-    JP2I --> JP12J[Lukk gammel journalpost]
-    JP12J --> JP_KOPI_LOS[Tilbake til LOS og åpne kopi av journalpost]
-    JP_KOPI_LOS --> JP2F
-    
-    JP2G --> LOS[Tilbake til LOS]
-```
-Link til [mermaid](https://mermaid.live/edit#pako:eNqdVcFy2jAQ_RWNzuGAfCqHdpIASYAWpuRUk8kIvDaqbMkjy-lkCJ-Tf8idH8vKWDi0QJhyALP73u76vbW8ogsdAe3QONV_FktuLLnvzhTBzySc6MJm2louSYvIlBeFiEUBRqiE6IT81qVRPI03b1UEkaTg8qFmk1brKxlM2mHMOzFvzbWWZLBl5FiXtElpQZE8BQHWgEpARVCTkebpl-GwafxX19MVLn2Jq_AnIPkJTDVgocosA9MArzzwOhxBkhAr0jmXQASRm7cGdu1h3bCvjS3AWpJvXv1A7qZANfCuh_dqBRZLkUZknOeJODpzryL1p-19EdkxEdlJCZin_7eIzIvIPhGReRHZSRGZF5GdJSLzIrKzRUTtHOflB4gXR-yHU8wSoZQbicgvrWZHXdo3uNk1gIV0DQyOhmJBmuK31HP34yrEPPl3y4NjBgUkg-iYuoFnn_KnQXsvgk-8CLwXwUkvAu9FcJYXQXd_N50pPrLqyUIg2uD0Edhao6rY_q1_W--7NOCVSbfhUOcCyR9aNx7deo_uwsGHvVXPGKtOHfDdscO-P47kn0M2CEellCThqFZ6sBViavTjcDy5exyNp-F9LZ7zHv87dzavuQLciVwQ_nSw0I7uR-9vM7upbqrEgfoP9IKimRkXEZ7KK0eYUbuEDGa0g5cRN3JGZ2qNOF5aPX1WC9qxpoQLWuYRt9AVPDE8o7iPabGL9iJhtdkFc65-ad2AoEp_374LqlfC-h0-pgEM) for å redigere diagrammet.
-
 ## Deployment
 
 Push til master deployer til dev-miljø.

@@ -147,7 +147,7 @@ internal class PleiepengerSyktBarnService(
                     .bodyValueAndAwait(SøknadFeil(søknad.soeknadId, feil))
             }
 
-            val feil = soknadService.opprettSakOgSendInnSøknad(
+            val feil = soknadService.sendSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD,
                 journalpostIder = journalpostIder

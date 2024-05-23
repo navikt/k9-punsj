@@ -1,7 +1,6 @@
 package no.nav.k9punsj.journalpost.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.fordel.K9FordelType
 
 data class JournalpostInfoDto(
@@ -19,5 +18,4 @@ data class JournalpostInfoDto(
     val kanKopieres: Boolean = punsjInnsendingType != K9FordelType.KOPI && erInngående, // Brukes av frontend,
     val erFerdigstilt: Boolean, // Brukes av frontend for å bestemme om ytelse å fagsak må settes før punsjing. (Ref: Postmottak)
     val gosysoppgaveId: String?,
-    val sak: Sak?
 )

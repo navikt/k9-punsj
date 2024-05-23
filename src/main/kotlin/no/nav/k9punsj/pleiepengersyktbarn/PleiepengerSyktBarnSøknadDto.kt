@@ -40,8 +40,7 @@ data class PleiepengerSyktBarnSøknadDto(
     val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
-    val metadata: Map<*, *>? = null,
-    val k9saksnummer: String? = null
+    val metadata: Map<*, *>? = null
 ) {
 
     data class BarnDto(
@@ -102,19 +101,16 @@ internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
-        ?.map { s: SøknadEntitet ->
+        ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(s.søknad).copy(
-                    k9saksnummer = s.k9saksnummer,
-                )
+                objectMapper().convertValue(s.søknad)
             } else {
                 PleiepengerSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false,
-                    k9saksnummer = s.k9saksnummer
+                    harInfoSomIkkeKanPunsjes = false
                 )
             }
         }
@@ -127,11 +123,8 @@ internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {
             soeknadId = this.søknadId,
             journalposter = hentUtJournalposter(this),
             harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false,
-            k9saksnummer = k9saksnummer
+            harMedisinskeOpplysninger = false
         )
     }
-    return objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(søknad).copy(
-        k9saksnummer = this.k9saksnummer
-    )
+    return objectMapper().convertValue(søknad)
 }

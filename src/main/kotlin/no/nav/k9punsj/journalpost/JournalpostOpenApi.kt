@@ -1,11 +1,13 @@
 package no.nav.k9punsj.journalpost
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.journalpost.dto.IdentDto
@@ -13,7 +15,6 @@ import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
 import no.nav.k9punsj.openapi.OasSøknadId
-import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@SecurityScheme(
+    name = "BearerAuth",
+    type = SecuritySchemeType.HTTP,
+    scheme = "bearer",
+    bearerFormat = "JWT"
+)
 @Tag(name = "Journalposter", description = "Håndtering av journalposter")
 internal class JournalpostOpenApi {
     @PostMapping(
@@ -45,7 +52,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Hent journalposter som ikke er ferdig behandlet på person",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HentJournalposter(
         @RequestBody body: IdentDto
@@ -86,7 +93,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Hente informasjon om en journalpost",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteJournalpostInfo(
         @PathVariable("journalpost_id") journalpostId: String
@@ -96,7 +103,7 @@ internal class JournalpostOpenApi {
     @PostMapping(JournalpostRoutes.Urls.SettPåVent, produces = ["application/json"])
     @Operation(
         summary = "Hente informasjon om en journalpost",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun SettPåVent(
         @PathVariable("journalpost_id") journalpostId: String,
@@ -119,7 +126,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Lukker oppgave i LOS og ferdigstiller gosysoppgave og journalpost",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun LukkJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
@@ -150,7 +157,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Hente dokumentet",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun HenteDokument(
         @PathVariable("journalpost_id") journalpostId: String,
@@ -177,7 +184,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Resette journalpost",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun ResettInfoOmJournalpost(
@@ -211,7 +218,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Gir som svar tilbake hva som har blitt sendt inn på journalposten",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun HentHvaSomHarBlittSendtInn(
@@ -238,7 +245,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Lukker en journalpost i k9-punsj og k9-los",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun LukkJournalpostDebugg(
@@ -265,7 +272,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Lukker alle journalposter i k9-punsj og k9-los. Sjekker først om de er lukket i SAF",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun LukkJournalposterDebugg(
@@ -288,7 +295,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Journalfører journalposten mot generell sak og ferdigstiller",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     fun JournalførPåGenerellSak(
         @RequestBody body: IdentOgJournalpost
@@ -314,7 +321,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Ferdigstiller journalposter som ikke ferdigstilt og som har sakstilknytning",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun FerdigstillJournalposterDebugg(
@@ -341,7 +348,7 @@ internal class JournalpostOpenApi {
     )
     @Operation(
         summary = "Oppdaterer journalposter som ikke ferdigstilt og som mangler idType og id på avsenderMottaker",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        security = [SecurityRequirement(name = "BearerAuth")],
         tags = ["Drift"]
     )
     fun OppdaterJournalposterDebugg(

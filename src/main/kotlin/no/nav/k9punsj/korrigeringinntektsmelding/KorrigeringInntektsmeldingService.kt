@@ -148,7 +148,7 @@ internal class KorrigeringInntektsmeldingService(
                     .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
             }
 
-            val feil = soknadService.opprettSakOgSendInnSøknad(
+            val feil = soknadService.sendSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.FRAVÆRSKORRIGERING_IM_OMS,
                 journalpostIder = journalpostIder

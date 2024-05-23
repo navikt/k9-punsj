@@ -73,7 +73,8 @@ class AuthenticationHandler(
 }
 
 private class ServerHttpRequest(private val serverRequest: ServerRequest) : HttpRequest {
-    override fun getHeader(headerName: String) = serverRequest.headers().header(headerName).firstOrNull()
+    override fun getCookies() = emptyArray<HttpRequest.NameValue>()
+    override fun getHeader(headerNavn: String) = serverRequest.headers().header(headerNavn).firstOrNull()
 }
 
 @Configuration

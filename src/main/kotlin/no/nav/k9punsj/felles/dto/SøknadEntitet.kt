@@ -16,6 +16,5 @@ data class SøknadEntitet(
     val opprettet_av: String? = null,
     val opprettet_tid: LocalDateTime? = null,
     val endret_av: String? = null,
-    val endret_tid: LocalDateTime? = null,
-    val k9saksnummer: String? = null
+    val endret_tid: LocalDateTime? = null
 )

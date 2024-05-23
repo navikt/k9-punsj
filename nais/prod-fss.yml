@@ -13,15 +13,6 @@ spec:
       enabled: true
       allowAllUsers: true
       tenant: nav.no
-      claims:
-        extra:
-          - "NAVident"
-        groups:
-            # 0000-GA-k9-drift
-          - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6"
-      singlePageApplication: true
-      replyURLs:
-        - https://k9-punsj.intern.nav.no/internal/webjars/swagger-ui/oauth2-redirect.html
   accessPolicy:
     inbound:
       rules:
@@ -149,7 +140,3 @@ spec:
       value: "false"
     - name: KODEVERDI_SOM_STRING
       value: "false"
-
-    # Swagger
-    - name: AZURE_LOGIN_URL
-      value: "https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0"

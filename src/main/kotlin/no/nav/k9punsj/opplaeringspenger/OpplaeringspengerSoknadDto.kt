@@ -35,8 +35,7 @@ data class OpplaeringspengerSøknadDto(
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
     val begrunnelseForInnsending: BegrunnelseForInnsendingDto? = null,
-    val metadata: Map<*, *>? = null,
-    val k9saksnummer: String? = null
+    val metadata: Map<*, *>? = null
 ) {
 
     data class BarnDto(
@@ -118,8 +117,7 @@ internal fun Mappe.tilOlpVisning(norskIdent: String): SvarOlpDto {
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false,
-                    k9saksnummer = s.k9saksnummer
+                    harInfoSomIkkeKanPunsjes = false
                 )
             }
         }

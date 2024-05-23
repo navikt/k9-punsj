@@ -107,11 +107,10 @@ class PleiepengerLivetsSluttfaseRoutesTest : AbstractContainerBaseTest() {
         pleietrengende: String,
     ): OpprettNySøknad {
         return OpprettNySøknad(
-            norskIdent = personnummer,
-            journalpostId = journalpostId,
-            k9saksnummer = "ABC123",
-            pleietrengendeIdent = pleietrengende,
-            annenPart = null
+            personnummer,
+            journalpostId,
+            pleietrengende,
+            null
         )
     }
 

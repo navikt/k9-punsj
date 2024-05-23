@@ -179,8 +179,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest : AbstractContainerBaseTe
             norskIdent = personnummer,
             journalpostId = journalpostId,
             annenPart = annenPart,
-            barn = barn,
-            k9saksnummer = null
+            barn = barn
         )
     }
 
@@ -202,8 +201,7 @@ internal class OmsorgspengerMidlertidigAleneRoutesTest : AbstractContainerBaseTe
         val innsendingForOpprettelseAvMappe = NyOmsMASøknad(
             norskIdent = ident,
             journalpostId = journalpostid,
-            barn = barn,
-            k9saksnummer = null
+            barn = barn
         )
 
         // oppretter en søknad

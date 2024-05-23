@@ -3,7 +3,6 @@ package no.nav.k9punsj.gosys
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.integrasjoner.gosys.Gjelder
-import no.nav.k9punsj.wiremock.JournalpostIds
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -29,7 +28,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         @Language("JSON")
         val body = """
         {
-          "journalpostId": "${JournalpostIds.Ok}",
+          "journalpostId": "202",
           "norskIdent": "29099000129"
         }
         """.trimIndent()
@@ -48,7 +47,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         @Language("JSON")
         val body = """
         {
-          "journalpostId": "${JournalpostIds.Ok}",
+          "journalpostId": "202",
           "norskIdent": "29099000129",
           "gjelder": "PleiepengerPårørende"
         }

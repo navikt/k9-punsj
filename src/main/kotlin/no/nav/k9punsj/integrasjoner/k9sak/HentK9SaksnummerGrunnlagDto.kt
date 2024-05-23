@@ -1,4 +1,4 @@
-package no.nav.k9punsj.integrasjoner.k9sak.dto
+package no.nav.k9punsj.integrasjoner.k9sak
 
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.PeriodeDto

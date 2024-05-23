@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling
 import no.nav.k9punsj.brev.dto.DokumentbestillingDto
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -27,7 +26,7 @@ internal class BrevOpenApi {
     @Operation(
         summary = "Sender en brevbestilling med gitt mal og innhold",
         description = "Sender en brevbestilling med gitt mal og innhold",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [

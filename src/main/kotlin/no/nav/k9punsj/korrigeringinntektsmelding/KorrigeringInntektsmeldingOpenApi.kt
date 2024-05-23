@@ -13,7 +13,6 @@ import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,7 +22,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     @Operation(
         summary = "Henter data på person for omsorgspenger",
         description = "Sendes NorskIdente til person som headere.",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -50,7 +49,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     )
     @Operation(
         summary = "Starte en helt ny søknad",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -107,7 +106,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     )
     @Operation(
         summary = "Oppdatere en søknad i en eksisterende mappe.",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -136,7 +135,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     )
     @Operation(
         summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -197,7 +196,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     )
     @Operation(
         summary = "Valider søknad mot k9-format sin kontrakt",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
@@ -249,7 +248,7 @@ internal class KorrigeringInntektsmeldingOpenApi {
     @Operation(
         summary = "Henter arbeidsforholdIder som ligger i k9-sak",
         description = "Henter arbeidsforholdIder som ligger i k9-sak",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+        security = [SecurityRequirement(name = "BearerAuth")]
     )
     @ApiResponses(
         value = [
