@@ -23,7 +23,6 @@ internal class ForvaltningRoutes(
     }
 
     @Bean
-    @RouterOperation(beanClass = MappeService::class, beanMethod = "slettMappeMedAlleKoblinger")
     fun ForvaltningRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST(Urls.SlettMappeMedAlleTilkoblinger) { request ->
             RequestContext(coroutineContext, request) {
