@@ -42,7 +42,8 @@ data class PleiepengerLivetsSluttfaseSøknadDto(
     val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
 
     data class UttakDto(
@@ -67,14 +68,17 @@ internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<PleiepengerLivetsSluttfaseSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
                 PleiepengerLivetsSluttfaseSøknadDto(
                     soeknadId = s.søknadId,
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }
@@ -87,8 +91,11 @@ internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDt
             soeknadId = this.søknadId,
             journalposter = hentUtJournalposter(this),
             harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
+            harMedisinskeOpplysninger = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<PleiepengerLivetsSluttfaseSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

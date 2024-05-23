@@ -1,7 +1,7 @@
 package no.nav.k9punsj.sak
 
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.sak.dto.SakInfoDto
 import org.slf4j.LoggerFactory
@@ -19,22 +19,51 @@ internal class SakService(
 
     suspend fun hentSaker(søkerIdent: String): List<SakInfoDto> {
         logger.info("Henter fagsaker fra k9...")
+        val søkerAktørId = personService.finnAktørId(søkerIdent)
         val (fagsaker: Set<Fagsak>?, feil: String?) = k9SakService.hentFagsaker(søkerIdent)
 
         if (!feil.isNullOrBlank()) {
             throw IllegalStateException(feil)
         } else {
-            return fagsaker!!.map {
+            val fagsaker = fagsaker!!.map {
                 val personIdent = it.pleietrengendeAktorId?.let { aktørId ->
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
+
+                val relatertPersonIdent = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                }
+
+                if (it.relatertPersonAktørId != null && relatertPersonIdent == null) {
+                    logger.error("Fant ikke person i PDL for relatertPersonAktørId.")
+                }
+
                 SakInfoDto(
                     fagsakId = it.saksnummer,
+                    reservert = false,
                     sakstype = it.sakstype.kode,
                     pleietrengendeIdent = personIdent,
-                    gyldigPeriode = it.gyldigPeriode
+                    relatertPersonIdent = relatertPersonIdent,
+                    gyldigPeriode = it.gyldigPeriode,
+                    behandlingsår = null
                 )
             }
+            logger.info("Henter reserverte saksnummere fra k9...")
+            val reserverteSaksnummere = k9SakService.hentReserverteSaksnummere(søkerAktørId).map {
+                SakInfoDto(
+                    reservert = true,
+                    fagsakId = it.saksnummer,
+                    sakstype = it.ytelseType.kode,
+                    pleietrengendeIdent = it.pleietrengendeAktørId?.let { aktørId ->
+                        personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                    },
+                    gyldigPeriode = null,
+                    relatertPersonIdent = it.relatertPersonAktørId,
+                    behandlingsår = it.behandlingsår
+                )
+            }
+            // Returnerer fagsaker og reserverte saksnummere
+            return (fagsaker + reserverteSaksnummere).distinctBy { it.fagsakId }
         }
     }
 }

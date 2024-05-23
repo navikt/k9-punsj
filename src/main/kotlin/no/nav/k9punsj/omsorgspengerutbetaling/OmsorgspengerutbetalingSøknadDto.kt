@@ -37,7 +37,8 @@ data class OmsorgspengerutbetalingSøknadDto(
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
     val erKorrigering: Boolean ? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class FraværPeriode(
         val aktivitetsFravær: AktivitetFravær,
@@ -88,9 +89,11 @@ internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerutbetalingSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
     return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
@@ -98,7 +101,9 @@ internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
 
 internal fun SøknadEntitet.tilOmsUtvisning(): OmsorgspengerutbetalingSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerutbetalingSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerutbetalingSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerutbetalingSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

@@ -141,16 +141,16 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto) {
+    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String): Pair<HttpStatusCode, String> {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
-        dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+        return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
             journalpostId = dto.journalpostId,
             identitetsnummer = dto.brukerIdent.somIdentitetsnummer(),
             enhetKode = "9999",
             sak = Sak(
                 sakstype = Sak.SaksType.FAGSAK,
-                fagsakId = dto.saksnummer
+                fagsakId = saksnummer
             )
         )
     }
@@ -252,6 +252,10 @@ class JournalpostService(
         }
         journalpostRepository.ferdig(journalpostId)
         return HttpStatus.OK to "OK"
+    }
+
+    suspend fun settTilFerdig(journalpostId: String) {
+        journalpostRepository.ferdig(journalpostId)
     }
 
     internal suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {
