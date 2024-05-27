@@ -64,7 +64,7 @@ class PdlServiceImpl(
             query = HENT_IDENT,
             variables = mapOf(
                 "ident" to fnummer,
-                "historikk" to "false",
+                "historikk" to false,
                 "grupper" to listOf("AKTORID")
             )
         )
@@ -100,7 +100,7 @@ class PdlServiceImpl(
             query = HENT_IDENT,
             variables = mapOf(
                 "ident" to fnummer,
-                "historikk" to "false",
+                "historikk" to false,
                 "grupper" to listOf("AKTORID")
             )
         )
