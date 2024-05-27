@@ -38,14 +38,15 @@ internal class SakService(
                     logger.error("Fant ikke person i PDL for relatertPersonAktørId.")
                 }
 
+                val gyldigPeriode = it.gyldigPeriode
                 SakInfoDto(
-                    fagsakId = it.saksnummer,
                     reservert = false,
+                    fagsakId = it.saksnummer,
                     sakstype = it.sakstype.kode,
                     pleietrengendeIdent = personIdent,
                     relatertPersonIdent = relatertPersonIdent,
-                    gyldigPeriode = it.gyldigPeriode,
-                    behandlingsår = null
+                    gyldigPeriode = gyldigPeriode,
+                    behandlingsår = gyldigPeriode?.fom?.year
                 )
             }
             logger.info("Henter reserverte saksnummere fra k9...")
