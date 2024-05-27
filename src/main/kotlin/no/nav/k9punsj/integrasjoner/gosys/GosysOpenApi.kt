@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.openapi.OpenApi
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -56,7 +57,7 @@ internal class GosysOpenApi {
     @Operation(
         summary = "Oppretter journalføringsoppgave",
         description = "",
-        security = [SecurityRequirement(name = "BearerAuth")]
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun OpprettJournalføringsoppgave(@RequestBody body: GosysRoutes.GosysOpprettJournalføringsOppgaveRequest) {
     }

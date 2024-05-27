@@ -4,9 +4,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.AbstractContainerBaseTest
-import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
+import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
@@ -15,6 +15,7 @@ import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
+import no.nav.k9punsj.wiremock.JournalpostIds
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -133,7 +134,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekk()
-        val journalpostid = abs(Random(2234).nextInt()).toString()
+        val journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -176,7 +177,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     fun `Skal fordele trekk av dager på enkelt dager slik at det validere ok - kompleks versjon`(): Unit = runBlocking {
         val norskIdent = "02020050123"
         val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsTrekkKompleks()
-        val journalpostid = abs(Random(2256234).nextInt()).toString()
+        val journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostid)
 
         opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid)
@@ -207,8 +208,8 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
     private fun opprettSøknad(
         personnummer: String,
         journalpostId: String,
-    ): IdentOgJournalpost {
-        return IdentOgJournalpost(personnummer, journalpostId)
+    ): OpprettNySøknad {
+        return OpprettNySøknad(norskIdent = personnummer, journalpostId = journalpostId, k9saksnummer = "1234")
     }
 
     private fun tilpasserSøknadsMalTilTesten(
@@ -297,7 +298,7 @@ class KorrigeringInntektsmeldingDtoRoutesTest : AbstractContainerBaseTest() {
         Assertions.assertNotNull(responseBody!!.soekerId)
     }
 
-    private fun opprettNySøknad(requestBody: IdentOgJournalpost): URI? = webTestClient.post()
+    private fun opprettNySøknad(requestBody: OpprettNySøknad): URI? = webTestClient.post()
         .uri { it.path("/$api/$søknadTypeUri").build() }
         .header("Authorization", "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}")
         .body(BodyInserters.fromValue(requestBody))

@@ -2,9 +2,11 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
@@ -15,6 +17,7 @@ import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
@@ -24,12 +27,15 @@ import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
+import no.nav.k9punsj.journalpost.dto.Sak
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
+import no.nav.k9punsj.sak.SakService
+import no.nav.k9punsj.sak.dto.SakInfoDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -59,10 +65,13 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
+    private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
+    private val sakService: SakService,
+    private val k9SakService: K9SakService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
     @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
@@ -105,12 +114,34 @@ internal class JournalpostRoutes(
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
                     val k9FordelType = punsjJournalpost?.type?.let { K9FordelType.fraKode(it) }
 
+                    val safJournalPost = journalpostService.hentSafJournalPost(journalpostId = journalpostId)
+
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
                                 journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                                     journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+
+                    val k9FagsakYtelseType = punsjJournalpost?.ytelse?.let {
+                        punsjJournalpost.utledK9sakFagsakYtelseType(
+                            k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                        )
+                    }
+
+                    // Hvis journalposten har sakstilhørighet, hent sak fra K9sak
+                    val safSak = safJournalPost?.sak
+                    val k9Fagsak = safSak?.let { sak: SafDtos.Sak ->
+                        norskIdent?.let { ident: String ->
+                            sakService.hentSaker(ident)
+                                .filterNot { it.reservert }
+                                .firstOrNull { it.fagsakId == sak.fagsakId }
+                        }
+                    }
+
+                    val utledetSak =
+                        utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType, punsjJournalpost)
+                    logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -124,7 +155,8 @@ internal class JournalpostRoutes(
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
-                        erFerdigstilt = erFerdigstiltEllerJournalfoert
+                        erFerdigstilt = erFerdigstiltEllerJournalfoert,
+                        sak = utledetSak
                     )
 
                     utvidJournalpostMedMottattDato(
@@ -370,10 +402,6 @@ internal class JournalpostRoutes(
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
 
-                val journalpostYtelse = journalpost.ytelse
-
-                logger.info("Kopierer journalpost med id=$journalpostId og ytelse=$journalpostYtelse")
-
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
                 dto.annenPart?.let { identListe.add(it) }
@@ -389,19 +417,17 @@ internal class JournalpostRoutes(
                     return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-
-                val k9FagsakYtelseType = journalpostYtelse?.let {
-                    val k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType
-                        .fraKode(it)
-
+                val k9FagsakYtelseType = journalpost?.ytelse?.let {
                     journalpost.utledK9sakFagsakYtelseType(
-                        k9sakFagsakYtelseType = k9sakFagsakYtelseType
+                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
+                            it
+                        )
                     )
                 } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
 
-                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpostYtelse)
+                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
 
-                if (journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
                     return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
                 }
 
@@ -427,6 +453,60 @@ internal class JournalpostRoutes(
                 return@RequestContext ServerResponse
                     .status(HttpStatus.ACCEPTED)
                     .bodyValueAndAwait("Journalposten vil bli kopiert.")
+            }
+        }
+    }
+
+    private suspend fun utledSak(
+        erFerdigstiltEllerJournalfoert: Boolean,
+        safSak: SafDtos.Sak?,
+        k9Fagsak: SakInfoDto?,
+        k9FagsakYtelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType?,
+        punsjJournalpost: PunsjJournalpost?,
+    ): Sak {
+        logger.info("Utleder sak for journalpost")
+        val harSafSak = safSak != null
+        val safSakHarFagsakId = safSak?.fagsakId != null
+        val ikkeHarFagsak = k9Fagsak == null
+
+        val erReservertSaksnummer = harSafSak && safSakHarFagsakId && ikkeHarFagsak
+        logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
+
+        return when (erReservertSaksnummer) {
+            true -> {
+                logger.info("Utleder reservert sak. Henter reservert saksnummer fra k9-sak med fagsakId: ${safSak!!.fagsakId}")
+                val reservertSaksnummerDto = k9SakService.hentReservertSaksnummer(
+                    Saksnummer(safSak.fagsakId)
+                )
+                logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
+                val pleietrengendeIdent = reservertSaksnummerDto?.pleietrengendeAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
+                val relatertPersonIdent = reservertSaksnummerDto?.relatertPersonAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
+                Sak(
+                    reservertSaksnummer = true,
+                    fagsakId = reservertSaksnummerDto?.saksnummer,
+                    gyldigPeriode = null,
+                    pleietrengendeIdent = pleietrengendeIdent,
+                    relatertPersonIdent = relatertPersonIdent,
+                    sakstype = reservertSaksnummerDto?.ytelseType?.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
+                )
+            }
+
+            else -> {
+                logger.info("Utleder fagsak fra k9-sak med fagsakId: ${safSak?.fagsakId}")
+                Sak(
+                    reservertSaksnummer = false,
+                    fagsakId = safSak?.fagsakId,
+                    gyldigPeriode = k9Fagsak?.gyldigPeriode,
+                    pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
+                    sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar,
+                    relatertPersonIdent = k9Fagsak?.relatertPersonIdent
+                )
             }
         }
     }

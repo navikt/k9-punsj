@@ -21,7 +21,8 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -45,13 +46,16 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
                 OmsorgspengerKroniskSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }
@@ -63,8 +67,11 @@ internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøk
         return OmsorgspengerKroniskSyktBarnSøknadDto(
             soeknadId = this.søknadId,
             harMedisinskeOpplysninger = false,
-            harInfoSomIkkeKanPunsjes = false
+            harInfoSomIkkeKanPunsjes = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }
