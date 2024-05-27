@@ -44,4 +44,12 @@ class MappeRepository(private val dataSource: DataSource) {
             }
         }
     }
+
+    fun slettAlleMapper() {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf("delete from $MAPPE_TABLE").asExecute
+            )
+        }
+    }
 }

@@ -37,6 +37,7 @@ internal fun PunsjJournalpost?.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType:
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
             no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode -> FagsakYtelseType.OMSORGSPENGER_MA
+            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode -> FagsakYtelseType.OMSORGSPENGER_AO
             no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
             no.nav.k9punsj.felles.FagsakYtelseType.OPPLÆRINGSPENGER.kode -> FagsakYtelseType.OPPLÆRINGSPENGER
             else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $k9sakFagsakYtelseType")

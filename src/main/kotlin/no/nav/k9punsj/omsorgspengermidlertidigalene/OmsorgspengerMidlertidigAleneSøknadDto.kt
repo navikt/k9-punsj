@@ -15,7 +15,8 @@ data class NyOmsMASøknad(
     val norskIdent: String,
     val journalpostId: String,
     val annenPart: String? = null,
-    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
+    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>,
+    val k9saksnummer: String?
 )
 
 data class OmsorgspengerMidlertidigAleneSøknadDto(
@@ -30,7 +31,8 @@ data class OmsorgspengerMidlertidigAleneSøknadDto(
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -61,9 +63,11 @@ internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
     return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, søknader)
@@ -71,7 +75,9 @@ internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
 
 internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

@@ -50,8 +50,9 @@ data class MatchFagsakMedPeriode(
 data class OpprettNySøknad(
     val norskIdent: String,
     val journalpostId: String,
-    @JsonAlias("barnIdent") val pleietrengendeIdent: String?,
-    val annenPart: String?,
+    val k9saksnummer: String,
+    @JsonAlias("barnIdent") val pleietrengendeIdent: String? = null,
+    val annenPart: String? = null,
 )
 
 data class PleietrengendeDto(

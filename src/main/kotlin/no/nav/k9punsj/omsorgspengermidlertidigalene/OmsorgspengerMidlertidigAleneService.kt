@@ -156,7 +156,7 @@ internal class OmsorgspengerMidlertidigAleneService(
                     .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.SØKNAD_OMS_UTVIDETRETT_MA,
                 journalpostIder = journalpostIder

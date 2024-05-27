@@ -24,7 +24,8 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -48,9 +49,11 @@ internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerAleneOmsorgSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
     return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
@@ -58,7 +61,9 @@ internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {
 
 internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerAleneOmsorgSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }
