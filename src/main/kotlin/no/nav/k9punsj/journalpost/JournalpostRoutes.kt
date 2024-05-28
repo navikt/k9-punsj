@@ -125,7 +125,10 @@ internal class JournalpostRoutes(
 
                     val k9FagsakYtelseType = punsjJournalpost?.ytelse?.let {
                         punsjJournalpost.utledK9sakFagsakYtelseType(
-                            k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                            k9sakFagsakYtelseType = when(it) {
+                                FagsakYtelseType.UKJENT.kode -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.UDEFINERT
+                                else -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                            }
                         )
                     }
 
