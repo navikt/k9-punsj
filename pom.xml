@@ -21,7 +21,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>21</java.version>
-        <kotlin.version>1.9.24</kotlin.version>
+        <kotlin.version>2.0.0</kotlin.version>
 
         <!-- spring relatert -->
         <springdoc.version>2.5.0</springdoc.version>
@@ -49,7 +49,7 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.19.8</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
-        <wiremock.version>3.5.4</wiremock.version>
+        <wiremock.version>3.6.0</wiremock.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
