@@ -93,8 +93,9 @@ class PostMottakService(
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
             oppdaterOgFerdigstillJournalpostMedSaksnummer(validertMottattJournalpost, oppdatertJournalpost, saksnummer)
-            lagreTilDB(oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now()))
-            opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, validertMottattJournalpost)
+            val oppdatertJournalpostMedJournalføringstidspunkt = oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now())
+            lagreTilDB(oppdatertJournalpostMedJournalføringstidspunkt)
+            opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpostMedJournalføringstidspunkt, validertMottattJournalpost)
         } else {
             logger.info("Journalpost er allerede ferdigstilt eller journalført")
         }

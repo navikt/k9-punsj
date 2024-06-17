@@ -18,3 +18,9 @@ logging:
       apache:
         kafka: WARN
     kafka: WARN
+
+no:
+  nav:
+    kafka:
+      k9_los:
+        topic: privat-k9punsj-aksjonspunkthendelse-v1
