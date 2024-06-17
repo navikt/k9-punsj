@@ -16,6 +16,7 @@ import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class PostMottakService(
@@ -92,7 +93,7 @@ class PostMottakService(
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
             oppdaterOgFerdigstillJournalpostMedSaksnummer(validertMottattJournalpost, oppdatertJournalpost, saksnummer)
-            lagreTilDB(oppdatertJournalpost)
+            lagreTilDB(oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now()))
             opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpost, validertMottattJournalpost)
         } else {
             logger.info("Journalpost er allerede ferdigstilt eller journalført")

@@ -57,7 +57,8 @@ internal class AksjonspunktServiceImpl(
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
             ytelse = ytelse,
             type = punsjJournalpost.type!!,
-            status = K9LosOppgaveStatusDto.AAPEN
+            status = K9LosOppgaveStatusDto.AAPEN,
+            journalførtTidspunkt = punsjJournalpost.journalførtTidspunkt
         )
 
         log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -334,21 +335,23 @@ internal class AksjonspunktServiceImpl(
         sendtInn: Boolean? = null,
         ferdigstiltAv: String? = null,
         mottattDato: LocalDateTime? = null,
-        status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN
+        status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN,
+        journalførtTidspunkt: LocalDateTime? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId = eksternId.toString(),
             journalpostId = journalpostId,
-            eventTid = LocalDateTime.now(),
             aktørId = aktørId,
+            eventTid = LocalDateTime.now(),
             aksjonspunktKoderMedStatusListe = aksjonspunkter,
             pleietrengendeAktørId = barnIdent,
-            ytelse = ytelse,
             type = type,
+            ytelse = ytelse,
             sendtInn = sendtInn,
             ferdigstiltAv = ferdigstiltAv,
             mottattDato = mottattDato,
-            status = status
+            journalførtTidspunkt = journalførtTidspunkt,
+            status = status,
         )
 
         return objectMapper().writeValueAsString(punsjEventDto)
