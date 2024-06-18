@@ -14,6 +14,7 @@ data class PunsjJournalpost(
     val aktørId: String?,
     val skalTilK9: Boolean? = null,
     val mottattDato: LocalDateTime? = null,
+    val journalførtTidspunkt: LocalDateTime? = null,
     val type: String? = K9FordelType.UKJENT.kode,
     val gosysoppgaveId: String? = null,
     val ytelse: String? = null,

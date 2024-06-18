@@ -14,5 +14,6 @@ data class PunsjEventDto(
     val sendtInn: Boolean? = null, // Slettes, erstattes med status UTFØRT
     val ferdigstiltAv: String? = null, // Slettes
     val mottattDato: LocalDateTime? = null, // TODO: Mottatt dato for journalposten?
-    val status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN
+    val status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN,
+    val journalførtTidspunkt: LocalDateTime? = null
 )

@@ -27,6 +27,7 @@ import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -61,6 +62,10 @@ abstract class AbstractContainerBaseTest {
 
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
+
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    protected lateinit var embeddedKafkaBroker: EmbeddedKafkaBroker
 
     companion object {
         val saksbehandlerAuthorizationHeader = "Bearer ${Azure.V2_0.saksbehandlerAccessToken()}"
