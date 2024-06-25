@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.1</version>
         <relativePath/>
     </parent>
 
@@ -31,8 +31,8 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>4.1.12</k9-sak.version>
-        <k9-formidling.version>1.0.13</k9-formidling.version>
+        <k9-sak.version>4.1.15</k9-sak.version>
+        <k9-formidling.version>1.0.14</k9-formidling.version>
         <k9-format.version>9.3.0</k9-format.version>
         <k9-rapid.version>1.20240510083323-9f05ca1</k9-rapid.version>
 

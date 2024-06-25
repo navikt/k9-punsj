@@ -175,6 +175,7 @@ internal object SafDtos {
             true -> !(erEttersendelse || erSøknad)
             false -> false
         }
+        val ikkeErTemaOMS = tema?.let { Tema.OMS.name != it } ?: false
     }
 
     internal data class Tilleggsopplysning(

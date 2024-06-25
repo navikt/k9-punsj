@@ -152,6 +152,11 @@ class SafGateway(
             logger.warn("Ikke støttet journalstatus ${journalpost?.journalstatus}.")
         }
 
+
+        if (journalpost != null && journalpost.ikkeErTemaOMS) throw IkkeStøttetJournalpost().also {
+            logger.warn("Ikke støttet journalpost ${journalpost.journalstatus}. Tema er ikke lenger OMS, men ${journalpost.tema}.")
+        }
+
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.
         if (journalpost?.journalposttype == "N" &&
             journalpost.journalstatus?.equals("UNDER_ARBEID") == true
