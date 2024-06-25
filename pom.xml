@@ -64,7 +64,7 @@
         <fuel.version>2.3.1</fuel.version>
         <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
         <token-support.version>5.0.1</token-support.version>
-        <dusseldorf-ktor.version>4.2.5</dusseldorf-ktor.version>
+        <dusseldorf-ktor.version>5.0.1</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
 
