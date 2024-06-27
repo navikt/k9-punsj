@@ -17,10 +17,7 @@ class JournalpostRoutesTest: AbstractContainerBaseTest() {
     fun `Gitt journalpost med annet tema enn OMS, forvent conflict feil`(): Unit = runBlocking {
         val journalpostId = "123"
 
-        wireMockServer.stubSafHenteJournalpost(
-            journalpostId = journalpostId,
-            responseBody = SafMockResponses.OkResponseHenteJournalpost(tema = "SYK")
-        )
+        gittJournalpostMedTema(journalpostId = journalpostId, tema = "SYK")
 
         webTestClient.get()
             .uri("/$api/$journalpostUri/$journalpostId")
@@ -32,5 +29,12 @@ class JournalpostRoutesTest: AbstractContainerBaseTest() {
                     {"type":"punsj://ikke-støttet-journalpost"}
                 """.trimIndent()
             )
+    }
+
+    private fun gittJournalpostMedTema(journalpostId: String, tema: String) {
+        wireMockServer.stubSafHenteJournalpost(
+            journalpostId = journalpostId,
+            responseBody = SafMockResponses.OkResponseHenteJournalpost(tema = tema)
+        )
     }
 }

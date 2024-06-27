@@ -154,7 +154,7 @@ class PostMottakServiceTest : AbstractContainerBaseTest() {
             sakstype = SafDtos.Sakstype.FAGSAK,
             fagsakId = saksnummer,
             fagsaksystem = "K9",
-            tema = SafDtos.Tema.OMS
+            tema = SafDtos.Tema.OMS.name
         ),
         avsender = null,
         avsenderMottaker = null,
