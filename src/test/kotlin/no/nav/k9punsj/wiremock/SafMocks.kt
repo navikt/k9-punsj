@@ -253,6 +253,12 @@ object SafMockResponses {
             "type": "FNR",
             "id": "29099000129"
           },
+          "sak": {
+            "fagsakId": "ABC123",
+            "fagsaksystem": "K9",
+            "tema": "$tema",
+            "fagsaktype": "FAGSAK"
+          },
           "dokumenter": [
             {
               "dokumentInfoId": "470164680",
