@@ -164,12 +164,8 @@ fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
 )
 
 fun WireMockServer.stubSafHenteJournalpost(
-    journalpostId: String = "123456789",
-    tema: String = "OMS",
-    responseBody: String = SafMockResponses.OkResponseHenteJournalpost(
-        journalpostId = journalpostId,
-        tema = tema
-    )
+    journalpostId: JournalpostId? = null,
+    responseBody: String = SafMockResponses.OkResponseHenteJournalpost(),
 ): WireMockServer {
     val contentBodyPattern = if (journalpostId == null) AnythingPattern() else ContainsPattern(journalpostId)
     WireMock.stubFor(
@@ -237,62 +233,59 @@ object JournalpostIds {
     const val FerdigstiltMedSaksnummer: JournalpostId = "7523521"
 }
 
-private object SafMockResponses {
+object SafMockResponses {
     @Language("JSON")
-    fun OkResponseHenteJournalpost(
-        journalpostId: String = "123456789",
-        tema: String = "OMS",
-    ) = """
-        {
-          "data": {
-            "journalpost": {
-              "journalpostId": "$journalpostId",
-              "tema": "$tema",
-              "journalposttype": "I",
-              "journalstatus": "MOTTATT",
-              "relevanteDatoer" : [
-              {
-                "dato" : "2020-10-12T12:53:21.046Z",
-                "datotype" : "DATO_REGISTRERT"
-              }
-              ],
-              "bruker": {
-                "type": "FNR",
-                "id": "29099000129"
-              },
-              "dokumenter": [
+    fun OkResponseHenteJournalpost(journalpostId: String = "123456789", tema: String = "OMS") = """
+    {
+      "data": {
+        "journalpost": {
+          "journalpostId": "$journalpostId",
+          "tema": "$tema",
+          "journalposttype": "I",
+          "journalstatus": "MOTTATT",
+          "relevanteDatoer" : [
+          {
+            "dato" : "2020-10-12T12:53:21.046Z",
+            "datotype" : "DATO_REGISTRERT"
+          }
+          ],
+          "bruker": {
+            "type": "FNR",
+            "id": "29099000129"
+          },
+          "dokumenter": [
+            {
+              "dokumentInfoId": "470164680",
+              "dokumentvarianter": [
                 {
-                  "dokumentInfoId": "470164680",
-                  "dokumentvarianter": [
-                    {
-                      "variantformat": "ARKIV",
-                      "saksbehandlerHarTilgang": true
-                    },
-                    {
-                      "variantformat": "ORIGINAL",
-                      "saksbehandlerHarTilgang": true
-                    }
-                  ]
+                  "variantformat": "ARKIV",
+                  "saksbehandlerHarTilgang": true
                 },
                 {
-                  "dokumentInfoId": "470164681",
-                  "brevkode": "test",
-                  "dokumentvarianter": [
-                    {
-                      "variantformat": "ARKIV",
-                      "saksbehandlerHarTilgang": true
-                    }
-                  ]
+                  "variantformat": "ORIGINAL",
+                  "saksbehandlerHarTilgang": true
                 }
-              ],
-              "avsenderMottaker": {
-                "id": "29099000129",
-                "type": "FNR"
-              }
+              ]
+            },
+            {
+              "dokumentInfoId": "470164681",
+              "brevkode": "test",
+              "dokumentvarianter": [
+                {
+                  "variantformat": "ARKIV",
+                  "saksbehandlerHarTilgang": true
+                }
+              ]
             }
+          ],
+          "avsenderMottaker": {
+            "id": "29099000129",
+            "type": "FNR"
           }
         }
-        """.trimIndent()
+      }
+    }
+    """.trimIndent()
 
     @Language("JSON")
     val AbacErrorResponseHenteJournalpost = """
