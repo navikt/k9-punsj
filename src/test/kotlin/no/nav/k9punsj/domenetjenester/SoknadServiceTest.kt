@@ -112,7 +112,7 @@ internal class SoknadServiceTest {
             sakstype = SafDtos.Sakstype.FAGSAK,
             fagsakId = "AB123",
             fagsaksystem = "k9",
-            tema = SafDtos.Tema.OMS
+            tema = SafDtos.Tema.OMS.name
         ),
         avsender = null,
         avsenderMottaker = SafDtos.AvsenderMottaker(id = null, type = null, null),

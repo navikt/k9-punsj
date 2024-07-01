@@ -163,9 +163,9 @@ fun WireMockServer.stubSafHenteDokumentAbacError() = stubSafHenteDokumentError(
     httpStatus = 403
 )
 
-private fun WireMockServer.stubSafHenteJournalpost(
+fun WireMockServer.stubSafHenteJournalpost(
     journalpostId: JournalpostId? = null,
-    responseBody: String = SafMockResponses.OkResponseHenteJournalpost,
+    responseBody: String = SafMockResponses.OkResponseHenteJournalpost(),
 ): WireMockServer {
     val contentBodyPattern = if (journalpostId == null) AnythingPattern() else ContainsPattern(journalpostId)
     WireMock.stubFor(
@@ -233,14 +233,14 @@ object JournalpostIds {
     const val FerdigstiltMedSaksnummer: JournalpostId = "7523521"
 }
 
-private object SafMockResponses {
+object SafMockResponses {
     @Language("JSON")
-    val OkResponseHenteJournalpost = """
+    fun OkResponseHenteJournalpost(journalpostId: String = "123456789", tema: String = "OMS") = """
     {
       "data": {
         "journalpost": {
-          "journalpostId": "123456789",
-          "tema": "OMS",
+          "journalpostId": "$journalpostId",
+          "tema": "$tema",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
           "relevanteDatoer" : [
@@ -252,6 +252,12 @@ private object SafMockResponses {
           "bruker": {
             "type": "FNR",
             "id": "29099000129"
+          },
+          "sak": {
+            "fagsakId": "ABC123",
+            "fagsaksystem": "K9",
+            "tema": "$tema",
+            "fagsaktype": "FAGSAK"
           },
           "dokumenter": [
             {

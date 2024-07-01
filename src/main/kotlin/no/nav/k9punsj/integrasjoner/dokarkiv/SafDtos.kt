@@ -126,7 +126,7 @@ internal object SafDtos {
         val sakstype: Sakstype?,
         val fagsakId: String?,
         val fagsaksystem: String?,
-        val tema: Tema?
+        val tema: String?
     )
 
     internal data class Avsender(
