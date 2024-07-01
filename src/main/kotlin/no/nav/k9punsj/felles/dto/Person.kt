@@ -9,7 +9,7 @@ data class Person(
 )
 
 data class PdlPerson(
-    internal val identitetsnummer: String,
-    internal val fødselsdato: LocalDate,
-    internal val navn: String
+    val identitetsnummer: String,
+    val fødselsdato: LocalDate,
+    val navn: String
 )
