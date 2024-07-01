@@ -26,16 +26,16 @@ internal class SakService(
             throw IllegalStateException(feil)
         } else {
             val fagsaker = fagsaker!!.map {
-                val personIdent = it.pleietrengendeAktorId?.let { aktørId ->
-                    personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                val pleietrengende = it.pleietrengendeAktorId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
                 }
 
                 val relatertPersonIdent = it.relatertPersonAktørId?.let { aktørId ->
                     personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
                 }
 
-                if (it.relatertPersonAktørId != null && relatertPersonIdent == null) {
-                    logger.error("Fant ikke person i PDL for relatertPersonAktørId.")
+                val relatertPerson = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
                 }
 
                 val gyldigPeriode = it.gyldigPeriode
@@ -43,23 +43,33 @@ internal class SakService(
                     reservert = false,
                     fagsakId = it.saksnummer,
                     sakstype = it.sakstype.kode,
-                    pleietrengendeIdent = personIdent,
+                    pleietrengendeIdent = pleietrengende?.identitetsnummer,
+                    pleietrengende = pleietrengende,
                     relatertPersonIdent = relatertPersonIdent,
+                    relatertPerson = relatertPerson,
                     gyldigPeriode = gyldigPeriode,
                     behandlingsår = gyldigPeriode?.fom?.year
                 )
             }
             logger.info("Henter reserverte saksnummere fra k9...")
             val reserverteSaksnummere = k9SakService.hentReserverteSaksnummere(søkerAktørId).map {
+                val pleietrengende = it.pleietrengendeAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
+                val relatertPerson = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
                 SakInfoDto(
                     reservert = true,
                     fagsakId = it.saksnummer,
                     sakstype = it.ytelseType.kode,
-                    pleietrengendeIdent = it.pleietrengendeAktørId?.let { aktørId ->
-                        personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
-                    },
+                    pleietrengendeIdent = pleietrengende?.identitetsnummer,
+                    pleietrengende = pleietrengende,
                     gyldigPeriode = null,
-                    relatertPersonIdent = it.relatertPersonAktørId,
+                    relatertPersonIdent = relatertPerson?.identitetsnummer,
+                    relatertPerson = relatertPerson,
                     behandlingsår = it.behandlingsår
                 )
             }

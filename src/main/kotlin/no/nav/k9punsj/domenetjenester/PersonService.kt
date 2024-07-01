@@ -1,6 +1,7 @@
 package no.nav.k9punsj.domenetjenester
 
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
+import no.nav.k9punsj.felles.dto.PdlPerson
 import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import org.springframework.stereotype.Service
@@ -32,6 +33,16 @@ class PersonService(
             ?: throw IllegalStateException("Fant ikke identitetsnummer i PDL")
 
         return personRepository.lagre(norskIdent = norskIdent, aktørId = aktørId)
+    }
+
+    suspend fun hentPersonopplysninger(identitetsnummer: String): PdlPerson? {
+        return pdlService.hentPersonopplysninger(setOf(identitetsnummer)).firstOrNull()?.let {
+            PdlPerson(
+                identitetsnummer = it.identitetsnummer,
+                fødselsdato = it.fødselsdato,
+                navn = it.navn()
+            )
+        }
     }
 
     suspend fun finnPerson(personId: String): Person {
