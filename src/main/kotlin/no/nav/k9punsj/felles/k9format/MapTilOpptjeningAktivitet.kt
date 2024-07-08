@@ -27,8 +27,7 @@ fun ArbeidAktivitetDto.mapOpptjeningAktivitet(feil: MutableList<Feil>): Opptjeni
     selvstendigNaeringsdrivende?.mapOpptjeningAktivitetSelvstendigNæringsdrivende(feil)
         ?.also { k9OpptjeningAktivitet.medSelvstendigNæringsdrivende(it) }
 
-    if (frilanser != null) frilanser.also { k9OpptjeningAktivitet.medFrilanser(it.mapOpptjeningAktivitetFrilanser(feil)) }
-    else k9OpptjeningAktivitet.medFrilanser(Frilanser()) // Fjerner frilansinfo fra k9-sak.
+    frilanser?.also { k9OpptjeningAktivitet.medFrilanser(it.mapOpptjeningAktivitetFrilanser(feil)) }
 
     return k9OpptjeningAktivitet
 }
