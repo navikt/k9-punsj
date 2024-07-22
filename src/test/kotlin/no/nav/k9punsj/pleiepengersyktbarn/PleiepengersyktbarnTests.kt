@@ -8,6 +8,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
@@ -523,8 +524,8 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
                 )
                 assertThat(søknad.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
                 assertThat(søknad.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
+                assertThat(søknad.tilsynsordning?.perioder?.first()?.duration?.somTimerOgMinutter()?.first).isEqualTo(7)
+                assertThat(søknad.tilsynsordning?.perioder?.first()?.duration?.somTimerOgMinutter()?.second).isEqualTo(30)
                 assertThat(søknad.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("7,5")
                 assertThat(søknad.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
                 assertThat(søknad.bosteder!![0].land).isEqualTo("RU")
