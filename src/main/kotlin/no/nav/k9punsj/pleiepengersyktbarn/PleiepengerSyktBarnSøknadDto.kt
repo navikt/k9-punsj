@@ -1,15 +1,19 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.utils.objectMapper
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -70,11 +74,25 @@ data class PleiepengerSyktBarnSøknadDto(
         val perioder: List<TilsynsordningInfoDto>?
     )
 
-    data class TilsynsordningInfoDto(
-        val periode: PeriodeDto?,
-        val timer: Int,
-        val minutter: Int
-    )
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "tidsformat", defaultImpl = TilsynsordningInfoDto.LegacyTilsynsordningInfoDto::class)
+    sealed class TilsynsordningInfoDto(val duration: Duration) {
+        abstract val periode: PeriodeDto?
+
+        @JsonTypeName("desimaler")
+        data class StringTilsynsordningInfoDto(override val periode: PeriodeDto?, val perDagString: String) :
+            TilsynsordningInfoDto(perDagString.somDuration() ?: Duration.ZERO) // Vurder om det skal brukes defaultverdi her eller feile
+
+        @JsonTypeName("timerOgMin")
+        data class TimerOgMinutterTilsynsordningInfoDto(override val periode: PeriodeDto?, val perDag: TimerOgMinutter) :
+            TilsynsordningInfoDto(perDag.somDuration())
+
+        // Slett legacyklasse når frontend er endret
+        data class LegacyTilsynsordningInfoDto(
+            override val periode: PeriodeDto?,
+            val timer: Int,
+            val minutter: Int
+        ) : TilsynsordningInfoDto(TimerOgMinutter(timer.toLong(), minutter).somDuration())
+    }
 
     data class UttakDto(
         val periode: PeriodeDto?,
