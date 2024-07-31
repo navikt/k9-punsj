@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.parameters.HeaderParameter
 import io.swagger.v3.oas.models.security.OAuthFlow
 import io.swagger.v3.oas.models.security.OAuthFlows
 import io.swagger.v3.oas.models.security.Scopes
@@ -57,7 +58,11 @@ internal class OpenApi(
         )
         .components(
             Components()
-                .addSecuritySchemes(OAUTH2, azureLogin())
+//                .addSecuritySchemes(OAUTH2, azureLogin())
+                .addSecuritySchemes("bearer", SecurityScheme()
+                    .`in`(SecurityScheme.In.HEADER)
+                    .bearerFormat("jwt")
+                    .type(SecurityScheme.Type.APIKEY))
         )
         .addSecurityItem(
             SecurityRequirement()
