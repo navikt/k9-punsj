@@ -1,6 +1,5 @@
 package no.nav.k9punsj.felles
 
-import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import java.time.Duration
@@ -30,7 +29,7 @@ internal object DurationMapper {
         val timerOgMinutter = somTimerOgMinutterOrNull()
         if (timerOgMinutter != null) {
             val (timer, minutter) = timerOgMinutter
-            return Duration.ofHours(timer).plusMinutes(minutter.toLong())
+            return Duration.ofHours(timer).plusMinutes(minutter)
         }
 
         // Ikke en støttet måte å oppgi tid på
