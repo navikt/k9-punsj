@@ -103,8 +103,7 @@ data class PleiepengerSyktBarnSøknadDto(
     data class UttakDto(
         val periode: PeriodeDto?,
         val timerPleieAvBarnetPerDag: String?,
-        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()
-            ?.somTimerOgMinutterDto()
+        val pleieAvBarnetPerDag: TimerOgMinutter? = timerPleieAvBarnetPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto()
     )
 
     data class OmsorgDto(
