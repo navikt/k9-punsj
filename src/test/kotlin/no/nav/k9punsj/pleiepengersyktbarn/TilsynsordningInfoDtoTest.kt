@@ -5,7 +5,7 @@ import no.nav.k9punsj.utils.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class PleiepengerSyktBarnSøknadDtoTest {
+class TilsynsordningInfoDtoTest {
     private val objectMapper = objectMapper()
 
     @Test
