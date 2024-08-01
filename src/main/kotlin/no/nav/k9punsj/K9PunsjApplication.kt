@@ -7,7 +7,6 @@ import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.utils.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
