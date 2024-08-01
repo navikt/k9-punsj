@@ -71,32 +71,6 @@ data class PleiepengerSyktBarnSøknadDto(
         val perioder: List<TilsynsordningInfoDto>?
     )
 
-//    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "tidsformat")
-//    sealed class TilsynsordningInfoDto(
-//        open val periode: PeriodeDto?,
-//        ) {
-//        abstract val duration: Duration
-//
-//        @JsonTypeName("desimaler")
-//        data class StringTilsynsordningInfoDto @JsonCreator @JsonIgnoreProperties("timer", "minutter") constructor(
-//            override val periode: PeriodeDto?,
-//            val perDagString: String
-//        ) : TilsynsordningInfoDto(periode) {
-//            val timer = perDagString.somDuration()?.toHours() ?: 0
-//            val minutter = perDagString.somDuration()?.toMinutesPart() ?: 0
-//            @JsonIgnore override val duration: Duration = perDagString.somDuration() ?: Duration.ZERO
-//        }
-//
-//        @JsonTypeName("timerOgMin")
-//        data class TimerOgMinutterTilsynsordningInfoDto(
-//            override val periode: PeriodeDto?,
-//            val timer: Long,
-//            val minutter: Int,
-//        ) : TilsynsordningInfoDto(periode) {
-//            override val duration: Duration = TimerOgMinutter(timer, minutter).somDuration()
-//        }
-//    }
-
     data class TilsynsordningInfoDto(
         val periode: PeriodeDto?,
         val tidsformat: Tidsformat?,
