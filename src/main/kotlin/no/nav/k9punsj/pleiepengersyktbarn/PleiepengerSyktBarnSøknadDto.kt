@@ -1,8 +1,6 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeName
+import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
@@ -11,7 +9,6 @@ import no.nav.k9punsj.felles.FagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.utils.objectMapper
 import java.time.Duration
 import java.time.LocalDate
@@ -74,24 +71,33 @@ data class PleiepengerSyktBarnSøknadDto(
         val perioder: List<TilsynsordningInfoDto>?
     )
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "tidsformat", defaultImpl = TilsynsordningInfoDto.LegacyTilsynsordningInfoDto::class)
-    sealed class TilsynsordningInfoDto(val duration: Duration) {
-        abstract val periode: PeriodeDto?
+    data class TilsynsordningInfoDto(
+        val periode: PeriodeDto?,
+        val tidsformat: Tidsformat?,
+        val timer: Long,
+        val minutter: Int,
+        val perDagString: String?
+    ) {
+        fun somDuration(): Duration {
+            return TimerOgMinutter(timer, minutter).somDuration()
+        }
 
-        @JsonTypeName("desimaler")
-        data class StringTilsynsordningInfoDto(override val periode: PeriodeDto?, val perDagString: String) :
-            TilsynsordningInfoDto(perDagString.somDuration() ?: Duration.ZERO) // Vurder om det skal brukes defaultverdi her eller feile
-
-        @JsonTypeName("timerOgMin")
-        data class TimerOgMinutterTilsynsordningInfoDto(override val periode: PeriodeDto?, val perDag: TimerOgMinutter) :
-            TilsynsordningInfoDto(perDag.somDuration())
-
-        // Slett legacyklasse når frontend er endret
-        data class LegacyTilsynsordningInfoDto(
-            override val periode: PeriodeDto?,
-            val timer: Int,
-            val minutter: Int
-        ) : TilsynsordningInfoDto(TimerOgMinutter(timer.toLong(), minutter).somDuration())
+        companion object {
+            @JvmStatic
+            @JsonCreator
+            fun create(periode: PeriodeDto?,
+                       tidsformat: Tidsformat?,
+                       timer: Long,
+                       minutter: Int,
+                       perDagString: String?): TilsynsordningInfoDto =
+                when (tidsformat) {
+                    Tidsformat.desimaler -> {
+                        val duration = perDagString.somDuration()
+                        TilsynsordningInfoDto(periode, tidsformat, duration?.toHours() ?: 0, duration?.toMinutesPart() ?: 0, perDagString)
+                    }
+                    else -> TilsynsordningInfoDto(periode, tidsformat, timer, minutter, null)
+                }
+            }
     }
 
     data class UttakDto(
@@ -105,6 +111,10 @@ data class PleiepengerSyktBarnSøknadDto(
         val samtykketOmsorgForBarnet: Boolean?,
         val beskrivelseAvOmsorgsrollen: String?
     )
+}
+
+enum class Tidsformat {
+    desimaler, timerOgMin
 }
 
 data class SvarPsbDto(
