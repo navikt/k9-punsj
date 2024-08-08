@@ -30,16 +30,11 @@ jobs:
           java-version: 21
           distribution: temurin
           cache: maven
-      - uses: octo-sts/action@6177b4481c00308b3839969c3eca88c96a91775f # v1.0.0
-        id: octo-sts
-        with:
-          scope: ${{ github.repository_owner }}
-          identity: readertoken
 
       - name: Bygge JAR
         run: mvn clean package --settings ./.m2/settings.xml
         env:
-          GITHUB_PASSWORD: ${{ steps.octo-sts.outputs.token }}
+          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
 
       - uses: nais/docker-build-push@v0
         id: docker-push
@@ -69,4 +64,4 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_PASSWORD: ${{ steps.octo-sts.outputs.token }}
+          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
