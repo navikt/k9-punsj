@@ -427,26 +427,23 @@ internal class JournalpostRoutes(
                     return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-                val k9FagsakYtelseType = journalpost.ytelse?.let {
-                    val ytelseKode =
-                        if (it == PunsjFagsakYtelseType.UKJENT.kode) PunsjFagsakYtelseType.UDEFINERT.kode else it
-                    journalpost.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType = FagsakYtelseType.fraKode(ytelseKode))
-                } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
+                val k9FagsakYtelseType = dto.ytelse ?: journalpost.ytelse?.let {
+                    val ytelseKode = if (it == PunsjFagsakYtelseType.UKJENT.kode) PunsjFagsakYtelseType.UDEFINERT.kode else it
+                    journalpost.utledK9sakFagsakYtelseType(FagsakYtelseType.fraKode(ytelseKode))
+                } ?: return@RequestContext kanIkkeKopieres("Mangler ytelse for journalpost.")
 
-                val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(journalpost.ytelse)
-
-                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-                    return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
+                if (journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+                    return@RequestContext kanIkkeKopieres("Kan ikke kopiere journalpost med type inntektsmelding utgått.")
                 }
 
-                val støttedeYtelseTyperForKopiering = listOf(
-                    PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
-                    PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                    PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+                val støttedeYtelseTyperForKopiering = setOf(
+                    FagsakYtelseType.OMSORGSPENGER_KS,
+                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                    FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
                 )
 
-                if (!støttedeYtelseTyperForKopiering.contains(punsjFagsakYtelseType)) {
-                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${punsjFagsakYtelseType.navn} for relaterte journalposter")
+                if (k9FagsakYtelseType !in støttedeYtelseTyperForKopiering) {
+                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
                 }
 
                 innsendingClient.sendKopierJournalpost(
