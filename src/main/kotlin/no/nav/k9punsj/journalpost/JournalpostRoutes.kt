@@ -49,6 +49,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -410,7 +412,7 @@ internal class JournalpostRoutes(
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+                    ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost.")
 
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
@@ -424,17 +426,17 @@ internal class JournalpostRoutes(
 
                 val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
                 if (safJournalpost != null && safJournalpost.journalposttype == "U") {
-                    return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
+                    throw KanIkkeKopieresErrorResponse("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
                 val k9FagsakYtelseType: FagsakYtelseType =
                     dto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
                         val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
                         journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
-                    } ?: return@RequestContext kanIkkeKopieres("Mangler ytelse for journalpost.")
+                    } ?: throw KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
 
                 if (journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-                    return@RequestContext kanIkkeKopieres("Kan ikke kopiere journalpost med type inntektsmelding utgått.")
+                    throw KanIkkeKopieresErrorResponse("Kan ikke kopiere journalpost med type inntektsmelding utgått.")
                 }
 
                 val støttedeYtelseTyperForKopiering = setOf(
@@ -444,7 +446,7 @@ internal class JournalpostRoutes(
                 )
 
                 if (k9FagsakYtelseType !in støttedeYtelseTyperForKopiering) {
-                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
+                    throw KanIkkeKopieresErrorResponse("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
                 }
 
                 innsendingClient.sendKopierJournalpost(
@@ -541,10 +543,9 @@ internal class JournalpostRoutes(
         }
     }
 
-    private suspend fun kanIkkeKopieres(feil: String) = ServerResponse
-        .status(HttpStatus.CONFLICT)
-        .bodyValueAndAwait(feil)
-        .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
+    private class KanIkkeKopieresErrorResponse(feil: String) :
+        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
+
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
