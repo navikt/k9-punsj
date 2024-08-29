@@ -427,10 +427,11 @@ internal class JournalpostRoutes(
                     return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-                val k9FagsakYtelseType = dto.ytelse ?: journalpost.ytelse?.let {
-                    val ytelseKode = if (it == PunsjFagsakYtelseType.UKJENT.kode) PunsjFagsakYtelseType.UDEFINERT.kode else it
-                    journalpost.utledK9sakFagsakYtelseType(FagsakYtelseType.fraKode(ytelseKode))
-                } ?: return@RequestContext kanIkkeKopieres("Mangler ytelse for journalpost.")
+                val k9FagsakYtelseType: FagsakYtelseType =
+                    dto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
+                        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
+                        journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
+                    } ?: return@RequestContext kanIkkeKopieres("Mangler ytelse for journalpost.")
 
                 if (journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
                     return@RequestContext kanIkkeKopieres("Kan ikke kopiere journalpost med type inntektsmelding utgått.")

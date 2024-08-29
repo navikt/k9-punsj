@@ -128,7 +128,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             til = journalpost.aktørId.toString(),
             barn = "05032435485",
             annenPart = null,
-            ytelse = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            ytelse = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
 
         webTestClient
