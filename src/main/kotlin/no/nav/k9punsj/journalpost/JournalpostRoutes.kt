@@ -2,6 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -125,9 +126,9 @@ internal class JournalpostRoutes(
 
                     val k9PunsjFagsakYtelseType = punsjJournalpost?.ytelse?.let {
                         punsjJournalpost.utledK9sakFagsakYtelseType(
-                            k9sakFagsakYtelseType = when(it) {
-                                PunsjFagsakYtelseType.UKJENT.kode -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.UDEFINERT
-                                else -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                            k9sakFagsakYtelseType = when (it) {
+                                PunsjFagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
+                                else -> FagsakYtelseType.fraKode(it)
                             }
                         )
                     }
@@ -143,7 +144,13 @@ internal class JournalpostRoutes(
                     }
 
                     val utledetSak =
-                        utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9PunsjFagsakYtelseType, punsjJournalpost)
+                        utledSak(
+                            erFerdigstiltEllerJournalfoert,
+                            safSak,
+                            k9Fagsak,
+                            k9PunsjFagsakYtelseType,
+                            punsjJournalpost
+                        )
                     logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
@@ -420,12 +427,10 @@ internal class JournalpostRoutes(
                     return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-                val k9FagsakYtelseType = journalpost?.ytelse?.let {
-                    journalpost.utledK9sakFagsakYtelseType(
-                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
-                            it
-                        )
-                    )
+                val k9FagsakYtelseType = journalpost.ytelse?.let {
+                    val ytelseKode =
+                        if (it == PunsjFagsakYtelseType.UKJENT.kode) PunsjFagsakYtelseType.UDEFINERT.kode else it
+                    journalpost.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType = FagsakYtelseType.fraKode(ytelseKode))
                 } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
 
                 val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(journalpost.ytelse)
@@ -464,7 +469,7 @@ internal class JournalpostRoutes(
         erFerdigstiltEllerJournalfoert: Boolean,
         safSak: SafDtos.Sak?,
         k9Fagsak: SakInfoDto?,
-        k9FagsakYtelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType?,
+        k9FagsakYtelseType: FagsakYtelseType?,
         punsjJournalpost: PunsjJournalpost?,
     ): Sak {
         logger.info("Utleder sak for journalpost")
