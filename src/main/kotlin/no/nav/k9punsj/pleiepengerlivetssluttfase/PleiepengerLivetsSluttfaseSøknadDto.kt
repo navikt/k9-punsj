@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.ArbeidstidDto
 import no.nav.k9punsj.felles.dto.BostederDto
@@ -60,9 +60,9 @@ data class SvarPlsDto(
 )
 
 internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {
-    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
+    val bunke = hentFor(PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf())
+        return SvarPlsDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -82,7 +82,7 @@ internal fun Mappe.tilPlsVisning(norskIdent: String): SvarPlsDto {
                 )
             }
         }
-    return SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, søknader)
+    return SvarPlsDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilPlsvisning(): PleiepengerLivetsSluttfaseSøknadDto {

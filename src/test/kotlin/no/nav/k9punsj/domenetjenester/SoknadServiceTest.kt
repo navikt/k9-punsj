@@ -10,14 +10,8 @@ import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.personopplysninger.Barn
 import no.nav.k9.søknad.felles.personopplysninger.Søker
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer
-import no.nav.k9.søknad.ytelse.Ytelse
-import no.nav.k9.søknad.ytelse.Ytelse.PLEIEPENGER_SYKT_BARN
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
-import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.innsending.InnsendingClient

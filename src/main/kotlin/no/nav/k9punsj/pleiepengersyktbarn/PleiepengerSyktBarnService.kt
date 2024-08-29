@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -61,7 +61,7 @@ internal class PleiepengerSyktBarnService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
+            .bodyValueAndAwait(SvarPsbDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -184,7 +184,7 @@ internal class PleiepengerSyktBarnService(
     internal suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            ytelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            ytelseType = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             journalpostId = nySøknad.journalpostId
         )
 
@@ -254,7 +254,7 @@ internal class PleiepengerSyktBarnService(
         val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
             matchfagsak.brukerIdent,
             matchfagsak.barnIdent,
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
 
         return if (perioder != null) {
@@ -278,7 +278,7 @@ internal class PleiepengerSyktBarnService(
         return k9SakService.hentPerioderSomFinnesIK9(
             søker = dto.soekerId,
             barn = dto.barn.norskIdent,
-            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
     }
 }

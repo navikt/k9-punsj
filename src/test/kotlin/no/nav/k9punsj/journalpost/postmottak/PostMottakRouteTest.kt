@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.CALL_ID_KEY
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.junit.jupiter.api.AfterEach
@@ -53,7 +53,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             journalpostId = journalpostId,
             brukerIdent = brukerIdent,
             pleietrengendeIdent = "456",
-            fagsakYtelseTypeKode = FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode,
+            fagsakYtelseTypeKode = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode,
             saksnummer = null,
             relatertPersonIdent = null
         )
@@ -94,7 +94,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             journalpostId = journalpostId,
             brukerIdent = brukerIdent,
             pleietrengendeIdent = "456",
-            fagsakYtelseTypeKode = FagsakYtelseType.OMSORGSPENGER.kode,
+            fagsakYtelseTypeKode = PunsjFagsakYtelseType.OMSORGSPENGER.kode,
             saksnummer = null,
             relatertPersonIdent = null
         ).valider(behandlingsår?.toIntOrNull()) }

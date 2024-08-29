@@ -1,14 +1,14 @@
 package no.nav.k9punsj.util
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Søknadstype
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class FagsakYtelseTypeMappingTest {
+class PunsjFagsakYtelseTypeMappingTest {
 
     @Test
     fun `mapper ytelsetype fra punsjetsøknad`() {
@@ -69,7 +69,7 @@ class FagsakYtelseTypeMappingTest {
         val jsonSøknad = objectMapper().readTree(json) as ObjectNode
 
         val fagsakYtelseTypeKode = Søknadstype.fraK9FormatYtelsetype(jsonSøknad["ytelse"]["type"].asText()).k9YtelseType
-        val fagsakYtelseType = FagsakYtelseType.fromKode(fagsakYtelseTypeKode)
-        Assertions.assertEquals(FagsakYtelseType.OMSORGSPENGER, fagsakYtelseType)
+        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(fagsakYtelseTypeKode)
+        Assertions.assertEquals(PunsjFagsakYtelseType.OMSORGSPENGER, punsjFagsakYtelseType)
     }
 }

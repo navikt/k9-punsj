@@ -7,7 +7,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Søknadstype
@@ -66,7 +66,7 @@ class SoknadService(
 
         val søkerFnr = søknad.søker.personIdent.verdi
         val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
-        val fagsakYtelseType = FagsakYtelseType.fromKode(k9YtelseType)
+        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -114,7 +114,7 @@ class SoknadService(
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
                 k9FormatSøknad = søknad,
                 søknadEntitet = søknadEntitet,
-                fagsakYtelseType = fagsakYtelseType
+                punsjFagsakYtelseType = punsjFagsakYtelseType
             )
             require(k9Respons.second.isNullOrBlank()) {
                 return HttpStatus.INTERNAL_SERVER_ERROR to "Feil ved henting av saksnummer: ${k9Respons.second}"
@@ -207,7 +207,7 @@ class SoknadService(
         k9SakService.sendInnSoeknad(
             soknad = søknad,
             journalpostId = journalpostId.toString(),
-            fagsakYtelseType = fagsakYtelseType,
+            punsjFagsakYtelseType = punsjFagsakYtelseType,
             saksnummer = k9Saksnummer,
             brevkode = brevkode
         )
@@ -302,7 +302,7 @@ class SoknadService(
             soknad = søknad,
             søknadEntitet = søknadEntitet ,
             journalpostId = journalpostId.toString(),
-            fagsakYtelseType = FagsakYtelseType.fromKode(Søknadstype.fraBrevkode(brevkode).k9YtelseType),
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(Søknadstype.fraBrevkode(brevkode).k9YtelseType),
             saksnummer = k9Saksnummer,
             brevkode = brevkode
         )

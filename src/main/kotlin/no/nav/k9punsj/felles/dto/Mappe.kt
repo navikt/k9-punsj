@@ -1,13 +1,13 @@
 package no.nav.k9punsj.felles.dto
 
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 
 data class Mappe(
     val mappeId: String,
     val søker: Person,
     val bunke: List<BunkeEntitet>
 ) {
-    fun hentFor(fagsakYtelseType: FagsakYtelseType): BunkeEntitet? {
-        return bunke.firstOrNull { it.fagsakYtelseType == fagsakYtelseType }
+    fun hentFor(punsjFagsakYtelseType: PunsjFagsakYtelseType): BunkeEntitet? {
+        return bunke.firstOrNull { it.punsjFagsakYtelseType == punsjFagsakYtelseType }
     }
 }
