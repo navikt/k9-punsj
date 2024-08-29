@@ -2,12 +2,13 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
@@ -48,6 +49,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -123,11 +126,11 @@ internal class JournalpostRoutes(
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                                     journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
 
-                    val k9FagsakYtelseType = punsjJournalpost?.ytelse?.let {
+                    val k9PunsjFagsakYtelseType = punsjJournalpost?.ytelse?.let {
                         punsjJournalpost.utledK9sakFagsakYtelseType(
-                            k9sakFagsakYtelseType = when(it) {
-                                FagsakYtelseType.UKJENT.kode -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.UDEFINERT
-                                else -> no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(it)
+                            k9sakFagsakYtelseType = when (it) {
+                                PunsjFagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
+                                else -> FagsakYtelseType.fraKode(it)
                             }
                         )
                     }
@@ -143,7 +146,13 @@ internal class JournalpostRoutes(
                     }
 
                     val utledetSak =
-                        utledSak(erFerdigstiltEllerJournalfoert, safSak, k9Fagsak, k9FagsakYtelseType, punsjJournalpost)
+                        utledSak(
+                            erFerdigstiltEllerJournalfoert,
+                            safSak,
+                            k9Fagsak,
+                            k9PunsjFagsakYtelseType,
+                            punsjJournalpost
+                        )
                     logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
@@ -403,7 +412,7 @@ internal class JournalpostRoutes(
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: return@RequestContext kanIkkeKopieres("Finner ikke journalpost.")
+                    ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost.")
 
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
@@ -417,31 +426,27 @@ internal class JournalpostRoutes(
 
                 val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
                 if (safJournalpost != null && safJournalpost.journalposttype == "U") {
-                    return@RequestContext kanIkkeKopieres("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
+                    throw KanIkkeKopieresErrorResponse("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
                 }
 
-                val k9FagsakYtelseType = journalpost?.ytelse?.let {
-                    journalpost.utledK9sakFagsakYtelseType(
-                        k9sakFagsakYtelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.fraKode(
-                            it
-                        )
-                    )
-                } ?: return@RequestContext kanIkkeKopieres("Finner ikke ytelse for journalpost.")
+                val k9FagsakYtelseType: FagsakYtelseType =
+                    dto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
+                        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
+                        journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
+                    } ?: throw KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
 
-                val fagsakYtelseType = FagsakYtelseType.fromKode(journalpost.ytelse)
-
-                if (journalpost?.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-                    return@RequestContext kanIkkeKopieres("Kan ikke kopier journalpost med type inntektsmelding utgått.")
+                if (journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+                    throw KanIkkeKopieresErrorResponse("Kan ikke kopiere journalpost med type inntektsmelding utgått.")
                 }
 
-                val støttedeYtelseTyperForKopiering = listOf(
-                    FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
+                val støttedeYtelseTyperForKopiering = setOf(
+                    FagsakYtelseType.OMSORGSPENGER_KS,
                     FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                    FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+                    FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
                 )
 
-                if (!støttedeYtelseTyperForKopiering.contains(fagsakYtelseType)) {
-                    return@RequestContext kanIkkeKopieres("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
+                if (k9FagsakYtelseType !in støttedeYtelseTyperForKopiering) {
+                    throw KanIkkeKopieresErrorResponse("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
                 }
 
                 innsendingClient.sendKopierJournalpost(
@@ -464,7 +469,7 @@ internal class JournalpostRoutes(
         erFerdigstiltEllerJournalfoert: Boolean,
         safSak: SafDtos.Sak?,
         k9Fagsak: SakInfoDto?,
-        k9FagsakYtelseType: no.nav.k9.kodeverk.behandling.FagsakYtelseType?,
+        k9FagsakYtelseType: FagsakYtelseType?,
         punsjJournalpost: PunsjJournalpost?,
     ): Sak {
         logger.info("Utleder sak for journalpost")
@@ -538,10 +543,9 @@ internal class JournalpostRoutes(
         }
     }
 
-    private suspend fun kanIkkeKopieres(feil: String) = ServerResponse
-        .status(HttpStatus.CONFLICT)
-        .bodyValueAndAwait(feil)
-        .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
+    private class KanIkkeKopieresErrorResponse(feil: String) :
+        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
+
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)

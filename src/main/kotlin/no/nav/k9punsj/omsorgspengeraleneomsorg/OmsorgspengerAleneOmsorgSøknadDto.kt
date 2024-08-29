@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -41,9 +41,9 @@ data class SvarOmsAODto(
 )
 
 internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
+        return SvarOmsAODto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -56,7 +56,7 @@ internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {
                 OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
-    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
+    return SvarOmsAODto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {

@@ -3,14 +3,13 @@ package no.nav.k9punsj.korrigeringinntektsmelding
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
@@ -62,7 +61,7 @@ internal class KorrigeringInntektsmeldingService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
+            .bodyValueAndAwait(SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -82,7 +81,7 @@ internal class KorrigeringInntektsmeldingService(
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+        journalpostService.settFagsakYtelseType(PunsjFagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingKorrigeringIm(
             nySøknad = opprettNySøknad
@@ -231,7 +230,7 @@ internal class KorrigeringInntektsmeldingService(
     internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): ServerResponse {
         val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
             søker = matchFagsakMedPeriode.brukerIdent,
-            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER,
             periodeDto = matchFagsakMedPeriode.periodeDto
         )
 

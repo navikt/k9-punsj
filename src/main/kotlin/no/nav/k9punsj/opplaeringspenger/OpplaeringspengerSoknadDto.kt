@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -103,9 +103,9 @@ data class SvarOlpDto(
 )
 
 internal fun Mappe.tilOlpVisning(norskIdent: String): SvarOlpDto {
-    val bunke = hentFor(FagsakYtelseType.OPPLÆRINGSPENGER)
+    val bunke = hentFor(PunsjFagsakYtelseType.OPPLÆRINGSPENGER)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOlpDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf())
+        return SvarOlpDto(norskIdent, PunsjFagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -123,7 +123,7 @@ internal fun Mappe.tilOlpVisning(norskIdent: String): SvarOlpDto {
                 )
             }
         }
-    return SvarOlpDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, søknader)
+    return SvarOlpDto(norskIdent, PunsjFagsakYtelseType.OPPLÆRINGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOlpvisning(): OpplaeringspengerSøknadDto {

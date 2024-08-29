@@ -3,7 +3,7 @@ package no.nav.k9punsj.rest.eksternt.k9sak
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
@@ -22,10 +22,10 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String?,
-        fagsakYtelseType: FagsakYtelseType
+        punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> {
         // OmsorgspengerutbetalingRoutesTest.Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år
-        if (søker == "03011939596" && fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER) {
+        if (søker == "03011939596" && punsjFagsakYtelseType == PunsjFagsakYtelseType.OMSORGSPENGER) {
             return Pair(
                 listOf(
                     PeriodeDto(
@@ -46,15 +46,15 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String?,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         periode: PeriodeDto
     ): Pair<List<PeriodeDto>?, String?> {
-        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, punsjFagsakYtelseType = punsjFagsakYtelseType)
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         periodeDto: PeriodeDto
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         // simulerer svar på denne
@@ -95,7 +95,7 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentEllerOpprettSaksnummer(
         k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
-        fagsakYtelseType: FagsakYtelseType
+        punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<String?, String?> {
         return Pair("ABC123", null)
     }
@@ -103,7 +103,7 @@ internal class TestK9SakService : K9SakService {
     override suspend fun sendInnSoeknad(
         soknad: Søknad,
         journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode
     ) {
@@ -142,7 +142,7 @@ internal class TestK9SakService : K9SakService {
         soknad: Søknad,
         søknadEntitet: SøknadEntitet,
         journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode,
     ) {

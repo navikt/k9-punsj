@@ -113,6 +113,18 @@ spec:
     - name: AUDITLOGGER_PRODUCT
       value: "k9-punsj"
 
+    # Tracing : opentelemetry
+    - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+      value: "https://elastic-apm.adeo.no"
+    - name: "OTEL_METRICS_EXPORTER"
+      value: "otlp"
+    - name: "OTEL_LOGS_EXPORTER"
+      value: "none"
+    - name: "OTEL_RESOURCE_ATTRIBUTES"
+      value: "service.name=k9-punsj,service.version=k9-punsj,deployment.environment=q"
+    - name: "OTEL_TRACES_EXPORTER"
+      value: "otlp"
+
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
       value: https://k9-sak.nais.preprod.local/k9/sak/api

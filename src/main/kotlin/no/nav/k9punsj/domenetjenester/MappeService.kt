@@ -3,7 +3,7 @@ package no.nav.k9punsj.domenetjenester
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.JsonB
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -47,7 +47,7 @@ internal class MappeService(
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OPPLÆRINGSPENGER)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.OPPLÆRINGSPENGER)
         val søknadfelles = felles(nySøknad.journalpostId)
         val opplaeringspengerSøknadDto =
             OpplaeringspengerSøknadDto(
@@ -79,7 +79,7 @@ internal class MappeService(
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId =
-            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         val søknadfelles = felles(nySøknad.journalpostId)
         val pleiepengerSøknadDto =
             PleiepengerSyktBarnSøknadDto(
@@ -111,7 +111,7 @@ internal class MappeService(
 
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(soker.personId)
         val bunkeId =
-            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
+            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE)
         val soknadfelles = felles(nySøknad.journalpostId)
         val pleiepengerLivetsSluttfaseSoknadDto = PleiepengerLivetsSluttfaseSøknadDto(
             soeknadId = soknadfelles.søknadsId.toString(),
@@ -154,7 +154,7 @@ internal class MappeService(
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.OMSORGSPENGER)
 
         val søknadfelles = felles(nySøknad.journalpostId)
         val dto = KorrigeringInntektsmeldingDto(
@@ -179,7 +179,7 @@ internal class MappeService(
         val norskIdent = nySøknad.norskIdent
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.OMSORGSPENGER)
 
         val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerutbetalingSøknadDto(
@@ -207,7 +207,7 @@ internal class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(
             mappeId,
-            FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN
+            PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN
         )
 
         val søknadfelles = felles(nySøknad.journalpostId)
@@ -237,7 +237,7 @@ internal class MappeService(
         val søker = personService.finnEllerOpprettPersonVedNorskIdent(norskIdent)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId =
-            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+            bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
 
         val søknadfelles = felles(nySøknad.journalpostId)
         val dto = OmsorgspengerAleneOmsorgSøknadDto(
@@ -267,7 +267,7 @@ internal class MappeService(
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(søker.personId)
         val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(
             mappeId,
-            FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE
+            PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE
         )
 
         val søknadfelles = felles(nySøknad.journalpostId)
@@ -537,7 +537,7 @@ internal class MappeService(
         val bunkerMedSøknader = alleBunker.map { b ->
             BunkeEntitet(
                 b.bunkeId,
-                b.fagsakYtelseType,
+                b.punsjFagsakYtelseType,
                 hentAlleSøknaderForBunker.filter { s -> s.bunkeId == b.bunkeId }.toList()
             )
         }

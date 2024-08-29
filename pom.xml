@@ -32,8 +32,8 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>4.1.17</k9-sak.version>
-        <k9-formidling.version>1.0.14</k9-formidling.version>
-        <k9-format.version>9.4.0</k9-format.version>
+        <k9-formidling.version>10.1.0</k9-formidling.version>
+        <k9-format.version>9.5.0</k9-format.version>
         <k9-rapid.version>1.20240510083323-9f05ca1</k9-rapid.version>
 
         <!-- database -->

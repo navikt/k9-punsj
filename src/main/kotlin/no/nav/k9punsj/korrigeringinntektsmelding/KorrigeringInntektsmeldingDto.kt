@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -45,9 +45,9 @@ data class SvarOmsDto(
 )
 
 internal fun Mappe.tilOmsVisning(norskIdent: String): SvarOmsDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
+        return SvarOmsDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -59,7 +59,7 @@ internal fun Mappe.tilOmsVisning(norskIdent: String): SvarOmsDto {
                 KorrigeringInntektsmeldingDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
             }
         }
-    return SvarOmsDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
+    return SvarOmsDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsvisning(): KorrigeringInntektsmeldingDto {
