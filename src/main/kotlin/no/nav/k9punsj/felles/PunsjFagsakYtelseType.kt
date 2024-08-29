@@ -1,6 +1,6 @@
 package no.nav.k9punsj.felles
 
-enum class FagsakYtelseType(val kode: String, val navn: String, val oppgavetema: String?) {
+enum class PunsjFagsakYtelseType(val kode: String, val navn: String, val oppgavetema: String?) {
     PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "OMS"),
     PLEIEPENGER_LIVETS_SLUTTFASE("PPN", "Pleiepenger i livets sluttfase", "OMS"),
     OMSORGSPENGER("OMP", "Omsorgspenger", "OMS"),
@@ -13,18 +13,13 @@ enum class FagsakYtelseType(val kode: String, val navn: String, val oppgavetema:
     UDEFINERT("-", "Ikke definert", null);
 
     companion object {
-        private val map = values().associateBy { v -> v.kode }
-        fun fromKode(kode: String): FagsakYtelseType {
+        private val map = entries.associateBy { v -> v.kode }
+        fun fromKode(kode: String): PunsjFagsakYtelseType {
 
-            val type = map[kode]
-            if (type != null) {
-                return type
-            } else {
-                return UKJENT
-            }
+            return map[kode] ?: UKJENT
         }
 
-        fun fraNavn(navn: String): FagsakYtelseType {
+        fun fraNavn(navn: String): PunsjFagsakYtelseType {
             return values().firstOrNull { it.name == navn } ?: UDEFINERT
         }
     }

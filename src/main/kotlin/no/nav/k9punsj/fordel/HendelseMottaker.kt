@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.Tag
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.metrikker.Metrikk
@@ -32,7 +32,7 @@ class HendelseMottaker @Autowired constructor(
         if (journalpostIkkeEksisterer) {
             val aktørId = fordelPunsjEventDto.aktørId
             val punsjEventType = K9FordelType.fraKode(fordelPunsjEventDto.type).kode
-            val ytelse = FagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode
+            val ytelse = PunsjFagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode
             val gosysoppgaveId = fordelPunsjEventDto.gosysoppgaveId
 
             // TODO: Dersom SKRIV_TIL_OSS_SPØRMSÅL, SKRIV_TIL_OSS_SVAR, SAMTALEREFERAT

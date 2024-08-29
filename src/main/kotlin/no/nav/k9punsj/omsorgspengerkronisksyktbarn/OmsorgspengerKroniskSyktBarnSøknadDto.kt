@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -38,9 +38,9 @@ data class SvarOmsKSBDto(
 )
 
 internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())
+        return SvarOmsKSBDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -59,7 +59,7 @@ internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
                 )
             }
         }
-    return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
+    return SvarOmsKSBDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøknadDto {

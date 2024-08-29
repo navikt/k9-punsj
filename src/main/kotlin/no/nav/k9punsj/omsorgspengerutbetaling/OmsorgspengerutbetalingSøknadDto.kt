@@ -7,7 +7,7 @@ import no.nav.k9.søknad.felles.fravær.FraværÅrsak
 import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.BostederDto
 import no.nav.k9punsj.felles.dto.Mappe
@@ -81,9 +81,9 @@ data class SvarOmsUtDto(
 )
 
 internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
+        return SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -96,7 +96,7 @@ internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
                 OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
-    return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
+    return SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsUtvisning(): OmsorgspengerutbetalingSøknadDto {
