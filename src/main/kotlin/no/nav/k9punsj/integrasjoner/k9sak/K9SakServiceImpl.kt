@@ -96,10 +96,10 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String?,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
     ): Pair<List<PeriodeDto>?, String?> {
         val matchDto = MatchDto(
-            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            ytelseType = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode),
             bruker = søker,
             pleietrengende = barn
         )
@@ -131,13 +131,13 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String?,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
         periode: PeriodeDto,
     ): Pair<List<PeriodeDto>?, String?> {
         val søkerAktørId = personService.finnAktørId(søker)
         val barnAktørId = barn?.let { personService.finnAktørId(barn) }
         val finnFagsakDto = FinnFagsakDto(
-            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            ytelseType = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode),
             aktørId = søkerAktørId,
             pleietrengendeAktørId = barnAktørId,
             periode = periode
@@ -181,11 +181,11 @@ class K9SakServiceImpl(
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
         periodeDto: PeriodeDto,
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         val matchDto = MatchArbeidsforholdDto(
-            ytelseType = FagsakYtelseType.fraKode(fagsakYtelseType.kode),
+            ytelseType = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode),
             bruker = søker,
             periode = periodeDto
         )
@@ -239,10 +239,10 @@ class K9SakServiceImpl(
     override suspend fun hentEllerOpprettSaksnummer(
         k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
     ): Pair<String?, String?> {
         // Bruker k9saksnummergrunnlag for å mappe
-        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
+        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(punsjFagsakYtelseType)
 
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
         val pleietrengendeAktørId =
@@ -254,7 +254,7 @@ class K9SakServiceImpl(
                 personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
             } else null
 
-        val ytelseTypeKode = FagsakYtelseType.fraKode(fagsakYtelseType.kode).kode
+        val ytelseTypeKode = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode).kode
 
         val periodeFraK9Format = try {
             k9FormatSøknad.getYtelse<Ytelse>().søknadsperiode
@@ -300,7 +300,7 @@ class K9SakServiceImpl(
     override suspend fun sendInnSoeknad(
         soknad: Søknad,
         journalpostId: String,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode,
     ) {
@@ -315,7 +315,7 @@ class K9SakServiceImpl(
             [{
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
-                "ytelseType": "${fagsakYtelseType.kode}",
+                "ytelseType": "${punsjFagsakYtelseType.kode}",
                 "kanalReferanse": "$callId",
                 "type": "${brevkode.kode}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
@@ -329,7 +329,7 @@ class K9SakServiceImpl(
                 "saksnummer": "$saksnummer",
                 "journalpostId": "$journalpostId",
                 "ytelseType": {
-                    "kode": "${fagsakYtelseType.kode}",
+                    "kode": "${punsjFagsakYtelseType.kode}",
                     "kodeverk": "FAGSAK_YTELSE"
                 },
                 "kanalReferanse": "$callId",
@@ -428,7 +428,7 @@ class K9SakServiceImpl(
         soknad: Søknad,
         søknadEntitet: SøknadEntitet,
         journalpostId: String,
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode,
     ) {
@@ -436,7 +436,7 @@ class K9SakServiceImpl(
         val søknadJson = objectMapper().writeValueAsString(soknad)
         val callId = hentCallId()
 
-        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(fagsakYtelseType)
+        val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(punsjFagsakYtelseType)
         val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
         val pleietrengendeAktørId =
             if (!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
@@ -463,7 +463,7 @@ class K9SakServiceImpl(
                     "tom": ${k9sakPeriode.tom?.let { "\"$it\"" }}
                 },
                 "ytelseType": {
-                    "kode": "${fagsakYtelseType.kode}",
+                    "kode": "${punsjFagsakYtelseType.kode}",
                     "kodeverk": "FAGSAK_YTELSE"
                 },
                 "kanalReferanse": "$callId",
@@ -592,13 +592,13 @@ class K9SakServiceImpl(
     )
 
     private fun SøknadEntitet.tilK9saksnummerGrunnlag(
-        fagsakYtelseType: no.nav.k9punsj.felles.FagsakYtelseType,
+        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
     ): HentK9SaksnummerGrunnlag {
-        return when (fagsakYtelseType) {
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> {
+        return when (punsjFagsakYtelseType) {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN -> {
                 val psbVisning = this.tilPsbvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(psbVisning.soekerId),
                     pleietrengende = requireNotNull(psbVisning.barn).norskIdent,
                     annenPart = null,
@@ -606,10 +606,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER -> {
                 val omsVisning = this.tilOmsvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(omsVisning.soekerId),
                     pleietrengende = null,
                     annenPart = null,
@@ -617,10 +617,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_UTBETALING -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_UTBETALING -> {
                 val omsUtvisning = this.tilOmsUtvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(omsUtvisning.soekerId),
                     pleietrengende = null,
                     annenPart = null,
@@ -628,10 +628,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN -> {
                 val omsAoVisning = this.tilOmsAOvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(omsAoVisning.soekerId),
                     pleietrengende = requireNotNull(omsAoVisning.barn).norskIdent,
                     annenPart = null,
@@ -639,10 +639,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE -> {
                 val omsMaVisning = this.tilOmsMAvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(omsMaVisning.soekerId),
                     pleietrengende = null,
                     annenPart = requireNotNull(omsMaVisning.annenForelder).norskIdent,
@@ -650,10 +650,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN -> {
                 val omsKsVisning = this.tilOmsKSBvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(omsKsVisning.soekerId),
                     pleietrengende = requireNotNull(omsKsVisning.barn).norskIdent,
                     annenPart = null,
@@ -661,10 +661,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE -> {
                 val tilPlsvisning = this.tilPlsvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(tilPlsvisning.soekerId),
                     pleietrengende = requireNotNull(tilPlsvisning.pleietrengende).norskIdent,
                     annenPart = null,
@@ -672,10 +672,10 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.OPPLÆRINGSPENGER -> {
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OPPLÆRINGSPENGER -> {
                 val tilOlpvisning = this.tilOlpvisning()
                 HentK9SaksnummerGrunnlag(
-                    søknadstype = fagsakYtelseType,
+                    søknadstype = punsjFagsakYtelseType,
                     søker = requireNotNull(tilOlpvisning.soekerId),
                     pleietrengende = requireNotNull(tilOlpvisning.barn).norskIdent,
                     annenPart = null,
@@ -683,8 +683,8 @@ class K9SakServiceImpl(
                 )
             }
 
-            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
-            no.nav.k9punsj.felles.FagsakYtelseType.UDEFINERT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.UKJENT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.UDEFINERT -> throw IllegalStateException("Ustøttet fagsakytelsetype")
         }
     }
 

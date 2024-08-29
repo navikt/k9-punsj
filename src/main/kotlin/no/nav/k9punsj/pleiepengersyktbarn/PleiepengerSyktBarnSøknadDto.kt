@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
@@ -124,9 +124,9 @@ data class SvarPsbDto(
 )
 
 internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
-    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+    val bunke = hentFor(PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
+        return SvarPsbDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
@@ -146,7 +146,7 @@ internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
                 )
             }
         }
-    return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
+    return SvarPsbDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {

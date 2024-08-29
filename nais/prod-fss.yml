@@ -114,6 +114,10 @@ spec:
     - name: AUDITLOGGER_PRODUCT
       value: "k9-punsj"
 
+    # tracing (appdynamics/opentelemetry)
+    - name: APPD_ENABLED
+      value: "true"
+
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
       value: https://k9-sak.nais.adeo.no/k9/sak/api

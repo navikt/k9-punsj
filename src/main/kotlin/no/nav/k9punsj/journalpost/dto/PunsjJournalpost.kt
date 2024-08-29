@@ -33,14 +33,14 @@ internal fun PunsjJournalpost?.utledK9sakFagsakYtelseType(k9sakFagsakYtelseType:
                 logger.info("Journalpost har ingen ytelse. Bruker ${k9sakFagsakYtelseType.kode}")
                 k9sakFagsakYtelseType
             }
-            no.nav.k9punsj.felles.FagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode -> FagsakYtelseType.OMSORGSPENGER_MA
-            no.nav.k9punsj.felles.FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode -> FagsakYtelseType.OMSORGSPENGER_AO
-            no.nav.k9punsj.felles.FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
-            no.nav.k9punsj.felles.FagsakYtelseType.OPPLÆRINGSPENGER.kode -> FagsakYtelseType.OPPLÆRINGSPENGER
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER.kode -> FagsakYtelseType.OMSORGSPENGER
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode -> FagsakYtelseType.OMSORGSPENGER_KS
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode -> FagsakYtelseType.OMSORGSPENGER_MA
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode -> FagsakYtelseType.OMSORGSPENGER_AO
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+            no.nav.k9punsj.felles.PunsjFagsakYtelseType.OPPLÆRINGSPENGER.kode -> FagsakYtelseType.OPPLÆRINGSPENGER
             else -> throw IllegalStateException("Ikke støttet journalpost: $journalpostId, ytelseType: $k9sakFagsakYtelseType")
         }
         logger.info("Utleder fagsakytelsetype fra {} til {}", this.ytelse, ytelse)

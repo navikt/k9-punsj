@@ -8,7 +8,7 @@ import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
@@ -134,7 +134,7 @@ internal class AksjonspunktServiceImplTest: AbstractContainerBaseTest() {
 
         val person = personRepository.lagre("2123245", morsAktørId)
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(person.personId)
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         søknadRepository.opprettSøknad(SøknadEntitet(søknadId, bunkeId, person.personId))
 
         Mockito.doNothing().`when`(hendelseProducer).sendMedOnSuccess(topicName = captureString(topicCaptor), data = captureString(valueCaptor), key = captureString(keyCaptor), onSuccess = captureFun(anyCaptor))

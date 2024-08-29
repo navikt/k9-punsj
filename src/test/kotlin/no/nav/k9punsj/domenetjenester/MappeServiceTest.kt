@@ -6,7 +6,7 @@ import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Person
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.pleiepengersyktbarn.tilPsbVisning
@@ -58,7 +58,7 @@ class MappeServiceTest: AbstractContainerBaseTest() {
             opprettOgAssertSøknad(
                 person = person,
                 barn = barn,
-                fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 søknad = mutableMapOf(
                     "soeknadId" to UUID.randomUUID().toString()
                 )
@@ -80,7 +80,7 @@ class MappeServiceTest: AbstractContainerBaseTest() {
         Assertions.assertThat(mappeEtterSletting.bunke).isEmpty()
     }
 
-    private suspend fun opprettOgAssertSøknad(person: Person, barn: Person, fagsakYtelseType: FagsakYtelseType, søknad: MutableMap<String, Any?>) {
+    private suspend fun opprettOgAssertSøknad(person: Person, barn: Person, punsjFagsakYtelseType: PunsjFagsakYtelseType, søknad: MutableMap<String, Any?>) {
         val barnFødselsdato = LocalDate.now()
 
         // oppretter en person
@@ -92,7 +92,7 @@ class MappeServiceTest: AbstractContainerBaseTest() {
         val mappeId = mappeRepository.opprettEllerHentMappeForPerson(person.personId)
 
         // oppretter en bunke i mappen for pleiepenger
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, fagsakYtelseType)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, punsjFagsakYtelseType)
 
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(journalpostid1, journalpostid2)

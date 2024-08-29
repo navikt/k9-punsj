@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.SendSøknad
@@ -56,7 +56,7 @@ internal class OmsorgspengerAleneOmsorgService(
             .bodyValueAndAwait(
                 SvarOmsAODto(
                     søker = norskIdent,
-                    fagsakTypeKode = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode,
+                    fagsakTypeKode = PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode,
                     søknader = listOf()
                 )
             )
@@ -75,7 +75,7 @@ internal class OmsorgspengerAleneOmsorgService(
     suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            ytelseType = FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
+            ytelseType = PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN,
             journalpostId = opprettNySøknad.journalpostId
         )
 

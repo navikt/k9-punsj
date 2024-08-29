@@ -3,9 +3,11 @@ package no.nav.k9punsj.journalpost
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.SoknadService
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
@@ -94,7 +96,39 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = "05032435485",
-            annenPart = null
+            annenPart = null,
+            ytelse = null
+        )
+
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/kopier/$journalpostId").build() }
+            .body(BodyInserters.fromValue(kopierJournalpostDto))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .exchange()
+            .expectStatus().isAccepted
+    }
+
+    @Test
+    fun `Støtter å overstyre ytelse på journalpost ved kopiering`(): Unit = runBlocking {
+
+        val journalpostId = IdGenerator.nesteId()
+        val melding = FordelPunsjEventDto(
+            aktørId = "1234567890",
+            journalpostId = journalpostId,
+            type = K9FordelType.PAPIRSØKNAD.kode,
+            ytelse = PunsjFagsakYtelseType.UKJENT.kode
+        )
+        hendelseMottaker.prosesser(melding)
+
+        val journalpost = journalpostRepository.hent(journalpostId)
+
+        val kopierJournalpostDto = KopierJournalpostDto(
+            fra = journalpost.aktørId.toString(),
+            til = journalpost.aktørId.toString(),
+            barn = "05032435485",
+            annenPart = null,
+            ytelse = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
 
         webTestClient

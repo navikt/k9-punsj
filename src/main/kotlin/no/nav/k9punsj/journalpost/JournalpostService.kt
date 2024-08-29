@@ -2,7 +2,7 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
@@ -131,7 +131,7 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
+    internal suspend fun settFagsakYtelseType(ytelseType: PunsjFagsakYtelseType, journalpostId: String) {
         val journalpost = journalpostRepository.hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(ytelse = ytelseType.kode)
