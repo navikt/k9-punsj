@@ -1,8 +1,9 @@
 package no.nav.k9punsj.felles
 
+import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 
-enum class PunsjFagsakYtelseType(val kode: String, val navn: String, val oppgavetema: String?) {
+enum class PunsjFagsakYtelseType(@JsonValue val kode: String, val navn: String, val oppgavetema: String?) {
     PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "OMS"),
     PLEIEPENGER_LIVETS_SLUTTFASE("PPN", "Pleiepenger i livets sluttfase", "OMS"),
     OMSORGSPENGER("OMP", "Omsorgspenger", "OMS"),
