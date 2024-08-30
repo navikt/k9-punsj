@@ -95,7 +95,11 @@ class PostMottakService(
             oppdaterOgFerdigstillJournalpostMedSaksnummer(validertMottattJournalpost, oppdatertJournalpost, saksnummer)
             val oppdatertJournalpostMedJournalføringstidspunkt = oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now())
             lagreTilDB(oppdatertJournalpostMedJournalføringstidspunkt)
-            opprettAksjonspunktOgSendTilK9Los(oppdatertJournalpostMedJournalføringstidspunkt, validertMottattJournalpost)
+            opprettAksjonspunktOgSendTilK9Los(
+                oppdatertJournalpost = oppdatertJournalpostMedJournalføringstidspunkt,
+                mottattJournalpost = validertMottattJournalpost,
+                pleietrengendeAktørId = pleietrengendeAktørId
+            )
         } else {
             logger.info("Journalpost er allerede ferdigstilt eller journalført")
         }
@@ -106,6 +110,7 @@ class PostMottakService(
     private suspend fun opprettAksjonspunktOgSendTilK9Los(
         oppdatertJournalpost: PunsjJournalpost,
         mottattJournalpost: JournalpostMottaksHaandteringDto,
+        pleietrengendeAktørId: String?,
     ) {
         val fagsakYtelseTypeKode = mottattJournalpost.fagsakYtelseTypeKode
         val type = oppdatertJournalpost.type
@@ -115,7 +120,8 @@ class PostMottakService(
             punsjJournalpost = oppdatertJournalpost,
             aksjonspunkt = aksjonspunkt,
             type = type,
-            ytelse = fagsakYtelseTypeKode
+            ytelse = fagsakYtelseTypeKode,
+            pleietrengendeAktørId = pleietrengendeAktørId
         )
     }
 
