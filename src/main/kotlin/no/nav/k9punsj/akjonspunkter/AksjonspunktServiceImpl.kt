@@ -40,7 +40,8 @@ internal class AksjonspunktServiceImpl(
         punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
-        ytelse: String?
+        ytelse: String?,
+        pleietrengendeAktørId: String?
     ) {
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val eksternId = punsjJournalpost.uuid
@@ -58,7 +59,8 @@ internal class AksjonspunktServiceImpl(
             ytelse = ytelse,
             type = punsjJournalpost.type!!,
             status = K9LosOppgaveStatusDto.AAPEN,
-            journalførtTidspunkt = punsjJournalpost.journalførtTidspunkt
+            journalførtTidspunkt = punsjJournalpost.journalførtTidspunkt,
+            pleietrengendeAktørId = pleietrengendeAktørId
         )
 
         log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -192,7 +194,7 @@ internal class AksjonspunktServiceImpl(
                     AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
-                barnIdent = barnIdent,
+                pleietrengendeAktørId = barnIdent,
                 type = journalpost.type!!,
                 status = K9LosOppgaveStatusDto.VENTER
             )
@@ -229,7 +231,7 @@ internal class AksjonspunktServiceImpl(
                     aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     ),
-                    barnIdent = barnIdent,
+                    pleietrengendeAktørId = barnIdent,
                     type = journalpost.type!!,
                     status = K9LosOppgaveStatusDto.VENTER
                 )
@@ -293,7 +295,7 @@ internal class AksjonspunktServiceImpl(
                 journalpostId = punsjJournalpost.journalpostId,
                 ytelse = punsjJournalpost.ytelse,
                 aktørId = punsjJournalpost.aktørId,
-                barnIdent = null,
+                pleietrengendeAktørId = null,
                 type = punsjJournalpost.type!!,
                 aksjonspunkter = aksjonspunkterPaJournalpost,
                 status = status
@@ -331,7 +333,7 @@ internal class AksjonspunktServiceImpl(
         aksjonspunkter: Map<String, String>,
         ytelse: String? = null,
         type: String,
-        barnIdent: String? = null,
+        pleietrengendeAktørId: String? = null,
         sendtInn: Boolean? = null,
         ferdigstiltAv: String? = null,
         mottattDato: LocalDateTime? = null,
@@ -344,7 +346,7 @@ internal class AksjonspunktServiceImpl(
             aktørId = aktørId,
             eventTid = LocalDateTime.now(),
             aksjonspunktKoderMedStatusListe = aksjonspunkter,
-            pleietrengendeAktørId = barnIdent,
+            pleietrengendeAktørId = pleietrengendeAktørId,
             type = type,
             ytelse = ytelse,
             sendtInn = sendtInn,

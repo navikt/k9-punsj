@@ -67,7 +67,8 @@ internal class FordelKafkaTest: AbstractContainerBaseTest() {
                 punsjJournalpost,
                 Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 melding.type,
-                melding.ytelse
+                melding.ytelse,
+                pleietrengendeAktørId = null
             )
         }
         val value = valueCaptor.value
@@ -96,7 +97,8 @@ internal class FordelKafkaTest: AbstractContainerBaseTest() {
                 punsjJournalpost,
                 Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 melding.type,
-                melding.ytelse
+                melding.ytelse,
+                pleietrengendeAktørId = null
             )
         }
         val value = valueCaptor.value
