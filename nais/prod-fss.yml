@@ -58,6 +58,10 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   vault:
     enabled: true
     paths:
