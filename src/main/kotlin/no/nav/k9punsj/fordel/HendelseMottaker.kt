@@ -52,7 +52,8 @@ class HendelseMottaker @Autowired constructor(
                 punsjJournalpost = punsjJournalpost,
                 aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
                 type = punsjEventType,
-                ytelse = fordelPunsjEventDto.ytelse
+                ytelse = fordelPunsjEventDto.ytelse,
+                pleietrengendeAktørId = null
             )
         } else {
             if (K9FordelType.fraKode(fordelPunsjEventDto.type) == K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {

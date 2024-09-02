@@ -9,7 +9,8 @@ interface AksjonspunktService {
         punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
-        ytelse: String?
+        ytelse: String?,
+        pleietrengendeAktørId: String?
     )
 
     suspend fun settPåVentOgSendTilLos(journalpostId: String, søknadId: String?)
