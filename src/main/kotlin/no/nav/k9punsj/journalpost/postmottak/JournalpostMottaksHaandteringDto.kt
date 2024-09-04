@@ -34,7 +34,7 @@ data class JournalpostMottaksHaandteringDto(
 
             }
 
-            OPPLÆRINGSPENGER -> TODO()
+            OPPLÆRINGSPENGER -> {} // yolo
             else -> throw PostMottakException(
                 "Ikke støttet ytelseType $fagsakYtelseTypeKode",
                 HttpStatus.BAD_REQUEST,
