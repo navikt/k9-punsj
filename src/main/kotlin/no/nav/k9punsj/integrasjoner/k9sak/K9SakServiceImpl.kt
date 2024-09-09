@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
@@ -28,6 +29,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
@@ -91,6 +93,7 @@ class K9SakServiceImpl(
         internal const val hentReservertSaksnummerUrl = "/saksnummer"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
+        internal const val hentInstitusjonUrl = "/opplæringsinstitusjon/alle"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -482,6 +485,20 @@ class K9SakServiceImpl(
             val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
             log.error(feilmelding)
             throw IllegalStateException(feilmelding)
+        }
+    }
+
+    override suspend fun hentInstitusjoner(): Pair<List<GodkjentOpplæringsinstitusjonDto>?, String?> {
+        val (json, _) = kotlin.runCatching { httpGet(hentInstitusjonUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
+
+        return try {
+            val institusjoner = objectMapper().readValue<List<GodkjentOpplæringsinstitusjonDto>>(json)
+            Pair(institusjoner, null)
+        } catch (e: Exception) {
+            Pair(null, "Feilet deserialisering $e")
         }
     }
 

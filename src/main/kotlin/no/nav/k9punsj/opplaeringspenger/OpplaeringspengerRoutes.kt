@@ -36,6 +36,7 @@ internal class OpplaeringspengerRoutes(
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
+        internal const val HentInstitusjoner = "/$søknadType/institusjoner" // get
     }
 
     @Bean
@@ -112,6 +113,19 @@ internal class OpplaeringspengerRoutes(
                 )?.let { return@RequestContext it }
 
                 opplaeringspengerService.hentInfoFraK9Sak(matchfagsak)
+            }
+        }
+
+        GET("/api${Urls.HentInstitusjoner}") { request ->
+
+            // Usikker på om vi trenger å sjekke tilgang her
+            RequestContext(coroutineContext, request) {
+                /*
+                val norskIdent = request.hentNorskIdentHeader()
+                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HentInstitusjoner)
+                    ?.let { return@RequestContext it }
+*/
+                opplaeringspengerService.hentInstitusjoner()
             }
         }
     }

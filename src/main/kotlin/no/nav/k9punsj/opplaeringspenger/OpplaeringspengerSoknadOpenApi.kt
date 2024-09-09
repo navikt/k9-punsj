@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.PerioderDto
@@ -271,5 +272,28 @@ internal class OpplaeringspengerSoknadOpenApi {
         ]
     )
     fun HentInfoFraK9sak(@RequestBody matchFagsak: Matchfagsak) {
+    }
+
+    @GetMapping(OpplaeringspengerRoutes.Urls.HentInstitusjoner, produces = ["application/json"])
+    @Operation(
+        summary = "Henter alle godkjente institusjoner.",
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Henter alle godkjente institusjoner.",
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = GodkjentOpplæringsinstitusjonDto::class
+                        )
+                    )
+                ]
+            )
+        ]
+    )
+    private fun HentInstitusjoner() {
     }
 }

@@ -76,6 +76,14 @@ internal class OpplaeringspengerService(
             .bodyValueAndAwait(søknad.tilOlpvisning())
     }
 
+    internal suspend fun hentInstitusjoner(): ServerResponse {
+        val institusjoner = k9SakService.hentInstitusjoner()
+        return ServerResponse
+            .ok()
+            .json()
+            .bodyValueAndAwait(institusjoner)
+    }
+
     internal suspend fun oppdaterEksisterendeSøknad(
         request: ServerRequest,
         søknad: OpplaeringspengerSøknadDto
