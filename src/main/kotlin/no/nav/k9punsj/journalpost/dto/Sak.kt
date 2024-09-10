@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost.dto
 
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.Person
 
 data class Sak(
     val reservertSaksnummer: Boolean,
@@ -8,6 +9,7 @@ data class Sak(
     val gyldigPeriode: PeriodeDto?,
     val pleietrengendeIdent: String?,
     val relatertPersonIdent: String?,
+    val barnIdenter: List<Person>?,
     val sakstype: String?,
     val behandlingsÅr: Int?,
 ) {

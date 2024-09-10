@@ -47,6 +47,10 @@ class PostMottakService(
         val relatertPersonAktørId = relatertPersonIdent.takeUnless { it.isNullOrBlank() }
             ?.let { personService.finnAktørId(it) }
 
+        val fosterbarnIdenter = mottattJournalpost.barnAktørIder
+        val fosterbarnAktørIder = fosterbarnIdenter.takeUnless { !it.isNullOrEmpty() }
+            ?.let { fosterbarnIdent -> fosterbarnIdent.map { personService.finnAktørId(it) } }
+
         val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
 
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
@@ -80,6 +84,7 @@ class PostMottakService(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
                     relatertPersonAktørId = relatertPersonAktørId,
+                    barnAktørIder = fosterbarnAktørIder,
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
                 )
@@ -93,7 +98,8 @@ class PostMottakService(
 
         if (!erFerdigstiltEllerJournalført(safJournalpostinfo)) {
             oppdaterOgFerdigstillJournalpostMedSaksnummer(validertMottattJournalpost, oppdatertJournalpost, saksnummer)
-            val oppdatertJournalpostMedJournalføringstidspunkt = oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now())
+            val oppdatertJournalpostMedJournalføringstidspunkt =
+                oppdatertJournalpost.copy(journalførtTidspunkt = LocalDateTime.now())
             lagreTilDB(oppdatertJournalpostMedJournalføringstidspunkt)
             opprettAksjonspunktOgSendTilK9Los(
                 oppdatertJournalpost = oppdatertJournalpostMedJournalføringstidspunkt,

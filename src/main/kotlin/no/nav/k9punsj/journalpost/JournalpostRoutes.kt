@@ -493,12 +493,16 @@ internal class JournalpostRoutes(
                 val relatertPersonIdent = reservertSaksnummerDto?.relatertPersonAktørId?.let {
                     personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
                 }
+                val barnIdenter = reservertSaksnummerDto?.barnAktørIder?.let { fosterbarnAktørIder: List<String> ->
+                    fosterbarnAktørIder.map { personService.finnEllerOpprettPersonVedAktørId(it) }
+                }
                 Sak(
                     reservertSaksnummer = true,
                     fagsakId = reservertSaksnummerDto?.saksnummer,
                     gyldigPeriode = null,
                     pleietrengendeIdent = pleietrengendeIdent,
                     relatertPersonIdent = relatertPersonIdent,
+                    barnIdenter = barnIdenter,
                     sakstype = reservertSaksnummerDto?.ytelseType?.kode,
                     behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
@@ -511,9 +515,10 @@ internal class JournalpostRoutes(
                     fagsakId = safSak?.fagsakId,
                     gyldigPeriode = k9Fagsak?.gyldigPeriode,
                     pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
+                    relatertPersonIdent = k9Fagsak?.relatertPersonIdent,
+                    barnIdenter = null,
                     sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode,
-                    behandlingsÅr = punsjJournalpost?.behandlingsAar,
-                    relatertPersonIdent = k9Fagsak?.relatertPersonIdent
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
                 )
             }
         }

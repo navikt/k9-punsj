@@ -55,7 +55,8 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             pleietrengendeIdent = "456",
             fagsakYtelseTypeKode = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode,
             saksnummer = null,
-            relatertPersonIdent = null
+            relatertPersonIdent = null,
+            barnAktørIder = null
         )
 
         webTestClient
@@ -96,7 +97,8 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             pleietrengendeIdent = "456",
             fagsakYtelseTypeKode = PunsjFagsakYtelseType.OMSORGSPENGER.kode,
             saksnummer = null,
-            relatertPersonIdent = null
+            relatertPersonIdent = null,
+            barnAktørIder = null
         ).valider(behandlingsår?.toIntOrNull()) }
     }
 }

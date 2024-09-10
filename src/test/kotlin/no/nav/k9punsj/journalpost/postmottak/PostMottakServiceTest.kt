@@ -102,6 +102,7 @@ class PostMottakServiceTest : AbstractContainerBaseTest() {
             brukerIdent = brukerIdent,
             pleietrengendeIdent = pleietrengendeIdent,
             relatertPersonIdent = null,
+            barnAktørIder = null,
             fagsakYtelseTypeKode = "PSB",
             saksnummer = saksnummer,
         )

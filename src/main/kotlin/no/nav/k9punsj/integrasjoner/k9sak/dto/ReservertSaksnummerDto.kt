@@ -8,6 +8,7 @@ data class ReservertSaksnummerDto(
     val brukerAktørId: String,
     val pleietrengendeAktørId: String? = null,
     val relatertPersonAktørId: String? = null,
+    val barnAktørIder: List<String>? = null,
     val behandlingsår: Int? = null,
 ) {
     override fun toString(): String {
