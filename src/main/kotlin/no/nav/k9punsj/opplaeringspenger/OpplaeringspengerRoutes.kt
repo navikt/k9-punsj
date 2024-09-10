@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -118,7 +121,12 @@ internal class OpplaeringspengerRoutes(
 
         GET("/api${Urls.HentInstitusjoner}") { request ->
             RequestContext(coroutineContext, request) {
-                opplaeringspengerService.hentInstitusjoner()
+                val institusjoner = opplaeringspengerService.hentInstitusjoner()
+
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(institusjoner)
             }
         }
     }
