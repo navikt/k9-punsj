@@ -117,14 +117,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         GET("/api${Urls.HentInstitusjoner}") { request ->
-
-            // Usikker på om vi trenger å sjekke tilgang her
             RequestContext(coroutineContext, request) {
-                /*
-                val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HentInstitusjoner)
-                    ?.let { return@RequestContext it }
-*/
                 opplaeringspengerService.hentInstitusjoner()
             }
         }
