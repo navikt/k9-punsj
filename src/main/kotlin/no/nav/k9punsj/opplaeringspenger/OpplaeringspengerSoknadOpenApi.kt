@@ -1,6 +1,7 @@
 package no.nav.k9punsj.opplaeringspenger
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -286,8 +287,10 @@ internal class OpplaeringspengerSoknadOpenApi {
                 description = "Henter alle godkjente institusjoner.",
                 content = [
                     Content(
-                        schema = Schema(
-                            implementation = GodkjentOpplæringsinstitusjonDto::class
+                        array = ArraySchema(
+                            schema = Schema(
+                                implementation = GodkjentOpplæringsinstitusjonDto::class
+                            )
                         )
                     )
                 ]
