@@ -126,7 +126,7 @@ internal object SafDtos {
         val sakstype: Sakstype?,
         val fagsakId: String?,
         val fagsaksystem: String?,
-        val tema: Tema?
+        val tema: String?
     )
 
     internal data class Avsender(
@@ -175,6 +175,7 @@ internal object SafDtos {
             true -> !(erEttersendelse || erSøknad)
             false -> false
         }
+        val ikkeErTemaOMS = tema?.let { Tema.OMS.name != it } ?: false
         private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
         val erFerdigstilt = ferdigstilteStatuser.contains(journalstatus)
     }

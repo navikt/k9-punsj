@@ -8,6 +8,7 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.AbstractContainerBaseTest
+import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
@@ -19,6 +20,7 @@ import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
 import no.nav.k9punsj.utils.objectMapper
+import no.nav.k9punsj.wiremock.JournalpostIds
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -70,7 +72,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
         val norskIdent = "02020050163"
-        val opprettNySøknad = opprettSøknad(norskIdent, "9999")
+        val opprettNySøknad = opprettSøknad(norskIdent, "9999", "DEF456")
 
         opprettNySøknad(opprettNySøknad).expectStatus().isCreated
 
@@ -79,8 +81,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
             .expectBody(SvarPsbDto::class.java)
             .consumeWith {
                 val søknader = it.responseBody!!.søknader!!
+                val søknadDto = søknader.first()
                 assertThat(søknader).hasSize(1)
-                assertThat(it.responseBody!!.søknader?.first()?.journalposter?.first()).isEqualTo("9999")
+                assertThat(søknadDto.journalposter?.first()).isEqualTo("9999")
+                assertThat(søknadDto.k9saksnummer).isEqualTo("DEF456")
             }
     }
 
@@ -115,7 +119,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val journalpostid = "9999"
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
-        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid)
+        val opprettNySøknad = opprettSøknad(norskIdent, journalpostid, "DEF456")
 
         val location = opprettNySøknad(opprettNySøknad)
             .expectStatus().isCreated
@@ -223,10 +227,10 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         opprettOgSendInnSoeknad(
             soeknadJson = gyldigSoeknad,
             ident = norskIdent,
-            journalpostid = "99997777"
+            journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
         ).expectStatus().isAccepted
 
-        assertThat(journalpostRepository.kanSendeInn(listOf("99997777"))).isFalse
+        assertThat(journalpostRepository.kanSendeInn(listOf(JournalpostIds.FerdigstiltMedSaksnummer))).isFalse
     }
 
     @Test
@@ -234,16 +238,19 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         runBlocking {
             val norskIdent = "02020050121"
             val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontend()
-            val journalpostId = "34234234"
-            tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
+            tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent)
 
             val søknad =
-                opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
+                opprettOgSendInnSoeknad(
+                    soeknadJson = gyldigSoeknad,
+                    ident = norskIdent,
+                    journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+                )
                     .expectStatus().isAccepted
                     .expectBody(Søknad::class.java)
                     .returnResult().responseBody!!
 
-            assertThat(journalpostRepository.kanSendeInn(listOf(journalpostId))).isFalse
+            assertThat(journalpostRepository.kanSendeInn(listOf(JournalpostIds.FerdigstiltMedSaksnummer))).isFalse
 
             val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = søknad.søknadId.id)
 
@@ -273,7 +280,11 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.tomtLand()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        opprettOgSendInnSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+        ).expectStatus().isAccepted
     }
 
     @Test
@@ -297,7 +308,11 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.utenUttak()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        opprettOgSendInnSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+        ).expectStatus().isAccepted
     }
 
     @Test
@@ -306,7 +321,11 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
         val soeknad: SøknadJson = LesFraFilUtil.ferieNull()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
-        opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent).expectStatus().isAccepted
+        opprettOgSendInnSoeknad(
+            soeknadJson = soeknad,
+            ident = norskIdent,
+            journalpostid = JournalpostIds.FerdigstiltMedSaksnummer
+        ).expectStatus().isAccepted
     }
 
     @Test
@@ -467,7 +486,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
             .consumeWith { response: EntityExchangeResult<PleiepengerSyktBarnSøknadDto> ->
                 val søknad = response.responseBody!!
                 assertThat(søknad.soekerId).isEqualTo(norskIdent)
-                assertThat(søknad.journalposter!![0]).isEqualTo("99997777")
+                assertThat(søknad.journalposter!![0]).isEqualTo(JournalpostIds.FerdigstiltMedSaksnummer)
                 assertThat(søknad.mottattDato).isEqualTo(LocalDate.of(2020, 10, 12))
                 assertThat(søknad.barn?.norskIdent).isEqualTo("22222222222")
                 assertThat(søknad.soeknadsperiode?.first()?.fom).isEqualTo(LocalDate.of(2018, 12, 30))
@@ -505,8 +524,8 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
                 )
                 assertThat(søknad.beredskap?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
                 assertThat(søknad.nattevaak?.first()?.tilleggsinformasjon).isEqualTo("FÅ SLUTT PÅ COVID!!!")
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.timer).isEqualTo(7)
-                assertThat(søknad.tilsynsordning?.perioder?.first()?.minutter).isEqualTo(30)
+                assertThat(søknad.tilsynsordning?.perioder?.first()?.somDuration()?.toHours()).isEqualTo(7)
+                assertThat(søknad.tilsynsordning?.perioder?.first()?.somDuration()?.toMinutesPart()).isEqualTo(30)
                 assertThat(søknad.uttak?.first()?.timerPleieAvBarnetPerDag).isEqualTo("7,5")
                 assertThat(søknad.omsorg?.relasjonTilBarnet).isEqualTo("MOR")
                 assertThat(søknad.bosteder!![0].land).isEqualTo("RU")
@@ -693,8 +712,15 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 private fun opprettSøknad(
     personnummer: String,
     journalpostId: String,
+    k9saksnummer: String = "ABC123",
 ): OpprettNySøknad {
-    return OpprettNySøknad(personnummer, journalpostId, null, null)
+    return OpprettNySøknad(
+        norskIdent = personnummer,
+        journalpostId = journalpostId,
+        k9saksnummer = k9saksnummer,
+        pleietrengendeIdent = null,
+        annenPart = null
+    )
 }
 
 private fun lagSendSøknad(

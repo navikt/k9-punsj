@@ -255,13 +255,7 @@ internal class MapPsbTilK9Format(
         filter { it.periode.erSatt() }.forEach { tilsynsordning ->
             val k9Periode = tilsynsordning.periode!!.somK9Periode()!!
             k9Tilsynsordning[k9Periode] = TilsynPeriodeInfo()
-                .medEtablertTilsynTimerPerDag(
-                    Duration
-                        .ofHours(tilsynsordning.timer.toLong())
-                        .plusMinutes(
-                            tilsynsordning.minutter.toLong()
-                        )
-                )
+                .medEtablertTilsynTimerPerDag(tilsynsordning.somDuration())
         }
         if (k9Tilsynsordning.isNotEmpty()) {
             pleiepengerSyktBarn.medTilsynsordning(Tilsynsordning().medPerioder(k9Tilsynsordning))

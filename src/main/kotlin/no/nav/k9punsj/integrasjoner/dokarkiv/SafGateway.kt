@@ -55,7 +55,7 @@ class SafGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
-        private const val MaxDokumentSize = 16 * 1024 * 1024
+        private const val MaxDokumentSize = 24 * 1024 * 1024
         private val IkkeStøttedeStatuser = setOf("UTGAAR", "AVBRUTT", "FEILREGISTRERT")
     }
 
@@ -150,6 +150,11 @@ class SafGateway(
         // Disse statusene støttes uansett ikke av Punsj så gir samme feilmelding som om man ikke har tilgang.
         if (IkkeStøttedeStatuser.contains(journalpost?.journalstatus)) throw IkkeStøttetJournalpost().also {
             logger.warn("Ikke støttet journalstatus ${journalpost?.journalstatus}.")
+        }
+
+
+        if (journalpost != null && journalpost.ikkeErTemaOMS) throw IkkeStøttetJournalpost().also {
+            logger.warn("Ikke støttet journalpost ${journalpost.journalstatus}. Tema er ikke lenger OMS, men ${journalpost.tema}.")
         }
 
         // Kan ikke oppdatere eller ferdigstille Notater som er under redigering.

@@ -7,7 +7,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.Søknadstype
@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -45,15 +46,19 @@ class SoknadService(
     private val safGateway: SafGateway,
     private val k9SakService: K9SakService,
     private val pdlService: PdlService,
-    private val dokarkivGateway: DokarkivGateway
+    private val dokarkivGateway: DokarkivGateway,
 ) {
 
     internal suspend fun sendSøknad(
         søknad: Søknad,
         brevkode: Brevkode,
-        journalpostIder: MutableSet<String>
+        journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
-        val correlationId = try { coroutineContext.hentCorrelationId() } catch (e: Exception) { UUID.randomUUID().toString() }
+        val correlationId = try {
+            coroutineContext.hentCorrelationId()
+        } catch (e: Exception) {
+            UUID.randomUUID().toString()
+        }
 
         val journalpostIdListe = journalpostIder.toList()
         val journalposterKanSendesInn = journalpostService.kanSendeInn(journalpostIdListe)
@@ -61,7 +66,7 @@ class SoknadService(
 
         val søkerFnr = søknad.søker.personIdent.verdi
         val k9YtelseType = Søknadstype.fraBrevkode(brevkode).k9YtelseType
-        val fagsakYtelseType = FagsakYtelseType.fromKode(k9YtelseType)
+        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(k9YtelseType)
 
         if (!journalposterKanSendesInn) {
             return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
@@ -97,8 +102,9 @@ class SoknadService(
         */
         val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
         val k9Saksnummer = if(fagsakIder.isNotEmpty()) {
-            if(fagsakIder.size > 1) {
-                return HttpStatus.INTERNAL_SERVER_ERROR to "Fant flere fagsakIder på innsending: ${fagsakIder.map { it.second }}"
+
+            if (fagsakIder.distinctBy { it.second }.size > 1) {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Det er ikke tillatt med flere fagsakIder på journalpostene: ${fagsakIder.map { it.second }}"
             }
             fagsakIder.map {
                 logger.info("Journalpost ${it.first} knyttet til fagsakId ${it.second}")
@@ -106,10 +112,10 @@ class SoknadService(
             fagsakIder.first().second
         } else {
             val k9Respons = k9SakService.hentEllerOpprettSaksnummer(
-                    k9FormatSøknad = søknad,
-                    søknadEntitet = søknadEntitet,
-                    fagsakYtelseType = fagsakYtelseType
-                )
+                k9FormatSøknad = søknad,
+                søknadEntitet = søknadEntitet,
+                punsjFagsakYtelseType = punsjFagsakYtelseType
+            )
             require(k9Respons.second.isNullOrBlank()) {
                 return HttpStatus.INTERNAL_SERVER_ERROR to "Feil ved henting av saksnummer: ${k9Respons.second}"
             }
@@ -193,14 +199,15 @@ class SoknadService(
             json = søknadObject
         )
 
-        val journalpostId = dokarkivGateway.opprettOgFerdigstillJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
+        val journalpostId =
+            dokarkivGateway.opprettOgFerdigstillJournalpost(nyJournalpostRequest).journalpostId.somJournalpostId()
         logger.info("Opprettet Oppsummerings-PDF for PunsjetSøknad. JournalpostId=[$journalpostId]")
 
         // Send in søknad til k9sak
         k9SakService.sendInnSoeknad(
             soknad = søknad,
             journalpostId = journalpostId.toString(),
-            fagsakYtelseType = fagsakYtelseType,
+            punsjFagsakYtelseType = punsjFagsakYtelseType,
             saksnummer = k9Saksnummer,
             brevkode = brevkode
         )
@@ -215,6 +222,141 @@ class SoknadService(
         return null
     }
 
+    internal suspend fun opprettSakOgSendInnSøknad(
+        søknad: Søknad,
+        brevkode: Brevkode,
+        journalpostIder: MutableSet<String>,
+    ): Pair<HttpStatus, String>? {
+        val journalpostIdListe = journalpostIder.toList()
+
+        if (!journalposteneKanSendesInn(journalpostIdListe)) {
+            return HttpStatus.CONFLICT to "En eller alle journalpostene $journalpostIder har blitt sendt inn fra før"
+        }
+
+        val (journalposter, journalposterMedTypeUtgaaende) = hentOgSjekkJournalpostene(journalpostIdListe)
+        if (journalposterMedTypeUtgaaende.isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter av type utgående ikke støttet: $journalposterMedTypeUtgaaende"
+        }
+
+        val feilregistrerteJournalposter = feilregistrerteJournalposter(journalposter)
+        if (feilregistrerteJournalposter(journalposter).isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter med status feilregistrert ikke støttet: $feilregistrerteJournalposter"
+        }
+
+        val ikkeFerdigstiltEllerJournalførteJournalposter = ikkeFerdigstiltEllerJournalførteJournalposter(journalposter)
+        if (ikkeFerdigstiltEllerJournalførteJournalposter.isNotEmpty()) {
+            return HttpStatus.CONFLICT to "Journalposter som ikke er ferdigstilt eller journalført er ikke støttet: $ikkeFerdigstiltEllerJournalførteJournalposter"
+        }
+
+        val fagsakIder = fagsaker(journalposter)
+        logger.info("Fant fagsakIder på journalpostene: ${fagsakIder.map { it.second }}")
+        when {
+            fagsakIder.isEmpty() -> {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Journalpostene må ha sakstilknytning: ${fagsakIder.map { it.second }}"
+            }
+
+            fagsakIder.distinctBy { it.second }.size > 1 -> {
+                return HttpStatus.INTERNAL_SERVER_ERROR to "Det er ikke tillatt med flere fagsakIder på journalpostene: ${fagsakIder.map { it.second }}"
+            }
+        }
+
+        val k9Saksnummer = fagsakIder.first().second
+        require(k9Saksnummer != null) { "K9Saksnummer er null" }
+
+        val søknadObject = objectMapper().convertValue<ObjectNode>(søknad)
+        val punsjetAvSaksbehandler = hentSistEndretAvSaksbehandler(søknad.søknadId.id)
+        søknadObject.put("punsjet av", punsjetAvSaksbehandler)
+
+        // Journalfør og ferdigstill søknadjson
+        val pdf = PdfGenerator.genererPdf(
+            html = HtmlGenerator.genererHtml(
+                tittel = "Innsending fra Punsj",
+                json = søknadObject
+            )
+        )
+
+        val nyJournalpostMedPunsjetSøknadsopplysninger = JournalPostRequest(
+            eksternReferanseId = hentCorrelationId(coroutineContext),
+            tittel = "PunsjetSøknad",
+            brevkode = K9_PUNSJ_INNSENDING_BREVKODE,
+            tema = Tema.OMS,
+            kanal = Kanal.INGEN_DISTRIBUSJON,
+            journalposttype = JournalpostType.NOTAT,
+            dokumentkategori = DokumentKategori.IS,
+            fagsystem = FagsakSystem.K9,
+            sakstype = SaksType.FAGSAK,
+            saksnummer = k9Saksnummer,
+            brukerIdent = søknad.søker.personIdent.verdi,
+            avsenderNavn = punsjetAvSaksbehandler,
+            pdf = pdf,
+            json = søknadObject
+        )
+
+        val journalpostId =
+            dokarkivGateway.opprettOgFerdigstillJournalpost(nyJournalpostMedPunsjetSøknadsopplysninger).journalpostId.somJournalpostId()
+        logger.info("Opprettet Oppsummerings-PDF for PunsjetSøknad. JournalpostId=[$journalpostId]")
+
+        // Send in søknad til k9sak
+        val søknadEntitet = requireNotNull(søknadRepository.hentSøknad(søknad.søknadId.id))
+        k9SakService.opprettSakOgSendInnSøknad(
+            soknad = søknad,
+            søknadEntitet = søknadEntitet ,
+            journalpostId = journalpostId.toString(),
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(Søknadstype.fraBrevkode(brevkode).k9YtelseType),
+            saksnummer = k9Saksnummer,
+            brevkode = brevkode
+        )
+
+        leggerVedPayload(søknad, journalpostIder)
+        journalpostService.settAlleTilFerdigBehandlet(journalpostIdListe)
+        logger.info("Punsj har market disse journalpostIdene $journalpostIder som ferdigbehandlet")
+        søknadRepository.markerSomSendtInn(søknad.søknadId.id)
+
+        søknadMetrikkService.publiserMetrikker(søknad)
+        return null
+    }
+
+    private fun fagsaker(journalposter: List<SafDtos.Journalpost?>): Set<Pair<String, String?>> =
+        journalposter.filterNotNull()
+            .filterNot { it.sak?.fagsakId.isNullOrEmpty() }
+            .map { it.journalpostId to it.sak?.fagsakId }
+            .toSet()
+
+    private fun feilregistrerteJournalposter(journalposter: List<SafDtos.Journalpost?>) =
+        journalposter.filterNotNull()
+            .filterNot { it.journalstatus == null }
+            .filter { it.journalstatus == SafDtos.Journalstatus.FEILREGISTRERT.toString() }
+            .map { it.journalpostId }
+            .toSet()
+
+    private fun ikkeFerdigstiltEllerJournalførteJournalposter(journalposter: List<SafDtos.Journalpost?>) =
+        journalposter.asSequence().filterNotNull()
+            .filterNot { it.journalstatus == null }
+            .filterNot { it.journalstatus == SafDtos.Journalstatus.FERDIGSTILT.toString() || it.journalstatus == SafDtos.Journalstatus.JOURNALFOERT.toString() }
+            .map { it.journalpostId }
+            .toSet()
+
+    private suspend fun hentOgSjekkJournalpostene(journalpostIdListe: List<String>): Pair<List<SafDtos.Journalpost?>, Set<String>> {
+        val journalposter = safGateway.hentJournalposter(journalpostIdListe)
+        val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
+            .filter { it.journalposttype == SafDtos.JournalpostType.U.toString() }
+            .map { it.journalpostId }
+            .toSet()
+        return Pair(journalposter, journalposterMedTypeUtgaaende)
+    }
+
+    private suspend fun journalposteneKanSendesInn(journalpostIdListe: List<String>) =
+        journalpostService.kanSendeInn(journalpostIdListe)
+
+    private fun hentCorrelationId(coroutineContext: CoroutineContext): String {
+        val correlationId = try {
+            coroutineContext.hentCorrelationId()
+        } catch (e: Exception) {
+            UUID.randomUUID().toString()
+        }
+        return correlationId
+    }
+
     suspend fun hentSøknad(søknadId: String): SøknadEntitet? {
         return søknadRepository.hentSøknad(søknadId)
     }
@@ -227,6 +369,11 @@ class SoknadService(
         søknadRepository.oppdaterSøknad(søknad)
     }
 
+    // slett søknad
+    suspend fun slettAlleSøknader() {
+        søknadRepository.slettAlleSøknader()
+    }
+
     suspend fun hentAlleSøknaderForBunke(bunkerId: String): List<SøknadEntitet> {
         return søknadRepository.hentAlleSøknaderForBunke(bunkerId)
     }
@@ -237,7 +384,7 @@ class SoknadService(
 
     private suspend fun leggerVedPayload(
         søknad: Søknad,
-        journalpostIder: MutableSet<String>
+        journalpostIder: MutableSet<String>,
     ) {
         val writeValueAsString = objectMapper().writeValueAsString(søknad)
 

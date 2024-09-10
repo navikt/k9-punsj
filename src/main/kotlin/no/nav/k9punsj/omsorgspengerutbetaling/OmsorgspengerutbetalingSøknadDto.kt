@@ -7,7 +7,7 @@ import no.nav.k9.søknad.felles.fravær.FraværÅrsak
 import no.nav.k9.søknad.felles.fravær.SøknadÅrsak
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.BostederDto
 import no.nav.k9punsj.felles.dto.Mappe
@@ -37,7 +37,8 @@ data class OmsorgspengerutbetalingSøknadDto(
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
     val erKorrigering: Boolean ? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class FraværPeriode(
         val aktivitetsFravær: AktivitetFravær,
@@ -80,25 +81,29 @@ data class SvarOmsUtDto(
 )
 
 internal fun Mappe.tilOmsUtVisning(norskIdent: String): SvarOmsUtDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf())
+        return SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerutbetalingSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerutbetalingSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
-    return SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, søknader)
+    return SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsUtvisning(): OmsorgspengerutbetalingSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerutbetalingSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerutbetalingSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerutbetalingSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

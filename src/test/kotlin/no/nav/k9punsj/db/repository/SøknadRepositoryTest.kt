@@ -6,7 +6,7 @@ import no.nav.k9punsj.domenetjenester.repository.BunkeRepository
 import no.nav.k9punsj.domenetjenester.repository.MappeRepository
 import no.nav.k9punsj.domenetjenester.repository.PersonRepository
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.util.LesFraFilUtil
 import org.assertj.core.api.Assertions.assertThat
@@ -47,15 +47,15 @@ internal class SøknadRepositoryTest: AbstractContainerBaseTest() {
 
     @Test
     fun `Skal lagre pleiepenger sykt barn søknad`(): Unit = runBlocking {
-        opprettOgAssertSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, LesFraFilUtil.søknadFraFrontend())
+        opprettOgAssertSøknad(PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN, LesFraFilUtil.søknadFraFrontend())
     }
 
     @Test
     fun `Skal lagre omsorgspenger kronisk sykt barn søknad`(): Unit = runBlocking {
-        opprettOgAssertSøknad(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB())
+        opprettOgAssertSøknad(PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN, LesFraFilUtil.søknadUtenBarnFraFrontendOmsKSB())
     }
 
-    private suspend fun opprettOgAssertSøknad(fagsakYtelseType: FagsakYtelseType, søknad: MutableMap<String, Any?>) {
+    private suspend fun opprettOgAssertSøknad(punsjFagsakYtelseType: PunsjFagsakYtelseType, søknad: MutableMap<String, Any?>) {
         val barnFødselsdato = LocalDate.now()
 
         // oppretter en person
@@ -68,7 +68,7 @@ internal class SøknadRepositoryTest: AbstractContainerBaseTest() {
         val mappeId = mappeRepo.opprettEllerHentMappeForPerson(person.personId)
 
         // oppretter en bunke i mappen for pleiepenger
-        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, fagsakYtelseType)
+        val bunkeId = bunkeRepository.opprettEllerHentBunkeForFagsakType(mappeId, punsjFagsakYtelseType)
 
         val journalposter = mutableMapOf<String, Any?>()
         journalposter["journalposter"] = listOf(journalpostid1, journalpostid2)

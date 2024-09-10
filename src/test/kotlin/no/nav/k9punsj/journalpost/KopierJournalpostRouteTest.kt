@@ -102,7 +102,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                     sakstype = SafDtos.Sakstype.FAGSAK,
                     fagsakId = "CBA123",
                     fagsaksystem = "K9",
-                    tema = SafDtos.Tema.OMS
+                    tema = SafDtos.Tema.OMS.name
                 ),
                 tittel = null
             )
@@ -131,7 +131,39 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = "05032435485",
-            annenPart = null
+            annenPart = null,
+            ytelse = null
+        )
+
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/kopier/$journalpostId").build() }
+            .body(BodyInserters.fromValue(kopierJournalpostDto))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .exchange()
+            .expectStatus().isAccepted
+    }
+
+    @Test
+    fun `Støtter å overstyre ytelse på journalpost ved kopiering`(): Unit = runBlocking {
+
+        val journalpostId = IdGenerator.nesteId()
+        val melding = FordelPunsjEventDto(
+            aktørId = "1234567890",
+            journalpostId = journalpostId,
+            type = K9FordelType.PAPIRSØKNAD.kode,
+            ytelse = PunsjFagsakYtelseType.UKJENT.kode
+        )
+        hendelseMottaker.prosesser(melding)
+
+        val journalpost = journalpostRepository.hent(journalpostId)
+
+        val kopierJournalpostDto = KopierJournalpostDto(
+            fra = journalpost.aktørId.toString(),
+            til = journalpost.aktørId.toString(),
+            barn = "05032435485",
+            annenPart = null,
+            ytelse = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
 
         webTestClient

@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
@@ -59,7 +59,7 @@ internal class OmsorgspengerMidlertidigAleneService(
             .bodyValueAndAwait(
                 SvarOmsMADto(
                     norskIdent,
-                    FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode,
+                    PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode,
                     listOf()
                 )
             )
@@ -78,7 +78,7 @@ internal class OmsorgspengerMidlertidigAleneService(
     internal suspend fun nySøknad(request: ServerRequest, nyOmsMASøknad: NyOmsMASøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            ytelseType = FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
+            ytelseType = PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE,
             journalpostId = nyOmsMASøknad.journalpostId
         )
 
@@ -156,7 +156,7 @@ internal class OmsorgspengerMidlertidigAleneService(
                     .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.SØKNAD_OMS_UTVIDETRETT_MA,
                 journalpostIder = journalpostIder

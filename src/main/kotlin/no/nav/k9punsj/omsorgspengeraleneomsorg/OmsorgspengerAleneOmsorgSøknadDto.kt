@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspengeraleneomsorg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -24,7 +24,8 @@ data class OmsorgspengerAleneOmsorgSøknadDto(
     val begrunnelseForInnsending: String? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -40,25 +41,29 @@ data class SvarOmsAODto(
 )
 
 internal fun Mappe.tilOmsAOVisning(norskIdent: String): SvarOmsAODto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
+        return SvarOmsAODto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerAleneOmsorgSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerAleneOmsorgSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
-    return SvarOmsAODto(norskIdent, FagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
+    return SvarOmsAODto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsAOvisning(): OmsorgspengerAleneOmsorgSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerAleneOmsorgSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerAleneOmsorgSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

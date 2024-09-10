@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.MatchFagsakMedPeriode
@@ -60,7 +60,7 @@ internal class OmsorgspengerutbetalingService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarOmsUtDto(norskIdent, FagsakYtelseType.OMSORGSPENGER.kode, listOf()))
+            .bodyValueAndAwait(SvarOmsUtDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -80,7 +80,7 @@ internal class OmsorgspengerutbetalingService(
 
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
-        journalpostService.settFagsakYtelseType(FagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
+        journalpostService.settFagsakYtelseType(PunsjFagsakYtelseType.OMSORGSPENGER, opprettNySøknad.journalpostId)
 
         val søknadEntitet = mappeService.førsteInnsendingOmsorgspengerutbetaling(
             nySøknad = opprettNySøknad
@@ -170,7 +170,7 @@ internal class OmsorgspengerutbetalingService(
                     .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT, // TODO: Finn en måte å spesifisere hvilken brevkode det gjelder.
                 journalpostIder = journalpostIder
@@ -265,7 +265,7 @@ internal class OmsorgspengerutbetalingService(
     internal suspend fun hentArbeidsforholdIderFraK9Sak(matchFagsakMedPeriode: MatchFagsakMedPeriode): ServerResponse {
         val (arbeidsgiverMedArbeidsforholdId, feil) = k9SakService.hentArbeidsforholdIdFraInntektsmeldinger(
             søker = matchFagsakMedPeriode.brukerIdent,
-            fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER,
             periodeDto = matchFagsakMedPeriode.periodeDto
         )
 
@@ -291,12 +291,12 @@ internal class OmsorgspengerutbetalingService(
         val (perioder, _) = if (matchfagsak.periode == null) {
             k9SakService.hentPerioderSomFinnesIK9(
                 søker = matchfagsak.brukerIdent,
-                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER
+                punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER
             )
         } else {
             k9SakService.hentPerioderSomFinnesIK9ForPeriode(
                 søker = matchfagsak.brukerIdent,
-                fagsakYtelseType = FagsakYtelseType.OMSORGSPENGER,
+                punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER,
                 periode = matchfagsak.periode
             )
         }

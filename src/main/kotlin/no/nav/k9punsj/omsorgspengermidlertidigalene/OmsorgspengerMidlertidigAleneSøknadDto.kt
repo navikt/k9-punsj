@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspengermidlertidigalene
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -15,7 +15,8 @@ data class NyOmsMASøknad(
     val norskIdent: String,
     val journalpostId: String,
     val annenPart: String? = null,
-    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>
+    val barn: List<OmsorgspengerMidlertidigAleneSøknadDto.BarnDto>,
+    val k9saksnummer: String?
 )
 
 data class OmsorgspengerMidlertidigAleneSøknadDto(
@@ -30,7 +31,8 @@ data class OmsorgspengerMidlertidigAleneSøknadDto(
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean? = null,
     val harMedisinskeOpplysninger: Boolean? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -53,25 +55,29 @@ data class SvarOmsMADto(
 )
 
 internal fun Mappe.tilOmsMAVisning(norskIdent: String): SvarOmsMADto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, listOf())
+        return SvarOmsMADto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
-                OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s))
+                OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = s.søknadId, journalposter = hentUtJournalposter(s), k9saksnummer = s.k9saksnummer)
             }
         }
-    return SvarOmsMADto(norskIdent, FagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, søknader)
+    return SvarOmsMADto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsMAvisning(): OmsorgspengerMidlertidigAleneSøknadDto {
     if (søknad == null) {
-        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId)
+        return OmsorgspengerMidlertidigAleneSøknadDto(soeknadId = this.søknadId, k9saksnummer = k9saksnummer)
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerMidlertidigAleneSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

@@ -26,42 +26,23 @@ internal class ArbeidsgiverRoutes(
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgiverePath) { request ->
             RequestContext(coroutineContext, request) {
-                if (request.identitetsnummer().harTilgang()) {
-                    ServerResponse
-                        .status(HttpStatus.OK)
-                        .json()
-                        .bodyValueAndAwait(
-                            arbeidsgiverService.hentArbeidsgivere(
-                                identitetsnummer = request.identitetsnummer(),
-                                fom = request.fom(),
-                                tom = request.tom()
-                            )
-                        )
-                } else {
-                    ServerResponse
-                        .status(HttpStatus.FORBIDDEN)
-                        .buildAndAwait()
-                }
-            }
-        }
-    }
+                val identitetsnummer = request.identitetsnummer()
 
-    @Bean
-    fun hentArbeidsgivereHistorikkRoute() = SaksbehandlerRoutes(authenticationHandler) {
-        GET(ArbeidsgivereHistorikkPath) { request ->
-            RequestContext(coroutineContext, request) {
-                if (request.identitetsnummer().harTilgang()) {
+                if (identitetsnummer.harTilgang()) {
+                    val fom = request.fom()
+                    val tom = request.tom()
+                    val inkluderAvsluttetArbeidsforhold = request.inkluderAvsluttetArbeidsforhold()
+
+                    val arbeidsgivere = arbeidsgiverService.hentArbeidsgivere(
+                        identitetsnummer = identitetsnummer,
+                        fom = fom,
+                        tom = tom,
+                        inkluderAvsluttetArbeidsforhold = inkluderAvsluttetArbeidsforhold
+                    )
                     ServerResponse
                         .status(HttpStatus.OK)
                         .json()
-                        .bodyValueAndAwait(
-                            arbeidsgiverService.hentArbeidsgivereHistorikk(
-                                identitetsnummer = request.identitetsnummer(),
-                                fom = request.fom(),
-                                tom = request.tom(),
-                                historikk = request.historikk()
-                            )
-                        )
+                        .bodyValueAndAwait(arbeidsgivere)
                 } else {
                     ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -109,7 +90,6 @@ internal class ArbeidsgiverRoutes(
 
     private companion object {
         private const val ArbeidsgiverePath = "/api/arbeidsgivere"
-        private const val ArbeidsgivereHistorikkPath = "/api/arbeidsgivere-historikk"
         private const val ArbeidsgivereMedIdPath = "/api/arbeidsgivere-med-id"
         private val Oslo = ZoneId.of("Europe/Oslo")
         private fun ServerRequest.fom() = queryParamOrNull("fom")
@@ -120,7 +100,7 @@ internal class ArbeidsgiverRoutes(
             ?.let { LocalDate.parse(it) }
             ?: LocalDate.now(Oslo).plusMonths(6)
 
-        private fun ServerRequest.historikk() = queryParamOrNull("historikk")
+        private fun ServerRequest.inkluderAvsluttetArbeidsforhold() = queryParamOrNull("inkluderAvsluttetArbeidsforhold")
             ?.let { it.toBoolean() }
             ?: false
 

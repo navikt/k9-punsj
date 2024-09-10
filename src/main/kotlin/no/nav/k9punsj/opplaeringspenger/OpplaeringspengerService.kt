@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -61,7 +61,7 @@ internal class OpplaeringspengerService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarOlpDto(norskIdent, FagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf()))
+            .bodyValueAndAwait(SvarOlpDto(norskIdent, PunsjFagsakYtelseType.OPPLÆRINGSPENGER.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -147,7 +147,7 @@ internal class OpplaeringspengerService(
                     .bodyValueAndAwait(SøknadFeil(søknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.OPPLÆRINGSPENGER_SOKNAD,
                 journalpostIder = journalpostIder
@@ -184,7 +184,7 @@ internal class OpplaeringspengerService(
     internal suspend fun nySøknad(request: ServerRequest, nySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            FagsakYtelseType.OPPLÆRINGSPENGER,
+            PunsjFagsakYtelseType.OPPLÆRINGSPENGER,
             nySøknad.journalpostId
         )
 
@@ -256,7 +256,7 @@ internal class OpplaeringspengerService(
         val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
             matchfagsak.brukerIdent,
             matchfagsak.barnIdent,
-            FagsakYtelseType.OPPLÆRINGSPENGER
+            PunsjFagsakYtelseType.OPPLÆRINGSPENGER
         )
 
         return if (perioder != null) {
@@ -279,7 +279,7 @@ internal class OpplaeringspengerService(
         return k9SakService.hentPerioderSomFinnesIK9(
             søker = dto.soekerId,
             barn = dto.barn.norskIdent,
-            fagsakYtelseType = FagsakYtelseType.OPPLÆRINGSPENGER
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.OPPLÆRINGSPENGER
         )
     }
 }

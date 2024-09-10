@@ -27,6 +27,26 @@ internal class SafDtosTest {
     }
 
     @Test
+    internal fun skal_sjekke_erIkkeStøttetTema_true() {
+        val journalpost = SafDtos.Journalpost(
+            journalpostId = "123456789",
+            tema = "AAP",
+            tittel = "Arbeidsavklaringspenger",
+            journalposttype = SafDtos.JournalpostType.I.name,
+            journalstatus = SafDtos.Journalstatus.MOTTATT.name,
+            bruker = null,
+            sak = null,
+            avsender = null,
+            avsenderMottaker = null,
+            dokumenter = emptyList(),
+            relevanteDatoer = emptyList(),
+            tilleggsopplysninger = listOf()
+        )
+
+        Assertions.assertThat(journalpost.ikkeErTemaOMS).isTrue()
+    }
+
+    @Test
     internal fun skal_sjekke_erIkkeStøttetDigitalJournalpost_true() {
         val journalpost = SafDtos.Journalpost(
             journalpostId = "123456789",

@@ -2,6 +2,9 @@ query($identer: [ID!]!) {
     hentPersonBolk(identer: $identer) {
         ident,
         person {
+            folkeregisteridentifikator {
+                identifikasjonsnummer
+            },
             navn(historikk: false) {
                 fornavn, mellomnavn, etternavn
             },

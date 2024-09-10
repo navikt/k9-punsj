@@ -9,7 +9,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.Matchfagsak
 import no.nav.k9punsj.felles.dto.OpprettNySøknad
@@ -61,7 +61,7 @@ internal class PleiepengerLivetsSluttfaseService(
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(SvarPlsDto(norskIdent, FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf()))
+            .bodyValueAndAwait(SvarPlsDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE.kode, listOf()))
     }
 
     internal suspend fun henteSøknad(søknadId: String): ServerResponse {
@@ -143,7 +143,7 @@ internal class PleiepengerLivetsSluttfaseService(
                     .bodyValueAndAwait(SøknadFeil(sendSøknad.soeknadId, feil))
             }
 
-            val feil = soknadService.sendSøknad(
+            val feil = soknadService.opprettSakOgSendInnSøknad(
                 søknad = søknadK9Format,
                 brevkode = Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
                 journalpostIder = journalpostIder
@@ -179,7 +179,7 @@ internal class PleiepengerLivetsSluttfaseService(
     internal suspend fun nySøknad(request: ServerRequest, opprettNySøknad: OpprettNySøknad): ServerResponse {
         // setter riktig type der man jobber på en ukjent i utgangspunktet
         journalpostService.settFagsakYtelseType(
-            FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE,
+            PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE,
             opprettNySøknad.journalpostId
         )
 
@@ -250,7 +250,7 @@ internal class PleiepengerLivetsSluttfaseService(
         val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
             søker = matchfagsak.brukerIdent,
             barn = matchfagsak.barnIdent,
-            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
         )
 
         return if (perioder == null) {
@@ -273,7 +273,7 @@ internal class PleiepengerLivetsSluttfaseService(
         return k9SakService.hentPerioderSomFinnesIK9(
             søker = dto.soekerId,
             barn = dto.pleietrengende.norskIdent,
-            fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
         )
     }
 }

@@ -3,7 +3,7 @@ package no.nav.k9punsj.domenetjenester.repository
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.BunkeEntitet
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -16,7 +16,7 @@ class BunkeRepository(private val dataSource: DataSource) {
         const val BUNKE_TABLE = "bunke"
     }
 
-    suspend fun opprettEllerHentBunkeForFagsakType(mappeId: String, type: FagsakYtelseType): String {
+    suspend fun opprettEllerHentBunkeForFagsakType(mappeId: String, type: PunsjFagsakYtelseType): String {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 val resultat = tx.run(
@@ -66,14 +66,14 @@ class BunkeRepository(private val dataSource: DataSource) {
                             "mappeId" to UUID.fromString(mappeId)
                         )
                     ).map { row ->
-                        BunkeEntitet(row.string("bunke_id"), FagsakYtelseType.fromKode(row.string("ytelse_type")))
+                        BunkeEntitet(row.string("bunke_id"), PunsjFagsakYtelseType.fromKode(row.string("ytelse_type")))
                     }.asList
                 )
             }
         }
     }
 
-    suspend fun hentYtelseTypeForBunke(bunkeId: String): FagsakYtelseType? {
+    suspend fun hentYtelseTypeForBunke(bunkeId: String): PunsjFagsakYtelseType? {
         return using(sessionOf(dataSource)) {
             return@using it.transaction { tx ->
                 return@transaction tx.run(
@@ -85,10 +85,18 @@ class BunkeRepository(private val dataSource: DataSource) {
                             "bunkeId" to UUID.fromString(bunkeId)
                         )
                     ).map { row ->
-                        FagsakYtelseType.fromKode(row.string("ytelse_type"))
+                        PunsjFagsakYtelseType.fromKode(row.string("ytelse_type"))
                     }.asSingle
                 )
             }
+        }
+    }
+
+    fun slettAlleBunker() {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf("delete from $BUNKE_TABLE").asExecute
+            )
         }
     }
 }

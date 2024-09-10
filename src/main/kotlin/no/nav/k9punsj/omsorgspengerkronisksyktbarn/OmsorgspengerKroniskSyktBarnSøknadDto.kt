@@ -2,7 +2,7 @@ package no.nav.k9punsj.omsorgspengerkronisksyktbarn
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.Mappe
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
@@ -21,7 +21,8 @@ data class OmsorgspengerKroniskSyktBarnSøknadDto(
     val journalposter: List<String>? = null,
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
     data class BarnDto(
         val norskIdent: String?,
@@ -37,25 +38,28 @@ data class SvarOmsKSBDto(
 )
 
 internal fun Mappe.tilOmsKSBVisning(norskIdent: String): SvarOmsKSBDto {
-    val bunke = hentFor(FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
+    val bunke = hentFor(PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())
+        return SvarOmsKSBDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
         ?.map { s ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer
+                )
             } else {
                 OmsorgspengerKroniskSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }
-    return SvarOmsKSBDto(norskIdent, FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
+    return SvarOmsKSBDto(norskIdent, PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøknadDto {
@@ -63,8 +67,11 @@ internal fun SøknadEntitet.tilOmsKSBvisning(): OmsorgspengerKroniskSyktBarnSøk
         return OmsorgspengerKroniskSyktBarnSøknadDto(
             soeknadId = this.søknadId,
             harMedisinskeOpplysninger = false,
-            harInfoSomIkkeKanPunsjes = false
+            harInfoSomIkkeKanPunsjes = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<OmsorgspengerKroniskSyktBarnSøknadDto>(søknad).copy(
+        k9saksnummer = k9saksnummer
+    )
 }

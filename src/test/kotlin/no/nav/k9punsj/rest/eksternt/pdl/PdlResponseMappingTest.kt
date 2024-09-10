@@ -53,6 +53,9 @@ internal class PdlResponseMappingTest {
                 "hentPersonBolk": [{
                         "ident": "1111111111",
                         "person": {
+                            "folkeregisteridentifikator": [{
+                                "identifikasjonsnummer": "1111111111"
+                            }],
                             "navn": [{
                                 "fornavn": "OLA",
                                 "mellomnavn": null,
@@ -67,6 +70,9 @@ internal class PdlResponseMappingTest {
                     {
                         "ident": "22222222222",
                         "person": {
+                            "folkeregisteridentifikator": [{
+                                "identifikasjonsnummer": "22222222222"
+                            }],
                             "navn": [{
                                 "fornavn": "KARI",
                                 "mellomnavn": "MELLOMSTE",

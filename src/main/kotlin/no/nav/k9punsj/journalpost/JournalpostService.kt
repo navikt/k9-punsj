@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
@@ -135,7 +136,7 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun settFagsakYtelseType(ytelseType: FagsakYtelseType, journalpostId: String) {
+    internal suspend fun settFagsakYtelseType(ytelseType: PunsjFagsakYtelseType, journalpostId: String) {
         val journalpost = journalpostRepository.hentHvis(journalpostId)
         if (journalpost != null) {
             val medType = journalpost.copy(ytelse = ytelseType.kode)
@@ -145,16 +146,16 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto) {
+    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String): Pair<HttpStatusCode, String> {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
-        dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
+        return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
             journalpostId = dto.journalpostId,
             identitetsnummer = dto.brukerIdent.somIdentitetsnummer(),
             enhetKode = "9999",
             sak = Sak(
                 sakstype = Sak.SaksType.FAGSAK,
-                fagsakId = dto.saksnummer
+                fagsakId = saksnummer
             )
         )
     }
@@ -256,6 +257,10 @@ class JournalpostService(
         }
         journalpostRepository.ferdig(journalpostId)
         return HttpStatus.OK to "OK"
+    }
+
+    suspend fun settTilFerdig(journalpostId: String) {
+        journalpostRepository.ferdig(journalpostId)
     }
 
     internal suspend fun kopierJournalpost(

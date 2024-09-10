@@ -1,15 +1,16 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
-import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.søknad.felles.type.BegrunnelseForInnsending
 import no.nav.k9punsj.felles.DurationMapper.somDuration
 import no.nav.k9punsj.felles.DurationMapper.somTimerOgMinutter
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.*
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somTimerOgMinutterDto
-import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.utils.objectMapper
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -40,7 +41,8 @@ data class PleiepengerSyktBarnSøknadDto(
     val harMedisinskeOpplysninger: Boolean,
     val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
-    val metadata: Map<*, *>? = null
+    val metadata: Map<*, *>? = null,
+    val k9saksnummer: String? = null
 ) {
 
     data class BarnDto(
@@ -71,9 +73,32 @@ data class PleiepengerSyktBarnSøknadDto(
 
     data class TilsynsordningInfoDto(
         val periode: PeriodeDto?,
-        val timer: Int,
-        val minutter: Int
-    )
+        val tidsformat: Tidsformat?,
+        val timer: Long,
+        val minutter: Int,
+        val perDagString: String?
+    ) {
+        fun somDuration(): Duration {
+            return TimerOgMinutter(timer, minutter).somDuration()
+        }
+
+        companion object {
+            @JvmStatic
+            @JsonCreator
+            fun create(periode: PeriodeDto?,
+                       tidsformat: Tidsformat?,
+                       timer: Long,
+                       minutter: Int,
+                       perDagString: String?): TilsynsordningInfoDto =
+                when (tidsformat) {
+                    Tidsformat.desimaler -> {
+                        val duration = perDagString.somDuration()
+                        TilsynsordningInfoDto(periode, tidsformat, duration?.toHours() ?: 0, duration?.toMinutesPart() ?: 0, perDagString)
+                    }
+                    else -> TilsynsordningInfoDto(periode, tidsformat, timer, minutter, null)
+                }
+            }
+    }
 
     data class UttakDto(
         val periode: PeriodeDto?,
@@ -88,6 +113,10 @@ data class PleiepengerSyktBarnSøknadDto(
     )
 }
 
+enum class Tidsformat {
+    desimaler, timerOgMin
+}
+
 data class SvarPsbDto(
     val søker: String,
     val fagsakTypeKode: String,
@@ -95,26 +124,29 @@ data class SvarPsbDto(
 )
 
 internal fun Mappe.tilPsbVisning(norskIdent: String): SvarPsbDto {
-    val bunke = hentFor(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+    val bunke = hentFor(PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     if (bunke?.søknader.isNullOrEmpty()) {
-        return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
+        return SvarPsbDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, listOf())
     }
     val søknader = bunke?.søknader
         ?.filter { s -> !s.sendtInn }
-        ?.map { s ->
+        ?.map { s: SøknadEntitet ->
             if (s.søknad != null) {
-                objectMapper().convertValue(s.søknad)
+                objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(s.søknad).copy(
+                    k9saksnummer = s.k9saksnummer,
+                )
             } else {
                 PleiepengerSyktBarnSøknadDto(
                     soeknadId = s.søknadId,
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
                     harMedisinskeOpplysninger = false,
-                    harInfoSomIkkeKanPunsjes = false
+                    harInfoSomIkkeKanPunsjes = false,
+                    k9saksnummer = s.k9saksnummer
                 )
             }
         }
-    return SvarPsbDto(norskIdent, FagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
+    return SvarPsbDto(norskIdent, PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode, søknader)
 }
 
 internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {
@@ -123,8 +155,11 @@ internal fun SøknadEntitet.tilPsbvisning(): PleiepengerSyktBarnSøknadDto {
             soeknadId = this.søknadId,
             journalposter = hentUtJournalposter(this),
             harInfoSomIkkeKanPunsjes = false,
-            harMedisinskeOpplysninger = false
+            harMedisinskeOpplysninger = false,
+            k9saksnummer = k9saksnummer
         )
     }
-    return objectMapper().convertValue(søknad)
+    return objectMapper().convertValue<PleiepengerSyktBarnSøknadDto>(søknad).copy(
+        k9saksnummer = this.k9saksnummer
+    )
 }

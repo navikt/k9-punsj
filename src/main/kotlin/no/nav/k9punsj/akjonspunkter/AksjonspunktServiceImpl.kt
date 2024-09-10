@@ -16,6 +16,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -27,7 +28,8 @@ internal class AksjonspunktServiceImpl(
     private val søknadsService: SoknadService,
     private val personService: PersonService,
     @Value("\${no.nav.kafka.k9_los.topic}") private val k9losAksjonspunkthendelseTopic: String,
-    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String
+    @Value("\${no.nav.kafka.k9_punsj_til_los.topic}") private val k9PunsjTilLosTopic: String,
+    @Value("\${SETT_PAA_VENT_TID:#{null}}") private val tidPåVent: String?
 ) : AksjonspunktService {
 
     private companion object {
@@ -38,7 +40,8 @@ internal class AksjonspunktServiceImpl(
         punsjJournalpost: PunsjJournalpost,
         aksjonspunkt: Pair<AksjonspunktKode, AksjonspunktStatus>,
         type: String?,
-        ytelse: String?
+        ytelse: String?,
+        pleietrengendeAktørId: String?
     ) {
         val (aksjonspunktKode, aksjonspunktStatus) = aksjonspunkt
         val eksternId = punsjJournalpost.uuid
@@ -55,7 +58,9 @@ internal class AksjonspunktServiceImpl(
             aksjonspunkter = mutableMapOf(aksjonspunktKode.kode to aksjonspunktStatus.kode),
             ytelse = ytelse,
             type = punsjJournalpost.type!!,
-            status = K9LosOppgaveStatusDto.AAPEN
+            status = K9LosOppgaveStatusDto.AAPEN,
+            journalførtTidspunkt = punsjJournalpost.journalførtTidspunkt,
+            pleietrengendeAktørId = pleietrengendeAktørId
         )
 
         log.info("Oppretter aksjonspunkt(" + aksjonspunktEntitet.aksjonspunktId + ") med kode (" + aksjonspunktEntitet.aksjonspunktKode.kode + ")")
@@ -174,7 +179,7 @@ internal class AksjonspunktServiceImpl(
             aksjonspunktKode = AksjonspunktKode.VENTER_PÅ_INFORMASJON,
             journalpostId = journalpost.journalpostId,
             aksjonspunktStatus = AksjonspunktStatus.OPPRETTET,
-            frist_tid = LocalDateTime.now().plusWeeks(3),
+            frist_tid = if (tidPåVent != null) LocalDateTime.now().plus(Duration.parse(tidPåVent)) else LocalDateTime.now().plusWeeks(3),
             vent_årsak = VentÅrsakType.VENT_TRENGER_FLERE_OPPLYSINGER
         )
 
@@ -189,7 +194,7 @@ internal class AksjonspunktServiceImpl(
                     AksjonspunktKode.PUNSJ.kode to AksjonspunktStatus.UTFØRT.kode,
                     AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                 ),
-                barnIdent = barnIdent,
+                pleietrengendeAktørId = barnIdent,
                 type = journalpost.type!!,
                 status = K9LosOppgaveStatusDto.VENTER
             )
@@ -226,7 +231,7 @@ internal class AksjonspunktServiceImpl(
                     aksjonspunkter = mutableMapOf(
                         AksjonspunktKode.VENTER_PÅ_INFORMASJON.kode to AksjonspunktStatus.OPPRETTET.kode
                     ),
-                    barnIdent = barnIdent,
+                    pleietrengendeAktørId = barnIdent,
                     type = journalpost.type!!,
                     status = K9LosOppgaveStatusDto.VENTER
                 )
@@ -290,7 +295,7 @@ internal class AksjonspunktServiceImpl(
                 journalpostId = punsjJournalpost.journalpostId,
                 ytelse = punsjJournalpost.ytelse,
                 aktørId = punsjJournalpost.aktørId,
-                barnIdent = null,
+                pleietrengendeAktørId = null,
                 type = punsjJournalpost.type!!,
                 aksjonspunkter = aksjonspunkterPaJournalpost,
                 status = status
@@ -328,25 +333,27 @@ internal class AksjonspunktServiceImpl(
         aksjonspunkter: Map<String, String>,
         ytelse: String? = null,
         type: String,
-        barnIdent: String? = null,
+        pleietrengendeAktørId: String? = null,
         sendtInn: Boolean? = null,
         ferdigstiltAv: String? = null,
         mottattDato: LocalDateTime? = null,
-        status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN
+        status: K9LosOppgaveStatusDto? = K9LosOppgaveStatusDto.AAPEN,
+        journalførtTidspunkt: LocalDateTime? = null
     ): String {
         val punsjEventDto = PunsjEventDto(
             eksternId = eksternId.toString(),
             journalpostId = journalpostId,
-            eventTid = LocalDateTime.now(),
             aktørId = aktørId,
+            eventTid = LocalDateTime.now(),
             aksjonspunktKoderMedStatusListe = aksjonspunkter,
-            pleietrengendeAktørId = barnIdent,
-            ytelse = ytelse,
+            pleietrengendeAktørId = pleietrengendeAktørId,
             type = type,
+            ytelse = ytelse,
             sendtInn = sendtInn,
             ferdigstiltAv = ferdigstiltAv,
             mottattDato = mottattDato,
-            status = status
+            journalførtTidspunkt = journalførtTidspunkt,
+            status = status,
         )
 
         return objectMapper().writeValueAsString(punsjEventDto)

@@ -1,13 +1,17 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.k9sak.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -18,10 +22,10 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9(
         søker: String,
         barn: String?,
-        fagsakYtelseType: FagsakYtelseType
+        punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> {
         // OmsorgspengerutbetalingRoutesTest.Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år
-        if (søker == "03011939596" && fagsakYtelseType == FagsakYtelseType.OMSORGSPENGER) {
+        if (søker == "03011939596" && punsjFagsakYtelseType == PunsjFagsakYtelseType.OMSORGSPENGER) {
             return Pair(
                 listOf(
                     PeriodeDto(
@@ -42,15 +46,15 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String?,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         periode: PeriodeDto
     ): Pair<List<PeriodeDto>?, String?> {
-        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, fagsakYtelseType = fagsakYtelseType)
+        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, punsjFagsakYtelseType = punsjFagsakYtelseType)
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         periodeDto: PeriodeDto
     ): Pair<List<ArbeidsgiverMedArbeidsforholdId>?, String?> {
         // simulerer svar på denne
@@ -67,18 +71,21 @@ internal class TestK9SakService : K9SakService {
                 saksnummer = "ABC123",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
+                relatertPersonAktørId =  null
             ),
             Fagsak(
                 saksnummer = "DEF456",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
                 null,
-                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15"))
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
+                relatertPersonAktørId = null
             ),
             Fagsak(
                 saksnummer = "GHI789",
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 null,
+                relatertPersonAktørId = null,
                 gyldigPeriode = null
             )
         ),
@@ -88,7 +95,7 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentEllerOpprettSaksnummer(
         k9FormatSøknad: Søknad,
         søknadEntitet: SøknadEntitet,
-        fagsakYtelseType: FagsakYtelseType
+        punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<String?, String?> {
         return Pair("ABC123", null)
     }
@@ -96,9 +103,48 @@ internal class TestK9SakService : K9SakService {
     override suspend fun sendInnSoeknad(
         soknad: Søknad,
         journalpostId: String,
-        fagsakYtelseType: FagsakYtelseType,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
         saksnummer: String,
         brevkode: Brevkode
+    ) {
+        // do nothing
+    }
+
+    override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto) = SaksnummerDto("ABC123")
+
+    override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer) = ReservertSaksnummerDto(
+        saksnummer = "ABC123",
+        ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        brukerAktørId = "123456789",
+    )
+
+    override suspend fun hentReserverteSaksnummere(søkerAktørId: String): Set<ReservertSaksnummerDto> {
+        return setOf(
+            ReservertSaksnummerDto(
+                saksnummer = "ABC123",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+                brukerAktørId = "123456789",
+            ),
+            ReservertSaksnummerDto(
+                saksnummer = "DEF456",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+                brukerAktørId = "123456789",
+            ),
+            ReservertSaksnummerDto(
+                saksnummer = "GHI789",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
+                brukerAktørId = "123456789",
+            )
+        )
+    }
+
+    override suspend fun opprettSakOgSendInnSøknad(
+        soknad: Søknad,
+        søknadEntitet: SøknadEntitet,
+        journalpostId: String,
+        punsjFagsakYtelseType: PunsjFagsakYtelseType,
+        saksnummer: String,
+        brevkode: Brevkode,
     ) {
         // do nothing
     }

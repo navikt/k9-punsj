@@ -2,10 +2,13 @@ package no.nav.k9punsj.journalpost
 
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.felles.FagsakYtelseType
+import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
@@ -16,6 +19,7 @@ import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
@@ -25,12 +29,15 @@ import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
+import no.nav.k9punsj.journalpost.dto.Sak
 import no.nav.k9punsj.journalpost.dto.SettPåVentDto
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
 import no.nav.k9punsj.openapi.OasJournalpostIder
+import no.nav.k9punsj.sak.SakService
+import no.nav.k9punsj.sak.dto.SakInfoDto
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
@@ -43,6 +50,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -60,13 +69,16 @@ internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
+    private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
     private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
+    private val sakService: SakService,
+    private val k9SakService: K9SakService,
     private val azureGraphService: IAzureGraphService,
     private val innlogget: InnloggetUtils,
-    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean
+    @Value("\${FERDIGSTILL_GOSYSOPPGAVE_ENABLED:false}") private val ferdigstillGosysoppgaveEnabled: Boolean,
 ) {
 
     private companion object {
@@ -106,12 +118,43 @@ internal class JournalpostRoutes(
                     val punsjJournalpost = journalpostService.hentHvisJournalpostMedId(journalpostId = journalpostId)
                     val k9FordelType = punsjJournalpost?.type?.let { K9FordelType.fraKode(it) }
 
+                    val safJournalPost = journalpostService.hentSafJournalPost(journalpostId = journalpostId)
+
                     val kanOpprettesJournalforingsOppgave =
                         (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
                                 journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
                                     journalpostInfo.journalpostStatus == SafDtos.Journalstatus.JOURNALFOERT.name)
+
+                    val k9PunsjFagsakYtelseType = punsjJournalpost?.ytelse?.let {
+                        punsjJournalpost.utledK9sakFagsakYtelseType(
+                            k9sakFagsakYtelseType = when (it) {
+                                PunsjFagsakYtelseType.UKJENT.kode -> FagsakYtelseType.UDEFINERT
+                                else -> FagsakYtelseType.fraKode(it)
+                            }
+                        )
+                    }
+
+                    // Hvis journalposten har sakstilhørighet, hent sak fra K9sak
+                    val safSak = safJournalPost?.sak
+                    val k9Fagsak = safSak?.let { sak: SafDtos.Sak ->
+                        norskIdent?.let { ident: String ->
+                            sakService.hentSaker(ident)
+                                .filterNot { it.reservert }
+                                .firstOrNull { it.fagsakId == sak.fagsakId }
+                        }
+                    }
+
+                    val utledetSak =
+                        utledSak(
+                            erFerdigstiltEllerJournalfoert,
+                            safSak,
+                            k9Fagsak,
+                            k9PunsjFagsakYtelseType,
+                            punsjJournalpost
+                        )
+                    logger.info("Utledet sak: $utledetSak")
 
                     val journalpostInfoDto = JournalpostInfoDto(
                         journalpostId = journalpostInfo.journalpostId,
@@ -125,7 +168,8 @@ internal class JournalpostRoutes(
                         gosysoppgaveId = punsjJournalpost?.gosysoppgaveId,
                         kanOpprettesJournalføringsoppgave = kanOpprettesJournalforingsOppgave,
                         journalpostStatus = journalpostInfo.journalpostStatus,
-                        erFerdigstilt = erFerdigstiltEllerJournalfoert
+                        erFerdigstilt = erFerdigstiltEllerJournalfoert,
+                        sak = utledetSak
                     )
 
                     utvidJournalpostMedMottattDato(
@@ -394,6 +438,65 @@ internal class JournalpostRoutes(
         }
     }
 
+    private suspend fun utledSak(
+        erFerdigstiltEllerJournalfoert: Boolean,
+        safSak: SafDtos.Sak?,
+        k9Fagsak: SakInfoDto?,
+        k9FagsakYtelseType: FagsakYtelseType?,
+        punsjJournalpost: PunsjJournalpost?,
+    ): Sak {
+        logger.info("Utleder sak for journalpost")
+        val harSafSak = safSak != null
+        val safSakHarFagsakId = safSak?.fagsakId != null
+        val ikkeHarFagsak = k9Fagsak == null
+
+        val erReservertSaksnummer = harSafSak && safSakHarFagsakId && ikkeHarFagsak
+        logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
+
+        return when (erReservertSaksnummer) {
+            true -> {
+                logger.info("Utleder reservert sak. Henter reservert saksnummer fra k9-sak med fagsakId: ${safSak!!.fagsakId}")
+                val reservertSaksnummerDto = k9SakService.hentReservertSaksnummer(
+                    Saksnummer(safSak.fagsakId)
+                )
+                logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
+                val pleietrengendeIdent = reservertSaksnummerDto?.pleietrengendeAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
+                val relatertPersonIdent = reservertSaksnummerDto?.relatertPersonAktørId?.let {
+                    personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
+                }
+                val barnIdenter = reservertSaksnummerDto?.barnAktørIder?.let { fosterbarnAktørIder: List<String> ->
+                    fosterbarnAktørIder.map { personService.finnEllerOpprettPersonVedAktørId(it) }
+                }
+                Sak(
+                    reservertSaksnummer = true,
+                    fagsakId = reservertSaksnummerDto?.saksnummer,
+                    gyldigPeriode = null,
+                    pleietrengendeIdent = pleietrengendeIdent,
+                    relatertPersonIdent = relatertPersonIdent,
+                    barnIdenter = barnIdenter,
+                    sakstype = reservertSaksnummerDto?.ytelseType?.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
+                )
+            }
+
+            else -> {
+                logger.info("Utleder fagsak fra k9-sak med fagsakId: ${safSak?.fagsakId}")
+                Sak(
+                    reservertSaksnummer = false,
+                    fagsakId = safSak?.fagsakId,
+                    gyldigPeriode = k9Fagsak?.gyldigPeriode,
+                    pleietrengendeIdent = k9Fagsak?.pleietrengendeIdent,
+                    relatertPersonIdent = k9Fagsak?.relatertPersonIdent,
+                    barnIdenter = null,
+                    sakstype = k9Fagsak?.sakstype ?: k9FagsakYtelseType?.kode,
+                    behandlingsÅr = punsjJournalpost?.behandlingsAar
+                )
+            }
+        }
+    }
+
     private suspend fun utvidJournalpostMedMottattDato(
         journalpostId: String,
         mottattDato: LocalDateTime,
@@ -418,10 +521,9 @@ internal class JournalpostRoutes(
         }
     }
 
-    private suspend fun kanIkkeKopieres(feil: String) = ServerResponse
-        .status(HttpStatus.CONFLICT)
-        .bodyValueAndAwait(feil)
-        .also { logger.warn("Journalpost kan ikke kopieres: $feil") }
+    private class KanIkkeKopieresErrorResponse(feil: String) :
+        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
+
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
