@@ -75,7 +75,7 @@ internal class TestK9SakService : K9SakService {
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
                 gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktørId =  null
+                relatertPersonAktørId = null
             ),
             Fagsak(
                 saksnummer = "DEF456",
@@ -152,13 +152,10 @@ internal class TestK9SakService : K9SakService {
         // do nothing
     }
 
-    override suspend fun hentInstitusjoner(): Pair<List<GodkjentOpplæringsinstitusjonDto>?, String?> {
+    override suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
         val gyldigePerioder = listOf(Periode(LocalDate.now().minusMonths(12), LocalDate.now()))
-        return Pair(
-            first = listOf(
-                GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehus Asker/Bærum", gyldigePerioder),
-            ),
-            second = null
+        return listOf(
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehus Asker/Bærum", gyldigePerioder),
         )
     }
 }

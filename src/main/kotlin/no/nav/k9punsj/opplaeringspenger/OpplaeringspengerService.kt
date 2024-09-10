@@ -77,18 +77,12 @@ internal class OpplaeringspengerService(
     }
 
     internal suspend fun hentInstitusjoner(): ServerResponse {
-        val (institusjoner, feil) = k9SakService.hentInstitusjoner()
+        val institusjoner = k9SakService.hentInstitusjoner()
 
-        if (feil != null) {
-            return ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(OasFeil(feil))
-        }
         return ServerResponse
             .ok()
             .json()
-            .bodyValueAndAwait(institusjoner!!)
+            .bodyValueAndAwait(institusjoner)
     }
 
     internal suspend fun oppdaterEksisterendeSøknad(

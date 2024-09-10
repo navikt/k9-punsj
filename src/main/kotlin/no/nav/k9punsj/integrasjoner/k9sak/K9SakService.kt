@@ -63,5 +63,5 @@ interface K9SakService {
         brevkode: Brevkode,
     )
 
-    suspend fun hentInstitusjoner(): Pair<List<GodkjentOpplæringsinstitusjonDto>?, String?>
+    suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto>
 }

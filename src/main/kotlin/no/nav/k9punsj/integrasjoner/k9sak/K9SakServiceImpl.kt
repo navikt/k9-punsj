@@ -29,7 +29,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
@@ -93,7 +93,7 @@ class K9SakServiceImpl(
         internal const val hentReservertSaksnummerUrl = "/saksnummer"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
-        internal const val hentInstitusjonUrl = "/opplæringsinstitusjon/alle"
+        internal const val hentInstitusjonerUrl = "/opplæringsinstitusjon/alle"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
@@ -488,18 +488,22 @@ class K9SakServiceImpl(
         }
     }
 
-    override suspend fun hentInstitusjoner(): Pair<List<GodkjentOpplæringsinstitusjonDto>?, String?> {
-        val (json, _) = kotlin.runCatching { httpGet(hentInstitusjonUrl) }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { return Pair(null, it.message) }
-        )
+    override suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
+        val result = httpGet(hentInstitusjonerUrl)
 
-        return try {
-            val institusjoner = objectMapper().readValue<List<GodkjentOpplæringsinstitusjonDto>>(json)
-            Pair(institusjoner, null)
-        } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
-        }
+        return kotlin.runCatching { objectMapper().readValue<List<GodkjentOpplæringsinstitusjonDto>>(result) }
+            .fold(
+                onSuccess = { it },
+                onFailure = { throwable: Throwable ->
+                    throw RestKallException(
+                        titel = "Feil ved henting av institusjoner",
+                        message = "Feilet ved deserialisering av respons ved henting av institusjoner: ${throwable.message}",
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                        uri = URI.create(hentInstitusjonerUrl)
+                    )
+                }
+            )
+
     }
 
     private suspend fun utledK9sakPeriode(
