@@ -1,6 +1,8 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
+import no.nav.k9.sak.typer.Periode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.LokalProfil
@@ -9,14 +11,15 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.Month
+import java.util.*
 
 @Component
 @LokalProfil
@@ -33,6 +36,7 @@ class LokalK9SakService : K9SakService {
             ),
             null
         )
+
         false -> Pair(emptyList(), null)
     }
 
@@ -58,7 +62,7 @@ class LokalK9SakService : K9SakService {
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
                 null,
                 gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
-                relatertPersonAktørId =  null
+                relatertPersonAktørId = null
             ),
             Fagsak(
                 saksnummer = "DEF456",
@@ -72,6 +76,13 @@ class LokalK9SakService : K9SakService {
                 no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 null,
                 gyldigPeriode = null,
+                relatertPersonAktørId = null
+            ),
+            Fagsak(
+                saksnummer = "JKL123",
+                no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER,
+                null,
+                gyldigPeriode = PeriodeDto(LocalDate.parse("2022-08-01"), LocalDate.parse("2022-08-15")),
                 relatertPersonAktørId = null
             )
         ),
@@ -119,6 +130,11 @@ class LokalK9SakService : K9SakService {
                 saksnummer = "GHI789",
                 ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS,
                 brukerAktørId = "123456789",
+            ),
+            ReservertSaksnummerDto(
+                saksnummer = "JKL123",
+                ytelseType = no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER,
+                brukerAktørId = "123456789",
             )
         )
     }
@@ -132,5 +148,30 @@ class LokalK9SakService : K9SakService {
         brevkode: Brevkode,
     ) {
         // do nothing
+    }
+
+    override suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
+        val gyldigePerioder = listOf(Periode(LocalDate.now().minusMonths(12), LocalDate.now()))
+        return listOf(
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehus Asker/Bærum", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Buskerud (Drammen sykehus)", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset i Vestfold", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehus Asker/Bærum", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Elverum", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Gjøvik", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Hamar", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Kongsvinger", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Lillehammer", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Innlandet Tynset", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Telemark", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehuset Østfold", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sørlandet sykehus, Arendal", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sørlandet sykehus, Farsund", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sørlandet sykehus, Kristiansand", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sørlandet sykehus, Mandal", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "St. Olavs Hospital", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Stavanger Universitetssykehus", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sunnaas sykehus", gyldigePerioder),
+        )
     }
 }

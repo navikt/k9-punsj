@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -36,6 +39,7 @@ internal class OpplaeringspengerRoutes(
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
+        internal const val HentInstitusjoner = "/$søknadType/institusjoner" // get
     }
 
     @Bean
@@ -112,6 +116,17 @@ internal class OpplaeringspengerRoutes(
                 )?.let { return@RequestContext it }
 
                 opplaeringspengerService.hentInfoFraK9Sak(matchfagsak)
+            }
+        }
+
+        GET("/api${Urls.HentInstitusjoner}") { request ->
+            RequestContext(coroutineContext, request) {
+                val institusjoner = opplaeringspengerService.hentInstitusjoner()
+
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(institusjoner)
             }
         }
     }
