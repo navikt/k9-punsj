@@ -84,7 +84,7 @@ class PostMottakService(
                     brukerAktørId = brukerAktørId,
                     pleietrengendeAktørId = pleietrengendeAktørId,
                     relatertPersonAktørId = relatertPersonAktørId,
-                    barnAktørIder = fosterbarnAktørIder,
+                    barnAktørIder = fosterbarnAktørIder ?: listOf(),
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
                 )
