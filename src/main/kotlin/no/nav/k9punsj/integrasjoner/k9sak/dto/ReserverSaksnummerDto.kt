@@ -7,7 +7,7 @@ data class ReserverSaksnummerDto(
     val brukerAktørId: String,
     val pleietrengendeAktørId: String? = null,
     val relatertPersonAktørId: String? = null,
-    val barnAktørIder: List<String>? = null,
+    val barnAktørIder: List<String> = listOf(),
     val ytelseType: FagsakYtelseType,
     var behandlingsår: Int? = null,
 ) {
