@@ -14,6 +14,7 @@ internal object SafDtos {
                 tema
                 tittel
                 journalposttype
+                datoOpprettet
                 relevanteDatoer {
                   dato
                   datotype
