@@ -66,6 +66,7 @@ import kotlin.coroutines.coroutineContext
 internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
+    private val journalpostkopieringService: JournalpostkopieringService,
     private val pdlService: PdlService,
     private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
@@ -420,7 +421,7 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
                 }
 
-                val nyJournalpostId = journalpostService.kopierJournalpost(
+                val nyJournalpostId = journalpostkopieringService.kopierJournalpost(
                     journalpostId = journalpostId.somJournalpostId(),
                     kopierJournalpostDto = dto
                 )
