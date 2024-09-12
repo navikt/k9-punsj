@@ -164,10 +164,12 @@ internal object SafDtos {
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,
         val relevanteDatoer: List<RelevantDato>,
+        val datoOpprettet: LocalDateTime,
         private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()
     ) {
         val k9Kilde = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.kilde" }?.verdi
         val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
+        val erUtgående = journalposttype == "U"
         private val erDigital = "DIGITAL" == k9Kilde
         private val erEttersendelse = "ETTERSENDELSE" == k9Type
         private val erSøknad = "SØKNAD" == k9Type
@@ -177,7 +179,11 @@ internal object SafDtos {
         }
         val ikkeErTemaOMS = tema?.let { Tema.OMS.name != it } ?: false
         private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
+
         val erFerdigstilt = ferdigstilteStatuser.contains(journalstatus)
+        private val erInngående = journalposttype == "I"
+        private val erNotat = journalposttype == "N"
+        internal val kanKopieres = erInngående || erNotat
     }
 
     internal data class Tilleggsopplysning(

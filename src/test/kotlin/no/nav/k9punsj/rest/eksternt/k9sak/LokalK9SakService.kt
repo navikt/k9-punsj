@@ -11,6 +11,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.util.MockUtil.erFødtI
@@ -84,6 +85,10 @@ class LokalK9SakService : K9SakService {
         punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType
     ): Pair<String?, String?> {
         return Pair("ABC123", null)
+    }
+
+    override suspend fun hentEllerOpprettSaksnummer(hentK9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag): String {
+        return "ABC123"
     }
 
     override suspend fun sendInnSoeknad(

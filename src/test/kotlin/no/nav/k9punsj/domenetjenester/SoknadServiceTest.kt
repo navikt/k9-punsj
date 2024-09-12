@@ -121,6 +121,7 @@ internal class SoknadServiceTest {
                 )
             )
         ),
+        datoOpprettet = LocalDateTime.parse("2022-07-01T13:32:05"),
         relevanteDatoer = listOf(
             SafDtos.RelevantDato(
                 dato = LocalDateTime.parse("2022-07-01T13:32:05"),

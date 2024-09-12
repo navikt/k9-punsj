@@ -8,6 +8,7 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
@@ -32,6 +33,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
@@ -84,6 +86,8 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
     fun `Mapper kopierjournalpostinfo med barn og sender inn`(): Unit = runBlocking {
 
         val journalpostId = IdGenerator.nesteId()
+        val saksnummer = "ABC123"
+
         Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
             SafDtos.Journalpost(
                 journalpostId = journalpostId,
@@ -100,10 +104,11 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                 ),
                 sak = SafDtos.Sak(
                     sakstype = SafDtos.Sakstype.FAGSAK,
-                    fagsakId = "CBA123",
+                    fagsakId = saksnummer,
                     fagsaksystem = "K9",
                     tema = SafDtos.Tema.OMS.name
                 ),
+                datoOpprettet = LocalDateTime.now(),
                 tittel = null
             )
         )
@@ -113,7 +118,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             dokarkivGateway.knyttTilAnnenSak(
                 journalpostId = journalpostId.somJournalpostId(),
                 identitetsnummer = "27519339353".somIdentitetsnummer(),
-                saksnummer = "CBA123"
+                saksnummer = saksnummer
             )
         ).thenReturn(nyJournalpostId.somJournalpostId())
 
@@ -141,15 +146,53 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .body(BodyInserters.fromValue(kopierJournalpostDto))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
             .exchange()
-            .expectStatus().isAccepted
+            .expectStatus().isCreated
+            .expectBody()
+            .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
     }
 
     @Test
     fun `Støtter å overstyre ytelse på journalpost ved kopiering`(): Unit = runBlocking {
-
         val journalpostId = IdGenerator.nesteId()
+        val saksnummer = "ABC123"
+        val søkerAktørId = "27519339353"
+
+        Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
+            SafDtos.Journalpost(
+                journalpostId = journalpostId,
+                tema = null,
+                journalstatus = SafDtos.Journalstatus.JOURNALFOERT.name,
+                journalposttype = SafDtos.JournalpostType.N.name,
+                dokumenter = emptyList(),
+                relevanteDatoer = emptyList(),
+                avsender = null,
+                avsenderMottaker = null,
+                bruker = SafDtos.Bruker(
+                    id = søkerAktørId,
+                    type = "AKTOER_ID"
+                ),
+                sak = SafDtos.Sak(
+                    sakstype = SafDtos.Sakstype.FAGSAK,
+                    fagsakId = saksnummer,
+                    fagsaksystem = "K9",
+                    tema = SafDtos.Tema.OMS.name
+                ),
+                datoOpprettet = LocalDateTime.now(),
+                tittel = null
+            )
+        )
+
+        val nyJournalpostId = IdGenerator.nesteId()
+        Mockito.`when`(
+            dokarkivGateway.knyttTilAnnenSak(
+                journalpostId = journalpostId.somJournalpostId(),
+                identitetsnummer = søkerAktørId.somIdentitetsnummer(),
+                saksnummer = saksnummer
+            )
+        ).thenReturn(nyJournalpostId.somJournalpostId())
+
         val melding = FordelPunsjEventDto(
-            aktørId = "1234567890",
+            aktørId = søkerAktørId,
             journalpostId = journalpostId,
             type = K9FordelType.PAPIRSØKNAD.kode,
             ytelse = PunsjFagsakYtelseType.UKJENT.kode
@@ -174,7 +217,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .json("""{"journalpostId":"$nyJournalpostId"}""")
+            .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
     }
 
     @ParameterizedTest

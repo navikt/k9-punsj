@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class SafDtosTest {
 
@@ -14,6 +15,7 @@ internal class SafDtosTest {
             tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -34,6 +36,7 @@ internal class SafDtosTest {
             tittel = "Arbeidsavklaringspenger",
             journalposttype = SafDtos.JournalpostType.I.name,
             journalstatus = SafDtos.Journalstatus.MOTTATT.name,
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -54,6 +57,7 @@ internal class SafDtosTest {
             tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -74,6 +78,7 @@ internal class SafDtosTest {
             tittel = "omsorgspengerutbetaling",
             journalposttype = "test",
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,

@@ -2,12 +2,13 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.FagsakYtelseType
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
+import kotlinx.coroutines.runBlocking
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -19,12 +20,15 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.journalpost.dto.DokumentInfo
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.journalpost.postmottak.JournalpostMottaksHaandteringDto
+import no.nav.k9punsj.utils.PeriodeUtils.somPeriodeDto
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,7 +46,7 @@ class JournalpostService(
     private val journalpostRepository: JournalpostRepository,
     private val dokarkivGateway: DokarkivGateway,
     private val objectMapper: ObjectMapper,
-    private val k9SakService: K9SakService
+    private val k9SakService: K9SakService,
 ) {
 
     private companion object {
@@ -146,7 +150,10 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String): Pair<HttpStatusCode, String> {
+    internal suspend fun oppdaterOgFerdigstillForMottak(
+        dto: JournalpostMottaksHaandteringDto,
+        saksnummer: String,
+    ): Pair<HttpStatusCode, String> {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
         return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
@@ -265,51 +272,82 @@ class JournalpostService(
 
     internal suspend fun kopierJournalpost(
         journalpostId: JournalpostId,
-        fra: Identitetsnummer,
-        til: Identitetsnummer,
-        pleietrengende: Identitetsnummer?,
-        annenPart: Identitetsnummer?
+        kopierJournalpostDto: KopierJournalpostDto,
     ): JournalpostId {
         val journalpost = hentHvisJournalpostMedId(journalpostId.toString())
-            ?: throw java.lang.IllegalStateException("Finner ikke journalpost.")
+        checkNotNull(journalpost) { "Finner ikke journalpost." }
 
         val safJournalpost = hentSafJournalPost(journalpostId.toString())
-        if (safJournalpost != null && safJournalpost.journalposttype == "U") {
+        requireNotNull(safJournalpost) { "Finner ikke SAF journalpost." }
+
+        check(!safJournalpost.erUtgående) {
             throw IllegalStateException("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
         }
 
-        if (safJournalpost != null) {
-            if (!safJournalpost.erFerdigstilt) {
-                throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
-            }
+        check(safJournalpost.erFerdigstilt) {
+            throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
         }
 
-        val fagsakYtelseType = journalpost.ytelse?.let { FagsakYtelseType.fromKode(it) } ?: throw IllegalStateException(
-            "Finner ikke ytelsestype for journalpost."
-        )
-
-        if (journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+        check(journalpost.type != null && journalpost.type != K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
             throw IllegalStateException("Kan ikke kopier journalpost med type inntektsmelding utgått.")
         }
 
+        val k9FagsakYtelseType: FagsakYtelseType =
+            kopierJournalpostDto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
+                val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
+                journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
+            } ?: throw JournalpostRoutes.KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
+
         val støttedeYtelseTyperForKopiering = listOf(
-            FagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN,
+            FagsakYtelseType.OMSORGSPENGER_KS,
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-            FagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
         )
 
-        if (!støttedeYtelseTyperForKopiering.contains(fagsakYtelseType)) {
-            throw IllegalStateException("Støtter ikke kopiering av ${fagsakYtelseType.navn} for relaterte journalposter")
+        check (støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
+            throw IllegalStateException("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
         }
 
+        check(safJournalpost.kanKopieres) {
+            "Kan ikke kopieres. $journalpost."
+        }
 
-        // TODO: Hent saksnummer fra k9-sak
-        // val saksnummer = k9SakService.hentSaksnr
-        return dokarkivGateway.knyttTilAnnenSak(
-            journalpostId = journalpostId,
-            identitetsnummer = til,
-            saksnummer = "CBA123"
+        val k9SakGrunnlag = kopierJournalpostDto.somK9SakGrunnlag(
+            k9FagsakYtelseType = k9FagsakYtelseType,
+            periodeDto = safJournalpost?.datoOpprettet?.toLocalDate()?.somPeriodeDto()
         )
+
+        val saksnummer = hentEllerOpprettSaksnummer(
+            journalpostId = journalpostId.toString(),
+            kopierJournalpostDto = kopierJournalpostDto,
+            k9SakGrunnlag = k9SakGrunnlag
+        )
+
+        val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
+            journalpostId = journalpostId,
+            identitetsnummer = k9SakGrunnlag.søker.somIdentitetsnummer(),
+            saksnummer = saksnummer
+        )
+        logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
+        return nyJournalpostId
+    }
+
+    private suspend fun hentEllerOpprettSaksnummer(journalpostId: String, kopierJournalpostDto: KopierJournalpostDto, k9SakGrunnlag: HentK9SaksnummerGrunnlag): String {
+        // Henter eller oppretter saksnummer for den originale personen
+        val fraSaksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
+
+        // Sjekker om journalposten kopieres til samme person og logger hvis så er tilfelle
+        if (kopierJournalpostDto.fra == kopierJournalpostDto.til) {
+            logger.info("Kopierer journalpost: $journalpostId til samme person.")
+            return fraSaksnummer // Bruker eksisterende saksnummer for samme person
+        }
+
+        // Hvis journalposten kopieres til en annen person, Hent eller opprett nytt saksnummer
+        val nySaksnummer = k9SakService.hentEllerOpprettSaksnummer(
+            k9SakGrunnlag.copy(søker = kopierJournalpostDto.til)
+        )
+        logger.info("Kopierer journalpost: $journalpostId til ny person med saksnummer: $nySaksnummer")
+        return nySaksnummer
     }
 
     internal suspend fun journalpostIkkeEksisterer(journalpostId: String): Boolean {

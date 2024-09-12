@@ -25,7 +25,6 @@ import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
-import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
@@ -425,15 +424,12 @@ internal class JournalpostRoutes(
 
                 val nyJournalpostId = journalpostService.kopierJournalpost(
                     journalpostId = journalpostId.somJournalpostId(),
-                    fra = dto.fra.somIdentitetsnummer(),
-                    til = dto.til.somIdentitetsnummer(),
-                    pleietrengende = dto.barn?.somIdentitetsnummer(),
-                    annenPart = dto.annenPart?.somIdentitetsnummer()
+                    kopierJournalpostDto = dto
                 )
 
                 return@RequestContext ServerResponse
                     .status(HttpStatus.CREATED)
-                    .bodyValueAndAwait(nyJournalpostId)
+                    .bodyValueAndAwait("""{"nyJournalPostId":"$nyJournalpostId"}""")
             }
         }
     }
@@ -521,7 +517,7 @@ internal class JournalpostRoutes(
         }
     }
 
-    private class KanIkkeKopieresErrorResponse(feil: String) :
+    class KanIkkeKopieresErrorResponse(feil: String) :
         ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
 
 
