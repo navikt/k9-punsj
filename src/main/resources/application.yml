@@ -99,8 +99,6 @@ no.nav:
       topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
     k9_punsj_til_los:
       topic: ${SEND_OPPDATERING_TIL_K9LOS}
-    k9_rapid:
-      topic: ${K9_RAPID_TOPIC}
     k9_fordel:
       topic: ${K9_FORDEL_TOPIC}
     k9_punsjbolle:

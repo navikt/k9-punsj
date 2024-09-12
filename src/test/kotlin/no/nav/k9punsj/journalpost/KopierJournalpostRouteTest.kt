@@ -12,7 +12,6 @@ import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
@@ -42,9 +41,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
-
-    @MockBean
-    private lateinit var innsendingClient: InnsendingClient
 
     @MockBean
     private lateinit var soknadService: SoknadService

@@ -146,8 +146,6 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
 
     # Integrasjoner (Kafka)
-    - name: K9_RAPID_TOPIC
-      value: "omsorgspenger.k9-rapid-v2"
     - name: SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS
       value: "k9saksbehandling.punsj-aksjonspunkthendelse-v1"
     - name: SEND_BREVBESTILLING_TIL_K9_FORMIDLING
