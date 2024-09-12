@@ -71,7 +71,6 @@ internal class JournalpostRoutes(
     private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
-    private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
     private val sakService: SakService,
     private val k9SakService: K9SakService,
