@@ -85,6 +85,7 @@ class JournalpostkopieringService(
             throw IllegalStateException("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
         }
 
+        // TODO: Trengs denne sjekken?
         check(safJournalpost.erFerdigstilt) {
             throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
         }
