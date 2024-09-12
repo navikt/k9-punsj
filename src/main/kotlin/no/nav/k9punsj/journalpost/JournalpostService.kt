@@ -275,6 +275,37 @@ class JournalpostService(
         kopierJournalpostDto: KopierJournalpostDto,
     ): JournalpostId {
         val journalpost = hentHvisJournalpostMedId(journalpostId.toString())
+        val (safJournalpost, k9FagsakYtelseType: FagsakYtelseType) = validerJournalpostKopiering(
+            journalpost = journalpost,
+            journalpostId = journalpostId,
+            kopierJournalpostDto = kopierJournalpostDto
+        )
+
+        val k9SakGrunnlag = kopierJournalpostDto.somK9SakGrunnlag(
+            k9FagsakYtelseType = k9FagsakYtelseType,
+            periodeDto = safJournalpost.datoOpprettet.toLocalDate().somPeriodeDto()
+        )
+
+        val saksnummer = hentEllerOpprettSaksnummer(
+            journalpostId = journalpostId.toString(),
+            kopierJournalpostDto = kopierJournalpostDto,
+            k9SakGrunnlag = k9SakGrunnlag
+        )
+
+        val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
+            journalpostId = journalpostId,
+            identitetsnummer = k9SakGrunnlag.søker.somIdentitetsnummer(),
+            saksnummer = saksnummer
+        )
+        logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
+        return nyJournalpostId
+    }
+
+    private suspend fun JournalpostService.validerJournalpostKopiering(
+        journalpost: PunsjJournalpost?,
+        journalpostId: JournalpostId,
+        kopierJournalpostDto: KopierJournalpostDto,
+    ): Pair<SafDtos.Journalpost, FagsakYtelseType> {
         checkNotNull(journalpost) { "Finner ikke journalpost." }
 
         val safJournalpost = hentSafJournalPost(journalpostId.toString())
@@ -304,32 +335,14 @@ class JournalpostService(
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
         )
 
-        check (støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
+        check(støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
             throw IllegalStateException("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
         }
 
         check(safJournalpost.kanKopieres) {
             "Kan ikke kopieres. $journalpost."
         }
-
-        val k9SakGrunnlag = kopierJournalpostDto.somK9SakGrunnlag(
-            k9FagsakYtelseType = k9FagsakYtelseType,
-            periodeDto = safJournalpost?.datoOpprettet?.toLocalDate()?.somPeriodeDto()
-        )
-
-        val saksnummer = hentEllerOpprettSaksnummer(
-            journalpostId = journalpostId.toString(),
-            kopierJournalpostDto = kopierJournalpostDto,
-            k9SakGrunnlag = k9SakGrunnlag
-        )
-
-        val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
-            journalpostId = journalpostId,
-            identitetsnummer = k9SakGrunnlag.søker.somIdentitetsnummer(),
-            saksnummer = saksnummer
-        )
-        logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
-        return nyJournalpostId
+        return Pair(safJournalpost, k9FagsakYtelseType)
     }
 
     private suspend fun hentEllerOpprettSaksnummer(journalpostId: String, kopierJournalpostDto: KopierJournalpostDto, k9SakGrunnlag: HentK9SaksnummerGrunnlag): String {
