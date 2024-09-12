@@ -4,6 +4,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
+import no.nav.k9punsj.fordel.FordelPunsjEventDto
+import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service
 class JournalpostkopieringService(
     private val journalpostRepository: JournalpostRepository,
     private val k9SakService: K9SakService,
+    private val hendeMottaker: HendelseMottaker,
     private val safGateway: SafGateway,
     private val dokarkivGateway: DokarkivGateway,
 ) {
@@ -55,6 +58,16 @@ class JournalpostkopieringService(
             saksnummer = saksnummer
         )
         logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
+
+        // Erstatter no.nav.k9punsj.kafka.KafkaConsumers.consumePunsjbarJournalpost
+        hendeMottaker.prosesser(FordelPunsjEventDto(
+            aktørId = kopierJournalpostDto.til,
+            journalpostId = nyJournalpostId.toString(),
+            type = K9FordelType.KOPI.kode,
+            ytelse = k9FagsakYtelseType.kode,
+            gosysoppgaveId = null
+        ))
+
         return nyJournalpostId
     }
 

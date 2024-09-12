@@ -19,6 +19,7 @@ import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -145,6 +146,10 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .expectStatus().isCreated
             .expectBody()
             .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
+
+        val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
+        Assertions.assertNotNull(journalpostKopi)
+        assertThat(journalpostKopi!!.type).isNotNull().isEqualTo(K9FordelType.KOPI.kode)
     }
 
     @Test
@@ -214,6 +219,10 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .expectStatus().isCreated
             .expectBody()
             .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
+
+        val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
+        Assertions.assertNotNull(journalpostKopi)
+        assertThat(journalpostKopi!!.type).isNotNull().isEqualTo(K9FordelType.KOPI.kode)
     }
 
     @ParameterizedTest

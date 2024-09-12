@@ -56,9 +56,6 @@ no.nav:
     base_url: ${K9SAK_BASE_URL}
     scope: ${K9SAK_SCOPE}
 
-  k9punsjbolle:
-    base_url: ${K9PUNSJBOLLE_BASE_URL}
-    scope: ${K9PUNSJBOLLE_SCOPE}
 
   gosys:
     base_url: ${GOSYS_BASE_URL}
