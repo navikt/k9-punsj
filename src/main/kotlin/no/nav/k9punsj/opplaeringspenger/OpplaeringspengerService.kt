@@ -3,6 +3,7 @@ package no.nav.k9punsj.opplaeringspenger
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
 import no.nav.k9.søknad.Søknad
 import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
@@ -74,6 +75,10 @@ internal class OpplaeringspengerService(
             .ok()
             .json()
             .bodyValueAndAwait(søknad.tilOlpvisning())
+    }
+
+    internal suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
+        return k9SakService.hentInstitusjoner()
     }
 
     internal suspend fun oppdaterEksisterendeSøknad(

@@ -22,6 +22,7 @@ fun WireMockServer.stubSaf() = stubSafHenteDokumentOk()
     .stubSafIkkeStøttet()
     .stubSafHenteDokumentAbacError()
     .stubSafHentJournalpostOk()
+    .stubSafHentJournalpostOPL()
     .stubSafHentJournalpostAbacError()
     .stubSafHentJournalpostIkkeKomplettTilgang()
     .stubSafHentJournalpostFinnesIkke()
@@ -208,6 +209,14 @@ fun WireMockServer.stubSafPunsjbolleHentFerdigstillJournalpostOk() = stubSafHent
 )
 
 fun WireMockServer.stubSafHentJournalpostOk() = stubSafHenteJournalpost()
+
+fun WireMockServer.stubSafHentJournalpostOPL() = stubSafHenteJournalpost(
+    journalpostId = JournalpostIds.OPL, 
+    responseBody = SafMockResponses.OkResponseHenteJournalpost(
+        journalpostId = JournalpostIds.OPL, fagsakId = "JKL123"
+    )
+)
+
 fun WireMockServer.stubSafHentJournalpostAbacError() = stubSafHenteJournalpost(
     journalpostId = JournalpostIds.AbacError,
     responseBody = SafMockResponses.AbacErrorResponseHenteJournalpost
@@ -225,6 +234,7 @@ fun WireMockServer.stubSafHentJournalpostFinnesIkke() = stubSafHenteJournalpost(
 
 object JournalpostIds {
     const val Ok: JournalpostId = "200"
+    const val OPL: JournalpostId = "420"
     const val AbacError: JournalpostId = "500"
     const val IkkeKomplettTilgang: JournalpostId = "403"
     const val FinnesIkke: JournalpostId = "404"
@@ -235,7 +245,7 @@ object JournalpostIds {
 
 object SafMockResponses {
     @Language("JSON")
-    fun OkResponseHenteJournalpost(journalpostId: String = "123456789", tema: String = "OMS") = """
+    fun OkResponseHenteJournalpost(journalpostId: String = "123456789", tema: String = "OMS", fagsakId: String = "ABC123") = """
     {
       "data": {
         "journalpost": {
@@ -255,7 +265,7 @@ object SafMockResponses {
             "id": "29099000129"
           },
           "sak": {
-            "fagsakId": "ABC123",
+            "fagsakId": "$fagsakId",
             "fagsaksystem": "K9",
             "tema": "$tema",
             "fagsaktype": "FAGSAK"

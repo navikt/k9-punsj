@@ -1,6 +1,7 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
@@ -66,4 +67,6 @@ interface K9SakService {
         saksnummer: String,
         brevkode: Brevkode,
     )
+
+    suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto>
 }
