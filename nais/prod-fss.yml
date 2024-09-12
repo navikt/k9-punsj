@@ -147,8 +147,6 @@ spec:
       value: "k9saksbehandling.k9-punsj-til-los"
     - name: K9_FORDEL_TOPIC
       value: "k9saksbehandling.fordel-journalforing"
-    - name: K9_PUNSJBOLLE_TOPIC
-      value: "k9saksbehandling.punsjbar-journalpost"
 
     # Feature toggles
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED

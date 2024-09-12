@@ -86,9 +86,9 @@ class JournalpostkopieringService(
         }
 
         // TODO: Trengs denne sjekken?
-        check(safJournalpost.erFerdigstilt) {
+        /*check(safJournalpost.erFerdigstilt) {
             throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
-        }
+        }*/
 
         check(journalpost.type != null && journalpost.type != K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
             throw IllegalStateException("Kan ikke kopier journalpost med type inntektsmelding utgått.")
