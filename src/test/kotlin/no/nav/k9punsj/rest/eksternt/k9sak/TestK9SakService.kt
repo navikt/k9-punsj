@@ -155,7 +155,11 @@ internal class TestK9SakService : K9SakService {
     override suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
         val gyldigePerioder = listOf(Periode(LocalDate.now().minusMonths(12), LocalDate.now()))
         return listOf(
-            GodkjentOpplæringsinstitusjonDto(UUID.randomUUID(), "Sykehus Asker/Bærum", gyldigePerioder),
+            GodkjentOpplæringsinstitusjonDto(
+                UUID.fromString("dccf90ba-5b3f-475b-9026-af0fa771d6c1"),
+                "Sykehus Asker/Bærum",
+                gyldigePerioder
+            ),
         )
     }
 }
