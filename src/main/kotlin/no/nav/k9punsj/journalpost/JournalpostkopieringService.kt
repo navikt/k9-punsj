@@ -13,7 +13,6 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.utils.PeriodeUtils.somPeriodeDto
 import org.slf4j.LoggerFactory
@@ -33,13 +32,12 @@ class JournalpostkopieringService(
     private companion object {
         private val logger = LoggerFactory.getLogger(JournalpostkopieringService::class.java)
     }
+
     internal suspend fun kopierJournalpost(
         journalpostId: JournalpostId,
         kopierJournalpostDto: KopierJournalpostDto,
     ): JournalpostId {
-        val journalpost = journalpostRepository.hentHvis(journalpostId.toString())
         val (safJournalpost, k9FagsakYtelseType: FagsakYtelseType) = validerJournalpostKopiering(
-            journalpost = journalpost,
             journalpostId = journalpostId,
             kopierJournalpostDto = kopierJournalpostDto
         )
@@ -62,37 +60,39 @@ class JournalpostkopieringService(
         )
         logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
 
-        // Erstatter no.nav.k9punsj.kafka.KafkaConsumers.consumePunsjbarJournalpost
-        hendeMottaker.prosesser(FordelPunsjEventDto(
-            aktørId = kopierJournalpostDto.til,
-            journalpostId = nyJournalpostId.toString(),
-            type = K9FordelType.KOPI.kode,
-            ytelse = k9FagsakYtelseType.kode,
-            gosysoppgaveId = null
-        ))
+        hendeMottaker.prosesser(
+            FordelPunsjEventDto(
+                aktørId = kopierJournalpostDto.til,
+                journalpostId = nyJournalpostId.toString(),
+                type = K9FordelType.KOPI.kode,
+                ytelse = k9FagsakYtelseType.kode,
+                gosysoppgaveId = null
+            )
+        )
 
         return nyJournalpostId
     }
 
     private suspend fun validerJournalpostKopiering(
-        journalpost: PunsjJournalpost?,
         journalpostId: JournalpostId,
         kopierJournalpostDto: KopierJournalpostDto,
     ): Pair<SafDtos.Journalpost, FagsakYtelseType> {
-        journalpost ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost.")
+
+        val journalpost = journalpostRepository.hentHvis(journalpostId.toString())
+            ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost i DB.")
 
         val safJournalpost = safGateway.hentJournalpostInfo(journalpostId.toString())
             ?: throw KanIkkeKopieresErrorResponse("Finner ikke SAF journalpost.")
 
-        if(safJournalpost.erUtgående) {
+        if (safJournalpost.erUtgående) {
             throw KanIkkeKopieresErrorResponse("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
         }
 
-        if(!safJournalpost.kanKopieres) {
+        if (!safJournalpost.kanKopieres) {
             throw KanIkkeKopieresErrorResponse("Kan ikke kopieres. $journalpost.")
         }
 
-        if(journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+        if (journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
             throw KanIkkeKopieresErrorResponse("Kan ikke kopier journalpost med type inntektsmelding utgått.")
         }
 
@@ -108,14 +108,18 @@ class JournalpostkopieringService(
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
         )
 
-        if(!støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
+        if (!støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
             throw KanIkkeKopieresErrorResponse("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
         }
 
         return Pair(safJournalpost, k9FagsakYtelseType)
     }
 
-    private suspend fun hentEllerOpprettSaksnummer(journalpostId: String, kopierJournalpostDto: KopierJournalpostDto, k9SakGrunnlag: HentK9SaksnummerGrunnlag): String {
+    private suspend fun hentEllerOpprettSaksnummer(
+        journalpostId: String,
+        kopierJournalpostDto: KopierJournalpostDto,
+        k9SakGrunnlag: HentK9SaksnummerGrunnlag,
+    ): String {
         // Henter eller oppretter saksnummer for den originale personen
         val fraSaksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
 
