@@ -13,6 +13,7 @@ import no.nav.k9punsj.utils.objectMapper
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.SortedSet
 
 data class PleiepengerSyktBarnSøknadDto(
     val soeknadId: String,
@@ -39,7 +40,7 @@ data class PleiepengerSyktBarnSøknadDto(
     val utenlandsoppholdV2: List<UtenlandsoppholdDtoV2> = emptyList(),
     val harInfoSomIkkeKanPunsjes: Boolean,
     val harMedisinskeOpplysninger: Boolean,
-    val trekkKravPerioder: Set<PeriodeDto> = emptySet(),
+    val trekkKravPerioder: List<PeriodeDto> = emptyList(),
     val begrunnelseForInnsending: BegrunnelseForInnsending? = null,
     val metadata: Map<*, *>? = null,
     val k9saksnummer: String? = null
