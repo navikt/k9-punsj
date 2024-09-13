@@ -132,8 +132,8 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktørId AND FERDIG_BEHANDLET IS FALSE",
-                mapOf("aktørId" to aktørId)
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktoerId AND FERDIG_BEHANDLET IS FALSE",
+                mapOf("aktoerId" to aktørId)
             )
             val resultat = it.run(
                 statement
@@ -148,8 +148,8 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPersonBareFordel(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktørId AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'",
-                mapOf("aktørId" to aktørId)
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktoerId AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'",
+                mapOf("aktoerId" to aktørId)
             )
             val resultat = it.run(
                 statement
