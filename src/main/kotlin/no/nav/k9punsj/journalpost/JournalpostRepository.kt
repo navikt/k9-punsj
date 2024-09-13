@@ -10,6 +10,7 @@ import no.nav.k9punsj.utils.objectMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.collections.mapOf
 
 @Repository
 class JournalpostRepository(private val dataSource: DataSource) {
@@ -131,7 +132,8 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPerson(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE"
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktørId AND FERDIG_BEHANDLET IS FALSE",
+                mapOf("aktørId" to aktørId)
             )
             val resultat = it.run(
                 statement
@@ -146,7 +148,8 @@ class JournalpostRepository(private val dataSource: DataSource) {
     suspend fun finnJournalposterPåPersonBareFordel(aktørId: String): List<PunsjJournalpost> {
         return using(sessionOf(dataSource)) {
             val statement = queryOf(
-                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = '$aktørId' AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'"
+                "SELECT DATA FROM $JOURNALPOST_TABLE WHERE data ->> 'aktørId' = :aktørId AND FERDIG_BEHANDLET IS FALSE AND KILDE = 'FORDEL'",
+                mapOf("aktørId" to aktørId)
             )
             val resultat = it.run(
                 statement
