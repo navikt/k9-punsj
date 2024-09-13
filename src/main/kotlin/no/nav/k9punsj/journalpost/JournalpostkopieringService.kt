@@ -17,7 +17,10 @@ import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.utils.PeriodeUtils.somPeriodeDto
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
 import org.springframework.stereotype.Service
+import org.springframework.web.ErrorResponseException
 
 @Service
 class JournalpostkopieringService(
@@ -76,29 +79,28 @@ class JournalpostkopieringService(
         journalpostId: JournalpostId,
         kopierJournalpostDto: KopierJournalpostDto,
     ): Pair<SafDtos.Journalpost, FagsakYtelseType> {
-        checkNotNull(journalpost) { "Finner ikke journalpost." }
+        journalpost ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost.")
 
-        val safJournalpost =  safGateway.hentJournalpostInfo(journalpostId.toString())
-        requireNotNull(safJournalpost) { "Finner ikke SAF journalpost." }
+        val safJournalpost = safGateway.hentJournalpostInfo(journalpostId.toString())
+            ?: throw KanIkkeKopieresErrorResponse("Finner ikke SAF journalpost.")
 
-        check(!safJournalpost.erUtgående) {
-            throw IllegalStateException("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
+        if(safJournalpost.erUtgående) {
+            throw KanIkkeKopieresErrorResponse("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
         }
 
-        // TODO: Trengs denne sjekken?
-        /*check(safJournalpost.erFerdigstilt) {
-            throw IllegalStateException("Journalpost må ferdigstilles før den kopieres. Type: (${safJournalpost.journalposttype}) Status: (${safJournalpost.journalstatus})")
-        }*/
+        if(!safJournalpost.kanKopieres) {
+            throw KanIkkeKopieresErrorResponse("Kan ikke kopieres. $journalpost.")
+        }
 
-        check(journalpost.type != null && journalpost.type != K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-            throw IllegalStateException("Kan ikke kopier journalpost med type inntektsmelding utgått.")
+        if(journalpost.type != null && journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
+            throw KanIkkeKopieresErrorResponse("Kan ikke kopier journalpost med type inntektsmelding utgått.")
         }
 
         val k9FagsakYtelseType: FagsakYtelseType =
             kopierJournalpostDto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
                 val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
                 journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
-            } ?: throw JournalpostRoutes.KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
+            } ?: throw KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
 
         val støttedeYtelseTyperForKopiering = listOf(
             FagsakYtelseType.OMSORGSPENGER_KS,
@@ -106,13 +108,10 @@ class JournalpostkopieringService(
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
         )
 
-        check(støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
-            throw IllegalStateException("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
+        if(!støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
+            throw KanIkkeKopieresErrorResponse("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
         }
 
-        check(safJournalpost.kanKopieres) {
-            "Kan ikke kopieres. $journalpost."
-        }
         return Pair(safJournalpost, k9FagsakYtelseType)
     }
 
@@ -133,4 +132,9 @@ class JournalpostkopieringService(
         logger.info("Kopierer journalpost: $journalpostId til ny person med saksnummer: $nySaksnummer")
         return nySaksnummer
     }
+
+
+    class KanIkkeKopieresErrorResponse(feil: String) :
+        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
+
 }

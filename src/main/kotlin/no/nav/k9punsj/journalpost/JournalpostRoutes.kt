@@ -8,13 +8,13 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
@@ -48,8 +48,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.ProblemDetail
-import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -58,7 +56,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -515,10 +513,6 @@ internal class JournalpostRoutes(
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
-
-    class KanIkkeKopieresErrorResponse(feil: String) :
-        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
-
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)
