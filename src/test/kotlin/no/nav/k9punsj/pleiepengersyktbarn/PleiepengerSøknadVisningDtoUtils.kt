@@ -181,7 +181,7 @@ internal object PleiepengerSøknadVisningDtoUtils {
         ),
         harInfoSomIkkeKanPunsjes = true,
         harMedisinskeOpplysninger = true,
-        trekkKravPerioder = setOf(requiredPeriode),
+        trekkKravPerioder = listOf(requiredPeriode),
         begrunnelseForInnsending = BegrunnelseForInnsending().medBegrunnelseForInnsending("fordi dette er ett test")
     )
 

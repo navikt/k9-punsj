@@ -210,7 +210,7 @@ internal class MapPsbTilK9Format(
         pleiepengerSyktBarn.medLovbestemtFerie(LovbestemtFerie().medPerioder(k9LovbestemtFerie))
     }
 
-    private fun Set<PeriodeDto>.leggTilTrekkKravPerioder() {
+    private fun List<PeriodeDto>.leggTilTrekkKravPerioder() {
         pleiepengerSyktBarn.addAllTrekkKravPerioder(this.somK9Perioder())
     }
 
