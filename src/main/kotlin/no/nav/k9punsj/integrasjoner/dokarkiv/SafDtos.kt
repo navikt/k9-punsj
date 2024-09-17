@@ -179,9 +179,7 @@ internal object SafDtos {
             false -> false
         }
         val ikkeErTemaOMS = tema?.let { Tema.OMS.name != it } ?: false
-        private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
 
-        val erFerdigstilt = ferdigstilteStatuser.contains(journalstatus)
         private val erInngående = journalposttype == "I"
         private val erNotat = journalposttype == "N"
         internal val kanKopieres = erInngående || erNotat
