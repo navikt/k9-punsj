@@ -146,7 +146,7 @@ class JournalpostkopieringService(
         return saksnummer
     }
 
-    class KanIkkeKopieresErrorResponse(feil: String) :
-        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
+    class KanIkkeKopieresErrorResponse(feil: String, status: HttpStatus = HttpStatus.CONFLICT) :
+        ErrorResponseException(status, ProblemDetail.forStatusAndDetail(status, feil), null)
 
 }
