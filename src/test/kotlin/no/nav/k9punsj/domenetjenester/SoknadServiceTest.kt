@@ -92,7 +92,7 @@ internal class SoknadServiceTest {
         journalpostId = "525115311",
         tittel = "omsorgspengerutbetaling",
         tema = "OMS",
-        journalposttype = "N",
+        journalposttype = SafDtos.JournalpostType.NOTAT.kode,
         journalstatus = "FEILREGISTRERT",
         bruker = SafDtos.Bruker(
             id = "2351670926708",

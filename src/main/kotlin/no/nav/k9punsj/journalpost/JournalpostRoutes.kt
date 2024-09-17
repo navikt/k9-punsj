@@ -117,7 +117,7 @@ internal class JournalpostRoutes(
                     val safJournalPost = journalpostService.hentSafJournalPost(journalpostId = journalpostId)
 
                     val kanOpprettesJournalforingsOppgave =
-                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
+                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.INNGAAENDE.kode &&
                                 journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||

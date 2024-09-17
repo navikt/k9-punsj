@@ -2,12 +2,9 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import kotlinx.coroutines.runBlocking
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
@@ -19,16 +16,11 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
-import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.journalpost.dto.DokumentInfo
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
-import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
-import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.journalpost.postmottak.JournalpostMottaksHaandteringDto
-import no.nav.k9punsj.utils.PeriodeUtils.somPeriodeDto
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,7 +37,7 @@ class JournalpostService(
     private val safGateway: SafGateway,
     private val journalpostRepository: JournalpostRepository,
     private val dokarkivGateway: DokarkivGateway,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
 
     private companion object {
@@ -105,7 +97,7 @@ class JournalpostService(
                     norskIdent = norskIdent,
                     aktørId = aktørId,
                     mottattDato = mottattDato,
-                    erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
+                    erInngående = SafDtos.JournalpostType.INNGAAENDE == parsedJournalpost.journalpostType,
                     journalpostStatus = safJournalpost.journalstatus!!,
                     journalpostType = safJournalpost.journalposttype
                 )
@@ -186,7 +178,7 @@ class JournalpostService(
     }
 
     private fun utledMottattDato(parsedSafJournalpost: ParsedSafJournalpost): LocalDateTime {
-        return if (parsedSafJournalpost.journalpostType == SafDtos.JournalpostType.I) {
+        return if (parsedSafJournalpost.journalpostType == SafDtos.JournalpostType.INNGAAENDE) {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
@@ -305,7 +297,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
         }
 
     return ParsedSafJournalpost(
-        journalpostType = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
+        journalpostType = SafDtos.JournalpostType.entries.first { it.kode == journalposttype },
         brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
         avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
         tema = enumValueOfOrNull<SafDtos.Tema>(tema),

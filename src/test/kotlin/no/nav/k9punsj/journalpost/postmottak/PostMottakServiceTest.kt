@@ -146,7 +146,7 @@ class PostMottakServiceTest : AbstractContainerBaseTest() {
         journalpostId = journalpostId,
         tema = "OMS",
         tittel = "Søknad om pleipenger til sykt barn",
-        journalposttype = SafDtos.JournalpostType.I.name,
+        journalposttype = SafDtos.JournalpostType.INNGAAENDE.kode,
         journalstatus = SafDtos.Journalstatus.MOTTATT.name,
         bruker = SafDtos.Bruker(
             id = brukerIdent,
