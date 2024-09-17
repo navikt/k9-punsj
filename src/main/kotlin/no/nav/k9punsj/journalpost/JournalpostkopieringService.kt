@@ -120,23 +120,21 @@ class JournalpostkopieringService(
         kopierJournalpostDto: KopierJournalpostDto,
         k9SakGrunnlag: HentK9SaksnummerGrunnlag,
     ): String {
-        // Henter eller oppretter saksnummer for den originale personen
-        val fraSaksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
 
         // Sjekker om journalposten kopieres til samme person og logger hvis så er tilfelle
         if (kopierJournalpostDto.fra == kopierJournalpostDto.til) {
-            logger.info("Kopierer journalpost: $journalpostId til samme person.")
-            return fraSaksnummer // Bruker eksisterende saksnummer for samme person
+            val saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
+            logger.info("Kopierer journalpost: $journalpostId til samme person med saksnummer: $saksnummer")
+            return saksnummer // Bruker eksisterende saksnummer for samme person
         }
 
         // Hvis journalposten kopieres til en annen person, Hent eller opprett nytt saksnummer
-        val nySaksnummer = k9SakService.hentEllerOpprettSaksnummer(
+        val saksnummer = k9SakService.hentEllerOpprettSaksnummer(
             k9SakGrunnlag.copy(søker = kopierJournalpostDto.til)
         )
-        logger.info("Kopierer journalpost: $journalpostId til ny person med saksnummer: $nySaksnummer")
-        return nySaksnummer
+        logger.info("Kopierer journalpost: $journalpostId til ny person med saksnummer: $saksnummer")
+        return saksnummer
     }
-
 
     class KanIkkeKopieresErrorResponse(feil: String) :
         ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
