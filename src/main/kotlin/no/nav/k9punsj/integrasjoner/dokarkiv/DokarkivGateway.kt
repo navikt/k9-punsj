@@ -220,13 +220,13 @@ class DokarkivGateway(
         @Language("JSON")
         val dto = """
         {
-            "sakstype": "FAGSAK",
-            "fagsaksystem": "K9",
+            "sakstype": "${SafDtos.Sakstype.FAGSAK}",
+            "fagsaksystem": "${FagsakSystem.K9}",
             "fagsakId": "$saksnummer",
             "journalfoerendeEnhet": "9999",
-            "tema": "OMS",
+            "tema": "${Tema.OMS}",
             "bruker": {
-                "idType": "FNR",
+                "idType": "${IdType.FNR}",
                 "id": "$identitetsnummer"
             }
         }
@@ -421,6 +421,7 @@ data class JournalPostRequest(
 }
 
 enum class Tema { OMS }
+enum class IdType { FNR }
 enum class JournalpostType { NOTAT }
 enum class DokumentKategori { IS }
 enum class FagsakSystem { K9 }
