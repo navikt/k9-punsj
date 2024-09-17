@@ -419,14 +419,14 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
                 }
 
-                val nyJournalpostId = journalpostkopieringService.kopierJournalpost(
+                val kopierJournalpostInfo = journalpostkopieringService.kopierJournalpost(
                     journalpostId = journalpostId.somJournalpostId(),
                     kopierJournalpostDto = dto
                 )
 
                 return@RequestContext ServerResponse
                     .status(HttpStatus.CREATED)
-                    .bodyValueAndAwait("""{"nyJournalPostId":"$nyJournalpostId"}""")
+                    .bodyValueAndAwait(kopierJournalpostInfo)
             }
         }
     }

@@ -81,9 +81,10 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Mapper kopierjournalpostinfo med barn og sender inn`(): Unit = runBlocking {
-
         val journalpostId = IdGenerator.nesteId()
         val saksnummer = "ABC123"
+        val søkerAktørId = "27519339353"
+        val barn = "05032435485"
 
         Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
             SafDtos.Journalpost(
@@ -96,7 +97,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                 avsender = null,
                 avsenderMottaker = null,
                 bruker = SafDtos.Bruker(
-                    id = "27519339353",
+                    id = søkerAktørId,
                     type = "AKTOER_ID"
                 ),
                 sak = SafDtos.Sak(
@@ -114,13 +115,13 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         Mockito.`when`(
             dokarkivGateway.knyttTilAnnenSak(
                 journalpostId = journalpostId.somJournalpostId(),
-                identitetsnummer = "27519339353".somIdentitetsnummer(),
+                identitetsnummer = søkerAktørId.somIdentitetsnummer(),
                 saksnummer = saksnummer
             )
         ).thenReturn(nyJournalpostId.somJournalpostId())
 
         val melding = FordelPunsjEventDto(
-            aktørId = "27519339353",
+            aktørId = søkerAktørId,
             journalpostId = journalpostId,
             type = K9FordelType.PAPIRSØKNAD.kode,
             ytelse = "PSB"
@@ -132,7 +133,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val kopierJournalpostDto = KopierJournalpostDto(
             fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
-            barn = "05032435485",
+            barn = barn,
             annenPart = null,
             ytelse = null
         )
@@ -145,7 +146,16 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
+            .json("""
+                {
+                  "nyJournalpostId":"$nyJournalpostId",
+                  "saksnummer":"$saksnummer",
+                  "fra":"$søkerAktørId",
+                  "til":"$søkerAktørId",
+                  "pleietrengende":"$barn",
+                  "annenPart":null,
+                  "ytelse":"PSB"
+                }""".trimIndent())
 
         val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
         Assertions.assertNotNull(journalpostKopi)
@@ -157,6 +167,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpostId = IdGenerator.nesteId()
         val saksnummer = "ABC123"
         val søkerAktørId = "27519339353"
+        val barn = "05032435485"
 
         Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
             SafDtos.Journalpost(
@@ -205,7 +216,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val kopierJournalpostDto = KopierJournalpostDto(
             fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
-            barn = "05032435485",
+            barn = barn,
             annenPart = null,
             ytelse = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
         )
@@ -218,7 +229,16 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .json("""{"nyJournalPostId":"$nyJournalpostId"}""")
+            .json("""
+                {
+                  "nyJournalpostId":"$nyJournalpostId",
+                  "saksnummer":"$saksnummer",
+                  "fra":"$søkerAktørId",
+                  "til":"$søkerAktørId",
+                  "pleietrengende":"$barn",
+                  "annenPart":null,
+                  "ytelse":"PSB"
+                }""".trimIndent())
 
         val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
         Assertions.assertNotNull(journalpostKopi)

@@ -4,6 +4,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.Companion.somPunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
@@ -13,6 +14,7 @@ import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
+import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.utils.PeriodeUtils.somPeriodeDto
 import org.slf4j.LoggerFactory
@@ -36,7 +38,7 @@ class JournalpostkopieringService(
     internal suspend fun kopierJournalpost(
         journalpostId: JournalpostId,
         kopierJournalpostDto: KopierJournalpostDto,
-    ): JournalpostId {
+    ): KopierJournalpostInfo {
         val (safJournalpost, k9FagsakYtelseType: FagsakYtelseType) = validerJournalpostKopiering(
             journalpostId = journalpostId,
             kopierJournalpostDto = kopierJournalpostDto
@@ -70,7 +72,15 @@ class JournalpostkopieringService(
             )
         )
 
-        return nyJournalpostId
+        return KopierJournalpostInfo(
+            nyJournalpostId = nyJournalpostId.toString(),
+            saksnummer = saksnummer,
+            fra = kopierJournalpostDto.fra,
+            til = kopierJournalpostDto.til,
+            pleietrengende = kopierJournalpostDto.barn,
+            annenPart = kopierJournalpostDto.annenPart,
+            ytelse = k9FagsakYtelseType.somPunsjFagsakYtelseType()
+        )
     }
 
     private suspend fun validerJournalpostKopiering(
