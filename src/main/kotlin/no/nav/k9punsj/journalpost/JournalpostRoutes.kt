@@ -8,14 +8,14 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.IdentOgJournalpost
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.K9FordelType
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -24,7 +24,6 @@ import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
 import no.nav.k9punsj.journalpost.dto.IdentDto
 import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
 import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
-import no.nav.k9punsj.journalpost.dto.KopierJournalpostInfo
 import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
@@ -49,8 +48,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.ProblemDetail
-import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -59,7 +56,7 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.coroutines.coroutineContext
 
@@ -67,11 +64,11 @@ import kotlin.coroutines.coroutineContext
 internal class JournalpostRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
+    private val journalpostkopieringService: JournalpostkopieringService,
     private val pdlService: PdlService,
     private val personService: PersonService,
     private val aksjonspunktService: AksjonspunktService,
     private val pepClient: IPepClient,
-    private val innsendingClient: InnsendingClient,
     private val gosysService: GosysService,
     private val sakService: SakService,
     private val k9SakService: K9SakService,
@@ -120,7 +117,7 @@ internal class JournalpostRoutes(
                     val safJournalPost = journalpostService.hentSafJournalPost(journalpostId = journalpostId)
 
                     val kanOpprettesJournalforingsOppgave =
-                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name &&
+                        (journalpostInfo.journalpostType == SafDtos.JournalpostType.INNGAAENDE.kode &&
                                 journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
                     val erFerdigstiltEllerJournalfoert = (
                             journalpostInfo.journalpostStatus == SafDtos.Journalstatus.FERDIGSTILT.name ||
@@ -411,8 +408,6 @@ internal class JournalpostRoutes(
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
-                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
-                    ?: throw KanIkkeKopieresErrorResponse("Finner ikke journalpost.")
 
                 val identListe = mutableListOf(dto.fra, dto.til)
                 dto.barn?.let { identListe.add(it) }
@@ -424,43 +419,14 @@ internal class JournalpostRoutes(
                         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")
                 }
 
-                val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
-                if (safJournalpost != null && safJournalpost.journalposttype == "U") {
-                    throw KanIkkeKopieresErrorResponse("Ikke støttet journalposttype: ${safJournalpost.journalposttype}")
-                }
-
-                val k9FagsakYtelseType: FagsakYtelseType =
-                    dto.ytelse?.somK9FagsakYtelseType() ?: journalpost.ytelse?.let {
-                        val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(it)
-                        journalpost.utledK9sakFagsakYtelseType(punsjFagsakYtelseType.somK9FagsakYtelseType())
-                    } ?: throw KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
-
-                if (journalpost.type == K9FordelType.INNTEKTSMELDING_UTGÅTT.kode) {
-                    throw KanIkkeKopieresErrorResponse("Kan ikke kopiere journalpost med type inntektsmelding utgått.")
-                }
-
-                val støttedeYtelseTyperForKopiering = setOf(
-                    FagsakYtelseType.OMSORGSPENGER_KS,
-                    FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-                    FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+                val kopierJournalpostInfo = journalpostkopieringService.kopierJournalpost(
+                    journalpostId = journalpostId.somJournalpostId(),
+                    kopierJournalpostDto = dto
                 )
 
-                if (k9FagsakYtelseType !in støttedeYtelseTyperForKopiering) {
-                    throw KanIkkeKopieresErrorResponse("Støtter ikke kopiering av ${k9FagsakYtelseType.navn} for relaterte journalposter")
-                }
-
-                innsendingClient.sendKopierJournalpost(
-                    KopierJournalpostInfo(
-                        journalpostId = journalpostId,
-                        fra = dto.fra,
-                        til = dto.til,
-                        pleietrengende = dto.barn,
-                        ytelse = k9FagsakYtelseType
-                    )
-                )
                 return@RequestContext ServerResponse
-                    .status(HttpStatus.ACCEPTED)
-                    .bodyValueAndAwait("Journalposten vil bli kopiert.")
+                    .status(HttpStatus.CREATED)
+                    .bodyValueAndAwait(kopierJournalpostInfo)
             }
         }
     }
@@ -547,10 +513,6 @@ internal class JournalpostRoutes(
             journalpostService.lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER)
         }
     }
-
-    private class KanIkkeKopieresErrorResponse(feil: String) :
-        ErrorResponseException(HttpStatus.CONFLICT, ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, feil), null)
-
 
     private fun ServerRequest.journalpostId(): String = pathVariable(JournalpostIdKey)
     private fun ServerRequest.dokumentId(): String = pathVariable(DokumentIdKey)

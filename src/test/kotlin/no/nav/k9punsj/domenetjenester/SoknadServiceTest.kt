@@ -14,7 +14,6 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.dto.SøknadEntitet
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
@@ -44,9 +43,6 @@ internal class SoknadServiceTest {
 
     @MockK(relaxUnitFun = true)
     private lateinit var mockSøknadRepository: SøknadRepository
-
-    @MockK(relaxUnitFun = true)
-    private lateinit var mockInnsendingClient: InnsendingClient
 
     @MockK(relaxUnitFun = true)
     private lateinit var mockSøknadMetrikkService: SøknadMetrikkService
@@ -96,7 +92,7 @@ internal class SoknadServiceTest {
         journalpostId = "525115311",
         tittel = "omsorgspengerutbetaling",
         tema = "OMS",
-        journalposttype = "N",
+        journalposttype = SafDtos.JournalpostType.NOTAT.kode,
         journalstatus = "FEILREGISTRERT",
         bruker = SafDtos.Bruker(
             id = "2351670926708",
@@ -121,6 +117,7 @@ internal class SoknadServiceTest {
                 )
             )
         ),
+        datoOpprettet = LocalDateTime.parse("2022-07-01T13:32:05"),
         relevanteDatoer = listOf(
             SafDtos.RelevantDato(
                 dato = LocalDateTime.parse("2022-07-01T13:32:05"),

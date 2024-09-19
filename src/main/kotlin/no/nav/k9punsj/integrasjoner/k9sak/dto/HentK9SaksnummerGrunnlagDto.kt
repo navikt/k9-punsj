@@ -10,4 +10,8 @@ data class HentK9SaksnummerGrunnlag(
     val pleietrengende: String?,
     val annenPart: String?,
     val periode: PeriodeDto?,
-)
+) {
+    override fun toString(): String {
+        return "HentK9SaksnummerGrunnlag(søknadstype=$søknadstype, harSøker=true, harpleietrengende=${pleietrengende != null}, harAnnenPart=${annenPart != null}, periode=$periode)"
+    }
+}

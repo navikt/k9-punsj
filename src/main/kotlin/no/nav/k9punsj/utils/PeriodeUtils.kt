@@ -3,6 +3,8 @@ package no.nav.k9punsj.utils
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9punsj.felles.dto.PeriodeDto
+import java.time.LocalDate
+import kotlin.concurrent.thread
 
 object PeriodeUtils {
     fun PeriodeDto?.erSatt() = this != null && (fom != null || tom != null)
@@ -18,4 +20,6 @@ object PeriodeUtils {
     fun LocalDateInterval.somK9Periode(): Periode {
         return Periode(this.fomDato, this.tomDato)
     }
+
+    fun LocalDate.somPeriodeDto() = PeriodeDto(fom = this, tom = this)
 }

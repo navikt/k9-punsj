@@ -67,7 +67,6 @@ internal object MockConfiguration {
             "SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS" to "privat-k9punsj-aksjonspunkthendelse-v1",
             "SEND_OPPDATERING_TIL_K9LOS" to "k9saksbehandling.k9-punsj-til-los",
             "K9_FORDEL_TOPIC" to "k9saksbehandling.fordel-journalforing",
-            "K9_PUNSJBOLLE_TOPIC" to "k9saksbehandling.punsjbar-journalpost"
         )
     }
 }

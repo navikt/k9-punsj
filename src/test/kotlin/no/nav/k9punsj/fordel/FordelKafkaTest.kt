@@ -7,7 +7,6 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktServiceImpl
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.SoknadService
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
@@ -33,9 +32,6 @@ internal class FordelKafkaTest: AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
-
-    @MockBean
-    private lateinit var innsendingClient: InnsendingClient
 
     @MockBean
     private lateinit var soknadService: SoknadService

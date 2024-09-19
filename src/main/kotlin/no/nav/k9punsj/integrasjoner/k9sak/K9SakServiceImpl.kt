@@ -52,6 +52,7 @@ import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtvisning
 import no.nav.k9punsj.opplaeringspenger.tilOlpvisning
 import no.nav.k9punsj.pleiepengerlivetssluttfase.tilPlsvisning
 import no.nav.k9punsj.pleiepengersyktbarn.tilPsbvisning
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -298,6 +299,40 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering")
         }
+    }
+
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
+    ): String {
+        val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
+        val pleietrengendeAktørId =
+            if (!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+            } else null
+        val annenpartAktørId =
+            if (!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
+            } else null
+
+        val ytelseTypeKode = k9SaksnummerGrunnlag.søknadstype.somK9FagsakYtelseType().kode
+        val k9Periode = k9SaksnummerGrunnlag.periode?.let { Periode(it.fom, it.tom) }
+        requireNotNull(k9Periode) { "Mangler periode" }
+
+        val payloadMedAktørId = FinnEllerOpprettSak(
+            ytelseTypeKode,
+            søkerAktørId,
+            pleietrengendeAktørId,
+            annenpartAktørId,
+            k9Periode,
+            null
+        )
+
+        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId) }.getOrNull()
+            ?: throw IllegalStateException("Feilet serialisering")
+
+        val response =  httpPost(body, opprettFagsakUrl)
+
+        return JSONObject(response).getString("saksnummer").toString()
     }
 
     override suspend fun sendInnSoeknad(

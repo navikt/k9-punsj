@@ -40,5 +40,17 @@ enum class PunsjFagsakYtelseType(@JsonValue val kode: String, val navn: String, 
         fun fraNavn(navn: String): PunsjFagsakYtelseType {
             return values().firstOrNull { it.name == navn } ?: UDEFINERT
         }
+
+        fun FagsakYtelseType.somPunsjFagsakYtelseType(): PunsjFagsakYtelseType = when(this) {
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN -> PLEIEPENGER_SYKT_BARN
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE -> PLEIEPENGER_LIVETS_SLUTTFASE
+            FagsakYtelseType.OMSORGSPENGER -> OMSORGSPENGER
+            FagsakYtelseType.OMSORGSPENGER_KS -> OMSORGSPENGER_KRONISK_SYKT_BARN
+            FagsakYtelseType.OMSORGSPENGER_MA -> OMSORGSPENGER_MIDLERTIDIG_ALENE
+            FagsakYtelseType.OMSORGSPENGER_AO -> OMSORGSPENGER_ALENE_OMSORGEN
+            FagsakYtelseType.OPPLÆRINGSPENGER -> OPPLÆRINGSPENGER
+            FagsakYtelseType.UDEFINERT -> UKJENT
+            else -> throw IllegalStateException("Ikke støttet fagsakytelsetype: $this")
+        }
     }
 }

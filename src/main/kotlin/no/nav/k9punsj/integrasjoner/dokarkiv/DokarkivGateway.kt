@@ -38,10 +38,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
 import kotlin.coroutines.coroutineContext
@@ -208,6 +206,56 @@ class DokarkivGateway(
         }
     }
 
+    internal suspend fun knyttTilAnnenSak(
+        journalpostId: JournalpostId,
+        identitetsnummer: Identitetsnummer,
+        saksnummer: String
+    ): JournalpostId {
+        val accessToken = cachedAccessTokenClient
+            .getAccessToken(
+                scopes = dokarkivScope,
+                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            )
+
+        @Language("JSON")
+        val dto = """
+        {
+            "sakstype": "${SafDtos.Sakstype.FAGSAK}",
+            "fagsaksystem": "${FagsakSystem.K9}",
+            "fagsakId": "$saksnummer",
+            "journalfoerendeEnhet": "9999",
+            "tema": "${Tema.OMS}",
+            "bruker": {
+                "idType": "${IdType.FNR}",
+                "id": "$identitetsnummer"
+            }
+        }
+        """.trimIndent()
+        val body = BodyInserters.fromValue(dto)
+        val url = URI.create(knyttTilAnnenSakUrl(journalpostId))
+
+        val response = client
+            .put()
+            .uri(url)
+            .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .retrieve()
+            .toEntity(String::class.java)
+            .awaitFirst()
+
+        check(response.statusCode.is2xxSuccessful) {
+            "Feil ved kopiering av journalpost. HttpStatus=[${response.statusCode.value()}, Response=[${response.body}], Url=[$url]"
+        }
+
+        val nyJournalpostId = JSONObject(response.body).get("nyJournalpostId").toString().somJournalpostId()
+
+        return nyJournalpostId
+    }
+
     private companion object {
         private val logger: Logger = LoggerFactory.getLogger(DokarkivGateway::class.java)
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -233,6 +281,8 @@ class DokarkivGateway(
     private fun String.oppdaterJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this"
     private val opprettOgFerdigstillJournalpostUrl = "$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true"
     private fun String.ferdigstillJournalpostUrl() = "$baseUrl/rest/journalpostapi/v1/journalpost/$this/ferdigstill"
+    private fun knyttTilAnnenSakUrl(journalpostId: JournalpostId) =
+        "$baseUrl/rest/journalpostapi/v1/journalpost/$journalpostId/knyttTilAnnenSak"
 
     private fun JSONObject.stringOrNull(key: String) = when (notNullNotBlankString(key)) {
         true -> getString(key)
@@ -371,6 +421,7 @@ data class JournalPostRequest(
 }
 
 enum class Tema { OMS }
+enum class IdType { FNR }
 enum class JournalpostType { NOTAT }
 enum class DokumentKategori { IS }
 enum class FagsakSystem { K9 }

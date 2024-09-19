@@ -10,6 +10,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
+import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 
@@ -41,6 +42,10 @@ interface K9SakService {
         søknadEntitet: SøknadEntitet,
         punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<String?, String?>
+
+    suspend fun hentEllerOpprettSaksnummer(
+        hentK9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
+    ): String
 
     suspend fun sendInnSoeknad(
         soknad: Søknad,

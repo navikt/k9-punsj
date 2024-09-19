@@ -3,6 +3,7 @@ package no.nav.k9punsj.journalpost
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class SafDtosTest {
 
@@ -12,8 +13,9 @@ internal class SafDtosTest {
             journalpostId = "123456789",
             tema = "test",
             tittel = "omsorgspengerutbetaling",
-            journalposttype = "test",
+            journalposttype = SafDtos.JournalpostType.UTGAAENDE.kode,
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -32,8 +34,9 @@ internal class SafDtosTest {
             journalpostId = "123456789",
             tema = "AAP",
             tittel = "Arbeidsavklaringspenger",
-            journalposttype = SafDtos.JournalpostType.I.name,
+            journalposttype = SafDtos.JournalpostType.INNGAAENDE.kode,
             journalstatus = SafDtos.Journalstatus.MOTTATT.name,
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -52,8 +55,9 @@ internal class SafDtosTest {
             journalpostId = "123456789",
             tema = "test",
             tittel = "omsorgspengerutbetaling",
-            journalposttype = "test",
+            journalposttype = SafDtos.JournalpostType.INNGAAENDE.kode,
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,
@@ -72,8 +76,9 @@ internal class SafDtosTest {
             journalpostId = "123456789",
             tema = "test",
             tittel = "omsorgspengerutbetaling",
-            journalposttype = "test",
+            journalposttype = SafDtos.JournalpostType.NOTAT.kode,
             journalstatus = "test",
+            datoOpprettet = LocalDateTime.now(),
             bruker = null,
             sak = null,
             avsender = null,

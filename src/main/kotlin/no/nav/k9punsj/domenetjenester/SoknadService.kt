@@ -74,7 +74,7 @@ class SoknadService(
 
         val journalposter = safGateway.hentJournalposter(journalpostIdListe)
         val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
-            .filter { it.journalposttype == SafDtos.JournalpostType.U.toString() }
+            .filter { it.journalposttype == SafDtos.JournalpostType.UTGAAENDE.kode }
             .map { it.journalpostId }
             .toSet()
         if (journalposterMedTypeUtgaaende.isNotEmpty()) {
@@ -339,7 +339,7 @@ class SoknadService(
     private suspend fun hentOgSjekkJournalpostene(journalpostIdListe: List<String>): Pair<List<SafDtos.Journalpost?>, Set<String>> {
         val journalposter = safGateway.hentJournalposter(journalpostIdListe)
         val journalposterMedTypeUtgaaende = journalposter.filterNotNull()
-            .filter { it.journalposttype == SafDtos.JournalpostType.U.toString() }
+            .filter { it.journalposttype == SafDtos.JournalpostType.UTGAAENDE.kode }
             .map { it.journalpostId }
             .toSet()
         return Pair(journalposter, journalposterMedTypeUtgaaende)

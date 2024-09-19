@@ -253,6 +253,7 @@ object SafMockResponses {
           "tema": "$tema",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
+          "datoOpprettet": "2020-10-12T12:53:21",
           "relevanteDatoer" : [
           {
             "dato" : "2020-10-12T12:53:21.046Z",
@@ -337,6 +338,7 @@ object SafMockResponses {
           "tema": "OMS",
           "journalposttype": "I",
           "journalstatus": "MOTTATT",
+           "datoOpprettet": "2020-10-12T12:53:21",
           "relevanteDatoer" : [
           {
             "dato" : "2020-10-12T12:53:21.046Z",
@@ -418,6 +420,7 @@ object SafMockResponses {
             "fagsaksystem": "K9",
             "tema": "OMS"
           },
+          "datoOpprettet": "2020-10-12T12:53:21",
           "relevanteDatoer" : [
           {
             "dato" : "2022-10-12T12:53:21.046Z",
