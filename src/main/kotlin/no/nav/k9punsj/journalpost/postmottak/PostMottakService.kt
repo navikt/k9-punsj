@@ -48,7 +48,7 @@ class PostMottakService(
             ?.let { personService.finnAktørId(it) }
 
         val fosterbarnIdenter = mottattJournalpost.barnAktørIder
-        val fosterbarnAktørIder = fosterbarnIdenter.takeUnless { !it.isNullOrEmpty() }
+        val fosterbarnAktørIder = fosterbarnIdenter.takeUnless { it.isNullOrEmpty() }
             ?.let { fosterbarnIdent -> fosterbarnIdent.map { personService.finnAktørId(it) } }
 
         val fagsakYtelseType = FagsakYtelseType.fraKode(mottattJournalpost.fagsakYtelseTypeKode)
