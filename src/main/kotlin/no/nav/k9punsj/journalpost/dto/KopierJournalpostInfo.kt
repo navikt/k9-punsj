@@ -1,12 +1,13 @@
 package no.nav.k9punsj.journalpost.dto
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 
 data class KopierJournalpostInfo(
-    internal val journalpostId: String,
-    internal val fra: String,
-    internal val til: String,
-    internal val pleietrengende: String? = null,
-    internal val annenPart: String? = null,
-    internal val ytelse: FagsakYtelseType
+    val nyJournalpostId: String,
+    val saksnummer: String,
+    val fra: String,
+    val til: String,
+    val pleietrengende: String? = null,
+    val annenPart: String? = null,
+    val ytelse: PunsjFagsakYtelseType
 )

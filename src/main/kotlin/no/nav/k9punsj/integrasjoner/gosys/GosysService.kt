@@ -49,7 +49,7 @@ internal class GosysService(
             ?: return ServerResponse.status(HttpStatus.NOT_FOUND).buildAndAwait()
                 .also { logger.warn("Kunne ikke finne journalpost med id {}", oppgaveRequest.journalpostId) }
 
-        if (!(journalpostInfo.journalpostType == SafDtos.JournalpostType.I.name
+        if (!(journalpostInfo.journalpostType == SafDtos.JournalpostType.INNGAAENDE.kode
                 && journalpostInfo.journalpostStatus == SafDtos.Journalstatus.MOTTATT.name)
         ) {
             logger.warn(

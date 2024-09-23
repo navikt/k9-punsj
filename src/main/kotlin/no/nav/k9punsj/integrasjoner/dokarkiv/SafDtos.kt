@@ -14,6 +14,7 @@ internal object SafDtos {
                 tema
                 tittel
                 journalposttype
+                datoOpprettet
                 relevanteDatoer {
                   dato
                   datotype
@@ -89,8 +90,8 @@ internal object SafDtos {
         OMS
     }
 
-    enum class JournalpostType {
-        I, N, U
+    enum class JournalpostType(val kode: String) {
+        INNGAAENDE("I"), NOTAT("N"), UTGAAENDE("U")
     }
 
     internal enum class AvsenderType {
@@ -116,6 +117,9 @@ internal object SafDtos {
     internal enum class Sakstype {
         GENERELL_SAK, FAGSAK
     }
+
+    internal enum class K9Type { SØKNAD, ETTERSENDELSE }
+    internal enum class K9Kilde { DIGITAL }
 
     internal data class Bruker(
         val id: String?,
@@ -164,18 +168,24 @@ internal object SafDtos {
         val avsenderMottaker: AvsenderMottaker?,
         val dokumenter: List<Dokument>,
         val relevanteDatoer: List<RelevantDato>,
+        val datoOpprettet: LocalDateTime,
         private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()
     ) {
         val k9Kilde = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.kilde" }?.verdi
         val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
-        private val erDigital = "DIGITAL" == k9Kilde
-        private val erEttersendelse = "ETTERSENDELSE" == k9Type
-        private val erSøknad = "SØKNAD" == k9Type
+        val erUtgående = journalposttype == JournalpostType.UTGAAENDE.kode
+        private val erDigital = K9Kilde.DIGITAL.name == k9Kilde
+        val erEttersendelse = K9Type.ETTERSENDELSE.name == k9Type
+        private val erSøknad = K9Type.SØKNAD.name == k9Type
         val erIkkeStøttetDigitalJournalpost = when (erDigital) {
             true -> !(erEttersendelse || erSøknad)
             false -> false
         }
         val ikkeErTemaOMS = tema?.let { Tema.OMS.name != it } ?: false
+
+        private val erInngående = journalposttype == JournalpostType.INNGAAENDE.kode
+        private val erNotat = journalposttype == JournalpostType.NOTAT.kode
+        internal val kanKopieres = erInngående || erNotat
     }
 
     internal data class Tilleggsopplysning(

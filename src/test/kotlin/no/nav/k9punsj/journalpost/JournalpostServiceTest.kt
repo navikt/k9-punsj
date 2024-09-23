@@ -10,6 +10,7 @@ import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -27,6 +28,9 @@ internal class JournalpostServiceTest: AbstractContainerBaseTest() {
 
     @MockK
     private lateinit var objectMapper: ObjectMapper
+
+    @MockK
+    private lateinit var k9SakService: K9SakService
 
     @InjectMockKs
     private lateinit var journalpostService: JournalpostService

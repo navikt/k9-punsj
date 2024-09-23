@@ -2,10 +2,10 @@ package no.nav.k9punsj.journalpost
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.IkkeTilgang
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.felles.dto.JournalposterDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
@@ -97,7 +97,7 @@ class JournalpostService(
                     norskIdent = norskIdent,
                     aktørId = aktørId,
                     mottattDato = mottattDato,
-                    erInngående = SafDtos.JournalpostType.I == parsedJournalpost.journalpostType,
+                    erInngående = SafDtos.JournalpostType.INNGAAENDE == parsedJournalpost.journalpostType,
                     journalpostStatus = safJournalpost.journalstatus!!,
                     journalpostType = safJournalpost.journalposttype
                 )
@@ -141,7 +141,10 @@ class JournalpostService(
         }
     }
 
-    internal suspend fun oppdaterOgFerdigstillForMottak(dto: JournalpostMottaksHaandteringDto, saksnummer: String): Pair<HttpStatusCode, String> {
+    internal suspend fun oppdaterOgFerdigstillForMottak(
+        dto: JournalpostMottaksHaandteringDto,
+        saksnummer: String,
+    ): Pair<HttpStatusCode, String> {
         val journalpostDataFraSaf = safGateway.hentDataFraSaf(dto.journalpostId)
         return dokarkivGateway.oppdaterJournalpostDataOgFerdigstill(
             dataFraSaf = journalpostDataFraSaf,
@@ -175,7 +178,7 @@ class JournalpostService(
     }
 
     private fun utledMottattDato(parsedSafJournalpost: ParsedSafJournalpost): LocalDateTime {
-        return if (parsedSafJournalpost.journalpostType == SafDtos.JournalpostType.I) {
+        return if (parsedSafJournalpost.journalpostType == SafDtos.JournalpostType.INNGAAENDE) {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_REGISTRERT }?.dato
         } else {
             parsedSafJournalpost.relevanteDatoer.firstOrNull { it.datotype == SafDtos.Datotype.DATO_JOURNALFOERT }?.dato
@@ -294,7 +297,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
         }
 
     return ParsedSafJournalpost(
-        journalpostType = enumValueOfOrNull<SafDtos.JournalpostType>(journalposttype),
+        journalpostType = SafDtos.JournalpostType.entries.first { it.kode == journalposttype },
         brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
         avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
         tema = enumValueOfOrNull<SafDtos.Tema>(tema),

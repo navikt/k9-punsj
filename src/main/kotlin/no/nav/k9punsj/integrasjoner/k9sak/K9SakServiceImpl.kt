@@ -41,8 +41,8 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUr
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
@@ -64,8 +64,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
-import java.util.Base64
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -298,6 +297,40 @@ class K9SakServiceImpl(
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering")
         }
+    }
+
+    override suspend fun hentEllerOpprettSaksnummer(
+        k9SaksnummerGrunnlag: HentK9SaksnummerGrunnlag
+    ): String {
+        val søkerAktørId = personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.søker).aktørId
+        val pleietrengendeAktørId =
+            if (!k9SaksnummerGrunnlag.pleietrengende.isNullOrEmpty() && k9SaksnummerGrunnlag.pleietrengende != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.pleietrengende).aktørId
+            } else null
+        val annenpartAktørId =
+            if (!k9SaksnummerGrunnlag.annenPart.isNullOrEmpty() && k9SaksnummerGrunnlag.annenPart != "null") {
+                personService.finnEllerOpprettPersonVedNorskIdent(k9SaksnummerGrunnlag.annenPart).aktørId
+            } else null
+
+        val ytelseTypeKode = k9SaksnummerGrunnlag.søknadstype.somK9FagsakYtelseType().kode
+        val k9Periode = k9SaksnummerGrunnlag.periode?.let { Periode(it.fom, it.tom) }
+        requireNotNull(k9Periode) { "Mangler periode" }
+
+        val payloadMedAktørId = FinnEllerOpprettSak(
+            ytelseTypeKode,
+            søkerAktørId,
+            pleietrengendeAktørId,
+            annenpartAktørId,
+            k9Periode,
+            null
+        )
+
+        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId) }.getOrNull()
+            ?: throw IllegalStateException("Feilet serialisering")
+
+        val response =  httpPost(body, opprettFagsakUrl)
+
+        return JSONObject(response).getString("saksnummer").toString()
     }
 
     override suspend fun sendInnSoeknad(

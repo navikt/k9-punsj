@@ -12,7 +12,6 @@ import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.integrasjoner.k9losapi.PunsjEventDto
-import no.nav.k9punsj.innsending.InnsendingClient
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -39,9 +38,6 @@ internal class AksjonspunktServiceImplTest: AbstractContainerBaseTest() {
 
     @MockBean
     private lateinit var dokarkivGateway: DokarkivGateway
-
-    @MockBean
-    private lateinit var innsendingClient: InnsendingClient
 
     @MockBean
     private lateinit var søknadMetrikkService: SøknadMetrikkService
