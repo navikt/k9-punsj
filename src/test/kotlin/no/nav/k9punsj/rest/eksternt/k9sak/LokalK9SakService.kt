@@ -175,11 +175,6 @@ class LokalK9SakService : K9SakService {
                 gyldigePerioder
             ),
             GodkjentOpplæringsinstitusjonDto(
-                UUID.fromString("202c3f51-fc70-4ecb-8bf1-2eb20daf6346"),
-                "Sykehus Asker/Bærum",
-                gyldigePerioder
-            ),
-            GodkjentOpplæringsinstitusjonDto(
                 UUID.fromString("7a53ef39-4cac-4866-a8ae-3784af75fc91"),
                 "Sykehuset Innlandet Elverum",
                 gyldigePerioder
