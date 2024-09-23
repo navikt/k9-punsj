@@ -62,6 +62,9 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+      destinations:
+        - id: "grafana-lgtm"
+        - id: "elastic-apm"
   vault:
     enabled: true
     paths:
@@ -69,8 +72,6 @@ spec:
         kvPath: /kv/prod/fss/k9-punsj/default
       - mountPath: /var/run/secrets/nais.io/srvk9punsj
         kvPath: /serviceuser/data/prod/srvk9punsj
-      - mountPath: /var/run/secrets/nais.io/appdynamics
-        kvPath: /apikey/appdynamics/prod
   webproxy: true
   kafka:
     pool: nav-prod
@@ -118,9 +119,9 @@ spec:
     - name: AUDITLOGGER_PRODUCT
       value: "k9-punsj"
 
-    # tracing (appdynamics/opentelemetry)
-    - name: APPD_ENABLED
-      value: "true"
+    # opentelemetry
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "service.name=k9-punsj,service.namespace=k9saksbehandling,deployment.environment=p,nais.backend=elastic-apm;grafana-lgtm"
 
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
