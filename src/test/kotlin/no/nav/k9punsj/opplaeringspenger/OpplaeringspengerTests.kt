@@ -9,17 +9,18 @@ import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.metrikker.JournalpostMetrikkRepository
+import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasSoknadsfeil
-import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
 import no.nav.k9punsj.util.TestUtils.hentSøknadId
+import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.wiremock.JournalpostIds
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -138,7 +139,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         oppdaterSøknad(søknadJson)
             .expectStatus().isOk
             .expectBody()
-            .consumeWith{ res ->
+            .consumeWith { res ->
                 val oppdatertSøknad = objectMapper.readValue(res.responseBody, OpplaeringspengerSøknadDto::class.java)
                 assertNotNull(oppdatertSøknad)
                 assertEquals(norskIdent, oppdatertSøknad.soekerId)
@@ -263,43 +264,47 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
     fun `Prøver å sende søknaden til Kafka når den er gyldig`(): Unit = runBlocking {
         val norskIdent = "02020050121"
         val søknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
 
         val (_, status, body) = opprettOgSendInnSoeknad(
             søknadJson = søknad,
             norskIdent = norskIdent,
-            journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+            journalpostId = journalpostId
         )
         assertThat(body.feil).isNull()
         assertEquals(HttpStatus.ACCEPTED, status)
 
-        assertThat(journalpostRepository.kanSendeInn(listOf(JournalpostIds.FerdigstiltMedSaksnummer))).isFalse
+        assertThat(journalpostRepository.kanSendeInn(listOf(journalpostId))).isFalse
     }
 
-//    @Test
-//    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`(): Unit =
-//        runBlocking {
-//            val norskIdent = "02020050121"
-//            val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
-//            val journalpostId = "34234234"
-//            tilpasserSøknadsMalTilTesten(gyldigSoeknad, norskIdent, journalpostId)
-//            val (id, status, body) =
-//                opprettOgSendInnSoeknad(soeknadJson = gyldigSoeknad, ident = norskIdent, journalpostid = journalpostId)
-//
-//            assertThat(body.feil).isNull()
-//            assertEquals(HttpStatus.ACCEPTED, status)
-//            assertThat(journalpostRepo.kanSendeInn(listOf(journalpostId))).isFalse
-//
-//            val sendSøknad = lagSendSøknad(norskIdent = norskIdent, søknadId = id)
-//            val (httpstatus, body2) = client.post()
-//                .uri { it.pathSegment(api, søknadTypeUri, "send").build() }
-//                .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-//                .body(BodyInserters.fromValue(sendSøknad))
-//                .awaitStatusWithBody<OasFeil>()
-//
-//            assertEquals(HttpStatus.CONFLICT, httpstatus)
-//            assertThat(body2.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
-//        }
-//
+    @Test
+    fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`(): Unit =
+        runBlocking {
+            val norskIdent = "02020050121"
+            val gyldigSoeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
+            val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+            val (søknadId, status, body) =
+                opprettOgSendInnSoeknad(
+                    søknadJson = gyldigSoeknad,
+                    norskIdent = norskIdent,
+                    journalpostId = journalpostId
+                )
+
+            assertThat(body.feil).isNull()
+            assertEquals(HttpStatus.ACCEPTED, status)
+            assertThat(journalpostRepository.kanSendeInn(listOf(journalpostId))).isFalse
+
+            val sendSøknad = lagSendSøknadDto(norskIdent = norskIdent, søknadId = søknadId)
+            sendSøknad(sendSøknad)
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+                .expectBody()
+                .consumeWith { res ->
+                    val oasFeil = objectMapper.readValue(res.responseBody, OasFeil::class.java)
+                    assertThat(oasFeil.feil).isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+                }
+        }
+
 //    @Test
 //    fun `Skal kunne lagre ned minimal søknad`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
@@ -572,7 +577,8 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
             .expectBody()
             .returnResult()
 
-        val oppdatertSøknad = objectMapper.readValue(oppdatertSøknadResponse.responseBody, OpplaeringspengerSøknadDto::class.java)
+        val oppdatertSøknad =
+            objectMapper.readValue(oppdatertSøknadResponse.responseBody, OpplaeringspengerSøknadDto::class.java)
         assertNotNull(oppdatertSøknad.soekerId)
 
         val søknadId = oppdatertSøknad.soeknadId
