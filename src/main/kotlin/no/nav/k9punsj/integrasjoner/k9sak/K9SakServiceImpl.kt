@@ -41,8 +41,8 @@ import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sendInnSøknadUr
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.sokFagsakerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.korrigeringinntektsmelding.tilOmsvisning
 import no.nav.k9punsj.omsorgspengeraleneomsorg.tilOmsAOvisning
@@ -65,8 +65,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
-import java.util.Base64
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.coroutineContext
 
 @Configuration

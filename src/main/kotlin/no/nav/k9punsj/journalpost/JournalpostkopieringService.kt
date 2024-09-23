@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
@@ -30,6 +31,7 @@ class JournalpostkopieringService(
     private val hendeMottaker: HendelseMottaker,
     private val safGateway: SafGateway,
     private val dokarkivGateway: DokarkivGateway,
+    private val personService: PersonService
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(JournalpostkopieringService::class.java)
@@ -62,9 +64,10 @@ class JournalpostkopieringService(
         )
         logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
 
+        val tilPersonAktørId = personService.finnAktørId(kopierJournalpostDto.til)
         hendeMottaker.prosesser(
             FordelPunsjEventDto(
-                aktørId = kopierJournalpostDto.til,
+                aktørId = tilPersonAktørId,
                 journalpostId = nyJournalpostId.toString(),
                 type = K9FordelType.KOPI.kode,
                 ytelse = k9FagsakYtelseType.kode,
