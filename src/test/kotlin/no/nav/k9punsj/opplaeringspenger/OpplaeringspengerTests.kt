@@ -381,38 +381,41 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
     }
 
 
-//    @Test
-//    fun `Skal kunne lagre ned sn fra søknad`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.sn()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-//
-//        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-//
-//        val søknadViaGet = client.get()
-//            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
-//            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-//            .awaitBodyWithType<OpplaeringspengerSøknadDto>()
-//
-//        assertNotNull(søknadViaGet)
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.organisasjonsnummer).isEqualTo("890508087")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
-//            LocalDate.of(2021, 5, 10)
-//        )
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.landkode).isEqualTo("")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerNavn).isEqualTo("Regskapsfører")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerTlf).isEqualTo("88888889")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(
-//            false
-//        )
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(false)
-//        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(
-//            listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet")
-//        )
-//    }
-//
+    @Test
+    fun `Skal kunne lagre ned sn fra søknad`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val søknadJson: SøknadJson = LesFraFilUtil.snSøknadOlp()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+
+        val søknadViaGet = hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectBody()
+            .returnResult()
+            .responseBody
+            .let { objectMapper.readValue(it, OpplaeringspengerSøknadDto::class.java) }
+
+        assertNotNull(søknadViaGet)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.virksomhetNavn).isEqualTo("FiskerAS")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.organisasjonsnummer).isEqualTo("890508087")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.periode?.fom).isEqualTo(
+            LocalDate.of(2021, 5, 10)
+        )
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.landkode).isEqualTo("")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerNavn).isEqualTo("Regskapsfører")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.regnskapsførerTlf).isEqualTo("88888889")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.registrertIUtlandet).isEqualTo(
+            false
+        )
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.bruttoInntekt).isEqualTo("1200000")
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.erNyoppstartet).isEqualTo(false)
+        assertThat(søknadViaGet.opptjeningAktivitet?.selvstendigNaeringsdrivende?.info?.virksomhetstyper).isEqualTo(
+            listOf("Fiske", "Jordbruk", "Dagmamma i eget hjem/familiebarnehage", "Annen næringsvirksomhet")
+        )
+    }
+
+
 //    @Test
 //    fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
