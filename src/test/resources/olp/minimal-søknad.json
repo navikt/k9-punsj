@@ -1,0 +1,58 @@
+{
+  "soeknadId": "0df10260-c763-47d2-a348-158738cbec99",
+  "soekerId": "",
+  "journalposter": [
+    "200"
+  ],
+  "mottattDato": "2019-10-20",
+  "klokkeslett": "12:53",
+  "barn": {
+    "norskIdent": "22222222222",
+    "foedselsdato": "2018-10-30"
+  },
+  "soeknadsperiode": [
+    {
+      "fom": "2018-12-30",
+      "tom": "2019-10-20"
+    }
+  ],
+  "trekkKravPerioder": [],
+  "opptjeningAktivitet": {
+    "arbeidstaker": [],
+    "selvstendigNaeringsdrivende": null,
+    "frilanser": null
+  },
+  "soknadsinfo": null,
+  "bosteder": [],
+  "utenlandsopphold": [],
+  "lovbestemtFerie": [],
+  "arbeidstid": {
+    "arbeidstakerList": [],
+    "frilanserArbeidstidInfo": {},
+    "selvstendigNæringsdrivendeArbeidstidInfo": null
+  },
+  "uttak": [],
+  "omsorg": {},
+  "kurs": {
+    "kursHolder": {
+      "holder": "Nav",
+      "institusjonsUuid": null
+    },
+    "formaal": "test",
+    "kursperioder": [
+      {
+        "periode": {
+          "fom": "2022-12-14",
+          "tom": "2023-01-14"
+        },
+        "avreise": "2022-12-14",
+        "hjemkomst": "2023-01-14"
+      }
+    ]
+  },
+  "harInfoSomIkkeKanPunsjes": false,
+  "harMedisinskeOpplysninger": false,
+  "begrunnelseForInnsending": null,
+  "metadata": null,
+  "k9saksnummer": null
+}

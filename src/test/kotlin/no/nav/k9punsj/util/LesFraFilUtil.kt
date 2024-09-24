@@ -208,5 +208,13 @@ class LesFraFilUtil {
         fun søknadFraFrontendOlpFull(): SøknadJson {
             return objectMapper().readValue(lesFraFilOlp("søknad-fra-frontend.json"))
         }
+
+        fun minimalSøknadOlp(): SøknadJson {
+            return objectMapper().readValue(lesFraFilOlp("minimal-søknad.json"))
+        }
+
+        fun tidSøknadOlp(): SøknadJson {
+            return objectMapper().readValue(lesFraFilOlp("med-tid-søknad.json"))
+        }
     }
 }

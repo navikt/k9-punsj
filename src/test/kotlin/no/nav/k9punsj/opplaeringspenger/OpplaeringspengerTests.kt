@@ -277,6 +277,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostId))).isFalse
     }
 
+
     @Test
     fun `Skal få 409 når det blir sendt på en journalpost som er sendt fra før, og innsendingen ikke inneholder andre journalposter som kan sendes inn`(): Unit =
         runBlocking {
@@ -305,31 +306,60 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
                 }
         }
 
-//    @Test
-//    fun `Skal kunne lagre ned minimal søknad`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.minimalSøknad()
-//        val journalpostId = IdGenerator.nesteId()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostId)
-//
-//        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent, journalpostId)
-//
-//        assertEquals(HttpStatus.BAD_REQUEST, status)
-//        assertThat(body.feil).isNotEmpty
-//    }
-//
-//    @Test
-//    fun `Skal kunne lagre med tid søknad`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.tidSøknad()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-//
-//        val (_, status, body) = opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
-//
-//        assertEquals(HttpStatus.BAD_REQUEST, status)
-//        assertThat(body.feil).isNotEmpty
-//    }
-//
+
+    @Test
+    fun `Skal kunne lagre ned en minimal søknad`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val minimalSøknad: SøknadJson = LesFraFilUtil.minimalSøknadOlp()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val (_, status, body) =
+            opprettOgSendInnSoeknad(
+                søknadJson = minimalSøknad,
+                norskIdent = norskIdent,
+                journalpostId = journalpostId
+            )
+
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
+    }
+
+
+    @Test
+    fun `Skal få feil hvis mottattDato ikke er fylt ut`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val minimalSøknad: SøknadJson = LesFraFilUtil.minimalSøknadOlp()
+        settMottattDatoTilNull(minimalSøknad)
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val (_, status, body) =
+            opprettOgSendInnSoeknad(
+                søknadJson = minimalSøknad,
+                norskIdent = norskIdent,
+                journalpostId = journalpostId
+            )
+
+        assertEquals(HttpStatus.BAD_REQUEST, status)
+        assertEquals("mottattDato", body.feil?.get(0)?.feilkode)
+    }
+
+
+    @Test
+    fun `Skal kunne lagre søknad med tid`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val søknadMedTid: SøknadJson = LesFraFilUtil.tidSøknadOlp()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val (_, status, body) = opprettOgSendInnSoeknad(
+            søknadJson = søknadMedTid,
+            norskIdent = norskIdent,
+            journalpostId = journalpostId
+        )
+
+        assertThat(body.feil).isNull()
+        assertEquals(HttpStatus.ACCEPTED, status)
+    }
+
 //    @Test
 //    fun `Skal kunne lagre ned ferie fra søknad`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
@@ -590,7 +620,6 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
 
         // sender en søknad
         val response = sendSøknad(sendSøknad)
-            .expectStatus().isAccepted
             .expectBody()
             .returnResult()
 
@@ -657,8 +686,12 @@ private fun lagSendSøknadDto(
     return SendSøknad(norskIdent, søknadId)
 }
 
+private fun settMottattDatoTilNull(søknad: SøknadJson) {
+    søknad.replace("mottattDato", null)
+}
+
 private fun tilpassSøknadsMalTilTest(
-    søknad: MutableMap<String, Any?>,
+    søknad: SøknadJson,
     norskIdent: String,
     journalpostId: String? = null
 ) {
