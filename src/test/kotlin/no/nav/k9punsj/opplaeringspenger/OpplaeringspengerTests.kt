@@ -61,7 +61,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
     @Test
     fun `Får tom liste når personen ikke har en eksisterende mappe`(): Unit = runBlocking {
         val norskIdent = "01110050053"
-        hentMappe(norskIdent)
+        hentMappeMedNorskIdent(norskIdent)
             .expectStatus().isEqualTo(HttpStatus.OK)
             .expectBody().jsonPath("$.søknader").isEmpty
     }
@@ -91,7 +91,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
 
         opprettSøknadOgHentSøknadId(opprettNySøknad)
 
-        hentMappe(norskIdent)
+        hentMappeMedNorskIdent(norskIdent)
             .expectStatus().isEqualTo(HttpStatus.OK)
             .expectBody()
             .consumeWith { response ->
@@ -113,8 +113,9 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val opprettNySøknad = lagOpprettNySøknadDto(norskIdent, journalpostid)
 
         val location = opprettSøknadOgHentSøknadId(opprettNySøknad)
+        val søknadId = hentSøknadId(location)
 
-        hentMappeGittSøknadFraLocation(location)
+        hentMappeForSøknadId(søknadId)
             .expectBody()
             .consumeWith { res ->
                 val søknadOlpDto = objectMapper.readValue(res.responseBody, OpplaeringspengerSøknadDto::class.java)
@@ -185,6 +186,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
             .returnResult(URI::class.java)
 
         val location = opprettetSøknadResponse.responseHeaders.location
+        val søknadId = hentSøknadId(location)
         leggPåNySøknadId(søknadFraFrontend, location)
 
         val oppdatertSøknadResponse = webTestClient.put()
@@ -211,7 +213,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val oppdatertSøknad =
             objectMapper.readValue(oppdatertSøknadResponse.responseBody, OpplaeringspengerSøknadDto::class.java)
 
-        hentMappeGittSøknadFraLocation(location)
+        hentMappeForSøknadId(søknadId)
             .expectStatus().isEqualTo(HttpStatus.OK)
             .expectBody().consumeWith { res ->
                 val søknad = objectMapper.readValue(res.responseBody, OpplaeringspengerSøknadDto::class.java)
@@ -360,23 +362,25 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         assertEquals(HttpStatus.ACCEPTED, status)
     }
 
-//    @Test
-//    fun `Skal kunne lagre ned ferie fra søknad`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.ferieSøknad()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-//
-//        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-//
-//        val søknadViaGet = client.get()
-//            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
-//            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-//            .awaitBodyWithType<OpplaeringspengerSøknadDto>()
-//
-//        assertNotNull(søknadViaGet)
-//        assertEquals(søknadViaGet.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
-//    }
-//
+    @Test
+    fun `Skal kunne lagre ned ferie fra søknad`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val søknadJson: SøknadJson = LesFraFilUtil.ferieSøknadOlp()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+
+        hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectBody()
+            .consumeWith{ res ->
+                val søknad = objectMapper.readValue(res.responseBody, OpplaeringspengerSøknadDto::class.java)
+                assertNotNull(søknad)
+                assertEquals(søknad.lovbestemtFerie?.get(0)?.fom!!, LocalDate.of(2021, 4, 14))
+            }
+    }
+
+
 //    @Test
 //    fun `Skal kunne lagre ned sn fra søknad`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
@@ -596,6 +600,32 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         norskIdent: String,
         journalpostId: String
     ): Triple<String, HttpStatusCode, OasSoknadsfeil> {
+        val oppdatertSøknad = opprettOgLagreSoeknad(norskIdent, journalpostId, søknadJson)
+
+        val søknadId = oppdatertSøknad?.soeknadId
+        assertNotNull(søknadId)
+        val sendSøknad = lagSendSøknadDto(norskIdent = norskIdent, søknadId = søknadId!!)
+
+        val journalposter = oppdatertSøknad?.journalposter!!
+        val kanSendeInn = journalpostRepository.kanSendeInn(journalposter)
+        assertThat(kanSendeInn).isTrue
+
+        // sender en søknad
+        val response = sendSøknad(sendSøknad)
+            .expectBody()
+            .returnResult()
+
+        val httpstatus = response.status
+        val oasSoknadsfeil = objectMapper.readValue(response.responseBody, OasSoknadsfeil::class.java)
+
+        return Triple(søknadId, httpstatus, oasSoknadsfeil)
+    }
+
+    private fun opprettOgLagreSoeknad(
+        norskIdent: String,
+        journalpostId: String,
+        søknadJson: SøknadJson
+    ): OpplaeringspengerSøknadDto? {
         val k9Saksnummer = "12345"
 
         val søknad = OpprettNySøknad(norskIdent, journalpostId, k9Saksnummer, null)
@@ -610,23 +640,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val oppdatertSøknad =
             objectMapper.readValue(oppdatertSøknadResponse.responseBody, OpplaeringspengerSøknadDto::class.java)
         assertNotNull(oppdatertSøknad.soekerId)
-
-        val søknadId = oppdatertSøknad.soeknadId
-        val sendSøknad = lagSendSøknadDto(norskIdent = norskIdent, søknadId = søknadId)
-
-        val journalposter = oppdatertSøknad.journalposter!!
-        val kanSendeInn = journalpostRepository.kanSendeInn(journalposter)
-        assertThat(kanSendeInn).isTrue
-
-        // sender en søknad
-        val response = sendSøknad(sendSøknad)
-            .expectBody()
-            .returnResult()
-
-        val httpstatus = response.status
-        val oasSoknadsfeil = objectMapper.readValue(response.responseBody, OasSoknadsfeil::class.java)
-
-        return Triple(søknadId, httpstatus, oasSoknadsfeil)
+        return oppdatertSøknad
     }
 
     private fun sendSøknad(sendSøknad: SendSøknad) = webTestClient.post()
@@ -660,14 +674,14 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         .body(BodyInserters.fromValue(søknadJson))
         .exchange()
 
-    private fun hentMappe(norskIdent: String) = webTestClient.get()
+    private fun hentMappeMedNorskIdent(norskIdent: String) = webTestClient.get()
         .uri { it.pathSegment(api, søknadTypeUri, "mappe").build() }
         .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
         .header("X-Nav-NorskIdent", norskIdent)
         .exchange()
 
-    private fun hentMappeGittSøknadFraLocation(location: URI?) = webTestClient.get()
-        .uri { it.pathSegment(api, søknadTypeUri, "mappe", hentSøknadId(location)).build() }
+    private fun hentMappeForSøknadId(søknadId: String?) = webTestClient.get()
+        .uri { it.pathSegment(api, søknadTypeUri, "mappe", søknadId).build() }
         .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
         .exchange()
 }

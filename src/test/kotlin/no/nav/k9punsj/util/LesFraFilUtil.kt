@@ -216,5 +216,9 @@ class LesFraFilUtil {
         fun tidSøknadOlp(): SøknadJson {
             return objectMapper().readValue(lesFraFilOlp("med-tid-søknad.json"))
         }
+
+        fun ferieSøknadOlp(): SøknadJson {
+            return objectMapper().readValue(lesFraFilOlp("med-ferie-søknad.json"))
+        }
     }
 }
