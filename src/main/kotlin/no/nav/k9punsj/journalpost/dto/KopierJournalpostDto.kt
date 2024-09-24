@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
 data class KopierJournalpostDto(
-    val fra: String,
     val til: String,
     val barn: String?,
     val annenPart: String?,
@@ -62,7 +61,7 @@ data class KopierJournalpostDto(
 
         return HentK9SaksnummerGrunnlag(
             søknadstype = ytelse ?: k9FagsakYtelseType.somPunsjFagsakYtelseType(),
-            søker = fra.somIdentitetsnummer().toString(),
+            søker = til.somIdentitetsnummer().toString(),
             pleietrengende = barn?.somIdentitetsnummer().toString(),
             annenPart = annenPart?.somIdentitetsnummer().toString(),
             periode = periode

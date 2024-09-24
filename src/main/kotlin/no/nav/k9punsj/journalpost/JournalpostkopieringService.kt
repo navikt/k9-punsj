@@ -51,11 +51,8 @@ class JournalpostkopieringService(
             periodeDto = safJournalpost.datoOpprettet.toLocalDate().somPeriodeDto()
         )
 
-        val saksnummer = hentEllerOpprettSaksnummer(
-            journalpostId = journalpostId.toString(),
-            kopierJournalpostDto = kopierJournalpostDto,
-            k9SakGrunnlag = k9SakGrunnlag
-        )
+        val saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
+        logger.info("Kopierer journalpost: $journalpostId til saksnummer: $saksnummer")
 
         val tilPersonFnr = kopierJournalpostDto.til
         val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
@@ -79,7 +76,6 @@ class JournalpostkopieringService(
         return KopierJournalpostInfo(
             nyJournalpostId = nyJournalpostId.toString(),
             saksnummer = saksnummer,
-            fra = kopierJournalpostDto.fra,
             til = tilPersonFnr,
             pleietrengende = kopierJournalpostDto.barn,
             annenPart = kopierJournalpostDto.annenPart,
@@ -127,27 +123,6 @@ class JournalpostkopieringService(
         }
 
         return Pair(safJournalpost, k9FagsakYtelseType)
-    }
-
-    private suspend fun hentEllerOpprettSaksnummer(
-        journalpostId: String,
-        kopierJournalpostDto: KopierJournalpostDto,
-        k9SakGrunnlag: HentK9SaksnummerGrunnlag,
-    ): String {
-
-        // Sjekker om journalposten kopieres til samme person og logger hvis så er tilfelle
-        if (kopierJournalpostDto.fra == kopierJournalpostDto.til) {
-            val saksnummer = k9SakService.hentEllerOpprettSaksnummer(k9SakGrunnlag)
-            logger.info("Kopierer journalpost: $journalpostId til samme person med saksnummer: $saksnummer")
-            return saksnummer // Bruker eksisterende saksnummer for samme person
-        }
-
-        // Hvis journalposten kopieres til en annen person, Hent eller opprett nytt saksnummer
-        val saksnummer = k9SakService.hentEllerOpprettSaksnummer(
-            k9SakGrunnlag.copy(søker = kopierJournalpostDto.til)
-        )
-        logger.info("Kopierer journalpost: $journalpostId til ny person med saksnummer: $saksnummer")
-        return saksnummer
     }
 
     class KanIkkeKopieresErrorResponse(feil: String, status: HttpStatus = HttpStatus.CONFLICT) :

@@ -99,7 +99,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             PLEIEPENGER_SYKT_BARN, PLEIEPENGER_LIVETS_SLUTTFASE, OMSORGSPENGER_MIDLERTIDIG_ALENE, OMSORGSPENGER_KRONISK_SYKT_BARN, OMSORGSPENGER_ALENE_OMSORGEN -> {
                 val barnEllerAnnenPart = "05032435485"
                 KopierJournalpostDto(
-                    fra = søkerAktørId,
                     til = søkerAktørId,
                     barn = barnEllerAnnenPart,
                     annenPart = null,
@@ -107,7 +106,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                     ytelse = null
                 )
                 KopierJournalpostDto(
-                    fra = søkerAktørId,
                     til = søkerAktørId,
                     barn = barnEllerAnnenPart,
                     annenPart = null,
@@ -115,7 +113,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                     ytelse = null
                 )
                 KopierJournalpostDto(
-                    fra = søkerAktørId,
                     til = søkerAktørId,
                     barn = null,
                     annenPart = barnEllerAnnenPart,
@@ -130,7 +127,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             OMSORGSPENGER, OMSORGSPENGER_UTBETALING -> {
                 val behandlingsÅr = 2024
                 KopierJournalpostDto(
-                    fra = søkerAktørId,
                     til = søkerAktørId,
                     barn = null,
                     annenPart = null,
@@ -149,7 +145,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         // Må sette minst barn eller annenPart uten ytelse satt
         assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
             KopierJournalpostDto(
-                fra = søkerAktørId,
                 til = søkerAktørId,
                 barn = null,
                 annenPart = null,
@@ -164,7 +159,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         // Må sette minst barn eller annenPart med ytelse satt
         assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
             KopierJournalpostDto(
-                fra = søkerAktørId,
                 til = søkerAktørId,
                 barn = null,
                 annenPart = null,
@@ -179,7 +173,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         // Må sette behandlingsÅr med ytelse satt
         assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
             KopierJournalpostDto(
-                fra = søkerAktørId,
                 til = søkerAktørId,
                 barn = null,
                 annenPart = null,
@@ -244,7 +237,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpost = journalpostRepository.hent(journalpostId)
 
         val kopierJournalpostDto = KopierJournalpostDto(
-            fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = barn,
             annenPart = null,
@@ -265,7 +257,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                 {
                   "nyJournalpostId":"$nyJournalpostId",
                   "saksnummer":"$saksnummer",
-                  "fra":"$søkerAktørId",
                   "til":"$søkerAktørId",
                   "pleietrengende":"$barn",
                   "annenPart":null,
@@ -330,7 +321,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpost = journalpostRepository.hent(journalpostId)
 
         val kopierJournalpostDto = KopierJournalpostDto(
-            fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = barn,
             annenPart = null,
@@ -351,7 +341,6 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
                 {
                   "nyJournalpostId":"$nyJournalpostId",
                   "saksnummer":"$saksnummer",
-                  "fra":"$søkerAktørId",
                   "til":"$søkerAktørId",
                   "pleietrengende":"$barn",
                   "annenPart":null,
