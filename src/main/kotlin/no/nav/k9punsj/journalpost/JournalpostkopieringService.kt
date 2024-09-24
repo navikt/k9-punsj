@@ -57,14 +57,15 @@ class JournalpostkopieringService(
             k9SakGrunnlag = k9SakGrunnlag
         )
 
+        val tilPersonFnr = kopierJournalpostDto.til
         val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
             journalpostId = journalpostId,
-            identitetsnummer = k9SakGrunnlag.søker.somIdentitetsnummer(),
+            identitetsnummer = tilPersonFnr.somIdentitetsnummer(),
             saksnummer = saksnummer
         )
         logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
 
-        val tilPersonAktørId = personService.finnAktørId(kopierJournalpostDto.til)
+        val tilPersonAktørId = personService.finnAktørId(tilPersonFnr)
         hendeMottaker.prosesser(
             FordelPunsjEventDto(
                 aktørId = tilPersonAktørId,
@@ -79,7 +80,7 @@ class JournalpostkopieringService(
             nyJournalpostId = nyJournalpostId.toString(),
             saksnummer = saksnummer,
             fra = kopierJournalpostDto.fra,
-            til = kopierJournalpostDto.til,
+            til = tilPersonFnr,
             pleietrengende = kopierJournalpostDto.barn,
             annenPart = kopierJournalpostDto.annenPart,
             ytelse = k9FagsakYtelseType.somPunsjFagsakYtelseType()
