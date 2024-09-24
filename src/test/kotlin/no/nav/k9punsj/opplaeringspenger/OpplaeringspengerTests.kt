@@ -109,7 +109,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val norskIdent = "02030050163"
         val journalpostid = "21707da8-a13b-4927-8776-c53399727b29"
 
-        tilpassSøknadsMalTilTest(søknad, norskIdent, journalpostid)
+        leggPåNySøkerIdOgJournalpostId(søknad, norskIdent, journalpostid)
         val opprettNySøknad = lagOpprettNySøknadDto(norskIdent, journalpostid)
 
         val location = opprettSøknadOgHentSøknadId(opprettNySøknad)
@@ -156,16 +156,6 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
             }
     }
 
-    private fun tilpassSøknadTilTest(
-        søknadJson: SøknadJson,
-        norskIdent: String,
-        journalpostid: String,
-        location: URI?
-    ) {
-        tilpassSøknadsMalTilTest(søknadJson, norskIdent, journalpostid)
-        leggPåNySøknadId(søknadJson, location)
-    }
-
 
     @Test
     fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
@@ -173,7 +163,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val norskIdent = "02030050163"
         val journalpostid = "9999"
 
-        tilpassSøknadsMalTilTest(søknadFraFrontend, norskIdent, journalpostid)
+        leggPåNySøkerIdOgJournalpostId(søknadFraFrontend, norskIdent, journalpostid)
         val opprettNySøknad = lagOpprettNySøknadDto(norskIdent, journalpostid)
 
         val opprettetSøknadResponse = webTestClient.post()
@@ -710,7 +700,17 @@ private fun settMottattDatoTilNull(søknad: SøknadJson) {
     søknad.replace("mottattDato", null)
 }
 
-private fun tilpassSøknadsMalTilTest(
+private fun tilpassSøknadTilTest(
+    søknadJson: SøknadJson,
+    norskIdent: String,
+    journalpostid: String,
+    location: URI?
+) {
+    leggPåNySøkerIdOgJournalpostId(søknadJson, norskIdent, journalpostid)
+    leggPåNySøknadId(søknadJson, location)
+}
+
+private fun leggPåNySøkerIdOgJournalpostId(
     søknad: SøknadJson,
     norskIdent: String,
     journalpostId: String? = null
