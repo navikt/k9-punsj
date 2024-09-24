@@ -59,7 +59,7 @@ class JournalpostkopieringService(
 
         val nyJournalpostId = dokarkivGateway.knyttTilAnnenSak(
             journalpostId = journalpostId,
-            identitetsnummer = k9SakGrunnlag.søker.somIdentitetsnummer(),
+            identitetsnummer = kopierJournalpostDto.til.somIdentitetsnummer(),
             saksnummer = saksnummer
         )
         logger.info("Kopiert journalpost: $journalpostId til ny journalpost: $nyJournalpostId med saksnummer: $saksnummer")
