@@ -416,24 +416,26 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
     }
 
 
-//    @Test
-//    fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-//
-//        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-//
-//        val søknadViaGet = client.get()
-//            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
-//            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-//            .awaitBodyWithType<OpplaeringspengerSøknadDto>()
-//
-//        assertNotNull(søknadViaGet)
-//        assertThat(søknadViaGet.harInfoSomIkkeKanPunsjes).isEqualTo(true)
-//        assertThat(søknadViaGet.harMedisinskeOpplysninger).isEqualTo(false)
-//    }
-//
+    @Test
+    fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val søknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+
+        hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectBody()
+            .consumeWith { res ->
+                val søknad = objectMapper.readValue(res.responseBody, OpplaeringspengerSøknadDto::class.java)
+                assertNotNull(søknad)
+                assertThat(søknad.harInfoSomIkkeKanPunsjes).isEqualTo(true)
+                assertThat(søknad.harMedisinskeOpplysninger).isEqualTo(false)
+            }
+    }
+
+
 //    @Test
 //    fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
