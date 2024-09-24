@@ -358,7 +358,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val søknadJson: SøknadJson = LesFraFilUtil.ferieSøknadOlp()
         val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
 
-        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+        val oppdatertSøknad = opprettOgLagreSøknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
 
         hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
             .expectStatus().isEqualTo(HttpStatus.OK)
@@ -377,7 +377,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val søknadJson: SøknadJson = LesFraFilUtil.snSøknadOlp()
         val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
 
-        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+        val oppdatertSøknad = opprettOgLagreSøknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
 
         val søknadViaGet = hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
             .expectStatus().isEqualTo(HttpStatus.OK)
@@ -412,7 +412,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val søknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
         val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
 
-        val oppdatertSøknad = opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+        val oppdatertSøknad = opprettOgLagreSøknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
 
         hentMappeForSøknadId(oppdatertSøknad?.soeknadId)
             .expectStatus().isEqualTo(HttpStatus.OK)
@@ -432,7 +432,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         val søknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
         val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
 
-        opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+        opprettOgLagreSøknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
 
         webTestClient.post()
             .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
@@ -486,7 +486,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
 //        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
 //        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 //
-//        val oppdatertSoeknadDto = opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
+//        val oppdatertSoeknadDto = opprettOgLagreSøknad(soeknadJson = soeknad, ident = norskIdent)
 //
 //        val søknadViaGet = client.get()
 //            .uri { it.pathSegment(api, søknadTypeUri, "mappe", oppdatertSoeknadDto.soeknadId).build() }
@@ -596,7 +596,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         norskIdent: String,
         journalpostId: String
     ): Triple<String, HttpStatusCode, OasSoknadsfeil> {
-        val oppdatertSøknad = opprettOgLagreSoeknad(norskIdent, journalpostId, søknadJson)
+        val oppdatertSøknad = opprettOgLagreSøknad(norskIdent, journalpostId, søknadJson)
 
         val søknadId = oppdatertSøknad?.soeknadId
         assertNotNull(søknadId)
@@ -617,7 +617,7 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
         return Triple(søknadId, httpstatus, oasSoknadsfeil)
     }
 
-    private fun opprettOgLagreSoeknad(
+    private fun opprettOgLagreSøknad(
         norskIdent: String,
         journalpostId: String,
         søknadJson: SøknadJson
