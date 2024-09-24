@@ -436,22 +436,23 @@ class OpplaeringspengerTests : AbstractContainerBaseTest() {
     }
 
 
-//    @Test
-//    fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
-//        val norskIdent = "02022352121"
-//        val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
-//        tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
-//        opprettOgLagreSoeknad(soeknadJson = soeknad, ident = norskIdent)
-//
-//        val httpStatus = client.post()
-//            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
-//            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-//            .body(BodyInserters.fromValue(soeknad))
-//            .awaitStatuscode()
-//
-//        assertEquals(HttpStatus.ACCEPTED, httpStatus)
-//    }
-//
+    @Test
+    fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
+        val norskIdent = "02022352121"
+        val søknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOlpFull()
+        val journalpostId = JournalpostIds.FerdigstiltMedSaksnummer
+
+        opprettOgLagreSoeknad(søknadJson = søknadJson, norskIdent = norskIdent, journalpostId = journalpostId)
+
+        webTestClient.post()
+            .uri { it.pathSegment(api, søknadTypeUri, "valider").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .body(BodyInserters.fromValue(søknadJson))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.ACCEPTED)
+    }
+
+
 //    @Test
 //    fun `Skal verifisere at vi utvider men flere journalposter`(): Unit = runBlocking {
 //        val norskIdent = "02022352121"
