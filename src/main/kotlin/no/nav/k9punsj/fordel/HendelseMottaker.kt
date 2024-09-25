@@ -29,23 +29,36 @@ class HendelseMottaker @Autowired constructor(
         val journalpostId = fordelPunsjEventDto.journalpostId
         val journalpostIkkeEksisterer = journalpostService.journalpostIkkeEksisterer(journalpostId)
 
+        val k9FordelType = K9FordelType.fraKode(fordelPunsjEventDto.type)
+
         if (journalpostIkkeEksisterer) {
+            val safJournalPost = journalpostService.hentSafJournalPost(journalpostId)
             val aktørId = fordelPunsjEventDto.aktørId
-            val punsjEventType = K9FordelType.fraKode(fordelPunsjEventDto.type).kode
-            val ytelse = PunsjFagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse).kode
+            val punsjEventType = k9FordelType.kode
+            val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse)
+            val ytelse = punsjFagsakYtelseType.kode
             val gosysoppgaveId = fordelPunsjEventDto.gosysoppgaveId
 
             // TODO: Dersom SKRIV_TIL_OSS_SPØRMSÅL, SKRIV_TIL_OSS_SVAR, SAMTALEREFERAT
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
             val uuid = UUID.randomUUID()
+            val journalførtTidspunkt = when {
+                k9FordelType == K9FordelType.KOPI && safJournalPost?.erFerdigstilt == true -> {
+                    log.info("Journalposten($journalpostId) av type=$k9FordelType er ferdigstilt, setter journalførtTidspunkt til datoOpprettet=${safJournalPost.datoOpprettet}")
+                    safJournalPost.datoOpprettet
+                }
+                else -> null
+            }
+
             val punsjJournalpost = PunsjJournalpost(
                 uuid = uuid,
                 journalpostId = journalpostId,
                 aktørId = aktørId,
                 ytelse = ytelse,
                 type = punsjEventType,
-                gosysoppgaveId = gosysoppgaveId
+                gosysoppgaveId = gosysoppgaveId,
+                journalførtTidspunkt = journalførtTidspunkt
             )
             journalpostService.opprettJournalpost(punsjJournalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
@@ -56,7 +69,7 @@ class HendelseMottaker @Autowired constructor(
                 pleietrengendeAktørId = null
             )
         } else {
-            if (K9FordelType.fraKode(fordelPunsjEventDto.type) == K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
+            if (k9FordelType == K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                 val journalpostFraDb = journalpostService.hent(journalpostId)
                 if (journalpostFraDb.type != null && K9FordelType.fraKode(journalpostFraDb.type) != K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG) {
                     journalpostService.settInnsendingstype(K9FordelType.PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG, journalpostId)
