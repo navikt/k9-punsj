@@ -113,9 +113,13 @@ class JournalpostkopieringService(
             } ?: throw KanIkkeKopieresErrorResponse("Mangler ytelse for journalpost.")
 
         val støttedeYtelseTyperForKopiering = listOf(
-            FagsakYtelseType.OMSORGSPENGER_KS,
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+            FagsakYtelseType.OMSORGSPENGER,
+            FagsakYtelseType.OMSORGSPENGER_KS,
+            FagsakYtelseType.OMSORGSPENGER_AO,
+            FagsakYtelseType.OMSORGSPENGER_MA,
+            FagsakYtelseType.OPPLÆRINGSPENGER
         )
 
         if (!støttedeYtelseTyperForKopiering.contains(k9FagsakYtelseType)) {
