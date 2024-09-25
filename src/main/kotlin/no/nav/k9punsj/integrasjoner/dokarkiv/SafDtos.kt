@@ -123,37 +123,37 @@ internal object SafDtos {
 
     internal data class Bruker(
         val id: String?,
-        val type: String?
+        val type: String?,
     )
 
     internal data class Sak(
         val sakstype: Sakstype?,
         val fagsakId: String?,
         val fagsaksystem: String?,
-        val tema: String?
+        val tema: String?,
     )
 
     internal data class Avsender(
         val id: String?,
-        val type: String?
+        val type: String?,
     )
 
     internal data class AvsenderMottaker(
         val id: String?,
         val type: String?,
-        val navn: String?
+        val navn: String?,
     )
 
     internal data class DokumentVariant(
         val variantformat: String,
-        val saksbehandlerHarTilgang: Boolean
+        val saksbehandlerHarTilgang: Boolean,
     )
 
     internal data class Dokument(
         val dokumentInfoId: String,
         val brevkode: String?,
         val tittel: String?,
-        val dokumentvarianter: MutableList<DokumentVariant>?
+        val dokumentvarianter: MutableList<DokumentVariant>?,
     )
 
     internal data class Journalpost(
@@ -169,11 +169,15 @@ internal object SafDtos {
         val dokumenter: List<Dokument>,
         val relevanteDatoer: List<RelevantDato>,
         val datoOpprettet: LocalDateTime,
-        private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList()
+        private val tilleggsopplysninger: List<Tilleggsopplysning> = emptyList(),
     ) {
         val k9Kilde = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.kilde" }?.verdi
         val k9Type = tilleggsopplysninger.firstOrNull { it.nokkel == "k9.type" }?.verdi
         val erUtgående = journalposttype == JournalpostType.UTGAAENDE.kode
+
+        val erFerdigstilt =
+            journalstatus == Journalstatus.FERDIGSTILT.toString() || journalstatus == Journalstatus.JOURNALFOERT.toString()
+
         private val erDigital = K9Kilde.DIGITAL.name == k9Kilde
         val erEttersendelse = K9Type.ETTERSENDELSE.name == k9Type
         private val erSøknad = K9Type.SØKNAD.name == k9Type
@@ -190,12 +194,12 @@ internal object SafDtos {
 
     internal data class Tilleggsopplysning(
         val nokkel: String,
-        val verdi: String
+        val verdi: String,
     )
 
     internal data class RelevantDato(
         val dato: LocalDateTime,
-        val datotype: Datotype
+        val datotype: Datotype,
     )
 
     internal enum class Datotype {
@@ -209,12 +213,12 @@ internal object SafDtos {
     }
 
     internal data class JournalpostResponse(
-        val journalpost: Journalpost?
+        val journalpost: Journalpost?,
     )
 
     data class JournalpostResponseWrapper(
         val data: JournalpostResponse?,
-        val errors: List<Any>?
+        val errors: List<Any>?,
     ) {
         private fun inneholderError(error: String) = errors?.toString()?.contains(error) ?: false
         internal val journalpostFinnesIkke = inneholderError("ikke funnet") || inneholderError("not_found")
