@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.stereotype.Service
 import org.springframework.web.ErrorResponseException
+import java.time.LocalDateTime
 
 @Service
 class JournalpostkopieringService(
@@ -72,6 +73,7 @@ class JournalpostkopieringService(
                 journalpostId = nyJournalpostId.toString(),
                 type = K9FordelType.KOPI.kode,
                 ytelse = k9FagsakYtelseType.kode,
+                journalførtTidspunkt = LocalDateTime.now(), // Journalførttidspunkt for kopiert journalpost.
                 gosysoppgaveId = null
             )
         )
