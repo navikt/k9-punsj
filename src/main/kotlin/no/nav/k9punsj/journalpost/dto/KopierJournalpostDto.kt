@@ -19,14 +19,14 @@ data class KopierJournalpostDto(
 ) {
     init {
         when {
-            ytelse == null && barn == null && annenPart == null -> {
+            ytelse == null && barn.isNullOrBlank() && annenPart.isNullOrBlank() -> {
                 throw JournalpostkopieringService.KanIkkeKopieresErrorResponse(
                     "Må sette minst barn eller annenPart",
                     HttpStatus.BAD_REQUEST
                 )
             }
 
-            ytelse != null && gjelderYtelseMedBarn() && barn == null && annenPart == null -> {
+            ytelse != null && gjelderYtelseMedBarn() && barn.isNullOrBlank() && annenPart.isNullOrBlank() -> {
                 throw JournalpostkopieringService.KanIkkeKopieresErrorResponse(
                     "Må sette minst barn eller annenPart",
                     HttpStatus.BAD_REQUEST
