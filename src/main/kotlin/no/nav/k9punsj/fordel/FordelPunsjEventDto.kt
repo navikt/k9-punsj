@@ -6,13 +6,15 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 data class FordelPunsjEventDto(
     val aktørId: String? = null,
     val journalpostId: String,
     val type: String,
     val ytelse: String,
-    val gosysoppgaveId: String? = null
+    val gosysoppgaveId: String? = null,
+    val journalførtTidspunkt: LocalDateTime? = null
 ) {
 
     internal companion object {

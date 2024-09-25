@@ -32,7 +32,6 @@ class HendelseMottaker @Autowired constructor(
         val k9FordelType = K9FordelType.fraKode(fordelPunsjEventDto.type)
 
         if (journalpostIkkeEksisterer) {
-            val safJournalPost = journalpostService.hentSafJournalPost(journalpostId)
             val aktørId = fordelPunsjEventDto.aktørId
             val punsjEventType = k9FordelType.kode
             val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse)
@@ -43,13 +42,6 @@ class HendelseMottaker @Autowired constructor(
             publiserJournalpostMetrikk(fordelPunsjEventDto)
 
             val uuid = UUID.randomUUID()
-            val journalførtTidspunkt = when {
-                k9FordelType == K9FordelType.KOPI && safJournalPost?.erFerdigstilt == true -> {
-                    log.info("Journalposten($journalpostId) av type=$k9FordelType er ferdigstilt, setter journalførtTidspunkt til datoOpprettet=${safJournalPost.datoOpprettet}")
-                    safJournalPost.datoOpprettet
-                }
-                else -> null
-            }
 
             val punsjJournalpost = PunsjJournalpost(
                 uuid = uuid,
@@ -58,7 +50,7 @@ class HendelseMottaker @Autowired constructor(
                 ytelse = ytelse,
                 type = punsjEventType,
                 gosysoppgaveId = gosysoppgaveId,
-                journalførtTidspunkt = journalførtTidspunkt
+                journalførtTidspunkt = fordelPunsjEventDto.journalførtTidspunkt
             )
             journalpostService.opprettJournalpost(punsjJournalpost)
             aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
