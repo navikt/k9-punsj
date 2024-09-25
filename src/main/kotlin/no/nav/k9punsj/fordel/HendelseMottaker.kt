@@ -32,7 +32,6 @@ class HendelseMottaker @Autowired constructor(
         val k9FordelType = K9FordelType.fraKode(fordelPunsjEventDto.type)
 
         if (journalpostIkkeEksisterer) {
-            val safJournalPost = journalpostService.hentSafJournalPost(journalpostId)
             val aktørId = fordelPunsjEventDto.aktørId
             val punsjEventType = k9FordelType.kode
             val punsjFagsakYtelseType = PunsjFagsakYtelseType.fromKode(fordelPunsjEventDto.ytelse)
