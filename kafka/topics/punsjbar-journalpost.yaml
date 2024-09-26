@@ -18,9 +18,6 @@ spec:
     - team: k9saksbehandling
       application: k9-punsj
       access: read
-    - team: omsorgspenger
-      application: k9-punsjbolle
-      access: write
     {{#if enablekafkamanager}}
     - team: k9saksbehandling
       application: k9-kafka-manager
