@@ -409,7 +409,7 @@ internal class JournalpostRoutes(
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
 
-                val identListe = mutableListOf(dto.fra, dto.til)
+                val identListe = mutableListOf(dto.til)
                 dto.barn?.let { identListe.add(it) }
                 dto.annenPart?.let { identListe.add(it) }
 

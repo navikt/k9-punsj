@@ -52,6 +52,7 @@ import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtvisning
 import no.nav.k9punsj.opplaeringspenger.tilOlpvisning
 import no.nav.k9punsj.pleiepengerlivetssluttfase.tilPlsvisning
 import no.nav.k9punsj.pleiepengersyktbarn.tilPsbvisning
+import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray

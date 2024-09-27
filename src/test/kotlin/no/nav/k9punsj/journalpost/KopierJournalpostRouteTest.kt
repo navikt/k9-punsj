@@ -9,6 +9,14 @@ import no.nav.k9punsj.domenetjenester.SoknadService
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_ALENE_OMSORGEN
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_KRONISK_SYKT_BARN
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_MIDLERTIDIG_ALENE
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.OMSORGSPENGER_UTBETALING
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType.UKJENT
 import no.nav.k9punsj.fordel.FordelPunsjEventDto
 import no.nav.k9punsj.fordel.HendelseMottaker
 import no.nav.k9punsj.fordel.K9FordelType
@@ -24,13 +32,16 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.MetricsEndpoint
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -77,6 +88,101 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
     @AfterEach
     fun tearDown() {
         cleanUpDB()
+    }
+
+    @ParameterizedTest
+    @EnumSource(PunsjFagsakYtelseType::class)
+    fun `Forventer ingen valideringfeil`(ytelseType: PunsjFagsakYtelseType) {
+        val søkerAktørId = "27519339353"
+
+        when (ytelseType) {
+            PLEIEPENGER_SYKT_BARN, PLEIEPENGER_LIVETS_SLUTTFASE, OMSORGSPENGER_MIDLERTIDIG_ALENE, OMSORGSPENGER_KRONISK_SYKT_BARN, OMSORGSPENGER_ALENE_OMSORGEN -> {
+                val barnEllerAnnenPart = "05032435485"
+                KopierJournalpostDto(
+                    til = søkerAktørId,
+                    barn = barnEllerAnnenPart,
+                    annenPart = null,
+                    behandlingsÅr = null,
+                    ytelse = null
+                )
+                KopierJournalpostDto(
+                    til = søkerAktørId,
+                    barn = barnEllerAnnenPart,
+                    annenPart = null,
+                    behandlingsÅr = null,
+                    ytelse = null
+                )
+                KopierJournalpostDto(
+                    til = søkerAktørId,
+                    barn = null,
+                    annenPart = barnEllerAnnenPart,
+                    behandlingsÅr = null,
+                    ytelse = null
+                )
+            }
+
+            else -> {}
+        }
+        when (ytelseType) {
+            OMSORGSPENGER, OMSORGSPENGER_UTBETALING -> {
+                val behandlingsÅr = 2024
+                KopierJournalpostDto(
+                    til = søkerAktørId,
+                    barn = null,
+                    annenPart = null,
+                    behandlingsÅr = behandlingsÅr,
+                    ytelse = ytelseType
+                )
+            }
+
+            else -> {}
+        }
+    }
+
+    fun `Forventer valideringfeil ved kopiering`() {
+        val søkerAktørId = "27519339353"
+
+        // Må sette minst barn eller annenPart uten ytelse satt
+        assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
+            KopierJournalpostDto(
+                til = søkerAktørId,
+                barn = null,
+                annenPart = null,
+                behandlingsÅr = null,
+                ytelse = null
+            )
+        }.also {
+            assertThat(it.body.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+            assertThat(it.body.detail).isEqualTo("Må sette minst barn eller annenPart")
+        }
+
+        // Må sette minst barn eller annenPart med ytelse satt
+        assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
+            KopierJournalpostDto(
+                til = søkerAktørId,
+                barn = null,
+                annenPart = null,
+                behandlingsÅr = null,
+                ytelse = PLEIEPENGER_SYKT_BARN
+            )
+        }.also {
+            assertThat(it.body.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+            assertThat(it.body.detail).isEqualTo("Må sette minst barn eller annenPart")
+        }
+
+        // Må sette behandlingsÅr med ytelse satt
+        assertThrows<JournalpostkopieringService.KanIkkeKopieresErrorResponse> {
+            KopierJournalpostDto(
+                til = søkerAktørId,
+                barn = null,
+                annenPart = null,
+                behandlingsÅr = null,
+                ytelse = OMSORGSPENGER_UTBETALING
+            )
+        }.also {
+            assertThat(it.body.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+            assertThat(it.body.detail).isEqualTo("Må sette behandlingsÅr")
+        }
     }
 
     @Test
@@ -131,10 +237,10 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpost = journalpostRepository.hent(journalpostId)
 
         val kopierJournalpostDto = KopierJournalpostDto(
-            fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = barn,
             annenPart = null,
+            behandlingsÅr = null,
             ytelse = null
         )
 
@@ -146,16 +252,17 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .json("""
+            .json(
+                """
                 {
                   "nyJournalpostId":"$nyJournalpostId",
                   "saksnummer":"$saksnummer",
-                  "fra":"$søkerAktørId",
                   "til":"$søkerAktørId",
                   "pleietrengende":"$barn",
                   "annenPart":null,
                   "ytelse":"PSB"
-                }""".trimIndent())
+                }""".trimIndent()
+            )
 
         val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
         Assertions.assertNotNull(journalpostKopi)
@@ -207,18 +314,18 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             aktørId = søkerAktørId,
             journalpostId = journalpostId,
             type = K9FordelType.PAPIRSØKNAD.kode,
-            ytelse = PunsjFagsakYtelseType.UKJENT.kode
+            ytelse = UKJENT.kode
         )
         hendelseMottaker.prosesser(melding)
 
         val journalpost = journalpostRepository.hent(journalpostId)
 
         val kopierJournalpostDto = KopierJournalpostDto(
-            fra = journalpost.aktørId.toString(),
             til = journalpost.aktørId.toString(),
             barn = barn,
             annenPart = null,
-            ytelse = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
+            behandlingsÅr = null,
+            ytelse = PLEIEPENGER_SYKT_BARN
         )
 
         webTestClient
@@ -229,16 +336,17 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .json("""
+            .json(
+                """
                 {
                   "nyJournalpostId":"$nyJournalpostId",
                   "saksnummer":"$saksnummer",
-                  "fra":"$søkerAktørId",
                   "til":"$søkerAktørId",
                   "pleietrengende":"$barn",
                   "annenPart":null,
                   "ytelse":"PSB"
-                }""".trimIndent())
+                }""".trimIndent()
+            )
 
         val journalpostKopi = journalpostRepository.hentHvis(nyJournalpostId)
         Assertions.assertNotNull(journalpostKopi)
