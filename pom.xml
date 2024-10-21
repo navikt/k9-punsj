@@ -31,9 +31,9 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>5.0.1</k9-sak.version>
+        <k9-sak.version>5.1.0</k9-sak.version>
         <k9-formidling.version>10.1.1</k9-formidling.version>
-        <k9-format.version>9.6.0</k9-format.version>
+        <k9-format.version>9.6.2</k9-format.version>
 
         <!-- database -->
         <postgresql.version>42.7.4</postgresql.version>
