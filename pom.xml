@@ -48,7 +48,7 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.20.2</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
-        <wiremock.version>3.9.1</wiremock.version>
+        <wiremock.version>3.9.2</wiremock.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
@@ -57,7 +57,7 @@
 
         <!-- serdes -->
         <gson.version>2.11.0</gson.version>
-        <jackson-kotlin.version>2.17.2</jackson-kotlin.version>
+        <jackson-kotlin.version>2.18.0</jackson-kotlin.version>
         <orgjson.version>20240303</orgjson.version>
 
         <fuel.version>2.3.1</fuel.version>
