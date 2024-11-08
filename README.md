@@ -93,8 +93,8 @@ Bruk header fra Nav token header i authorize.
 [Swagger](https://k9-punsj.dev.intern.nav.no/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
 
 ### Accesstoken i dev
-Husk å være logget inn på [dev](https://k9-punsj.dev.intern.nav.no/) først, så gå til 
-[Nav token header](https://k9-punsj-oidc-auth-proxy.dev.intern.nav.no/api/k9-punsj/oidc/hentNavTokenHeader)
+Husk å være logget inn på [dev](https://k9-punsj-frontend.intern.dev.nav.no/) først, så gå til 
+[Nav token header](https://k9-punsj-frontend.intern.dev.nav.no/api/k9-punsj/oidc/hentNavTokenHeader)
 for å hente token som kan brukes i swagger.
 
 ### Kafka manager for lesing av meldinger i dev
