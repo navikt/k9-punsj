@@ -41,7 +41,7 @@ data class OmsorgspengerutbetalingSøknadDto(
     val k9saksnummer: String? = null
 ) {
     data class FraværPeriode(
-        val aktivitetsFravær: AktivitetFravær,
+        val aktivitetsFravær: AktivitetFravær?,
         val organisasjonsnummer: String? = null,
         val periode: PeriodeDto,
         val fraværÅrsak: FraværÅrsak?,

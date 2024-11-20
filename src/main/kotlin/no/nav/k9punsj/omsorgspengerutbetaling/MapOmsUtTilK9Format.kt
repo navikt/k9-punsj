@@ -126,7 +126,21 @@ internal class MapOmsUtTilK9Format(
             val normalArbeidstid: Duration? = fraværsPeriode.normalArbeidstid?.somDuration()
             val fraværÅrsak: FraværÅrsak? = fraværsPeriode.fraværÅrsak
             val søknadÅrsak: SøknadÅrsak? = fraværsPeriode.søknadÅrsak
+
+            // Validate aktivitetsFravær
+            if (fraværsPeriode.aktivitetsFravær == null) {
+                feil.add(
+                        Feil(
+                                "fraværsPerioder[$index].aktivitetsFravær",
+                                null,
+                                "aktivitetsFravær kan ikke være null"
+                        )
+                )
+                return@mapIndexed null // Skip processing this entry
+            }
+
             val aktivitetFravær: List<AktivitetFravær> = listOf(fraværsPeriode.aktivitetsFravær)
+
             if (AktivitetFravær.ARBEIDSTAKER == fraværsPeriode.aktivitetsFravær && fraværsPeriode.organisasjonsnummer.isNullOrEmpty()) {
                 feil.add(
                     Feil(
