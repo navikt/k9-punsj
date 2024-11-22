@@ -35,6 +35,12 @@ internal class MapDokumentTilK9Formidling(
             feil.addAll(validator.validate(bestilling).map {
                 Feil(it.propertyPath.toString(), "kode", it.message) }
             )
+
+            if (bestilling.dokumentMal == DokumentMalType.VARSEL_TILKOMMEN_FOSTERHJEM.kode
+                || bestilling.dokumentMal == DokumentMalType.VARSEL_TILKOMMEN_OMSORGSSTONAD.kode) {
+                check(bestilling.aktørId == bestilling.overstyrtMottaker.id) {"Mottaker må være personen saken gjelder"}
+            }
+
         }.onFailure { throwable ->
             logger.warn("Uventet mappingfeil", throwable)
             feil.add(Feil("dokumentbestilling", "uventetMappingfeil", throwable.message ?: "Uventet mappingfeil"))
