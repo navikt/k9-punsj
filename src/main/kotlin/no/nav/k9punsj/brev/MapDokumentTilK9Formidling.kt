@@ -82,9 +82,11 @@ internal class MapDokumentTilK9Formidling(
             DokumentdataParametreK9()
             .apply {
                 fritekst = this@leggTilDokumentData.fritekst
-                fritekstbrev = FritekstbrevinnholdDto().apply {
-                    overskrift = this@leggTilDokumentData.fritekstbrev.overskrift
-                    brødtekst = this@leggTilDokumentData.fritekstbrev.brødtekst
+                fritekstbrev = this@leggTilDokumentData.fritekstbrev?.let { f ->
+                    FritekstbrevinnholdDto().apply {
+                        overskrift = f.overskrift
+                        brødtekst = f.brødtekst
+                    }
                 }
             }
         }

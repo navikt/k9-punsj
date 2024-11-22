@@ -43,6 +43,7 @@ internal class BrevRoutes(
                 val dokumentbestillingDto = kotlin.runCatching {
                     request.body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
                 }.getOrElse {
+                    logger.error("Feil ved parsing av brev dto", it)
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()
@@ -62,6 +63,7 @@ internal class BrevRoutes(
                         saksbehandler = saksbehandler
                     )
                 } catch (e: Exception) {
+                    logger.error("Feil ved bestilling av brev", e)
                     return@RequestContext ServerResponse
                         .badRequest()
                         .json()
