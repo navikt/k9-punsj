@@ -25,7 +25,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: k9-punsj-oidc-auth-proxy
         - application: k9-sak
         - application: k9-punsj-frontend
           namespace: k9saksbehandling
