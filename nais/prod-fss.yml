@@ -82,7 +82,7 @@ spec:
     - name: DEFAULTDS_VAULT_MOUNTPATH
       value: postgresql/prod-fss/
     - name: DEFAULTDS_URL
-      value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-punsj
+      value: jdbc:postgresql://a01dbvl041.adeo.no:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.intern.nav.no
 
