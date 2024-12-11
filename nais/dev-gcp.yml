@@ -65,7 +65,6 @@ spec:
       runtime: java
       destinations:
         - id: "grafana-lgtm"
-        - id: "elastic-apm"
   webproxy: true
   kafka:
     pool: nav-dev
