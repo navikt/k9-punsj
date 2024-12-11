@@ -71,14 +71,6 @@ spec:
   envFrom:
     - secret: k9-punsj-secrets
   env:
-    - name: DEFAULTDS_USERNAME
-      value: k9-punsj
-    - name: DEFAULTDS_PASSWORD
-      value: k9-punsj
-    - name: DEFAULTDS_VAULT_MOUNTPATH
-      value: postgresql/preprod-fss/
-    - name: DEFAULTDS_URL
-      value: jdbc:postgresql://b27dbvl028.preprod.local:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.dev.intern.nav.no
 
