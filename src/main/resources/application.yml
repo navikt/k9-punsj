@@ -79,6 +79,7 @@ no.nav:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    vault_mountpath: ${DEFAULTDS_VAULT_MOUNTPATH}
 
   abac:
     system_user: ${SYSTEMBRUKER_USERNAME}
