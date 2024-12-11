@@ -60,8 +60,6 @@ spec:
         databases:
           - name: k9-punsj
             envVarPrefix: DB
-
-
   observability:
     autoInstrumentation:
       enabled: true
