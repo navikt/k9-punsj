@@ -1,8 +1,6 @@
 spring:
   flyway:
     enabled: true
-    init-sqls:
-      - SET ROLE "k9-punsj-admin"
 
 management:
   health:
