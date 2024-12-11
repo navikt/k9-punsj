@@ -10,7 +10,7 @@ class DbConfiguration(
     @Value("\${no.nav.db.url}") private val url: String,
     @Value("\${no.nav.db.username}") private val username: String,
     @Value("\${no.nav.db.password}") private val password: String?,
-    @Value("\${no.nav.db.vault_mountpath:}") private val vaultMountpath: String
+    @Value("\${no.nav.db.vault_mountpath}") private val vaultMountpath: String
 ) {
 
     @Bean

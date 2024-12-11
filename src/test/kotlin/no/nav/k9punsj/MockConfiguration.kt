@@ -50,7 +50,7 @@ internal object MockConfiguration {
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
             "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
             "DEFAULTDS_VAULT_MOUNTPATH" to "",
-            "DB_URL" to "${postgresqlContainer?.jdbcUrl}",
+            "DB_JDBC_URL" to "${postgresqlContainer?.jdbcUrl}",
             "DB_USERNAME" to "${postgresqlContainer?.username}",
             "DB_PASSWORD" to "${postgresqlContainer?.password}",
             "NAIS_STS_TOKEN_ENDPOINT" to wireMockServer.getNaisStsTokenUrl(),
