@@ -74,6 +74,8 @@ spec:
   env:
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.dev.intern.nav.no
+    - name: DEFAULTDS_VAULT_MOUNTPATH
+      value: ""
 
     # SAF:
     - name: SAF_BASE_URL
