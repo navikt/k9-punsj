@@ -26,9 +26,9 @@ spec:
     inbound:
       rules:
         - application: k9-punsj-frontend
-          namespace: k9saksbehandling
-          cluster: dev-gcp
         - application: k9-sak
+          namespace: k9saksbehandling
+          cluster: dev-fss
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
@@ -77,7 +77,7 @@ spec:
 
     # SAF:
     - name: SAF_BASE_URL
-      value: https://saf.dev.intern.nav.no
+      value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_HENTE_JOURNALPOST_SCOPES
       value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: SAF_HENTE_DOKUMENT_SCOPES
@@ -85,19 +85,19 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: http://oppgave.oppgavehandtering
+      value: https://oppgave.dev-fss-pub.nais.io
     - name: GOSYS_BASE_SCOPE
       value: api://dev-fss.oppgavehandtering.oppgave/.default
 
     # PDL:
     - name: PDL_BASE_URL
-      value: https://pdl-api.dev.intern.nav.no/graphql
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
 
     # Sikkerhet:
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.k9saksbehandling/application/authorize
+      value: https://abac-k9.dev-fss-pub.nais.io/application/authorize
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -113,17 +113,17 @@ spec:
 
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
-      value: https://k9-sak.nais.preprod.local/k9/sak/api
+      value: https://k9-sak.dev-fss-pub.nais.io/k9/sak/api
     - name: K9SAK_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: AAREG_BASE_URL
-      value: https://aareg-services.intern.dev.nav.no/api/v2
+      value: https://aareg-services.dev-fss-pub.nais.io/api/v2
     - name: AAREG_SCOPE
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
     - name: EREG_BASE_URL
-      value: https://ereg-services.intern.dev.nav.no/api/v1
+      value: https://ereg-services-q2.dev-fss-pub.nais.io//api/v1
     - name: DOKARKIV_BASE_URL
-      value: https://dokarkiv.dev.intern.nav.no
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 
