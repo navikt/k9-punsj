@@ -26,6 +26,8 @@ spec:
     inbound:
       rules:
         - application: k9-punsj-frontend
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-sak
           namespace: k9saksbehandling
           cluster: dev-fss
