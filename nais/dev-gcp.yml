@@ -40,7 +40,7 @@ spec:
     initialDelay: 20
     timeout: 1
   ingresses:
-    - https://k9-punsj.dev.intern.nav.no
+    - https://k9-punsj.intern.dev.nav.no
   resources:
     limits:
       cpu: 2000m
