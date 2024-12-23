@@ -31,14 +31,14 @@ spec:
           cluster: dev-fss
     outbound:
       external:
-        - host: "https://saf-q2.dev-fss-pub.nais.io"
-        - host: "https://oppgave.dev-fss-pub.nais.io"
-        - host: "https://pdl-api.dev-fss-pub.nais.io"
-        - host: "https://abac-k9.dev-fss-pub.nais.io"
-        - host: "https://k9-sak.dev-fss-pub.nais.io"
-        - host: "https://aareg-services-q2.dev-fss-pub.nais.io"
-        - host: "https://ereg-services-q2.dev-fss-pub.nais.io"
-        - host: "https://dokarkiv-q2.dev-fss-pub.nais.io"
+        - host: "saf-q2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
+        - host: "pdl-api.dev-fss-pub.nais.io"
+        - host: "abac-k9.dev-fss-pub.nais.io"
+        - host: "k9-sak.dev-fss-pub.nais.io"
+        - host: "aareg-services-q2.dev-fss-pub.nais.io"
+        - host: "ereg-services-q2.dev-fss-pub.nais.io"
+        - host: "dokarkiv-q2.dev-fss-pub.nais.io"
 
   liveness:
     path: /internal/actuator/info
