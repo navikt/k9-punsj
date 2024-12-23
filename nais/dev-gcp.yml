@@ -68,7 +68,6 @@ spec:
       runtime: java
       destinations:
         - id: "grafana-lgtm"
-  webproxy: true
   kafka:
     pool: nav-dev
   envFrom:
