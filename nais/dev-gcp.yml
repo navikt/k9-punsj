@@ -29,6 +29,17 @@ spec:
         - application: k9-sak
           namespace: k9saksbehandling
           cluster: dev-fss
+    outbound:
+      external:
+        - host: "https://saf-q2.dev-fss-pub.nais.io"
+        - host: "https://oppgave.dev-fss-pub.nais.io"
+        - host: "https://pdl-api.dev-fss-pub.nais.io"
+        - host: "https://abac-k9.dev-fss-pub.nais.io"
+        - host: "https://k9-sak.dev-fss-pub.nais.io"
+        - host: "https://aareg-services-q2.dev-fss-pub.nais.io"
+        - host: "https://ereg-services-q2.dev-fss-pub.nais.io"
+        - host: "https://dokarkiv-q2.dev-fss-pub.nais.io"
+
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
