@@ -297,7 +297,7 @@ private fun SafDtos.Journalpost.parseJournalpost(): ParsedSafJournalpost {
         }
 
     return ParsedSafJournalpost(
-        journalpostType = SafDtos.JournalpostType.entries.first { it.kode == journalposttype },
+        journalpostType = SafDtos.JournalpostType.values().first { it.kode == journalposttype },
         brukerType = enumValueOfOrNull<SafDtos.BrukerType>(bruker?.type),
         avsenderType = enumValueOfOrNull<SafDtos.AvsenderType>(avsender?.type),
         tema = enumValueOfOrNull<SafDtos.Tema>(tema),
