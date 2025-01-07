@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-@Disabled("Baluba etter nyttår")
 class PeriodeDtoTest {
 
     @Test
