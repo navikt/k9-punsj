@@ -15,7 +15,7 @@ class PeriodeDtoTest {
             tom = null
         ).utledDato()
 
-        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2023-01-01"))
+        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2024-01-01"))
     }
 
     @Test
@@ -25,27 +25,28 @@ class PeriodeDtoTest {
             tom = null
         ).utledDato()
 
-        assertThat(periodeNøyaktig2ÅrSiden.fom).isEqualTo(LocalDate.parse("2023-01-01"))
+        assertThat(periodeNøyaktig2ÅrSiden.fom).isEqualTo(LocalDate.parse("2024-01-01"))
     }
 
     @Test
     fun `Hvis fom er ila de siste 2 årene, bruk fom`() {
         val periodeEldreEnn2År = PeriodeDto(
-            fom = LocalDate.parse("2023-01-01"),
+            fom = LocalDate.parse("2025-01-01"),
             tom = null
         ).utledDato()
 
-        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2023-01-01"))
+        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2025-01-01"))
     }
 
     @Test
     fun `Hvis fom er idag, bruk fom`() {
+        val idag = LocalDate.now()
         val periodeEldreEnn2År = PeriodeDto(
-            fom = LocalDate.parse("2023-06-20"),
+            fom = idag,
             tom = null
         ).utledDato()
 
-        assertThat(periodeEldreEnn2År.fom).isEqualTo(LocalDate.parse("2023-06-20"))
+        assertThat(periodeEldreEnn2År.fom).isEqualTo(idag)
     }
 
     @Test

@@ -31,7 +31,7 @@ enum class PunsjFagsakYtelseType(@JsonValue val kode: String, val navn: String, 
     }
 
     companion object {
-        private val map = entries.associateBy { v -> v.kode }
+        private val map = values().associateBy { v -> v.kode }
         fun fromKode(kode: String): PunsjFagsakYtelseType {
 
             return map[kode] ?: UKJENT
