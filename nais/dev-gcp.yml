@@ -133,7 +133,7 @@ spec:
     - name: AAREG_SCOPE
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
     - name: EREG_BASE_URL
-      value: https://ereg-services-q2.dev-fss-pub.nais.io//api/v1
+      value: https://ereg-services-q2.dev-fss-pub.nais.io/api/v1
     - name: DOKARKIV_BASE_URL
       value: https://dokarkiv-q2.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
