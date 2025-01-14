@@ -157,6 +157,3 @@ spec:
     # Swagger
     - name: AZURE_LOGIN_URL
       value: "https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0"
-    # Hvilken application-fil som brukes
-    - name: SPRING_PROFILES_ACTIVE
-      value: 'fss'
