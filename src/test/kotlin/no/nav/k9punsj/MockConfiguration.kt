@@ -49,7 +49,7 @@ internal object MockConfiguration {
             "SAF_HENTE_DOKUMENT_SCOPES" to "saf-client-id/.default",
             "SWAGGER_SERVER_BASE_URL" to "http://localhost:$port",
             "KAFKA_BOOTSTRAP_SERVERS" to "localhost:9093",
-            "DEFAULTDS_VAULT_MOUNTPATH" to "",
+            "VAULT_MOUNTPATH" to "",
             "DB_JDBC_URL" to "${postgresqlContainer?.jdbcUrl}",
             "DB_USERNAME" to "${postgresqlContainer?.username}",
             "DB_PASSWORD" to "${postgresqlContainer?.password}",
