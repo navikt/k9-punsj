@@ -3,7 +3,6 @@ package no.nav.k9punsj.felles
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.omsorgspengeraleneomsorg.utledDato
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
