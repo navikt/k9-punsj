@@ -23,7 +23,6 @@ jobs:
       - name: Bygge JAR
         run: mvn clean package --settings ./.m2/settings.xml
         env:
-          SPRING_PROFILES_ACTIVE: fss
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
 
       - name: Bygg Docker image
