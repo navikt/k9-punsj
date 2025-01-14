@@ -1,0 +1,104 @@
+spring:
+  flyway:
+    enabled: true
+    init-sqls:
+      - SET ROLE "k9-punsj-admin"
+
+management:
+  health:
+    diskspace:
+      enabled: false
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: info, health, prometheus
+      base-path: /internal/actuator
+
+springdoc:
+  enable-kotlin: true
+  api-docs:
+    path: /internal/api-docs
+  swagger-ui:
+    path: /internal/swagger
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${AZURE_APP_CLIENT_ID}
+      scope-separator: ","
+  oAuthFlow:
+    authorizationUrl: ${AZURE_LOGIN_URL:http://localhost:8080}/authorize
+    tokenUrl: ${AZURE_LOGIN_URL:http://localhost:8080}/token
+    apiScope: api://${AZURE_APP_CLIENT_ID:abc123}/.default
+
+no.nav:
+  navn: '@project.artifactId@'
+  versjon: '@project.version@'
+  beskrivelse: '@project.description@'
+  swagger_server_base_url: ${SWAGGER_SERVER_BASE_URL:http://localhost:8085}
+
+  dokarkiv:
+    base_url: ${DOKARKIV_BASE_URL}
+    scope: ${DOKARKIV_SCOPE}
+
+  saf:
+    base_url: ${SAF_BASE_URL}
+    scopes:
+      hente_journalpost_scopes: ${SAF_HENTE_JOURNALPOST_SCOPES}
+      hente_dokument_scopes: ${SAF_HENTE_DOKUMENT_SCOPES}
+
+  pdl:
+    base_url: ${PDL_BASE_URL}
+    scope: ${PDL_SCOPE}
+
+  k9sak:
+    base_url: ${K9SAK_BASE_URL}
+    scope: ${K9SAK_SCOPE}
+
+
+  gosys:
+    base_url: ${GOSYS_BASE_URL}
+    scope: ${GOSYS_BASE_SCOPE}
+
+  security:
+    jwt:
+      expirythreshold: 1
+      client:
+        azure:
+          client_id: ${AZURE_APP_CLIENT_ID}
+          jwk: ${AZURE_APP_JWK}
+          token_endpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+      issuer:
+        azurev2:
+          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+          accepted_audience: ${AZURE_APP_CLIENT_ID}
+          proxyUrl: ${HTTP_PROXY:}
+
+  db:
+    url: ${DEFAULTDS_URL}
+    username: ${DEFAULTDS_USERNAME}
+    password: ${DEFAULTDS_PASSWORD}
+    vault_mountpath: ${DB_VAULT_MOUNT_PATH}
+
+  abac:
+    system_user: ${SYSTEMBRUKER_USERNAME}
+    system_user_password: ${SYSTEMBRUKER_PASSWORD}
+    url: ${ABAC_PDP_ENDPOINT_URL}
+  audit:
+    enabled: ${AUDITLOGGER_ENABLED}
+    vendor: ${AUDITLOGGER_VENDOR}
+    product: ${AUDITLOGGER_PRODUCT}
+  kafka:
+    k9_formidling:
+      topic: ${SEND_BREVBESTILLING_TIL_K9_FORMIDLING}
+    k9_los:
+      topic: ${SEND_AKSJONSPUNKTHENDELSE_TIL_K9LOS}
+    k9_punsj_til_los:
+      topic: ${SEND_OPPDATERING_TIL_K9LOS}
+    k9_fordel:
+      topic: ${K9_FORDEL_TOPIC}
+    override_truststore_password: ${KAFKA_OVERRIDE_TRUSTSTORE_PASSWORD}
+
+server:
+  port: ${PORT:8080}

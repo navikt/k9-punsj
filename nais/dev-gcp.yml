@@ -163,4 +163,9 @@ spec:
     - name: AZURE_LOGIN_URL
       value: "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0"
 
+    # Hvilken application-fil som brukes
+    - name: SPRING_PROFILES_ACTIVE
+      value: "gcp"
+
+
 

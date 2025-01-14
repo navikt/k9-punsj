@@ -74,10 +74,10 @@ no.nav:
           proxyUrl: ${HTTP_PROXY:}
 
   db:
-    url: ${DEFAULTDS_URL:${DB_JDBC_URL}}
-    username: ${DEFAULTDS_USERNAME:${DB_USERNAME}}
-    password: ${DEFAULTDS_PASSWORD:${DB_PASSWORD}}
-    vault_mountpath: ${DB_VAULT_MOUNT_PATH:}
+    url: ${DB_JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    vault_mountpath: null
 
   abac:
     system_user: ${SYSTEMBRUKER_USERNAME}
