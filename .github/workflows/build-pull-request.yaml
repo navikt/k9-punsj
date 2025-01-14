@@ -21,10 +21,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Bygge JAR
-        run: mvn clean package --settings ./.m2/settings.xml
+        run: mvn -Denv="fss" clean package --settings ./.m2/settings.xml
         env:
           GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
-          SPRING_PROFILES_ACTIVE: gcp
 
       - name: Bygg Docker image
         run: docker build --pull .
