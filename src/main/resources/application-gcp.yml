@@ -77,7 +77,7 @@ no.nav:
     url: ${DB_JDBC_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    vault_mountpath: null
+    vault_mountpath: ""
 
   abac:
     system_user: ${SYSTEMBRUKER_USERNAME}
