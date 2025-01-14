@@ -1,8 +1,6 @@
 spring:
   flyway:
     enabled: true
-  profiles:
-    include: fss
 
 management:
   health:
