@@ -3,10 +3,9 @@ spring:
     enabled: true
 
 
-no:
-  nav:
-    db:
-      url: ${DB_JDBC_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-      vault_mountpath: ""
+no.nav:
+  db:
+    url: ${DB_JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    vault_mountpath: ""
