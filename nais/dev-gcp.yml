@@ -21,14 +21,25 @@ spec:
           - id: "0bc9661c-975c-4adb-86d1-a97172490662"
       singlePageApplication: true
       replyURLs:
-        - https://k9-punsj.dev.intern.nav.no/internal/webjars/swagger-ui/oauth2-redirect.html
+        - https://k9-punsj.intern.dev.nav.no/internal/webjars/swagger-ui/oauth2-redirect.html
   accessPolicy:
     inbound:
       rules:
         - application: k9-punsj-frontend
-          namespace: k9saksbehandling
-          cluster: dev-gcp
         - application: k9-sak
+          namespace: k9saksbehandling
+          cluster: dev-fss
+    outbound:
+      external:
+        - host: "saf-q2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
+        - host: "pdl-api.dev-fss-pub.nais.io"
+        - host: "abac-k9.dev-fss-pub.nais.io"
+        - host: "k9-sak.dev-fss-pub.nais.io"
+        - host: "aareg-services-q2.dev-fss-pub.nais.io"
+        - host: "ereg-services-q2.dev-fss-pub.nais.io"
+        - host: "dokarkiv-q2.dev-fss-pub.nais.io"
+
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
@@ -39,6 +50,8 @@ spec:
     path: /internal/actuator/info
     initialDelay: 20
     timeout: 1
+  ingresses:
+    - https://k9-punsj.intern.dev.nav.no
   resources:
     limits:
       cpu: 2000m
@@ -59,32 +72,24 @@ spec:
         tier: db-f1-micro
         databases:
           - name: k9-punsj
+            envVarPrefix: DB
   observability:
     autoInstrumentation:
       enabled: true
       runtime: java
       destinations:
         - id: "grafana-lgtm"
-  webproxy: true
   kafka:
     pool: nav-dev
   envFrom:
     - secret: k9-punsj-secrets
   env:
-    - name: DEFAULTDS_USERNAME
-      value: k9-punsj
-    - name: DEFAULTDS_PASSWORD
-      value: k9-punsj
-    - name: DEFAULTDS_VAULT_MOUNTPATH
-      value: postgresql/preprod-fss/
-    - name: DEFAULTDS_URL
-      value: jdbc:postgresql://b27dbvl028.preprod.local:5432/k9-punsj
     - name: SWAGGER_SERVER_BASE_URL
       value: https://k9-punsj.dev.intern.nav.no
 
     # SAF:
     - name: SAF_BASE_URL
-      value: https://saf.dev.intern.nav.no
+      value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_HENTE_JOURNALPOST_SCOPES
       value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: SAF_HENTE_DOKUMENT_SCOPES
@@ -92,19 +97,19 @@ spec:
 
     # Gosys / Oppgave:
     - name: GOSYS_BASE_URL
-      value: http://oppgave.oppgavehandtering
+      value: https://oppgave.dev-fss-pub.nais.io
     - name: GOSYS_BASE_SCOPE
       value: api://dev-fss.oppgavehandtering.oppgave/.default
 
     # PDL:
     - name: PDL_BASE_URL
-      value: https://pdl-api.dev.intern.nav.no/graphql
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
 
     # Sikkerhet:
     - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.k9saksbehandling/application/authorize
+      value: https://abac-k9.dev-fss-pub.nais.io/application/authorize
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
@@ -120,17 +125,17 @@ spec:
 
     # Integrasjoner (Rest)
     - name: K9SAK_BASE_URL
-      value: https://k9-sak.nais.preprod.local/k9/sak/api
+      value: https://k9-sak.dev-fss-pub.nais.io/k9/sak/api
     - name: K9SAK_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: AAREG_BASE_URL
-      value: https://aareg-services.intern.dev.nav.no/api/v2
+      value: https://aareg-services-q2.dev-fss-pub.nais.io/api/v2
     - name: AAREG_SCOPE
       value: api://dev-fss.arbeidsforhold.aareg-services-nais/.default
     - name: EREG_BASE_URL
-      value: https://ereg-services.intern.dev.nav.no/api/v1
+      value: https://ereg-services-q2.dev-fss-pub.nais.io/api/v1
     - name: DOKARKIV_BASE_URL
-      value: https://dokarkiv.dev.intern.nav.no
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 
@@ -157,5 +162,10 @@ spec:
       # Swagger
     - name: AZURE_LOGIN_URL
       value: "https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0"
+
+    # Hvilken application-fil som brukes
+    - name: SPRING_PROFILES_ACTIVE
+      value: "gcp"
+
 
 

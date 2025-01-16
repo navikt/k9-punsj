@@ -90,7 +90,7 @@ Link til k9-punsj skjemaer:
 
 ### Swagger i dev
 Bruk header fra Nav token header i authorize.
-[Swagger](https://k9-punsj.dev.intern.nav.no/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
+[Swagger](https://k9-punsj.intern.dev.nav.no/internal/webjars/swagger-ui/index.html?configUrl=/internal/api-docs/swagger-config)
 
 ### Accesstoken i dev
 Husk å være logget inn på [dev](https://k9-punsj-frontend.intern.dev.nav.no/) først, så gå til 

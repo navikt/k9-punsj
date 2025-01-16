@@ -1,7 +1,9 @@
 name: Build master & deploy to dev-gcp
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - master
 
 env:
   IMAGE_BASE: ghcr.io/${{ github.repository }}

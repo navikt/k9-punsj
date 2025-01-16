@@ -17,7 +17,7 @@ spec:
         extra:
           - "NAVident"
         groups:
-            # 0000-GA-k9-drift
+          # 0000-GA-k9-drift
           - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6"
       singlePageApplication: true
       replyURLs:
