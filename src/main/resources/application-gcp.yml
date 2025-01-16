@@ -1,6 +1,7 @@
 spring:
   flyway:
     enabled: true
+    init-sqls: []
 
 
 no.nav:
