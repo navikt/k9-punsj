@@ -12,8 +12,8 @@ import no.nav.k9.søknad.felles.type.Periode
 import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger
 import no.nav.k9.søknad.ytelse.olp.v1.OpplæringspengerSøknadValidator
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kurs
-import no.nav.k9.søknad.ytelse.olp.v1.kurs.KursPeriodeMedReisetid
 import no.nav.k9.søknad.ytelse.olp.v1.kurs.Kursholder
+import no.nav.k9.søknad.ytelse.olp.v1.kurs.Reise
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
@@ -110,11 +110,17 @@ internal class MapOlpTilK9Format(
                 return
             }
         }
-        val kursHolder = Kursholder(institusjonsUuid)
-        val kursPerioder = this.kursperioder?.map {
-            KursPeriodeMedReisetid(it.periode?.somK9Periode(), it.avreise, it.hjemkomst, it.begrunnelseReisetidTil, it.begrunnelseReisetidHjem)
-        }?.toList()
-        val kurs = Kurs(kursHolder, kursPerioder)
+        val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
+        val kursPerioder = this.kursperioder?.map { it.periode?.somK9Periode() }?.toList()
+
+        // TODO: Måten reisetid er satt her er en midlertig fiks for å få det til å stemme med kontrakten for olp.
+        // Her må vi hente daten riktig fra punsj frontend.
+        val reise = Reise(
+            this.kursperioder.isNullOrEmpty(),
+            this.kursperioder?.map { it.hjemkomst },
+            this.kursperioder?.first()?.begrunnelseReisetidTil
+        )
+        val kurs = Kurs(kursHolder, kursPerioder, reise)
         opplaeringspenger.medKurs(kurs)
     }
 
@@ -213,7 +219,7 @@ internal class MapOlpTilK9Format(
             }
         }
 
-        if(k9Uttak.isEmpty() && this.kurs != null) {
+        if (k9Uttak.isEmpty() && this.kurs != null) {
             this.kurs.kursperioder?.forEach { kursPeriode ->
                 kursPeriode.periode?.somK9Periode()?.let { k9Uttak[it] = DefaultUttak }
             }
@@ -228,11 +234,11 @@ internal class MapOlpTilK9Format(
         dto: OpplaeringspengerSøknadDto,
         opptjeningAktivitet: ArbeidAktivitetDto?
     ) = dto.opptjeningAktivitet != null &&
-        (
-            !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
-                opptjeningAktivitet?.frilanser != null ||
-                opptjeningAktivitet?.selvstendigNaeringsdrivende != null
-            )
+            (
+                    !opptjeningAktivitet?.arbeidstaker.isNullOrEmpty() ||
+                            opptjeningAktivitet?.frilanser != null ||
+                            opptjeningAktivitet?.selvstendigNaeringsdrivende != null
+                    )
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(MapOlpTilK9Format::class.java)
