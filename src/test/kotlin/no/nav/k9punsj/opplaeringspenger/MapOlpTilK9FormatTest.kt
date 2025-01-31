@@ -74,8 +74,8 @@ internal class MapOlpTilK9FormatTest {
                 "kursperioder": [
                   {
                     "periode": { "fom": "2023-01-01", "tom": "2023-01-31" },
-                    "avreise": "2022-12-31",
-                    "hjemkomst": "2023-02-01"
+                    "avreise": "2023-01-01",
+                    "hjemkomst": "2023-01-31"
                   }
                 ]
               },
