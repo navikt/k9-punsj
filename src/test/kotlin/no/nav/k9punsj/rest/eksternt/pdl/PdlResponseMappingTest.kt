@@ -61,7 +61,7 @@ internal class PdlResponseMappingTest {
                                 "mellomnavn": null,
                                 "etternavn": "NORDMANN"
                             }],
-                            "foedsel": [{
+                            "foedselsdato": [{
                                 "foedselsdato": "1980-12-02"
                             }],
                             "adressebeskyttelse": []
@@ -78,7 +78,7 @@ internal class PdlResponseMappingTest {
                                 "mellomnavn": "MELLOMSTE",
                                 "etternavn": "NORDMANN"
                             }],
-                            "foedsel": [{
+                            "foedselsdato": [{
                                 "foedselsdato": "1990-12-02"
                             }],
                             "adressebeskyttelse": [{
