@@ -8,7 +8,7 @@ query($identer: [ID!]!) {
             navn(historikk: false) {
                 fornavn, mellomnavn, etternavn
             },
-            foedsel {
+            foedselsdato {
                 foedselsdato
             },
             adressebeskyttelse(historikk: false) {
