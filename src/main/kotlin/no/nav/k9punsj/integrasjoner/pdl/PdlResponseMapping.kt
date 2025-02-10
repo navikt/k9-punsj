@@ -22,7 +22,7 @@ internal fun ObjectNode.mapPersonopplysninger(): Set<Personopplysninger> {
             val folkeregisteridentifikator = (person.get("folkeregisteridentifikator") as ArrayNode).first()
             Personopplysninger(
                 identitetsnummer = folkeregisteridentifikator.get("identifikasjonsnummer").asText(),
-                fødselsdato = LocalDate.parse((person.get("foedsel") as ArrayNode).first().get("foedselsdato").asText()),
+                fødselsdato = LocalDate.parse((person.get("foedselsdato") as ArrayNode).first().get("foedselsdato").asText()),
                 gradering = (person.get("adressebeskyttelse") as ArrayNode).firstOrNull()?.get("gradering")?.asText().fraPdlDto(),
                 fornavn = navn.get("fornavn").asText(),
                 mellomnavn = when (navn.hasNonNull("mellomnavn")) {
