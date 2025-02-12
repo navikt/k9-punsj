@@ -213,18 +213,6 @@ class JournalpostRepository(private val dataSource: DataSource) {
         }
     }
 
-    @Deprecated("Bruk JournalpostService")
-    suspend fun settKildeHvisIkkeFinnesFraFør(journalposter: List<String>?, aktørId: String) {
-        journalposter?.forEach {
-            if (journalpostIkkeEksisterer(it)) {
-                val punsjJournalpost = PunsjJournalpost(UUID.randomUUID(), it, aktørId)
-                lagre(punsjJournalpost, PunsjJournalpostKildeType.SAKSBEHANDLER) {
-                    punsjJournalpost
-                }
-            }
-        }
-    }
-
     suspend fun settInnsendingstype(type: K9FordelType, journalpostId: String) {
         val journalpost = hentHvis(journalpostId)
         if (journalpost != null) {

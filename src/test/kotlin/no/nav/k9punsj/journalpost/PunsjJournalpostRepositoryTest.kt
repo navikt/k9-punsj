@@ -194,30 +194,6 @@ internal class PunsjJournalpostRepositoryTest : AbstractContainerBaseTest() {
     }
 
     @Test
-    fun `skal sette kilde hvis journalposten ikke finnes i databasen fra før`(): Unit = runBlocking {
-        val dummyAktørId = IdGenerator.nesteId()
-
-        val punsjJournalpost2 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
-        journalpostRepository.lagre(punsjJournalpost2) {
-            punsjJournalpost2
-        }
-
-        assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(1)
-        val punsjJournalpost1 =
-            PunsjJournalpost(uuid = UUID.randomUUID(), journalpostId = IdGenerator.nesteId(), aktørId = dummyAktørId)
-
-        journalpostRepository.settKildeHvisIkkeFinnesFraFør(
-            listOf(
-                punsjJournalpost1.journalpostId,
-                punsjJournalpost2.journalpostId
-            ), dummyAktørId
-        )
-
-        assertThat(journalpostRepository.finnJournalposterPåPerson(dummyAktørId)).hasSize(2)
-    }
-
-    @Test
     fun `skal vise om journalposten må til infotrygd`(): Unit = runBlocking {
         val dummyAktørId = IdGenerator.nesteId()
 
