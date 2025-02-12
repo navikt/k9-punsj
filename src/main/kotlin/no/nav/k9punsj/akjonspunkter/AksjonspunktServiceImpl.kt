@@ -10,15 +10,15 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import no.nav.k9punsj.journalpost.dto.VentDto
 import no.nav.k9punsj.kafka.HendelseProducer
-import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnSøknadDto
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Service
 internal class AksjonspunktServiceImpl(
@@ -99,10 +99,7 @@ internal class AksjonspunktServiceImpl(
             .filter { it.aksjonspunktStatus == AksjonspunktStatus.OPPRETTET }
 
         if (aksjonspunkterSomSkalLukkes.isNotEmpty()) {
-            val mutableMap = mutableMapOf<String, String>()
-            aksjonspunkterSomSkalLukkes.forEach {
-                mutableMap.plus(Pair(it.aksjonspunktKode.kode, AksjonspunktStatus.UTFØRT))
-            }
+            val aksjonspunkter = aksjonspunkterSomSkalLukkes.associate { it.aksjonspunktKode.kode to AksjonspunktStatus.UTFØRT.kode }
 
             val journalpost = journalpostService.hent(journalpostId)
             val eksternId = journalpost.uuid
@@ -110,7 +107,7 @@ internal class AksjonspunktServiceImpl(
                 eksternId = eksternId,
                 journalpostId = journalpostId,
                 aktørId = journalpost.aktørId,
-                aksjonspunkter = mutableMap,
+                aksjonspunkter = aksjonspunkter,
                 sendtInn = erSendtInn,
                 ferdigstiltAv = ansvarligSaksbehandler,
                 type = journalpost.type!!,
