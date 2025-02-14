@@ -48,7 +48,7 @@
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.20.4</testcontainers.version>
         <springmockk.version>4.0.2</springmockk.version>
-        <wiremock.version>3.11.0</wiremock.version>
+        <wiremock.version>3.12.0</wiremock.version>
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
