@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:21
+FROM ghcr.io/navikt/sif-baseimages/java-21:2025.02.13.1522Z
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-punsj
 
