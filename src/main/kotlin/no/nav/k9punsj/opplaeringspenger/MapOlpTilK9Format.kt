@@ -116,9 +116,9 @@ internal class MapOlpTilK9Format(
         // TODO: Måten reisetid er satt her er en midlertig fiks for å få det til å stemme med kontrakten for olp.
         // Her må vi hente daten riktig fra punsj frontend.
         val reise = Reise(
-            this.kursperioder.isNullOrEmpty(),
-            this.kursperioder?.map { it.hjemkomst },
-            this.kursperioder?.first()?.begrunnelseReisetidTil
+            this.reise?.reisedager?.isNotEmpty() == true,
+            this.reise?.reisedager,
+            this.reise?.reisedagerBeskrivelse
         )
         val kurs = Kurs(kursHolder, kursPerioder, reise)
         opplaeringspenger.medKurs(kurs)
@@ -142,14 +142,7 @@ internal class MapOlpTilK9Format(
     }
 
     private fun OpplaeringspengerSøknadDto.leggTilSøknadsperiode() {
-        if (!this.soeknadsperiode.isNullOrEmpty()) {
-            opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
-        } else {
-            // Utleder søknadsperiode fra kursperioder
-            this.kurs?.utledsSoeknadsPeriodeFraKursperioder()?.let { kursPeriode ->
-                opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
-            }
-        }
+        opplaeringspenger.medSøknadsperiode(this.soeknadsperiode?.somK9Perioder())
     }
 
     private fun OpplaeringspengerSøknadDto.BarnDto.leggTilBarn() {

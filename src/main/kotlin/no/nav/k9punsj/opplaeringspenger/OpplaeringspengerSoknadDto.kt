@@ -65,19 +65,21 @@ data class OpplaeringspengerSøknadDto(
 
     data class Kurs(
         val kursHolder: KursHolder?,
-        val kursperioder: List<KursPeriodeMedReisetid>?
-    ) {
-        fun utledsSoeknadsPeriodeFraKursperioder(): PeriodeDto? {
-            return kursperioder?.let {
-                val fom = kursperioder.sortedBy { it.avreise }.first().periode?.fom
-                val tom = kursperioder.sortedBy { it.hjemkomst }.last().periode?.tom
-                PeriodeDto(fom = fom, tom = tom)
-            }
-        }
-    }
+        val kursperioder: List<KursPeriode>?,
+        val reise: Reise?
+    )
 
     data class BegrunnelseForInnsendingDto(
         val tekst: String
+    )
+
+    data class KursPeriode(
+        val periode: PeriodeDto
+    )
+
+    data class Reise(
+        val reisedager: List<LocalDate>,
+        val reisedagerBeskrivelse: String
     )
 
     data class KursPeriodeMedReisetid(
