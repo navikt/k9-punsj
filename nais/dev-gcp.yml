@@ -85,7 +85,7 @@ spec:
     - secret: k9-punsj-secrets
   env:
     - name: SWAGGER_SERVER_BASE_URL
-      value: https://k9-punsj.dev.intern.nav.no
+      value: https://k9-punsj.intern.dev.nav.no
 
     # SAF:
     - name: SAF_BASE_URL
