@@ -176,13 +176,13 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
         begrunnelseForInnsending = OpplaeringspengerSøknadDto.BegrunnelseForInnsendingDto("fordi dette er ett test"),
         kurs = OpplaeringspengerSøknadDto.Kurs(
             kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "Nav", institusjonsUuid = null),
-            kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
+            kursperioder = listOf(OpplaeringspengerSøknadDto.KursPeriode(
                 periode = requiredPeriode,
-                avreise = requiredPeriode.fom,
-                hjemkomst = requiredPeriode.tom,
-                begrunnelseReisetidTil = "borte bra",
-                begrunnelseReisetidHjem = "hjemme best"
-            ))
+            )),
+            reise = OpplaeringspengerSøknadDto.Reise(
+                reisedager = listOf(requiredPeriode.fom, requiredPeriode.tom).filterNotNull(),
+                reisedagerBeskrivelse = "borte bra, hjemme best"
+            )
         )
     )
 

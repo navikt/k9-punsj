@@ -142,7 +142,14 @@ internal class MapOlpTilK9Format(
     }
 
     private fun OpplaeringspengerSøknadDto.leggTilSøknadsperiode() {
-        opplaeringspenger.medSøknadsperiode(this.soeknadsperiode?.somK9Perioder())
+        if (!this.soeknadsperiode.isNullOrEmpty()) {
+            opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
+        } else {
+            // Utleder søknadsperiode fra kursperioder
+            this.kurs?.utledsSoeknadsPeriodeFraKursperioder()?.let { kursPeriode ->
+                opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
+            }
+        }
     }
 
     private fun OpplaeringspengerSøknadDto.BarnDto.leggTilBarn() {

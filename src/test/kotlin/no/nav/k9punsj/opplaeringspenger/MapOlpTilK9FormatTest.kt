@@ -41,7 +41,11 @@ internal class MapOlpTilK9FormatTest {
 
         val kurs = OpplaeringspengerSøknadDto.Kurs(
             kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "test", institusjonsUuid = null),
-            kursperioder = listOf(periode3, periode1, periode2)
+            kursperioder = listOf(periode3, periode1, periode2),
+            reise = OpplaeringspengerSøknadDto.Reise(
+                reisedager = listOf(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 29)),
+                reisedagerBeskrivelse = "borte bra, hjemme best"
+            )
         )
 
         val søknadsperiode = kurs.utledsSoeknadsPeriodeFraKursperioder()
@@ -73,11 +77,13 @@ internal class MapOlpTilK9FormatTest {
                 },
                 "kursperioder": [
                   {
-                    "periode": { "fom": "2023-01-01", "tom": "2023-01-31" },
-                    "avreise": "2023-01-01",
-                    "hjemkomst": "2023-01-31"
+                    "periode": { "fom": "2023-01-01", "tom": "2023-01-31" }
                   }
-                ]
+                ],
+                "reise": {
+                    "reisedager": ["2023-01-01", "2023-01-31"],
+                    "reisedagerBeskrivelse": "borte bra, hjemme best"
+                }
               },
               "lovbestemtFerie": [],
               "mottattDato": "2020-10-12",
@@ -105,15 +111,11 @@ internal class MapOlpTilK9FormatTest {
         assert(dto.feil().isEmpty())
     }
 
-    private fun KursPeriode(fom: LocalDate, tom: LocalDate) = OpplaeringspengerSøknadDto.KursPeriodeMedReisetid(
+    private fun KursPeriode(fom: LocalDate, tom: LocalDate) = OpplaeringspengerSøknadDto.KursPeriode(
             periode = PeriodeDto(
                 fom = fom,
                 tom = tom
-            ),
-            avreise = fom.minusDays(1),
-            hjemkomst = tom.plusDays(1),
-            begrunnelseReisetidHjem = "test",
-            begrunnelseReisetidTil = "test",
+            )
         )
 
 
