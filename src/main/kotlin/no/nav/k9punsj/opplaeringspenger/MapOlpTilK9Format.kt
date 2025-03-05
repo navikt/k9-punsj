@@ -113,8 +113,6 @@ internal class MapOlpTilK9Format(
         val kursHolder = Kursholder(this.kursHolder?.holder, institusjonsUuid)
         val kursPerioder = this.kursperioder?.map { it.periode?.somK9Periode() }?.toList()
 
-        // TODO: Måten reisetid er satt her er en midlertig fiks for å få det til å stemme med kontrakten for olp.
-        // Her må vi hente daten riktig fra punsj frontend.
         val reise = Reise(
             this.reise?.reisedager?.isNotEmpty() == true,
             this.reise?.reisedager,
