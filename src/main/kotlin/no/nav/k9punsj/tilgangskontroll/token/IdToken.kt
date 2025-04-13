@@ -22,4 +22,5 @@ data class IdToken(
     override fun kanBehandleKode7(): Boolean = jwt.groups.any { s -> s == "69d4a70f-1c83-42a8-8fb8-2f5d54048647" }
     override fun kanBehandleEgneAnsatte(): Boolean = jwt.groups.any { s -> s == "de44052d-b062-4497-89a2-0c85b935b808" }
     override fun erOppgavebehandler(): Boolean = jwt.groups.any { s -> s == "a9f5ef81-4e81-42e8-b368-0273071b64b9" }
+    override fun getNavIdent(): String = jwt.NAVident
 }
