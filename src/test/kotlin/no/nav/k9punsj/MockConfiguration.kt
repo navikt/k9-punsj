@@ -6,13 +6,7 @@ import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2WellKnownUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsTokenUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getNaisStsWellKnownUrl
-import no.nav.k9punsj.wiremock.getAaregBaseUrl
-import no.nav.k9punsj.wiremock.getDokarkivBaseUrl
-import no.nav.k9punsj.wiremock.getEregBaseUrl
-import no.nav.k9punsj.wiremock.getGosysBaseUrl
-import no.nav.k9punsj.wiremock.getK9sakBaseUrl
-import no.nav.k9punsj.wiremock.getPdlBaseUrl
-import no.nav.k9punsj.wiremock.getSafBaseUrl
+import no.nav.k9punsj.wiremock.*
 import java.net.URI
 
 internal object MockConfiguration {
@@ -43,6 +37,8 @@ internal object MockConfiguration {
             "PDL_SCOPE" to "pdl/.default",
             "DOKARKIV_SCOPE" to "dokarkiv/.default",
             "K9SAK_BASE_URL" to wireMockServer.getK9sakBaseUrl(),
+            "SIF_ABAC_PDP_BASE_URL" to wireMockServer.getSifAbacPdpBaseUrl(),
+            "SIF_ABAC_PDP_SCOPE" to "sif-abac-pdp/.default",
             "GOSYS_BASE_URL" to wireMockServer.getGosysBaseUrl(),
             "GOSYS_BASE_SCOPE" to "gosys/.default",
             "SAF_HENTE_JOURNALPOST_SCOPES" to "saf-client-id/.default",

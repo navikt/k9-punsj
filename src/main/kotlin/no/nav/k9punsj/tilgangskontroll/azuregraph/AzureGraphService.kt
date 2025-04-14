@@ -6,8 +6,7 @@ import com.github.kittinunf.fuel.httpGet
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.StandardProfil
-import no.nav.k9punsj.hentAuthentication
-import no.nav.k9punsj.tilgangskontroll.token.ITokenService
+import no.nav.k9punsj.idToken
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
 import no.nav.k9punsj.utils.objectMapper
@@ -21,30 +20,26 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 @StandardProfil
 class AzureGraphService(
-    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
-    private val tokenService: ITokenService
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient
 ) : IAzureGraphService {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val cache = Cache<String>()
     val log = LoggerFactory.getLogger("AzureGraphService")!!
 
     override suspend fun hentIdentTilInnloggetBruker(): String {
-        val accessToken = coroutineContext.hentAuthentication().accessToken
-        val iIdToken = tokenService.decodeToken(accessToken)
-        return iIdToken.getNavIdent()
+        return coroutineContext.idToken().getNavIdent()
     }
 
     override suspend fun hentEnhetForInnloggetBruker(): String {
-        val accessToken = coroutineContext.hentAuthentication().accessToken
-        val iIdToken = tokenService.decodeToken(accessToken)
-        val username = iIdToken.getUsername() + "_office_location"
+        val idToken = coroutineContext.idToken()
+        val username = idToken.getUsername() + "_office_location"
         val cachedObject = cache.get(username)
 
         if (cachedObject == null) {
             val enhetAccessToken =
                 cachedAccessTokenClient.getAccessToken(
                     scopes = setOf("https://graph.microsoft.com/user.read"),
-                    onBehalfOf = accessToken
+                    onBehalfOf = idToken.value
                 )
 
             val (request, _, result) = "https://graph.microsoft.com/v1.0/me?\$select=officeLocation"

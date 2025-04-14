@@ -19,6 +19,10 @@ spec:
         groups:
           # 0000-GA-k9-drift
           - id: "0bc9661c-975c-4adb-86d1-a97172490662"
+          # 0000-GA-k9-saksbehandler
+          - id: "93e8903d-5c3f-4cbe-929e-0afeb22dec73"
+          # 0000-GA-k9-veileder
+          - id: "5bc5cae2-3ef9-4897-9828-766757299de8"
       singlePageApplication: true
       replyURLs:
         - https://k9-punsj.intern.dev.nav.no/internal/webjars/swagger-ui/oauth2-redirect.html
@@ -111,6 +115,13 @@ spec:
     - name: ABAC_PDP_ENDPOINT_URL
       value: https://abac-k9.dev-fss-pub.nais.io/application/authorize
 
+    # 0000-GA-k9-veileder
+    - name: BRUKER_GRUPPE_ID_VEILEDER
+      value : "5bc5cae2-3ef9-4897-9828-766757299de8"
+    # 0000-GA-k9-saksbehandler
+    - name: BRUKER_GRUPPE_ID_SAKSBEHANDLER
+      value: "93e8903d-5c3f-4cbe-929e-0afeb22dec73"
+
     # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
@@ -124,6 +135,10 @@ spec:
       value: "service.name=k9-punsj,service.namespace=k9saksbehandling,deployment.environment=q,nais.backend=elastic-apm;grafana-lgtm"
 
     # Integrasjoner (Rest)
+    - name: SIF_ABAC_PDP_BASE_URL
+      value: https://sif-abac-pdp.dev-fss-pub.nais.io/sif/sif-abac-pdp/api/tilgangskontroll/k9
+    - name: SIF_ABAC_PDP_SCOPE
+      value: api://dev-fss.k9saksbehandling.sif-abac-pdp/.default
     - name: K9SAK_BASE_URL
       value: https://k9-sak.dev-fss-pub.nais.io/k9/sak/api
     - name: K9SAK_SCOPE
@@ -158,6 +173,8 @@ spec:
       value: "true"
     - name: KODEVERDI_SOM_STRING
       value: "true"
+    - name: VALGT_PDP
+      value: "begge"
 
       # Swagger
     - name: AZURE_LOGIN_URL
