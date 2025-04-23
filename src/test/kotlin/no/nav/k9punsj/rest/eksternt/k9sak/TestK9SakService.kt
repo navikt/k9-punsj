@@ -163,6 +163,7 @@ internal class TestK9SakService : K9SakService {
             GodkjentOpplæringsinstitusjonDto(
                 UUID.fromString("dccf90ba-5b3f-475b-9026-af0fa771d6c1"),
                 "Sykehus Asker/Bærum",
+                "000000000",
                 gyldigePerioder
             ),
         )
