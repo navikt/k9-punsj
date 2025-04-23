@@ -3,6 +3,7 @@ package no.nav.k9punsj.tilgangskontroll.token
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class JWTToken(
+    val NAVident : String, // Z994048
     val aio: String, // ATQAy/8PAAAA6s6UsBsUOzNWRnSavXm4AEzHtQkCCN4tzvZe3DWwIP4lj74AIe3rp8C+jYiN1LxM
     val aud: String, // 5afad323-c9df-4e14-b481-b278e9d2bf69
     val azp: String, // a084abb8-6a38-4506-84c2-e4ac8b438a05

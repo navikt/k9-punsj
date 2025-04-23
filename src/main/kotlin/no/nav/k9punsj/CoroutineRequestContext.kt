@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
 import no.nav.k9punsj.felles.IkkeFunnet
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
+import no.nav.k9punsj.tilgangskontroll.token.IdToken
 import no.nav.security.token.support.core.jwt.JwtToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,12 +15,7 @@ import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.ErrorResponseException
-import org.springframework.web.reactive.function.server.CoRouterFunctionDsl
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
-import org.springframework.web.reactive.function.server.coRouter
+import org.springframework.web.reactive.function.server.*
 import java.net.URI
 import java.util.*
 import kotlin.coroutines.AbstractCoroutineContextElement
@@ -57,6 +53,11 @@ private fun CoroutineContext.settAuthentication(authorizationHeader: String) =
 
 internal fun CoroutineContext.hentAuthentication(): Authentication =
     hentAttributt("authentication") as? Authentication ?: throw IllegalStateException("Authentication ikke satt")
+
+internal fun CoroutineContext.idToken(): IdToken {
+    val accessToken = hentAuthentication().accessToken
+    return IdToken(accessToken)
+}
 
 internal fun SaksbehandlerRoutes(
     authenticationHandler: AuthenticationHandler,

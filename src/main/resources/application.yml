@@ -56,6 +56,10 @@ no.nav:
     base_url: ${K9SAK_BASE_URL}
     scope: ${K9SAK_SCOPE}
 
+  sif.abac.pdp:
+    base_url: ${SIF_ABAC_PDP_BASE_URL}
+    scope: ${SIF_ABAC_PDP_SCOPE}
+
 
   gosys:
     base_url: ${GOSYS_BASE_URL}
@@ -102,3 +106,5 @@ no.nav:
 
 server:
   port: ${PORT:8080}
+
+valgt.pdp : ${VALGT_PDP}
