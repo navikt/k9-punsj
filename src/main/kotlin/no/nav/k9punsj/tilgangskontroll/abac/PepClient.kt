@@ -5,19 +5,17 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.configuration.AuditConfiguration
+import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.utils.objectMapper
-import no.nav.k9punsj.tilgangskontroll.audit.Auditdata
-import no.nav.k9punsj.tilgangskontroll.audit.AuditdataHeader
-import no.nav.k9punsj.tilgangskontroll.audit.Auditlogger
-import no.nav.k9punsj.tilgangskontroll.audit.CefField
-import no.nav.k9punsj.tilgangskontroll.audit.CefFieldName
-import no.nav.k9punsj.tilgangskontroll.audit.EventClassId
-import no.nav.k9punsj.tilgangskontroll.azuregraph.AzureGraphService
+import no.nav.k9punsj.tilgangskontroll.audit.*
 import no.nav.k9punsj.utils.Cache
 import no.nav.k9punsj.utils.CacheObject
+import no.nav.k9punsj.utils.objectMapper
+import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt
+import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -25,7 +23,8 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
+import kotlin.coroutines.coroutineContext
 
 private val gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -36,9 +35,10 @@ private const val DOMENE = "k9"
 @StandardProfil
 class PepClient(
     private val config: AuditConfiguration,
-    private val azureGraphService: AzureGraphService,
     private val auditlogger: Auditlogger,
-    private val pdlService: PdlService
+    private val pdlService: PdlService,
+    private val sifAbacPdpKlient: SifAbacPdpKlient,
+    @Value("\${valgt.pdp}") private val valgtPdp: String,
 ) : IPepClient {
 
     private val url = config.abacEndpointUrl()
@@ -46,44 +46,87 @@ class PepClient(
     private val cache = Cache<Boolean>()
 
     override suspend fun harBasisTilgang(fnr: String, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
-        val decision = evaluate(requestBuilder)
-        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
-        return decision
+        return velgImpl(
+            abacK9Impl = {
+                val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                val requestBuilder = basisTilgangRequest(identTilInnloggetBruker, fnr)
+                val decision = evaluate(requestBuilder)
+                loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+                decision
+            },
+            sifAbacPdpImpl = {
+                sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ,  listOf(PersonIdent(fnr)))
+                    .also {
+                        val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+                    }
+            }
+        )
     }
 
     override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-
-        fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
-        }
-        return fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+        return velgImpl(
+            abacK9Impl = {
+                val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                fnr.forEach {
+                    loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+                }
+                fnr.map { basisTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+            },
+            sifAbacPdpImpl = {
+                sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ, fnr.map { PersonIdent(it) })
+                    .also {
+                        val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                        fnr.forEach {
+                            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+                        }
+                    }
+            }
+        )
     }
 
-
     override suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
-        val decision = evaluate(requestBuilder)
-        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
-        return decision
+        return velgImpl(
+            abacK9Impl = {
+                val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                val requestBuilder = sendeInnTilgangRequest(identTilInnloggetBruker, fnr)
+                val decision = evaluate(requestBuilder)
+                loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
+                decision
+            },
+            sifAbacPdpImpl = {
+                sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE,  listOf(PersonIdent(fnr)))
+                    .also {
+                        val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                        loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
+                    }
+            }
+        )
     }
 
     override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-
-        fnr.forEach {
-            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
-        }
-        return fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+        return velgImpl(
+            abacK9Impl = {
+                val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                fnr.forEach {
+                    loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
+                }
+                fnr.map { sendeInnTilgangRequest(identTilInnloggetBruker, it) }.map { evaluate(it) }.all { true }
+            },
+            sifAbacPdpImpl = {
+                sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE,  fnr.map { PersonIdent(it)})
+                    .also {
+                        val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+                        fnr.forEach {
+                            loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
+                        }
+                    }
+            }
+        )
     }
 
     override suspend fun erSaksbehandler(): Boolean {
-        val identTilInnloggetBruker = azureGraphService.hentIdentTilInnloggetBruker()
-        val erSaksbehandlerIK9Sak = erSaksbehandlerIK9Sak(identTilInnloggetBruker)
-        return evaluate(erSaksbehandlerIK9Sak)
+        return coroutineContext.idToken().erSaksbehandler()
     }
 
     private fun basisTilgangRequest(
@@ -112,16 +155,6 @@ class PepClient(
             .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
             .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9punsj")
             .addResourceAttribute(RESOURCE_FNR, fnr)
-    }
-
-    private fun erSaksbehandlerIK9Sak(identTilInnloggetBruker: String): XacmlRequestBuilder {
-        return XacmlRequestBuilder()
-            .addResourceAttribute(RESOURCE_DOMENE, DOMENE)
-            .addResourceAttribute(RESOURCE_TYPE, TILGANG_SAK)
-            .addActionAttribute(ACTION_ID, "create")
-            .addAccessSubjectAttribute(SUBJECT_TYPE, INTERNBRUKER)
-            .addAccessSubjectAttribute(SUBJECTID, identTilInnloggetBruker)
-            .addEnvironmentAttribute(ENVIRONMENT_PEP_ID, "srvk9los")
     }
 
     private suspend fun loggTilAudit(
@@ -186,6 +219,30 @@ class PepClient(
             return result
         } else {
             return get.value
+        }
+    }
+
+    suspend fun <T> velgImpl(abacK9Impl: suspend () -> T, sifAbacPdpImpl: suspend () -> T): T {
+        return when (valgtPdp) {
+            "abac-k9" -> abacK9Impl()
+            "sif-abac-pdp" -> sifAbacPdpImpl()
+            "begge" -> {
+                val resultat = abacK9Impl()
+                try {
+                    val resultatNy = sifAbacPdpImpl()
+                    if (resultatNy != resultat) {
+                        log.warn(
+                            "Differanse i tilgangsjekk. Ny {} gammel {}. Bruker resultat for gammel sjekk",
+                            resultatNy,
+                            resultat
+                        )
+                    }
+                } catch (e: Exception) {
+                    log.warn("Feil i ny tilgangssjekk. Bruker resultat fra gammel. ", e)
+                }
+                resultat
+            }
+            else -> throw IllegalArgumentException("Ikke-støttet valgt pdp: " + valgtPdp)
         }
     }
 }
