@@ -1,4 +1,4 @@
-name: Build master & deploy to dev-gcp
+name: "Bygg og deploy"
 
 on:
   push:
