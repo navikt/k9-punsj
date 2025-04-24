@@ -43,12 +43,14 @@ internal class HentInstitusjonerTest : AbstractContainerBaseTest() {
         val correlationId = UUID.randomUUID().toString()
         val uuid = UUID.randomUUID()
         val institusjonNavn = "Sykehus Test"
+        val institusjonOrgNr = "000000000"
         val perioder = listOf(Periode(LocalDate.now().minusMonths(12), LocalDate.now()))
         val forventetJson = """
             [
                 {
                     "uuid": "$uuid",
                     "navn": "$institusjonNavn",
+                    "orgnr" : "$institusjonOrgNr",
                     "perioder": [
                         {
                             "fom": "${perioder.first().fom}",
@@ -59,7 +61,7 @@ internal class HentInstitusjonerTest : AbstractContainerBaseTest() {
             ], 
             """.trimIndent()
 
-        val godkjentOpplæringsinstitusjonDto = GodkjentOpplæringsinstitusjonDto(uuid, institusjonNavn, perioder)
+        val godkjentOpplæringsinstitusjonDto = GodkjentOpplæringsinstitusjonDto(uuid, institusjonNavn, institusjonOrgNr, perioder)
 
         coEvery { k9SakService.hentInstitusjoner() } returns listOf(godkjentOpplæringsinstitusjonDto)
 
