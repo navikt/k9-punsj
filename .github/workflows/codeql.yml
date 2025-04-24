@@ -7,12 +7,11 @@ on:
 jobs:
   codeql:
     name: CodeQl
-    uses: navikt/fp-gha-workflows/.github/workflows/codeql.yml@f7528b272a7cca0316ceff37d02780bb32d61a66
+    uses: navikt/sif-gha-workflows/.github/workflows/codeql.yml@main
     secrets: inherit
     permissions:
-      contents: read
       actions: read
       security-events: write
+      contents: read
     with:
-      use-reader: true
       java-version: 21
