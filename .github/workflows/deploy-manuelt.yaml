@@ -11,8 +11,8 @@ on:
         type: choice
         description: 'The cluster to deployed to (dev-gcp|prod-fss)'
         options:
-          - dev
-          - prod
+          - dev-gcp
+          - prod-fss
 
 jobs:
   deploy:
