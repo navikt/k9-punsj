@@ -52,7 +52,7 @@
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
-        <verapdf.version>1.26.5</verapdf.version>
+        <verapdf.version>1.28.1</verapdf.version>
         <handlebars.version>4.4.0</handlebars.version>
 
         <!-- serdes -->
