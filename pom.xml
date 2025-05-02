@@ -31,7 +31,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>5.4.12</k9-sak.version>
+        <k9-sak.version>5.4.13</k9-sak.version>
         <k9-formidling.version>10.1.3</k9-formidling.version>
         <k9-format.version>11.5.0</k9-format.version>
 
