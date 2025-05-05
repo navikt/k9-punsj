@@ -111,7 +111,7 @@ internal class OpplaeringspengerRoutes(
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(matchfagsak.brukerIdent),
+                    norskIdentDto = listOf(matchfagsak.brukerIdent, matchfagsak?.barnIdent).filterNotNull(),
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
