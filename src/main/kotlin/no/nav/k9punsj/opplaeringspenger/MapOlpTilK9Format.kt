@@ -20,10 +20,7 @@ import no.nav.k9punsj.felles.ZoneUtils.Oslo
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
-import no.nav.k9punsj.felles.k9format.MappingUtils
-import no.nav.k9punsj.felles.k9format.leggTilUtenlandsopphold
-import no.nav.k9punsj.felles.k9format.mapOpptjeningAktivitet
-import no.nav.k9punsj.felles.k9format.mapTilArbeidstid
+import no.nav.k9punsj.felles.k9format.*
 import no.nav.k9punsj.utils.PeriodeUtils.erSatt
 import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
 import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
@@ -76,6 +73,10 @@ internal class MapOlpTilK9Format(
             dto.leggTilBegrunnelseForInnsending()
             dto.kurs?.leggTilKurs()
             dto.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
+            dto.bosteder?.mapTilBosteder()?.apply {
+                opplaeringspenger.medBosteder(this)
+            }
+
 
             // Fullfører søknad & validerer
             søknad.medYtelse(opplaeringspenger)
