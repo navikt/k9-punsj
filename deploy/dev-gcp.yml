@@ -142,7 +142,7 @@ spec:
 
     # Integrasjoner (Rest)
     - name: SIF_ABAC_PDP_BASE_URL
-      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/k9
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/k9
     - name: SIF_ABAC_PDP_SCOPE
       value: api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name: K9SAK_BASE_URL
