@@ -1,4 +1,4 @@
 package no.nav.k9punsj.tilgangskontroll.token
 
-class IdTokenInvalidFormatException(idToken: IdToken, cause: Throwable? = null) :
-    RuntimeException("$idToken er på ugyldig format.", cause)
+class IdTokenInvalidFormatException(cause: Throwable? = null) :
+    RuntimeException("IdToken er på ugyldig format.", cause)

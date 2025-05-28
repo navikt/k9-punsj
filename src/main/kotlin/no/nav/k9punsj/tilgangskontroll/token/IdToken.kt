@@ -13,7 +13,7 @@ data class IdToken(
         val body = String(Base64.getDecoder().decode(split[1]), Charset.defaultCharset())
         objectMapper().readValue(body, JWTToken::class.java)
     } catch (cause: Throwable) {
-        throw IdTokenInvalidFormatException(this, cause)
+        throw IdTokenInvalidFormatException(cause)
     }
 
     override fun getName(): String = jwt.name
