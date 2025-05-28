@@ -48,7 +48,7 @@ class SifAbacPdpKlient(
         val jwt = coroutineContext.idToken().value
         val oboToken = cachedAccessTokenClient.getAccessToken(scopes, jwt)
 
-        val (request, _, result) = "$baseUrl$url"
+        val (request, _, result) = url
             .httpPost()
             .body(body)
             .header(
