@@ -16,6 +16,7 @@ import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt
 import no.nav.sif.abac.kontrakt.abac.ResourceType
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto
 import no.nav.sif.abac.kontrakt.abac.dto.PersonerOperasjonDto
+import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning
 import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -40,14 +41,14 @@ class SifAbacPdpKlient(
         val request = PersonerOperasjonDto(emptyList(), personIdenter, OperasjonDto(ResourceType.FAGSAK, action))
 
         val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/personer")
-        return om.readValue<Decision>(response) == Decision.Permit
+        return om.readValue<Tilgangsbeslutning>(response).harTilgang()
     }
 
     private suspend fun httpPostMedOboToken(body: String, url: String): String {
         val jwt = coroutineContext.idToken().value
         val oboToken = cachedAccessTokenClient.getAccessToken(scopes, jwt)
 
-        val (request, _, result) = "$baseUrl$url"
+        val (request, _, result) = url
             .httpPost()
             .body(body)
             .header(
@@ -85,10 +86,5 @@ class SifAbacPdpKlient(
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }
-    }
-
-    enum class Decision {
-        Deny,
-        Permit
     }
 }
