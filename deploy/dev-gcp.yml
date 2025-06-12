@@ -180,7 +180,7 @@ spec:
     - name: KODEVERDI_SOM_STRING
       value: "true"
     - name: VALGT_PDP
-      value: "sif-abac-pdp"
+      value: "begge"
 
       # Swagger
     - name: AZURE_LOGIN_URL
