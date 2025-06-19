@@ -115,9 +115,6 @@ spec:
       value: api://prod-fss.pdl.pdl-api/.default
 
     # Sikkerhet:
-    - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.k9saksbehandling/application/authorize
-
     # 0000-GA-k9-veileder
     - name: BRUKER_GRUPPE_ID_VEILEDER
       value : "be11a922-59a2-4afa-b5ad-b9e9bd445268"
@@ -172,8 +169,6 @@ spec:
       value: "false"
     - name: KODEVERDI_SOM_STRING
       value: "false"
-    - name: VALGT_PDP
-      value : "begge"
 
     # Swagger
     - name: AZURE_LOGIN_URL

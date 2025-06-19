@@ -16,7 +16,7 @@ k9-punsj --> |sender aksjonspunkthendelse| topic-punsj-til-los
 k9-los .-> |konsumerer aksjonspunkthendelse| topic-punsj-til-los
 k9-punsj --> |sender brevbestilling| topic-punsj-til-formidling
 k9-formidling .-> |konsumerer brevbestilling| topic-punsj-til-formidling
-k9-punsj --> |sjekker tilganger for saksbehandler| abac-k9
+k9-punsj --> |sjekker tilganger for saksbehandler| sif-abac-pdp
 k9-punsj --> |oppretter oppgave| gosys:::notDomain
 k9-punsj --> |henter journalpostinfo og dokument | saf:::notDomain
 k9-punsj --> |henter ident, barn, og personopplysninger| pdl:::notDomain

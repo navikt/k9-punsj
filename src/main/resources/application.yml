@@ -85,10 +85,6 @@ no.nav:
     password: ${DEFAULTDS_PASSWORD}
     vault_mountpath: ${DEFAULTDS_VAULT_MOUNTPATH}
 
-  abac:
-    system_user: ${SYSTEMBRUKER_USERNAME}
-    system_user_password: ${SYSTEMBRUKER_PASSWORD}
-    url: ${ABAC_PDP_ENDPOINT_URL}
   audit:
     enabled: ${AUDITLOGGER_ENABLED}
     vendor: ${AUDITLOGGER_VENDOR}
@@ -106,5 +102,3 @@ no.nav:
 
 server:
   port: ${PORT:8080}
-
-valgt.pdp : ${VALGT_PDP}
