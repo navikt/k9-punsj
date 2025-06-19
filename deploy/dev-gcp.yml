@@ -40,7 +40,6 @@ spec:
         - host: "saf-q2.dev-fss-pub.nais.io"
         - host: "oppgave.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
-        - host: "abac-k9.dev-fss-pub.nais.io"
         - host: "k9-sak.dev-fss-pub.nais.io"
         - host: "aareg-services-q2.dev-fss-pub.nais.io"
         - host: "ereg-services-q2.dev-fss-pub.nais.io"
@@ -118,9 +117,6 @@ spec:
       value: api://dev-fss.pdl.pdl-api/.default
 
     # Sikkerhet:
-    - name: ABAC_PDP_ENDPOINT_URL
-      value: https://abac-k9.dev-fss-pub.nais.io/application/authorize
-
     # 0000-GA-k9-veileder
     - name: BRUKER_GRUPPE_ID_VEILEDER
       value : "5bc5cae2-3ef9-4897-9828-766757299de8"
@@ -179,8 +175,6 @@ spec:
       value: "true"
     - name: KODEVERDI_SOM_STRING
       value: "true"
-    - name: VALGT_PDP
-      value: "sif-abac-pdp"
 
       # Swagger
     - name: AZURE_LOGIN_URL

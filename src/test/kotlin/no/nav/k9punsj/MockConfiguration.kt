@@ -27,8 +27,6 @@ internal object MockConfiguration {
             "AZURE_APP_JWK" to ClientCredentials.ClientA.privateKeyJwk,
             "AZURE_OPENID_CONFIG_TOKEN_ENDPOINT" to tokenUrl,
             "AZURE_APP_WELL_KNOWN_URL" to wellKnownUrl,
-            "SYSTEMBRUKER_USERNAME" to "vtp",
-            "SYSTEMBRUKER_PASSWORD" to "vtp",
             "NAV_TRUSTSTORE_PATH" to "${System.getProperty("user.home")}/.modig/truststore.jks",
             "NAV_TRUSTSTORE_PASSWORD" to "changeit",
             "SAF_BASE_URL" to wireMockServer.getSafBaseUrl(),
