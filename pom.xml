@@ -32,7 +32,7 @@
 
         <!-- Kontrakt -->
         <k9-sak.version>5.4.18</k9-sak.version>
-        <k9-formidling.version>10.1.5</k9-formidling.version>
+        <k9-formidling.version>10.1.6</k9-formidling.version>
         <k9-format.version>12.3.0</k9-format.version>
 
         <!-- database -->
