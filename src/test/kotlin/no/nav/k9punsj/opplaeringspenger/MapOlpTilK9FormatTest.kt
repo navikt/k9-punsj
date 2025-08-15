@@ -25,41 +25,6 @@ internal class MapOlpTilK9FormatTest {
     }
 
     @Test
-    fun `Kurs med flere kursperioder utleder søknadsperiode fra første o siste dato i perioderna`() {
-        val periode1 = KursPeriode(
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 1, 5)
-        )
-        val periode2 = KursPeriode(
-            LocalDate.of(2023, 1, 8),
-            LocalDate.of(2023, 1, 10)
-        )
-        val periode3 = KursPeriode(
-            LocalDate.of(2023, 1, 20),
-            LocalDate.of(2023, 1, 29)
-        )
-
-        val kurs = OpplaeringspengerSøknadDto.Kurs(
-            kursHolder = OpplaeringspengerSøknadDto.KursHolder(holder = "test", institusjonsUuid = null),
-            kursperioder = listOf(periode3, periode1, periode2),
-            reise = OpplaeringspengerSøknadDto.Reise(
-                reisedager = listOf(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 29)),
-                reisedagerBeskrivelse = "borte bra, hjemme best"
-            )
-        )
-
-        val søknadsperiode = kurs.utledsSoeknadsPeriodeFraKursperioder()
-
-        assert(søknadsperiode != null)
-        assert(søknadsperiode?.get(0)?.fom == periode3.periode.fom)
-        assert(søknadsperiode?.get(0)?.tom == periode3.periode.tom)
-        assert(søknadsperiode?.get(1)?.fom == periode1.periode.fom)
-        assert(søknadsperiode?.get(1)?.tom == periode1.periode.tom)
-        assert(søknadsperiode?.get(2)?.fom == periode2.periode.fom)
-        assert(søknadsperiode?.get(2)?.tom == periode2.periode.tom)
-    }
-
-    @Test
     fun `test json-payload mapper o validerer`() {
         val json = """
             {

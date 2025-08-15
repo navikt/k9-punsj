@@ -67,13 +67,7 @@ data class OpplaeringspengerSøknadDto(
         val kursHolder: KursHolder?,
         val kursperioder: List<KursPeriode>?,
         val reise: Reise?
-    ) {
-        fun utledsSoeknadsPeriodeFraKursperioder(): List<PeriodeDto>? {
-            return kursperioder?.map { kursPeriode ->
-                PeriodeDto(fom = kursPeriode.periode.fom, tom = kursPeriode.periode.tom)
-            }
-        }
-    }
+    )
 
     data class BegrunnelseForInnsendingDto(
         val tekst: String

@@ -152,8 +152,8 @@ internal class MapOlpTilK9Format(
         } else {
             // Utleder søknadsperiode fra kursperioder
             if (this.kurs != null) {
-                this.kurs.utledsSoeknadsPeriodeFraKursperioder()?.map { kursPeriode ->
-                    opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
+                this.kurs.kursperioder?.map { kursPeriode ->
+                    opplaeringspenger.medSøknadsperiode(kursPeriode.periode.somK9Periode())
                 }
             }
         }
