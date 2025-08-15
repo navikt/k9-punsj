@@ -75,7 +75,9 @@ internal class MapOlpTilK9Format(
                 }
             }
             dto.leggTilBegrunnelseForInnsending()
-            dto.kurs?.leggTilKurs()
+            if (dto.kurs != null ) {
+                dto.kurs.leggTilKurs()
+            }
             dto.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
             dto.bosteder?.mapTilBosteder()?.apply {
                 opplaeringspenger.medBosteder(this)
