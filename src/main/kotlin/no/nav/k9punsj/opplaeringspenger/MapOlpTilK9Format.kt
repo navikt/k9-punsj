@@ -75,7 +75,7 @@ internal class MapOlpTilK9Format(
                 }
             }
             dto.leggTilBegrunnelseForInnsending()
-            if (dto.kurs != null ) {
+            if (dto.kurs != null) {
                 dto.kurs.leggTilKurs()
             }
             dto.leggTilUttak(søknadsperiode = dto.soeknadsperiode)
@@ -151,8 +151,10 @@ internal class MapOlpTilK9Format(
             opplaeringspenger.medSøknadsperiode(this.soeknadsperiode.somK9Perioder())
         } else {
             // Utleder søknadsperiode fra kursperioder
-            this.kurs?.utledsSoeknadsPeriodeFraKursperioder()?.let { kursPeriode ->
-                opplaeringspenger.medSøknadsperiode(kursPeriode.somK9Periode())
+            if (this.kurs != null) {
+                this.kurs.kursperioder?.map { kursPeriode ->
+                    opplaeringspenger.medSøknadsperiode(kursPeriode.periode.somK9Periode())
+                }
             }
         }
     }
