@@ -68,11 +68,9 @@ data class OpplaeringspengerSøknadDto(
         val kursperioder: List<KursPeriode>?,
         val reise: Reise?
     ) {
-        fun utledsSoeknadsPeriodeFraKursperioder(): PeriodeDto? {
-            return kursperioder?.let {
-                val fom = kursperioder.mapNotNull { it.periode.fom }.min()
-                val tom = kursperioder.mapNotNull { it.periode.tom }.max()
-                PeriodeDto(fom = fom, tom = tom)
+        fun utledsSoeknadsPeriodeFraKursperioder(): List<PeriodeDto>? {
+            return kursperioder?.map { kursPeriode ->
+                PeriodeDto(fom = kursPeriode.periode.fom, tom = kursPeriode.periode.tom)
             }
         }
     }
