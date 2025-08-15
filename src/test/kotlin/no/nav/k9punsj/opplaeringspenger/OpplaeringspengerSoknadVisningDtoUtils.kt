@@ -23,6 +23,8 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
     ): OpplaeringspengerSøknadDto {
         val now = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
         @Language("JSON")
+        val søknadFom = søknadsperiode?.first ?: LocalDate.now()
+        val søknadTom = søknadsperiode?.second ?: LocalDate.now().plusWeeks(1)
         val json = """
             {
               "soeknadId": "${UUID.randomUUID()}",
@@ -36,22 +38,17 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
                 "12345678"
               ],
               "kurs":{
-                  "kursHolder":{
+                  "kursHolder": {
                      "holder":"Nav"
                   },
-                  "formaal":"test",
                   "kursperioder":[
                      {
-                        "periode":{
-                           "fom":"2022-12-14",
-                           "tom":"2022-12-30"
-                        },
-                        "avreise":"2022-12-14",
-                        "hjemkomst":"2022-12-30"
+                        "periode": {
+                           "fom": "${søknadFom}",
+                           "tom": "${søknadTom}"
+                        }
                      }
-                  ],
-                  "begrunnelseReisetidTil": "borte bra",
-                  "begrunnelseReisetidHjem": "hjemme best"
+                  ]
                }
             }
             """
