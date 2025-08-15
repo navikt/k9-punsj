@@ -51,8 +51,12 @@ internal class MapOlpTilK9FormatTest {
         val søknadsperiode = kurs.utledsSoeknadsPeriodeFraKursperioder()
 
         assert(søknadsperiode != null)
-        assert(søknadsperiode!!.fom == LocalDate.of(2023, 1, 1))
-        assert(søknadsperiode!!.tom == LocalDate.of(2023, 1, 29))
+        assert(søknadsperiode?.get(0)?.fom == periode3.periode.fom)
+        assert(søknadsperiode?.get(0)?.tom == periode3.periode.tom)
+        assert(søknadsperiode?.get(1)?.fom == periode1.periode.fom)
+        assert(søknadsperiode?.get(1)?.tom == periode1.periode.tom)
+        assert(søknadsperiode?.get(2)?.fom == periode2.periode.fom)
+        assert(søknadsperiode?.get(2)?.tom == periode2.periode.tom)
     }
 
     @Test
