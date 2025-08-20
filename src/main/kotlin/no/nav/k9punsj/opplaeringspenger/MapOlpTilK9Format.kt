@@ -109,6 +109,11 @@ internal class MapOlpTilK9Format(
 
 
     private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
+        // hvis hverken institusjonsUuid eller holder er satt, så skal ikke kurs legges til
+        if (this.kursHolder?.institusjonsUuid.isNullOrBlank() && this.kursHolder?.holder.isNullOrBlank()) {
+            return
+        }
+
         val institusjonsUuid = this.kursHolder?.institusjonsUuid?.let {
             try {
                 UUID.fromString(it)
