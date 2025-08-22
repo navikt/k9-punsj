@@ -25,7 +25,7 @@ spec:
           - id: "5bc5cae2-3ef9-4897-9828-766757299de8"
       singlePageApplication: true
       replyURLs:
-        - https://k9-punsj.intern.dev.nav.no/internal/webjars/swagger-ui/oauth2-redirect.html
+        - https://k9-punsj.intern.dev.nav.no/internal/swagger-ui/oauth2-redirect.html
   accessPolicy:
     inbound:
       rules:
