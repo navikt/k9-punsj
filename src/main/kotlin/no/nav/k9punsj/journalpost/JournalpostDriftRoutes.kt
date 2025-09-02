@@ -4,7 +4,10 @@ import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
+import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
+import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
@@ -30,6 +33,7 @@ internal class JournalpostDriftRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val journalpostService: JournalpostService,
     private val aksjonspunktService: AksjonspunktService,
+    private val aksjonspunktRepository: AksjonspunktRepository,
     private val dokarkivGateway: DokarkivGateway,
     private val azureGraphService: IAzureGraphService,
 ) {
@@ -47,6 +51,7 @@ internal class JournalpostDriftRoutes(
         internal const val LukkJournalpostDebugg = "/journalpost/lukkDebugg/{$JournalpostIdKey}"
         internal const val FerdigstillJournalpostForDebugg = "/journalpost/ferdigstillDebugg"
         internal const val OppdaterJournalpostForDebugg = "/journalpost/oppdaterDebugg"
+        internal const val LukkLosOppgave = "/journalpost/lukk/losoppgave/{$JournalpostIdKey}"
     }
 
     @Bean
@@ -194,7 +199,12 @@ internal class JournalpostDriftRoutes(
                     .partition { it.sak?.fagsakId != null } // Del i med og uten sakstilknytning
 
                 val ferdigstillJournalposterResponse = medSakstilknytning
-                    .map { dokarkivGateway.ferdigstillJournalpost(it.journalpostId, "9999") } // Ferdigstill journalposter
+                    .map {
+                        dokarkivGateway.ferdigstillJournalpost(
+                            it.journalpostId,
+                            "9999"
+                        )
+                    } // Ferdigstill journalposter
 
                 val (vellykkedeFerdigstillinger, feiledeFerdigstillinger) = ferdigstillJournalposterResponse
                     .partition { it.statusCode.is2xxSuccessful } // Del i vellykkede og feilede ferdigstillinger
@@ -298,6 +308,41 @@ internal class JournalpostDriftRoutes(
                 return@RequestContext ServerResponse
                     .badRequest()
                     .buildAndAwait()
+            }
+        }
+
+        GET("/api${Urls.LukkLosOppgave}") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalpostId = request.journalpostId()
+
+                val journalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
+                    ?: return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait())
+
+                val losOppgaverFørEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
+
+                val aksjonspunkt = AksjonspunktKode.PUNSJ to AksjonspunktStatus.UTFØRT
+                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
+                    punsjJournalpost = journalpost,
+                    aksjonspunkt = aksjonspunkt,
+                    type = journalpost.type,
+                    ytelse = journalpost.ytelse,
+                    pleietrengendeAktørId = null
+                )
+
+                val losOppgaverEtterEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(
+                        mapOf(
+                            "losOppgaverFørEndring" to losOppgaverFørEndring,
+                            "losOppgaverEtterEndring" to losOppgaverEtterEndring,
+                            "journalposttilstand" to journalpost
+                        )
+                    )
             }
         }
     }
