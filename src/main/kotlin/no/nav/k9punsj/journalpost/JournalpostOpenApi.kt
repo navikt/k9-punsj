@@ -48,7 +48,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun HentJournalposter(
-        @RequestBody body: IdentDto
+        @RequestBody body: IdentDto,
     ) {
     }
 
@@ -89,7 +89,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun HenteJournalpostInfo(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 
@@ -100,7 +100,7 @@ internal class JournalpostOpenApi {
     )
     fun SettPåVent(
         @PathVariable("journalpost_id") journalpostId: String,
-        @RequestBody body: OasSøknadId
+        @RequestBody body: OasSøknadId,
     ) {
     }
 
@@ -123,7 +123,7 @@ internal class JournalpostOpenApi {
     )
     fun LukkJournalpost(
         @PathVariable("journalpost_id") journalpostId: String,
-        @RequestBody lukkJournalpostDto: LukkJournalpostDto
+        @RequestBody lukkJournalpostDto: LukkJournalpostDto,
     ) {
     }
 
@@ -154,7 +154,7 @@ internal class JournalpostOpenApi {
     )
     fun HenteDokument(
         @PathVariable("journalpost_id") journalpostId: String,
-        @PathVariable("dokument_id") dokumentId: String
+        @PathVariable("dokument_id") dokumentId: String,
     ) {
     }
 
@@ -181,7 +181,7 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun ResettInfoOmJournalpost(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 
@@ -215,7 +215,7 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun HentHvaSomHarBlittSendtInn(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 
@@ -242,7 +242,7 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun LukkJournalpostDebugg(
-        @PathVariable("journalpost_id") journalpostId: String
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 
@@ -269,7 +269,7 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun LukkJournalposterDebugg(
-        @RequestBody body: JournalpostRoutes.JournalpostIderRequest
+        @RequestBody body: JournalpostRoutes.JournalpostIderRequest,
     ) {
     }
 
@@ -291,7 +291,7 @@ internal class JournalpostOpenApi {
         security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     fun JournalførPåGenerellSak(
-        @RequestBody body: IdentOgJournalpost
+        @RequestBody body: IdentOgJournalpost,
     ) {
     }
 
@@ -318,7 +318,7 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun FerdigstillJournalposterDebugg(
-        @RequestBody body: JournalpostRoutes.JournalpostIderRequest
+        @RequestBody body: JournalpostRoutes.JournalpostIderRequest,
     ) {
     }
 
@@ -345,7 +345,38 @@ internal class JournalpostOpenApi {
         tags = ["Drift"]
     )
     fun OppdaterJournalposterDebugg(
-        @RequestBody body: JournalpostDriftRoutes.OppdaterJournalpostRequest
+        @RequestBody body: JournalpostDriftRoutes.OppdaterJournalpostRequest,
+    ) {
+    }
+
+    @GetMapping(JournalpostDriftRoutes.Urls.LukkLosOppgave, produces = ["application/json"])
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Hvis journalposten blir lukket i LOS"
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Journalpost i saf er ikke ferdigstilt, kan ikke lukke los oppgave. Den må håndteres i punsj først."
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Journalpost er ikke ferdig behandlet i punsj, kan ikke lukke los oppgave. Den må håndteres i punsj først."
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Journalposten eksisterer ikke i punsj eller i SAF."
+            )
+        ]
+    )
+    @Operation(
+        summary = "Lukker oppgave i LOS for journalposter som er ferdigstilt i SAF og Punsj",
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)],
+        tags = ["Drift"]
+    )
+    fun LukkLosOppgave(
+        @PathVariable("journalpost_id") journalpostId: String,
     ) {
     }
 }

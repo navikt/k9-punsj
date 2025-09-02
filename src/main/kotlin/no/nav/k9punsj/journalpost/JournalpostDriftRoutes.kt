@@ -315,10 +315,28 @@ internal class JournalpostDriftRoutes(
             RequestContext(coroutineContext, request) {
                 val journalpostId = request.journalpostId()
 
-                val journalpost = (journalpostService.hentHvisJournalpostMedId(journalpostId)
+                val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
                         .notFound()
-                        .buildAndAwait())
+                        .buildAndAwait()
+
+                val safJournalpost = journalpostService.hentSafJournalPost(journalpostId)
+                    ?: return@RequestContext ServerResponse
+                        .notFound()
+                        .buildAndAwait()
+
+                if (safJournalpost.erFerdigstilt.not()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .bodyValueAndAwait("Journalpost i saf er ikke ferdigstilt, kan ikke lukke los oppgave. Den må håndteres i punsj først.")
+                }
+
+                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
+                if (kanSendeInn.not()) {
+                    return@RequestContext ServerResponse
+                        .badRequest()
+                        .bodyValueAndAwait("Journalpost er ikke ferdig behandlet i punsj, kan ikke lukke los oppgave. Den må håndteres i punsj først.")
+                }
 
                 val losOppgaverFørEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
 
