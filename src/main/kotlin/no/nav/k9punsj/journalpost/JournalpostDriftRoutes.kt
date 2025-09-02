@@ -331,8 +331,8 @@ internal class JournalpostDriftRoutes(
                         .bodyValueAndAwait("Journalpost i saf er ikke ferdigstilt, kan ikke lukke los oppgave. Den må håndteres i punsj først.")
                 }
 
-                val kanSendeInn = journalpostService.kanSendeInn(listOf(journalpostId))
-                if (kanSendeInn.not()) {
+                val erSendtInn = journalpostService.kanSendeInn(listOf(journalpostId)).not()
+                if (erSendtInn.not()) {
                     return@RequestContext ServerResponse
                         .badRequest()
                         .bodyValueAndAwait("Journalpost er ikke ferdig behandlet i punsj, kan ikke lukke los oppgave. Den må håndteres i punsj først.")
@@ -340,13 +340,10 @@ internal class JournalpostDriftRoutes(
 
                 val losOppgaverFørEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
 
-                val aksjonspunkt = AksjonspunktKode.PUNSJ to AksjonspunktStatus.UTFØRT
-                aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
-                    punsjJournalpost = journalpost,
-                    aksjonspunkt = aksjonspunkt,
-                    type = journalpost.type,
-                    ytelse = journalpost.ytelse,
-                    pleietrengendeAktørId = null
+                aksjonspunktService.settUtførtPåAltSendLukkOppgaveTilK9Los(
+                    journalpostId = journalpostId,
+                    erSendtInn = erSendtInn,
+                    ansvarligSaksbehandler = null
                 )
 
                 val losOppgaverEtterEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
