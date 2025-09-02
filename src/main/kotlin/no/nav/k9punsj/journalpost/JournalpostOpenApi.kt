@@ -361,10 +361,6 @@ internal class JournalpostOpenApi {
                 description = "Journalpost i saf er ikke ferdigstilt, kan ikke lukke los oppgave. Den må håndteres i punsj først."
             ),
             ApiResponse(
-                responseCode = "400",
-                description = "Journalpost er ikke ferdig behandlet i punsj, kan ikke lukke los oppgave. Den må håndteres i punsj først."
-            ),
-            ApiResponse(
                 responseCode = "404",
                 description = "Journalposten eksisterer ikke i punsj eller i SAF."
             )

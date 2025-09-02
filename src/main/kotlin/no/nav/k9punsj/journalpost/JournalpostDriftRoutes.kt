@@ -332,11 +332,6 @@ internal class JournalpostDriftRoutes(
                 }
 
                 val erSendtInn = journalpostService.kanSendeInn(listOf(journalpostId)).not()
-                if (erSendtInn.not()) {
-                    return@RequestContext ServerResponse
-                        .badRequest()
-                        .bodyValueAndAwait("Journalpost er ikke ferdig behandlet i punsj, kan ikke lukke los oppgave. Den må håndteres i punsj først.")
-                }
 
                 val losOppgaverFørEndring = aksjonspunktRepository.hentAlleAksjonspunkter(journalpost.journalpostId)
 
