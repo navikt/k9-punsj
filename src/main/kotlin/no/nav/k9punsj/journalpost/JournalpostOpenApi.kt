@@ -367,7 +367,7 @@ internal class JournalpostOpenApi {
         ]
     )
     @Operation(
-        summary = "Lukker oppgave i LOS for journalposter som er ferdigstilt i SAF og Punsj",
+        summary = "Lukker oppgave i LOS for journalposter som er ferdigstilt i SAF. Skal kun brukes dersom journalposten er ferdig behandlet i punsj, men ikke i LOS.",
         security = [SecurityRequirement(name = OpenApi.OAUTH2)],
         tags = ["Drift"]
     )
