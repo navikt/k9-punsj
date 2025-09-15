@@ -39,7 +39,7 @@ class KafkaConfig(
         return mapOf(
             CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to env.getValue(KAFKA_BOKERS),
             CommonClientConfigs.CLIENT_ID_CONFIG to "k9-punsj-${InetAddress.getLocalHost().hostName}",
-            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to SecurityProtocol.SSL.name,
+            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to (env["KAFKA_SECURITY_PROTOCOL"] ?: SecurityProtocol.SSL.name),
             SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "",
             SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "jks",
             SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
@@ -47,7 +47,7 @@ class KafkaConfig(
             SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to env.getValue(KAFKA_KEYSTORE_PATH),
             SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(truststorePasswordKey),
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to env.getValue(CREDSTORE_PASSWORD)
-        )
+        ) + env["KAFKA_SASL_MECHANISM"]?.let { mapOf("sasl.mechanism" to it) }.orEmpty() + env["KAFKA_SASL_JAAS_CONFIG"]?.let { mapOf("sasl.jaas.config" to it) }.orEmpty()
     }
 
     private fun byggKafkaConsumerFactory(baseProperties: Map<String, Any>): ConsumerFactory<String, String> =
