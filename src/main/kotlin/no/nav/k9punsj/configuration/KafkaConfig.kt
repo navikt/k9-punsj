@@ -5,6 +5,7 @@ import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -31,15 +32,16 @@ class KafkaConfig(
     @Bean
     fun kafkaBaseProperties(): Map<String, Any> {
         val env = System.getenv()
+        val enableVtpConfig = env["ENABLE_VTP_CONFIG"]?.toBoolean() ?: false
 
         val truststorePasswordKey: String = if (overrideTruststorePassword.isNullOrEmpty())
             CREDSTORE_PASSWORD
         else OVERRIDE_TRUSTSTORE_PASSWORD
 
-        return mapOf(
+        val commonProps = mapOf(
             CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to env.getValue(KAFKA_BOKERS),
             CommonClientConfigs.CLIENT_ID_CONFIG to "k9-punsj-${InetAddress.getLocalHost().hostName}",
-            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to SecurityProtocol.SSL.name,
+            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to if (enableVtpConfig) "SASL_SSL" else SecurityProtocol.SSL.name,
             SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "",
             SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "jks",
             SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
@@ -48,6 +50,13 @@ class KafkaConfig(
             SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to env.getValue(truststorePasswordKey),
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to env.getValue(CREDSTORE_PASSWORD)
         )
+
+        return if (enableVtpConfig) {
+            commonProps + mapOf(
+                SaslConfigs.SASL_MECHANISM to "PLAIN",
+                SaslConfigs.SASL_JAAS_CONFIG to "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"vtp\" password=\"vtp\";"
+            )
+        } else commonProps
     }
 
     private fun byggKafkaConsumerFactory(baseProperties: Map<String, Any>): ConsumerFactory<String, String> =
