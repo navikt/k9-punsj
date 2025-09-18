@@ -14,8 +14,10 @@ import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.transaction.annotation.EnableTransactionManagement
 
 @EnableScheduling
+@EnableTransactionManagement
 @SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
 class K9PunsjApplication {
 
