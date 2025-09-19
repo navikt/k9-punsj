@@ -24,6 +24,7 @@ enum class K9FordelType(val kode: String, val navn: String, val erScanning: Bool
     PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG("PUNSJOPPGAVE_IKKE_LENGER_NØDVENDIG", "Punsjoppgave ikke lenger nødvendig", false),
     UTEN_FNR_DNR("UTEN_FNR_DNR", "Uten fnr eller dnr", false),
     KOPI("KOPI", "Kopi", true),
+    JOURNALPOSTNOTAT("JOURNALPOSTNOTAT", "Manuelt opprettet journalpostnotat", false),
     UKJENT("UKJENT", "Ukjent", true);
 
     companion object {
