@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
 import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
@@ -103,7 +104,7 @@ class NotatService(
         aksjonspunktService.opprettAksjonspunktOgSendTilK9Los(
             punsjJournalpost = punsjJournalpost,
             aksjonspunkt = Pair(AksjonspunktKode.PUNSJ, AksjonspunktStatus.OPPRETTET),
-            type = null, // TODO: Avklar om null kan brukes her
+            type = K9FordelType.JOURNALPOSTNOTAT.kode,
             ytelse = fagsak.sakstype,
             pleietrengendeAktørId = fagsak.pleietrengendeIdent
         )
