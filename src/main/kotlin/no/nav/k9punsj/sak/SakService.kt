@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-internal class SakService(
+class SakService(
     private val k9SakService: K9SakService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     private companion object {
