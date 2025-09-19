@@ -42,7 +42,8 @@ class AzureGraphService(
                     onBehalfOf = idToken.value
                 )
 
-            val (request, _, result) = "https://graph.microsoft.com/v1.0/me?\$select=officeLocation"
+            val graphBaseUrl = System.getenv("MS_GRAPH_URL") ?: "https://graph.microsoft.com"
+            val (request, _, result) = "$graphBaseUrl/me?\$select=officeLocation"
                 .httpGet()
                 .header(
                     HttpHeaders.ACCEPT to "application/json",
@@ -61,9 +62,10 @@ class AzureGraphService(
             )
 
             return try {
-                val officeLocation = objectMapper().readValue<OfficeLocation>(json).officeLocation
-                cache.set(username, CacheObject(officeLocation, LocalDateTime.now().plusDays(180)))
-                return officeLocation
+                val officeLocationData = objectMapper().readValue<OfficeLocation>(json)
+                val enhet = officeLocationData.officeLocation ?: officeLocationData.streetAddress ?: ""
+                cache.set(username, CacheObject(enhet, LocalDateTime.now().plusDays(180)))
+                return enhet
             } catch (e: Exception) {
                 log.error(
                     "Feilet deserialisering",
