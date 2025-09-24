@@ -32,7 +32,7 @@ class AzureGraphService(
 
     override suspend fun hentEnhetForInnloggetBruker(): String {
         val idToken = coroutineContext.idToken()
-        val username = idToken.getUsername() + "_office_location"
+        val username = idToken.getNavIdent() + "_office_location"
         val cachedObject = cache.get(username)
 
         if (cachedObject == null) {
