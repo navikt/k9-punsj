@@ -10,7 +10,7 @@ jobs:
   deploy-kafka-manager:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: nais/deploy/actions/deploy@v2
         if: github.ref == 'refs/heads/master'
         env:
