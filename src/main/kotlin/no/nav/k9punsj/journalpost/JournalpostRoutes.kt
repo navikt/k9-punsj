@@ -240,8 +240,8 @@ internal class JournalpostRoutes(
         POST("/api${Urls.SettBehandlingsAar}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = norskIdent,
                     url = Urls.SettBehandlingsAar
                 )?.let { return@RequestContext it }
 
@@ -413,7 +413,9 @@ internal class JournalpostRoutes(
                 dto.barn?.let { identListe.add(it) }
                 dto.annenPart?.let { identListe.add(it) }
 
-                if (!pepClient.sendeInnTilgang(identListe, Urls.KopierJournalpost)) {
+                val identListeForSporingslogg = mutableListOf(dto.til)
+
+                if (!pepClient.harSendeInnTilgang(identListe, identListeForSporingslogg, Urls.KopierJournalpost)) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .bodyValueAndAwait("Har ikke lov til å kopiere journalpost.")

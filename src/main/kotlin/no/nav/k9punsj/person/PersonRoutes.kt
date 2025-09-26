@@ -35,8 +35,8 @@ internal class PersonRoutes(
         GET("/api${Urls.HentePerson}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = norskIdent,
                     url = Urls.HentePerson
                 )?.let { return@RequestContext it }
 
@@ -59,8 +59,8 @@ internal class PersonRoutes(
         GET("/api${Urls.HenteBarn}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = norskIdent,
                     url = Urls.HenteBarn
                 )?.let { return@RequestContext it }
 
@@ -78,8 +78,8 @@ internal class PersonRoutes(
         GET("/api${Urls.HenteAktørId}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = norskIdent,
                     url = Urls.HenteAktørId
                 )?.let { return@RequestContext it }
 

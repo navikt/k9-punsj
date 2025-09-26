@@ -36,7 +36,7 @@ internal class SakerRoutes(
         GET("/api${Urls.HentSaker}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innloggetUtils.harInnloggetBrukerTilgangTil(norskIdentDto = listOf(norskIdent), url = Urls.HentSaker)
+                innloggetUtils.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HentSaker)
                     ?.let { return@RequestContext it }
 
                 val saker = try {

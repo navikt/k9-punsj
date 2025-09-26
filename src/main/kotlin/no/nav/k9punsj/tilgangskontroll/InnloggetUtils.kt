@@ -12,11 +12,11 @@ class InnloggetUtils(
     private val pepClient: IPepClient
 ) {
 
-    internal suspend fun harInnloggetBrukerTilgangTilOgSendeInn(
-        norskIdent: String,
+    internal suspend fun harInnloggetBrukerTilgangTilÅSendeInn(
+        fnr: String,
         url: String
     ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdent, url)
+        val saksbehandlerHarTilgang = pepClient.harSendeInnTilgang(fnr, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)
@@ -26,11 +26,12 @@ class InnloggetUtils(
         return null
     }
 
-    internal suspend fun harInnloggetBrukerTilgangTil(
-        norskIdentDto: List<String>,
+    internal suspend fun harInnloggetBrukerTilgangTilÅSendeInn(
+        fnr: List<String>,
+        fnrForSporingslogg: List<String>,
         url: String
     ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.sendeInnTilgang(norskIdentDto, url)
+        val saksbehandlerHarTilgang = pepClient.harSendeInnTilgang(fnr, fnrForSporingslogg, url)
         if (!saksbehandlerHarTilgang) {
             return ServerResponse
                 .status(HttpStatus.FORBIDDEN)

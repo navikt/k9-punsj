@@ -20,33 +20,35 @@ class PepClient(
 ) : IPepClient {
 
     companion object {
-        const val BASIS_TILGANG = "no.nav.abac.attributter.k9"
         const val TILGANG_SAK = "no.nav.abac.attributter.k9.fagsak"
     }
 
-    override suspend fun harBasisTilgang(fnr: String, urlKallet: String): Boolean {
+    override suspend fun harLesetilgang(fnr: String, urlKallet: String): Boolean {
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ, listOf(PersonIdent(fnr)))
         if (harTilgang) {
             val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
-            loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+            loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
         }
         return harTilgang
     }
 
-    override suspend fun harBasisTilgang(fnr: List<String>, urlKallet: String): Boolean {
+    override suspend fun harLesetilgang(fnr: List<String>, fnrForSporingslogg: List<String>, urlKallet: String): Boolean {
+        if (!fnr.containsAll(fnrForSporingslogg)){
+            throw IllegalArgumentException("fnrForSporingslogg skal være sub-sett av fnr")
+        }
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ, fnr.map { PersonIdent(it) })
         if (harTilgang) {
             val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
             fnr.forEach {
-                loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, BASIS_TILGANG, "read", urlKallet)
+                loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
             }
         }
         return harTilgang
     }
 
-    override suspend fun sendeInnTilgang(fnr: String, urlKallet: String): Boolean {
+    override suspend fun harSendeInnTilgang(fnr: String, urlKallet: String): Boolean {
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE, listOf(PersonIdent(fnr)))
         if (harTilgang) {
@@ -56,7 +58,10 @@ class PepClient(
         return harTilgang
     }
 
-    override suspend fun sendeInnTilgang(fnr: List<String>, urlKallet: String): Boolean {
+    override suspend fun harSendeInnTilgang(fnr: List<String>, fnrForSporingslogg: List<String>, urlKallet: String): Boolean {
+        if (!fnr.containsAll(fnrForSporingslogg)){
+            throw IllegalArgumentException("fnrForSporingslogg skal være sub-sett av fnr")
+        }
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE, fnr.map { PersonIdent(it) })
         if (harTilgang) {
