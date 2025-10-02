@@ -124,7 +124,7 @@ class DokarkivGateway(
             .toEntity(JournalPostResponse::class.java)
             .awaitFirst()
 
-        if (response.statusCode == HttpStatus.CREATED && response.body != null) {
+        if (response.statusCode.is2xxSuccessful && response.body != null) {
             return response.body!!
         }
 
@@ -376,7 +376,8 @@ data class JournalPostRequest(
               "eksternReferanseId": "$eksternReferanseId",
               "tittel": "$tittel",
               "avsenderMottaker": {
-                "navn": "$avsenderNavn"
+                "navn": "$avsenderNavn",
+                "idType": "FNR"
               },
               "bruker": {
                 "id": "$brukerIdent",
