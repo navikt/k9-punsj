@@ -376,8 +376,7 @@ data class JournalPostRequest(
               "eksternReferanseId": "$eksternReferanseId",
               "tittel": "$tittel",
               "avsenderMottaker": {
-                "navn": "$avsenderNavn",
-                "idType": "FNR"
+                "navn": "$avsenderNavn"
               },
               "bruker": {
                 "id": "$brukerIdent",
