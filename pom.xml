@@ -33,7 +33,7 @@
         <!-- Kontrakt -->
         <k9-sak.version>5.4.18</k9-sak.version>
         <k9-format.version>12.5.7</k9-format.version>
-        <k9-formidling.version>10.1.7</k9-formidling.version>
+        <k9-formidling.version>10.1.10</k9-formidling.version>
 
         <!-- database -->
         <postgresql.version>42.7.8</postgresql.version>
