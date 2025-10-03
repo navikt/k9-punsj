@@ -12,6 +12,7 @@ import no.nav.k9punsj.utils.CacheObject
 import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.time.LocalDateTime
@@ -20,7 +21,8 @@ import kotlin.coroutines.coroutineContext
 @Configuration
 @StandardProfil
 class AzureGraphService(
-    @Qualifier("azure") private val accessTokenClient: AccessTokenClient
+    @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
+    @Value("\${MS_GRAPH_URL:https://graph.microsoft.com/v1.0}") private val msGraphUrl: String
 ) : IAzureGraphService {
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val cache = Cache<String>()
@@ -32,7 +34,7 @@ class AzureGraphService(
 
     override suspend fun hentEnhetForInnloggetBruker(): String {
         val idToken = coroutineContext.idToken()
-        val username = idToken.getUsername() + "_office_location"
+        val username = idToken.getNavIdent() + "_office_location"
         val cachedObject = cache.get(username)
 
         if (cachedObject == null) {
@@ -42,7 +44,7 @@ class AzureGraphService(
                     onBehalfOf = idToken.value
                 )
 
-            val (request, _, result) = "https://graph.microsoft.com/v1.0/me?\$select=officeLocation"
+            val (request, _, result) = "$msGraphUrl/me?\$select=officeLocation"
                 .httpGet()
                 .header(
                     HttpHeaders.ACCEPT to "application/json",
@@ -61,9 +63,23 @@ class AzureGraphService(
             )
 
             return try {
-                val officeLocation = objectMapper().readValue<OfficeLocation>(json).officeLocation
-                cache.set(username, CacheObject(officeLocation, LocalDateTime.now().plusDays(180)))
-                return officeLocation
+                val officeLocationData = objectMapper().readValue<OfficeLocation>(json)
+                val enhet = when {
+                    officeLocationData.officeLocation != null -> {
+                        log.info("Bruker officeLocation for enhet")
+                        officeLocationData.officeLocation
+                    }
+                    officeLocationData.streetAddress != null -> {
+                        log.info("Bruker streetAddress for enhet")
+                        officeLocationData.streetAddress
+                    }
+                    else -> {
+                        log.warn("Ingen officeLocation eller streetAddress funnet")
+                        ""
+                    }
+                }
+                cache.set(username, CacheObject(enhet, LocalDateTime.now().plusDays(180)))
+                return enhet
             } catch (e: Exception) {
                 log.error(
                     "Feilet deserialisering",

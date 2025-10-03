@@ -124,7 +124,7 @@ class DokarkivGateway(
             .toEntity(JournalPostResponse::class.java)
             .awaitFirst()
 
-        if (response.statusCode == HttpStatus.CREATED && response.body != null) {
+        if (response.statusCode.is2xxSuccessful && response.body != null) {
             return response.body!!
         }
 
