@@ -81,7 +81,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.51.0</version>
+                <version>3.51.1</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
@@ -116,7 +116,7 @@
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>oauth2-oidc-sdk</artifactId>
-                <version>11.29.1</version>
+                <version>11.29.2</version>
             </dependency>
 
         </dependencies>
