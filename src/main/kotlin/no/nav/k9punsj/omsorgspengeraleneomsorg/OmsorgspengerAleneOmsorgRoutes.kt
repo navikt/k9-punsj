@@ -43,8 +43,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = norskIdent,
                     url = Urls.HenteMappe
                 )?.let { return@RequestContext it }
 
@@ -62,8 +62,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val nySøknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = nySøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = nySøknad.norskIdent,
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
@@ -81,8 +81,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = sendSøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = sendSøknad.norskIdent,
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
@@ -94,8 +94,8 @@ internal class OmsorgspengerAleneOmsorgRoutes(
             RequestContext(coroutineContext, request) {
                 val soknadTilValidering = request.omsorgspengerAleneOmsorgSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                        norskIdent = norskIdent,
+                    innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                        fnr = norskIdent,
                         url = Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }

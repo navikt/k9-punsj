@@ -20,7 +20,7 @@ internal class ArbeidsgiverRoutes(
 ) {
 
     suspend fun String.harTilgang() =
-        pepClient.harBasisTilgang(this, ArbeidsgiverePath)
+        pepClient.harLesetilgang(this, ArbeidsgiverePath)
 
     @Bean
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {

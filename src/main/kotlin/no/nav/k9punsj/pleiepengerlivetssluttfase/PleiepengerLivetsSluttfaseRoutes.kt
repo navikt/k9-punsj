@@ -45,7 +45,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         GET("/api${Urls.HenteMappe}") { request ->
             RequestContext(coroutineContext, request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(norskIdent = norskIdent, url = Urls.HenteMappe)
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
 
                 pleiepengerLivetsSluttfaseService.henteMappe(norskIdent)
@@ -69,8 +69,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
             RequestContext(coroutineContext, request) {
                 val sendSøknad = request.mapSendSøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = sendSøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = sendSøknad.norskIdent,
                     url = Urls.SendEksisterendeSøknad
                 )?.let { return@RequestContext it }
 
@@ -81,8 +81,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
             RequestContext(coroutineContext, request) {
                 val opprettNySøknad = request.mapNySøknad()
-                innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                    norskIdent = opprettNySøknad.norskIdent,
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = opprettNySøknad.norskIdent,
                     url = Urls.NySøknad
                 )?.let { return@RequestContext it }
 
@@ -94,8 +94,8 @@ internal class PleiepengerLivetsSluttfaseRoutes(
             RequestContext(coroutineContext, request) {
                 val soknadTilValidering = request.pleiepengerPlsSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
-                    innlogget.harInnloggetBrukerTilgangTilOgSendeInn(
-                        norskIdent = norskIdent,
+                    innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                        fnr = norskIdent,
                         url = Urls.ValiderSøknad
                     )?.let { return@RequestContext it }
                 }
@@ -107,8 +107,9 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(coroutineContext, request) {
                 val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTil(
-                    norskIdentDto = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
+                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
+                    fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
+                    fnrForSporingslogg = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
                     url = Urls.HentInfoFraK9sak
                 )?.let { return@RequestContext it }
 
