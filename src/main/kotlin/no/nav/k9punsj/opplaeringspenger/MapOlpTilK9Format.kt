@@ -193,7 +193,6 @@ internal class MapOlpTilK9Format(
                 Journalpost()
                     .medJournalpostId(journalpostId)
                     .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
-                    .medInneholderMedisinskeOpplysninger(harMedisinskeOpplysninger)
             )
         }
     }

@@ -37,7 +37,6 @@ internal class MapOlpTilK9FormatTest {
               "begrunnelseForInnsending": { "tekst": "" },
               "bosteder": [],
               "harInfoSomIkkeKanPunsjes": false,
-              "harMedisinskeOpplysninger": true,
               "journalposter": ["200"],
               "klokkeslett": "12:53",
               "kurs": {

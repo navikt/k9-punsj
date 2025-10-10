@@ -58,7 +58,6 @@ internal class MappeService(
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
                 klokkeslett = søknadfelles.klokkeslett,
                 harInfoSomIkkeKanPunsjes = false,
-                harMedisinskeOpplysninger = false,
                 k9saksnummer = nySøknad.k9saksnummer
             )
 
