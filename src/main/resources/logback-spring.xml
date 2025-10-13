@@ -23,7 +23,7 @@
                 </valueMask>
                 <valueMask>
                     <!-- regex for å matche JWT -->
-                    <value>(e[yw][a-Za-z0-9_-]*)\.(e[yw][a-Za-z0-9_-]*)\.([a-Za-z0-9_-]+)</value>
+                    <value>(e[yw][A-Za-z0-9_-]*)\.(e[yw][A-Za-z0-9_-]*)\.([A-Za-z0-9_-]+)</value>
                     <!-- bevarer header og body, men ikke signatur -->
                     <mask>$1.$2</mask>
                 </valueMask>
