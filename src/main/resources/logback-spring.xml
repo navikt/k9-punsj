@@ -1,34 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                <valueMask>
-                    <!--
-                    Regex for å matche 11-sifret nummer.
-                    (^|\W) – Matcher starten av strengen eller et ikke-alfanumerisk tegn, slik at vi ikke klipper av tall som ikke er en del av en 11-sifret sekvens.
-                    (\d{4}) – Fanger de første 4 sifrene.
-                    \d{7} – Matcher de resterende 7 sifrene.
-                    (?=$|\W) – Sørger for at treffet slutter ved grensen av det 11-sifrede tallet, enten ved slutten av strengen eller etterfulgt av et ikke-alfanumerisk tegn.
-                     -->
-                    <value>(^|\W)(\d{4})\d{7}(?=$|\W)</value>
-
-                    <!--
-                    Behold de første 4 sifrene (dag og måned) og masker de resterende 7 sifrene.
-                    $1 – Refererer til den første fangstgruppen (f.eks. separatoren eller starten).
-                    $2 – Refererer til de første 4 fangede sifrene.
-                    ******* – Erstatter resten av sifrene med stjerner.
-                    -->
-                    <mask>$1$2*******</mask>
-                </valueMask>
-                <valueMask>
-                    <!-- regex for å matche JWT -->
-                    <value>(e[yw][a-Za-z0-9_-]*)\.(e[yw][a-Za-z0-9_-]*)\.([a-Za-z0-9_-]+)</value>
-                    <!-- bevarer header og body, men ikke signatur -->
-                    <mask>$1.$2</mask>
-                </valueMask>
-            </jsonGeneratorDecorator>
-        </encoder>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
     <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
