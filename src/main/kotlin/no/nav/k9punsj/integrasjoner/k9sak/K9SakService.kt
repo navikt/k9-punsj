@@ -22,6 +22,10 @@ interface K9SakService {
         punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?>
 
+    suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
+        saksnummer: String,
+    ): Pair<List<PeriodeDto>?, String?>
+
     suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String? = null,
