@@ -131,13 +131,9 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
         saksnummer: String,
     ): Pair<List<PeriodeDto>?, String?> {
-        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(
-            SaksnummerDto(saksnummer)) }.getOrNull()
-            ?: return Pair(null, "Feilet serialisering")
-
-        val (json, feil) = kotlin.runCatching {
+          val (json, feil) = kotlin.runCatching {
             httpPost(
-                body,
+                "",
                 hentPerioderForSakUrl + "?saksnummer=${saksnummer}"
             )
         }.fold(
