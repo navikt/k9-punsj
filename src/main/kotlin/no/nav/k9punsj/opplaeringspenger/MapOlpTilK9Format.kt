@@ -109,8 +109,8 @@ internal class MapOlpTilK9Format(
 
 
     private fun OpplaeringspengerSøknadDto.Kurs.leggTilKurs() {
-        // hvis hverken institusjonsUuid eller holder er satt, så skal ikke kurs legges til
-        if (this.kursHolder?.institusjonsUuid.isNullOrBlank() && this.kursHolder?.holder.isNullOrBlank()) {
+        // hvis hverken institusjonsUuid, holder eller reise er satt, så skal ikke kurs legges til
+        if (this.kursHolder?.institusjonsUuid.isNullOrBlank() && this.kursHolder?.holder.isNullOrBlank() && this.kursperioder.isNullOrEmpty() && (this.reise?.reisedager.isNullOrEmpty() || this.reise?.reisedagerBeskrivelse.isNullOrBlank())) {
             return
         }
 
