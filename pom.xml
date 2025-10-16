@@ -31,13 +31,13 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
 
         <!-- Kontrakt -->
-        <k9-sak.version>6.0.0</k9-sak.version>
+        <k9-sak.version>6.0.1</k9-sak.version>
         <k9-format.version>12.5.7</k9-format.version>
         <k9-formidling.version>10.1.10</k9-formidling.version>
 
         <!-- database -->
         <postgresql.version>42.7.8</postgresql.version>
-        <flyway.version>11.13.2</flyway.version>
+        <flyway.version>11.14.0</flyway.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <HikariCP.version>7.0.2</HikariCP.version>
         <kotliquery.version>1.9.1</kotliquery.version>
@@ -86,7 +86,7 @@
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
-                <version>9.8</version>
+                <version>9.9</version>
             </dependency>
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -480,7 +480,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>

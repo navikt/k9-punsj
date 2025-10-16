@@ -31,6 +31,7 @@ import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSakUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReserverteSaksnummereUrl
@@ -52,7 +53,6 @@ import no.nav.k9punsj.omsorgspengerutbetaling.tilOmsUtvisning
 import no.nav.k9punsj.opplaeringspenger.tilOlpvisning
 import no.nav.k9punsj.pleiepengerlivetssluttfase.tilPlsvisning
 import no.nav.k9punsj.pleiepengersyktbarn.tilPsbvisning
-import no.nav.k9punsj.utils.PeriodeUtils.somK9Periode
 import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -84,6 +84,7 @@ class K9SakServiceImpl(
 
     internal object Urls {
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
+        internal const val hentPerioderForSakUrl = "/behandling/soknad/perioder/saksnummer"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
@@ -111,6 +112,31 @@ class K9SakServiceImpl(
             ?: return Pair(null, "Feilet serialisering")
 
         val (json, feil) = kotlin.runCatching { httpPost(body, hentPerioderUrl) }.fold(
+            onSuccess = { Pair(it, null) },
+            onFailure = { return Pair(null, it.message) }
+        )
+        return try {
+            if (json == null) {
+                return Pair(null, feil!!)
+            }
+            val resultat = objectMapper().readValue<List<Periode>>(json)
+            val liste = resultat
+                .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
+            Pair(liste, null)
+        } catch (e: Exception) {
+            Pair(null, "Feilet deserialisering $e")
+        }
+    }
+
+    override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
+        saksnummer: String,
+    ): Pair<List<PeriodeDto>?, String?> {
+          val (json, feil) = kotlin.runCatching {
+            httpPost(
+                "",
+                hentPerioderForSakUrl + "?saksnummer=${saksnummer}"
+            )
+        }.fold(
             onSuccess = { Pair(it, null) },
             onFailure = { return Pair(null, it.message) }
         )
@@ -162,7 +188,7 @@ class K9SakServiceImpl(
         val (json, feil) = kotlin.runCatching {
             httpPost(
                 saksnummerJson,
-                "/behandling/soknad/perioder/saksnummer?saksnummer=${saksnummer.saksnummer}"
+                hentPerioderForSakUrl + "?saksnummer=${saksnummer.saksnummer}"
             )
         }.fold(
             onSuccess = { Pair(it, null) },

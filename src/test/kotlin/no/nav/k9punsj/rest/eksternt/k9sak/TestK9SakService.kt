@@ -47,6 +47,10 @@ internal class TestK9SakService : K9SakService {
         return Pair(emptyList(), null)
     }
 
+    override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): Pair<List<PeriodeDto>?, String?> {
+        return Pair(emptyList(), null)
+    }
+
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,
         barn: String?,
