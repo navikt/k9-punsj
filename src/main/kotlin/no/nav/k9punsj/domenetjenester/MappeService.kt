@@ -57,7 +57,6 @@ internal class MappeService(
                 journalposter = listOf(nySøknad.journalpostId),
                 mottattDato = søknadfelles.mottattDato?.toLocalDate(),
                 klokkeslett = søknadfelles.klokkeslett,
-                harInfoSomIkkeKanPunsjes = false,
                 k9saksnummer = nySøknad.k9saksnummer
             )
 

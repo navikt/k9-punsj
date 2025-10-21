@@ -32,7 +32,6 @@ data class OpplaeringspengerSøknadDto(
     val uttak: List<UttakDto>? = null,
     val omsorg: OmsorgDto? = null,
     val kurs: Kurs? = null,
-    val harInfoSomIkkeKanPunsjes: Boolean,
     val begrunnelseForInnsending: BegrunnelseForInnsendingDto? = null,
     val metadata: Map<*, *>? = null,
     val k9saksnummer: String? = null
@@ -118,7 +117,6 @@ internal fun Mappe.tilOlpVisning(norskIdent: String): SvarOlpDto {
                     soeknadId = s.søknadId,
                     soekerId = norskIdent,
                     journalposter = hentUtJournalposter(s),
-                    harInfoSomIkkeKanPunsjes = false,
                     k9saksnummer = s.k9saksnummer
                 )
             }
@@ -130,8 +128,7 @@ internal fun SøknadEntitet.tilOlpvisning(): OpplaeringspengerSøknadDto {
     if (søknad == null) {
         return OpplaeringspengerSøknadDto(
             soeknadId = this.søknadId,
-            journalposter = hentUtJournalposter(this),
-            harInfoSomIkkeKanPunsjes = false,
+            journalposter = hentUtJournalposter(this)
         )
     }
     return objectMapper().convertValue(søknad)

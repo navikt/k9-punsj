@@ -36,7 +36,6 @@ internal class MapOlpTilK9FormatTest {
               "barn": { "norskIdent": "03091477490", "foedselsdato": "" },
               "begrunnelseForInnsending": { "tekst": "" },
               "bosteder": [],
-              "harInfoSomIkkeKanPunsjes": false,
               "journalposter": ["200"],
               "klokkeslett": "12:53",
               "kurs": {

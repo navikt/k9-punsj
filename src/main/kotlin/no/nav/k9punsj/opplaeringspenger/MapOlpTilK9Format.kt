@@ -192,7 +192,6 @@ internal class MapOlpTilK9Format(
             søknad.medJournalpost(
                 Journalpost()
                     .medJournalpostId(journalpostId)
-                    .medInformasjonSomIkkeKanPunsjes(harInfoSomIkkeKanPunsjes)
             )
         }
     }
