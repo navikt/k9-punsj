@@ -167,7 +167,6 @@ internal object OpplaeringspengerSoknadVisningDtoUtils {
             samtidigHjemme = null,
             harMedsoeker = null
         ),
-        harInfoSomIkkeKanPunsjes = true,
         trekkKravPerioder = setOf(requiredPeriode),
         begrunnelseForInnsending = OpplaeringspengerSøknadDto.BegrunnelseForInnsendingDto("fordi dette er ett test"),
         kurs = OpplaeringspengerSøknadDto.Kurs(
