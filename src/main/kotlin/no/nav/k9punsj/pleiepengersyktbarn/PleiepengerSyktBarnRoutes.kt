@@ -42,7 +42,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
-        internal const val HentInfoFraK9sakMedSaksnummer = "/${søknadType}/k9sak/info/saksnummer" // post
+        internal const val HentInfoFraK9sakMedSaksnummer = "/$søknadType/k9sak/info/saksnummer" // post
     }
 
     @Bean
