@@ -272,4 +272,35 @@ internal class PleiepengerSyktBarnSoknadOpenApi {
     )
     fun HentInfoFraK9sak(@RequestBody matchFagsak: Matchfagsak) {
     }
+
+    @PostMapping(
+        PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sakMedSaksnummer,
+        produces = ["application/json"]
+    )
+    @Operation(
+        summary = "Henter perioder som ligger i k9-sak med saksnummer",
+        description = "Henter perioder som ligger i k9-sak med saksnummer",
+        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Henter fagsak på pleiepenger sykt barn fra k9-sak og gjør den tilgjengelig for visning",
+                content = [
+                    Content(
+                        schema = Schema(
+                            implementation = PerioderDto::class
+                        )
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Fant ingen fagsak med gitt saksnummer"
+            )
+        ]
+    )
+    fun HentInfoFraK9sakMedSaksnummer(@RequestParam saksnummer: String) {
+    }
 }
