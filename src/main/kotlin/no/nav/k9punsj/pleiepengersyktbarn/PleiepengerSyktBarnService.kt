@@ -106,7 +106,7 @@ internal class PleiepengerSyktBarnService(
 
         try {
             val søknad: PleiepengerSyktBarnSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknad)?.first ?: emptyList()
+            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
 
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -203,7 +203,7 @@ internal class PleiepengerSyktBarnService(
                 .badRequest()
                 .buildAndAwait()
 
-        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(soknadTilValidering)?.first ?: emptyList()
+        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
 
@@ -270,15 +270,10 @@ internal class PleiepengerSyktBarnService(
         }
     }
 
-    @Deprecated("Flyttes til felles k9-sak tjeneste")
-    private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerSyktBarnSøknadDto): Pair<List<PeriodeDto>?, String?>? {
-        if (dto.soekerId.isNullOrBlank() || dto.barn == null || dto.barn.norskIdent.isNullOrBlank()) {
-            return null
+    private suspend fun henterPerioderSomFinnesIK9sak(saksnummer: String?): Pair<List<PeriodeDto>?, String?> {
+        if (saksnummer.isNullOrBlank()) {
+            return Pair(emptyList(), null)
         }
-        return k9SakService.hentPerioderSomFinnesIK9(
-            søker = dto.soekerId,
-            barn = dto.barn.norskIdent,
-            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        )
+        return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
     }
 }
