@@ -3,6 +3,8 @@ package no.nav.k9punsj.pleiepengersyktbarn
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.felles.dto.PeriodeDto
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
@@ -14,11 +16,15 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class PleiepengerSyktBarnRoutes(
     private val pleiepengerSyktBarnService: PleiepengerSyktBarnService,
+    private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils
 ) {
@@ -36,6 +42,7 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
         internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
+        internal const val HentInfoFraK9sakMedSaksnummer = "/$søknadType/k9sak/info/saksnummer" // post
     }
 
     @Bean
@@ -113,6 +120,25 @@ internal class PleiepengerSyktBarnRoutes(
                 )?.let { return@RequestContext it }
 
                 pleiepengerSyktBarnService.hentInfoFraK9Sak(matchfagsak)
+            }
+        }
+
+        POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
+            RequestContext(coroutineContext, request) {
+                val saksnummer = request.queryParam("saksnummer").orElseThrow()
+                val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
+
+                if (perioder != null) {
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(perioder)
+                } else {
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(listOf<PeriodeDto>())
+                }
             }
         }
     }
