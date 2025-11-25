@@ -590,13 +590,15 @@ class K9SakServiceImpl(
             periode
         } else {
             val søkerIdent = soknad.søker.personIdent.verdi
-            val behandlingsÅr = hentReservertSaksnummer(Saksnummer(saksnummer))?.behandlingsår ?: periodeFraFagsak(
-                søkerIdent, saksnummer
-            ).fom.year
-            Periode(
-                LocalDate.of(behandlingsÅr, 1, 1),
-                LocalDate.of(behandlingsÅr, 12, 31)
-            )
+            val behandlingsÅr = hentReservertSaksnummer(Saksnummer(saksnummer))?.behandlingsår
+            return if (behandlingsÅr != null) {
+                Periode(
+                    LocalDate.of(behandlingsÅr, 1, 1),
+                    LocalDate.of(behandlingsÅr, 12, 31)
+                )
+            } else {
+                periodeFraFagsak(søkerIdent, saksnummer)
+            }
         }
     }
 
