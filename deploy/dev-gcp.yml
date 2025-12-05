@@ -59,11 +59,10 @@ spec:
     - https://k9-punsj.intern.dev.nav.no
   resources:
     limits:
-      cpu: 2000m
-      memory: 1024Mi
+      memory: 2048Mi
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 1024Mi
   replicas:
     min: 1
     max: 1

@@ -45,10 +45,9 @@ spec:
     timeout: 1
   resources:
     limits:
-      cpu: 4000m
       memory: 2048Mi
     requests:
-      cpu: 500m
+      cpu: 200m
       memory: 1024Mi
   ingresses:
     - https://k9-punsj.nais.adeo.no
