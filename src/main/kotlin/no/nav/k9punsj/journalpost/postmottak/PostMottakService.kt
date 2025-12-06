@@ -58,7 +58,7 @@ class PostMottakService(
 
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
-        if (fagsakYtelseType != FagsakYtelseType.OPPLÆRINGSPENGER) {
+        if (eksisterendeSaksnummer == null && fagsakYtelseType != FagsakYtelseType.OPPLÆRINGSPENGER) {
             // Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.
             k9SakService.hentFagsaker(brukerIdent).first
                 ?.let { fagsaker ->
@@ -67,7 +67,7 @@ class PostMottakService(
                                 && it.sakstype == fagsakYtelseType
                                 && (it.gyldigPeriode?.fom?.year == oppdatertJournalpost.behandlingsAar || oppdatertJournalpost.behandlingsAar == null)
                     }
-                        ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
+                        ?.let { eksisterendeFagsak ->
                             throw PostMottakException(
                                 melding = "Det eksisterer allerede en fagsak(${eksisterendeFagsak.sakstype.name} - ${eksisterendeFagsak.saksnummer}) på pleietrengende.",
                                 httpStatus = HttpStatus.CONFLICT,
