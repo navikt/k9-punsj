@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import jakarta.validation.constraints.Null
 import kotlinx.coroutines.runBlocking
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -88,7 +87,6 @@ class K9SakServiceImpl(
     internal object Urls {
         internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentPerioderForSakUrl = "/behandling/soknad/perioder/saksnummer"
-        internal const val hentPerioderForSakUrlV2 = "/behandling/soknad/perioder/saksnummer/v2"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
@@ -152,7 +150,7 @@ class K9SakServiceImpl(
             }
             val resultat = objectMapper().readValue<List<Periode>>(json)
             val sammenslåttePerioder =
-                LocalDateTimeline(resultat.map { LocalDateSegment<Null>(it.fom, it.tom, null) }).compress()
+                LocalDateTimeline(resultat.map { LocalDateSegment<Unit>(it.fom, it.tom, null) }).compress()
             val liste =
                 sammenslåttePerioder.toSegments().map { periode -> PeriodeDto(periode.fom, periode.tom) }
             Pair(liste, null)
