@@ -151,8 +151,10 @@ class K9SakServiceImpl(
                 return Pair(null, feil!!)
             }
             val resultat = objectMapper().readValue<List<Periode>>(json)
-            val sammenslåttePerioder = LocalDateTimeline(resultat.map { LocalDateSegment<Null>(it.fom, it.tom, null) })
-            val liste = sammenslåttePerioder.toSegments().map { periode -> PeriodeDto(periode.fom, periode.tom) }
+            val sammenslåttePerioder =
+                LocalDateTimeline(resultat.map { LocalDateSegment<Null>(it.fom, it.tom, null) }).compress()
+            val liste =
+                sammenslåttePerioder.toSegments().map { periode -> PeriodeDto(periode.fom, periode.tom) }
             Pair(liste, null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
