@@ -2,12 +2,13 @@ package no.nav.k9punsj.integrasjoner.k9sak.dto
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType.*
+import no.nav.k9.sak.typer.AktørId
 
 data class ReserverSaksnummerDto(
-    val brukerAktørId: String,
-    val pleietrengendeAktørId: String? = null,
-    val relatertPersonAktørId: String? = null,
-    val barnAktørIder: List<String> = listOf(),
+    val brukerAktørId: AktørId,
+    val pleietrengendeAktørId: AktørId? = null,
+    val relatertPersonAktørId: AktørId? = null,
+    val barnAktørIder: List<AktørId> = listOf(),
     val ytelseType: FagsakYtelseType,
     var behandlingsår: Int? = null,
 ) {
