@@ -85,8 +85,8 @@ class PostMottakService(
             val reservertSaksnummerDto = k9SakService.reserverSaksnummer(
                 ReserverSaksnummerDto(
                     brukerAktørId = AktørId(brukerAktørId),
-                    pleietrengendeAktørId = pleietrengendeAktørId.takeUnless { it.isNullOrBlank() }?.let { AktørId(it) },
-                    relatertPersonAktørId = relatertPersonAktørId.takeUnless { it.isNullOrBlank() }?.let { AktørId(it) },
+                    pleietrengendeAktørId?.let { AktørId(it) },
+                    relatertPersonAktørId = relatertPersonAktørId?.let { AktørId(it) },
                     barnAktørIder = fosterbarnAktørIder?.map { AktørId(it) } ?: listOf(),
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
