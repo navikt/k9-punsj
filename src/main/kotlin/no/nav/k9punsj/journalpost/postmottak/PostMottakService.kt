@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost.postmottak
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.sak.typer.AktørId
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
@@ -83,10 +84,10 @@ class PostMottakService(
             logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${validertMottattJournalpost.journalpostId}")
             val reservertSaksnummerDto = k9SakService.reserverSaksnummer(
                 ReserverSaksnummerDto(
-                    brukerAktørId = brukerAktørId,
-                    pleietrengendeAktørId = pleietrengendeAktørId,
-                    relatertPersonAktørId = relatertPersonAktørId,
-                    barnAktørIder = fosterbarnAktørIder ?: listOf(),
+                    brukerAktørId = AktørId(brukerAktørId),
+                    pleietrengendeAktørId = pleietrengendeAktørId?.let { AktørId(it) },
+                    relatertPersonAktørId = relatertPersonAktørId?.let { AktørId(it) },
+                    barnAktørIder = fosterbarnAktørIder?.map { AktørId(it) } ?: listOf(),
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
                 )
