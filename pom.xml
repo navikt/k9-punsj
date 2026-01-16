@@ -47,7 +47,7 @@
         <mockk.version>1.13.8</mockk.version>
         <jsonassert.version>1.5.1</jsonassert.version>
         <testcontainers.version>1.21.4</testcontainers.version>
-        <springmockk.version>5.0.1</springmockk.version>
+        <springmockk.version>4.0.2</springmockk.version>
         <wiremock.version>3.13.2</wiremock.version>
 
         <!-- pdf -->
