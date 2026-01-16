@@ -168,6 +168,8 @@ spec:
       value: "false"
     - name: KODEVERDI_SOM_STRING
       value: "false"
+    - name: ENABLE_SAK_SPLITT_PSB
+      value: "false"
 
     # Swagger
     - name: AZURE_LOGIN_URL
