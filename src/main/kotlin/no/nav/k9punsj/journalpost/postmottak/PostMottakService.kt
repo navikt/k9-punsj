@@ -15,6 +15,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -26,6 +27,7 @@ class PostMottakService(
     private val k9SakService: K9SakService,
     private val aksjonspunktService: AksjonspunktService,
     private val personService: PersonService,
+    @Value("\${ENABLE_SAK_SPLITT_PSB:false}") private val enableSakSplittPSB: Boolean
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
@@ -59,7 +61,7 @@ class PostMottakService(
 
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
-        if (eksisterendeSaksnummer == null && fagsakYtelseType != FagsakYtelseType.OPPLÆRINGSPENGER) {
+        if (eksisterendeSaksnummer == null && fagsakYtelseType != FagsakYtelseType.OPPLÆRINGSPENGER && !(enableSakSplittPSB && fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN)) {
             // Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.
             k9SakService.hentFagsaker(brukerIdent).first
                 ?.let { fagsaker ->
