@@ -8,6 +8,8 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import kotlinx.coroutines.runBlocking
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
@@ -108,8 +110,10 @@ class K9SakServiceImpl(
             pleietrengende = barn
         )
 
-        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }.getOrNull()
-            ?: return Pair(null, "Feilet serialisering")
+        val body =
+            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }
+                .getOrNull()
+                ?: return Pair(null, "Feilet serialisering")
 
         val (json, feil) = kotlin.runCatching { httpPost(body, hentPerioderUrl) }.fold(
             onSuccess = { Pair(it, null) },
@@ -131,7 +135,7 @@ class K9SakServiceImpl(
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
         saksnummer: String,
     ): Pair<List<PeriodeDto>?, String?> {
-          val (json, feil) = kotlin.runCatching {
+        val (json, feil) = kotlin.runCatching {
             httpPost(
                 "",
                 hentPerioderForSakUrl + "?saksnummer=${saksnummer}"
@@ -145,8 +149,10 @@ class K9SakServiceImpl(
                 return Pair(null, feil!!)
             }
             val resultat = objectMapper().readValue<List<Periode>>(json)
-            val liste = resultat
-                .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
+            val sammenslåttePerioder =
+                LocalDateTimeline(resultat.map { LocalDateSegment<Unit>(it.fom, it.tom, null) }).compress()
+            val liste =
+                sammenslåttePerioder.toSegments().map { periode -> PeriodeDto(periode.fom, periode.tom) }
             Pair(liste, null)
         } catch (e: Exception) {
             Pair(null, "Feilet deserialisering $e")
@@ -172,8 +178,10 @@ class K9SakServiceImpl(
             periode = periode
         )
 
-        val saksnummerBody = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(finnFagsakDto) }.getOrNull()
-            ?: return Pair(null, "Feilet serialisering")
+        val saksnummerBody =
+            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(finnFagsakDto) }
+                .getOrNull()
+                ?: return Pair(null, "Feilet serialisering")
 
         val (saksnummerJson, saksnummerFeil) = kotlin.runCatching { httpPost(saksnummerBody, finnFagsak) }.fold(
             onSuccess = { Pair(it, null) },
@@ -219,8 +227,10 @@ class K9SakServiceImpl(
             periode = periodeDto
         )
 
-        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }.getOrNull()
-            ?: return Pair(null, "Feilet serialisering")
+        val body =
+            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }
+                .getOrNull()
+                ?: return Pair(null, "Feilet serialisering")
 
         val (json, feil) = kotlin.runCatching { httpPost(body, hentIntektsmeldingerUrl) }.fold(
             onSuccess = { Pair(it, null) },
@@ -310,7 +320,9 @@ class K9SakServiceImpl(
             null
         )
 
-        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId) }.getOrNull()
+        val body = kotlin.runCatching {
+            objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId)
+        }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
         val response = kotlin.runCatching { httpPost(body, opprettFagsakUrl) }.fold(
@@ -352,10 +364,12 @@ class K9SakServiceImpl(
             null
         )
 
-        val body = kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId) }.getOrNull()
+        val body = kotlin.runCatching {
+            objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId)
+        }.getOrNull()
             ?: throw IllegalStateException("Feilet serialisering")
 
-        val response =  httpPost(body, opprettFagsakUrl)
+        val response = httpPost(body, opprettFagsakUrl)
 
         return JSONObject(response).getString("saksnummer").toString()
     }
