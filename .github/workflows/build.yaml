@@ -31,13 +31,45 @@ jobs:
       pg_version: 16
     secrets: inherit
 
+  verdikjede-tester:
+    name: Verdikjedetester
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    needs: build-app
+    with:
+      tag: ${{ needs.build-app.outputs.build-version }}
+      suites: "punsj"
+      override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
+      image_version: ${{ needs.build-app.outputs.build-version }}
+
+  verdikjede-tester-dependabot:
+    name: Verdikjedetester Dependabot
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    needs: build-app
+    with:
+      tag: ${{ needs.build-app.outputs.build-version }}
+      suites: "punsj"
+      override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
+      image_version: ${{ needs.build-app.outputs.build-version }}
+
   deploy-dev:
     name: Deploy dev
     permissions:
       id-token: write
       contents: write
     if: ${{ github.ref_name == github.event.repository.default_branch}}
-    needs: [build-app]
+    needs: [build-app, verdikjede-tester]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
@@ -52,7 +84,7 @@ jobs:
       id-token: write
       contents: write
     if: ${{ github.ref_name == github.event.repository.default_branch}}
-    needs: [build-app, deploy-dev]
+    needs: [build-app, verdikjede-tester, deploy-dev]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
