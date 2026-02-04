@@ -24,6 +24,7 @@ internal class JournalpostInfoRoutes(
 
     internal object Urls {
         internal const val HentÅpneJournalposterPost = "/journalpost/uferdig"
+        internal const val LosAvstemming = "/journalpost/losavstemming"
     }
 
     @Bean
@@ -45,14 +46,8 @@ internal class JournalpostInfoRoutes(
                     .bodyValueAndAwait(JournalpostIderDto(journalpostIder, journalpostPåBarnet))
             }
         }
-    }
 
-    private suspend fun ServerRequest.søkUferdigJournalposter() =
-        body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
-
-    @Bean
-    fun journalpostInfoRoutes() = SaksbehandlerRoutes(authenticationHandler) {
-        GET("/api/journalpost/losavstemming") { request ->
+        GET("/api${Urls.LosAvstemming}") { request ->
             RequestContext(coroutineContext, request) {
                 val journalposter = journalpostService.hentÅpneJournalposter()
                     .map { journalpost ->
@@ -70,6 +65,9 @@ internal class JournalpostInfoRoutes(
             }
         }
     }
+
+    private suspend fun ServerRequest.søkUferdigJournalposter() =
+        body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
     data class JournalpostTilstand(
         val journalpostId: String,
