@@ -50,4 +50,30 @@ internal class JournalpostInfoRoutes(
     private suspend fun ServerRequest.søkUferdigJournalposter() =
         body(BodyExtractors.toMono(SøkUferdigJournalposter::class.java)).awaitFirst()
 
+    @Bean
+    fun journalpostInfoRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+        GET("/api/journalpost/losavstemming") { request ->
+            RequestContext(coroutineContext, request) {
+                val journalposter = journalpostService.hentÅpneJournalposter()
+                    .map { journalpost ->
+                        JournalpostTilstand(
+                            journalpostId = journalpost.journalpostId,
+                            eksternId = journalpost.uuid.toString(),
+                            ytelseType = journalpost.ytelse,
+                        )
+                    }
+
+                return@RequestContext ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(journalposter)
+            }
+        }
+    }
+
+    data class JournalpostTilstand(
+        val journalpostId: String,
+        val eksternId: String,
+        val ytelseType: String?,
+    )
 }
