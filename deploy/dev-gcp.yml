@@ -33,6 +33,9 @@ spec:
         - application: k9-sak
           namespace: k9saksbehandling
           cluster: dev-fss
+        - application: k9-los-api
+          namespace: k9saksbehandling
+          cluster: dev-fss
     outbound:
       rules:
         - application: sif-abac-pdp
