@@ -8,4 +8,8 @@ internal class JournalpostInfoContoller {
     @PostMapping(JournalpostInfoRoutes.Urls.HentÅpneJournalposterPost, produces = ["application/json"], consumes = ["application/json"])
     fun HentÅpneJournalposterPost(@RequestBody dto: SøkUferdigJournalposter) {
     }
+
+    @GetMapping(JournalpostInfoRoutes.Urls.LosAvstemming, produces = ["application/json"])
+    fun hentJournalposterForLosAvstemming() {
+    }
 }
