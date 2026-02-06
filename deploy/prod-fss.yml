@@ -33,6 +33,9 @@ spec:
         - application: k9-punsj-frontend
           namespace: k9saksbehandling
           cluster: prod-gcp
+        - application: k9-los-api
+          namespace: k9saksbehandling
+          cluster: prod-fss
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
