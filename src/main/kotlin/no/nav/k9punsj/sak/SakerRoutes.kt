@@ -31,6 +31,7 @@ internal class SakerRoutes(
         internal const val HentSaker = "/saker/hent"
     }
 
+
     @Bean
     fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentSaker}") { request ->
