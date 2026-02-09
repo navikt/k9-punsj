@@ -85,7 +85,9 @@ fun OmsorgspengerUtbetaling.publiserMetrikker(søknad: Søknad, meterRegistry: M
 
 fun hentSøknadsperiodeUker(ytelse: Ytelse): Double? {
     val søknadsperiode = runCatching { ytelse.søknadsperiode }.getOrNull() ?: return null
-    return ChronoUnit.WEEKS.between(søknadsperiode.fraOgMed, søknadsperiode.tilOgMed).toDouble()
+    val fraOgMed = søknadsperiode.fraOgMed ?: return null
+    val tilOgMed = søknadsperiode.tilOgMed ?: return null
+    return ChronoUnit.WEEKS.between(fraOgMed, tilOgMed).toDouble()
 }
 
 fun fellesMetrikker(søknad: Søknad, meterRegistry: MeterRegistry) {
