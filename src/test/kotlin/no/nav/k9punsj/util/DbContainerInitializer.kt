@@ -2,7 +2,7 @@ package no.nav.k9punsj.util
 
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 
 class DbContainerInitializer: ApplicationContextInitializer<ConfigurableApplicationContext> {
     companion object {

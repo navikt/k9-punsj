@@ -1,4 +1,7 @@
 spring:
+  http:
+    codecs:
+      preferred-json-mapper: jackson2
   flyway:
     enabled: true
     init-sqls:

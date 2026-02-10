@@ -166,7 +166,7 @@ private suspend fun serverResponseAsProblemDetails(
     serverRequest: ServerRequest,
 ): ServerResponse {
     val problemDetail = error.body
-    problemDetail.instance = serverRequest.uri()
+    problemDetail.instance = URI(serverRequest.uri().path)
     problemDetail.setProperty("correlationId", serverRequest.correlationId())
 
     logger.error("{}", problemDetail)

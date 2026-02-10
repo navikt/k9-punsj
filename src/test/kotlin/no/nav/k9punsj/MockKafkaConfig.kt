@@ -36,7 +36,7 @@ class MockKafkaConfig {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofMillis(RETRY_INTERVAL))
         factory.setCommonErrorHandler(CommonContainerStoppingErrorHandler())
-        factory.consumerFactory = consumerFactory
+        factory.setConsumerFactory(consumerFactory)
         return factory
     }
 
