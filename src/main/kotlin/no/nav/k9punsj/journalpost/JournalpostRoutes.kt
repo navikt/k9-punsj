@@ -144,7 +144,6 @@ internal class JournalpostRoutes(
 
                     val utledetSak =
                         utledSak(
-                            erFerdigstiltEllerJournalfoert,
                             safSak,
                             k9Fagsak,
                             k9PunsjFagsakYtelseType,
@@ -434,7 +433,6 @@ internal class JournalpostRoutes(
     }
 
     private suspend fun utledSak(
-        erFerdigstiltEllerJournalfoert: Boolean,
         safSak: SafDtos.Sak?,
         k9Fagsak: SakInfoDto?,
         k9FagsakYtelseType: FagsakYtelseType?,
@@ -443,18 +441,20 @@ internal class JournalpostRoutes(
         logger.info("Utleder sak for journalpost")
         val harSafSak = safSak != null
         val safSakHarFagsakId = safSak?.fagsakId != null
-        val ikkeHarFagsak = k9Fagsak == null
+        val harK9Fagsak = k9Fagsak != null
 
-        val erReservertSaksnummer = harSafSak && safSakHarFagsakId && ikkeHarFagsak
-        logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harFagsak: $ikkeHarFagsak, erReservertSaksnummer: $erReservertSaksnummer")
+        val erReservertSaksnummer = harSafSak && safSakHarFagsakId && !harK9Fagsak
+        logger.info("erReservertSaksnummer: $erReservertSaksnummer. Grunnlag -> harSafSak: $harSafSak, safSakHarFagsakId: $safSakHarFagsakId, harK9Fagsak: $harK9Fagsak, erReservertSaksnummer: $erReservertSaksnummer")
 
         return when (erReservertSaksnummer) {
             true -> {
-                logger.info("Utleder reservert sak. Henter reservert saksnummer fra k9-sak med fagsakId: ${safSak!!.fagsakId}")
+                logger.info("Utleder reservert sak. Henter reservert saksnummer fra k9-sak hvis finnes med fagsakId: ${safSak!!.fagsakId}")
                 val reservertSaksnummerDto = k9SakService.hentReservertSaksnummer(
                     Saksnummer(safSak.fagsakId)
                 )
-                logger.info("Fant reservert saksnummer: $reservertSaksnummerDto")
+                logger.info(reservertSaksnummerDto?.let { "Fant reservert saksnummer: $it" }
+                    ?: "Fant ingen reservert saksnummer i k9-sak.")
+
                 val pleietrengendeIdent = reservertSaksnummerDto?.pleietrengendeAktørId?.let {
                     personService.finnEllerOpprettPersonVedAktørId(it).norskIdent
                 }

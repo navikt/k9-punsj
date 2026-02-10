@@ -458,7 +458,7 @@ class K9SakServiceImpl(
      * @throws RestKallException hvis det oppstår feil ved henting av reservert saksnummer.
      */
     override suspend fun hentReservertSaksnummer(saksnummer: Saksnummer): ReservertSaksnummerDto? {
-        val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}")
+        val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}", true)
         return if (result.isBlank()) null
         else kotlin.runCatching {
             objectMapper().readValue<ReservertSaksnummerDto>(
@@ -653,10 +653,10 @@ class K9SakServiceImpl(
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
 
-        return håndterFuelResult(result, request)
+        return håndterFuelResult(result, request, false)
     }
 
-    private suspend fun httpGet(url: String): String {
+    private suspend fun httpGet(url: String, tomStrengVed404: Boolean = false): String {
         val (request, _, result) = "$baseUrl$url"
             .httpGet()
             .header(
@@ -666,25 +666,30 @@ class K9SakServiceImpl(
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
 
-        return håndterFuelResult(result, request)
+        return håndterFuelResult(result, request, tomStrengVed404)
     }
 
     private fun håndterFuelResult(
         result: Result<String, FuelError>,
         request: Request,
+        tomStrengVed404: Boolean,
     ) = result.fold(
         { success: String -> success },
         { error: FuelError ->
-            log.error(
-                "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
-            )
-            log.error(error.toString())
-            throw RestKallException(
-                titel = "Restkall mot k9-sak feilet",
-                message = error.response.body().asString("text/plain"),
-                httpStatus = HttpStatus.valueOf(error.response.statusCode),
-                uri = error.response.url.toURI()
-            )
+            if (tomStrengVed404 && error.response.statusCode == HttpStatus.NOT_FOUND.value()) {
+                ""
+            } else {
+                log.error(
+                    "Error response = '${error.response.body().asString("text/plain")}' fra '${request.url}'"
+                )
+                log.error(error.toString())
+                throw RestKallException(
+                    titel = "Restkall mot k9-sak feilet",
+                    message = error.response.body().asString("text/plain"),
+                    httpStatus = HttpStatus.valueOf(error.response.statusCode),
+                    uri = error.response.url.toURI()
+                )
+            }
         }
     )
 
