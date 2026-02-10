@@ -78,6 +78,8 @@ class SafGateway(
                     configurer
                         .defaultCodecs()
                         .maxInMemorySize(MaxDokumentSize)
+                    configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper()))
+                    configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper()))
                 }.build()
         )
         .build()
