@@ -1,5 +1,6 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.dokument.Brevkode
@@ -19,17 +20,19 @@ import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.felles.dto.hentUtJournalposter
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.journalpost.JournalpostService
-import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.azuregraph.IAzureGraphService
 import no.nav.k9punsj.utils.ServerRequestUtils.søknadLocationUri
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.ProblemDetail
 import org.springframework.stereotype.Service
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
+import java.net.URI
 
 @Service
 internal class PleiepengerSyktBarnService(
@@ -102,7 +105,10 @@ internal class PleiepengerSyktBarnService(
 
     internal suspend fun sendEksisterendeSøknad(sendSøknad: SendSøknad): ServerResponse {
         val søknadEntitet = soknadService.hentSøknad(sendSøknad.soeknadId)
-            ?: return ServerResponse.badRequest().buildAndAwait()
+            ?: throw innsendingErrorResponseException(
+                status = HttpStatus.BAD_REQUEST,
+                detail = "Søknad med id ${sendSøknad.soeknadId} finnes ikke."
+            )
 
         try {
             val søknad: PleiepengerSyktBarnSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
@@ -120,9 +126,10 @@ internal class PleiepengerSyktBarnService(
 
             if (journalpostIder.isEmpty()) {
                 logger.error("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
-                return ServerResponse
-                    .status(HttpStatus.CONFLICT)
-                    .bodyValueAndAwait(OasFeil("Innsendingen må inneholde minst en journalpost som kan sendes inn."))
+                throw innsendingErrorResponseException(
+                    status = HttpStatus.CONFLICT,
+                    detail = "Innsendingen må inneholde minst en journalpost som kan sendes inn."
+                )
             }
 
             val (søknadK9Format, feilISøknaden) = MapPsbTilK9Format(
@@ -141,10 +148,10 @@ internal class PleiepengerSyktBarnService(
                     )
                 }.toList()
 
-                return ServerResponse
-                    .status(HttpStatus.BAD_REQUEST)
-                    .json()
-                    .bodyValueAndAwait(SøknadFeil(søknad.soeknadId, feil))
+                throw innsendingValidationErrorResponseException(
+                    søknadId = søknad.soeknadId,
+                    feil = feil
+                )
             }
 
             val feil = soknadService.opprettSakOgSendInnSøknad(
@@ -154,11 +161,10 @@ internal class PleiepengerSyktBarnService(
             )
             if (feil != null) {
                 val (httpStatus, feilen) = feil
-
-                return ServerResponse
-                    .status(httpStatus)
-                    .json()
-                    .bodyValueAndAwait(OasFeil(feilen))
+                throw innsendingErrorResponseException(
+                    status = httpStatus,
+                    detail = feilen
+                )
             }
 
             val ansvarligSaksbehandler = soknadService.hentSistEndretAvSaksbehandler(søknad.soeknadId)
@@ -172,12 +178,12 @@ internal class PleiepengerSyktBarnService(
                 .accepted()
                 .json()
                 .bodyValueAndAwait(søknadK9Format)
-        } catch (e: Exception) {
-            logger.error(e.localizedMessage, e)
-            return ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(e.localizedMessage)
+        } catch (error: Throwable) {
+            if (error is ErrorResponseException && error.statusCode.value() != HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+                throw error
+            }
+            logger.error(error.localizedMessage, error)
+            throw error.asInnsendingErrorResponseException()
         }
     }
 
@@ -275,5 +281,121 @@ internal class PleiepengerSyktBarnService(
             return Pair(emptyList(), null)
         }
         return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
+    }
+
+    private fun Throwable.asInnsendingErrorResponseException(): ErrorResponseException {
+        val detail = normalizedErrorMessage(this)
+        val problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, detail).apply {
+            title = "Feil ved innsending av søknad"
+            type = URI("/problem-details/innsending-feil")
+        }
+        return ErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR, problemDetail, this)
+    }
+
+    private fun innsendingErrorResponseException(
+        status: HttpStatus,
+        detail: String?,
+        properties: Map<String, Any?> = emptyMap()
+    ): ErrorResponseException {
+        val normalizedDetail = detail?.trim()?.takeIf { it.isNotEmpty() } ?: "Uhåndtert feil uten detaljer"
+        val (title, type) = when (status) {
+            HttpStatus.BAD_REQUEST -> "Ugyldig søknad for innsending" to URI("/problem-details/innsending-validering-feil")
+            HttpStatus.CONFLICT -> "Konflikt ved innsending av søknad" to URI("/problem-details/innsending-konflikt")
+            else -> "Feil ved innsending av søknad" to URI("/problem-details/innsending-feil")
+        }
+
+        val problemDetail = ProblemDetail.forStatusAndDetail(status, normalizedDetail).apply {
+            this.title = title
+            this.type = type
+            properties
+                .filterValues { it != null }
+                .forEach { (key, value) ->
+                    setProperty(key, value)
+                }
+        }
+        return ErrorResponseException(status, problemDetail, null)
+    }
+
+    private fun innsendingValidationErrorResponseException(
+        søknadId: String,
+        feil: List<SøknadFeil.SøknadFeilDto>
+    ): ErrorResponseException {
+        return innsendingErrorResponseException(
+            status = HttpStatus.BAD_REQUEST,
+            detail = "Søknaden inneholder valideringsfeil",
+            properties = mapOf(
+                "soeknadId" to søknadId,
+                "feil" to feil
+            )
+        )
+    }
+
+    private fun normalizedErrorMessage(error: Throwable): String {
+        val messageCandidates = listOfNotNull(
+            (error as? ErrorResponseException)?.body?.detail,
+            error.message,
+            error.localizedMessage
+        ).map { it.trim() }.filter { it.isNotEmpty() }
+
+        messageCandidates.forEach { candidate ->
+            extractFeilmelding(candidate)?.let { return it }
+        }
+
+        return "Uhåndtert feil uten detaljer"
+    }
+
+    private fun extractFeilmelding(raw: String): String? {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) {
+            return null
+        }
+
+        parseFeilmeldingFromJson(trimmed)?.let { return it }
+
+        val detailPattern = Regex(
+            pattern = "detail='(.*?)'(?=,\\s*instance=|,\\s*properties=|\\])",
+            options = setOf(RegexOption.DOT_MATCHES_ALL)
+        )
+        val detailText = detailPattern.find(trimmed)?.groupValues?.get(1)?.trim()
+        if (!detailText.isNullOrBlank()) {
+            parseFeilmeldingFromJson(detailText)?.let { return it }
+            return detailText
+        }
+
+        return trimmed
+    }
+
+    private fun parseFeilmeldingFromJson(raw: String): String? {
+        val sanitized = raw.trim()
+        val candidates = buildList {
+            add(sanitized)
+            add(sanitized.replace("\\\"", "\""))
+            if (sanitized.startsWith("\"") && sanitized.endsWith("\"") && sanitized.length > 1) {
+                add(sanitized.substring(1, sanitized.length - 1))
+            }
+        }.distinct()
+
+        candidates.forEach { candidate ->
+            val jsonNode = runCatching { objectMapper.readTree(candidate) }.getOrNull() ?: return@forEach
+            findFeilmelding(jsonNode)?.let { return it }
+        }
+
+        return null
+    }
+
+    private fun findFeilmelding(node: JsonNode): String? {
+        node.get("feilmelding")
+            ?.takeIf { it.isTextual }
+            ?.asText()
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
+
+        val detailNode = node.get("detail") ?: return null
+        return if (detailNode.isTextual) {
+            extractFeilmelding(detailNode.asText())
+        } else {
+            findFeilmelding(detailNode)
+        }
     }
 }

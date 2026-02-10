@@ -14,6 +14,7 @@ import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.felles.dto.SøknadFeil
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OpenApi
+import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -103,10 +104,10 @@ internal class PleiepengerSyktBarnSoknadOpenApi {
     @PostMapping(
         PleiepengerSyktBarnRoutes.Urls.SendEksisterendeSøknad,
         consumes = ["application/json"],
-        produces = ["application/json"]
+        produces = ["application/json", "application/problem+json"]
     )
     @Operation(
-        summary = "Sende inn søknad til behandling i saksbehsandlingssystemet.",
+        summary = "Sende inn søknad til behandling i saksbehandlingssystemet.",
         security = [SecurityRequirement(name = OpenApi.OAUTH2)]
     )
     @ApiResponses(
@@ -116,6 +117,7 @@ internal class PleiepengerSyktBarnSoknadOpenApi {
                 description = "Søknaden er lukket for endring og sendt til behandling.",
                 content = [
                     Content(
+                        mediaType = "application/json",
                         schema = Schema(
                             implementation = no.nav.k9.søknad.Søknad::class
                         )
@@ -127,18 +129,21 @@ internal class PleiepengerSyktBarnSoknadOpenApi {
                 description = "Innsending feilet grunnet mangler i søknaden.",
                 content = [
                     Content(
+                        mediaType = "application/problem+json",
                         schema = Schema(
-                            implementation = SøknadFeil::class
+                            implementation = ProblemDetail::class
                         )
                     )
                 ]
-            ), ApiResponse(
+            ),
+            ApiResponse(
                 responseCode = "409",
                 description = "En eller flere journalposter har blitt sendt inn fra før",
                 content = [
                     Content(
+                        mediaType = "application/problem+json",
                         schema = Schema(
-                            implementation = OasFeil::class
+                            implementation = ProblemDetail::class
                         )
                     )
                 ]
@@ -148,8 +153,9 @@ internal class PleiepengerSyktBarnSoknadOpenApi {
                 description = "Hvis det feiler uventet på server",
                 content = [
                     Content(
+                        mediaType = "application/problem+json",
                         schema = Schema(
-                            implementation = OasFeil::class
+                            implementation = ProblemDetail::class
                         )
                     )
                 ]
