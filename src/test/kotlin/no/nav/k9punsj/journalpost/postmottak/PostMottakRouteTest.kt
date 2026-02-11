@@ -64,7 +64,7 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             .uri { it.path("/api/journalpost/mottak").build() }
             .body(BodyInserters.fromValue(mottaksHaandteringDto))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", mottaksHaandteringDto.pleietrengendeIdent)
+            .header("X-Nav-NorskIdent", mottaksHaandteringDto.pleietrengendeIdent!!)
             .header(CALL_ID_KEY, correlationId)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)

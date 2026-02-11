@@ -29,7 +29,7 @@ object WebClientUtils {
         return body
     }
 
-    suspend inline fun <reified RequestType> WebClient.postAndAssert(
+    suspend inline fun <reified RequestType : Any> WebClient.postAndAssert(
         authorizationHeader: String,
         assertStatus: HttpStatusCode,
         requestBody: BodyInserter<RequestType, ReactiveHttpOutputMessage>,
@@ -44,7 +44,7 @@ object WebClientUtils {
         return clientResponse
     }
 
-    suspend inline fun <reified RequestType, reified ResponsType> WebClient.postAndAssertAwaitWithStatusAndBody(
+    suspend inline fun <reified RequestType : Any, reified ResponsType> WebClient.postAndAssertAwaitWithStatusAndBody(
         authorizationHeader: String,
         navNorskIdentHeader: String? = null,
         assertStatus: HttpStatusCode,
@@ -66,7 +66,7 @@ object WebClientUtils {
         return body
     }
 
-    suspend inline fun <reified RequestType, reified ResponseType> WebClient.putAndAssert(
+    suspend inline fun <reified RequestType : Any, reified ResponseType> WebClient.putAndAssert(
         norskIdent: String? = null,
         authorizationHeader: String,
         assertStatus: HttpStatus,
