@@ -38,8 +38,8 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.actuate.metrics.MetricsEndpoint
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyInserters
@@ -48,13 +48,13 @@ import java.time.LocalDateTime
 
 internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
-    @MockBean
+    @MockitoBean
     private lateinit var safGateway: SafGateway
 
-    @MockBean
+    @MockitoBean
     private lateinit var dokarkivGateway: DokarkivGateway
 
-    @MockBean
+    @MockitoBean
     private lateinit var soknadService: SoknadService
 
     @Autowired
@@ -381,7 +381,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .uri { it.path("/api/journalpost/settBehandlingsAar/${journalpostId}").build() }
             .body(BodyInserters.fromValue(payload))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", journalpost.aktørId)
+            .header("X-Nav-NorskIdent", journalpost.aktørId!!)
             .exchange()
             .expectStatus().isOk
             .expectBody().json(
@@ -415,7 +415,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
             .uri { it.path("/api/journalpost/settBehandlingsAar/$journalpostId").build() }
             .body(BodyInserters.fromValue(payload))
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", journalpost.aktørId)
+            .header("X-Nav-NorskIdent", journalpost.aktørId!!)
             .exchange()
             .expectStatus().isOk
             .expectBody().json(

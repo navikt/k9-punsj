@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
@@ -35,12 +35,12 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.jdbc.JdbcTestUtils
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.MountableFile
 import java.net.URI
 
 
-class PostgreSQLContainer12 : PostgreSQLContainer<PostgreSQLContainer12>("postgres:12")
+class PostgreSQLContainer12 : PostgreSQLContainer("postgres:12")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
@@ -85,7 +85,7 @@ abstract class AbstractContainerBaseTest {
         }
 
         fun lokaltKjørendeAzureV2OrNull(): URI? {
-            val potensiellUrl = URI("http://localhost:8100/v2.0")
+            val potensiellUrl = URI("http://localhost/azure/v2.0")
             val kjørerLokalt = runBlocking {
                 val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
                     .httpGet()

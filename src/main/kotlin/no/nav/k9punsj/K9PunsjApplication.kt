@@ -7,10 +7,9 @@ import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.utils.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+import org.springframework.boot.reactor.netty.NettyReactiveWebServerFactory
 import org.springframework.boot.runApplication
-import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
-import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory
+import org.springframework.boot.web.server.reactive.ReactiveWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -18,7 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 
 @EnableScheduling
 @EnableTransactionManagement
-@SpringBootApplication(exclude = [ErrorMvcAutoConfiguration::class])
+@SpringBootApplication
 class K9PunsjApplication {
 
     @Bean
