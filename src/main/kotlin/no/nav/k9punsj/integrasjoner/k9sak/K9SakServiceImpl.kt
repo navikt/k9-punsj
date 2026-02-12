@@ -551,14 +551,15 @@ class K9SakServiceImpl(
             }
         """.trimIndent()
 
-        val (_, feil) = runCatching { httpPost(body, opprettSakOgSendInnSøknadUrl) }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { Pair(null, it.message) }
-        )
-        require(feil.isNullOrEmpty()) {
-            val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak: $feil"
-            log.error(feilmelding)
-            throw IllegalStateException(feilmelding)
+        try {
+            httpPost(body, opprettSakOgSendInnSøknadUrl)
+        } catch (error: Exception) {
+            if (error is RestKallException) {
+                throw error
+            }
+            val feilmelding = "Feil ved opprettelse av sak og innsending av søknad til k9-sak"
+            log.error(feilmelding, error)
+            throw IllegalStateException(feilmelding, error)
         }
     }
 
