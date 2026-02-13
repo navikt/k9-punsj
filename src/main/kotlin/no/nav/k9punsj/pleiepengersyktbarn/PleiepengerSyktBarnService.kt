@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9.kodeverk.dokument.Brevkode
-import no.nav.k9.søknad.Søknad
-import no.nav.k9.søknad.felles.Feil
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.MappeService
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -205,31 +203,30 @@ internal class PleiepengerSyktBarnService(
 
     internal suspend fun validerSøknad(soknadTilValidering: PleiepengerSyktBarnSøknadDto): ServerResponse {
         val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
-            ?: return ServerResponse
-                .badRequest()
-                .buildAndAwait()
+            ?: throw valideringErrorResponseException(
+                status = HttpStatus.BAD_REQUEST,
+                detail = "Søknad med id ${soknadTilValidering.soeknadId} finnes ikke."
+            )
 
-        val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
-        val journalPoster = søknadEntitet.journalposter!!
-        val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
-
-        val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
-
-        try {
-            mapTilEksternFormat = MapPsbTilK9Format(
+        val (søknad, feilListe) = try {
+            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
+            val journalPoster = søknadEntitet.journalposter!!
+            val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
+            MapPsbTilK9Format(
                 søknadId = soknadTilValidering.soeknadId,
                 journalpostIder = journalposterDto.journalposter,
                 perioderSomFinnesIK9 = hentPerioderSomFinnesIK9,
                 dto = soknadTilValidering
             ).søknadOgFeil()
-        } catch (e: Exception) {
-            return ServerResponse
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json()
-                .bodyValueAndAwait(e.localizedMessage)
+        } catch (error: Throwable) {
+            logger.error("Uventet feil under validering av PSB søknad", error)
+            throw valideringErrorResponseException(
+                status = HttpStatus.INTERNAL_SERVER_ERROR,
+                detail = normalizedErrorMessage(error),
+                cause = error
+            )
         }
 
-        val (søknad, feilListe) = mapTilEksternFormat
         if (feilListe.isNotEmpty()) {
             val feil = feilListe.map { feil ->
                 SøknadFeil.SøknadFeilDto(
@@ -239,10 +236,10 @@ internal class PleiepengerSyktBarnService(
                 )
             }.toList()
 
-            return ServerResponse
-                .status(HttpStatus.BAD_REQUEST)
-                .json()
-                .bodyValueAndAwait(SøknadFeil(soknadTilValidering.soeknadId, feil))
+            throw valideringValidationErrorResponseException(
+                søknadId = soknadTilValidering.soeknadId,
+                feil = feil
+            )
         }
         val saksbehandler = azureGraphService.hentIdentTilInnloggetBruker()
         mappeService.utfyllendeInnsendingPsb(
@@ -321,6 +318,44 @@ internal class PleiepengerSyktBarnService(
         feil: List<SøknadFeil.SøknadFeilDto>
     ): ErrorResponseException {
         return innsendingErrorResponseException(
+            status = HttpStatus.BAD_REQUEST,
+            detail = "Søknaden inneholder valideringsfeil",
+            properties = mapOf(
+                "soeknadId" to søknadId,
+                "feil" to feil
+            )
+        )
+    }
+
+    private fun valideringErrorResponseException(
+        status: HttpStatus,
+        detail: String?,
+        properties: Map<String, Any?> = emptyMap(),
+        cause: Throwable? = null
+    ): ErrorResponseException {
+        val normalizedDetail = detail?.trim()?.takeIf { it.isNotEmpty() } ?: "Uhåndtert feil uten detaljer"
+        val (title, type) = when (status) {
+            HttpStatus.BAD_REQUEST -> "Ugyldig søknad for validering" to URI("/problem-details/validering-feil")
+            else -> "Feil ved validering av søknad" to URI("/problem-details/validering-uventet-feil")
+        }
+
+        val problemDetail = ProblemDetail.forStatusAndDetail(status, normalizedDetail).apply {
+            this.title = title
+            this.type = type
+            properties
+                .filterValues { it != null }
+                .forEach { (key, value) ->
+                    setProperty(key, value)
+                }
+        }
+        return ErrorResponseException(status, problemDetail, cause)
+    }
+
+    private fun valideringValidationErrorResponseException(
+        søknadId: String,
+        feil: List<SøknadFeil.SøknadFeilDto>
+    ): ErrorResponseException {
+        return valideringErrorResponseException(
             status = HttpStatus.BAD_REQUEST,
             detail = "Søknaden inneholder valideringsfeil",
             properties = mapOf(
