@@ -329,11 +329,11 @@ internal class PleiepengerSyktBarnService(
 
     private fun valideringErrorResponseException(
         status: HttpStatus,
-        detail: String?,
+        detail: String,
         properties: Map<String, Any?> = emptyMap(),
         cause: Throwable? = null
     ): ErrorResponseException {
-        val normalizedDetail = detail?.trim()?.takeIf { it.isNotEmpty() } ?: "Uhåndtert feil uten detaljer"
+        val normalizedDetail = detail.trim().takeIf { it.isNotEmpty() } ?: "Uhåndtert feil uten detaljer"
         val (title, type) = when (status) {
             HttpStatus.BAD_REQUEST -> "Ugyldig søknad for validering" to URI("/problem-details/validering-feil")
             else -> "Feil ved validering av søknad" to URI("/problem-details/validering-uventet-feil")
