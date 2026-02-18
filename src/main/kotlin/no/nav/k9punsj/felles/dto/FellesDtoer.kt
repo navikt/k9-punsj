@@ -2,6 +2,7 @@ package no.nav.k9punsj.felles.dto
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.k9punsj.utils.objectMapper
 import java.time.LocalDate
@@ -68,6 +69,7 @@ data class BostederDto(
 data class UtenlandsoppholdDto(
     val periode: PeriodeDto?,
     val land: String?,
+    @get:JsonProperty("årsak")
     val årsak: String?
 )
 
@@ -77,6 +79,7 @@ data class UtenlandsoppholdDtoV2(
     val innleggelsesperioder: List<InnleggelsesperiodeDto> = emptyList()
 ) {
     data class InnleggelsesperiodeDto(
+        @get:JsonProperty("årsak")
         val årsak: String?,
         val periode: PeriodeDto?
     )
