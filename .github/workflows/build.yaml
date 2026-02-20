@@ -24,7 +24,7 @@ jobs:
     uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
     with:
       java-version: 25
-      build-image: ${{ github.actor != 'dependabot[bot]' }}
+      build-image: true
       push-image: ${{ github.ref_name == github.event.repository.default_branch}}
       upload-image: ${{ github.ref_name != github.event.repository.default_branch }}
       db_schema: k9punsj_unit
