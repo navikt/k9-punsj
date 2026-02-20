@@ -162,7 +162,7 @@
         <dependency>
             <groupId>no.nav.sif.abac</groupId>
             <artifactId>kontrakt</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
         </dependency>
 
         <!-- kotlin -->
