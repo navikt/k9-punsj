@@ -3,7 +3,7 @@ package no.nav.k9punsj.util
 import io.micrometer.core.instrument.Statistic
 import no.nav.k9punsj.metrikker.Metrikk
 import org.assertj.core.api.Assertions
-import org.springframework.boot.actuate.metrics.MetricsEndpoint
+import org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint
 
 class MetricUtils {
 
@@ -14,7 +14,7 @@ class MetricUtils {
             forventetVerdi: Double,
             vararg tags: MetrikkTag
         ) {
-            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
+            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())!!
             Assertions.assertThat(getCount(metricResponse)).isEqualTo(forventetVerdi)
             if (tags.isNotEmpty()) {
                 val tagsResponse = tags(metricResponse)
@@ -28,7 +28,7 @@ class MetricUtils {
             forventetVerdi: Double,
             vararg tags: MetrikkTag
         ) {
-            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
+            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())!!
             Assertions.assertThat(getGuageValue(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }
@@ -39,7 +39,7 @@ class MetricUtils {
             forventetVerdi: Double,
             vararg tags: MetrikkTag
         ) {
-            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())
+            val metricResponse = metricsEndpoint.metric(metric.navn, listOf())!!
             Assertions.assertThat(getBucketValue(metricResponse)).isEqualTo(forventetVerdi)
             Assertions.assertThat(tags(metricResponse)).contains(*tags)
         }

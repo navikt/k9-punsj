@@ -38,7 +38,7 @@ class SifAbacPdpKlient(
     private val om = objectMapper(kodeverdiSomString = true)
 
     suspend fun harTilgangTilPersoner(action: BeskyttetRessursActionAttributt, personIdenter: List<PersonIdent>): Boolean {
-        val request = PersonerOperasjonDto(emptyList(), personIdenter, OperasjonDto(ResourceType.FAGSAK, action))
+        val request = PersonerOperasjonDto(emptyList(), personIdenter, OperasjonDto(ResourceType.FAGSAK, action, setOf()))
 
         val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/personer")
         return om.readValue<Tilgangsbeslutning>(response).harTilgang()

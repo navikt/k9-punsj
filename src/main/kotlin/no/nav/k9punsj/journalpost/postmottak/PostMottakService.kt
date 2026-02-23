@@ -1,6 +1,7 @@
 package no.nav.k9punsj.journalpost.postmottak
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
+import no.nav.k9.sak.typer.AktørId
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
@@ -14,6 +15,7 @@ import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -25,6 +27,7 @@ class PostMottakService(
     private val k9SakService: K9SakService,
     private val aksjonspunktService: AksjonspunktService,
     private val personService: PersonService,
+    @Value("\${ENABLE_SAK_SPLITT_PSB:false}") private val enableSakSplittPSB: Boolean
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(PostMottakService::class.java)
@@ -56,24 +59,26 @@ class PostMottakService(
         val oppdatertJournalpost = hentOgOppdaterJournalpostFraDB(mottattJournalpost)
         val validertMottattJournalpost = mottattJournalpost.valider(oppdatertJournalpost.behandlingsAar)
 
-        logger.info("Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.")
         val eksisterendeSaksnummer = mottattJournalpost.saksnummer
 
-        k9SakService.hentFagsaker(brukerIdent).first
-            ?.let { fagsaker ->
-                fagsaker.firstOrNull {
-                    it.pleietrengendeAktorId == pleietrengendeAktørId
-                            && it.sakstype == fagsakYtelseType
-                            && (it.gyldigPeriode?.fom?.year == oppdatertJournalpost.behandlingsAar || oppdatertJournalpost.behandlingsAar == null)
-                }
-                    ?.takeIf { eksisterendeSaksnummer == null }?.let { eksisterendeFagsak ->
-                        throw PostMottakException(
-                            melding = "Det eksisterer allerede en fagsak(${eksisterendeFagsak.sakstype.name} - ${eksisterendeFagsak.saksnummer}) på pleietrengende.",
-                            httpStatus = HttpStatus.CONFLICT,
-                            journalpostId = mottattJournalpost.journalpostId
-                        )
+        if (eksisterendeSaksnummer == null && fagsakYtelseType != FagsakYtelseType.OPPLÆRINGSPENGER && !(enableSakSplittPSB && fagsakYtelseType == FagsakYtelseType.PLEIEPENGER_SYKT_BARN)) {
+            // Verifiserer at det ikke finnes eksisterende fagsak for pleietrengende når man reserverer saksnummer.
+            k9SakService.hentFagsaker(brukerIdent).first
+                ?.let { fagsaker ->
+                    fagsaker.firstOrNull {
+                        it.pleietrengendeAktorId == pleietrengendeAktørId
+                                && it.sakstype == fagsakYtelseType
+                                && (it.gyldigPeriode?.fom?.year == oppdatertJournalpost.behandlingsAar || oppdatertJournalpost.behandlingsAar == null)
                     }
-            }
+                        ?.let { eksisterendeFagsak ->
+                            throw PostMottakException(
+                                melding = "Det eksisterer allerede en fagsak(${eksisterendeFagsak.sakstype.name} - ${eksisterendeFagsak.saksnummer}) på pleietrengende.",
+                                httpStatus = HttpStatus.CONFLICT,
+                                journalpostId = mottattJournalpost.journalpostId
+                            )
+                        }
+                }
+        }
 
         val safJournalpostinfo = hentJournalpostInfoFraSaf(oppdatertJournalpost)
 
@@ -81,10 +86,10 @@ class PostMottakService(
             logger.info("Reserverer saksnummer fra k9-sak for journalpost: ${validertMottattJournalpost.journalpostId}")
             val reservertSaksnummerDto = k9SakService.reserverSaksnummer(
                 ReserverSaksnummerDto(
-                    brukerAktørId = brukerAktørId,
-                    pleietrengendeAktørId = pleietrengendeAktørId,
-                    relatertPersonAktørId = relatertPersonAktørId,
-                    barnAktørIder = fosterbarnAktørIder ?: listOf(),
+                    brukerAktørId = AktørId(brukerAktørId),
+                    pleietrengendeAktørId = pleietrengendeAktørId?.let { AktørId(it) },
+                    relatertPersonAktørId = relatertPersonAktørId?.let { AktørId(it) },
+                    barnAktørIder = fosterbarnAktørIder?.map { AktørId(it) } ?: listOf(),
                     ytelseType = fagsakYtelseType,
                     behandlingsår = oppdatertJournalpost.behandlingsAar
                 )

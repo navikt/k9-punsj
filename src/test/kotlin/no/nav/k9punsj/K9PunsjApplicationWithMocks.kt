@@ -59,7 +59,7 @@ internal class K9PunsjApplicationWithMocks {
         }
 
         private fun lokaltKjørendeAzureV2OrNull(): URI? {
-            val potensiellUrl = URI("http://localhost:8100/v2.0")
+            val potensiellUrl = URI("http://localhost/azure/v2.0")
             val kjørerLokalt = runBlocking {
                 val (_, response, _) = "$potensiellUrl/.well-known/openid-configuration"
                     .httpGet()

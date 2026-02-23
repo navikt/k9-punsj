@@ -18,19 +18,19 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.actuate.metrics.MetricsEndpoint
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.util.*
 
 internal class HendelseMottakerTest: AbstractContainerBaseTest() {
 
-    @MockBean
+    @MockitoBean
     private lateinit var safGateway: SafGateway
 
-    @MockBean
+    @MockitoBean
     private lateinit var dokarkivGateway: DokarkivGateway
 
-    @MockBean
+    @MockitoBean
     private lateinit var soknadService: SoknadService
 
     @Autowired

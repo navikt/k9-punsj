@@ -22,7 +22,7 @@ import no.nav.k9punsj.util.MetricUtils.MetrikkTag
 import no.nav.k9punsj.util.SøknadJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.actuate.metrics.MetricsEndpoint
+import org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint
 
 internal class SøknadMetrikkServiceTest {
 

@@ -13,8 +13,6 @@ import no.nav.k9punsj.felles.dto.OpprettNySøknad
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SendSøknad
 import no.nav.k9punsj.journalpost.JournalpostRepository
-import no.nav.k9punsj.openapi.OasFeil
-import no.nav.k9punsj.openapi.OasSoknadsfeil
 import no.nav.k9punsj.util.IdGenerator
 import no.nav.k9punsj.util.LesFraFilUtil
 import no.nav.k9punsj.util.SøknadJson
@@ -198,7 +196,12 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         sendInnSøknad(sendSøknad)
             .expectStatus().isBadRequest
-            .expectBody(OasSoknadsfeil::class.java)
+            .expectBody()
+            .jsonPath("$.type").isEqualTo("/problem-details/innsending-validering-feil")
+            .jsonPath("$.title").isEqualTo("Ugyldig søknad for innsending")
+            .jsonPath("$.status").isEqualTo(400)
+            .jsonPath("$.detail").isEqualTo("Søknad med id d8e2c5a8-b993-4d2d-9cb5-fdb22a653a0c finnes ikke.")
+            .jsonPath("$.correlationId").exists()
     }
 
     @Test
@@ -256,11 +259,12 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
             sendInnSøknad(sendSøknad)
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT)
-                .expectBody(OasFeil::class.java)
-                .consumeWith {
-                    val body = it.responseBody!!
-                    assertEquals("Innsendingen må inneholde minst en journalpost som kan sendes inn.", body.feil)
-                }
+                .expectBody()
+                .jsonPath("$.type").isEqualTo("/problem-details/innsending-konflikt")
+                .jsonPath("$.title").isEqualTo("Konflikt ved innsending av søknad")
+                .jsonPath("$.status").isEqualTo(409)
+                .jsonPath("$.detail").isEqualTo("Innsendingen må inneholde minst en journalpost som kan sendes inn.")
+                .jsonPath("$.correlationId").exists()
         }
 
     @Test
@@ -295,11 +299,15 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
         opprettOgSendInnSoeknad(soeknadJson = soeknad, ident = norskIdent)
             .expectStatus().isBadRequest
-            .expectBody(OasSoknadsfeil::class.java)
-            .consumeWith {
-                val body = it.responseBody!!
-                assertThat(body.feil).isNotEmpty
-            }
+            .expectBody()
+            .jsonPath("$.type").isEqualTo("/problem-details/innsending-validering-feil")
+            .jsonPath("$.title").isEqualTo("Ugyldig søknad for innsending")
+            .jsonPath("$.status").isEqualTo(400)
+            .jsonPath("$.detail").isEqualTo("Søknaden inneholder valideringsfeil")
+            .jsonPath("$.soeknadId").exists()
+            .jsonPath("$.feil").isArray
+            .jsonPath("$.feil[0].feilmelding").exists()
+            .jsonPath("$.correlationId").exists()
     }
 
     @Test

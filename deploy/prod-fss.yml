@@ -33,6 +33,9 @@ spec:
         - application: k9-punsj-frontend
           namespace: k9saksbehandling
           cluster: prod-gcp
+        - application: k9-los-api
+          namespace: k9saksbehandling
+          cluster: prod-fss
   liveness:
     path: /internal/actuator/info
     initialDelay: 20
@@ -45,10 +48,9 @@ spec:
     timeout: 1
   resources:
     limits:
-      cpu: 4000m
       memory: 2048Mi
     requests:
-      cpu: 500m
+      cpu: 200m
       memory: 1024Mi
   ingresses:
     - https://k9-punsj.nais.adeo.no
@@ -168,6 +170,8 @@ spec:
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "false"
     - name: KODEVERDI_SOM_STRING
+      value: "false"
+    - name: ENABLE_SAK_SPLITT_PSB
       value: "false"
 
     # Swagger

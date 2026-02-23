@@ -27,11 +27,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator
+import org.springframework.boot.health.contributor.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
@@ -55,7 +57,7 @@ class SafGateway(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsj"
         private const val CorrelationIdHeader = "Nav-Callid"
-        private const val MaxDokumentSize = 24 * 1024 * 1024
+        private const val MaxDokumentSize = 64 * 1024 * 1024
         private val IkkeStøttedeStatuser = setOf("UTGAAR", "AVBRUTT", "FEILREGISTRERT")
     }
 
@@ -76,6 +78,8 @@ class SafGateway(
                     configurer
                         .defaultCodecs()
                         .maxInMemorySize(MaxDokumentSize)
+                    configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper()))
+                    configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper()))
                 }.build()
         )
         .build()

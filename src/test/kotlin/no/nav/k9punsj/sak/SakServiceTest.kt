@@ -6,14 +6,14 @@ import no.nav.k9punsj.domenetjenester.PersonService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 internal class SakServiceTest: AbstractContainerBaseTest() {
 
     @Autowired
     private lateinit var sakService: SakService
 
-    @MockBean
+    @MockitoBean
     private lateinit var personService: PersonService
 
     @Test

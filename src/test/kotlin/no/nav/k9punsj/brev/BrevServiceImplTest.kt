@@ -20,18 +20,18 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 
 internal class BrevServiceImplTest: AbstractContainerBaseTest() {
 
-    @MockBean
+    @MockitoBean
     private lateinit var hendelseProducer: HendelseProducer
 
-    @MockBean
+    @MockitoBean
     private lateinit var journalpostService: JournalpostService
 
-    @MockBean
+    @MockitoBean
     private lateinit var personService: PersonService
 
     @Autowired
