@@ -141,18 +141,26 @@ fun ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
             if (jobberNormalt != null && fravær != null) {
                 val faktiskArbeid = jobberNormalt.minus(fravær).coerceAtLeast(java.time.Duration.ZERO)
                 k9Info.medFaktiskArbeidTimerPerDag(faktiskArbeid)
+                k9Info.medJobberNormaltTimerPerDag(jobberNormalt)
             }
-            jobberNormalt?.also { k9Info.medJobberNormaltTimerPerDag(it) }
         } else {
-            mapEllerLeggTilFeil(feil, "$felt.faktiskArbeidTimerPerDag") {
+            val faktiskArbeid = mapEllerLeggTilFeil(feil, "$felt.faktiskArbeidTimerPerDag") {
                 periode.faktiskArbeidTimerPerDag.somDuration()
-            }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
-            mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
+            }
+            val jobberNormalt = mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
                 periode.jobberNormaltTimerPerDag.somDuration()
-            }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
+            }
+
+            if (faktiskArbeid != null || jobberNormalt != null) {
+                faktiskArbeid?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
+                jobberNormalt?.also { k9Info.medJobberNormaltTimerPerDag(it) }
+            }
         }
 
-        k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
+        // Only add period if at least one value was set
+        if (k9Info.faktiskArbeidTimerPerDag != null || k9Info.jobberNormaltTimerPerDag != null) {
+            k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
+        }
     }
     return if (k9ArbeidstidPeriodeInfo.isNotEmpty()) {
         ArbeidstidInfo().medPerioder(k9ArbeidstidPeriodeInfo)
