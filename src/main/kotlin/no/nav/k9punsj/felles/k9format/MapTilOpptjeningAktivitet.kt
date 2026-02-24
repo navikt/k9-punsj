@@ -106,9 +106,7 @@ fun List<ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker(feil: Mut
         arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]", feil, støtterFravær)
             ?.let { k9Arbeidstaker.medArbeidstidInfo(it) }
 
-        val noeSatt =
-            arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
-        if (noeSatt) {
+        if (k9Arbeidstaker.arbeidstidInfo != null) {
             k9Arbeidstaker
         } else {
             null
