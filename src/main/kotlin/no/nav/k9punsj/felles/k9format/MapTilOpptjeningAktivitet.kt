@@ -12,8 +12,9 @@ import no.nav.k9.søknad.felles.type.VirksomhetType
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo
 import no.nav.k9punsj.felles.ZoneUtils.Oslo
-import no.nav.k9punsj.felles.DurationMapper.somDuration
+import no.nav.k9punsj.felles.DurationMapper.somDuration as somDurationFraString
 import no.nav.k9punsj.felles.dto.ArbeidAktivitetDto
+import no.nav.k9punsj.felles.dto.TimerOgMinutter.Companion.somDuration
 import no.nav.k9punsj.felles.k9format.MappingUtils.mapEllerLeggTilFeil
 import no.nav.k9punsj.utils.PeriodeUtils.erSatt
 import no.nav.k9punsj.utils.PeriodeUtils.jsonPath
@@ -106,7 +107,9 @@ fun List<ArbeidAktivitetDto.ArbeidstakerDto>.mapArbeidstidArbeidstaker(feil: Mut
         arbeidstaker.arbeidstidInfo?.mapArbeidstid("arbeidstakerList[$index]", feil, støtterFravær)
             ?.let { k9Arbeidstaker.medArbeidstidInfo(it) }
 
-        if (k9Arbeidstaker.arbeidstidInfo != null) {
+        val noeSatt =
+            arbeidstaker.norskIdent.erSatt() || arbeidstaker.organisasjonsnummer.erSatt() || k9Arbeidstaker.arbeidstidInfo != null
+        if (noeSatt) {
             k9Arbeidstaker
         } else {
             null
@@ -130,35 +133,32 @@ fun ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
         if (harFravær && harFaktiskArbeid) {
             feil.add(Feil(felt, "fraværOgFaktiskArbeidSamtidig", "Kan ikke oppgi både fravær og faktisk arbeidstid samtidig"))
         } else if (harFravær) {
+            // Fravær-sti: Bruker string-felter direkte for å unngå dobbel-konvertering
             val jobberNormalt = mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag.somDuration()
+                periode.jobberNormaltTimerPerDag.somDurationFraString()
             }
             val fravær = mapEllerLeggTilFeil(feil, "$felt.fraværTimerPerDag") {
-                periode.fraværTimerPerDag.somDuration()
+                periode.fraværTimerPerDag.somDurationFraString()
             }
             if (jobberNormalt != null && fravær != null) {
                 val faktiskArbeid = jobberNormalt.minus(fravær).coerceAtLeast(java.time.Duration.ZERO)
                 k9Info.medFaktiskArbeidTimerPerDag(faktiskArbeid)
                 k9Info.medJobberNormaltTimerPerDag(jobberNormalt)
+            } else if (fravær != null && jobberNormalt == null) {
+                // Validering: Kan ikke beregne faktisk arbeid fra fravær uten å vite normaltid
+                feil.add(Feil(felt, "fraværUtenNormaltid", "Må oppgi jobberNormaltTimerPerDag når fraværTimerPerDag er oppgitt"))
             }
         } else {
-            val faktiskArbeid = mapEllerLeggTilFeil(feil, "$felt.faktiskArbeidTimerPerDag") {
-                periode.faktiskArbeidTimerPerDag.somDuration()
-            }
-            val jobberNormalt = mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag.somDuration()
-            }
-
-            if (faktiskArbeid != null || jobberNormalt != null) {
-                faktiskArbeid?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
-                jobberNormalt?.also { k9Info.medJobberNormaltTimerPerDag(it) }
-            }
+            // Normal arbeidstid-sti: Bruker BEREGNEDE FELTER for eksakt samme oppførsel som før
+            mapEllerLeggTilFeil(feil, "$felt.faktiskArbeidTimerPerDag") {
+                periode.faktiskArbeidPerDag?.somDuration()
+            }?.also { k9Info.medFaktiskArbeidTimerPerDag(it) }
+            mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
+                periode.jobberNormaltPerDag?.somDuration()
+            }?.also { k9Info.medJobberNormaltTimerPerDag(it) }
         }
 
-        // Only add period if at least one value was set
-        if (k9Info.faktiskArbeidTimerPerDag != null || k9Info.jobberNormaltTimerPerDag != null) {
-            k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
-        }
+        k9ArbeidstidPeriodeInfo[k9Periode] = k9Info
     }
     return if (k9ArbeidstidPeriodeInfo.isNotEmpty()) {
         ArbeidstidInfo().medPerioder(k9ArbeidstidPeriodeInfo)
