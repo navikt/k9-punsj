@@ -55,6 +55,7 @@ data class ArbeidAktivitetDto(
                 val periode: PeriodeDto?,
                 val faktiskArbeidTimerPerDag: String?,
                 val jobberNormaltTimerPerDag: String?,
+                val fraværTimerPerDag: String? = null,
                 val faktiskArbeidPerDag: TimerOgMinutter? = faktiskArbeidTimerPerDag?.somDuration()?.somTimerOgMinutter()?.somTimerOgMinutterDto(),
                 /*val faktiskArbeidPerDag: TimerOgMinutter? = korrigereArbeidstidRettOver80Prosent(
                     faktiskArbeidTimerPerDag, jobberNormaltTimerPerDag

@@ -65,7 +65,7 @@ internal class MapOlpTilK9Format(
                     opplaeringspenger.medUtenlandsopphold(this)
                 }
             }
-            dto.arbeidstid?.mapTilArbeidstid(feil)?.apply {
+            dto.arbeidstid?.mapTilArbeidstid(feil, støtterFravær = true)?.apply {
                 opplaeringspenger.medArbeidstid(this)
             }
             dto.trekkKravPerioder.leggTilTrekkKravPerioder()
