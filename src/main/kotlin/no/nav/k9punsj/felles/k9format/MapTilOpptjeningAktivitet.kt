@@ -127,18 +127,19 @@ fun ArbeidAktivitetDto.ArbeidstakerDto.ArbeidstidInfoDto.mapArbeidstid(
         val k9Info = ArbeidstidPeriodeInfo()
         val felt = "ytelse.arbeisdtid.$type.arbeidstidInfo.perioder.${k9Periode.jsonPath()}"
 
-        val harFravær = støtterFravær && periode.fraværTimerPerDag != null
-        val harFaktiskArbeid = periode.faktiskArbeidTimerPerDag != null
+        val harFravær = støtterFravær && (!periode.fraværTimerPerDag.isNullOrEmpty() || periode.fraværPerDag != null)
+        val harFaktiskArbeid = !periode.faktiskArbeidTimerPerDag.isNullOrEmpty()
 
         if (harFravær && harFaktiskArbeid) {
             feil.add(Feil(felt, "fraværOgFaktiskArbeidSamtidig", "Kan ikke oppgi både fravær og faktisk arbeidstid samtidig"))
+            return@forEach
         } else if (harFravær) {
-            // Fravær-sti: Bruker string-felter direkte for å unngå dobbel-konvertering
+            // Fravær-sti: Støtter både desimal-streng og timer/minutter-objekt
             val jobberNormalt = mapEllerLeggTilFeil(feil, "$felt.jobberNormaltTimerPerDag") {
-                periode.jobberNormaltTimerPerDag.somDurationFraString()
+                periode.jobberNormaltPerDag?.somDuration() ?: periode.jobberNormaltTimerPerDag.somDurationFraString()
             }
             val fravær = mapEllerLeggTilFeil(feil, "$felt.fraværTimerPerDag") {
-                periode.fraværTimerPerDag.somDurationFraString()
+                periode.fraværPerDag?.somDuration() ?: periode.fraværTimerPerDag.somDurationFraString()
             }
             if (jobberNormalt != null && fravær != null) {
                 val faktiskArbeid = jobberNormalt.minus(fravær).coerceAtLeast(java.time.Duration.ZERO)
