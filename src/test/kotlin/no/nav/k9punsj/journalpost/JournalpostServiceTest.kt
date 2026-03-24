@@ -4,18 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
-import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.Sak
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 
-internal class JournalpostServiceTest: AbstractContainerBaseTest() {
+@ExtendWith(MockKExtension::class)
+internal class JournalpostServiceTest {
 
     @MockK
     private lateinit var safGateway: SafGateway
@@ -29,8 +30,6 @@ internal class JournalpostServiceTest: AbstractContainerBaseTest() {
     @MockK
     private lateinit var objectMapper: ObjectMapper
 
-    @MockK
-    private lateinit var k9SakService: K9SakService
 
     @InjectMockKs
     private lateinit var journalpostService: JournalpostService
