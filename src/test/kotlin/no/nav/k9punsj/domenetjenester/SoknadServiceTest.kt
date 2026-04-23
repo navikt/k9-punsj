@@ -166,7 +166,7 @@ internal class SoknadServiceTest {
         coEvery { pdlService.hentPersonopplysninger(any()) }.returns(
             setOf(
                 Personopplysninger(
-                    identitetsnummer = "21040076619",
+                    identitetsnummer = "15490357286",
                     fødselsdato = LocalDateTime.now().toLocalDate(),
                     fornavn = "fornavn",
                     mellomnavn = "mellomnavn",
@@ -185,10 +185,10 @@ internal class SoknadServiceTest {
                 PleiepengerSyktBarn()
                     .medBarn(
                         Barn()
-                            .medNorskIdentitetsnummer(NorskIdentitetsnummer.of("20032390359"))
+                            .medNorskIdentitetsnummer(NorskIdentitetsnummer.of("26470392885"))
                     )
             )
-            .medSøker(Søker(NorskIdentitetsnummer.of("21040076619")))
+            .medSøker(Søker(NorskIdentitetsnummer.of("15490357286")))
 
         val result = soknadService.sendSøknad(
             søknad = søknad,

@@ -99,7 +99,7 @@ internal class ArbeidsgivereRoutesTest : AbstractContainerBaseTest() {
             }
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
-            .header("X-Nav-NorskIdent", "22053826656")
+            .header("X-Nav-NorskIdent", "11410183759")
             .exchange()
             .expectStatus().isOk
             .expectBody().json(forventetResponse)

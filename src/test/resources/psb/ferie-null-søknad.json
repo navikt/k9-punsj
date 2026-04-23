@@ -1,13 +1,13 @@
 {
   "soeknadId": "c5040ae4-6c33-4a40-a8a7-a8ad97406f3b",
-  "soekerId": "15026819005",
+  "soekerId": "24420167209",
   "journalposter": [
     "7523521"
   ],
   "mottattDato": "2021-05-10",
   "klokkeslett": "12:53",
   "barn": {
-    "norskIdent": "15026819005"
+    "norskIdent": "24420167209"
   },
   "sendtInn": false,
   "erFraK9": false,
@@ -36,7 +36,7 @@
           ]
         },
         "organisasjonsnummer": null,
-        "norskIdent": "15026819005"
+        "norskIdent": "24420167209"
       }
     ],
     "frilanserArbeidstidInfo": null,

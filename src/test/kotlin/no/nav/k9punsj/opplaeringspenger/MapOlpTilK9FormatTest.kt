@@ -33,7 +33,7 @@ internal class MapOlpTilK9FormatTest {
                 "frilanserArbeidstidInfo": null,
                 "selvstendigNæringsdrivendeArbeidstidInfo": null
               },
-              "barn": { "norskIdent": "03091477490", "foedselsdato": "" },
+              "barn": { "norskIdent": "15490357286", "foedselsdato": "" },
               "begrunnelseForInnsending": { "tekst": "" },
               "bosteder": [],
               "journalposter": ["200"],
@@ -64,7 +64,7 @@ internal class MapOlpTilK9FormatTest {
                 "selvstendigNaeringsdrivende": null,
                 "frilanser": null
               },
-              "soekerId": "29099000129",
+              "soekerId": "24420167209",
               "soeknadId": "c9f9d5aa-535d-4da3-af8b-76e245ed1794",
               "soeknadsperiode": null,
               "soknadsinfo": { "samtidigHjemme": null, "harMedsøker": null },

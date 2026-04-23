@@ -54,7 +54,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
-        val norskIdent = "01010050053"
+        val norskIdent = "17420373147"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString())
 
         opprettNySøknad(opprettNySøknad).expectStatus().isCreated
@@ -62,7 +62,7 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
-        val norskIdent = "02020050163"
+        val norskIdent = "18410162721"
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, journalpostId)
 
@@ -196,9 +196,9 @@ class OmsorgspengerutbetalingRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år`(): Unit = runBlocking {
-        // 03011939596 på OMS har två perioder i k9sak fra december 2022.
+        // 26470392885 på OMS har två perioder i k9sak fra december 2022.
         // OmsUtKorrigering fjerner første perioden i 2022.
-        val norskIdent = "03011939596"
+        val norskIdent = "26470392885"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUtKorrigering()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)

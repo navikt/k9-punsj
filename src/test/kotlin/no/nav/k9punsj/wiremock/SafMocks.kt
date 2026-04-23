@@ -262,7 +262,7 @@ object SafMockResponses {
           ],
           "bruker": {
             "type": "FNR",
-            "id": "29099000129"
+            "id": "24420167209"
           },
           "sak": {
             "fagsakId": "$fagsakId",
@@ -296,7 +296,7 @@ object SafMockResponses {
             }
           ],
           "avsenderMottaker": {
-            "id": "29099000129",
+            "id": "24420167209",
             "type": "FNR"
           }
         }
@@ -347,7 +347,7 @@ object SafMockResponses {
           ],
           "bruker": {
             "type": "FNR",
-            "id": "29099000129"
+            "id": "24420167209"
           },
           "dokumenter": [
             {

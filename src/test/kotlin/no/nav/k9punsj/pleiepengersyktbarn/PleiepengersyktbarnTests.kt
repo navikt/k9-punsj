@@ -61,7 +61,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
-        val norskIdent = "01010050053"
+        val norskIdent = "17420373147"
         val opprettNySøknad = opprettSøknad(norskIdent, "999")
 
         opprettNySøknad(opprettNySøknad).expectStatus().isCreated
@@ -69,7 +69,7 @@ class PleiepengersyktbarnTests : AbstractContainerBaseTest() {
 
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
-        val norskIdent = "02020050163"
+        val norskIdent = "18410162721"
         val opprettNySøknad = opprettSøknad(norskIdent, "9999", "DEF456")
 
         opprettNySøknad(opprettNySøknad).expectStatus().isCreated

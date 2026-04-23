@@ -115,9 +115,9 @@ internal class TestPdlService : PdlService {
                 gradering = Personopplysninger.Gradering.UGRADERT
             )
         )
-        setOf("03011939596") -> setOf( // SoknadService
+        setOf("26470392885") -> setOf( // SoknadService
             Personopplysninger(
-                identitetsnummer = "03011939596",
+                identitetsnummer = "26470392885",
                 fødselsdato = LocalDate.parse("1980-05-06"),
                 fornavn = "Anders",
                 mellomnavn = "OMPUT",

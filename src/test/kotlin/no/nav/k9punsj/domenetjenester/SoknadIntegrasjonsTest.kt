@@ -27,7 +27,7 @@ internal class SoknadIntegrasjonsTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Sender in søknad mottatt 2023 til k9 for OMS 2022 og får riktig saksnummer`(): Unit = runBlocking {
-        val norskIdent = "03011939596"
+        val norskIdent = "26470392885"
         val soeknadJson: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsUt2022()
         val journalpostid = FerdigstiltMedSaksnummer
         tilpasserSøknadsMalTilTesten(soeknadJson, norskIdent, journalpostid)

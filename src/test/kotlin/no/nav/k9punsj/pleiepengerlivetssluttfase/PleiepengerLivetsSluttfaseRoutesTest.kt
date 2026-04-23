@@ -48,7 +48,7 @@ class PleiepengerLivetsSluttfaseRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
-        val norskIdent = "01010050053"
+        val norskIdent = "17420373147"
         val pleietrengende = "01010050023"
         val opprettNySøknad = opprettSøknad(norskIdent, UUID.randomUUID().toString(), pleietrengende)
 

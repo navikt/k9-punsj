@@ -29,7 +29,7 @@ internal class TestK9SakService : K9SakService {
         punsjFagsakYtelseType: PunsjFagsakYtelseType
     ): Pair<List<PeriodeDto>?, String?> {
         // OmsorgspengerutbetalingRoutesTest.Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år
-        if (søker == "03011939596" && punsjFagsakYtelseType == PunsjFagsakYtelseType.OMSORGSPENGER) {
+        if (søker == "26470392885" && punsjFagsakYtelseType == PunsjFagsakYtelseType.OMSORGSPENGER) {
             return Pair(
                 listOf(
                     PeriodeDto(
