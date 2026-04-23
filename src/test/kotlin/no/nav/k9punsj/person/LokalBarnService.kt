@@ -12,13 +12,13 @@ internal class LokalBarnService : BarnService {
     override suspend fun hentBarn(identitetsnummer: String): Set<Barn> = when {
         identitetsnummer.erFødtI(Month.MAY) -> setOf(
             Barn(
-                identitetsnummer = "09018070097", // Tilfeldig genrerert gyldig fnr
+                identitetsnummer = "13480175462", // Tilfeldig genrerert gyldig fnr
                 fødselsdato = LocalDate.now().minusYears(10),
                 fornavn = "Ola",
                 etternavn = "Nordmann"
             ),
             Barn(
-                identitetsnummer = "08078374668",
+                identitetsnummer = "14510058187",
                 fødselsdato = LocalDate.now().minusYears(5).minusMonths(5),
                 fornavn = "Kari",
                 mellomnavn = "Mellomste", // Tilfeldig genrerert gyldig fnr

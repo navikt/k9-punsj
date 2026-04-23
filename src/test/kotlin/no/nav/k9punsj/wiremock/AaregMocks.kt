@@ -13,7 +13,7 @@ private const val path = "/aareg-mock"
 fun WireMockServer.stubAareg() : WireMockServer =
     stubHentArbeidsforhold(identitetsnummer = AnythingPattern(), response = defaultResponse)
         .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22222222222"), response = "[]")
-        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("22053826656"), response = flereArbeidsforholdIar, inkluderAvsluttetArbeidsforhold = true)
+        .stubHentArbeidsforhold(identitetsnummer = WireMock.equalTo("11410183759"), response = flereArbeidsforholdIar, inkluderAvsluttetArbeidsforhold = true)
 
 fun WireMockServer.getAaregBaseUrl() = baseUrl() + path
 

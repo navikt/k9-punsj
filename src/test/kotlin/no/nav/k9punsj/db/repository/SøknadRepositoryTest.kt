@@ -19,7 +19,7 @@ import java.util.*
 
 internal class SøknadRepositoryTest: AbstractContainerBaseTest() {
 
-    private val standardIdent = "01122334410"
+    private val standardIdent = "24420167209"
     private val standardAktørId = "1000000000000"
 
     private val barnIdent = "01122334412"

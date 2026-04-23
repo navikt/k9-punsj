@@ -1,13 +1,13 @@
 {
   "soeknadId": "5cf03cbd-a9c0-402b-adb4-c9219e00fd44",
-  "soekerId": "29099000129",
+  "soekerId": "24420167209",
   "journalposter": [
     "7523521"
   ],
   "mottattDato": "2021-05-04",
   "klokkeslett": "12:53",
   "barn": {
-    "norskIdent": "29099000129",
+    "norskIdent": "24420167209",
     "foedselsdato": ""
   },
   "sendtInn": false,
@@ -37,7 +37,7 @@
           ]
         },
         "organisasjonsnummer": null,
-        "norskIdent": "29099000129"
+        "norskIdent": "24420167209"
       }
     ]
   },

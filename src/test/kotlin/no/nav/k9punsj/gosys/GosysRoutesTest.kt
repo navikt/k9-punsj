@@ -30,7 +30,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         val body = """
         {
           "journalpostId": "${JournalpostIds.Ok}",
-          "norskIdent": "29099000129"
+          "norskIdent": "24420167209"
         }
         """.trimIndent()
 
@@ -49,7 +49,7 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
         val body = """
         {
           "journalpostId": "${JournalpostIds.Ok}",
-          "norskIdent": "29099000129",
+          "norskIdent": "24420167209",
           "gjelder": "PleiepengerPårørende"
         }
         """.trimIndent()

@@ -78,7 +78,7 @@ class K9PunsjApplicationTests : AbstractContainerBaseTest() {
                 """
                 {
                     "journalpostId": "1",
-                    "norskIdent": "29099000129",
+                    "norskIdent": "24420167209",
                     "dokumenter": [
                         {
                             "dokumentId": "470164680"

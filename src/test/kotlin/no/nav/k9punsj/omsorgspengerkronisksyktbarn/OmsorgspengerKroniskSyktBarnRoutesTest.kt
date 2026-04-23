@@ -51,8 +51,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Opprette ny mappe på person`(): Unit = runBlocking {
-        val norskIdent = "01010050053"
-        val pleietrengendeIdent = "02020050163"
+        val norskIdent = "17420373147"
+        val pleietrengendeIdent = "18410162721"
         val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, UUID.randomUUID().toString())
 
         opprettNySøknad(opprettNySøknad)
@@ -61,8 +61,8 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Hente eksisterende mappe på person`(): Unit = runBlocking {
-        val norskIdent = "02020050163"
-        val pleietrengendeIdent = "01010050053"
+        val norskIdent = "18410162721"
+        val pleietrengendeIdent = "17420373147"
         val journalpostId = UUID.randomUUID().toString()
         val opprettNySøknad = opprettSøknad(norskIdent, pleietrengendeIdent, journalpostId)
 
@@ -80,7 +80,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Hent en søknad`(): Unit = runBlocking {
         val søknad = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
-        val pleietrengendeIdent = "01010050053"
+        val pleietrengendeIdent = "17420373147"
         val journalpostid = abs(Random(2224).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknad, norskIdent, journalpostid)
 
@@ -101,7 +101,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Oppdaterer en søknad`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
-        val pleietrengendeIdent = "01010050053"
+        val pleietrengendeIdent = "17420373147"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
@@ -124,7 +124,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     fun `Oppdaterer en søknad med metadata`(): Unit = runBlocking {
         val søknadFraFrontend = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val norskIdent = "02030050163"
-        val pleietrengendeIdent = "01010050053"
+        val pleietrengendeIdent = "17420373147"
         val journalpostid = abs(Random(1234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(søknadFraFrontend, norskIdent, journalpostid)
 
@@ -161,7 +161,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
         opprettOgSendInnSoeknad(
             soeknadJson = gyldigSoeknad,
             ident = norskIdent,
-            pleietrengendeIdent = "01010050053",
+            pleietrengendeIdent = "17420373147",
             journalpostid = journalpostid
         )
         assertThat(journalpostRepository.kanSendeInn(listOf(journalpostid))).isFalse
@@ -170,7 +170,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Skal verifisere at søknad er ok`(): Unit = runBlocking {
         val norskIdent = "02022352122"
-        val pleietrengendeIdent = "01010050053"
+        val pleietrengendeIdent = "17420373147"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         val journalpostid = abs(Random(234234).nextInt()).toString()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent, journalpostid)
@@ -187,7 +187,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
     @Test
     fun `Skal kunne lagre flagg om medisinske og punsjet`(): Unit = runBlocking {
         val norskIdent = "02022352121"
-        val pleietrengendeIdent = "01010050053"
+        val pleietrengendeIdent = "17420373147"
         val soeknad: SøknadJson = LesFraFilUtil.søknadFraFrontendOmsKSB()
         tilpasserSøknadsMalTilTesten(soeknad, norskIdent)
 
@@ -231,7 +231,7 @@ class OmsorgspengerKroniskSyktBarnRoutesTest : AbstractContainerBaseTest() {
         opprettOgLagreSoeknad(
             soeknadJson = soeknadJson,
             ident = norskIdent,
-            pleietrengendeIdent = "01010050053",
+            pleietrengendeIdent = "17420373147",
             journalpostid = journalpostid
         )
 

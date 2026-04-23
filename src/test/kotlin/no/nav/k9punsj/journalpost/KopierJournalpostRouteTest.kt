@@ -97,7 +97,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
 
         when (ytelseType) {
             PLEIEPENGER_SYKT_BARN, PLEIEPENGER_LIVETS_SLUTTFASE, OMSORGSPENGER_MIDLERTIDIG_ALENE, OMSORGSPENGER_KRONISK_SYKT_BARN, OMSORGSPENGER_ALENE_OMSORGEN -> {
-                val barnEllerAnnenPart = "05032435485"
+                val barnEllerAnnenPart = "11410183759"
                 KopierJournalpostDto(
                     til = søkerAktørId,
                     barn = barnEllerAnnenPart,
@@ -190,7 +190,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpostId = IdGenerator.nesteId()
         val saksnummer = "ABC123"
         val søkerAktørId = "27519339353"
-        val barn = "05032435485"
+        val barn = "11410183759"
 
         Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
             SafDtos.Journalpost(
@@ -274,7 +274,7 @@ internal class KopierJournalpostRouteTest : AbstractContainerBaseTest() {
         val journalpostId = IdGenerator.nesteId()
         val saksnummer = "ABC123"
         val søkerAktørId = "27519339353"
-        val barn = "05032435485"
+        val barn = "11410183759"
 
         Mockito.`when`(safGateway.hentJournalpostInfo(journalpostId)).thenReturn(
             SafDtos.Journalpost(

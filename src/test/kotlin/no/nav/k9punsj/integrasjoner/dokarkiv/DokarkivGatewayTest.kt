@@ -28,7 +28,7 @@ class DokarkivGatewayTest {
                 )
             ),
             bruker = FerdigstillJournalpost.Bruker(
-                identitetsnummer = "15069205221".somIdentitetsnummer(),
+                identitetsnummer = "18410162721".somIdentitetsnummer(),
                 sak = Pair(Fagsystem.K9SAK, saksnummer),
                 navn = "Pessimistisk Bildekort"
             ),
@@ -56,7 +56,7 @@ class DokarkivGatewayTest {
                 )
             ),
             bruker = FerdigstillJournalpost.Bruker(
-                identitetsnummer = "15069205221".somIdentitetsnummer(),
+                identitetsnummer = "18410162721".somIdentitetsnummer(),
                 sak = Pair(Fagsystem.K9SAK, saksnummer),
                 navn = "Pessimistisk Bildekort"
             ),
