@@ -24,7 +24,7 @@
         <kotlin.version>2.3.20</kotlin.version>
 
         <!-- spring relatert -->
-        <springdoc.version>3.0.2</springdoc.version>
+        <springdoc.version>3.0.3</springdoc.version>
 
         <!-- logging -->
         <logback.logstash.version>9.0</logback.logstash.version>
