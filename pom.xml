@@ -21,7 +21,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>25</java.version>
-        <kotlin.version>2.3.20</kotlin.version>
+        <kotlin.version>2.3.21</kotlin.version>
 
         <!-- spring relatert -->
         <springdoc.version>3.0.2</springdoc.version>
