@@ -6,6 +6,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import net.logstash.logback.argument.StructuredArguments.e
 import no.nav.k9punsj.felles.IkkeFunnet
+import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.token.IdToken
 import no.nav.security.token.support.core.jwt.JwtToken
@@ -112,6 +113,12 @@ private fun Routes(
         ServerResponse
             .notFound()
             .buildAndAwait()
+    }
+    onError<IkkeStøttetJournalpost> { _, _ ->
+        ServerResponse
+            .status(HttpStatus.CONFLICT)
+            .json()
+            .bodyValueAndAwait("""{"type":"punsj://ikke-støttet-journalpost"}""")
     }
     onError<DecodingException> { error, serverRequest ->
         val exceptionId = ULID().nextValue().toString()

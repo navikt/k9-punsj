@@ -4,10 +4,13 @@ import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.k9punsj.AbstractContainerBaseTest
 import no.nav.k9punsj.integrasjoner.gosys.Gjelder
 import no.nav.k9punsj.wiremock.JournalpostIds
+import no.nav.k9punsj.wiremock.SafMockResponses
 import no.nav.k9punsj.wiremock.saksbehandlerAccessToken
+import no.nav.k9punsj.wiremock.stubSafHenteJournalpost
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserters
 
@@ -61,5 +64,35 @@ internal class GosysRoutesTest: AbstractContainerBaseTest() {
             .body(BodyInserters.fromValue(body))
             .exchange()
             .expectStatus().isOk
+    }
+
+    @Test
+    fun `ikke støttet journalpost håndteres som conflict`() {
+        val journalpostId = "123"
+        wireMockServer.stubSafHenteJournalpost(
+            journalpostId = journalpostId,
+            responseBody = SafMockResponses.OkResponseHenteJournalpost(journalpostId = journalpostId, tema = "SYK")
+        )
+
+        @Language("JSON")
+        val body = """
+        {
+          "journalpostId": "$journalpostId",
+          "norskIdent": "24420167209"
+        }
+        """.trimIndent()
+
+        webTestClient.post()
+            .uri { it.path("/api/gosys/opprettJournalforingsoppgave/").build() }
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(body))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+            .expectBody().json(
+                """
+                    {"type":"punsj://ikke-støttet-journalpost"}
+                """.trimIndent()
+            )
     }
 }
