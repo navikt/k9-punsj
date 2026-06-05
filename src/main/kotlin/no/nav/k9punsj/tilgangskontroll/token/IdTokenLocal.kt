@@ -9,4 +9,5 @@ data class IdTokenLocal(
     override fun erVeileder(): Boolean = false
     override fun harBasistilgang(): Boolean = true
     override fun getNavIdent(): String = "Z000000"
+    override fun harHistoriskTilgang(): Boolean = true
 }
