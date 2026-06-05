@@ -18,5 +18,8 @@ data class IdToken(
     override fun erSaksbehandler(): Boolean = jwt.groups.any { s -> s == System.getenv("BRUKER_GRUPPE_ID_SAKSBEHANDLER")!! }
     override fun erVeileder(): Boolean = jwt.groups.any { s -> s == System.getenv("BRUKER_GRUPPE_ID_VEILEDER")!! }
     override fun harBasistilgang(): Boolean = erSaksbehandler() || erVeileder()
+    override fun harHistoriskTilgang(): Boolean = System.getenv("BRUKER_GRUPPE_ID_HISTORISK_SAK")?.let { gruppeId ->
+        jwt.groups.any { s -> s == gruppeId }
+    } ?: false
     override fun getNavIdent(): String = jwt.NAVident
 }

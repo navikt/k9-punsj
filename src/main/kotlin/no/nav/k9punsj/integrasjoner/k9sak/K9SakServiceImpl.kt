@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
@@ -806,12 +807,15 @@ class K9SakServiceImpl(
                 val fagsakYtelseType = FagsakYtelseType.fraKode(sakstypeKode)
                 val gyldigPeriode: JSONObject? = it.optJSONObject("gyldigPeriode")
                 val periodeDto: PeriodeDto? = gyldigPeriode?.somPeriodeDto()
+                val statusKode = it.optJSONObject("status")?.optString("kode")
+                    ?: it.optString("status").takeIf { s -> s.isNotEmpty() }
                 Fagsak(
                     saksnummer = saksnummer,
                     sakstype = fagsakYtelseType,
                     pleietrengendeAktorId = pleietrengende,
                     gyldigPeriode = periodeDto,
-                    relatertPersonAktørId = relatertPersonAktorId
+                    relatertPersonAktørId = relatertPersonAktorId,
+                    status = statusKode?.let { kode -> FagsakStatus.fraKode(kode) },
                 )
             }.toSet()
 

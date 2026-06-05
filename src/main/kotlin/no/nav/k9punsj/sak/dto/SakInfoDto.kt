@@ -13,4 +13,5 @@ data class SakInfoDto(
     val behandlingsår: Int?,
     val relatertPersonIdent: String?,
     val relatertPerson: PdlPerson?,
+    val historisk: Boolean = false,
 )
