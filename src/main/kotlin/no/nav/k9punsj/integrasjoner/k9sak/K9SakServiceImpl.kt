@@ -808,7 +808,6 @@ class K9SakServiceImpl(
                 val gyldigPeriode: JSONObject? = it.optJSONObject("gyldigPeriode")
                 val periodeDto: PeriodeDto? = gyldigPeriode?.somPeriodeDto()
                 val statusKode = it.optJSONObject("status")?.optString("kode")
-                    ?: it.optString("status").takeIf { s -> s.isNotEmpty() }
                 Fagsak(
                     saksnummer = saksnummer,
                     sakstype = fagsakYtelseType,
