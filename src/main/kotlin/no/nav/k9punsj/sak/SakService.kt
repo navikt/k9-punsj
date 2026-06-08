@@ -73,7 +73,8 @@ class SakService(
                     gyldigPeriode = null,
                     relatertPersonIdent = relatertPerson?.identitetsnummer,
                     relatertPerson = relatertPerson,
-                    behandlingsår = it.behandlingsår
+                    behandlingsår = it.behandlingsår,
+                    historisk = false
                 )
             }
             // Returnerer fagsaker og reserverte saksnummere
