@@ -193,6 +193,8 @@ class PdlServiceImpl(
             logger.warn("Errors i response fra PDL. Errors=${objectMapper().writeValueAsString(errors)}")
         }
 
+        logger.debug("PDL rårespons: {}", response)
+
         return response
     }
 

@@ -172,6 +172,10 @@ spec:
     - name: SETT_PAA_VENT_TID
       value: "PT1H"
 
+    # Logging
+    - name: LOGGING_LEVEL_NO_NAV_K9PUNSJ_INTEGRASJONER_PDL
+      value: "DEBUG"
+
     # Feature toggles
     - name: FERDIGSTILL_GOSYSOPPGAVE_ENABLED
       value: "true"
