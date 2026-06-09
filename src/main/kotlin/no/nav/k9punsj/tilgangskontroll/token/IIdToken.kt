@@ -7,4 +7,5 @@ interface IIdToken {
     fun erSaksbehandler() :Boolean
     fun erVeileder() :Boolean
     fun harBasistilgang() :Boolean
+    fun harHistoriskTilgang() :Boolean
 }
