@@ -56,7 +56,7 @@
 
         <fuel.version>2.3.1</fuel.version>
         <token-support.version>6.0.7</token-support.version>
-        <kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
+        <kotlinx-coroutines.version>1.11.0</kotlinx-coroutines.version>
         <dusseldorf-ktor.version>7.0.8</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
@@ -68,7 +68,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>4.1.0</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
@@ -88,7 +88,7 @@
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>10.9</version>
+                <version>10.9.1</version>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
