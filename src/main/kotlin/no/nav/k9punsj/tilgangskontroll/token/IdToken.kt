@@ -22,4 +22,5 @@ data class IdToken(
         jwt.groups.any { s -> s == gruppeId }
     } ?: false
     override fun getNavIdent(): String = jwt.NAVident
+    override fun getName(): String = jwt.name ?: jwt.NAVident
 }

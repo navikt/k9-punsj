@@ -9,6 +9,7 @@ data class IdTokenLocal(
     override fun erVeileder(): Boolean = false
     override fun harBasistilgang(): Boolean = true
     override fun getNavIdent(): String = "Z000000"
+    override fun getName(): String = "Lokal Saksbehandler"
     override fun harHistoriskTilgang(): Boolean = value
         .takeIf { it.isNotBlank() }
         ?.let { runCatching { IdToken(it).harHistoriskTilgang() }.getOrDefault(false) }
