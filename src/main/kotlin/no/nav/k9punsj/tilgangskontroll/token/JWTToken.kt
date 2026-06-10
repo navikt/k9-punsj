@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class JWTToken(
     val NAVident : String, // Z994048
+    val name: String? = null, // Visningsnavn fra Azure AD
     val aud: String, // 5afad323-c9df-4e14-b481-b278e9d2bf69
     val azp: String, // a084abb8-6a38-4506-84c2-e4ac8b438a05
     val exp: Int, // 1586930888
