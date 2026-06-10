@@ -1,5 +1,6 @@
 package no.nav.k9punsj.sak
 
+import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -39,6 +40,7 @@ class SakService(
                 }
 
                 val gyldigPeriode = it.gyldigPeriode
+                val erHistorisk = it.status == FagsakStatus.HISTORISK
                 SakInfoDto(
                     reservert = false,
                     fagsakId = it.saksnummer,
@@ -48,7 +50,8 @@ class SakService(
                     relatertPersonIdent = relatertPersonIdent,
                     relatertPerson = relatertPerson,
                     gyldigPeriode = gyldigPeriode,
-                    behandlingsår = gyldigPeriode?.fom?.year
+                    behandlingsår = gyldigPeriode?.fom?.year,
+                    historisk = erHistorisk,
                 )
             }
             logger.info("Henter reserverte saksnummere fra k9...")
@@ -70,7 +73,8 @@ class SakService(
                     gyldigPeriode = null,
                     relatertPersonIdent = relatertPerson?.identitetsnummer,
                     relatertPerson = relatertPerson,
-                    behandlingsår = it.behandlingsår
+                    behandlingsår = it.behandlingsår,
+                    historisk = false
                 )
             }
             // Returnerer fagsaker og reserverte saksnummere

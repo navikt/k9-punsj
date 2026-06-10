@@ -23,6 +23,8 @@ spec:
           - id: "93e8903d-5c3f-4cbe-929e-0afeb22dec73"
           # 0000-GA-k9-veileder
           - id: "5bc5cae2-3ef9-4897-9828-766757299de8"
+          # 0000-GA-k9-historisk-sak
+          - id: "f92e7578-b530-4e0f-87e6-f5f82fa84168"
       singlePageApplication: true
       replyURLs:
         - https://k9-punsj.intern.dev.nav.no/internal/swagger-ui/oauth2-redirect.html
@@ -125,6 +127,9 @@ spec:
     # 0000-GA-k9-saksbehandler
     - name: BRUKER_GRUPPE_ID_SAKSBEHANDLER
       value: "93e8903d-5c3f-4cbe-929e-0afeb22dec73"
+    # 0000-GA-k9-historisk-sak
+    - name: BRUKER_GRUPPE_ID_HISTORISK_SAK
+      value: "f92e7578-b530-4e0f-87e6-f5f82fa84168"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
