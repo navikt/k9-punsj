@@ -16,6 +16,7 @@ import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
 import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.K9FordelType
+import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
@@ -140,6 +141,11 @@ internal class JournalpostRoutes(
                                 .filterNot { it.reservert }
                                 .firstOrNull { it.fagsakId == sak.fagsakId }
                         }
+                    }
+
+
+                    if (k9Fagsak != null && k9Fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
+                        throw IkkeTilgang("Bruker har ikke tilgang til historiske saker")
                     }
 
                     val utledetSak =
