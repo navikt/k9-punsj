@@ -1,5 +1,6 @@
 package no.nav.k9punsj.journalpost.postmottak
 
+import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.typer.AktørId
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
@@ -103,10 +104,8 @@ class PostMottakService(
             reservertSaksnummerDto.saksnummer
         } else {
             val fagsak = sakService.hentSaker(brukerIdent).firstOrNull { it.fagsakId == eksisterendeSaksnummer }
-            if (fagsak?.historisk == true && !coroutineContext.idToken().harHistoriskTilgang()) {
-                throw IkkeTilgang(
-                    "Fagsak $eksisterendeSaksnummer er historisk, og brukeren har ikke tilgang til historiske saker."
-                )
+            if (fagsak != null && fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
+                throw IkkeTilgang.historiskSak(fagsak.fagsakId)
             }
             logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
             eksisterendeSaksnummer

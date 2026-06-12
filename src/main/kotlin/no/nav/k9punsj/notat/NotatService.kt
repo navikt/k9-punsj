@@ -56,7 +56,7 @@ class NotatService(
             ?: throw IllegalStateException("Finner ikke fagsak ${notat.fagsakId} for søker ${notat.søkerIdentitetsnummer}")
 
         if (fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
-            throw IkkeTilgang("Fagsak ${fagsak.fagsakId} er historisk, og brukeren har ikke tilgang til historiske saker.")
+            throw IkkeTilgang.historiskSak(fagsak.fagsakId)
         }
 
         logger.info("Genererer PDF for notat med fagsak [${fagsak.sakstype} - ${notat.fagsakId}].")

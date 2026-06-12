@@ -144,7 +144,7 @@ internal class JournalpostRoutes(
                     }
 
                     if (k9Fagsak != null && k9Fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
-                        throw IkkeTilgang("Fagsak ${k9Fagsak.fagsakId} er historisk, og brukeren har ikke tilgang til historiske saker.")
+                        throw IkkeTilgang.historiskSak(k9Fagsak.fagsakId)
                     }
 
                     val utledetSak =
@@ -190,7 +190,7 @@ internal class JournalpostRoutes(
                 } catch (case: IkkeTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
-                        .buildAndAwait()
+                        .bodyValueAndAwait(case.feil)
                 }
             }
         }

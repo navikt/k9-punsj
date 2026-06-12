@@ -3,14 +3,17 @@ package no.nav.k9punsj.journalpost.postmottak
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
 import kotlin.coroutines.coroutineContext
 
 @Configuration
@@ -35,7 +38,14 @@ internal class PostMottakRoutes(
                 )?.let { return@RequestContext it }
 
                 val dto = request.body(BodyExtractors.toMono(JournalpostMottaksHaandteringDto::class.java)).awaitFirst()
-                val saksnummerDto= postMottakService.klassifiserOgJournalfør(dto)
+
+                val saksnummerDto = try {
+                    postMottakService.klassifiserOgJournalfør(dto)
+                } catch (case: IkkeTilgang) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .bodyValueAndAwait(case.feil)
+                }
 
                 return@RequestContext ServerResponse.ok().bodyValueAndAwait(saksnummerDto)
             }
