@@ -16,6 +16,7 @@ import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.sak.SakService
 import no.nav.k9punsj.util.opprettKafkaStringConsumer
 import org.apache.kafka.clients.consumer.Consumer
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
@@ -46,6 +47,9 @@ class PostMottakServiceTest : AbstractContainerBaseTest() {
 
     @MockkBean
     private lateinit var dokarkivGateway: DokarkivGateway
+
+    @MockkBean
+    private lateinit var sakService: SakService
 
     @Autowired
     private lateinit var journalpostService: JournalpostService
@@ -89,6 +93,8 @@ class PostMottakServiceTest : AbstractContainerBaseTest() {
                 )
             ), null
         )
+
+        coEvery { sakService.hentSaker(brukerIdent) } returns emptyList()
 
         coEvery { safGateway.hentJournalpostInfo(journalpostId) } returns opprettSafJournalpost(
             journalpostId,
