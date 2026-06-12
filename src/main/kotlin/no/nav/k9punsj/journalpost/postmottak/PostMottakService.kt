@@ -6,7 +6,9 @@ import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.dto.SaksnummerDto
+import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
@@ -14,17 +16,20 @@ import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.JournalpostInfo
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
+import no.nav.k9punsj.sak.SakService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import kotlin.coroutines.coroutineContext
 
 @Service
 class PostMottakService(
     private val journalpostService: JournalpostService,
     private val pdlService: PdlService,
     private val k9SakService: K9SakService,
+    private val sakService: SakService,
     private val aksjonspunktService: AksjonspunktService,
     private val personService: PersonService,
     @Value("\${ENABLE_SAK_SPLITT_PSB:false}") private val enableSakSplittPSB: Boolean
@@ -97,6 +102,10 @@ class PostMottakService(
 
             reservertSaksnummerDto.saksnummer
         } else {
+            val fagsak = sakService.hentSaker(brukerIdent).firstOrNull { it.fagsakId == eksisterendeSaksnummer }
+            if (fagsak != null && fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
+                throw IkkeTilgang.historiskSak(fagsak.fagsakId)
+            }
             logger.info("Bruker eksisterende saksnummer: $eksisterendeSaksnummer")
             eksisterendeSaksnummer
         }

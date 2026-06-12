@@ -7,7 +7,13 @@ import java.net.URI
 
 internal class IkkeStøttetJournalpost(feil: String = "Punsj støtter ikke denne journalposten.") : Throwable(feil)
 internal class NotatUnderArbeidFeil : Throwable("Notatet må ferdigstilles før det kan åpnes i Punsj")
-internal class IkkeTilgang(feil: String) : Throwable(feil)
+internal class IkkeTilgang(val feil: String) : Throwable(feil) {
+    companion object {
+        fun historiskSak(fagsakId: String) = IkkeTilgang(
+            "Fagsak $fagsakId er historisk, og brukeren har ikke tilgang til historiske saker."
+        )
+    }
+}
 internal class FeilIAksjonslogg(feil: String) : Throwable(feil)
 internal class UgyldigToken(feil: String) : Throwable(feil)
 internal class IkkeFunnet : Throwable()

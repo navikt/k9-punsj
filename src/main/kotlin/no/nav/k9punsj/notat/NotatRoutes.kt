@@ -1,6 +1,7 @@
 package no.nav.k9punsj.notat
 
 import kotlinx.coroutines.reactive.awaitFirst
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.openapi.OasFeil
@@ -52,12 +53,20 @@ internal class NotatRoutes(
                         .json()
                         .bodyValueAndAwait(it)
                 },
-                onFailure = {
-                    logger.error("Feilet med å opprette notat.", it)
-                    ServerResponse
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .json()
-                        .bodyValueAndAwait(OasFeil(it.message))
+                onFailure = { cause ->
+                    when (cause) {
+                        is IkkeTilgang -> ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .json()
+                            .bodyValueAndAwait(cause.feil)
+                        else -> {
+                            logger.error("Feilet med å opprette notat.", cause)
+                            ServerResponse
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .json()
+                                .bodyValueAndAwait(OasFeil(cause.message))
+                        }
+                    }
                 }
             )
         }

@@ -84,6 +84,37 @@ internal class PostMottakRouteTest : AbstractContainerBaseTest() {
             )
     }
 
+    @Test
+    fun `forventer 403 med melding ved forsøk på å knytte journalpost til historisk sak`(): Unit = runBlocking {
+        val journalpostId = IdGenerator.nesteId()
+        val fagsakId = "HISTORISK456"
+
+        coEvery { postMottakService.klassifiserOgJournalfør(any()) } throws
+            no.nav.k9punsj.felles.IkkeTilgang.historiskSak(fagsakId)
+
+        val mottaksHaandteringDto = JournalpostMottaksHaandteringDto(
+            journalpostId = journalpostId,
+            brukerIdent = "123",
+            pleietrengendeIdent = "456",
+            fagsakYtelseTypeKode = PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN.kode,
+            saksnummer = fagsakId,
+            relatertPersonIdent = null,
+            barnAktørIder = null
+        )
+
+        webTestClient
+            .post()
+            .uri { it.path("/api/journalpost/mottak").build() }
+            .body(BodyInserters.fromValue(mottaksHaandteringDto))
+            .header(HttpHeaders.AUTHORIZATION, saksbehandlerAuthorizationHeader)
+            .header("X-Nav-NorskIdent", mottaksHaandteringDto.pleietrengendeIdent!!)
+            .header(CALL_ID_KEY, UUID.randomUUID().toString())
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.FORBIDDEN)
+            .expectBody(String::class.java)
+            .isEqualTo("Fagsak $fagsakId er historisk, og brukeren har ikke tilgang til historiske saker.")
+    }
+
 
     @ParameterizedTest
     @ValueSource(strings = ["1999", "2101", "null"])
