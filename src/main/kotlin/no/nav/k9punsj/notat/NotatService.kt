@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
+import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.hentCorrelationId
+import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
 import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
 import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
@@ -53,6 +55,9 @@ class NotatService(
             .firstOrNull { it.fagsakId == notat.fagsakId }
             ?: throw IllegalStateException("Finner ikke fagsak ${notat.fagsakId} for søker ${notat.søkerIdentitetsnummer}")
 
+        if (fagsak.historisk && !coroutineContext.idToken().harHistoriskTilgang()) {
+            throw IkkeTilgang("Fagsak ${fagsak.fagsakId} er historisk, og brukeren har ikke tilgang til historiske saker.")
+        }
 
         logger.info("Genererer PDF for notat med fagsak [${fagsak.sakstype} - ${notat.fagsakId}].")
         val notatPdf =
