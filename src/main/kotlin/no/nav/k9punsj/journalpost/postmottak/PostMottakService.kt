@@ -1,6 +1,5 @@
 package no.nav.k9punsj.journalpost.postmottak
 
-import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.sak.typer.AktørId
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
