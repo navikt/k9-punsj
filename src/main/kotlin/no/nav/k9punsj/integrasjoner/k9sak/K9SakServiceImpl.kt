@@ -30,6 +30,7 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
@@ -650,7 +651,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, coroutineContext.hentAuthentication().accessToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
@@ -663,7 +664,7 @@ class K9SakServiceImpl(
             .httpGet()
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, coroutineContext.hentAuthentication().accessToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
