@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.gosys
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -14,7 +15,6 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.buildAndAwait
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class GosysRoutes(
@@ -40,7 +40,7 @@ internal class GosysRoutes(
     @Bean
     fun GosysRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.OpprettJournalføringsoppgave}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val oppgaveRequest = request.mapOppgaveRequest()
 
                 return@RequestContext try {

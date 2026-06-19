@@ -1,5 +1,6 @@
 package no.nav.k9punsj.sak
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.openapi.OasFeil
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class SakerRoutes(
@@ -34,7 +34,7 @@ internal class SakerRoutes(
     @Bean
     fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentSaker}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innloggetUtils.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HentSaker)
                     ?.let { return@RequestContext it }

@@ -1,5 +1,6 @@
 package no.nav.k9punsj.notat
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -15,7 +16,6 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class NotatRoutes(
@@ -37,7 +37,7 @@ internal class NotatRoutes(
     @Bean
     fun NotatRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.OpprettNotat}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val nyNotat = request.nyNotat()
 
                 return@RequestContext kotlin.runCatching {

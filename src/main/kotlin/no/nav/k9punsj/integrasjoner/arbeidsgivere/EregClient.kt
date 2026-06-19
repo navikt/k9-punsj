@@ -3,12 +3,12 @@ package no.nav.k9punsj.integrasjoner.arbeidsgivere
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.net.URI
-import kotlin.coroutines.coroutineContext
 
 @Component
 internal class EregClient(
@@ -19,7 +19,7 @@ internal class EregClient(
         val url = "$baseUrl/organisasjon/$organisasjonsummer/noekkelinfo"
 
         val (_, response, result) = url.httpGet()
-            .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
+            .header("Nav-Call-Id", currentCoroutineContext().hentCorrelationId())
             .header("Nav-Consumer-Id", "k9-punsj")
             .header("Accept", "application/json")
             .awaitStringResponseResult()

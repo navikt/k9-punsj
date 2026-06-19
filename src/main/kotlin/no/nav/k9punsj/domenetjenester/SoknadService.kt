@@ -2,30 +2,21 @@ package no.nav.k9punsj.domenetjenester
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9.kodeverk.Fagsystem
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
 import no.nav.k9punsj.domenetjenester.repository.SøknadRepository
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
+import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.felles.Søknadstype
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.innsending.journalforjson.HtmlGenerator
 import no.nav.k9punsj.innsending.journalforjson.PdfGenerator
-import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
-import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
-import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
-import no.nav.k9punsj.integrasjoner.dokarkiv.FerdigstillJournalpost
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
-import no.nav.k9punsj.integrasjoner.dokarkiv.SafGateway
-import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
+import no.nav.k9punsj.integrasjoner.dokarkiv.*
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
@@ -34,9 +25,8 @@ import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 
 @Service
 class SoknadService(
@@ -55,7 +45,7 @@ class SoknadService(
         journalpostIder: MutableSet<String>,
     ): Pair<HttpStatus, String>? {
         val correlationId = try {
-            coroutineContext.hentCorrelationId()
+            currentCoroutineContext().hentCorrelationId()
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }
@@ -276,7 +266,7 @@ class SoknadService(
         )
 
         val nyJournalpostMedPunsjetSøknadsopplysninger = JournalPostRequest(
-            eksternReferanseId = hentCorrelationId(coroutineContext),
+            eksternReferanseId = hentCorrelationId(currentCoroutineContext()),
             tittel = "PunsjetSøknad",
             brevkode = K9_PUNSJ_INNSENDING_BREVKODE,
             tema = Tema.OMS,

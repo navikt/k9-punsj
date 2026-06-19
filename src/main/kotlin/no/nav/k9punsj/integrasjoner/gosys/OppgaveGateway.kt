@@ -1,13 +1,14 @@
 package no.nav.k9punsj.integrasjoner.gosys
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.oppgaveUrl
 import no.nav.k9punsj.integrasjoner.gosys.OppgaveGateway.Urls.patchEksisterendeOppgaveUrl
-import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -22,7 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import java.net.URI
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 /**
  * @see <a href="https://oppgave.dev.intern.nav.no/"> Se swagger definisjon for mer info</a>
@@ -127,7 +127,7 @@ internal class OppgaveGateway(
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ internal class OppgaveGateway(
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -165,7 +165,7 @@ internal class OppgaveGateway(
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)

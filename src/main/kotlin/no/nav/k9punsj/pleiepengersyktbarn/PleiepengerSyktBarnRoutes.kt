@@ -1,5 +1,6 @@
 package no.nav.k9punsj.pleiepengersyktbarn
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -48,7 +49,7 @@ internal class PleiepengerSyktBarnRoutes(
     @Bean
     fun pleiepengerSyktBarnSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
@@ -58,14 +59,14 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknadId = request.pathVariable(SøknadIdKey)
                 pleiepengerSyktBarnService.henteSøknad(søknadId)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapPleiepengerSøknad()
 
                 pleiepengerSyktBarnService.oppdaterEksisterendeSøknad(request, søknad)
@@ -73,7 +74,7 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = søknad.norskIdent,
@@ -85,7 +86,7 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = søknad.norskIdent,
@@ -97,7 +98,7 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapPleiepengerSøknad()
                 søknad.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
@@ -111,7 +112,7 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
@@ -124,7 +125,7 @@ internal class PleiepengerSyktBarnRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
                 val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
 

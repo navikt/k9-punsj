@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.arbeidsgivere
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.hentCorrelationId
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
-import kotlin.coroutines.coroutineContext
 
 @Component
 internal class AaregClient(
@@ -47,7 +47,7 @@ internal class AaregClient(
         logger.info("Henter arbeidsforhold fra: $url")
         val (_, response, result) = url.httpGet()
             .header("Authorization", authorizationHeader)
-            .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
+            .header("Nav-Call-Id", currentCoroutineContext().hentCorrelationId())
             .header("Nav-Personident", identitetsnummer)
             .header("Accept", "application/json")
             .awaitStringResponseResult()

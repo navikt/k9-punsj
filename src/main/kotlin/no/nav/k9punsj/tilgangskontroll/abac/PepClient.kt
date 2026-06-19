@@ -1,5 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll.abac
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.StandardProfil
 import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
@@ -9,7 +10,6 @@ import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 @StandardProfil
@@ -27,7 +27,7 @@ class PepClient(
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ, listOf(PersonIdent(fnr)))
         if (harTilgang) {
-            val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+            val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
             loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
         }
         return harTilgang
@@ -40,7 +40,7 @@ class PepClient(
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.READ, fnr.map { PersonIdent(it) })
         if (harTilgang) {
-            val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+            val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
             fnr.forEach {
                 loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
             }
@@ -52,7 +52,7 @@ class PepClient(
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE, listOf(PersonIdent(fnr)))
         if (harTilgang) {
-            val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+            val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
             loggTilAudit(identTilInnloggetBruker, fnr, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
         }
         return harTilgang
@@ -65,7 +65,7 @@ class PepClient(
         val harTilgang =
             sifAbacPdpKlient.harTilgangTilPersoner(BeskyttetRessursActionAttributt.CREATE, fnr.map { PersonIdent(it) })
         if (harTilgang) {
-            val identTilInnloggetBruker = coroutineContext.idToken().getNavIdent()
+            val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
             fnr.forEach {
                 loggTilAudit(identTilInnloggetBruker, it, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
             }
@@ -74,7 +74,7 @@ class PepClient(
     }
 
     override suspend fun erSaksbehandler(): Boolean {
-        return coroutineContext.idToken().erSaksbehandler()
+        return currentCoroutineContext().idToken().erSaksbehandler()
     }
 
     private suspend fun loggTilAudit(

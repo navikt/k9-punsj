@@ -5,23 +5,17 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.felles.FeilIAksjonslogg
-import no.nav.k9punsj.felles.IkkeFunnet
-import no.nav.k9punsj.felles.IkkeStøttetJournalpost
-import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.felles.JournalpostId
-import no.nav.k9punsj.felles.NotatUnderArbeidFeil
-import no.nav.k9punsj.felles.UgyldigToken
-import no.nav.k9punsj.felles.UventetFeil
+import no.nav.k9punsj.felles.*
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
-import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
+import no.nav.k9punsj.utils.objectMapper
 import org.json.JSONObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,9 +25,9 @@ import org.springframework.boot.health.contributor.ReactiveHealthIndicator
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Service
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
@@ -41,7 +35,6 @@ import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 @Service
 class SafGateway(
@@ -89,11 +82,11 @@ class SafGateway(
     internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
-            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
         )
 
         val correlationId = try {
-            coroutineContext.hentCorrelationId()
+            currentCoroutineContext().hentCorrelationId()
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }
@@ -174,7 +167,7 @@ class SafGateway(
     internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject {
         val accessToken = cachedAccessTokenClient.getAccessToken(
             scopes = henteJournalpostScopes,
-            onBehalfOf = coroutineContext.hentAuthentication().accessToken
+            onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
         )
 
         val body = objectMapper().writeValueAsString(SafDtos.FerdigstillJournalpostQuery(journalpostId))
@@ -185,7 +178,7 @@ class SafGateway(
                 HttpHeaders.ACCEPT to "application/json",
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                CorrelationIdHeader to currentCoroutineContext().hentCorrelationId(),
                 HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
             ).awaitStringResponseResult()
 
@@ -210,14 +203,14 @@ class SafGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = henteDokumentScopes,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         val (statusCode, entity) = client
             .get()
             .uri { it.pathSegment("rest", "hentdokument", journalpostId, dokumentId, VariantType).build() }
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .awaitExchange { Pair(it.statusCode(), it.awaitEntity<DataBuffer>()) }
 

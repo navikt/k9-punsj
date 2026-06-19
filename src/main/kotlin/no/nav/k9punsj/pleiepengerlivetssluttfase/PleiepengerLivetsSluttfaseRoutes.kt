@@ -1,5 +1,6 @@
 package no.nav.k9punsj.pleiepengerlivetssluttfase
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -15,7 +16,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class PleiepengerLivetsSluttfaseRoutes(
@@ -43,7 +43,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
     @Bean
     fun pleiepengerLivetsSluttfaseSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
@@ -53,21 +53,21 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknadId = request.søknadId()
                 pleiepengerLivetsSluttfaseService.henteSøknad(søknadId)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.pleiepengerPlsSøknad()
                 pleiepengerLivetsSluttfaseService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val sendSøknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = sendSøknad.norskIdent,
@@ -79,7 +79,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val opprettNySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = opprettNySøknad.norskIdent,
@@ -91,7 +91,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val soknadTilValidering = request.pleiepengerPlsSøknad()
                 soknadTilValidering.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
@@ -105,7 +105,7 @@ internal class PleiepengerLivetsSluttfaseRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),

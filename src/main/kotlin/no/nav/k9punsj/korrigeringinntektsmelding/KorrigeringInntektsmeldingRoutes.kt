@@ -1,5 +1,6 @@
 package no.nav.k9punsj.korrigeringinntektsmelding
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -14,7 +15,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class KorrigeringInntektsmeldingRoutes(
@@ -41,7 +41,7 @@ internal class KorrigeringInntektsmeldingRoutes(
     @Bean
     fun omsorgspengerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,
@@ -53,14 +53,14 @@ internal class KorrigeringInntektsmeldingRoutes(
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknadId = request.søknadId()
                 korrigeringInntektsmeldingService.henteSøknad(søknadId)
             }
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val opprettNySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = opprettNySøknad.norskIdent,
@@ -72,14 +72,14 @@ internal class KorrigeringInntektsmeldingRoutes(
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.korrigeringInntektsmelding()
                 korrigeringInntektsmeldingService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val sendSøknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = sendSøknad.norskIdent,
@@ -91,7 +91,7 @@ internal class KorrigeringInntektsmeldingRoutes(
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.korrigeringInntektsmelding()
                 søknad.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
@@ -106,7 +106,7 @@ internal class KorrigeringInntektsmeldingRoutes(
 
         // TODO: Denne skal ikke vara i en søknadstype, flytte till k9-sak route el. liknande
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = matchfagsakMedPeriode.brukerIdent,

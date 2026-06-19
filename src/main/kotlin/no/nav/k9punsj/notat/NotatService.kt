@@ -1,19 +1,13 @@
 package no.nav.k9punsj.notat
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.hentCorrelationId
-import no.nav.k9punsj.integrasjoner.dokarkiv.DokumentKategori
-import no.nav.k9punsj.integrasjoner.dokarkiv.FagsakSystem
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostRequest
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalPostResponse
-import no.nav.k9punsj.integrasjoner.dokarkiv.JournalpostType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Kanal
-import no.nav.k9punsj.integrasjoner.dokarkiv.SaksType
-import no.nav.k9punsj.integrasjoner.dokarkiv.Tema
+import no.nav.k9punsj.integrasjoner.dokarkiv.*
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.journalpost.JournalpostService
 import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
@@ -25,7 +19,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 @Service
 class NotatService(
@@ -66,7 +59,7 @@ class NotatService(
 
         val notatObject = objectMapper().convertValue(notat, ObjectNode::class.java)
         val journalPostRequest = JournalPostRequest(
-            eksternReferanseId = coroutineContext.hentCorrelationId(),
+            eksternReferanseId = currentCoroutineContext().hentCorrelationId(),
             tittel = notat.tittel,
             brevkode = "K9_PUNSJ_NOTAT",
             tema = Tema.OMS,
