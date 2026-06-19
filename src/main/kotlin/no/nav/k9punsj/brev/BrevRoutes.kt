@@ -1,5 +1,6 @@
 package no.nav.k9punsj.brev
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -15,8 +16,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.*
-import kotlin.coroutines.coroutineContext
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.json
 
 @Configuration
 internal class BrevRoutes(
@@ -39,7 +41,7 @@ internal class BrevRoutes(
     @Bean
     fun BrevRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.BestillBrev}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val dokumentbestillingDto = kotlin.runCatching {
                     request.body(BodyExtractors.toMono(DokumentbestillingDto::class.java)).awaitFirst()
                 }.getOrElse {
@@ -79,7 +81,7 @@ internal class BrevRoutes(
 
         // TODO: Skall fjernes når frontend har byttet til aktorId i PersonRoutes
         GET("/api${Urls.HentAktørId}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     norskIdent,

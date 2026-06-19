@@ -8,24 +8,17 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.onError
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
-import no.nav.k9punsj.felles.FeilIAksjonslogg
-import no.nav.k9punsj.felles.Identitetsnummer
-import no.nav.k9punsj.felles.IkkeFunnet
-import no.nav.k9punsj.felles.IkkeTilgang
-import no.nav.k9punsj.felles.JournalpostId
+import no.nav.k9punsj.felles.*
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.felles.Sak
-import no.nav.k9punsj.felles.UgyldigToken
-import no.nav.k9punsj.felles.UventetFeil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostStatus.Companion.somJournalpostStatus
 import no.nav.k9punsj.integrasjoner.dokarkiv.JoarkTyper.JournalpostType.Companion.somJournalpostType
 import no.nav.k9punsj.utils.WebClienttUtils.håndterFeil
-import no.nav.k9punsj.utils.objectMapper
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.slf4j.Logger
@@ -42,7 +35,6 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 @Service
 class DokarkivGateway(
@@ -74,7 +66,7 @@ class DokarkivGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         val (request, response, result) = journalpostId.oppdaterJournalpostUrl()
@@ -83,7 +75,7 @@ class DokarkivGateway(
             .header(
                 HttpHeaders.ACCEPT to "application/json",
                 ConsumerIdHeaderKey to ConsumerIdHeaderValue,
-                CorrelationIdHeader to coroutineContext.hentCorrelationId(),
+                CorrelationIdHeader to currentCoroutineContext().hentCorrelationId(),
                 HttpHeaders.AUTHORIZATION to accessToken.asAuthoriationHeader()
             ).awaitStringResponseResult()
 
@@ -106,7 +98,7 @@ class DokarkivGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         val body = BodyInserters.fromValue(journalpostRequest.dokarkivPayload())
@@ -115,7 +107,7 @@ class DokarkivGateway(
             .post()
             .uri(URI.create(opprettOgFerdigstillJournalpostUrl))
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
@@ -135,14 +127,14 @@ class DokarkivGateway(
         val body = BodyInserters.fromValue("""{"journalfoerendeEnhet": "$enhet"}""".trimIndent())
 
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(scopes = dokarkivScope, onBehalfOf = coroutineContext.hentAuthentication().accessToken)
+            .getAccessToken(scopes = dokarkivScope, onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken)
 
         return kotlin.runCatching {
             client
                 .patch()
                 .uri(URI(journalpostId.ferdigstillJournalpostUrl()))
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +149,7 @@ class DokarkivGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         return kotlin.runCatching {
@@ -165,7 +157,7 @@ class DokarkivGateway(
                 .put()
                 .uri(URI(journalpostId.oppdaterJournalpostUrl()))
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-                .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+                .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -183,7 +175,7 @@ class DokarkivGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         val body = BodyInserters.fromValue(ferdigstillJournalpost.oppdaterPayloadMedSak())
@@ -192,7 +184,7 @@ class DokarkivGateway(
             .put()
             .uri(URI.create(url))
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +206,7 @@ class DokarkivGateway(
         val accessToken = cachedAccessTokenClient
             .getAccessToken(
                 scopes = dokarkivScope,
-                onBehalfOf = coroutineContext.hentAuthentication().accessToken
+                onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
 
         @Language("JSON")
@@ -238,7 +230,7 @@ class DokarkivGateway(
             .put()
             .uri(url)
             .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            .header(CorrelationIdHeader, coroutineContext.hentCorrelationId())
+            .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, accessToken.asAuthoriationHeader())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)

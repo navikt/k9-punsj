@@ -1,5 +1,6 @@
 package no.nav.k9punsj.omsorgspengerutbetaling
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -19,7 +20,6 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OmsorgspengerutbetalingRoutes(
@@ -47,7 +47,7 @@ internal class OmsorgspengerutbetalingRoutes(
     @Bean
     fun omsorgspengerutbetalingSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,
@@ -59,14 +59,14 @@ internal class OmsorgspengerutbetalingRoutes(
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknadId = request.søknadId()
                 omsorgspengerutbetalingService.henteSøknad(søknadId)
             }
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val opprettNySøknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = opprettNySøknad.norskIdent,
@@ -78,14 +78,14 @@ internal class OmsorgspengerutbetalingRoutes(
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.omsorgspengerutbetalingSøknadDto()
                 omsorgspengerutbetalingService.oppdaterEksisterendeSøknad(søknad)
             }
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val sendSøknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = sendSøknad.norskIdent,
@@ -97,7 +97,7 @@ internal class OmsorgspengerutbetalingRoutes(
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.omsorgspengerutbetalingSøknadDto()
                 søknad.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
@@ -111,7 +111,7 @@ internal class OmsorgspengerutbetalingRoutes(
         }
 
         POST("/api${Urls.HentArbeidsforholdIderFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsakMedPeriode = request.mapMatchFagsakMedPerioder()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = matchfagsakMedPeriode.brukerIdent,
@@ -123,7 +123,7 @@ internal class OmsorgspengerutbetalingRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = matchfagsak.brukerIdent,

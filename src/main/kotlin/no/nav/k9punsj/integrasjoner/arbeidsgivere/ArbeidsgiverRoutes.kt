@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.arbeidsgivere
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -10,7 +11,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.*
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class ArbeidsgiverRoutes(
@@ -25,7 +25,7 @@ internal class ArbeidsgiverRoutes(
     @Bean
     fun hentArbeidsgivereRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgiverePath) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val identitetsnummer = request.identitetsnummer()
 
                 if (identitetsnummer.harTilgang()) {
@@ -55,7 +55,7 @@ internal class ArbeidsgiverRoutes(
     @Bean
     fun hentArbeidsgivereMedIdRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET(ArbeidsgivereMedIdPath) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 if (request.identitetsnummer().harTilgang()) {
                     ServerResponse
                         .status(HttpStatus.OK)
@@ -79,7 +79,7 @@ internal class ArbeidsgiverRoutes(
     @Bean
     fun hentArbeidsgiverInfoRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api/arbeidsgiver") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 when (val navn = arbeidsgiverService.hentOrganisasjonsnavn(request.organisasjonsnummer())) {
                     null -> ServerResponse.status(HttpStatus.NOT_FOUND).buildAndAwait()
                     else -> ServerResponse.status(HttpStatus.OK).json().bodyValueAndAwait("""{"navn":"$navn"}""")

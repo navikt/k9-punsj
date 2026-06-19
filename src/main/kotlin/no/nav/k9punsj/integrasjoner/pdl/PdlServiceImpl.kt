@@ -3,6 +3,7 @@ package no.nav.k9punsj.integrasjoner.pdl
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
@@ -10,8 +11,8 @@ import no.nav.k9punsj.IkkeTestProfil
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCorrelationId
 import no.nav.k9punsj.person.Behandling
-import no.nav.k9punsj.utils.objectMapper
 import no.nav.k9punsj.tilgangskontroll.helsesjekk
+import no.nav.k9punsj.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,7 +25,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import java.net.URI
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 @IkkeTestProfil
@@ -154,7 +154,7 @@ class PdlServiceImpl(
         val response = client
             .post()
             .uri { it.build() }
-            .header("Nav-Call-Id", coroutineContext.hentCorrelationId())
+            .header("Nav-Call-Id", currentCoroutineContext().hentCorrelationId())
             .header("Tema", "OMS")
             .header(
                 "Behandlingsnummer",
@@ -206,7 +206,7 @@ class PdlServiceImpl(
 
     private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
         scopes = azureScopes,
-        onBehalfOf = coroutineContext.hentAuthentication().accessToken
+        onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
     ).asAuthoriationHeader()
 
     private fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(

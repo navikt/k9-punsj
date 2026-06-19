@@ -1,5 +1,6 @@
 package no.nav.k9punsj.fordel
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.LokalProfil
 import no.nav.k9punsj.RequestContext
@@ -13,7 +14,6 @@ import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.buildAndAwait
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 @LokalProfil
@@ -29,7 +29,7 @@ class LokalHendelseRoutes(
     @Bean
     fun prosesserHendelseRoute() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.ProsesserHendelse}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val fordelPunsjEventDto = request.request()
                 try {
                     hendelseMottaker.prosesser(fordelPunsjEventDto)

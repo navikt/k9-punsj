@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.felles.RestKallException
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 @Service
 class SifAbacPdpKlient(
@@ -45,7 +45,7 @@ class SifAbacPdpKlient(
     }
 
     private suspend fun httpPostMedOboToken(body: String, url: String): String {
-        val jwt = coroutineContext.idToken().value
+        val jwt = currentCoroutineContext().idToken().value
         val oboToken = cachedAccessTokenClient.getAccessToken(scopes, jwt)
 
         val (request, _, result) = url
@@ -82,7 +82,7 @@ class SifAbacPdpKlient(
 
     internal companion object {
         private suspend fun hentCallId() = try {
-            coroutineContext.hentCallId()
+            currentCoroutineContext().hentCallId()
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }

@@ -3,6 +3,7 @@ package no.nav.k9punsj.tilgangskontroll.azuregraph
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9punsj.StandardProfil
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.time.LocalDateTime
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 @StandardProfil
@@ -29,11 +29,11 @@ class AzureGraphService(
     val log = LoggerFactory.getLogger("AzureGraphService")!!
 
     override suspend fun hentIdentTilInnloggetBruker(): String {
-        return coroutineContext.idToken().getNavIdent()
+        return currentCoroutineContext().idToken().getNavIdent()
     }
 
     override suspend fun hentEnhetForInnloggetBruker(): String {
-        val idToken = coroutineContext.idToken()
+        val idToken = currentCoroutineContext().idToken()
         val username = idToken.getNavIdent() + "_office_location"
         val cachedObject = cache.get(username)
 

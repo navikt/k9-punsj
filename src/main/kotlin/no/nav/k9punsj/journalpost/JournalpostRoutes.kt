@@ -1,5 +1,6 @@
 package no.nav.k9punsj.journalpost
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
@@ -8,28 +9,16 @@ import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
 import no.nav.k9punsj.domenetjenester.PersonService
-import no.nav.k9punsj.felles.IdentOgJournalpost
+import no.nav.k9punsj.felles.*
 import no.nav.k9punsj.felles.Identitetsnummer.Companion.somIdentitetsnummer
-import no.nav.k9punsj.felles.IkkeFunnet
-import no.nav.k9punsj.felles.IkkeStøttetJournalpost
-import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.felles.JournalpostId.Companion.somJournalpostId
-import no.nav.k9punsj.felles.PunsjFagsakYtelseType
 import no.nav.k9punsj.fordel.K9FordelType
 import no.nav.k9punsj.integrasjoner.dokarkiv.SafDtos
 import no.nav.k9punsj.integrasjoner.gosys.GosysService
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
-import no.nav.k9punsj.journalpost.dto.BehandlingsAarDto
-import no.nav.k9punsj.journalpost.dto.IdentDto
-import no.nav.k9punsj.journalpost.dto.JournalpostInfoDto
-import no.nav.k9punsj.journalpost.dto.KopierJournalpostDto
-import no.nav.k9punsj.journalpost.dto.LukkJournalpostDto
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpost
-import no.nav.k9punsj.journalpost.dto.PunsjJournalpostKildeType
+import no.nav.k9punsj.journalpost.dto.*
 import no.nav.k9punsj.journalpost.dto.Sak
-import no.nav.k9punsj.journalpost.dto.SettPåVentDto
-import no.nav.k9punsj.journalpost.dto.utledK9sakFagsakYtelseType
 import no.nav.k9punsj.openapi.OasDokumentInfo
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.openapi.OasJournalpostDto
@@ -49,16 +38,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
-import org.springframework.web.reactive.function.server.json
+import org.springframework.web.reactive.function.server.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class JournalpostRoutes(
@@ -97,7 +81,7 @@ internal class JournalpostRoutes(
     @Bean
     fun JournalpostRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.JournalpostInfo}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 try {
                     val journalpostId = request.journalpostId()
                     val journalpostInfo = journalpostService.hentJournalpostInfo(
@@ -192,7 +176,7 @@ internal class JournalpostRoutes(
         }
 
         POST("/api${Urls.HentJournalposter}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.ident()
                 val pdlResponse = pdlService.identifikator(norskIdent.norskIdent)
                 val aktørId = pdlResponse?.identPdl?.data?.hentIdenter?.identer?.first()?.ident
@@ -228,7 +212,7 @@ internal class JournalpostRoutes(
         }
 
         POST("/api${Urls.SettPåVent}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpost = request.journalpostId()
                 val dto = kotlin.runCatching { request.søknadId() }.getOrDefault(SettPåVentDto(null))
                 aksjonspunktService.settPåVentOgSendTilLos(journalpost, dto.soeknadId)
@@ -238,7 +222,7 @@ internal class JournalpostRoutes(
         }
 
         POST("/api${Urls.SettBehandlingsAar}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,
@@ -269,7 +253,7 @@ internal class JournalpostRoutes(
         }
 
         POST("/api${Urls.LukkJournalpost}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.journalpostId()
                 val lukkJournalpostRequest = request.lukkJournalpostRequest()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
@@ -314,7 +298,7 @@ internal class JournalpostRoutes(
         }
 
         GET("/api${Urls.Dokument}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 try {
                     val dokument = journalpostService.hentDokument(
                         journalpostId = request.journalpostId(),
@@ -348,7 +332,7 @@ internal class JournalpostRoutes(
         * Brukes for å journalføre inntektsmelding uten søknad som generell sak
          */
         POST("/api${Urls.JournalførPåGenerellSak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val identOgJournalpost = request.identOgJournalpost()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
                 val journalpostId = identOgJournalpost.journalpostId
@@ -405,7 +389,7 @@ internal class JournalpostRoutes(
         }
 
         POST("/api${Urls.KopierJournalpost}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.pathVariable("journalpost_id")
                 val dto = request.body(BodyExtractors.toMono(KopierJournalpostDto::class.java)).awaitFirst()
 

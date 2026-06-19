@@ -1,5 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll.oidc
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
@@ -8,7 +9,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OidcRoutes(
@@ -22,7 +22,7 @@ internal class OidcRoutes(
     @Bean
     fun OidcRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentNavTokenHeader}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val clientHeader = request.headers().header("Authorization")
                 ServerResponse
                     .ok()

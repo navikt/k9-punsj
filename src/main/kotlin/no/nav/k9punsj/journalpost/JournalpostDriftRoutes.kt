@@ -1,13 +1,12 @@
 package no.nav.k9punsj.journalpost
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.akjonspunkter.AksjonspunktKode
 import no.nav.k9punsj.akjonspunkter.AksjonspunktRepository
 import no.nav.k9punsj.akjonspunkter.AksjonspunktService
-import no.nav.k9punsj.akjonspunkter.AksjonspunktStatus
 import no.nav.k9punsj.felles.IkkeStøttetJournalpost
 import no.nav.k9punsj.felles.IkkeTilgang
 import no.nav.k9punsj.integrasjoner.dokarkiv.DokarkivGateway
@@ -21,12 +20,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.BodyExtractors
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.buildAndAwait
-import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
+import org.springframework.web.reactive.function.server.*
 
 @Configuration
 internal class JournalpostDriftRoutes(
@@ -57,7 +51,7 @@ internal class JournalpostDriftRoutes(
     @Bean
     fun JournalpostDriftRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.ResettInfoOmJournalpost}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.journalpostId()
 
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
@@ -82,7 +76,7 @@ internal class JournalpostDriftRoutes(
         }
 
         GET("/api${Urls.LukkJournalpostDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.journalpostId()
                 val enhet = azureGraphService.hentEnhetForInnloggetBruker().trimIndent().take(4)
 
@@ -121,7 +115,7 @@ internal class JournalpostDriftRoutes(
         }
 
         POST("/api${Urls.LukkJournalposterDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostIder = request.journalpostIder().journalpostIder.toSet()
 
                 val punsjJper = journalpostService.hentHvisJournalpostMedIder(journalpostIder.toList())
@@ -181,7 +175,7 @@ internal class JournalpostDriftRoutes(
         }
 
         POST("/api${Urls.FerdigstillJournalpostForDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostIder = request.journalpostIder().journalpostIder.toSet()
                 logger.info("Forsøker å ferdigstille journalposter: {}", journalpostIder)
 
@@ -225,7 +219,7 @@ internal class JournalpostDriftRoutes(
         }
 
         POST("/api${Urls.OppdaterJournalpostForDebugg}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val oppdaterJournalpostRequest = request.journalposter()
                 logger.info("Forsøker å oppdatere journalposter: {}", oppdaterJournalpostRequest)
 
@@ -276,7 +270,7 @@ internal class JournalpostDriftRoutes(
         }
 
         GET("/api${Urls.HentHvaSomHarBlittSendtInn}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.journalpostId()
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)
                     ?: return@RequestContext ServerResponse
@@ -312,7 +306,7 @@ internal class JournalpostDriftRoutes(
         }
 
         GET("/api${Urls.LukkLosOppgave}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val journalpostId = request.journalpostId()
 
                 val journalpost = journalpostService.hentHvisJournalpostMedId(journalpostId)

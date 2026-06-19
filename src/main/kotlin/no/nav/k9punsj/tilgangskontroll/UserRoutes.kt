@@ -1,5 +1,6 @@
 package no.nav.k9punsj.tilgangskontroll
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.idToken
@@ -8,7 +9,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import kotlin.coroutines.coroutineContext
 
 internal data class UserDto(
     val name: String,
@@ -25,7 +25,7 @@ internal class UserRoutes(
     @Bean
     fun UserRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api/user") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val token = coroutineContext.idToken()
                 ServerResponse.ok()
                     .contentType(MediaType.APPLICATION_JSON)

@@ -1,5 +1,6 @@
 package no.nav.k9punsj.journalpost.postmottak
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -11,7 +12,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class PostMottakRoutes(
@@ -27,7 +27,7 @@ internal class PostMottakRoutes(
     @Bean
     fun PostMottakRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         POST("/api${Urls.Mottak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,

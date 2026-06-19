@@ -1,5 +1,6 @@
 package no.nav.k9punsj.person
 
+import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.domenetjenester.PersonService
@@ -33,7 +34,7 @@ internal class PersonRoutes(
     @Bean
     fun personRoute() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentePerson}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,
@@ -57,7 +58,7 @@ internal class PersonRoutes(
             }
         }
         GET("/api${Urls.HenteBarn}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,
@@ -76,7 +77,7 @@ internal class PersonRoutes(
         }
 
         GET("/api${Urls.HenteAktørId}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = norskIdent,

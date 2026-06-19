@@ -1,5 +1,6 @@
 package no.nav.k9punsj.opplaeringspenger
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
@@ -19,7 +20,6 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
 import org.springframework.web.reactive.function.server.json
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 internal class OpplaeringspengerRoutes(
@@ -49,7 +49,7 @@ internal class OpplaeringspengerRoutes(
     @Bean
     fun opplaeringspengerSøknadRoutes() = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HenteMappe}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HenteMappe)
                     ?.let { return@RequestContext it }
@@ -59,14 +59,14 @@ internal class OpplaeringspengerRoutes(
         }
 
         GET("/api${Urls.HenteSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknadId = request.pathVariable(SøknadIdKey)
                 opplaeringspengerService.henteSøknad(søknadId)
             }
         }
 
         PUT("/api${Urls.OppdaterEksisterendeSøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapOpplaeringspengerSøknad()
 
                 opplaeringspengerService.oppdaterEksisterendeSøknad(request, søknad)
@@ -74,7 +74,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         POST("/api${Urls.SendEksisterendeSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapSendSøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = søknad.norskIdent,
@@ -86,7 +86,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         POST("/api${Urls.NySøknad}", contentType(MediaType.APPLICATION_JSON)) { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapNySøknad()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = søknad.norskIdent,
@@ -98,7 +98,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         POST("/api${Urls.ValiderSøknad}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val søknad = request.mapOpplaeringspengerSøknad()
                 søknad.soekerId?.let { norskIdent ->
                     innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
@@ -112,7 +112,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()
                 innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
                     fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
@@ -125,7 +125,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
                 val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
 
@@ -144,7 +144,7 @@ internal class OpplaeringspengerRoutes(
         }
 
         GET("/api${Urls.HentInstitusjoner}") { request ->
-            RequestContext(coroutineContext, request) {
+            RequestContext(currentCoroutineContext(), request) {
                 val institusjoner = opplaeringspengerService.hentInstitusjoner()
 
                 ServerResponse
