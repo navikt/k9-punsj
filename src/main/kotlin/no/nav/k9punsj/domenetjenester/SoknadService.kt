@@ -369,11 +369,6 @@ class SoknadService(
         søknadRepository.oppdaterSøknad(søknad)
     }
 
-    // slett søknad
-    suspend fun slettAlleSøknader() {
-        søknadRepository.slettAlleSøknader()
-    }
-
     suspend fun hentAlleSøknaderForBunke(bunkerId: String): List<SøknadEntitet> {
         return søknadRepository.hentAlleSøknaderForBunke(bunkerId)
     }
