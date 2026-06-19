@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -30,6 +31,7 @@ import no.nav.k9punsj.felles.dto.ArbeidsgiverMedArbeidsforholdId
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
+import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
@@ -69,7 +71,6 @@ import org.springframework.http.HttpStatus
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 @Configuration
 @StandardProfil
@@ -645,12 +646,13 @@ class K9SakServiceImpl(
     }
 
     private suspend fun httpPost(body: String, url: String): String {
+        val idToken = currentCoroutineContext().hentAuthentication().accessToken
         val (request, _, result) = "$baseUrl$url"
             .httpPost()
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
@@ -659,11 +661,12 @@ class K9SakServiceImpl(
     }
 
     private suspend fun httpGet(url: String): String {
+        val idToken = currentCoroutineContext().hentAuthentication().accessToken
         val (request, _, result) = "$baseUrl$url"
             .httpGet()
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
@@ -791,7 +794,7 @@ class K9SakServiceImpl(
         private val logger = LoggerFactory.getLogger(K9SakServiceImpl::class.java)
 
         private suspend fun hentCallId() = try {
-            coroutineContext.hentCallId()
+            currentCoroutineContext().hentCallId()
         } catch (e: Exception) {
             UUID.randomUUID().toString()
         }
