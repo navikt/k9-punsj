@@ -652,7 +652,7 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
@@ -666,7 +666,7 @@ class K9SakServiceImpl(
             .httpGet()
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()

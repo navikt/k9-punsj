@@ -80,7 +80,7 @@ class SafGateway(
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
     internal suspend fun hentJournalpost(journalpostId: String): SafDtos.Journalpost? {
-        val accessToken = cachedAccessTokenClient.getAccessToken(
+        val accessToken = cachedAccessTokenClient.getOnBehalfOfAccessToken(
             scopes = henteJournalpostScopes,
             onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
         )
@@ -165,7 +165,7 @@ class SafGateway(
     }
 
     internal suspend fun hentDataFraSaf(journalpostId: String): JSONObject {
-        val accessToken = cachedAccessTokenClient.getAccessToken(
+        val accessToken = cachedAccessTokenClient.getOnBehalfOfAccessToken(
             scopes = henteJournalpostScopes,
             onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
         )
@@ -201,7 +201,7 @@ class SafGateway(
 
     internal suspend fun hentDokument(journalpostId: String, dokumentId: String): Dokument? {
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = henteDokumentScopes,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )

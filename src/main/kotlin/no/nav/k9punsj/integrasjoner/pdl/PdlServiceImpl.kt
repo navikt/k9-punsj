@@ -204,12 +204,12 @@ class PdlServiceImpl(
         val operationName: String? = null,
     )
 
-    private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+    private suspend fun userAuthorizationHeader() = cachedAzureAccessTokenClient.getOnBehalfOfAccessToken(
         scopes = azureScopes,
         onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
     ).asAuthoriationHeader()
 
-    private fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getAccessToken(
+    private fun systemAuthorizationHeader() = cachedAzureAccessTokenClient.getClientCredentialsAccessToken(
         scopes = azureScopes
     ).asAuthoriationHeader()
 

@@ -55,7 +55,7 @@ internal fun AccessTokenClient.helsesjekk(
 ): Health {
     val builder = Health.Builder(initialHealth.status, initialHealth.details)
     return try {
-        getAccessToken(scopes)
+        getClientCredentialsAccessToken(scopes)
         builder.withDetail("$operasjon-access-token", "OK!").status(initialHealth.status)
     } catch (cause: Throwable) {
         logger.warn("Feil ved henting av access token for $operasjon. ${cause.message}")
