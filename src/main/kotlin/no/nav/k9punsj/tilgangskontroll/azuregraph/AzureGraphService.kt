@@ -39,7 +39,7 @@ class AzureGraphService(
 
         if (cachedObject == null) {
             val enhetAccessToken =
-                cachedAccessTokenClient.getAccessToken(
+                cachedAccessTokenClient.getOnBehalfOfAccessToken(
                     scopes = setOf("https://graph.microsoft.com/user.read"),
                     onBehalfOf = idToken.value
                 )

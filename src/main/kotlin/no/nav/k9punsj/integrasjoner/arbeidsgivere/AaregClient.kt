@@ -30,7 +30,7 @@ internal class AaregClient(
         tom: LocalDate,
         inkluderAvsluttetArbeidsforhold: Boolean = false
     ): Arbeidsforhold {
-        val authorizationHeader = cachedAccessTokenClient.getAccessToken(setOf(scope)).asAuthoriationHeader()
+        val authorizationHeader = cachedAccessTokenClient.getClientCredentialsAccessToken(setOf(scope)).asAuthoriationHeader()
 
         val uriBuilder = UriComponentsBuilder.fromUri(baseUrl)
             .path("/arbeidstaker/arbeidsforhold")

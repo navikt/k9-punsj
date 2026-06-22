@@ -46,7 +46,7 @@ class SifAbacPdpKlient(
 
     private suspend fun httpPostMedOboToken(body: String, url: String): String {
         val jwt = currentCoroutineContext().idToken().value
-        val oboToken = cachedAccessTokenClient.getAccessToken(scopes, jwt)
+        val oboToken = cachedAccessTokenClient.getOnBehalfOfAccessToken(scopes, jwt)
 
         val (request, _, result) = url
             .httpPost()

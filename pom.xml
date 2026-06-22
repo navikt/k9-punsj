@@ -56,13 +56,28 @@
 
         <fuel.version>2.3.1</fuel.version>
         <token-support.version>6.0.10</token-support.version>
-        <kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
-        <dusseldorf-ktor.version>7.0.9</dusseldorf-ktor.version>
+        <kotlinx-coroutines.version>1.11.0</kotlinx-coroutines.version>
+        <dusseldorf-ktor.version>8.0.0</dusseldorf-ktor.version>
         <de.huxhorn.sulky.ulid.version>8.3.0</de.huxhorn.sulky.ulid.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-bom</artifactId>
+                <version>${kotlinx-coroutines.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <!--fix dependency convergence:-->
             <dependency>
@@ -173,12 +188,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-reactor</artifactId>
-            <version>${kotlinx-coroutines.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-slf4j</artifactId>
-            <version>${kotlinx-coroutines.version}</version>
         </dependency>
 
         <!-- Authentication -->
@@ -374,12 +387,10 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
+            <artifactId>kotlin-test-junit</artifactId>
             <scope>test</scope>
         </dependency>
 

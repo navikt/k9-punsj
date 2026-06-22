@@ -64,7 +64,7 @@ class DokarkivGateway(
         val oppdatertPayload = ferdigstillJournalpost.oppdaterPayloadMedSak()
 
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
@@ -96,7 +96,7 @@ class DokarkivGateway(
 
     internal suspend fun opprettOgFerdigstillJournalpost(journalpostRequest: JournalPostRequest): JournalPostResponse {
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
@@ -127,7 +127,7 @@ class DokarkivGateway(
         val body = BodyInserters.fromValue("""{"journalfoerendeEnhet": "$enhet"}""".trimIndent())
 
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(scopes = dokarkivScope, onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken)
+            .getOnBehalfOfAccessToken(scopes = dokarkivScope, onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken)
 
         return kotlin.runCatching {
             client
@@ -147,7 +147,7 @@ class DokarkivGateway(
 
     internal suspend fun oppdaterJournalpost(jsonString: String, journalpostId: String): ResponseEntity<String> {
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
@@ -173,7 +173,7 @@ class DokarkivGateway(
     ) {
         val url = ferdigstillJournalpost.journalpostId.toString().oppdaterJournalpostUrl()
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )
@@ -204,7 +204,7 @@ class DokarkivGateway(
         saksnummer: String
     ): JournalpostId {
         val accessToken = cachedAccessTokenClient
-            .getAccessToken(
+            .getOnBehalfOfAccessToken(
                 scopes = dokarkivScope,
                 onBehalfOf = currentCoroutineContext().hentAuthentication().accessToken
             )

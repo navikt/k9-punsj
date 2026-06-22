@@ -125,7 +125,7 @@ internal class OppgaveGateway(
             client
                 .post()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getClientCredentialsAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -145,7 +145,7 @@ internal class OppgaveGateway(
             client
                 .get()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getClientCredentialsAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -163,7 +163,7 @@ internal class OppgaveGateway(
             client
                 .patch()
                 .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
+                .header(HttpHeaders.AUTHORIZATION, cachedAccessTokenClient.getClientCredentialsAccessToken(setOf(oppgaveScope)).asAuthoriationHeader())
                 .header(CallIdHeaderKey, UUID.randomUUID().toString())
                 .header(CorrelationIdHeader, currentCoroutineContext().hentCorrelationId())
                 .header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
