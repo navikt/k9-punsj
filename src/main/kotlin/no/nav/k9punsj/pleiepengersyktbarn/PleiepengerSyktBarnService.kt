@@ -273,6 +273,7 @@ internal class PleiepengerSyktBarnService(
         }
     }
 
+    @Deprecated("Bruk tjeneste i SakerRoutes")
     private suspend fun henterPerioderSomFinnesIK9sak(saksnummer: String?): Pair<List<PeriodeDto>?, String?> {
         if (saksnummer.isNullOrBlank()) {
             return Pair(emptyList(), null)

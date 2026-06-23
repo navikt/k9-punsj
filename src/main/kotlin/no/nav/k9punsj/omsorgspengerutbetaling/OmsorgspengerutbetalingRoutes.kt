@@ -122,6 +122,7 @@ internal class OmsorgspengerutbetalingRoutes(
             }
         }
 
+        //TODO erstattes av /api/saker/perioder
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()

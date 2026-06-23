@@ -3,7 +3,9 @@ package no.nav.k9punsj.sak
 import kotlinx.coroutines.currentCoroutineContext
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.openapi.OasFeil
+import no.nav.k9punsj.pleiepengersyktbarn.PleiepengerSyktBarnRoutes
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
@@ -29,6 +31,7 @@ internal class SakerRoutes(
 
     internal object Urls {
         internal const val HentSaker = "/saker/hent"
+        internal const val HentPerioder = "/saker/perioder"
     }
 
     @Bean
@@ -53,6 +56,28 @@ internal class SakerRoutes(
                     .status(HttpStatus.OK)
                     .json()
                     .bodyValueAndAwait(saker)
+            }
+        }
+
+        POST("/api${Urls.HentPerioder}") { request ->
+            RequestContext(currentCoroutineContext(), request) {
+                val saksnummer = request.queryParam("saksnummer").orElseThrow()
+
+                //TODO gjør tilgangskontroll eksplisitt her. Tilgangskontroll blir gjort i k9-sak siden det kalles med OBO-token
+
+                val (perioder, _) = sakService.hentPerioderForSaksnummer(saksnummer)
+
+                if (perioder != null) {
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(perioder)
+                } else {
+                    ServerResponse
+                        .ok()
+                        .json()
+                        .bodyValueAndAwait(listOf<PeriodeDto>())
+                }
             }
         }
     }
