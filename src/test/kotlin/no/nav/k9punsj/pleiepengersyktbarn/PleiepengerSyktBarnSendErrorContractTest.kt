@@ -44,7 +44,7 @@ internal class PleiepengerSyktBarnSendErrorContractTest : AbstractContainerBaseT
 
         val upstreamDetail = """{"feilmelding":"Det oppstod en serverfeil","feilkode":null,"type":"GENERELL_FEIL"}"""
 
-        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns Pair(emptyList(), null)
+        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns emptyList()
         coEvery { k9SakService.opprettSakOgSendInnSøknad(any(), any(), any(), any(), any(), any()) } throws RestKallException(
             titel = "Restkall mot k9-sak feilet",
             message = upstreamDetail,
@@ -73,7 +73,7 @@ internal class PleiepengerSyktBarnSendErrorContractTest : AbstractContainerBaseT
 
         val upstreamDetail = "Opprettelse av fagsak feilet i k9-sak"
 
-        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns Pair(emptyList(), null)
+        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns emptyList()
         coEvery { k9SakService.opprettSakOgSendInnSøknad(any(), any(), any(), any(), any(), any()) } throws RestKallException(
             titel = "Restkall mot k9-sak feilet",
             message = upstreamDetail,
@@ -102,7 +102,7 @@ internal class PleiepengerSyktBarnSendErrorContractTest : AbstractContainerBaseT
 
         val upstreamDetail = "Konflikt i k9-sak"
 
-        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns Pair(emptyList(), null)
+        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns emptyList()
         coEvery { k9SakService.opprettSakOgSendInnSøknad(any(), any(), any(), any(), any(), any()) } throws RestKallException(
             titel = "Restkall mot k9-sak feilet",
             message = upstreamDetail,

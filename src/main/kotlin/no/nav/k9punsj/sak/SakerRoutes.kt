@@ -29,6 +29,7 @@ internal class SakerRoutes(
 
     internal object Urls {
         internal const val HentSaker = "/saker/hent"
+        internal const val HentPerioder = "/saker/perioder"
     }
 
     @Bean
@@ -53,6 +54,29 @@ internal class SakerRoutes(
                     .status(HttpStatus.OK)
                     .json()
                     .bodyValueAndAwait(saker)
+            }
+        }
+
+        POST("/api${Urls.HentPerioder}") { request ->
+            RequestContext(currentCoroutineContext(), request) {
+                val saksnummer = request.queryParam("saksnummer").orElseThrow()
+
+                //TODO gjør tilgangskontroll eksplisitt her. Tilgangskontroll blir gjort i k9-sak siden det kalles med OBO-token
+
+                val perioder = try {
+                    sakService.hentPerioderForSaksnummer(saksnummer)
+                } catch (e: Exception) {
+                    logger.error("Feilet med å hente saker.", e)
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(e.message))
+                }
+
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(perioder)
             }
         }
     }

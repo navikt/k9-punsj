@@ -111,6 +111,7 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
+        //TODO erstattes av /api/saker/perioder
         POST("/api${Urls.HentInfoFraK9sak}") { request ->
             RequestContext(currentCoroutineContext(), request) {
                 val matchfagsak = request.mapMatchFagsak()
@@ -124,6 +125,7 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
+        //TODO erstattes av /api/saker/perioder
         POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
             RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()

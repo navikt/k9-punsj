@@ -2,6 +2,7 @@ package no.nav.k9punsj.sak
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9punsj.domenetjenester.PersonService
+import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.sak.dto.SakInfoDto
@@ -80,5 +81,9 @@ class SakService(
             // Returnerer fagsaker og reserverte saksnummere
             return (fagsaker + reserverteSaksnummere).distinctBy { it.fagsakId }
         }
+    }
+
+    suspend fun hentPerioderForSaksnummer(saksnummer: String): List<PeriodeDto> {
+        return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
     }
 }

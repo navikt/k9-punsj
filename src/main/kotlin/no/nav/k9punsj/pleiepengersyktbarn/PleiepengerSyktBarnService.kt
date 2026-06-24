@@ -110,7 +110,7 @@ internal class PleiepengerSyktBarnService(
 
         try {
             val søknad: PleiepengerSyktBarnSøknadDto = objectMapper.convertValue(søknadEntitet.søknad!!)
-            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
+            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer)
 
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -209,7 +209,7 @@ internal class PleiepengerSyktBarnService(
             )
 
         val (søknad, feilListe) = try {
-            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer).first ?: emptyList()
+            val hentPerioderSomFinnesIK9 = henterPerioderSomFinnesIK9sak(søknadEntitet.k9saksnummer)
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
             MapPsbTilK9Format(
@@ -273,9 +273,10 @@ internal class PleiepengerSyktBarnService(
         }
     }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(saksnummer: String?): Pair<List<PeriodeDto>?, String?> {
+    @Deprecated("Bruk tjeneste i SakerRoutes")
+    private suspend fun henterPerioderSomFinnesIK9sak(saksnummer: String?): List<PeriodeDto> {
         if (saksnummer.isNullOrBlank()) {
-            return Pair(emptyList(), null)
+            return emptyList()
         }
         return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
     }

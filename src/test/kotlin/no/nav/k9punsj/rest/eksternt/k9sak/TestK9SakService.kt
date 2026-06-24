@@ -13,8 +13,8 @@ import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -47,8 +47,8 @@ internal class TestK9SakService : K9SakService {
         return Pair(emptyList(), null)
     }
 
-    override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): Pair<List<PeriodeDto>?, String?> {
-        return Pair(emptyList(), null)
+    override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): List<PeriodeDto> {
+        return emptyList()
     }
 
     override suspend fun hentPerioderSomFinnesIK9ForPeriode(
