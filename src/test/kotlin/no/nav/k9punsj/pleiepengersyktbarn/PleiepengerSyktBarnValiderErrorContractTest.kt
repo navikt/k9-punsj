@@ -33,7 +33,7 @@ internal class PleiepengerSyktBarnValiderErrorContractTest : AbstractContainerBa
         val correlationId = UUID.randomUUID().toString()
         val norskIdent = "02020050131"
 
-        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns Pair(emptyList(), null)
+        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns emptyList()
 
         val søknad = opprettUtfyltSøknad(
             søknadFraFrontend = LesFraFilUtil.tidSøknad(),
@@ -100,7 +100,7 @@ internal class PleiepengerSyktBarnValiderErrorContractTest : AbstractContainerBa
     fun `PSB valider returnerer 202 for gyldig søknad`(): Unit = runBlocking {
         val norskIdent = "02020050134"
 
-        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns Pair(emptyList(), null)
+        coEvery { k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(any()) } returns emptyList()
 
         val søknad = opprettUtfyltSøknad(
             søknadFraFrontend = LesFraFilUtil.søknadFraFrontend(),

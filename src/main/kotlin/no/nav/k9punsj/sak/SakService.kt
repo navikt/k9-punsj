@@ -83,7 +83,7 @@ class SakService(
         }
     }
 
-    suspend fun hentPerioderForSaksnummer(saksnummer: String): Pair<List<PeriodeDto>?, String?> {
-        return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer);
+    suspend fun hentPerioderForSaksnummer(saksnummer: String): List<PeriodeDto> {
+        return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
     }
 }

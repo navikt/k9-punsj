@@ -24,7 +24,7 @@ interface K9SakService {
 
     suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
         saksnummer: String,
-    ): Pair<List<PeriodeDto>?, String?>
+    ): List<PeriodeDto>
 
     suspend fun hentPerioderSomFinnesIK9ForPeriode(
         søker: String,

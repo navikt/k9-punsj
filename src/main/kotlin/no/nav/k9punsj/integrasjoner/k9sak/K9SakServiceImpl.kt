@@ -136,28 +136,26 @@ class K9SakServiceImpl(
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
         saksnummer: String,
-    ): Pair<List<PeriodeDto>?, String?> {
-        val (json, feil) = kotlin.runCatching {
+    ): List<PeriodeDto> {
+        val json = try {
             httpPost(
                 "",
                 hentPerioderForSakUrl + "?saksnummer=${saksnummer}"
             )
-        }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { return Pair(null, it.message) }
-        )
-        return try {
-            if (json == null) {
-                return Pair(null, feil!!)
-            }
-            val resultat = objectMapper().readValue<List<Periode>>(json)
-            val sammenslåttePerioder =
-                LocalDateTimeline(resultat.map { LocalDateSegment<Unit>(it.fom, it.tom, null) }).compress()
-            val liste =
-                sammenslåttePerioder.toSegments().map { periode -> PeriodeDto(periode.fom, periode.tom) }
-            Pair(liste, null)
         } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
+            throw RuntimeException(e.message, e)
+        }
+
+        return try {
+            objectMapper()
+                .readValue<List<Periode>>(json)
+                .map { LocalDateSegment<Unit>(it.fom, it.tom, null) }
+                .let(::LocalDateTimeline)
+                .compress()
+                .toSegments()
+                .map { periode -> PeriodeDto(periode.fom, periode.tom) }
+        } catch (e: Exception) {
+            throw RuntimeException("Feilet deserialisering $e", e)
         }
     }
 
@@ -652,7 +650,8 @@ class K9SakServiceImpl(
             .body(body)
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken)
+                    .asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
@@ -666,7 +665,8 @@ class K9SakServiceImpl(
             .httpGet()
             .header(
                 HttpHeaders.ACCEPT to "application/json",
-                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken).asAuthoriationHeader(),
+                HttpHeaders.AUTHORIZATION to cachedAccessTokenClient.getOnBehalfOfAccessToken(k9sakScope, idToken)
+                    .asAuthoriationHeader(),
                 HttpHeaders.CONTENT_TYPE to "application/json",
                 "callId" to hentCallId()
             ).awaitStringResponseResult()
