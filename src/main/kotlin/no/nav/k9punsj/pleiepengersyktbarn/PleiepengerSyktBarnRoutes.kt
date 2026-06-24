@@ -129,19 +129,12 @@ internal class PleiepengerSyktBarnRoutes(
         POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
             RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
-                val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
+                val perioder = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
 
-                if (perioder != null) {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(perioder)
-                } else {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(listOf<PeriodeDto>())
-                }
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(perioder)
             }
         }
     }
