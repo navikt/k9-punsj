@@ -131,17 +131,10 @@ internal class OpplaeringspengerRoutes(
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
                 val perioder = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
 
-                if (perioder != null) {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(perioder)
-                } else {
-                    ServerResponse
-                        .ok()
-                        .json()
-                        .bodyValueAndAwait(listOf<PeriodeDto>())
-                }
+                ServerResponse
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(perioder)
             }
         }
 
