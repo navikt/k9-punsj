@@ -98,7 +98,7 @@ class K9SakServiceImpl(
         internal const val hentReservertSaksnummerUrl = "/saksnummer"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
-        internal const val hentInstitusjonerUrl = "/opplæringsinstitusjon/alle"
+        internal const val hentInstitusjonerUrl = "/opplæringsinstitusjon/alle-v2"
     }
 
     override suspend fun hentPerioderSomFinnesIK9(
