@@ -42,8 +42,6 @@ internal class PleiepengerSyktBarnRoutes(
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
-        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
-        internal const val HentInfoFraK9sakMedSaksnummer = "/$søknadType/k9sak/info/saksnummer" // post
     }
 
     @Bean
@@ -111,32 +109,6 @@ internal class PleiepengerSyktBarnRoutes(
             }
         }
 
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
-                    fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    fnrForSporingslogg = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    url = Urls.HentInfoFraK9sak
-                )?.let { return@RequestContext it }
-
-                pleiepengerSyktBarnService.hentInfoFraK9Sak(matchfagsak)
-            }
-        }
-
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val saksnummer = request.queryParam("saksnummer").orElseThrow()
-                val perioder = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
-
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(perioder)
-            }
-        }
     }
 
     private suspend fun ServerRequest.mapPleiepengerSøknad() =

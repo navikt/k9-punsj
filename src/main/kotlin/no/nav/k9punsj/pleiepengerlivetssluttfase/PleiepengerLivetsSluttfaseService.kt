@@ -245,27 +245,6 @@ internal class PleiepengerLivetsSluttfaseService(
             .bodyValueAndAwait(søknad)
     }
 
-    @Deprecated("Flyttes til felles k9-sak tjeneste")
-    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): ServerResponse {
-        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
-            søker = matchfagsak.brukerIdent,
-            barn = matchfagsak.barnIdent,
-            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
-        )
-
-        return if (perioder == null) {
-            return ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(listOf<PeriodeDto>())
-        } else {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(perioder)
-        }
-    }
-
     private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {
         if (dto.soekerId.isNullOrBlank() || dto.pleietrengende == null || dto.pleietrengende.norskIdent.isNullOrBlank()) {
             return null

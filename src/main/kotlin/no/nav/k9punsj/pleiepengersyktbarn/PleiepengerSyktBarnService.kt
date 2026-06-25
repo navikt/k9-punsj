@@ -252,26 +252,6 @@ internal class PleiepengerSyktBarnService(
             .bodyValueAndAwait(søknad)
     }
 
-    @Deprecated("Flyttes til felles k9-sak tjeneste")
-    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): ServerResponse {
-        val (perioder, _) = k9SakService.hentPerioderSomFinnesIK9(
-            matchfagsak.brukerIdent,
-            matchfagsak.barnIdent,
-            PunsjFagsakYtelseType.PLEIEPENGER_SYKT_BARN
-        )
-
-        return if (perioder != null) {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(perioder)
-        } else {
-            ServerResponse
-                .ok()
-                .json()
-                .bodyValueAndAwait(listOf<PeriodeDto>())
-        }
-    }
 
     @Deprecated("Bruk tjeneste i SakerRoutes")
     private suspend fun henterPerioderSomFinnesIK9sak(saksnummer: String?): List<PeriodeDto> {

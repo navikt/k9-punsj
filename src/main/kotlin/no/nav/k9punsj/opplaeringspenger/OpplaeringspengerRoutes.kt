@@ -41,8 +41,6 @@ internal class OpplaeringspengerRoutes(
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
-        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
-        internal const val HentInfoFraK9sakMedSaksnummer = "/$søknadType/k9sak/info/saksnummer" // post
         internal const val HentInstitusjoner = "/$søknadType/institusjoner" // get
     }
 
@@ -108,33 +106,6 @@ internal class OpplaeringspengerRoutes(
                 }
 
                 opplaeringspengerService.validerSøknad(søknad)
-            }
-        }
-
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
-                    fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    fnrForSporingslogg = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    url = Urls.HentInfoFraK9sak
-                )?.let { return@RequestContext it }
-
-                opplaeringspengerService.hentInfoFraK9Sak(matchfagsak)
-            }
-        }
-
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val saksnummer = request.queryParam("saksnummer").orElseThrow()
-                val perioder = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
-
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(perioder)
             }
         }
 

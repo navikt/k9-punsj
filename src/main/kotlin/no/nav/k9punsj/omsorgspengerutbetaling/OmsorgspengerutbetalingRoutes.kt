@@ -122,23 +122,6 @@ internal class OmsorgspengerutbetalingRoutes(
             }
         }
 
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
-                    fnr = matchfagsak.brukerIdent,
-                    url = PleiepengerSyktBarnRoutes.Urls.HentInfoFraK9sak
-                )?.let { return@RequestContext it }
-
-                val perioder = omsorgspengerutbetalingService.hentInfoFraK9Sak(matchfagsak)
-
-                return@RequestContext ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(perioder)
-            }
-        }
     }
 
 
