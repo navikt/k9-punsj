@@ -4,12 +4,9 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsak
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
 import org.springframework.context.annotation.Bean
@@ -24,7 +21,6 @@ import org.springframework.web.reactive.function.server.json
 @Configuration
 internal class OpplaeringspengerRoutes(
     private val opplaeringspengerService: OpplaeringspengerService,
-    private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils
 ) {
