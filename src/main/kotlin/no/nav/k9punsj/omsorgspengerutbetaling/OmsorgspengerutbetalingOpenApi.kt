@@ -281,35 +281,4 @@ internal class OmsorgspengerutbetalingOpenApi {
     fun hentArbeidsforholdIder(@RequestBody matchFagsak: MatchFagsakMedPeriode) {
     }
 
-    @PostMapping(
-        OmsorgspengerutbetalingRoutes.Urls.HentInfoFraK9sak,
-        consumes = ["application/json"],
-        produces = ["application/json"]
-    )
-    @Operation(
-        summary = "Henter perioder som ligger i k9-sak",
-        description = "Henter perioder som ligger i k9-sak",
-        security = [SecurityRequirement(name = OpenApi.OAUTH2)]
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "Henter siste omsorgspengerutbetaling fra k9-sak og gjør den tilgjengelig for visning",
-                content = [
-                    Content(
-                        schema = Schema(
-                            implementation = PerioderDto::class
-                        )
-                    )
-                ]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "Fant ingen gjeldene søknad"
-            )
-        ]
-    )
-    fun HentInfoFraK9sak(@RequestBody matchFagsak: Matchfagsak) {
-    }
 }

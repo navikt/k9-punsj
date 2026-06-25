@@ -41,7 +41,6 @@ internal class OmsorgspengerutbetalingRoutes(
         const val SendEksisterendeSøknad = "/$søknadType/send" // post
         const val ValiderSøknad = "/$søknadType/valider" // post
         const val HentArbeidsforholdIderFraK9sak = "/$søknadType/k9sak/arbeidsforholdIder" // post
-        const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
     }
 
     @Bean
