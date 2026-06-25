@@ -4,12 +4,9 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactive.awaitFirst
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
-import no.nav.k9punsj.felles.dto.PeriodeDto
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakService
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.k9punsj.utils.ServerRequestUtils.mapMatchFagsak
 import no.nav.k9punsj.utils.ServerRequestUtils.mapNySøknad
 import no.nav.k9punsj.utils.ServerRequestUtils.mapSendSøknad
 import org.springframework.context.annotation.Bean
@@ -24,7 +21,6 @@ import org.springframework.web.reactive.function.server.json
 @Configuration
 internal class OpplaeringspengerRoutes(
     private val opplaeringspengerService: OpplaeringspengerService,
-    private val k9SakService: K9SakService,
     private val authenticationHandler: AuthenticationHandler,
     private val innlogget: InnloggetUtils
 ) {
@@ -41,8 +37,6 @@ internal class OpplaeringspengerRoutes(
         internal const val OppdaterEksisterendeSøknad = "/$søknadType/oppdater" // put
         internal const val SendEksisterendeSøknad = "/$søknadType/send" // post
         internal const val ValiderSøknad = "/$søknadType/valider" // post
-        internal const val HentInfoFraK9sak = "/$søknadType/k9sak/info" // post
-        internal const val HentInfoFraK9sakMedSaksnummer = "/$søknadType/k9sak/info/saksnummer" // post
         internal const val HentInstitusjoner = "/$søknadType/institusjoner" // get
     }
 
@@ -108,33 +102,6 @@ internal class OpplaeringspengerRoutes(
                 }
 
                 opplaeringspengerService.validerSøknad(søknad)
-            }
-        }
-
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sak}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val matchfagsak = request.mapMatchFagsak()
-                innlogget.harInnloggetBrukerTilgangTilÅSendeInn(
-                    fnr = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    fnrForSporingslogg = listOf(matchfagsak.brukerIdent, matchfagsak.barnIdent!!),
-                    url = Urls.HentInfoFraK9sak
-                )?.let { return@RequestContext it }
-
-                opplaeringspengerService.hentInfoFraK9Sak(matchfagsak)
-            }
-        }
-
-        //TODO erstattes av /api/saker/perioder
-        POST("/api${Urls.HentInfoFraK9sakMedSaksnummer}") { request ->
-            RequestContext(currentCoroutineContext(), request) {
-                val saksnummer = request.queryParam("saksnummer").orElseThrow()
-                val perioder = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
-
-                ServerResponse
-                    .ok()
-                    .json()
-                    .bodyValueAndAwait(perioder)
             }
         }
 
