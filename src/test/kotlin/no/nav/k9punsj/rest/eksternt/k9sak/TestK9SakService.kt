@@ -23,41 +23,9 @@ import java.util.*
 @Component
 @Profile("test") // TODO: Erstatt med mock
 internal class TestK9SakService : K9SakService {
-    override suspend fun hentPerioderSomFinnesIK9(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType
-    ): Pair<List<PeriodeDto>?, String?> {
-        // OmsorgspengerutbetalingRoutesTest.Korrigering OMP UT med fraværsperioder fra tidiger år validerer riktigt år
-        if (søker == "26470392885" && punsjFagsakYtelseType == PunsjFagsakYtelseType.OMSORGSPENGER) {
-            return Pair(
-                listOf(
-                    PeriodeDto(
-                        fom = LocalDate.of(2022, 12, 1),
-                        tom = LocalDate.of(2022, 12, 5)
-                    ),
-                    PeriodeDto(
-                        fom = LocalDate.of(2022, 12, 10),
-                        tom = LocalDate.of(2022, 12, 15)
-                    )
-                ),
-                null
-            )
-        }
-        return Pair(emptyList(), null)
-    }
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): List<PeriodeDto> {
         return emptyList()
-    }
-
-    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType,
-        periode: PeriodeDto
-    ): Pair<List<PeriodeDto>?, String?> {
-        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, punsjFagsakYtelseType = punsjFagsakYtelseType)
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(

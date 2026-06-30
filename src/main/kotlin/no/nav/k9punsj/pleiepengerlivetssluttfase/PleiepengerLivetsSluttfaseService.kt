@@ -102,7 +102,7 @@ internal class PleiepengerLivetsSluttfaseService(
             val søknad: PleiepengerLivetsSluttfaseSøknadDto =
                 objectMapper.convertValue(søknadEntitet.søknad!!)
 
-            val eksisterendePerioderFraK9Sak = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknad.k9saksnummer!!)
+            val eksisterendePerioderFraK9Sak = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknadEntitet.k9saksnummer!!)
 
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
