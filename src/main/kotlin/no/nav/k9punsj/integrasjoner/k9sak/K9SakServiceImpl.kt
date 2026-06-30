@@ -792,12 +792,6 @@ class K9SakServiceImpl(
             tom = LocalDate.parse(getString("tom"))
         )
 
-        private data class MatchDto(
-            val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: String? = null,
-        )
-
         data class FinnFagsakDto(
             val ytelseType: FagsakYtelseType,
             val aktørId: String,
