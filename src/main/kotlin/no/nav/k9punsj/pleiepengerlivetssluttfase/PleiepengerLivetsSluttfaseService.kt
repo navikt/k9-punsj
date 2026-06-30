@@ -102,7 +102,7 @@ internal class PleiepengerLivetsSluttfaseService(
             val søknad: PleiepengerLivetsSluttfaseSøknadDto =
                 objectMapper.convertValue(søknadEntitet.søknad!!)
 
-            val eksisterendePerioderFraK9Sak = henterPerioderSomFinnesIK9sak(søknad)?.first ?: emptyList()
+            val eksisterendePerioderFraK9Sak = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknad.k9saksnummer!!)
 
             val journalPoster = søknadEntitet.journalposter!!
             val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -193,12 +193,11 @@ internal class PleiepengerLivetsSluttfaseService(
     }
 
     internal suspend fun validerSøknad(soknadTilValidering: PleiepengerLivetsSluttfaseSøknadDto): ServerResponse {
-        val eksisterendePerioderFraK9Sak = henterPerioderSomFinnesIK9sak(soknadTilValidering)
-            ?.first ?: emptyList()
         val søknadEntitet = soknadService.hentSøknad(soknadTilValidering.soeknadId)
             ?: return ServerResponse
                 .badRequest()
                 .buildAndAwait()
+        val eksisterendePerioderFraK9Sak = k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknadEntitet.k9saksnummer!!)
 
         val journalPoster = søknadEntitet.journalposter!!
         val journalposterDto: JournalposterDto = objectMapper.convertValue(journalPoster)
@@ -245,14 +244,4 @@ internal class PleiepengerLivetsSluttfaseService(
             .bodyValueAndAwait(søknad)
     }
 
-    private suspend fun henterPerioderSomFinnesIK9sak(dto: PleiepengerLivetsSluttfaseSøknadDto): Pair<List<PeriodeDto>?, String?>? {
-        if (dto.soekerId.isNullOrBlank() || dto.pleietrengende == null || dto.pleietrengende.norskIdent.isNullOrBlank()) {
-            return null
-        }
-        return k9SakService.hentPerioderSomFinnesIK9(
-            søker = dto.soekerId,
-            barn = dto.pleietrengende.norskIdent,
-            punsjFagsakYtelseType = PunsjFagsakYtelseType.PLEIEPENGER_LIVETS_SLUTTFASE
-        )
-    }
 }
