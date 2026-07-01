@@ -120,6 +120,11 @@
                 <artifactId>oauth2-oidc-sdk</artifactId>
                 <version>11.37.2</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.k9.felles.sikkerhet</groupId>
+                <artifactId>k9-felles-sikkerhet</artifactId>
+                <version>11.2.7</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
