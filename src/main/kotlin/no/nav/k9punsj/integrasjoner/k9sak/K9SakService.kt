@@ -16,22 +16,9 @@ import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 
 interface K9SakService {
 
-    suspend fun hentPerioderSomFinnesIK9(
-        søker: String,
-        barn: String? = null,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType
-    ): Pair<List<PeriodeDto>?, String?>
-
     suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
         saksnummer: String,
     ): List<PeriodeDto>
-
-    suspend fun hentPerioderSomFinnesIK9ForPeriode(
-        søker: String,
-        barn: String? = null,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType,
-        periode: PeriodeDto
-    ): Pair<List<PeriodeDto>?, String?>
 
     suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
         søker: String,
