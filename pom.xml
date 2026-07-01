@@ -120,11 +120,6 @@
                 <artifactId>oauth2-oidc-sdk</artifactId>
                 <version>11.37.2</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.k9.felles.sikkerhet</groupId>
-                <artifactId>k9-felles-sikkerhet</artifactId>
-                <version>11.2.7</version>
-            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -168,6 +163,13 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>kontrakt</artifactId>
             <version>${k9-sak.version}</version>
+            <exclusions>
+                <exclusion>
+                    <!-- ekskluderer for å bruke versjonen som hentes av sif-abac-kontrakt -->
+                    <groupId>no.nav.k9.felles.sikkerhet</groupId>
+                    <artifactId>k9-felles-sikkerhet-kontrakt</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.formidling</groupId>
