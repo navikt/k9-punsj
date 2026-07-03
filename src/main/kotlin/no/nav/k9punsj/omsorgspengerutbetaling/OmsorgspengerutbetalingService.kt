@@ -136,16 +136,8 @@ internal class OmsorgspengerutbetalingService(
             }
 
             val eksisterendePerioder = if (søknad.erKorrigering!!) {
-                val fravaersPeriode = søknad.fravaersperioder?.let {
-                    søknad.periodeForHeleAretMedFravaer()
-                }
-                logger.info("Korrigering av søknad. Henter eksisterende perioder for soknadsperiode: [$fravaersPeriode]")
-                hentInfoFraK9Sak(
-                    Matchfagsak(
-                        brukerIdent = sendSøknad.norskIdent,
-                        periode = fravaersPeriode // Er periode null henter vi fraværsperioder fra i år.
-                    )
-                )
+                logger.info("Korrigering av søknad. Henter eksisterende perioder for saksnummer: [${søknadEntitet.k9saksnummer}]")
+                k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknadEntitet.k9saksnummer!!)
             } else listOf()
 
             val (søknadK9Format, feilListe) = MapOmsUtTilK9Format(
@@ -214,16 +206,8 @@ internal class OmsorgspengerutbetalingService(
 
         val mapTilEksternFormat: Pair<Søknad, List<Feil>>?
         val eksisterendePerioder = if (soknadTilValidering.erKorrigering!!) {
-            val fravaersPeriode = soknadTilValidering.fravaersperioder?.let {
-                soknadTilValidering.periodeForHeleAretMedFravaer()
-            }
-            logger.info("Korrigering av søknad. Henter eksisterende perioder for soknadsperiode: [$fravaersPeriode]")
-            hentInfoFraK9Sak(
-                Matchfagsak(
-                    brukerIdent = soknadTilValidering.soekerId!!,
-                    periode = fravaersPeriode // Er periode null henter vi fraværsperioder fra i år.
-                )
-            )
+            logger.info("Korrigering av søknad. Henter eksisterende perioder for saksnummer: [${søknadEntitet.k9saksnummer}]")
+            k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(søknadEntitet.k9saksnummer!!)
         } else listOf()
 
         try {
@@ -287,20 +271,4 @@ internal class OmsorgspengerutbetalingService(
         }
     }
 
-    internal suspend fun hentInfoFraK9Sak(matchfagsak: Matchfagsak): List<PeriodeDto> {
-        val (perioder, _) = if (matchfagsak.periode == null) {
-            k9SakService.hentPerioderSomFinnesIK9(
-                søker = matchfagsak.brukerIdent,
-                punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER
-            )
-        } else {
-            k9SakService.hentPerioderSomFinnesIK9ForPeriode(
-                søker = matchfagsak.brukerIdent,
-                punsjFagsakYtelseType = PunsjFagsakYtelseType.OMSORGSPENGER,
-                periode = matchfagsak.periode
-            )
-        }
-
-        return perioder ?: listOf()
-    }
 }

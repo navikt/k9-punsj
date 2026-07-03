@@ -33,11 +33,9 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCallId
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.finnFagsak
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSakUrl
-import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReservertSaksnummerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentReserverteSaksnummereUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.opprettFagsakUrl
@@ -87,51 +85,16 @@ class K9SakServiceImpl(
     private val log = LoggerFactory.getLogger("K9SakService")
 
     internal object Urls {
-        internal const val hentPerioderUrl = "/behandling/soknad/perioder"
         internal const val hentPerioderForSakUrl = "/behandling/soknad/perioder/saksnummer"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
         internal const val sokFagsakerUrl = "/fagsak/sok"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
-        internal const val finnFagsak = "/fordel/fagsak/sok"
         internal const val opprettFagsakUrl = "/fordel/fagsak/opprett"
         internal const val opprettSakOgSendInnSøknadUrl = "/fordel/fagsak/opprett/journalpost"
         internal const val hentReservertSaksnummerUrl = "/saksnummer"
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
         internal const val hentInstitusjonerUrl = "/opplæringsinstitusjon/alle-v2"
-    }
-
-    override suspend fun hentPerioderSomFinnesIK9(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
-    ): Pair<List<PeriodeDto>?, String?> {
-        val matchDto = MatchDto(
-            ytelseType = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode),
-            bruker = søker,
-            pleietrengende = barn
-        )
-
-        val body =
-            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }
-                .getOrNull()
-                ?: return Pair(null, "Feilet serialisering")
-
-        val (json, feil) = kotlin.runCatching { httpPost(body, hentPerioderUrl) }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { return Pair(null, it.message) }
-        )
-        return try {
-            if (json == null) {
-                return Pair(null, feil!!)
-            }
-            val resultat = objectMapper().readValue<List<Periode>>(json)
-            val liste = resultat
-                .map { periode -> PeriodeDto(periode.fom, periode.tom) }.toList()
-            Pair(liste, null)
-        } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
-        }
     }
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
@@ -156,63 +119,6 @@ class K9SakServiceImpl(
                 .map { periode -> PeriodeDto(periode.fom, periode.tom) }
         } catch (e: Exception) {
             throw RuntimeException("Feilet deserialisering $e", e)
-        }
-    }
-
-    /*
-     * 1. Slår opp saksnummer basert på ytelsetype, periode & søkers aktørId.
-     * 2. Henter perioder for saksnummer.
-     */
-    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: no.nav.k9punsj.felles.PunsjFagsakYtelseType,
-        periode: PeriodeDto,
-    ): Pair<List<PeriodeDto>?, String?> {
-        val søkerAktørId = personService.finnAktørId(søker)
-        val barnAktørId = barn?.let { personService.finnAktørId(barn) }
-        val finnFagsakDto = FinnFagsakDto(
-            ytelseType = FagsakYtelseType.fraKode(punsjFagsakYtelseType.kode),
-            aktørId = søkerAktørId,
-            pleietrengendeAktørId = barnAktørId,
-            periode = periode
-        )
-
-        val saksnummerBody =
-            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(finnFagsakDto) }
-                .getOrNull()
-                ?: return Pair(null, "Feilet serialisering")
-
-        val (saksnummerJson, saksnummerFeil) = kotlin.runCatching { httpPost(saksnummerBody, finnFagsak) }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { return Pair(null, it.message) }
-        )
-
-        saksnummerFeil?.let { Pair(null, saksnummerFeil) }
-
-        val saksnummer = saksnummerJson?.let { objectMapper().readValue<SaksnummerDto>(it) }
-            ?: return Pair(null, "Fant ikke saksnummer")
-
-        val (json, feil) = kotlin.runCatching {
-            httpPost(
-                saksnummerJson,
-                hentPerioderForSakUrl + "?saksnummer=${saksnummer.saksnummer}"
-            )
-        }.fold(
-            onSuccess = { Pair(it, null) },
-            onFailure = { return Pair(null, it.message) }
-        )
-
-        return try {
-            if (json == null) {
-                return Pair(null, feil!!)
-            }
-            val resultat = objectMapper().readValue<List<Periode>>(json)
-            val liste = resultat
-                .map { PeriodeDto(it.fom, it.tom) }.toList()
-            Pair(liste, null)
-        } catch (e: Exception) {
-            Pair(null, "Feilet deserialisering $e")
         }
     }
 
@@ -825,19 +731,6 @@ class K9SakServiceImpl(
         private fun JSONObject.somPeriodeDto() = PeriodeDto(
             fom = LocalDate.parse(getString("fom")),
             tom = LocalDate.parse(getString("tom"))
-        )
-
-        private data class MatchDto(
-            val ytelseType: FagsakYtelseType,
-            val bruker: String,
-            val pleietrengende: String? = null,
-        )
-
-        data class FinnFagsakDto(
-            val ytelseType: FagsakYtelseType,
-            val aktørId: String,
-            val pleietrengendeAktørId: String? = null,
-            val periode: PeriodeDto,
         )
 
         data class MatchArbeidsforholdDto(

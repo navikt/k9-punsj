@@ -16,42 +16,17 @@ import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
-import no.nav.k9punsj.util.MockUtil.erFødtI
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.Month
 import java.util.*
 
 @Component
 @LokalProfil
 class LokalK9SakService : K9SakService {
-    override suspend fun hentPerioderSomFinnesIK9(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType
-    ) = when (søker.erFødtI(Month.MAY)) {
-        true -> Pair(
-            listOf(
-                PeriodeDto(fom = LocalDate.now(), tom = LocalDate.now().plusWeeks(3)),
-                PeriodeDto(fom = LocalDate.now().minusMonths(6), tom = LocalDate.now().minusMonths(4))
-            ),
-            null
-        )
 
-        false -> Pair(emptyList(), null)
-    }
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): List<PeriodeDto> {
         return emptyList()
-    }
-
-    override suspend fun hentPerioderSomFinnesIK9ForPeriode(
-        søker: String,
-        barn: String?,
-        punsjFagsakYtelseType: PunsjFagsakYtelseType,
-        periode: PeriodeDto
-    ): Pair<List<PeriodeDto>?, String?> {
-        return hentPerioderSomFinnesIK9(søker = søker, barn = barn, punsjFagsakYtelseType = punsjFagsakYtelseType)
     }
 
     override suspend fun hentArbeidsforholdIdFraInntektsmeldinger(
