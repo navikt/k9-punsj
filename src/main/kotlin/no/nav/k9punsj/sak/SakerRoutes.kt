@@ -1,12 +1,17 @@
 package no.nav.k9punsj.sak
 
 import kotlinx.coroutines.currentCoroutineContext
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.RequestContext
 import no.nav.k9punsj.SaksbehandlerRoutes
+import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
 import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
+import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
+import no.nav.sif.abac.kontrakt.abac.dto.SaksnummerDto
+import no.nav.sif.abac.kontrakt.person.AktørId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -14,13 +19,15 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.json
 
 @Configuration
 internal class SakerRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val sakService: SakService,
-    private val innloggetUtils: InnloggetUtils
+    private val innloggetUtils: InnloggetUtils,
+    private val pepClient: IPepClient
 ) {
 
     internal companion object {
@@ -33,12 +40,22 @@ internal class SakerRoutes(
     }
 
     @Bean
-    fun SakerRoutes() = SaksbehandlerRoutes(authenticationHandler) {
+    fun SakerRoutes(personService: PersonService) = SaksbehandlerRoutes(authenticationHandler) {
         GET("/api${Urls.HentSaker}") { request ->
+            //TODO foretrekk POST og send fnr i body. GET med fnr i header er ikke ideelt.
             RequestContext(currentCoroutineContext(), request) {
                 val norskIdent = request.hentNorskIdentHeader()
-                innloggetUtils.harInnloggetBrukerTilgangTilÅSendeInn(fnr = norskIdent, url = Urls.HentSaker)
-                    ?.let { return@RequestContext it }
+                val aktørId = personService.finnAktørId(norskIdent)
+                val tilgang = pepClient.sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(
+                        brukerAktørId = AktørId(aktørId),
+                        urlKallet = Urls.HentSaker
+                    )
+                if (!tilgang.tilgangsbeslutning.harTilgang){
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .json()
+                        .bodyValueAndAwait(tilgang.tilgangsbeslutning().årsakerForIkkeTilgang)
+                }
 
                 val saker = try {
                     sakService.hentSaker(norskIdent)
@@ -48,6 +65,20 @@ internal class SakerRoutes(
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
                         .bodyValueAndAwait(OasFeil(e.message))
+                }
+
+                //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede,
+                //så utleder hvilke saksnumre det gjelder, og kjører tilgangskontroll på dissse
+                val reserverteSaksnumre = saker.map { s->s.fagsakId  }
+                    .filter { s->!tilgang.erHistoriskSak.keys.contains(SaksnummerDto(s)) }
+                reserverteSaksnumre.forEach {
+                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(Saksnummer(it), Urls.HentSaker)
+                    if (!tilgangsbeslutning.harTilgang) {
+                        return@RequestContext ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .json()
+                            .bodyValueAndAwait(tilgangsbeslutning.årsakerForIkkeTilgang)
+                    }
                 }
 
                 return@RequestContext ServerResponse
@@ -61,7 +92,13 @@ internal class SakerRoutes(
             RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
 
-                //TODO gjør tilgangskontroll eksplisitt her. Tilgangskontroll blir gjort i k9-sak siden det kalles med OBO-token
+                val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(Saksnummer(saksnummer), Urls.HentSaker)
+                if (!tilgangsbeslutning.harTilgang) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .json()
+                        .bodyValueAndAwait(tilgangsbeslutning.årsakerForIkkeTilgang)
+                }
 
                 val perioder = try {
                     sakService.hentPerioderForSaksnummer(saksnummer)

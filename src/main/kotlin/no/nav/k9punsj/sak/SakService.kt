@@ -83,6 +83,70 @@ class SakService(
         }
     }
 
+    suspend fun hentSakerV2(søkerIdent: String): List<SakInfoDto> {
+        logger.info("Henter fagsaker fra k9...")
+        val søkerAktørId = personService.finnAktørId(søkerIdent)
+        val (fagsaker: Set<Fagsak>?, feil: String?) = k9SakService.hentFagsaker(søkerIdent)
+
+        if (!feil.isNullOrBlank()) {
+            throw IllegalStateException(feil)
+        } else {
+            val fagsaker = fagsaker!!.map {
+                val pleietrengende = it.pleietrengendeAktorId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
+                val relatertPersonIdent = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.finnEllerOpprettPersonVedAktørId(aktørId).norskIdent
+                }
+
+                val relatertPerson = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
+                val gyldigPeriode = it.gyldigPeriode
+                val erHistorisk = it.status == FagsakStatus.HISTORISK
+                SakInfoDto(
+                    reservert = false,
+                    fagsakId = it.saksnummer,
+                    sakstype = it.sakstype.kode,
+                    pleietrengendeIdent = pleietrengende?.identitetsnummer,
+                    pleietrengende = pleietrengende,
+                    relatertPersonIdent = relatertPersonIdent,
+                    relatertPerson = relatertPerson,
+                    gyldigPeriode = gyldigPeriode,
+                    behandlingsår = gyldigPeriode?.fom?.year,
+                    historisk = erHistorisk,
+                )
+            }
+            logger.info("Henter reserverte saksnummere fra k9...")
+            val reserverteSaksnummere = k9SakService.hentReserverteSaksnummere(søkerAktørId).map {
+                val pleietrengende = it.pleietrengendeAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
+                val relatertPerson = it.relatertPersonAktørId?.let { aktørId ->
+                    personService.hentPersonopplysninger(aktørId)
+                }
+
+                SakInfoDto(
+                    reservert = true,
+                    fagsakId = it.saksnummer,
+                    sakstype = it.ytelseType.kode,
+                    pleietrengendeIdent = pleietrengende?.identitetsnummer,
+                    pleietrengende = pleietrengende,
+                    gyldigPeriode = null,
+                    relatertPersonIdent = relatertPerson?.identitetsnummer,
+                    relatertPerson = relatertPerson,
+                    behandlingsår = it.behandlingsår,
+                    historisk = false
+                )
+            }
+            // Returnerer fagsaker og reserverte saksnummere
+            return (fagsaker + reserverteSaksnummere).distinctBy { it.fagsakId }
+        }
+    }
+
     suspend fun hentPerioderForSaksnummer(saksnummer: String): List<PeriodeDto> {
         return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
     }

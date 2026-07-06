@@ -26,18 +26,4 @@ class InnloggetUtils(
         return null
     }
 
-    internal suspend fun harInnloggetBrukerTilgangTilÅSendeInn(
-        fnr: List<String>,
-        fnrForSporingslogg: List<String>,
-        url: String
-    ): ServerResponse? {
-        val saksbehandlerHarTilgang = pepClient.harSendeInnTilgang(fnr, fnrForSporingslogg, url)
-        if (!saksbehandlerHarTilgang) {
-            return ServerResponse
-                .status(HttpStatus.FORBIDDEN)
-                .json()
-                .bodyValueAndAwait("Du har ikke lov til å slå opp denne personen")
-        }
-        return null
-    }
 }
