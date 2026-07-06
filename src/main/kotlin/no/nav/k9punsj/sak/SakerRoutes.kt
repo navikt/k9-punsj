@@ -26,7 +26,6 @@ import org.springframework.web.reactive.function.server.json
 internal class SakerRoutes(
     private val authenticationHandler: AuthenticationHandler,
     private val sakService: SakService,
-    private val innloggetUtils: InnloggetUtils,
     private val pepClient: IPepClient
 ) {
 
