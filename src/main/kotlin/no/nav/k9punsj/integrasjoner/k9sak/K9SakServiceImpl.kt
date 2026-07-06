@@ -81,13 +81,15 @@ class K9SakServiceImpl(
     @Qualifier("azure") private val accessTokenClient: AccessTokenClient,
     private val journalpostService: JournalpostService,
     private val personService: PersonService,
-    @Value("\${KODEVERDI_SOM_STRING:false}") private val kodeverdiSomString: Boolean,
-    private val kodeverdiObjectMapper: ObjectMapper = objectMapper(kodeverdiSomString = kodeverdiSomString),
-    private val standardObjectMapper: ObjectMapper = objectMapper()
+    @Value("\${KODEVERDI_SOM_STRING:false}") private val kodeverdiSomString: Boolean
+
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val log = LoggerFactory.getLogger("K9SakService")
+
+    private val kodeverdiObjectMapper: ObjectMapper = objectMapper(kodeverdiSomString = kodeverdiSomString)
+    private val standardObjectMapper: ObjectMapper = objectMapper()
 
     internal object Urls {
         internal const val hentPerioderForSakUrl = "/behandling/soknad/perioder/saksnummer"
