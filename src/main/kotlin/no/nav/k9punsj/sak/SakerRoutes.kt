@@ -67,12 +67,10 @@ internal class SakerRoutes(
                         .bodyValueAndAwait(OasFeil(e.message))
                 }
 
-                //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede,
-                //så utleder hvilke saksnumre det gjelder, og kjører tilgangskontroll på dissse
-                val reserverteSaksnumre = saker.map { s->s.fagsakId  }
-                    .filter { s->!tilgang.erHistoriskSak.keys.contains(SaksnummerDto(s)) }
+                //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede så gjør det her
+                val reserverteSaksnumre = saker.filter { s->s.reservert }.map { s->Saksnummer(s.fagsakId) }
                 reserverteSaksnumre.forEach {
-                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(Saksnummer(it), Urls.HentSaker)
+                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(it, Urls.HentSaker)
                     if (!tilgangsbeslutning.harTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
