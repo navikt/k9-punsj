@@ -70,7 +70,7 @@ internal class SakerRoutes(
                 //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede så gjør det her
                 val reserverteSaksnumre = saker.filter { s->s.reservert }.map { s->Saksnummer(s.fagsakId) }
                 reserverteSaksnumre.forEach {
-                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(it, Urls.HentSaker)
+                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummerUtenAuditlogg(it)
                     if (!tilgangsbeslutning.harTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
