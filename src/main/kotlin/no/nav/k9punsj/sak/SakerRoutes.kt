@@ -54,7 +54,7 @@ internal class SakerRoutes(
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .json()
-                        .bodyValueAndAwait(tilgang.tilgangsbeslutning().årsakerForIkkeTilgang)
+                        .bodyValueAndAwait(tilgang.tilgangsbeslutning.årsakerForIkkeTilgang)
                 }
 
                 val saker = try {
