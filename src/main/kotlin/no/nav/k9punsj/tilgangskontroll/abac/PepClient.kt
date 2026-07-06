@@ -72,7 +72,7 @@ class PepClient(
         val tilgang = sifAbacPdpKlient.sjekkLesetilgangTilFagsak(saksnummer)
         if (tilgang.harTilgang){
             val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
-            loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_CREATE, TILGANG_SAK, "create", urlKallet)
+            loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_CREATE, TILGANG_SAK, "read", urlKallet)
         }
         return tilgang
     }
