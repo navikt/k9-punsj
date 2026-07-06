@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 internal class AlltidTilgangPepClient : IPepClient {
     override suspend fun harLesetilgang(fnr: List<String>, fnrForSporingslogg: List<String>, urlKallet: String) = true
     override suspend fun harLesetilgang(fnr: String, urlKallet: String) = true
-    override suspend fun harLesetilgangTilSaksnummer(fnr: Saksnummer, urlKallet: String) = Tilgangsbeslutning(true, emptySet())
+    override suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String) = Tilgangsbeslutning(true, emptySet())
     override suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): Tilgangsbeslutning = Tilgangsbeslutning(true, emptySet())
     override suspend fun sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(brukerAktørId: AktørId, urlKallet: String): TilgangsbeslutningOgHistoriskSak = TilgangsbeslutningOgHistoriskSak(Tilgangsbeslutning(true, emptySet()), emptyMap())
     override suspend fun harSendeInnTilgang(fnr: String, urlKallet: String) = true

@@ -11,7 +11,7 @@ interface IPepClient {
 
     suspend fun harLesetilgang(fnr: String, urlKallet: String): Boolean
 
-    suspend fun harLesetilgangTilSaksnummer(fnr: Saksnummer, urlKallet: String): Tilgangsbeslutning
+    suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): Tilgangsbeslutning
 
     suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): Tilgangsbeslutning
 
