@@ -11,8 +11,8 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
 import no.nav.k9punsj.integrasjoner.k9sak.dto.HentK9SaksnummerGrunnlag
-import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.ReserverSaksnummerDto
+import no.nav.k9punsj.integrasjoner.k9sak.dto.ReservertSaksnummerDto
 
 interface K9SakService {
 

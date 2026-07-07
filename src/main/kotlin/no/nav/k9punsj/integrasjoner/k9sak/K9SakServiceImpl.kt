@@ -1,5 +1,6 @@
 package no.nav.k9punsj.integrasjoner.k9sak
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -17,8 +18,10 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto
+import no.nav.k9.sak.kontrakt.fagsak.FagsakSøkeresultatDto
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak
 import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
+import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerV2Request
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9.søknad.Søknad
@@ -79,15 +82,19 @@ class K9SakServiceImpl(
     private val journalpostService: JournalpostService,
     private val personService: PersonService,
     @Value("\${KODEVERDI_SOM_STRING:false}") private val kodeverdiSomString: Boolean
+
 ) : K9SakService {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
     private val log = LoggerFactory.getLogger("K9SakService")
 
+    private val kodeverdiObjectMapper: ObjectMapper = objectMapper(kodeverdiSomString = kodeverdiSomString)
+    private val standardObjectMapper: ObjectMapper = objectMapper()
+
     internal object Urls {
         internal const val hentPerioderForSakUrl = "/behandling/soknad/perioder/saksnummer"
         internal const val hentIntektsmeldingerUrl = "/behandling/iay/im-arbeidsforhold-v2"
-        internal const val sokFagsakerUrl = "/fagsak/sok"
+        internal const val sokFagsakerUrl = "/fagsak/sok-v2"
         internal const val sendInnSøknadUrl = "/fordel/journalposter"
         internal const val opprettFagsakUrl = "/fordel/fagsak/opprett"
         internal const val opprettSakOgSendInnSøknadUrl = "/fordel/fagsak/opprett/journalpost"
@@ -110,7 +117,7 @@ class K9SakServiceImpl(
         }
 
         return try {
-            objectMapper()
+            standardObjectMapper
                 .readValue<List<Periode>>(json)
                 .map { LocalDateSegment<Unit>(it.fom, it.tom, null) }
                 .let(::LocalDateTimeline)
@@ -134,7 +141,7 @@ class K9SakServiceImpl(
         )
 
         val body =
-            kotlin.runCatching { objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(matchDto) }
+            kotlin.runCatching { kodeverdiObjectMapper.writeValueAsString(matchDto) }
                 .getOrNull()
                 ?: return Pair(null, "Feilet serialisering")
 
@@ -147,7 +154,7 @@ class K9SakServiceImpl(
             if (json == null) {
                 return Pair(null, feil)
             }
-            val dataSett = objectMapper().readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json)
+            val dataSett = standardObjectMapper.readValue<Set<InntektArbeidYtelseArbeidsforholdV2Dto>>(json)
             val map = dataSett.groupBy { it.arbeidsgiver }.map { entry ->
                 ArbeidsgiverMedArbeidsforholdId(
                     orgNummerEllerAktørID = entry.key.identifikator,
@@ -161,24 +168,54 @@ class K9SakServiceImpl(
     }
 
     override suspend fun hentFagsaker(søker: String): Pair<Set<Fagsak>?, String?> {
-        @Language("json")
-        val body = """
-            {
-              "searchString": "$søker"
-            }
-        """.trimIndent()
+        val fagsakerResponsePair = hentFagsakerFraK9sak(søker)
+        if (fagsakerResponsePair.second != null) {
+            return Pair(null, fagsakerResponsePair.second)
+        }
+        return Pair(mapK9sakResultat(fagsakerResponsePair.first!!), null)
+    }
 
+    suspend fun hentFagsakerFraK9sak(søker: String): Pair<FagsakSøkeresultatDto?, String?> {
+        val body = standardObjectMapper.writeValueAsString(SøkeSakEllerBrukerV2Request(søker))
         val (json, feil) = runCatching { httpPost(body, sokFagsakerUrl) }.fold(
             onSuccess = { Pair(it, null) },
             onFailure = { return Pair(null, it.message) }
         )
-
         return if (!json.isNullOrEmpty()) {
-            val pair = Pair(json.fagsaker(), null)
+            val pair = Pair(kodeverdiObjectMapper.readValue<FagsakSøkeresultatDto>(json), null)
             pair
         } else {
             Pair(null, feil)
         }
+    }
+
+    private fun mapK9sakResultat(k9sakResponse: FagsakSøkeresultatDto) : Set<Fagsak> {
+        var resultat = LinkedHashSet<Fagsak>()
+        k9sakResponse.fagsakerMedPersoninformasjon.forEach {
+            resultat.add(
+                Fagsak(
+                    saksnummer = it.saksnummer.verdi,
+                    sakstype = it.sakstype,
+                    pleietrengendeAktorId = it.pleietrengendeAktørId?.aktørId,
+                    relatertPersonAktørId = it.relatertPersonAktørId?.aktørId,
+                    gyldigPeriode = PeriodeDto(it.gyldigPeriode.fom, it.gyldigPeriode.tom),
+                    status = it.status
+                )
+            )
+        }
+        k9sakResponse.fagsakerUtenPersoninformasjon.forEach {
+            resultat.add(
+                Fagsak(
+                    saksnummer = it.saksnummer.verdi,
+                    sakstype = it.sakstype,
+                    pleietrengendeAktorId = null,
+                    relatertPersonAktørId = null,
+                    gyldigPeriode = PeriodeDto(it.gyldigPeriode.fom, it.gyldigPeriode.tom),
+                    status = it.status
+                )
+            )
+        }
+        return resultat
     }
 
     override suspend fun hentEllerOpprettSaksnummer(
@@ -227,7 +264,7 @@ class K9SakServiceImpl(
         )
 
         val body = kotlin.runCatching {
-            objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId)
+            kodeverdiObjectMapper.writeValueAsString(payloadMedAktørId)
         }.getOrNull()
             ?: return Pair(null, "Feilet serialisering")
 
@@ -271,7 +308,7 @@ class K9SakServiceImpl(
         )
 
         val body = kotlin.runCatching {
-            objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(payloadMedAktørId)
+            kodeverdiObjectMapper.writeValueAsString(payloadMedAktørId)
         }.getOrNull()
             ?: throw IllegalStateException("Feilet serialisering")
 
@@ -288,7 +325,7 @@ class K9SakServiceImpl(
         brevkode: Brevkode,
     ) {
         val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
-        val søknadJson = objectMapper(kodeverdiSomString = kodeverdiSomString).writeValueAsString(soknad)
+        val søknadJson = kodeverdiObjectMapper.writeValueAsString(soknad)
         val callId = hentCallId()
 
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
@@ -340,10 +377,10 @@ class K9SakServiceImpl(
      * @throws RestKallException hvis det oppstår feil ved reservering av saksnummer.
      */
     override suspend fun reserverSaksnummer(reserverSaksnummerDto: ReserverSaksnummerDto): SaksnummerDto {
-        val body = objectMapper().writeValueAsString(reserverSaksnummerDto)
+        val body = standardObjectMapper.writeValueAsString(reserverSaksnummerDto)
         val result = httpPost(body, reserverSaksnummerUrl)
 
-        return kotlin.runCatching { objectMapper().readValue<SaksnummerDto>(result) }
+        return kotlin.runCatching { standardObjectMapper.readValue<SaksnummerDto>(result) }
             .fold(
                 onSuccess = { saksnummerDto: SaksnummerDto -> saksnummerDto },
                 onFailure = { throwable: Throwable ->
@@ -367,7 +404,7 @@ class K9SakServiceImpl(
         val result = httpGet("$hentReservertSaksnummerUrl?saksnummer=${saksnummer.saksnummer}")
         return if (result.isBlank()) null
         else kotlin.runCatching {
-            objectMapper().readValue<ReservertSaksnummerDto>(
+            standardObjectMapper.readValue<ReservertSaksnummerDto>(
                 result
             )
         }
@@ -393,7 +430,7 @@ class K9SakServiceImpl(
         """.trimIndent()
         val result = httpPost(body, hentReserverteSaksnummereUrl)
 
-        return kotlin.runCatching { objectMapper().readValue<Set<ReservertSaksnummerDto>>(result) }
+        return kotlin.runCatching { standardObjectMapper.readValue<Set<ReservertSaksnummerDto>>(result) }
             .fold(
                 onSuccess = { reserverteSaksnummere: Set<ReservertSaksnummerDto> -> reserverteSaksnummere },
                 onFailure = { throwable: Throwable ->
@@ -416,7 +453,7 @@ class K9SakServiceImpl(
         brevkode: Brevkode,
     ) {
         val forsendelseMottattTidspunkt = soknad.mottattDato.withZoneSameInstant(Oslo).toLocalDateTime()
-        val søknadJson = objectMapper().writeValueAsString(soknad)
+        val søknadJson = standardObjectMapper.writeValueAsString(soknad)
         val callId = hentCallId()
 
         val k9SaksnummerGrunnlag = søknadEntitet.tilK9saksnummerGrunnlag(punsjFagsakYtelseType)
@@ -472,7 +509,7 @@ class K9SakServiceImpl(
     override suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto> {
         val result = httpGet(hentInstitusjonerUrl)
 
-        return kotlin.runCatching { objectMapper().readValue<List<GodkjentOpplæringsinstitusjonDto>>(result) }
+        return kotlin.runCatching { standardObjectMapper.readValue<List<GodkjentOpplæringsinstitusjonDto>>(result) }
             .fold(
                 onSuccess = { it },
                 onFailure = { throwable: Throwable ->
@@ -527,6 +564,7 @@ class K9SakServiceImpl(
         søkerIdent: String,
         saksnummer: String,
     ): Periode {
+        //TODO bedre å hente fagsk direkte isdf å første hente alle brukers saker og så filtrere
         val (fagsaker, feil) = hentFagsaker(søkerIdent)
         if (feil != null) {
             log.error("Feil ved henting av fagsaker: $feil")

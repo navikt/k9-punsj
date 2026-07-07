@@ -9,7 +9,9 @@ import com.github.kittinunf.result.Result
 import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.felles.RestKallException
+import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.idToken
 import no.nav.k9punsj.utils.objectMapper
@@ -17,7 +19,10 @@ import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt
 import no.nav.sif.abac.kontrakt.abac.ResourceType
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto
 import no.nav.sif.abac.kontrakt.abac.dto.PersonerOperasjonDto
+import no.nav.sif.abac.kontrakt.abac.dto.SaksnummerOperasjonDto
 import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning
+import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgHistoriskSak
+import no.nav.sif.abac.kontrakt.person.AktørId
 import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -42,6 +47,17 @@ class SifAbacPdpKlient(
 
         val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/personer")
         return om.readValue<Tilgangsbeslutning>(response).harTilgang()
+    }
+
+    suspend fun sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(brukerAktørId: AktørId): TilgangsbeslutningOgHistoriskSak{
+        val response = httpPostMedOboToken(om.writeValueAsString(brukerAktørId), "${baseUrl}/brukers-saker-med-historisk-flagg")
+        return om.readValue<TilgangsbeslutningOgHistoriskSak>(response)
+    }
+
+    suspend fun sjekkLesetilgangTilFagsak(saksnummer: Saksnummer): Tilgangsbeslutning {
+        val request = SaksnummerOperasjonDto(no.nav.sif.abac.kontrakt.abac.dto.SaksnummerDto(saksnummer.verdi), OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, setOf()))
+        val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/sak")
+        return om.readValue<Tilgangsbeslutning>(response)
     }
 
     private suspend fun httpPostMedOboToken(body: String, url: String): String {
