@@ -1,6 +1,8 @@
 package no.nav.k9punsj.rest.eksternt.k9sak
 
 import no.nav.k9.kodeverk.dokument.Brevkode
+import no.nav.k9.sak.kontrakt.fagsak.FagsakDto
+import no.nav.k9.sak.kontrakt.fagsak.FagsakSøkeresultatDto
 import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto
 import no.nav.k9.sak.typer.Periode
 import no.nav.k9.sak.typer.Saksnummer
@@ -23,7 +25,6 @@ import java.util.*
 @Component
 @LokalProfil
 class LokalK9SakService : K9SakService {
-
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(saksnummer: String): List<PeriodeDto> {
         return emptyList()

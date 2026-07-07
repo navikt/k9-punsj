@@ -5,7 +5,7 @@ import no.nav.k9punsj.felles.dto.PeriodeDto
 
 data class SakInfoDto(
     val reservert: Boolean,
-    val fagsakId: String,
+    val fagsakId: String, //FIXME det er misvisende at denne heter fagsakId når den inneholder saksnummer
     val sakstype: String,
     val pleietrengendeIdent: String?,
     val pleietrengende: PdlPerson?,
