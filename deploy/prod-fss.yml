@@ -81,8 +81,6 @@ spec:
     paths:
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/prod/fss/k9-punsj/default
-      - mountPath: /var/run/secrets/nais.io/srvk9punsj
-        kvPath: /serviceuser/data/prod/srvk9punsj
   webproxy: true
   kafka:
     pool: nav-prod
