@@ -13,6 +13,9 @@ object ServerRequestUtils {
     internal fun ServerRequest.hentNorskIdentHeader(): String =
         headers().header("X-Nav-NorskIdent").first()!!
 
+    internal suspend fun ServerRequest.mapNorskIdent(): String =
+        body(BodyExtractors.toMono(String::class.java)).awaitFirst()
+
     internal suspend fun ServerRequest.mapNySøknad(): OpprettNySøknad =
         body(BodyExtractors.toMono(OpprettNySøknad::class.java)).awaitFirst()
 

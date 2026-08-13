@@ -7,8 +7,8 @@ import no.nav.k9punsj.idToken
 import no.nav.k9punsj.integrasjoner.pdl.PdlService
 import no.nav.k9punsj.tilgangskontroll.audit.*
 import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt
-import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning
 import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgHistoriskSak
+import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgSporingshint
 import no.nav.sif.abac.kontrakt.person.AktørId
 import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.springframework.context.annotation.Configuration
@@ -64,15 +64,24 @@ class PepClient(
     /**
      * bare bruk denne der det allerede er auditlogget
      */
-    override suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): Tilgangsbeslutning {
+    override suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): TilgangsbeslutningOgSporingshint {
         return sifAbacPdpKlient.sjekkLesetilgangTilFagsak(saksnummer)
     }
 
-    override suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): Tilgangsbeslutning {
+    override suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): TilgangsbeslutningOgSporingshint {
         val tilgang = sifAbacPdpKlient.sjekkLesetilgangTilFagsak(saksnummer)
-        if (tilgang.harTilgang){
+        if (tilgang.tilgangsbeslutning.harTilgang) {
             val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
-            loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_CREATE, TILGANG_SAK, "read", urlKallet)
+            loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_ACCESS, TILGANG_SAK, "read", urlKallet)
+        }
+        return tilgang
+    }
+
+    override suspend fun harSkrivetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): TilgangsbeslutningOgSporingshint {
+        val tilgang = sifAbacPdpKlient.sjekkLesetilgangTilFagsak(saksnummer)
+        if (tilgang.tilgangsbeslutning.harTilgang) {
+            val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
+            loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_UPDATE, TILGANG_SAK, "update", urlKallet)
         }
         return tilgang
     }

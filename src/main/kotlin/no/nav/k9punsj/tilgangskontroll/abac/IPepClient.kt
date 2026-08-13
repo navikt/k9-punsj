@@ -1,8 +1,8 @@
 package no.nav.k9punsj.tilgangskontroll.abac
 
 import no.nav.k9.sak.typer.Saksnummer
-import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning
 import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgHistoriskSak
+import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgSporingshint
 import no.nav.sif.abac.kontrakt.person.AktørId
 
 interface IPepClient {
@@ -11,9 +11,11 @@ interface IPepClient {
 
     suspend fun harLesetilgang(fnr: String, urlKallet: String): Boolean
 
-    suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): Tilgangsbeslutning
+    suspend fun harLesetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): TilgangsbeslutningOgSporingshint
 
-    suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): Tilgangsbeslutning
+    suspend fun harSkrivetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): TilgangsbeslutningOgSporingshint
+
+    suspend fun harLesetilgangTilSaksnummerUtenAuditlogg(saksnummer: Saksnummer): TilgangsbeslutningOgSporingshint
 
     suspend fun sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(brukerAktørId : AktørId, urlKallet: String): TilgangsbeslutningOgHistoriskSak
 

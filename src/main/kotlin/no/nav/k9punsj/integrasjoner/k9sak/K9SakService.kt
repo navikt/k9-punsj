@@ -60,4 +60,5 @@ interface K9SakService {
     )
 
     suspend fun hentInstitusjoner(): List<GodkjentOpplæringsinstitusjonDto>
+    suspend fun gjenåpneHistoriskSak(saksnummer: Saksnummer)
 }
