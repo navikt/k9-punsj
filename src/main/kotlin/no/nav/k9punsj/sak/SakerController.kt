@@ -87,7 +87,7 @@ internal class SakerController {
     fun postHentSaker(@RequestBody norskIdent: String) {
     }
 
-    @PostMapping(SakerRoutes.Urls.HentPerioder, consumes = ["application/json"], produces = ["application/json"])
+    @PostMapping(SakerRoutes.Urls.HentPerioder, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(
@@ -120,7 +120,7 @@ internal class SakerController {
     fun hentPerioder(@RequestParam("saksnummer") saksnummer: String) {
     }
 
-    @PostMapping(SakerRoutes.Urls.GjenåpneHistoriskSak, consumes = ["application/json"], produces = ["application/json"])
+    @PostMapping(SakerRoutes.Urls.GjenåpneHistoriskSak, produces = ["application/json"])
     @ApiResponses(
         value = [
             ApiResponse(

@@ -132,7 +132,7 @@ internal class SakerRoutes(
             RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
 
-                val tilgangsbeslutning = pepClient.harLesetilgangTilSaksnummer(Saksnummer(saksnummer), Urls.HentSaker).tilgangsbeslutning
+                val tilgangsbeslutning = pepClient.harLesetilgangTilSaksnummer(Saksnummer(saksnummer), Urls.HentPerioder).tilgangsbeslutning
                 if (!tilgangsbeslutning.harTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -143,7 +143,7 @@ internal class SakerRoutes(
                 val perioder = try {
                     sakService.hentPerioderForSaksnummer(saksnummer)
                 } catch (e: Exception) {
-                    logger.error("Feilet med å hente saker.", e)
+                    logger.error("Feilet med å hente perioder.", e)
                     return@RequestContext ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()

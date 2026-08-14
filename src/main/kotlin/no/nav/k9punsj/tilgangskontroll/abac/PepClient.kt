@@ -78,7 +78,7 @@ class PepClient(
     }
 
     override suspend fun harSkrivetilgangTilSaksnummer(saksnummer: Saksnummer, urlKallet: String): TilgangsbeslutningOgSporingshint {
-        val tilgang = sifAbacPdpKlient.sjekkLesetilgangTilFagsak(saksnummer)
+        val tilgang = sifAbacPdpKlient.sjekkSkrivetilgangTilFagsak(saksnummer)
         if (tilgang.tilgangsbeslutning.harTilgang) {
             val identTilInnloggetBruker = currentCoroutineContext().idToken().getNavIdent()
             loggTilAudit(identTilInnloggetBruker, saksnummer, EventClassId.AUDIT_UPDATE, TILGANG_SAK, "update", urlKallet)
