@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/sif-baseimages/java-25:2026.08.13.0729Z
+FROM ghcr.io/navikt/sif-baseimages/java-25:2026.08.18.0742Z
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-punsj
 
