@@ -7,10 +7,9 @@ import no.nav.k9punsj.SaksbehandlerRoutes
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.openapi.OasFeil
 import no.nav.k9punsj.tilgangskontroll.AuthenticationHandler
-import no.nav.k9punsj.tilgangskontroll.InnloggetUtils
 import no.nav.k9punsj.tilgangskontroll.abac.IPepClient
 import no.nav.k9punsj.utils.ServerRequestUtils.hentNorskIdentHeader
-import no.nav.sif.abac.kontrakt.abac.dto.SaksnummerDto
+import no.nav.k9punsj.utils.ServerRequestUtils.mapNorskIdent
 import no.nav.sif.abac.kontrakt.person.AktørId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,6 +35,7 @@ internal class SakerRoutes(
     internal object Urls {
         internal const val HentSaker = "/saker/hent"
         internal const val HentPerioder = "/saker/perioder"
+        internal const val GjenåpneHistoriskSak = "/saker/gjenapneHistorisk"
     }
 
     @Bean
@@ -46,10 +46,10 @@ internal class SakerRoutes(
                 val norskIdent = request.hentNorskIdentHeader()
                 val aktørId = personService.finnAktørId(norskIdent)
                 val tilgang = pepClient.sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(
-                        brukerAktørId = AktørId(aktørId),
-                        urlKallet = Urls.HentSaker
-                    )
-                if (!tilgang.tilgangsbeslutning.harTilgang){
+                    brukerAktørId = AktørId(aktørId),
+                    urlKallet = Urls.HentSaker
+                )
+                if (!tilgang.tilgangsbeslutning.harTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
                         .json()
@@ -67,9 +67,9 @@ internal class SakerRoutes(
                 }
 
                 //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede så gjør det her
-                val reserverteSaksnumre = saker.filter { s->s.reservert }.map { s->Saksnummer(s.fagsakId) }
+                val reserverteSaksnumre = saker.filter { s -> s.reservert }.map { s -> Saksnummer(s.fagsakId) }
                 reserverteSaksnumre.forEach {
-                    val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummerUtenAuditlogg(it)
+                    val tilgangsbeslutning = pepClient.harLesetilgangTilSaksnummerUtenAuditlogg(it).tilgangsbeslutning
                     if (!tilgangsbeslutning.harTilgang) {
                         return@RequestContext ServerResponse
                             .status(HttpStatus.FORBIDDEN)
@@ -79,7 +79,50 @@ internal class SakerRoutes(
                 }
 
                 return@RequestContext ServerResponse
-                    .status(HttpStatus.OK)
+                    .ok()
+                    .json()
+                    .bodyValueAndAwait(saker)
+            }
+        }
+        POST("/api${Urls.HentSaker}") { request ->
+            RequestContext(currentCoroutineContext(), request) {
+                val norskIdent = request.mapNorskIdent()
+                val aktørId = personService.finnAktørId(norskIdent)
+                val tilgang = pepClient.sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(
+                    brukerAktørId = AktørId(aktørId),
+                    urlKallet = Urls.HentSaker
+                )
+                if (!tilgang.tilgangsbeslutning.harTilgang) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .json()
+                        .bodyValueAndAwait(tilgang.tilgangsbeslutning.årsakerForIkkeTilgang)
+                }
+
+                val saker = try {
+                    sakService.hentSaker(norskIdent)
+                } catch (e: Exception) {
+                    logger.error("Feilet med å hente saker.", e)
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(e.message))
+                }
+
+                //kallet til sakService returnerer også reserverte saker, de er ikke tilgangssjekket allerede så gjør det her
+                val reserverteSaksnumre = saker.filter { s -> s.reservert }.map { s -> Saksnummer(s.fagsakId) }
+                reserverteSaksnumre.forEach {
+                    val tilgangsbeslutning = pepClient.harLesetilgangTilSaksnummerUtenAuditlogg(it).tilgangsbeslutning
+                    if (!tilgangsbeslutning.harTilgang) {
+                        return@RequestContext ServerResponse
+                            .status(HttpStatus.FORBIDDEN)
+                            .json()
+                            .bodyValueAndAwait(tilgangsbeslutning.årsakerForIkkeTilgang)
+                    }
+                }
+
+                return@RequestContext ServerResponse
+                    .ok()
                     .json()
                     .bodyValueAndAwait(saker)
             }
@@ -89,7 +132,7 @@ internal class SakerRoutes(
             RequestContext(currentCoroutineContext(), request) {
                 val saksnummer = request.queryParam("saksnummer").orElseThrow()
 
-                val tilgangsbeslutning  = pepClient.harLesetilgangTilSaksnummer(Saksnummer(saksnummer), Urls.HentSaker)
+                val tilgangsbeslutning = pepClient.harLesetilgangTilSaksnummer(Saksnummer(saksnummer), Urls.HentPerioder).tilgangsbeslutning
                 if (!tilgangsbeslutning.harTilgang) {
                     return@RequestContext ServerResponse
                         .status(HttpStatus.FORBIDDEN)
@@ -100,7 +143,7 @@ internal class SakerRoutes(
                 val perioder = try {
                     sakService.hentPerioderForSaksnummer(saksnummer)
                 } catch (e: Exception) {
-                    logger.error("Feilet med å hente saker.", e)
+                    logger.error("Feilet med å hente perioder.", e)
                     return@RequestContext ServerResponse
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .json()
@@ -111,6 +154,36 @@ internal class SakerRoutes(
                     .ok()
                     .json()
                     .bodyValueAndAwait(perioder)
+            }
+        }
+
+        POST("/api${Urls.GjenåpneHistoriskSak}") { request ->
+            RequestContext(currentCoroutineContext(), request) {
+                val saksnummer = request.queryParam("saksnummer").map(::Saksnummer).orElseThrow()
+
+                val tilgangsbeslutning =
+                    pepClient.harSkrivetilgangTilSaksnummer(saksnummer, Urls.GjenåpneHistoriskSak).tilgangsbeslutning
+                if (!tilgangsbeslutning.harTilgang) {
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.FORBIDDEN)
+                        .json()
+                        .bodyValueAndAwait(tilgangsbeslutning.årsakerForIkkeTilgang)
+                }
+
+                try {
+                    sakService.gjenåpneHistoriskSak(saksnummer)
+                } catch (e: Exception) {
+                    logger.error("Feilet med å gjenåpne historisk sak.", e)
+                    return@RequestContext ServerResponse
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .json()
+                        .bodyValueAndAwait(OasFeil(e.message))
+                }
+
+                ServerResponse
+                    .ok()
+                    .json()
+                    .buildAndAwait()
             }
         }
     }

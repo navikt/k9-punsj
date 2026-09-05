@@ -11,7 +11,6 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.CachedAccessTokenClient
 import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.felles.RestKallException
-import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.hentCallId
 import no.nav.k9punsj.idToken
 import no.nav.k9punsj.utils.objectMapper
@@ -22,6 +21,7 @@ import no.nav.sif.abac.kontrakt.abac.dto.PersonerOperasjonDto
 import no.nav.sif.abac.kontrakt.abac.dto.SaksnummerOperasjonDto
 import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning
 import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgHistoriskSak
+import no.nav.sif.abac.kontrakt.abac.resultat.TilgangsbeslutningOgSporingshint
 import no.nav.sif.abac.kontrakt.person.AktørId
 import no.nav.sif.abac.kontrakt.person.PersonIdent
 import org.slf4j.LoggerFactory
@@ -49,15 +49,21 @@ class SifAbacPdpKlient(
         return om.readValue<Tilgangsbeslutning>(response).harTilgang()
     }
 
-    suspend fun sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(brukerAktørId: AktørId): TilgangsbeslutningOgHistoriskSak{
+    suspend fun sjekkTilgangTilBrukersSakerOgGiInformasjonOmHistoriskSak(brukerAktørId: AktørId): TilgangsbeslutningOgHistoriskSak {
         val response = httpPostMedOboToken(om.writeValueAsString(brukerAktørId), "${baseUrl}/brukers-saker-med-historisk-flagg")
         return om.readValue<TilgangsbeslutningOgHistoriskSak>(response)
     }
 
-    suspend fun sjekkLesetilgangTilFagsak(saksnummer: Saksnummer): Tilgangsbeslutning {
+    suspend fun sjekkLesetilgangTilFagsak(saksnummer: Saksnummer): TilgangsbeslutningOgSporingshint {
         val request = SaksnummerOperasjonDto(no.nav.sif.abac.kontrakt.abac.dto.SaksnummerDto(saksnummer.verdi), OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, setOf()))
-        val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/sak")
-        return om.readValue<Tilgangsbeslutning>(response)
+        val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/sak-sporingshint")
+        return om.readValue<TilgangsbeslutningOgSporingshint>(response)
+    }
+
+    suspend fun sjekkSkrivetilgangTilFagsak(saksnummer: Saksnummer): TilgangsbeslutningOgSporingshint {
+        val request = SaksnummerOperasjonDto(no.nav.sif.abac.kontrakt.abac.dto.SaksnummerDto(saksnummer.verdi), OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.UPDATE, setOf()))
+        val response = httpPostMedOboToken(om.writeValueAsString(request), "${baseUrl}/sak-sporingshint")
+        return om.readValue<TilgangsbeslutningOgSporingshint>(response)
     }
 
     private suspend fun httpPostMedOboToken(body: String, url: String): String {
