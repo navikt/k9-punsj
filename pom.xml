@@ -25,6 +25,7 @@
 
         <!-- spring relatert -->
         <springdoc.version>3.1.0</springdoc.version>
+        <netty.version>4.2.18.Final</netty.version> <!--Denne oppdateres ikke av dependabot - bør derfor fjernes når spring-boot oppdateres til nyeste versjon-->
 
         <!-- logging -->
         <logback.logstash.version>9.0</logback.logstash.version>
