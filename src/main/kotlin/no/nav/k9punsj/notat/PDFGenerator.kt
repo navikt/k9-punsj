@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Template
+import com.github.jknack.handlebars.cache.HighConcurrencyTemplateCache
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
@@ -126,6 +127,8 @@ abstract class PDFGenerator<in T> {
             )
 
             infiniteLoops(true)
+
+            with(HighConcurrencyTemplateCache())
         }
     }
 
