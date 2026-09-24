@@ -7,7 +7,9 @@ import de.huxhorn.sulky.ulid.ULID
 import no.nav.k9punsj.utils.UlidDeserializer
 import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.reactor.netty.NettyReactiveWebServerFactory
 import org.springframework.boot.runApplication
+import org.springframework.boot.web.server.reactive.ReactiveWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -26,6 +28,11 @@ class K9PunsjApplication {
             .featuresToDisable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
             .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .deserializerByType(ULID.Value::class.java, UlidDeserializer())
+    }
+
+    @Bean
+    fun reactiveWebServerFactory(): ReactiveWebServerFactory {
+        return NettyReactiveWebServerFactory()
     }
 }
 
