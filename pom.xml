@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -24,7 +24,7 @@
         <kotlin.version>2.4.10</kotlin.version>
 
         <!-- spring relatert -->
-        <springdoc.version>3.1.1</springdoc.version>
+        <springdoc.version>3.1.0</springdoc.version>
         <netty.version>4.2.18.Final</netty.version> <!--Denne oppdateres ikke av dependabot - bør derfor fjernes når spring-boot oppdateres til nyeste versjon-->
 
         <!-- logging -->
