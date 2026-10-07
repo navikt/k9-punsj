@@ -36,6 +36,7 @@ import no.nav.k9punsj.felles.dto.SaksnummerDto
 import no.nav.k9punsj.felles.dto.SøknadEntitet
 import no.nav.k9punsj.hentAuthentication
 import no.nav.k9punsj.hentCallId
+import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.gjenåpneHistoriskSakUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentInstitusjonerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentIntektsmeldingerUrl
 import no.nav.k9punsj.integrasjoner.k9sak.K9SakServiceImpl.Urls.hentPerioderForSakUrl
@@ -102,6 +103,7 @@ class K9SakServiceImpl(
         internal const val reserverSaksnummerUrl = "/saksnummer/reserver"
         internal const val hentReserverteSaksnummereUrl = "/saksnummer/søker"
         internal const val hentInstitusjonerUrl = "/opplæringsinstitusjon/alle-v2"
+        internal const val gjenåpneHistoriskSakUrl = "/fagsak/gjenapneHistorisk"
     }
 
     override suspend fun hentPerioderSomFinnesIK9ForSaksnummer(
@@ -521,7 +523,21 @@ class K9SakServiceImpl(
                     )
                 }
             )
+    }
 
+    override suspend fun gjenåpneHistoriskSak(saksnummer: Saksnummer) {
+        try {
+            val saksnummerDto = SaksnummerDto(saksnummer.verdi)
+            val body = standardObjectMapper.writeValueAsString(saksnummerDto)
+            httpPost(body, gjenåpneHistoriskSakUrl)
+        } catch (error: Exception) {
+            if (error is RestKallException) {
+                throw error
+            }
+            val feilmelding = "Feil ved gjenåpning av historisk sak i k9-sak"
+            log.error(feilmelding, error)
+            throw IllegalStateException(feilmelding, error)
+        }
     }
 
     private suspend fun utledK9sakPeriode(
@@ -560,7 +576,7 @@ class K9SakServiceImpl(
         }
     }
 
-    private suspend fun K9SakServiceImpl.periodeFraFagsak(
+    private suspend fun periodeFraFagsak(
         søkerIdent: String,
         saksnummer: String,
     ): Periode {

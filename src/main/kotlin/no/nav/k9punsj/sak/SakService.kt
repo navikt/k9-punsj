@@ -1,6 +1,7 @@
 package no.nav.k9punsj.sak
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus
+import no.nav.k9.sak.typer.Saksnummer
 import no.nav.k9punsj.domenetjenester.PersonService
 import no.nav.k9punsj.felles.dto.PeriodeDto
 import no.nav.k9punsj.integrasjoner.k9sak.dto.Fagsak
@@ -85,5 +86,9 @@ class SakService(
 
     suspend fun hentPerioderForSaksnummer(saksnummer: String): List<PeriodeDto> {
         return k9SakService.hentPerioderSomFinnesIK9ForSaksnummer(saksnummer)
+    }
+
+    suspend fun gjenåpneHistoriskSak(saksnummer: Saksnummer) {
+        return k9SakService.gjenåpneHistoriskSak(saksnummer)
     }
 }

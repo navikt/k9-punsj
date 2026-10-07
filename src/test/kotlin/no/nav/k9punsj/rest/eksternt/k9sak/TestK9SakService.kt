@@ -140,4 +140,6 @@ internal class TestK9SakService : K9SakService {
             ),
         )
     }
+
+    override suspend fun gjenåpneHistoriskSak(saksnummer: Saksnummer) {}
 }
