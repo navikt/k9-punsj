@@ -21,7 +21,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>25</java.version>
-        <kotlin.version>2.4.20</kotlin.version>
+        <kotlin.version>2.4.21</kotlin.version>
 
         <!-- spring relatert -->
         <springdoc.version>3.1.1</springdoc.version>
@@ -48,7 +48,7 @@
 
         <!-- pdf -->
         <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
-        <verapdf.version>1.30.2</verapdf.version>
+        <verapdf.version>1.30.3</verapdf.version>
         <handlebars.version>4.5.5</handlebars.version>
 
         <!-- serdes -->
@@ -84,12 +84,12 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>4.2.3</version>
+                <version>4.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
-                <version>9.10.1</version>
+                <version>9.11</version>
             </dependency>
             <dependency>
                 <groupId>javax.xml.bind</groupId>
