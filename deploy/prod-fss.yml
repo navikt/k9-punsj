@@ -82,6 +82,10 @@ spec:
   kafka:
     pool: nav-prod
   env:
+    # Proxy legges i JAVA_TOOL_OPTIONS, ikke JDK_JAVA_OPTIONS som Nais anbefaler, fordi det ville overstyrt
+    # JDK_JAVA_OPTIONS fra baseimaget. JVM-en leser begge. autoInstrumentation legger -javaagent til i JAVA_TOOL_OPTIONS.
+    - name: JAVA_TOOL_OPTIONS
+      value: $(JAVA_PROXY_OPTIONS)
     - name: DEFAULTDS_USERNAME
       value: k9-punsj
     - name: DEFAULTDS_PASSWORD
