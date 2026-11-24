@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/sif-baseimages/java-chainguard-25:2026.11.19.0715Z
+FROM ghcr.io/navikt/sif-baseimages/java-chainguard-25:2026.11.23.1517Z
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-punsj
 
 WORKDIR /app
